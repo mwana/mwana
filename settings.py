@@ -13,4 +13,16 @@ DATABASE_ENGINE = "sqlite3"
 DATABASE_NAME = "db.sqlite3"
 
 INSTALLED_APPS = (
-    "rapidsms")
+    "rapidsms",
+    "rapidsms.contrib.ajax", 
+    "rapidsms.contrib.httptester", 
+    "rapidsms.contrib.handlers", 
+    "rapidsms.contrib.echo"
+)
+
+INSTALLED_BACKENDS = {
+    "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
+}
+    
+
+# TEMPLATE_DIRS = []
