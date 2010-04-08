@@ -22,7 +22,6 @@ if __name__ == "__main__":
     django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
     
     for dir in [project_root, local_apps_root, rapidsms_lib, django_settings_root]:
-        print "adding %s to path" % dir
         sys.path.insert(0, dir)
 
     import settings
