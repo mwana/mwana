@@ -28,6 +28,10 @@ INSTALLED_APPS = (
     # the required urlpatterns)
     "rapidsms.contrib.djangoadmin",
     "django.contrib.admin",
+    
+    "mwana.apps.labresults",
+    "mwana.apps.reminders",
+    "mwana.apps.supply",
 )
 
 
