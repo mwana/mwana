@@ -13,6 +13,9 @@ DATABASE_ENGINE = "sqlite3"
 DATABASE_NAME = "db.sqlite3"
 
 INSTALLED_APPS = (
+    "django.contrib.sessions",
+    "django.contrib.contenttypes",
+    "django.contrib.auth",
     "rapidsms",
     "rapidsms.contrib.ajax", 
     "rapidsms.contrib.httptester", 
