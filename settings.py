@@ -22,7 +22,15 @@ INSTALLED_APPS = (
     "rapidsms.contrib.handlers", 
     "rapidsms.contrib.echo",
     "rapidsms.contrib.messagelog",
+    "rapidsms.contrib.registration",
+
+    # enable the django admin using a little shim app (which includes
+    # the required urlpatterns)
+    "rapidsms.contrib.djangoadmin",
+    "django.contrib.admin",
 )
+
+
 
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
