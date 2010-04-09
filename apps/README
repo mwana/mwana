@@ -1,2 +1,2 @@
 This directory is added to the Python path (during startup) by the
-'../rapidsms' script. Put your rapidsms/django apps in here.
+'../manage.py' script. Put your rapidsms/django apps in here.
