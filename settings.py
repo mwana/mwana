@@ -20,7 +20,8 @@ INSTALLED_APPS = (
     "rapidsms.contrib.ajax", 
     "rapidsms.contrib.httptester", 
     "rapidsms.contrib.handlers", 
-    "rapidsms.contrib.echo"
+    "rapidsms.contrib.echo",
+    "rapidsms.contrib.messagelog",
 )
 
 INSTALLED_BACKENDS = {
