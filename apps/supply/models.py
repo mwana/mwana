@@ -24,7 +24,6 @@ STATUS_CHOICES = (
     ("delivered", "Delivered"))
 
 
-
 class SupplyRequest(models.Model):
     """
     A request for supplies.
