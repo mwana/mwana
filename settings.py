@@ -16,7 +16,6 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.auth",
-    "django.contrib.admin",
     "rapidsms",
     "rapidsms.contrib.ajax", 
     "rapidsms.contrib.httptester", 
@@ -30,6 +29,10 @@ INSTALLED_APPS = (
     # the required urlpatterns)
     "rapidsms.contrib.djangoadmin",
     "django.contrib.admin",
+    
+    "mwana.apps.labresults",
+    "mwana.apps.reminders",
+    "mwana.apps.supply",
 )
 
 
