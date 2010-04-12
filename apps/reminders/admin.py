@@ -29,3 +29,18 @@ class MessageTranslationAdmin(admin.ModelAdmin):
         models.CharField: {'widget': forms.Textarea},
     }
 admin.site.register(reminders.MessageTranslation, MessageTranslationAdmin)
+
+
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('name', 'message')
+admin.site.register(reminders.Event, EventAdmin)
+
+
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'event', 'num_days', 'message')
+admin.site.register(reminders.Notification, NotificationAdmin)
+
+
+class RecipientAdmin(admin.ModelAdmin):
+    list_display = ('name', 'shortcut', 'language', 'number')
+admin.site.register(reminders.Recipient, RecipientAdmin)
