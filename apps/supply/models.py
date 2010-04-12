@@ -37,7 +37,6 @@ class SupplyRequest(models.Model):
     created = models.DateTimeField(default=datetime.datetime.utcnow)
     modified = models.DateTimeField(default=datetime.datetime.utcnow)
     
-    
     def __unicode__(self):
         return "Request for %s at %s on %s" % (self.type, self.place, self.created.date()) 
     
