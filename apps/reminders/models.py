@@ -44,7 +44,7 @@ class Recipient(models.Model):
     """
     name = models.CharField(max_length=255)
     shortcut = models.CharField(max_length=255)
-    language = models.ForeignKey(Language)
+    language = models.CharField(max_length=64)
     number = models.CharField(max_length=32)
 
     def __unicode__(self):
