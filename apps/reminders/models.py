@@ -1,5 +1,7 @@
 from django.db import models
 
+from rapidsms.models import Contact
+
 
 class Message(models.Model):
     """
@@ -18,7 +20,9 @@ class Event(models.Model):
     Anything that happens to a patient
     """
     name = models.CharField(max_length=255)
-    message = models.ForeignKey(Message)
+    message = models.ForeignKey(Message, help_text='Acknowledgement message '
+                                'sent to the contact person who creates this '
+                                'event for a patient.')
     
     def __unicode__(self):
         return self.name
@@ -30,23 +34,10 @@ class Notification(models.Model):
     """
     event = models.ForeignKey(Event)
     name = models.CharField(max_length=255)
-    num_days = models.IntegerField('Number of days after the event to send '
-                                   'this notification')
+    num_days = models.IntegerField(help_text='Number of days after the event '
+                                   'to send this notification.')
     message = models.ForeignKey(Message)
     
-    def __unicode__(self):
-        return self.name
- 
-    
-class Recipient(models.Model): 
-    """
-    Details of the message recipients
-    """
-    name = models.CharField(max_length=255)
-    shortcut = models.CharField(max_length=255)
-    language = models.CharField(max_length=64)
-    number = models.CharField(max_length=32)
-
     def __unicode__(self):
         return self.name
 
@@ -70,7 +61,7 @@ class PatientEvent(models.Model):
     date = models.DateField()
     
     def __unicode__(self):
-        return self.name
+        return '%s %s on %s' % (self.patient, self.event, self.date)
  
 
 class SentNotification(models.Model):
@@ -79,8 +70,9 @@ class SentNotification(models.Model):
     """
     notification = models.ForeignKey(Notification)
     patient = models.ForeignKey(Patient)
-    recipient = models.ForeignKey(Recipient)
+    recipient = models.ForeignKey(Contact)
     date = models.DateField()
     
     def __unicode__(self):
-        return self.name
+        return '%s sent to %s on %s' % (self.notification, self.patient,
+                                        self.date)
