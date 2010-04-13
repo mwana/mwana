@@ -16,22 +16,52 @@ class MessageForm(forms.ModelForm):
 
 
 class MessageAdmin(admin.ModelAdmin):
-    
-    list_display = ('name', 'text')
+    list_display = ('name', 'text',)
     form = MessageForm
+    search_fields = ('name', 'text',)
 admin.site.register(reminders.Message, MessageAdmin)
 
 
+class NotificationInline(admin.TabularInline):
+    model = reminders.Notification
+
+
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('name', 'message')
+    list_display = ('name', 'message',)
+    inlines = (NotificationInline,)
+    list_select_related = True
+    search_fields = ('name', 'message__name', 'message__text',)
 admin.site.register(reminders.Event, EventAdmin)
 
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'event', 'num_days', 'message')
+    list_display = ('name', 'event', 'num_days', 'message',)
+    list_filter = ('event',)
+    list_select_related = True
+    search_fields = ('name', 'event__name', 'message__name', 'message__text',)
 admin.site.register(reminders.Notification, NotificationAdmin)
 
 
-class RecipientAdmin(admin.ModelAdmin):
-    list_display = ('name', 'shortcut', 'language', 'number')
-admin.site.register(reminders.Recipient, RecipientAdmin)
+class PatientEventInline(admin.TabularInline):
+    model = reminders.PatientEvent
+
+
+class SentNotificationInline(admin.TabularInline):
+    model = reminders.SentNotification
+
+
+class PatientAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    inlines = (PatientEventInline, SentNotificationInline,)
+    search_fields = ('name',)
+admin.site.register(reminders.Patient, PatientAdmin)
+
+
+class SentNotificationAdmin(admin.ModelAdmin):
+    list_display = ('notification', 'patient', 'recipient', 'date',)
+    list_filter = ('notification', 'date',)
+    list_select_related = True
+    search_fields = ('notification__name', 'patient__name', 'recipient__name',
+                     'recipient__alias',)
+admin.site.register(reminders.SentNotification, SentNotificationAdmin)
+
