@@ -5,30 +5,21 @@ from django.db import models
 from mwana.apps.reminders import models as reminders
 
 
-class LanguageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description')
-admin.site.register(reminders.Language, LanguageAdmin)
-
-
-class MessageTranslationInline(admin.TabularInline):
-    model = reminders.MessageTranslation
-    formfield_overrides = {
-        models.CharField: {'widget': forms.Textarea(attrs={'rows': '4'})},
-    }
+class MessageForm(forms.ModelForm):
+    
+    class Meta:
+        model = reminders.Message
+    
+    def __init__(self, *args, **kwargs):
+        super(MessageForm, self).__init__(*args, **kwargs)
+        self.fields['text'].widget = forms.Textarea(attrs={'rows': '5'})
 
 
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    inlines = (MessageTranslationInline,)
+    
+    list_display = ('name', 'text')
+    form = MessageForm
 admin.site.register(reminders.Message, MessageAdmin)
-
-
-class MessageTranslationAdmin(admin.ModelAdmin):
-    list_display = ('text', 'message', 'language')
-    formfield_overrides = {
-        models.CharField: {'widget': forms.Textarea},
-    }
-admin.site.register(reminders.MessageTranslation, MessageTranslationAdmin)
 
 
 class EventAdmin(admin.ModelAdmin):
