@@ -1,3 +1,3 @@
-[submodule "submodules/rapidsms"]
-	path = submodules/rapidsms
+[submodule "mwana/submodules/rapidsms"]
+	path = mwana/submodules/rapidsms
 	url = git://github.com/mwana/rapidsms-core-dev.git
