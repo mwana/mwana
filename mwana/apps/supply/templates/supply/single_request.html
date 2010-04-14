@@ -1,0 +1,23 @@
+{% extends "layout-split-2.html" %}
+{% load forms_tags %}
+
+{% block title %}Single Supply - {{ block.super }}{% endblock %}
+
+{% block left %}
+<div class="module">
+    <h2>Supply Details</h2>
+    <p>{{ sreq }}</p>
+    <form action="" method="post">
+        {% render_form form %}
+        <div class="submit">
+            <input type="submit" value="Submit" />
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block right %}
+<div class="module">
+	<h2>Let's put a map here</h2>
+</div>
+{% endblock %}

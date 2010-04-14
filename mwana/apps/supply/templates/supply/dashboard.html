@@ -1,0 +1,44 @@
+{% extends "layout-split-2.html" %}
+{% load forms_tags %}
+
+{% block title %}Supply Requests - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block left %}
+<div class="module">
+    <h2>Pending Supply Requests</h2>
+    <table id="supply_requests" class="sortable">
+        <thead>
+            <th class="location" scope="col"><a href="">Location</a></th>
+            <th class="supply" scope="col"><a href="">Supply</a></th>
+            <th class="status" scope="col"><a href="">Status</a></th>
+        </thead>
+        <tbody>{% for srequest in active_requests %}
+            <tr lat="{{ srequest.location.point.latitude }}" lng="{{ srequest.location.point.longitude }}" slug="{{ srequest.location.slug|upper }}">
+                <th scope="row"><a href="{% url locations srequest.location.pk %}">{{ srequest.location.name }}</a></th>
+                <td>{{ srequest.type.name }}</td>
+                <td><a href="{% url supply_details srequest.pk %}">{{ srequest.get_status_display }}</a></td>
+            </tr>{% empty %}
+            <tr class="no-data">
+                <td colspan="3">
+                    <p>There aren't any pending supply requests.  Nice job warehouse!</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block right %}
+<div class="module">
+	<h2>Let's put a map here</h2>
+</div>
+{% endblock %}

@@ -38,12 +38,11 @@ class SupplyRequest(models.Model):
     modified = models.DateTimeField(default=datetime.datetime.utcnow)
     
     @classmethod
-    def active_for_location(cls, location):
+    def active(cls):
         """
-        Return the list of active (non-delivered) supply requests for
-        a particular location
+        Return a queryset of active (non-delivered) supply requests 
         """
-        return cls.objects.filter(location=location).exclude(status="delivered")
+        return cls.objects.exclude(status="delivered")
         
         
     def __unicode__(self):
