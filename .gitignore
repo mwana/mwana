@@ -1,3 +1,3 @@
 *.pyc
 *.db
-localsettings.py
+mwana/localsettings.py
