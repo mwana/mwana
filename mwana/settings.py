@@ -24,7 +24,6 @@ INSTALLED_APPS = (
     "rapidsms.contrib.echo",
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
-    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
 
     # enable the django admin using a little shim app (which includes
@@ -35,6 +34,7 @@ INSTALLED_APPS = (
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.supply",
+    "rapidsms.contrib.registration",
 )
 
 

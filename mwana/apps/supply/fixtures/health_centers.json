@@ -1,0 +1,52 @@
+[
+  {
+    "pk": 1, 
+    "model": "locations.locationtype", 
+    "fields": {
+      "exists_in": null, 
+      "plural": "Health Facilities", 
+      "slug": "health_facilities", 
+      "singular": "Health Facility"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "locations.location", 
+    "fields": {
+      "point": null, 
+      "type": 1, 
+      "name": "Kalingalinga Clinic", 
+      "slug": "kal"
+    }
+  }, 
+  {
+    "pk": 2, 
+    "model": "locations.location", 
+    "fields": {
+      "point": null, 
+      "type": 1, 
+      "name": "Kafue District Hospital", 
+      "slug": "kdh"
+    }
+  }, 
+  {
+    "pk": 3, 
+    "model": "locations.location", 
+    "fields": {
+      "point": null, 
+      "type": 1, 
+      "name": "University Teaching Hospital", 
+      "slug": "uth"
+    }
+  }, 
+  {
+    "pk": 4, 
+    "model": "locations.location", 
+    "fields": {
+      "point": null, 
+      "type": 1, 
+      "name": "Chelstone Hospital", 
+      "slug": "chel"
+    }
+  }
+]
