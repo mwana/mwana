@@ -59,6 +59,24 @@ class TestApp (TestScript):
         self.assertEqual(location, request.location)
         self.assertEqual("requested", request.status)
         
+        # make sure you can't request two of the same item
+        script = """
+            sguy > request sb
+            sguy < You already have requested sleeping bags. To check status send STATUS <SUPPLY CODE>.
+        """
+        self.runScript(script)
+        self.assertEqual(1, SupplyRequest.objects.count())
+        
+        # unless it has been delivered
+        request.status = "delivered"
+        request.save()
+        script = """
+            sguy > request sb
+            sguy < Your request for more sleeping bags has been received.
+        """
+        self.runScript(script)
+        self.assertEqual(2, SupplyRequest.objects.count())
+        
         # some error conditions
         script = """
             sguy > request noods

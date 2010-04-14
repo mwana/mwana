@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 import datetime
@@ -36,6 +37,15 @@ class SupplyRequest(models.Model):
     created = models.DateTimeField(default=datetime.datetime.utcnow)
     modified = models.DateTimeField(default=datetime.datetime.utcnow)
     
+    @classmethod
+    def active_for_location(cls, location):
+        """
+        Return the list of active (non-delivered) supply requests for
+        a particular location
+        """
+        return cls.objects.filter(location=location).exclude(status="delivered")
+        
+        
     def __unicode__(self):
         return "Request for %s at %s on %s" % (self.type, self.location, self.created.date()) 
     
