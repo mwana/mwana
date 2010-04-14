@@ -42,5 +42,8 @@ INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
 }
     
-
-# TEMPLATE_DIRS = []
+# import local settings if we find them
+try:
+    from localsettings import *
+except ImportError:
+    pass
