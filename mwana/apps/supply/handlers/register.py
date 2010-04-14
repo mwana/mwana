@@ -14,9 +14,10 @@ class RegisterHandler(KeywordHandler):
     keyword = "register|reg|join"
 
     PATTERN = re.compile(r"^\s*(\S+)\s+(.+)$")
+    HELP_TEXT = "To register, send JOIN <LOCATION CODE> <NAME>"
     
     def help(self):
-        self.respond("To register, send JOIN <LOCATION CODE> <NAME>")
+        self.respond(self.HELP_TEXT)
 
     def handle(self, text):
         m = self.PATTERN.search(text)

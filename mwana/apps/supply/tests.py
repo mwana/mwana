@@ -36,28 +36,48 @@ class TestApp (TestScript):
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         
     
-    testRequestSMSFlow = """
-            nancy > request tent
-            nancy < Your request for more tents has been received.
-            nancy > request tent mm
-            nancy < Your request for more tents and marshmallows has been received.
-            nancy > request noods
-            nancy < Sorry, I don't know about any supplies with code noods.
-            nancy > request noods lighter
-            nancy < Sorry, I don't know about any supplies with code noods or lighter.
-            nancy > request tent noods
-            nancy < Your request for more tents has been received.
-            nancy < Sorry, I don't know about any supplies with code noods.
-        """
-        
+    testRequestRequiresRegistration = """
+        noname > request sb
+        noname < Sorry you have to register to request supplies. To register, send JOIN <LOCATION CODE> <NAME>
+    """
+    
     def testRequest(self):
         self.assertEqual(0, SupplyRequest.objects.count())
-        testSMSFlow = """
-            trevor > request sb
-            trevor < Your request for more sleeping bags has been received.
+        # have to be a registered contact first
+        location = Location.objects.get(slug="uth")
+        contact = self._create_contact("sguy", "supply guy", location)
+        
+        script = """
+            sguy > request sb
+            sguy < Your request for more sleeping bags has been received.
         """
-        self.runScript(testSMSFlow)
+        self.runScript(script)
         self.assertEqual(1, SupplyRequest.objects.count())
         request = SupplyRequest.objects.all()[0]
         self.assertEqual("sb", request.type.slug)
+        self.assertEqual(contact, request.requested_by)
+        self.assertEqual(location, request.location)
+        self.assertEqual("requested", request.status)
+        
+        # some error conditions
+        script = """
+            sguy > request noods
+            sguy < Sorry, I don't know about any supplies with code noods.
+            sguy > request noods lighter
+            sguy < Sorry, I don't know about any supplies with code noods or lighter.
+            sguy > request tent noods
+            sguy < Your request for more tents has been received.
+            sguy < Sorry, I don't know about any supplies with code noods.
+        """
+        self.runScript(script)
+
+    def _create_contact(self, identity, name, location):
+        # this has a janky dependency on the reg format, but is nice and convenient
+        reg_script = """
+            %(identity)s > join %(loc_code)s %(name)s
+            %(identity)s < Thank you for registering, %(name)s! I've got you at %(loc_name)s.
+        """ % {"identity": identity, "name": name, 
+               "loc_code": location.slug, "loc_name": location.name}
+        self.runScript(reg_script)
+        return Contact.objects.get(connection__identity=identity, location=location, name=name)
         

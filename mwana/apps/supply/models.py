@@ -30,12 +30,12 @@ class SupplyRequest(models.Model):
     """
     
     type = models.ForeignKey(SupplyType)
-    place = models.ForeignKey(Location, null=True, blank=True)
-    requestor = models.ForeignKey(Contact, null=True, blank=True)
+    location = models.ForeignKey(Location)
+    requested_by = models.ForeignKey(Contact, null=True, blank=True)
     status = models.CharField(max_length=9, choices=STATUS_CHOICES)
     created = models.DateTimeField(default=datetime.datetime.utcnow)
     modified = models.DateTimeField(default=datetime.datetime.utcnow)
     
     def __unicode__(self):
-        return "Request for %s at %s on %s" % (self.type, self.place, self.created.date()) 
+        return "Request for %s at %s on %s" % (self.type, self.location, self.created.date()) 
     

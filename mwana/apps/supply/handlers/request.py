@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-
 from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.supply.models import SupplyType, SupplyRequest
-
+from .register import RegisterHandler
 
 class RequestHandler(KeywordHandler):
     """
@@ -17,6 +16,12 @@ class RequestHandler(KeywordHandler):
 
     def handle(self, text):
         supply_codes = text.split(" ")
+        
+        if not self.msg.contact:
+            self.respond("Sorry you have to register to request supplies. %s" %\
+                         RegisterHandler.HELP_TEXT)
+            return
+        
         found_supplies = []
         unknown_supplies = []
         for code in supply_codes:
@@ -25,7 +30,9 @@ class RequestHandler(KeywordHandler):
                 # create a new supply request for this 
                 # TODO: parse out the location
                 # TODO: check for pending requests
-                request = SupplyRequest.objects.create(type=supply, status="requested")
+                request = SupplyRequest.objects.create(type=supply, status="requested",
+                                                       location=self.msg.contact.location,
+                                                       requested_by=self.msg.contact)
                 found_supplies.append(supply)
             except SupplyType.DoesNotExist:
                 unknown_supplies.append(code)
