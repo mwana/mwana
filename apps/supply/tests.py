@@ -3,17 +3,29 @@
 
 
 from rapidsms.tests.scripted import TestScript
+from rapidsms.contrib.handlers.app import App as handler_app
 from mwana.apps.supply.app import App
-
+from mwana.apps.supply.models import SupplyType
 
 class TestApp (TestScript):
-    apps = (App,)
+    apps = (handler_app, App,)
     fixtures = ['camping_supplies']
     
-    testBasic = """
-        nancy > request tent
-        nancy < Your request for more tents has been received.
-        tobias > request sb
-        tobias < Your request for more sleeping bags has been received.
-    """
-    
+    def testBootstrap(self):
+        self.assertEqual(4, SupplyType.objects.count())
+        
+    testSMSFlow = """
+            nancy > request tent
+            nancy < Your request for more tents has been received.
+            nancy > request tent mm
+            nancy < Your request for more tents and marshmallows has been received.
+            nancy > request noods
+            nancy < Sorry, I don't know about any supplies with code noods.
+            nancy > request noods lighter
+            nancy < Sorry, I don't know about any supplies with code noods or lighter.
+            nancy > request tent noods
+            nancy < Your request for more tents has been received.
+            nancy < Sorry, I don't know about any supplies with code noods.
+        """
+
+        

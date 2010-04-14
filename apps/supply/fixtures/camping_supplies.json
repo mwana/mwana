@@ -28,7 +28,7 @@
     "model": "supply.supplytype", 
     "fields": {
       "slug": "mm", 
-      "name": "marshmellows"
+      "name": "marshmallows"
     }
   } 
 ]
