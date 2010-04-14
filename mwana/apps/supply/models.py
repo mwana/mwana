@@ -30,7 +30,7 @@ class SupplyRequest(models.Model):
     """
     
     type = models.ForeignKey(SupplyType)
-    place = models.ForeignKey(Location)
+    place = models.ForeignKey(Location, null=True, blank=True)
     requestor = models.ForeignKey(Contact, null=True, blank=True)
     status = models.CharField(max_length=9, choices=STATUS_CHOICES)
     created = models.DateTimeField(default=datetime.datetime.utcnow)

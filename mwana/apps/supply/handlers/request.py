@@ -3,7 +3,7 @@
 
 
 from rapidsms.contrib.handlers import KeywordHandler
-from mwana.apps.supply.models import SupplyType
+from mwana.apps.supply.models import SupplyType, SupplyRequest
 
 
 class RequestHandler(KeywordHandler):
@@ -22,6 +22,10 @@ class RequestHandler(KeywordHandler):
         for code in supply_codes:
             try:
                 supply = SupplyType.objects.get(slug__iexact=code)
+                # create a new supply request for this 
+                # TODO: parse out the location
+                # TODO: check for pending requests
+                request = SupplyRequest.objects.create(type=supply, status="requested")
                 found_supplies.append(supply)
             except SupplyType.DoesNotExist:
                 unknown_supplies.append(code)
