@@ -16,6 +16,7 @@ INSTALLED_APPS = (
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.auth",
+
     "rapidsms",
     "rapidsms.contrib.ajax", 
     "rapidsms.contrib.httptester", 
