@@ -1,6 +1,9 @@
+import datetime
+
 from django.db import models
 
 from rapidsms.models import Contact
+from rapidsms.contrib.locations.models import Location
 
 
 class Message(models.Model):
@@ -21,9 +24,6 @@ class Event(models.Model):
     """
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
-    message = models.ForeignKey(Message, help_text='Acknowledgement message '
-                                'sent to the contact person who creates this '
-                                'event for a patient.')
     
     def __unicode__(self):
         return self.name
@@ -48,7 +48,7 @@ class Patient(models.Model):
     Patient details
     """
     name = models.CharField(max_length=255)
-    location = models.CharField(max_length=255)
+    location = models.ForeignKey(Location, related_name='patients')
     national_id = models.CharField(max_length=50, blank=True)
     
     def __unicode__(self):
@@ -64,6 +64,10 @@ class PatientEvent(models.Model):
     date = models.DateField()
     date_logged = models.DateTimeField()
     
+    def save(self, *args, **kwargs):
+        self.date_logged = datetime.datetime.now()
+        super(PatientEvent, self).save(*args, **kwargs)
+        
     def __unicode__(self):
         return '%s %s on %s' % (self.patient, self.event, self.date)
  
