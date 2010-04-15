@@ -35,7 +35,7 @@ def create_locations(count):
         name = _new_facility_name()
         Location.objects.create(name=name,point=point,
                                 type=health_center_type,
-                                slug=name[:30])
+                                slug=name.replace(" ", "_")[:30])
     print "Successfully created %s new locations" % count
 
 def _new_facility_name():
