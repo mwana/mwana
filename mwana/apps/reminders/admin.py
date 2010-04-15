@@ -27,11 +27,11 @@ class NotificationInline(admin.TabularInline):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('name', 'message',)
+    list_display = ('name', 'slug',)
     inlines = (NotificationInline,)
     list_select_related = True
     prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name', 'message__name', 'message__text',)
+    search_fields = ('name', 'slug',)
 admin.site.register(reminders.Event, EventAdmin)
 
 
