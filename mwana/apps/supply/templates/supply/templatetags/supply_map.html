@@ -1,0 +1,6 @@
+<h3>{{ location.name }}</h3>
+<p>{{ location.active_requests.count }} active supply requests:</p>
+<ul>{% for sreq in location.active_requests %}
+    <li>{{ sreq.type }} - {{ sreq.get_status_display }} on {{ sreq.modified|date:"d M Y"}}</li>
+    {% endfor %}
+</ul>
