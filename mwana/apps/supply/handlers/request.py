@@ -3,7 +3,7 @@
 
 from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.supply.models import SupplyType, SupplyRequest
-from .register import RegisterHandler
+from mwana.apps.registration.handlers.register import RegisterHandler
 
 class RequestHandler(KeywordHandler):
     """

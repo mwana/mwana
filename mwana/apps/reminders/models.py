@@ -56,8 +56,8 @@ class PatientEvent(models.Model):
     """
     Event that happened to a patient at a given time
     """
-    patient = models.ForeignKey(Patient)
-    event = models.ForeignKey(Event)
+    patient = models.ForeignKey(Patient, related_name='patient_events')
+    event = models.ForeignKey(Event, related_name='patient_events')
     date = models.DateField()
     
     def __unicode__(self):
@@ -68,9 +68,10 @@ class SentNotification(models.Model):
     """
     Any notifications sent to user
     """
-    notification = models.ForeignKey(Notification)
-    patient = models.ForeignKey(Patient)
-    recipient = models.ForeignKey(Contact)
+    notification = models.ForeignKey(Notification,
+                                     related_name='sent_notifications')
+    patient = models.ForeignKey(Patient, related_name='sent_notifications')
+    recipient = models.ForeignKey(Contact, related_name='sent_notifications')
     date = models.DateField()
     
     def __unicode__(self):
