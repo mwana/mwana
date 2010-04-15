@@ -1,4 +1,4 @@
-{% extends "layout-split-2.html" %}
+{% extends "supply/base.html" %}
 {% load forms_tags %}
 
 {% block title %}Single Supply - {{ block.super }}{% endblock %}
@@ -6,7 +6,10 @@
 {% block left %}
 <div class="module">
     <h2>Supply Details</h2>
-    <p>{{ sreq }}</p>
+    <p>Location: <a href="{% url locations sreq.location.pk %}">{{ sreq.location.name }}</a></p>
+    <p>Requested: {{ sreq.type }}</p>
+    <p>Requested by: {{ sreq.requested_by|default:"UNKNOWN" }} on {{ sreq.created|date:"D d M Y" }}</p>
+    
     <form action="" method="post">
         {% render_form form %}
         <div class="submit">

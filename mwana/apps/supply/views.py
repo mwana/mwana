@@ -5,14 +5,19 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404
 from django.templatetags.tabs_tags import register_tab
 from django.views.decorators.http import require_http_methods
+from rapidsms.contrib.locations.models import Location
 from rapidsms.utils import render_to_response, web_message
 
 @register_tab(caption="Supplies")
 def dashboard(request):
     """Supply dashboard"""
     active_requests = SupplyRequest.active().order_by("-created").order_by("location")
+    locations = set((req.location for req in active_requests))
+    for location in locations:
+        location.active_requests = active_requests.filter(location=location)
     return render_to_response(request, "supply/dashboard.html", 
-                              {"active_requests": active_requests })
+                              {"active_requests": active_requests,
+                               "locations": locations })
 
 @require_http_methods(["GET", "POST"])
 def details(request, request_pk):
