@@ -17,7 +17,8 @@ class EventHandler(KeywordHandler):
 
     keyword = "event"
 
-    PATTERN = re.compile(r"\s*(?P<event_slug>\S+)\s+(?P<date>\S+)\s+(?P<name>\S+)\s+(?P<location_slug>\S+)\s*$")
+    PATTERN = re.compile(r"\s*(?P<event_slug>\S+)\s+(?P<date>\S+)\s+"
+                          "(?P<name>\S+)\s+(?P<location_slug>\S+)\s*$")
     HELP_TEXT = "To add an event, send EVENT <EVENT CODE> <DATE> <NAME> <LOCATION>"
     DATE_FORMATS = (
         '%d/%m/%y',
@@ -44,13 +45,15 @@ class EventHandler(KeywordHandler):
             try:
                 event = reminders.Event.objects.get(slug__iexact=event_slug)
             except reminders.Event.DoesNotExist:
-                self.respond("Sorry, I don't know about an event with code %(code)s. Please check your code and try again.",
+                self.respond("Sorry, I don't know about an event with code "
+                             "%(code)s. Please check your code and try again.",
                              code=event_slug)
                 return
             try:
                 location = Location.objects.get(slug__iexact=location_slug)
             except Location.DoesNotExist:
-                self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
+                self.respond("Sorry, I don't know about a location with code "
+                             "%(code)s. Please check your code and try again.",
                              code=location_slug)
                 return
             date = None
@@ -71,5 +74,6 @@ class EventHandler(KeywordHandler):
                          "will be notified when it's time for his or her next "
                          "appointment.", event=event.name, name=patient.name)
         else:
-            self.respond("Sorry, I didn't understand that. %s" % self.HELP_TEXT) 
+            self.respond("Sorry, I didn't understand that. %s" %
+                         self.HELP_TEXT) 
         
