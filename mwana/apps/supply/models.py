@@ -19,10 +19,10 @@ class SupplyType(models.Model):
         return self.name
 
 STATUS_CHOICES = (
-    ("requested", "Requested"), 
-    ("processed", "Processed"), 
-    ("sent", "Sent"), 
-    ("delivered", "Delivered"))
+    ("requested", "yet to be processed"),
+    ("processed", "has been processed"),
+    ("sent", "was processed. Supply was Sent"),
+    ("delivered", "was fulfilled. Supply has been delivered"))
 
 
 class SupplyRequest(models.Model):

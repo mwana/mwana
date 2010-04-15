@@ -2,7 +2,7 @@
 {% load forms_tags %}
 {% load supply_tags %}
 
-{% block title %}Supply Requests - {{ block.super }}{% endblock %}
+{% block title %}Supply Requests at {{ location }} - {{ block.super }}{% endblock %}
 
 {% block javascripts %}
 {{ block.super }}
@@ -19,22 +19,20 @@
 
 {% block left %}
 <div class="module">
-    <h2>Active Supply Requests</h2>
+    <h2>{{ location }}</h2>
     <table id="supply_requests" class="sortable">
         <thead>
-            <th class="location" scope="col"><a href="">Location</a></th>
             <th class="supply" scope="col"><a href="">Supply</a></th>
             <th class="status" scope="col"><a href="">Status</a></th>
         </thead>
-        <tbody>{% for srequest in active_requests %}
-            <tr lat="{{ srequest.location.point.latitude }}" lng="{{ srequest.location.point.longitude }}" slug="{{ srequest.location.slug|upper }}" name="{{ srequest.location.name }}">
-                <th scope="row"><a href="{% url supply_location_details srequest.location.pk %}">{{ srequest.location.name }}</a></th>
-                <td>{{ srequest.type.name }}</td>
-                <td><a href="{% url supply_request_details srequest.pk %}">{{ srequest.get_status_display }}</a></td>
+        <tbody>{% for srequest in location.active_requests %}
+            <tr>
+                <th scope="row">{{ srequest.type.name }}</th>
+                <td><a href="{% url supply_request_details srequest.pk %}">{{ srequest.get_status_display }}</a> {% ifequal srequest.status "requested" %} by {{ srequest.requested_by|default:"UNKNOWN" }}{% endifequal %} on {{ srequest.modified|date:"d M Y" }}</td>
             </tr>{% empty %}
             <tr class="no-data">
                 <td colspan="3">
-                    <p>There aren't any pending supply requests.  Nice job warehouse!</p>
+                    <p>There aren't any pending supply requests here.  Nice job warehouse!</p>
                 </td>
             </tr>
             {% endfor %}
@@ -45,18 +43,13 @@
 
 {% block right %}
 <div class="module">
-    <h2>Map <span>of Locations</span></h2>
+    <h2>Map <span>of {{ location }}</span></h2>
     <div class="map">
         <div id="map"></div>
     </div>
 </div>
-<div id="location_data" style="visibility:hidden">
-    <ul>{% for location in locations %}
-        <li lat="{{ location.point.latitude }}" lng="{{ location.point.longitude }}" slug="{{ location.slug|upper }}" name="{{ location.name }}">
-            {% render_location location %}
-        </li>
-        {% endfor %}
-    </ul>
+<div id="location_data" style="visibility:hidden" lat="{{ location.point.latitude }}" lng="{{ location.point.longitude }}" slug="{{ location.slug|upper }}" name="{{ location.name }}">
+{% render_location location %}
 </div>
 <script type="text/javascript">
     $(function() {
@@ -64,14 +57,16 @@
         /* initialize the google map */
         var map = new google.maps.Map(
             $("#map").get(0), {
+                zoom: 8,
                 mapTypeId: google.maps.MapTypeId.TERRAIN
             }
         );
 
         var bounds = new google.maps.LatLngBounds();
         
-        $("#location_data ul li").each(function() {
-            var loc = $(this);
+        loc_data = $("#location_data")
+        add_to_map = function(loc) {
+            
             var lat = loc.attr("lat");
             var lng = loc.attr("lng");
             if(lat && lng) {
@@ -91,23 +86,11 @@
                     infowindow.open(map,marker);
                 });
                 
-                /*
-                var label = new adammck.maps.Label({
-                    "map": map,
-                    "content": loc.html(),
-                    "position": new google.maps.LatLng(lat, lng),
-                    "direction": adammck.maps.Label.Direction.CENTER
-                });
-                
-                bounds.extend(label.position); */
-                
-                
                 bounds.extend(point);
-                
+                map.setCenter(point);
             }
-        });
-
-        map.fitBounds(bounds);
+        };
+        add_to_map(loc_data);
     });
 </script>
 {% endblock %}
