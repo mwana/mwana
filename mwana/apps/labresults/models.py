@@ -1,12 +1,14 @@
 from django.db import models
+from rapidsms.models import Connection
 
 class Clinic(models.Model):
     clinic_id = models.CharField(max_length=30)
     name = models.CharField(max_length=100)
-    district = models.CharField(max_length=100)
-    province = models.CharField(max_length=100)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+    district = models.CharField(max_length=100, blank=True)
+    province = models.CharField(max_length=100, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    last_fetch = models.DateField(null=True)
     
 class Result(models.Model):
     RESULT_CHOICES = (
@@ -27,12 +29,12 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=30)
     clinic_id = models.ForeignKey(Clinic)
     result = models.CharField(choices=RESULT_CHOICES)
-    taken_on = models.DateField()
+    taken_on = models.DateField(null=True)
     entered_on = models.DateField()
     notification_status = models.CharField(choices=STATUS_CHOICES)
 
 class Recipient(models.Model):
-    connection = models.ForeignKey(Connection) #TODO #phone # of recipient
+    connection = models.ForeignKey(Connection)
     clinic_id = models.ForeignKey(Clinic)
     pin = models.CharField(max_length=4)
     
