@@ -21,8 +21,8 @@ class SupplyType(models.Model):
 STATUS_CHOICES = (
     ("requested", "yet to be processed"),
     ("processed", "has been processed"),
-    ("sent", "was processed. Supply was Sent"),
-    ("delivered", "was fulfilled. Supply has been delivered"))
+    ("sent", "was processed and sent"),
+    ("delivered", "has been delivered"))
 
 
 class SupplyRequest(models.Model):
