@@ -20,6 +20,7 @@ class Event(models.Model):
     Anything that happens to a patient
     """
     name = models.CharField(max_length=255)
+    slug = models.CharField(max_length=255)
     message = models.ForeignKey(Message, help_text='Acknowledgement message '
                                 'sent to the contact person who creates this '
                                 'event for a patient.')
@@ -47,6 +48,8 @@ class Patient(models.Model):
     Patient details
     """
     name = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
+    national_id = models.CharField(max_length=50, blank=True)
     
     def __unicode__(self):
         return self.name
@@ -59,6 +62,7 @@ class PatientEvent(models.Model):
     patient = models.ForeignKey(Patient, related_name='patient_events')
     event = models.ForeignKey(Event, related_name='patient_events')
     date = models.DateField()
+    date_logged = models.DateTimeField()
     
     def __unicode__(self):
         return '%s %s on %s' % (self.patient, self.event, self.date)
@@ -72,7 +76,7 @@ class SentNotification(models.Model):
                                      related_name='sent_notifications')
     patient = models.ForeignKey(Patient, related_name='sent_notifications')
     recipient = models.ForeignKey(Contact, related_name='sent_notifications')
-    date = models.DateField()
+    date_logged = models.DateTimeField()
     
     def __unicode__(self):
         return '%s sent to %s on %s' % (self.notification, self.patient,
