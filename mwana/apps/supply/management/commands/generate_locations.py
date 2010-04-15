@@ -23,9 +23,11 @@ class Command(LabelCommand):
 def create_locations(count):
     # give django some time to bootstrap itself
     from rapidsms.contrib.locations.models import LocationType, Location, Point
-    health_center_type = LocationType.objects.get_or_create\
-        (singular="health facility", plural="health facilities",
-         slug="health_facilities")[0]
+    try:
+        health_center_type = LocationType.objects.get(slug="health_facilities")
+    except LocationType.DoesNotExist:
+        health_center_type = LocationType.objects.create\
+            (slug="health_facilities",singular="health facility", plural="health facilities")
     
     for i in range(count):
         lat, lon = _zambian_coordinate()
