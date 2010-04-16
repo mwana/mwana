@@ -37,9 +37,12 @@ INSTALLED_APPS = (
     "mwana.apps.reminders",
     "mwana.apps.supply",
     "rapidsms.contrib.registration",
+    "rapidsms.contrib.default",
 )
 
-
+# TODO: make a better default response, include other apps, and maybe 
+# this dynamic?
+DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, REQUEST, STATUS, and RECEIVE. Respond with any keyword for more information." 
 
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
