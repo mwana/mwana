@@ -48,7 +48,7 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production'
-    env.hosts = ['10.3.0.198']
+    env.hosts = ['10.10.10.20']
     env.user = 'mwana'
     env.root = '/home/mwana'
     env.dbname = 'mwana_production'
