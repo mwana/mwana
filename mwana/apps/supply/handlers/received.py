@@ -5,20 +5,19 @@ from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from mwana.apps.registration.handlers.register import RegisterHandler
 
-class RequestHandler(KeywordHandler):
+class ReceivedHandler(KeywordHandler):
     """
     """
 
-    keyword = "request|req"
+    keyword = "received|rec|got"
 
     def help(self):
-        self.respond("To request more supplies, send REQUEST <SUPPLY CODE>")
+        self.respond("To report receiving supplies, send GOT <SUPPLY CODE>")
 
     def handle(self, text):
-        supply_codes = text.split(" ")
         
         if not self.msg.contact:
-            self.respond("Sorry you have to register to request supplies. %s" %\
+            self.respond("Sorry you have to register to report supplies. %s" %\
                          RegisterHandler.HELP_TEXT)
             return
         
@@ -26,9 +25,10 @@ class RequestHandler(KeywordHandler):
         contact  = self.msg.contact
         location = self.msg.contact.location
         
-        created_supplies = []
-        pending_supplies = []
+        processed_supplies = []
+        inactive_supplies = []
         unknown_supplies = []
+        supply_codes = text.split(" ")
         for code in supply_codes:
             try:
                 supply = SupplyType.objects.get(slug__iexact=code)
@@ -37,28 +37,27 @@ class RequestHandler(KeywordHandler):
                 try: 
                     # if the below doesn't fail we already have a pending request
                     pending = SupplyRequest.active().get(location=location, type=supply)
-                    pending_supplies.append(pending)
+                    pending.status = "delivered"
+                    pending.save()
+                    processed_supplies.append(pending)
                 
                 except SupplyRequest.DoesNotExist:
-                    # normal flow -- create a new supply request for this 
-                    request = SupplyRequest.objects.create(type=supply, status="requested",
-                                                           location=self.msg.contact.location,
-                                                           requested_by=self.msg.contact)
-                    created_supplies.append(supply)
+                    # this was a known supply type, but we didn't have an active request
+                    inactive_supplies.append(supply)
             
             except SupplyType.DoesNotExist:
                 unknown_supplies.append(code)
         
-        if created_supplies:
-            self.respond("Your request for more %(supplies)s has been received.",
-                         supplies=" and ".join([supply.name for supply in created_supplies]))
+        if processed_supplies:
+            self.respond("Your confirmation that %(supplies)s were delivered has been received. Enjoy your new stuff!",
+                         supplies=" and ".join([supply.type.name for supply in processed_supplies]))
+        
+        if inactive_supplies:
+            self.respond("You don't have any active requests for %(supplies)s.",
+                         supplies=" and ".join([supply.name for supply in inactive_supplies]))
         
         if unknown_supplies:
             self.respond("Sorry, I don't know about any supplies with code %(supplies)s.",
                             supplies=" or ".join([code for code in unknown_supplies]))
-        
-        if pending_supplies:
-            self.respond("You already have requested %(supplies)s. To check status send STATUS <SUPPLY CODE>.",
-                         supplies=" and ".join([supply.type.name for supply in pending_supplies]))
         
         

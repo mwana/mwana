@@ -24,6 +24,7 @@ INSTALLED_APPS = (
     "rapidsms.contrib.echo",
     "rapidsms.contrib.locations",
     "rapidsms.contrib.messagelog",
+    "rapidsms.contrib.messaging",
     "rapidsms.contrib.scheduler",
 
     # enable the django admin using a little shim app (which includes
@@ -31,13 +32,17 @@ INSTALLED_APPS = (
     "rapidsms.contrib.djangoadmin",
     "django.contrib.admin",
     
+    "mwana.apps.registration",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.supply",
     "rapidsms.contrib.registration",
+    "rapidsms.contrib.default",
 )
 
-
+# TODO: make a better default response, include other apps, and maybe 
+# this dynamic?
+DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, REQUEST, STATUS, and GOT. Respond with any keyword for more information." 
 
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 

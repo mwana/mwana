@@ -27,10 +27,11 @@ class NotificationInline(admin.TabularInline):
 
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ('name', 'message',)
+    list_display = ('name', 'slug',)
     inlines = (NotificationInline,)
     list_select_related = True
-    search_fields = ('name', 'message__name', 'message__text',)
+    prepopulated_fields = {'slug': ('name',)}
+    search_fields = ('name', 'slug',)
 admin.site.register(reminders.Event, EventAdmin)
 
 
@@ -51,15 +52,15 @@ class SentNotificationInline(admin.TabularInline):
 
 
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name','location','national_id')
     inlines = (PatientEventInline, SentNotificationInline,)
     search_fields = ('name',)
 admin.site.register(reminders.Patient, PatientAdmin)
 
 
 class SentNotificationAdmin(admin.ModelAdmin):
-    list_display = ('notification', 'patient', 'recipient', 'date',)
-    list_filter = ('notification', 'date',)
+    list_display = ('notification', 'patient', 'recipient', 'date_logged',)
+    list_filter = ('notification', 'date_logged',)
     list_select_related = True
     search_fields = ('notification__name', 'patient__name', 'recipient__name',
                      'recipient__alias',)
