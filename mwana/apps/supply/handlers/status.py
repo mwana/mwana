@@ -51,12 +51,9 @@ class StatusHandler(KeywordHandler):
                         for request in supply_requests:
                             if request.requested_by:
                                 if request.requested_by == self.msg.contact:
-#                                    status = self.get_choice_text(request.status)
-                                    status = request.get_status_display()
-                                    date = request.modified.strftime("%B %d, %Y at %I:%M:%S %p")
-                                    name = request.type.name
-                                    response = "Request for %s last worked on %s %s. " % (name, date, status)
-                                    self.respond(response.strip())
+                                    self.respond("Your request for %(supply)s has status: %(status)s as of %(date)s.",
+                                                 supply=request.type.name, status=request.get_status_display().upper(), 
+                                                 date=request.modified.strftime("%B %d, %Y at %I:%M:%S %p"))
                                     match = True
                         if not match:
                             self.respond("Request for %s by %s not found" % (supply_type, self.msg.contact))

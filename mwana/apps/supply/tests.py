@@ -81,7 +81,7 @@ class TestApp (TestScript):
         script = """
             sguy > request sb
             sguy < Your request for more sleeping bags has been received.
-            sguy > status tent
+            sguy > status tent    
             sguy < Request for tents by supply guy not found
             sguy > status mm
             sguy < Request for marshmallows by supply guy not found
@@ -94,15 +94,13 @@ class TestApp (TestScript):
 
         # matched status request
         request = SupplyRequest.objects.all()[0]
-        status = request.get_status_display()
         date = request.modified.strftime("%B %d, %Y at %I:%M:%S %p")
-        name = request.type.name
-        message = "Request for %s last worked on %s %s. " % (name, date, status)
-
+        
         text = """
             sguy > status sb
-            sguy < %s
-        """ % message.strip()
+            sguy < Your request for sleeping bags has status: YET TO BE PROCESSED as of %(date)s.
+        """ % {"date": date}
+        
         script=text.strip()
         self.runScript(script)
 
