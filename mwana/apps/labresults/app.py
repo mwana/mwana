@@ -28,19 +28,22 @@ class App (rapidsms.App):
             try:
                 recipient = Recipient.objects.get(connection=message.connection)
             except Recipient.DoesNotExist:
-                send(message.connection, 'Do not recognize phone number')
+                message.respond('Do not recognize phone number')
+                return True
 
             pieces = message.text.split()
             if len(pieces) < 2:
-                send(message.connection, 'Missing PIN')
+                message.respond('Missing PIN')
+                return True
 
             pin = pieces[1]
             if pin.upper() != recipient.pin.upper():
-                send(message.connection, 'PIN is wrong')
+                message.respond('PIN is wrong')
+                return True
 
             clinic = recipient.clinic_id
-            self.send_results(clinic, recipient.connection)
-            clinic.last_fetch = date.now()
+            self.send_results(clinic, message)
+            clinic.last_fetch = date.today()
             clinic.save()
         
             return True
@@ -60,19 +63,23 @@ class App (rapidsms.App):
         """Perform global app cleanup when the application is stopped."""
         pass
         
-    def send_results (self, clinic, conn):
+    def send_results (self, clinic, message):
         outcomes = {'P': 'POS', 'N': 'NEG', 'B': 'BAD'}
         
         results = Result.objects.filter(notification_status__in=['new', 'notified'], clinic_id=clinic)
         
         content = []
-        content.append('%d %s' % (len(results), 'results' if len(results) > 1 else 'result'))
-        for r in results:
-            content.append('%s (%s) %s' % (r.patient_id, r.sample_id, outcomes[r.result]))
-        content.append('Record these results in the logbook, then delete these messages and the message you sent')
+        if len(results) > 0:
+            content.append('%d new EID %s' % (len(results), 'results' if len(results) > 1 else 'result'))
+            for r in results:
+                content.append('%s (%s) %s' % (r.patient_id, r.sample_id, outcomes[r.result]))
+            content.append('Record these results in the logbook, then delete these messages and the message you sent')
+        else:
+            content.append('No new EID results')
+            content.append('Remember to delete the message you sent')
         
         for sms in self.chunk_messages(content):
-            send(conn, sms)
+            message.respond(sms)
             
         for r in results:
             r.notification_status = 'sent'
@@ -88,6 +95,9 @@ class App (rapidsms.App):
                 yield message
             
             message = message_ext
+            
+        if len(message) > 0:
+            yield message
         
     def schedule_notification_task (self):
         callback = 'mwana.apps.labresults.app.send_results_notification'
@@ -98,7 +108,7 @@ class App (rapidsms.App):
         except EventSchedule.DoesNotExist:
             pass
         
-        task = EventSchedule(callback=callback, **config.sched)
+        task = EventSchedule(callback=callback, days_of_month='*', hours=[8], minutes=[0]) #**config.sched)
         task.save()
         
     def send_results_notification (self):

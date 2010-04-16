@@ -8,7 +8,7 @@ class Clinic(models.Model):
     province = models.CharField(max_length=100, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    last_fetch = models.DateField(null=True)
+    last_fetch = models.DateField(null=True, blank=True)
     
 class Result(models.Model):
     RESULT_CHOICES = (
