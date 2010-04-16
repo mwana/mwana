@@ -69,7 +69,7 @@ class App (rapidsms.App):
         content.append('%d %s' % (len(results), 'results' if len(results) > 1 else 'result'))
         for r in results:
             content.append('%s (%s) %s' % (r.patient_id, r.sample_id, outcomes[r.result]))
-        content.append('Remember to delete these messages, and the message you sent, once the results are recorded in the logbook')
+        content.append('Record these results in the logbook, then delete these messages and the message you sent')
         
         for sms in self.chunk_messages(content):
             send(conn, sms)

@@ -28,10 +28,10 @@ class Result(models.Model):
     patient_id = models.CharField(max_length=30)
     sample_id = models.CharField(max_length=30)
     clinic_id = models.ForeignKey(Clinic)
-    result = models.CharField(choices=RESULT_CHOICES)
+    result = models.CharField(choices=RESULT_CHOICES, max_length=1)
     taken_on = models.DateField(null=True)
     entered_on = models.DateField()
-    notification_status = models.CharField(choices=STATUS_CHOICES)
+    notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
 
 class Recipient(models.Model):
     connection = models.ForeignKey(Connection)
