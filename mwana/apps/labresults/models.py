@@ -10,6 +10,9 @@ class Clinic(models.Model):
     longitude = models.FloatField(null=True, blank=True)
     last_fetch = models.DateField(null=True, blank=True)
     
+    def __unicode__(self):
+        return '%s [%s]' % (self.clinic_id, self.name)
+    
 class Result(models.Model):
     RESULT_CHOICES = (
         ('P', 'Positive'),
@@ -33,8 +36,13 @@ class Result(models.Model):
     entered_on = models.DateField()
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
 
+    def __unicode__(self):
+        return '%s/%s/%s %s (%s)' % (self.patient_id, self.sample_id, self.clinic_id.clinic_id, self.result, self.notification_status)
+
 class Recipient(models.Model):
     connection = models.ForeignKey(Connection)
     clinic_id = models.ForeignKey(Clinic)
     pin = models.CharField(max_length=4)
     
+    def __unicode__(self):
+        return '%s :: %s' % (self.clinic_id.clinic_id, str(self.connection))
