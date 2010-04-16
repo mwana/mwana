@@ -55,7 +55,8 @@ class StatusHandler(KeywordHandler):
                                     status = request.get_status_display()
                                     date = request.modified.strftime("%B %d, %Y at %I:%M:%S %p")
                                     name = request.type.name
-                                    self.respond("Request for %s last worked on %s %s. " % (name, date, status))
+                                    response = "Request for %s last worked on %s %s. " % (name, date, status)
+                                    self.respond(response.strip())
                                     match = True
                         if not match:
                             self.respond("Request for %s by %s not found" % (supply_type, self.msg.contact))

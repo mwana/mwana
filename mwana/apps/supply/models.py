@@ -20,10 +20,9 @@ class SupplyType(models.Model):
 
 STATUS_CHOICES = (
     ("requested", "yet to be processed"),
-    ("processed", "has been processed"),
-    ("sent", "was processed. Supply was Sent"),
-    ("delivered", "was fulfilled. Supply has been delivered"))
-
+    ("processed", "processed at supplier"),
+    ("sent", "processed and sent for delivery"),
+    ("delivered", "processed, sent, and delivered"))
 
 class SupplyRequest(models.Model):
     """
@@ -46,5 +45,6 @@ class SupplyRequest(models.Model):
         
         
     def __unicode__(self):
-        return "Request for %s at %s on %s" % (self.type, self.location, self.created.date()) 
+        return "Request for %s by %s at %s on %s" % \
+            (self.type, self.requested_by, self.location, self.created.date()) 
     
