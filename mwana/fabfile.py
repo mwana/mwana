@@ -34,12 +34,12 @@ def setup_path():
     env.path = PATH_SEP.join((env.root, env.environment))
 
 
-def staging():
-    env.environment = 'staging'
-    env.hosts = ['']
-    env.user = 'mwana'
-    env.root = '/home/mwana'
-    env.dbname = 'mwana_staging'
+def dev():
+    env.environment = 'dev'
+    env.hosts = ['10.3.0.5']
+    env.user = 'deployer'
+    env.root = '/home/deployer'
+    env.dbname = 'mwana_dev'
     setup_path()
 
 
