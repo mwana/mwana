@@ -42,7 +42,7 @@ INSTALLED_APPS = (
 
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
-DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, REQUEST, STATUS, and RECEIVE. Respond with any keyword for more information." 
+DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, REQUEST, STATUS, and GOT. Respond with any keyword for more information." 
 
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 

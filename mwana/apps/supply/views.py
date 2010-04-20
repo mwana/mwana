@@ -42,7 +42,7 @@ def request_details(request, request_pk):
                 # to the original requester so they know things are 
                 # proceeding.
                 text = ("Your request for more %(supply)s at %(loc)s has been updated! " +\
-                       "The new status is: %(status)s.") % \
+                        "The new status is: %(status)s.") % \
                             {"supply": sreq.type.name, 
                              "loc":    sreq.location.name, 
                              "status": sreq.get_status_display().upper()}
