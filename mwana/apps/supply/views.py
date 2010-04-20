@@ -5,13 +5,12 @@ from datetime import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.templatetags.tabs_tags import register_tab
 from django.views.decorators.http import require_http_methods, require_GET
 from rapidsms.contrib.locations.models import Location
 from rapidsms.utils import render_to_response, web_message
 from rapidsms.contrib.messaging.utils import send_message
 
-@register_tab(caption="Supplies")
+
 @require_GET
 def dashboard(request):
     """Supply dashboard"""

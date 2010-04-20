@@ -36,7 +36,7 @@ INSTALLED_APPS = (
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.supply",
-    "rapidsms.contrib.registration",
+    
     "rapidsms.contrib.default",
 )
 
@@ -47,7 +47,18 @@ DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN,
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
 }
-    
+
+TABS = [
+    ('rapidsms.views.dashboard', 'Dashboard'),
+    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ('rapidsms.contrib.locations.views.dashboard', 'Map'),
+    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.registration.views.registration', 'Registration'),
+    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+    ('mwana.apps.supply.views.dashboard', 'Supplies'),
+]
+
 # import local settings if we find them
 try:
     from localsettings import *
