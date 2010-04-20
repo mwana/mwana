@@ -43,6 +43,15 @@ def dev():
     setup_path()
 
 
+def staging():
+    env.environment = 'staging'
+    env.hosts = ['10.3.0.5']
+    env.user = 'deployer'
+    env.root = '/home/deployer'
+    env.dbname = 'mwana_staging'
+    setup_path()
+
+
 def production():
     if not console.confirm('Are you sure you want to set the environment to '
                            'production?', default=False):
