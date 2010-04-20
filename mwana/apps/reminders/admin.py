@@ -52,14 +52,14 @@ class SentNotificationInline(admin.TabularInline):
 
 
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name','location','national_id')
+    list_display = ('name',)
     inlines = (PatientEventInline, SentNotificationInline,)
     search_fields = ('name',)
 admin.site.register(reminders.Patient, PatientAdmin)
 
 
 class SentNotificationAdmin(admin.ModelAdmin):
-    list_display = ('notification', 'patient', 'recipient', 'date_logged',)
+    list_display = ('notification', 'patient_event', 'recipient', 'date_logged',)
     list_filter = ('notification', 'date_logged',)
     list_select_related = True
     search_fields = ('notification__name', 'patient__name', 'recipient__name',
