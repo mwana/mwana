@@ -12,7 +12,19 @@ class Clinic(models.Model):
     
     def __unicode__(self):
         return '%s [%s]' % (self.clinic_id, self.name)
-    
+
+
+class RawResult(models.Model):
+    date = models.DateTimeField()
+    processed = models.BooleanField('Whether or not this result was saved to '
+                                    'the final results table in the database',
+                                    default=False)
+    data = models.TextField()
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')
+
+
 class Result(models.Model):
     RESULT_CHOICES = (
         ('P', 'Positive'),
@@ -38,6 +50,7 @@ class Result(models.Model):
 
     def __unicode__(self):
         return '%s/%s/%s %s (%s)' % (self.patient_id, self.sample_id, self.clinic_id.clinic_id, self.result, self.notification_status)
+
 
 class Recipient(models.Model):
     connection = models.ForeignKey(Connection)
