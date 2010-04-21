@@ -8,6 +8,7 @@ class RawResult(models.Model):
                                     'the final results table in the database',
                                     default=False)
     data = models.TextField()
+    parsed = models.BooleanField(default=False)
 
     def __unicode__(self):
         return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')

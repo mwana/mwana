@@ -29,6 +29,22 @@ def accept_results(request):
     data = urllib.urlencode({'varname': 'value'})
     f = urllib2.urlopen('http://localhost:8000/labresults/incoming/', data)
     """
-    labresults.RawResult.objects.create(date=datetime.datetime.now(),
-                                        data=json.dumps(request.POST))
-    return HttpResponse()
+    
+    if request.META['CONTENT_TYPE'] != 'text/json':
+        #do something?
+        pass
+    
+    content = request.raw_post_data
+    
+    try:
+      json.loads(request.raw_post_data)
+      parsed = True
+    except:
+      parsed = False
+    
+    labresults.RawResult.objects.create(date=datetime.datetime.now(), data=content, parsed=parsed)
+    
+    if parsed:
+      return HttpResponse('SUCCESS')
+    else:
+      return HttpResponse('CANNOT PARSE (%d bytes received)' % len(content))
