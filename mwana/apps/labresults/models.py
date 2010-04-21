@@ -1,22 +1,12 @@
 from django.db import models
+from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Connection
 
-class Clinic(models.Model):
-    clinic_id = models.CharField(max_length=30)
-    name = models.CharField(max_length=100)
-    district = models.CharField(max_length=100, blank=True)
-    province = models.CharField(max_length=100, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    last_fetch = models.DateField(null=True, blank=True)
-    
-    def __unicode__(self):
-        return '%s [%s]' % (self.clinic_id, self.name)
     
 class Result(models.Model):
     RESULT_CHOICES = (
-        ('P', 'Positive'),
-        ('N', 'Negative'),
+        ('P', 'HIV Positive'),
+        ('N', 'HIV Negative'),
         ('B', 'Bad Sample'),
     )
 
@@ -28,21 +18,14 @@ class Result(models.Model):
         ('sent', 'Result sent to clinic'),
     )
 
-    patient_id = models.CharField(max_length=30)
+    patient_id = models.CharField(max_length=30, blank=True)
     sample_id = models.CharField(max_length=30)
-    clinic_id = models.ForeignKey(Clinic)
+    clinic = models.ForeignKey(Location)
     result = models.CharField(choices=RESULT_CHOICES, max_length=1)
     taken_on = models.DateField(null=True)
     entered_on = models.DateField()
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
 
     def __unicode__(self):
-        return '%s/%s/%s %s (%s)' % (self.patient_id, self.sample_id, self.clinic_id.clinic_id, self.result, self.notification_status)
+        return '%s/%s/%s %s (%s)' % (self.patient_id, self.sample_id, self.clinic.slug, self.result, self.notification_status)
 
-class Recipient(models.Model):
-    connection = models.ForeignKey(Connection)
-    clinic_id = models.ForeignKey(Clinic)
-    pin = models.CharField(max_length=4)
-    
-    def __unicode__(self):
-        return '%s :: %s' % (self.clinic_id.clinic_id, str(self.connection))
