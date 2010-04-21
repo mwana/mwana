@@ -19,8 +19,9 @@ if __name__ == "__main__":
     rapidsms_root = os.path.join(project_root, "submodules", "rapidsms")
     rapidsms_lib = os.path.join(rapidsms_root, "lib")
     django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
+    django_tables_root = os.path.join(rapidsms_root, "submodules", "django-tables")
     
-    for dir in [project_root, rapidsms_lib, django_settings_root]:
+    for dir in [project_root, rapidsms_lib, django_settings_root, django_tables_root]:
         sys.path.insert(0, dir)
 
     import settings
