@@ -6,7 +6,7 @@ import rapidsms
 import datetime
 
 from mwana.apps.reminders import models as reminders
-from mwana.apps.registration.handlers.register import RegisterHandler
+from mwana.apps.reminders.handlers.agent import AgentHelper
 
 
 class App(rapidsms.App):
@@ -40,7 +40,7 @@ class App(rapidsms.App):
         """
         if not msg.contact:
             msg.respond("Sorry you have to register to add events. %s" %
-                        RegisterHandler.HELP_TEXT)
+                        AgentHelper.HELP_TEXT)
             return
         m = self.PATTERN.match(msg.text)
         if m is not None:
@@ -74,7 +74,7 @@ class App(rapidsms.App):
                 gender = event.gender == 'f' and 'her' or 'his'
             msg.respond("You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
-                        "it's time for %(gender)s next appointment at the "
+                        "it is time for %(gender)s next appointment at the "
                         "clinic.", event=event.name.lower(), gender=gender,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
