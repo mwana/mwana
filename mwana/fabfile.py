@@ -36,7 +36,7 @@ def setup_path():
 
 def dev():
     env.environment = 'dev'
-    env.hosts = ['10.3.0.5']
+    env.hosts = ['mwana']
     env.user = 'deployer'
     env.root = '/home/deployer'
     env.dbname = 'mwana_dev'
@@ -45,7 +45,7 @@ def dev():
 
 def staging():
     env.environment = 'staging'
-    env.hosts = ['10.3.0.5']
+    env.hosts = ['mwana']
     env.user = 'deployer'
     env.root = '/home/deployer'
     env.dbname = 'mwana_staging'
@@ -57,7 +57,7 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production'
-    env.hosts = ['10.10.10.20']
+    env.hosts = ['66.36.213.161']
     env.user = 'mwana'
     env.root = '/home/mwana'
     env.dbname = 'mwana_production'
