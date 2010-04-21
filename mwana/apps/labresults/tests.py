@@ -1,9 +1,15 @@
+import json
+
+from django.contrib.auth.models import User, Permission
+from django.core.urlresolvers import reverse
+
+from mwana.apps.labresults import models as labresults
+
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults.app import App
-from mwana.apps.labresults.models import Result
 import datetime
 
 class TestApp(TestScript):
@@ -67,18 +73,18 @@ class TestApp(TestScript):
         # Due to the intensive overhead of creating all these objects this is
         # much more of an integration test than a unit test.
         # Save some results
-        res1 = Result.objects.create(sample_id="0001", clinic=self.clinic, 
+        res1 = labresults.Result.objects.create(sample_id="0001", clinic=self.clinic, 
                                      result="N", 
                                      taken_on=datetime.datetime.today(),
                                      entered_on=datetime.datetime.today(), 
                                      notification_status="new")
         
-        res2 = Result.objects.create(sample_id="0002", clinic=self.clinic, result="P", 
+        res2 = labresults.Result.objects.create(sample_id="0002", clinic=self.clinic, result="P", 
                               taken_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(), 
                               notification_status="new")
         
-        res3 = Result.objects.create(sample_id="0003", clinic=self.clinic, result="N", 
+        res3 = labresults.Result.objects.create(sample_id="0003", clinic=self.clinic, result="N", 
                               taken_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(), 
                               notification_status="new")
@@ -91,7 +97,7 @@ class TestApp(TestScript):
         """ % {"name": self.contact.name, "count": 3 }
         self.runScript(script)
         
-        for res in [Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
+        for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
         
         script = """
@@ -105,7 +111,45 @@ class TestApp(TestScript):
         
         self.runScript(script)
         
-        for res in [Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
+        for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
             self.assertEqual("sent", res.notification_status)
             
+    def test_raw_result_entry(self):
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_rawresult')
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        data = {'varname': 'data'}
+        now = datetime.datetime.now()
+        response = self.client.post(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(labresults.RawResult.objects.count(), 1)
+        raw_result = labresults.RawResult.objects.get()
+        self.assertEqual(raw_result.data, json.dumps(data))
+        self.assertFalse(raw_result.processed)
+        self.assertEqual(raw_result.date.year, now.year)
+        self.assertEqual(raw_result.date.month, now.month)
+        self.assertEqual(raw_result.date.day, now.day)
+        self.assertEqual(raw_result.date.hour, now.hour)
+    
+    def test_raw_result_login_required(self):
+        data = {'varname': 'data'}
+        response = self.client.post(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 401) # authorization required
+        self.assertEqual(labresults.RawResult.objects.count(), 0)
+    
+    def test_raw_result_permission_required(self):
+        User.objects.create_user(username='adh', email='', password='abc')
+        self.client.login(username='adh', password='abc')
+        data = {'varname': 'data'}
+        response = self.client.post(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 401) # authorization required
+        self.assertEqual(labresults.RawResult.objects.count(), 0)
+    
+    def test_raw_result_post_required(self):
+        response = self.client.get(reverse('accept_results'))
+        self.assertEqual(response.status_code, 405) # method not supported
+
         

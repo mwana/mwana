@@ -2,7 +2,17 @@ from django.db import models
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Connection
 
-    
+class RawResult(models.Model):
+    date = models.DateTimeField()
+    processed = models.BooleanField('Whether or not this result was saved to '
+                                    'the final results table in the database',
+                                    default=False)
+    data = models.TextField()
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')
+
+
 class Result(models.Model):
     RESULT_CHOICES = (
         ('P', 'HIV Positive'),
