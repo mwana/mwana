@@ -61,4 +61,4 @@ class StatusHandler(KeywordHandler):
                 else:
                     self.respond("Request for %s by %s not found" % (supply_type, self.msg.contact))
         except Exception, e:
-            print "Exception: ", e
+            self.error(e)
