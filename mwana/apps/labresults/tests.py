@@ -94,7 +94,8 @@ class TestApp(TestScript):
         script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
-        """ % {"name": self.contact.name, "count": 3 }
+            other_worker  < Hello %(other_name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+        """ % {"name": self.contact.name, "other_name": self.other_contact.name, "count": 3 }
         self.runScript(script)
         
         for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
