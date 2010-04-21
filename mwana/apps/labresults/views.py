@@ -20,14 +20,14 @@ def accept_results(request):
     # set up authentication info
     authinfo = urllib2.HTTPBasicAuthHandler()
     authinfo.add_password(realm='Lab Results',
-                          uri='http://localhost:8000/labresults/incoming/',
+                          uri='http://localhost:8000/',
                           user='adh',
                           passwd='abc')
+    
     opener = urllib2.build_opener(authinfo)
     urllib2.install_opener(opener)
     data = urllib.urlencode({'varname': 'value'})
     f = urllib2.urlopen('http://localhost:8000/labresults/incoming/', data)
-    assert(f.getcode(), 200)
     """
     labresults.RawResult.objects.create(date=datetime.datetime.now(),
                                         data=json.dumps(request.POST))

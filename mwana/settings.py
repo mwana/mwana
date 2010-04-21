@@ -40,6 +40,8 @@ INSTALLED_APPS = (
     "rapidsms.contrib.default",
 )
 
+ADMIN_MEDIA_PREFIX = '/admin-media/'
+
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
 DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, REQUEST, STATUS, and GOT. Respond with any keyword for more information." 
