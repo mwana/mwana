@@ -36,7 +36,7 @@ class RequestHandler(KeywordHandler):
                 # check for pending requests
                 try: 
                     # if the below doesn't fail we already have a pending request
-                    pending = SupplyRequest.active().get(location=location, type=supply)
+                    pending = SupplyRequest.active().get(location=location, type=supply, requested_by=self.msg.contact)
                     pending_supplies.append(pending)
                 
                 except SupplyRequest.DoesNotExist:
