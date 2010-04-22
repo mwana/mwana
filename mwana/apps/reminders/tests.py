@@ -14,19 +14,19 @@ class TestApp(TestScript):
     
     def _register(self):
         ctr = LocationType.objects.create()
-        kdh = Location.objects.create(name="Kafue District Hospital",
-                                      slug="kdh", type=ctr)
+        Location.objects.create(name="Kafue District Hospital", slug="kdh",
+                                type=ctr)
         script = """
-            kk     > join kdh rupiah banda
-            kk     < Thank you for registering, rupiah banda! I've got you at Kafue District Hospital.
-        """
+            kk     > agent kdh 01 rupiah banda
+            kk     < Thank you rupiah banda! You have successfully registered at as a RemindMi Agent for Kafue District Hospital.
+            """
         self.runScript(script)
     
     def testRequiresRegistration(self):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             noname > birth 4/3/2010 maria
-            noname < Sorry you have to register to add events. To register, send JOIN <LOCATION CODE> <NAME>
+            noname < Sorry you have to register to add events. To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
         """
         self.runScript(script)
         self.assertEqual(0, reminders.Patient.objects.count())
@@ -46,32 +46,46 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth 34553 maria
-            kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY/MONTH/YEAR, for example: 23/04/2010
+            kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2010
         """
         self.runScript(script)
         self.assertEqual(0, reminders.Patient.objects.count())
-        
+
     def testCorrectMessageWithDate(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth 4/3/2010 maria
-            kk     < Thank you for adding a birth for maria on 04/03/2010.  You will be notified when it's time for his or her next appointment.
+            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4 3 2010 laura
+            kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4-3-2010 anna
+            kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+        """
+        self.runScript(script)
+        self.assertEqual(3, reminders.Patient.objects.count())
+        for patient in reminders.Patient.objects.all():
+            self.assertEqual(1, patient.patient_events.count())
+            patient_event = patient.patient_events.get()
+            self.assertEqual(patient_event.date, datetime.date(2010, 3, 4))
+            self.assertEqual(patient_event.event.slug, "birth")
+
+    def testCorrectMessageWithGender(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
+        script = """
+            kk     > birth 4/3/2010 maria
+            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         self.assertEqual(1, reminders.Patient.objects.count())
-        patient = reminders.Patient.objects.get()
-        self.assertEqual(1, patient.patient_events.count())
-        patient_event = patient.patient_events.get()
-        self.assertEqual(patient_event.date, datetime.date(2010, 3, 4))
-        self.assertEqual(patient_event.event.slug, "birth")
         
     def testCorrectMessageWithoutDate(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth maria
-            kk     < Thank you for adding a birth for maria on %s.  You will be notified when it's time for his or her next appointment.
+            kk     < You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % datetime.date.today().strftime('%d/%m/%Y')
         self.runScript(script)
         self.assertEqual(1, reminders.Patient.objects.count())
@@ -81,3 +95,27 @@ class TestApp(TestScript):
         self.assertEqual(patient_event.date, datetime.date.today())
         self.assertEqual(patient_event.event.slug, "birth")
         
+    def testAgentRegistration(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create()
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        reminders.Event.objects.create(name="Birth", slug="birth")
+        self.assertEqual(reminders.Event.objects.count(), 1)
+        script = """
+            lost   > agent
+            lost   < To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
+            rb     > agent kdh 01 rupiah banda
+            rb     < Thank you rupiah banda! You have successfully registered at as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
+            kk     > agent whoops 01 kenneth kaunda
+            kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
+            noname > agent abc
+            noname < Sorry, I didn't understand that. Make sure you send your clinic, zone #, and name like: AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
+        """
+        self.runScript(script)
+        self.assertEqual(1, Contact.objects.count(), "Registration didn't create a new contact!")
+        rb = Contact.objects.all()[0]
+        self.assertEqual(rb.zone_code, 1)
+        self.assertEqual("rupiah banda", rb.name, "Name was not set correctly after registration!")
+        self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
+

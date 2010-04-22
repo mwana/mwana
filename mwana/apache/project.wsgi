@@ -18,8 +18,9 @@ try:
     rapidsms_root = os.path.join(PROJECT_ROOT, "submodules", "rapidsms")
     rapidsms_lib = os.path.join(rapidsms_root, "lib")
     django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
+    django_tables_root = os.path.join(rapidsms_root, "submodules", "django-tables")
     
-    for dir in [PROJECT_ROOT, rapidsms_lib, django_settings_root]:
+    for dir in [PROJECT_ROOT, rapidsms_lib, django_settings_root, django_tables_root]:
         sys.path.insert(0, dir)
     
     import mwana.settings

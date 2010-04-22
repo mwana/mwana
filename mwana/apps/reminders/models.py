@@ -22,9 +22,16 @@ class Event(models.Model):
     """
     Anything that happens to a patient
     """
+    GENDER_CHOICES = (
+        ('m', 'Male'),
+        ('f', 'Female'),
+    )
     name = models.CharField(max_length=255)
     slug = models.CharField(max_length=255)
-    
+    gender = models.CharField(max_length=1, blank=True, help_text='If this '
+                              'event is gender-specific, specify the gender '
+                              'here.', choices=GENDER_CHOICES)
+
     def __unicode__(self):
         return self.name
 
