@@ -17,7 +17,7 @@ class TestApp(TestScript):
     
     def setUp(self):
         super(TestApp, self).setUp()
-        self.type = LocationType.objects.create(singular="clinic", plural="clinics", slug="clinics")
+        self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug="clinics")[0]
         self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="mib")
         # this gets the backend and connection in the db
         script = "clinic_worker > hello world"
