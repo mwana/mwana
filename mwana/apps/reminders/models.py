@@ -30,7 +30,9 @@ class Appointment(models.Model):
     event = models.ForeignKey(Event)
     name = models.CharField(max_length=255)
     num_days = models.IntegerField(help_text='Number of days after the event '
-                                   'to send this notification.')
+                                   'this appointment should be. Reminders are '
+                                   'sent two days before the appointment '
+                                   'date.')
     
     def __unicode__(self):
         return self.name
