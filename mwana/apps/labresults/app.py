@@ -26,7 +26,8 @@ class App (rapidsms.App):
     
     def start (self):
         """Configure your app in the start phase."""
-        self.schedule_notification_task()
+        # this breaks on postgres
+        #self.schedule_notification_task()
         pass
     
     def filter (self, message):
