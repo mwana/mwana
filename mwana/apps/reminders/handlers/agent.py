@@ -46,7 +46,7 @@ class AgentHelper(KeywordHandler):
                     events = ' or '.join(events)
                 elif len(events) > 0:
                     if len(events) > 2:
-                        events[-1] = 'or %s' % event[-1]
+                        events[-1] = 'or %s' % events[-1]
                     events = ', '.join(events)
                 if events:
                     notify_text = " Please notify us next time there is a "\
@@ -54,7 +54,7 @@ class AgentHelper(KeywordHandler):
                 else:
                     notify_text = ""
                 self.respond("Thank you %(name)s! You have successfully "
-                             "registered at as a RemindMi Agent for "
+                             "registered as a RemindMi Agent for "
                              "%(location)s.%(notify_text)s",
                              name=contact.name, location=location.name,
                              notify_text=notify_text)
