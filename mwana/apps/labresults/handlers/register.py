@@ -61,6 +61,6 @@ class RegisterHandler(KeywordHandler):
             correct.", name=contact.name, location=location.name)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
-                         code=location_code)
+                         code=clinic_code)
 
         
