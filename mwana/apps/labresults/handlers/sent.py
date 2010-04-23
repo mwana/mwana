@@ -29,6 +29,7 @@ class SentHandler(KeywordHandler):
             count = int(text.strip())
         except ValueError:
             self.respond("%s %s" % (SORRY, HELP))
+            return
             
         # TODO: maybe record this somewhere 
         self.respond(SENT, name=self.msg.contact.name, count=count,

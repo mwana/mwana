@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.supply",
+    "mwana.apps.help",
     
     "rapidsms.contrib.default",
 )
