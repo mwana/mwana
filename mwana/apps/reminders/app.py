@@ -5,6 +5,9 @@ import re
 import rapidsms
 import datetime
 
+from rapidsms.models import Contact
+
+from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.handlers.agent import AgentHelper
 
@@ -38,10 +41,6 @@ class App(rapidsms.App):
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
-        if not msg.contact:
-            msg.respond("Sorry you have to register to add events. %s" %
-                        AgentHelper.HELP_TEXT)
-            return
         m = self.PATTERN.match(msg.text)
         if m is not None:
             event_slug = m.group('event_slug').strip()
@@ -64,14 +63,28 @@ class App(rapidsms.App):
                                 "Please enter the date like so: "
                                 "DAY MONTH YEAR, for example: 23 04 2010")
                     return
+                else:
+                    # is there a better way to do this?
+                    if date.year == 1900:
+                        date.year = datetime.datetime.now().year
             else:
                 date = datetime.datetime.today()
-            patient, _ = reminders.Patient.objects.get_or_create(name=name)
-            patient.patient_events.create(event=event, date=date)
-            if not event.gender:
-                gender = 'his or her'
+            if msg.contact.location and msg.contact.zone_code is not None:
+                patient, _ = Contact.objects.get_or_create(
+                                            name=name,
+                                            location=msg.contact.location,
+                                            zone_code=msg.contact.zone_code)
             else:
-                gender = event.gender == 'f' and 'her' or 'his'
+                patient = Contact.objects.create(name=name)
+            try:
+                patient_t = ContactType.objects.get(slug='patient')
+            except ContactType.DoesNotExist:
+                patient_t = ContactType.objects.create(name='Patient',
+                                                       slug='patient')
+            patient.types.add(patient_t)
+            patient.patient_events.create(event=event, date=date,
+                                          cba_conn=msg.connection)
+            gender = event.possessive_pronoun
             msg.respond("You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "

@@ -5,6 +5,7 @@
 from django.db import models
 
 class ContactZone(models.Model):
+    
     zone_code = models.SmallIntegerField(help_text="An optional "
                                          "code that indicates the zone"
                                          "in the catchment area of the "

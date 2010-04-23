@@ -34,13 +34,6 @@ class SentNotificationInline(admin.TabularInline):
     model = reminders.SentNotification
 
 
-class PatientAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    inlines = (PatientEventInline, SentNotificationInline,)
-    search_fields = ('name',)
-admin.site.register(reminders.Patient, PatientAdmin)
-
-
 class SentNotificationAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'patient_event', 'recipient', 'date_logged',)
     list_filter = ('appointment', 'date_logged',)
