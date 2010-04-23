@@ -1,12 +1,14 @@
 import datetime
+import time
 
 from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from rapidsms.contrib.locations.models import Location, LocationType
 
 from mwana.apps.reminders.app import App
 from mwana.apps.reminders import models as reminders
+from mwana.apps.reminders import tasks
 
 
 class TestApp(TestScript):
@@ -29,7 +31,8 @@ class TestApp(TestScript):
             noname < Sorry you have to register to add events. To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
         """
         self.runScript(script)
-        self.assertEqual(0, reminders.Patient.objects.count())
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(0, patients.count())
     
     def testMalformedMessage(self):
         self._register()
@@ -39,7 +42,8 @@ class TestApp(TestScript):
             kk     < Sorry, I didn't understand that. To add an event, send <EVENT CODE> <DATE> <NAME>.  The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
-        self.assertEqual(0, reminders.Patient.objects.count())
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(0, patients.count())
 
     def testBadDate(self):
         self._register()
@@ -49,7 +53,8 @@ class TestApp(TestScript):
             kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2010
         """
         self.runScript(script)
-        self.assertEqual(0, reminders.Patient.objects.count())
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(0, patients.count())
 
     def testCorrectMessageWithDate(self):
         self._register()
@@ -63,8 +68,9 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
         """
         self.runScript(script)
-        self.assertEqual(3, reminders.Patient.objects.count())
-        for patient in reminders.Patient.objects.all():
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(3, patients.count())
+        for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
             self.assertEqual(patient_event.date, datetime.date(2010, 3, 4))
@@ -78,7 +84,8 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
-        self.assertEqual(1, reminders.Patient.objects.count())
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
         
     def testCorrectMessageWithoutDate(self):
         self._register()
@@ -88,8 +95,9 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % datetime.date.today().strftime('%d/%m/%Y')
         self.runScript(script)
-        self.assertEqual(1, reminders.Patient.objects.count())
-        patient = reminders.Patient.objects.get()
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
+        patient = patients.get()
         self.assertEqual(1, patient.patient_events.count())
         patient_event = patient.patient_events.get()
         self.assertEqual(patient_event.date, datetime.date.today())
@@ -119,3 +127,120 @@ class TestApp(TestScript):
         self.assertEqual("rupiah banda", rb.name, "Name was not set correctly after registration!")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
 
+    def testSendReminders(self):
+        birth = reminders.Event.objects.create(name="Birth", slug="birth",
+                                               gender="f")
+        birth.appointments.create(name='2 day', num_days=2)
+        birth.appointments.create(name='3 day', num_days=3)
+        birth.appointments.create(name='4 day', num_days=4)
+        clinic = LocationType.objects.create(singular='Clinic',
+                                             plural='Clinics', slug='clinic')
+        central = Location.objects.create(name='Central Clinic', type=clinic)
+        patient1 = Contact.objects.create(name='patient 1', location=central)
+        patient2 = Contact.objects.create(name='patient 2', location=central)
+        patient3 = Contact.objects.create(name='patient 3', location=central)
+        
+        # this gets the backend and connection in the db
+        self.runScript("""
+        cba1 > hello world
+        cba2 > hello world
+        """)
+        # take a break to allow the router thread to catch up; otherwise we
+        # get some bogus messages when they're retrieved below
+        time.sleep(.1)
+        cba1_conn = Connection.objects.get(identity="cba1")
+        cba1 = Contact.objects.create(name='cba1')
+        cba1_conn.contact = cba1
+        cba1_conn.save()
+        cba2_conn = Connection.objects.get(identity="cba2")
+        cba2 = Contact.objects.create(name='cba2')
+        cba2_conn.contact = cba2
+        cba2_conn.save()
+        birth.patient_events.create(patient=patient1, cba_conn=cba1_conn,
+                                    date=datetime.datetime.today())
+        birth.patient_events.create(patient=patient2, cba_conn=cba1_conn,
+                                    date=datetime.datetime.today())
+        birth.patient_events.create(patient=patient3, cba_conn=cba2_conn,
+                                    date=datetime.datetime.today())
+        self.startRouter()
+        tasks.send_notifications(self.router)
+        # just the 1 and two day notifications should go out;
+        # 3 patients x 2 notifications = 6 messages
+        messages = self.receiveAllMessages()
+        expected_messages =\
+            ['Hello cba1. patient 1 is due for her next clinic appointment. '
+             'Please deliver a reminder to this person and ensure she '
+             'visits Central Clinic within 3 days.',
+             'Hello cba1. patient 2 is due for her next clinic appointment. '
+             'Please deliver a reminder to this person and ensure she '
+             'visits Central Clinic within 3 days.',
+             'Hello cba2. patient 3 is due for her next clinic appointment. '
+             'Please deliver a reminder to this person and ensure she '
+             'visits Central Clinic within 3 days.']
+        self.assertEqual(len(messages), len(expected_messages))
+        for msg in messages:
+            self.assertTrue(msg.text in expected_messages, msg)
+        sent_notifications = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notifications.count(), len(expected_messages))
+        
+    def testRemindersSentOnlyOnce(self):
+        """
+        tests that notification messages are sent only sent once
+        """
+        birth = reminders.Event.objects.create(name="Birth", slug="birth")
+        birth.appointments.create(name='1 day', num_days=2)
+        patient1 = Contact.objects.create(name='patient 1')
+        
+        # this gets the backend and connection in the db
+        self.runScript("""cba > hello world""")
+        # take a break to allow the router thread to catch up; otherwise we
+        # get some bogus messages when they're retrieved below
+        time.sleep(.1)
+        cba_conn = Connection.objects.get(identity="cba")
+        birth.patient_events.create(patient=patient1, cba_conn=cba_conn,
+                                    date=datetime.datetime.today())
+        self.startRouter()
+        tasks.send_notifications(self.router)
+        # just the 1 and two day notifications should go out;
+        # 3 patients x 2 notifications = 6 messages
+        messages = self.receiveAllMessages()
+        self.assertEqual(len(messages), 1)
+        sent_notifications = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notifications.count(), 1)
+
+        # make sure no new messages go out if the method is called again
+        tasks.send_notifications(self.router)
+        messages = self.receiveAllMessages()
+        self.assertEqual(len(messages), 0)
+        sent_notifications = reminders.SentNotification.objects.all()
+        # number of sent notifications should still be 1 (not 2)
+        self.assertEqual(sent_notifications.count(), 1)
+        
+        self.stopRouter()
+        
+    def testRemindersNoLocation(self):
+        birth = reminders.Event.objects.create(name="Birth", slug="birth")
+        birth.appointments.create(name='1 day', num_days=2)
+        patient1 = Contact.objects.create(name='patient 1')
+        
+        # this gets the backend and connection in the db
+        self.runScript("""cba > hello world""")
+        # take a break to allow the router thread to catch up; otherwise we
+        # get some bogus messages when they're retrieved below
+        time.sleep(.1)
+        cba_conn = Connection.objects.get(identity="cba")
+        birth.patient_events.create(patient=patient1, cba_conn=cba_conn,
+                                    date=datetime.datetime.today())
+        self.startRouter()
+        tasks.send_notifications(self.router)
+        # just the 1 and two day notifications should go out;
+        # 3 patients x 2 notifications = 6 messages
+        messages = self.receiveAllMessages()
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0].text, "Hello. patient 1 is due for his "
+                         "or her next clinic appointment. Please deliver a "
+                         "reminder to this person and ensure he or she visits "
+                         "the clinic within 3 days.")
+        sent_notifications = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notifications.count(), 1)
+        

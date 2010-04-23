@@ -5,6 +5,9 @@ import re
 import rapidsms
 import datetime
 
+from rapidsms.models import Contact
+
+from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.handlers.agent import AgentHelper
 
@@ -66,12 +69,22 @@ class App(rapidsms.App):
                     return
             else:
                 date = datetime.datetime.today()
-            patient, _ = reminders.Patient.objects.get_or_create(name=name)
-            patient.patient_events.create(event=event, date=date)
-            if not event.gender:
-                gender = 'his or her'
+            if msg.contact.location and msg.contact.zone_code is not None:
+                patient, _ = Contact.objects.get_or_create(
+                                            name=name,
+                                            location=msg.contact.location,
+                                            zone_code=msg.contact.zone_code)
             else:
-                gender = event.gender == 'f' and 'her' or 'his'
+                patient = Contact.objects.create(name=name)
+            try:
+                patient_t = ContactType.objects.get(slug='patient')
+            except ContactType.DoesNotExist:
+                patient_t = ContactType.objects.create(name='Patient',
+                                                       slug='patient')
+            patient.types.add(patient_t)
+            patient.patient_events.create(event=event, date=date,
+                                          cba_conn=msg.connection)
+            gender = event.possessive_pronoun
             msg.respond("You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
