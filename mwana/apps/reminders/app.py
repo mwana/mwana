@@ -6,6 +6,7 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
+from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
@@ -30,7 +31,19 @@ class App(rapidsms.App):
         '%d-%m-%Y',
         '%d-%m',
     )
+
+    def start(self):
+        #self.schedule_notification_task()
+        pass
     
+    def schedule_notification_task (self):
+        callback = 'mwana.apps.reminders.tasks.send_notifications'
+
+        #remove existing schedule tasks; reschedule based on the current setting from config
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, days_of_month=ALL,
+                                     hours=ALL, minutes=ALL)
+
     def handle(self, msg):
         """
         Handles the actual adding of events.  Other simpler commands are done
@@ -41,17 +54,18 @@ class App(rapidsms.App):
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
+        
+        event_slug = msg.text.split()[0]
+        try:
+            event = reminders.Event.objects.get(slug__iexact=event_slug)
+        except reminders.Event.DoesNotExist:
+            return False
+        
         m = self.PATTERN.match(msg.text)
         if m is not None:
-            event_slug = m.group('event_slug').strip()
             date_str = (m.group('date') or '').strip()
             name = m.group('name').strip()
             date = None
-            
-            try:
-                event = reminders.Event.objects.get(slug__iexact=event_slug)
-            except reminders.Event.DoesNotExist:
-                return False
             if date_str:
                 for format in self.DATE_FORMATS:
                     try:
