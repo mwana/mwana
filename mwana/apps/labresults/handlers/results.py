@@ -55,7 +55,7 @@ class ResultsHandler(KeywordHandler):
                         self.respond("The results for sample %(sample_id)s are "
                         "not yet ready. You will be notified when they are ready.", sample_id=sample_id)
             else:
-                self.respond("Sory, no sample with id %s was found for your clinic. "
+                self.respond("Sorry, no sample with id %s was found for your clinic. "
                 "Please check your DBS records and try again." % sample_id)
         except Exception, e:
             self.error(e)
