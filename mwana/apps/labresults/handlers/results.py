@@ -5,10 +5,10 @@ import re
 from mwana.apps.labresults.models import Result
 from rapidsms.contrib.handlers import KeywordHandler
 
-UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS \
-samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
-HELP          = "To request for results for a DBS sample, send RESULT <sampleid>.\
- E.g result ID45"
+UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS "
+"samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
+HELP          = "To request for results for a DBS sample, send RESULT <sampleid>. "
+"E.g result ID45"
 SORRY         = "Sorry, we didn't understand that message."
 
 class ResultsHandler(KeywordHandler):
@@ -52,11 +52,11 @@ class ResultsHandler(KeywordHandler):
                     if result.result and len(result.result.strip()) > 0:
                         sample_results.append("%s: %s" % (result.sample_id, result.get_result_display()))
                     else:
-                        self.respond("The results for sample %(sample_id)s are \
-                        not yet ready. You will be notified when they are ready.", sample_id=sample_id)
+                        self.respond("The results for sample %(sample_id)s are "
+                        "not yet ready. You will be notified when they are ready.", sample_id=sample_id)
             else:
-                self.respond("Sory, no sample with id %s was found for your clinic. \
-                Please check your DBS records and try again." % sample_id)
+                self.respond("Sory, no sample with id %s was found for your clinic. "
+                "Please check your DBS records and try again." % sample_id)
         except Exception, e:
             self.error(e)
         if sample_results:
