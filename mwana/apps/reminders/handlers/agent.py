@@ -46,7 +46,7 @@ class AgentHelper(KeywordHandler):
                     events = ' or '.join(events)
                 elif len(events) > 0:
                     if len(events) > 2:
-                        events[-1] = 'or %s' % event[-1]
+                        events[-1] = 'or %s' % events[-1]
                     events = ', '.join(events)
                 if events:
                     notify_text = " Please notify us next time there is a "\
