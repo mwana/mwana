@@ -6,10 +6,10 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 import re
 
-BYE_MSG   = "You have successfully left, %(name)s. We're sorry to see you go."
-ERROR_MSG = "Whoops - you tried to leave the system but I don't know who you are! Don't worry, you won't be receiving any messages from us."
+BYE_MSG   = "You have successfully unregisterd from Results160, %(name)s. We're sorry to see you go."
+ERROR_MSG = "Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us."
     
-class RegisterHandler(KeywordHandler):
+class UnregisterHandler(KeywordHandler):
     """
     """
 
@@ -23,8 +23,15 @@ class RegisterHandler(KeywordHandler):
 
     def handle(self, text):
         if self.msg.connection.contact:
-            self.msg.connection.contact.delete()
-            self.respond(BYE_MSG, name=self.msg.connection.contact.name)
+            name = self.msg.connection.contact.name
+            # we just deactivate the contact, but don't delete it, because 
+            # there could be all kinds of useful foreign key goodies attached.
+            self.msg.connection.contact.is_active = False
+            self.msg.connection.contact.save()
+            # we also disassociate the contact from the connection
+            self.msg.connection.contact = None
+            self.msg.connection.save()
+            self.respond(BYE_MSG, name=name)
         else:
             self.respond(ERROR_MSG)
             
