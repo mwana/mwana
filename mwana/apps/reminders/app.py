@@ -41,10 +41,6 @@ class App(rapidsms.App):
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
-        if not msg.contact:
-            msg.respond("Sorry you have to register to add events. %s" %
-                        AgentHelper.HELP_TEXT)
-            return
         m = self.PATTERN.match(msg.text)
         if m is not None:
             event_slug = m.group('event_slug').strip()
@@ -67,6 +63,10 @@ class App(rapidsms.App):
                                 "Please enter the date like so: "
                                 "DAY MONTH YEAR, for example: 23 04 2010")
                     return
+                else:
+                    # is there a better way to do this?
+                    if date.year == 1900:
+                        date.year = datetime.datetime.now().year
             else:
                 date = datetime.datetime.today()
             if msg.contact.location and msg.contact.zone_code is not None:

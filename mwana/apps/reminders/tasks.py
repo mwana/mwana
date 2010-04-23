@@ -14,9 +14,9 @@ def send_notification(patient_event, appointment):
         # if the cba was registered, we'll have a location and zone_code on
         # the patient and can use that information to find the CBAs to whom
         # we should send the appointment reminders
-        connections = Connection.objects.filter(contacts__types__slug='cba',
-                                         contacts__location=patient.location,
-                                         contacts__zone_code=patient.zone_code)
+        connections = Connection.objects.filter(contact__types__slug='cba',
+                                         contact__location=patient.location,
+                                         contact__zone_code=patient.zone_code)
     else:
         # if the CBA was not registered, just send the notification to the
         # CBA who logged the event

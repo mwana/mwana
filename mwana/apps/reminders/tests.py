@@ -6,6 +6,7 @@ from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from rapidsms.contrib.locations.models import Location, LocationType
 
+from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders.app import App
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders import tasks
@@ -23,16 +24,6 @@ class TestApp(TestScript):
             kk     < Thank you rupiah banda! You have successfully registered at as a RemindMi Agent for Kafue District Hospital.
             """
         self.runScript(script)
-    
-    def testRequiresRegistration(self):
-        reminders.Event.objects.create(name="Birth", slug="birth")
-        script = """
-            noname > birth 4/3/2010 maria
-            noname < Sorry you have to register to add events. To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
-        """
-        self.runScript(script)
-        patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(0, patients.count())
     
     def testMalformedMessage(self):
         self._register()
@@ -56,7 +47,7 @@ class TestApp(TestScript):
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(0, patients.count())
 
-    def testCorrectMessageWithDate(self):
+    def Test(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
@@ -66,7 +57,13 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3-2010 anna
             kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
-        """
+            kk     > birth 4/3 maria
+            kk     < You have successfully registered a birth for maria on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4 3 laura
+            kk     < You have successfully registered a birth for laura on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4-3 anna
+            kk     < You have successfully registered a birth for anna on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+        """ % {'year': datetime.datetime.now().year}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(3, patients.count())
@@ -126,7 +123,9 @@ class TestApp(TestScript):
         self.assertEqual(rb.zone_code, 1)
         self.assertEqual("rupiah banda", rb.name, "Name was not set correctly after registration!")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
-
+        self.assertEqual(rb.types.count(), 1)
+        self.assertEqual(rb.types.all()[0].slug, 'cba')
+        
     def testSendReminders(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth",
                                                gender="f")
@@ -241,6 +240,41 @@ class TestApp(TestScript):
                          "or her next clinic appointment. Please deliver a "
                          "reminder to this person and ensure he or she visits "
                          "the clinic within 3 days.")
+        sent_notifications = reminders.SentNotification.objects.all()
+        self.assertEqual(sent_notifications.count(), 1)
+        
+    def testRemindersRegistered(self):
+        birth = reminders.Event.objects.create(name="Birth", slug="birth")
+        birth.appointments.create(name='1 day', num_days=2)
+        clinic = LocationType.objects.create(singular='Clinic',
+                                             plural='Clinics', slug='clinic')
+        central = Location.objects.create(name='Central Clinic', type=clinic)
+        patient1 = Contact.objects.create(name='patient 1', zone_code=1,
+                                          location=central)
+        
+        # this gets the backend and connection in the db
+        self.runScript("""cba > hello world""")
+        # take a break to allow the router thread to catch up; otherwise we
+        # get some bogus messages when they're retrieved below
+        time.sleep(.1)
+        cba_conn = Connection.objects.get(identity="cba")
+        cba = Contact.objects.create(name='cba', zone_code=1, location=central)
+        cba_type = ContactType.objects.create(name='CBA', slug='cba')
+        cba.types.add(cba_type)
+        cba_conn.contact = cba
+        cba_conn.save()
+        birth.patient_events.create(patient=patient1, cba_conn=cba_conn,
+                                    date=datetime.datetime.today())
+        self.startRouter()
+        tasks.send_notifications(self.router)
+        # just the 1 and two day notifications should go out;
+        # 3 patients x 2 notifications = 6 messages
+        messages = self.receiveAllMessages()
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(messages[0].text, "Hello cba. patient 1 is due for "
+                         "his or her next clinic appointment. Please deliver a "
+                         "reminder to this person and ensure he or she visits "
+                         "Central Clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
         
