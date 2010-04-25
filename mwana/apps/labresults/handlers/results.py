@@ -5,10 +5,10 @@ import re
 from mwana.apps.labresults.models import Result
 from rapidsms.contrib.handlers import KeywordHandler
 
-UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS "
-"samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
-HELP          = "To request for results for a DBS sample, send RESULT <sampleid>. "
-"E.g result ID45"
+UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS \
+samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
+HELP          = "To request for results for a DBS sample, send RESULT <sampleid>. \
+E.g result ID45"
 SORRY         = "Sorry, we didn't understand that message."
 
 class ResultsHandler(KeywordHandler):
@@ -32,34 +32,36 @@ class ResultsHandler(KeywordHandler):
         self.respond(HELP)
 
     def handle(self, text):
-
+        text = text.strip()
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
 
         if not self.PATTERN.match(text):
             if " " in text.strip():
-                self.respond("The sample id must not have spaces in between. %s"% HELP)
+                self.respond("The sample id must not have spaces in between. %s" % HELP)
             else:
                 self.respond("%s %s" % (SORRY, HELP))
             return
         sample_id = text.strip()
-        sample_results=[]
+        sample_results = []
         try:
             results = Result.objects.filter(sample_id__iexact=sample_id, clinic=self.msg.contact.location)
             if results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
                         sample_results.append("%s: %s" % (result.sample_id, result.get_result_display()))
+                        result.notification_status = "sent"
+                        result.save()
                     else:
                         self.respond("The results for sample %(sample_id)s are "
-                        "not yet ready. You will be notified when they are ready.", sample_id=sample_id)
+                                     "not yet ready. You will be notified when they are ready.", sample_id=sample_id)
             else:
                 self.respond("Sorry, no sample with id %s was found for your clinic. "
-                "Please check your DBS records and try again." % sample_id)
+                             "Please check your DBS records and try again." % sample_id)
         except Exception, e:
             self.error(e)
         if sample_results:
-            self.respond(",".join( rst for rst in sample_results))
+            self.respond(", ".join(rst for rst in sample_results))
 
 
