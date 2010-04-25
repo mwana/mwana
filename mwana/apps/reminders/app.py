@@ -18,8 +18,8 @@ class App(rapidsms.App):
     
     PATTERN = re.compile(r"^\s*(?P<event_slug>\S+)(?:\s+(?P<date>[\d/ -]+))?\s+"
                           "(?P<name>.+)\s*$")
-    HELP_TEXT = "To add an event, send <EVENT CODE> <DATE> <NAME>.  The date "\
-                "is optional and is logged as TODAY if left out."
+    HELP_TEXT = "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
+                " The date is optional and is logged as TODAY if left out."
     DATE_FORMATS = (
         '%d %m %y',
         '%d %m %Y',
@@ -33,16 +33,15 @@ class App(rapidsms.App):
     )
 
     def start(self):
-        #self.schedule_notification_task()
+        self.schedule_notification_task()
         pass
     
     def schedule_notification_task (self):
         callback = 'mwana.apps.reminders.tasks.send_notifications'
-
+        
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, days_of_month=ALL,
-                                     hours=ALL, minutes=ALL)
+        EventSchedule.objects.create(callback=callback, minutes=ALL)
 
     def handle(self, msg):
         """
@@ -105,6 +104,7 @@ class App(rapidsms.App):
                         "clinic.", event=event.name.lower(), gender=gender,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
-            msg.respond("Sorry, I didn't understand that. %s" %
-                        self.HELP_TEXT)
+            msg.respond("Sorry, I didn't understand that. " +
+                        self.HELP_TEXT % {'event_lower': event.name.lower(),
+                                          'event_upper': event.name.upper()})
         return True

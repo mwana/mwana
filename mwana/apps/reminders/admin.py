@@ -26,8 +26,9 @@ class AppointmentAdmin(admin.ModelAdmin):
 admin.site.register(reminders.Appointment, AppointmentAdmin)
 
 
-class PatientEventInline(admin.TabularInline):
-    model = reminders.PatientEvent
+class PatientEventAdmin(admin.ModelAdmin):
+    pass
+admin.site.register(reminders.PatientEvent, PatientEventAdmin)
 
 
 class SentNotificationInline(admin.TabularInline):
