@@ -27,7 +27,7 @@ class AgentHelper(KeywordHandler):
         if m is not None:
             location_slug = m.group('clinic').strip()
             zone = m.group('zone').strip()
-            name = m.group('name').strip()
+            name = m.group('name').strip().title()
             try:
                 location = Location.objects.get(slug__iexact=location_slug)
                 contact = Contact.objects.create(name=name, location=location,
