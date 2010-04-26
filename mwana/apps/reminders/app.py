@@ -10,7 +10,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
-from mwana.apps.reminders.handlers.agent import AgentHelper
+from mwana.apps.agents.handlers.agent import AgentHelper
 
 
 class App(rapidsms.App):
