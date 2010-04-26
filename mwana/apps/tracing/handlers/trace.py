@@ -57,7 +57,7 @@ class TraceHelper(KeywordHandler):
             if created or not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
             try:
-                trace = tracing.Trace.objects.get(contact=patient,
+                trace = tracing.Trace.objects.get(patient=patient,
                                                 date=datetime.datetime.today())
             except tracing.Trace.DoesNotExist:
                 trace = None
@@ -68,7 +68,8 @@ class TraceHelper(KeywordHandler):
                              "should be contacting the patient shortly.",
                              name=patient.name)
                 return
-            tracing.Trace.objects.create(contact=patient,
+            tracing.Trace.objects.create(patient=patient,
+                                         worker=self.msg.contact,
                                          date=datetime.datetime.today())
             self.respond("Thank you %(worker)s. I will send a message to "
                          "the responsible RemindMi agents to trace "
