@@ -21,7 +21,7 @@ class TestApp(TestScript):
                                 type=ctr)
         script = """
             kk     > agent kdh 01 rupiah banda
-            kk     < Thank you rupiah banda! You have successfully registered at as a RemindMi Agent for Kafue District Hospital.
+            kk     < Thank you rupiah banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital.
             """
         self.runScript(script)
     
@@ -30,7 +30,7 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth
-            kk     < Sorry, I didn't understand that. To add an event, send <EVENT CODE> <DATE> <NAME>.  The date is optional and is logged as TODAY if left out.
+            kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -111,7 +111,7 @@ class TestApp(TestScript):
             lost   > agent
             lost   < To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
             rb     > agent kdh 01 rupiah banda
-            rb     < Thank you rupiah banda! You have successfully registered at as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
+            rb     < Thank you rupiah banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
             kk     > agent whoops 01 kenneth kaunda
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > agent abc
