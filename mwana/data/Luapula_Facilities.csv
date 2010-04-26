@@ -1,0 +1,134 @@
+Province,District,Facility_Name,Code,Facility Type,Latitude,Longitude
+Luapula,Chiengi,Chiengi RTC,401018,Health Post,-8.652617,29.167233
+Luapula,Chiengi,Sambula,401015,Rural Health Centre,-8.936217,29.053033
+Luapula,Chiengi,Chipungu,401010,Rural Health Centre,-8.5391,29.02325
+Luapula,Chiengi,Kabole,401011,Rural Health Centre,-9.039667,29.041583
+Luapula,Chiengi,Mwabu,401016,Rural Health Centre,-8.568433,29.085467
+Luapula,Chiengi,Lambwe Chomba,401012,Rural Health Centre,-8.406667,29.57615
+Luapula,Chiengi,Puta,401014,Rural Health Centre,-8.686067,29.1417
+Luapula,Chiengi,Mukunta,401013,Rural Health Centre,-8.885,29.083367
+Luapula,Chiengi,Kalembwe,401017,Rural Health Centre,-8.77645,29.1173
+Luapula,Kawambwa,Chitondo,402015,Rural Health Centre,-9.717283,29.27395
+Luapula,Kawambwa,Mbereshi HAHC,402027,Rural Health Centre,-9.751767,28.791183
+Luapula,Kawambwa,Salanga,402026,Rural Health Centre,-9.957333,28.724883
+Luapula,Kawambwa,Kabila,402030,Rural Health Centre,-9.791417,29.306683
+Luapula,Kawambwa,Chimpempe,402012,Rural Health Centre,-9.540983,29.426267
+Luapula,Kawambwa,Kabanda,402016,Rural Health Centre,-9.6565,29.440783
+Luapula,Kawambwa,Kapako HP,402031,Health Post,-9.709833,29.203083
+Luapula,Kawambwa,Kazembe,402018,Rural Health Centre,-9.818733,28.7568
+Luapula,Kawambwa,Mufwaya,402021,Rural Health Centre,-9.718017,29.083933
+Luapula,Kawambwa,KCC,402028,Rural Health Centre,-9.789417,29.072667
+Luapula,Kawambwa,Muyembe,402025,Rural Health Centre,-9.988567,29.117017
+Luapula,Kawambwa,Lufubu,402020,Rural Health Centre,-9.889383,28.7903
+Luapula,Kawambwa,Musungu,402024,Rural Health Centre,-10.18985,29.704567
+Luapula,Kawambwa,Mushota,402023,Rural Health Centre,-9.80925,29.387633
+Luapula,Kawambwa,Kanengo,402017,Rural Health Centre,-9.952133,29.340917
+Luapula,Kawambwa,Chama,402010,Rural Health Centre,-9.773233,29.421467
+Luapula,Kawambwa,Chibote,402011,Rural Health Centre,-9.858233,29.541633
+Luapula,Kawambwa,KTC,402019,Rural Health Centre,-9.740267,29.272433
+Luapula,Kawambwa,Chipunka,402014,Rural Health Centre,-10.008417,28.703017
+Luapula,Kawambwa,Chimpili,402013,Rural Health Centre,-10.008133,29.892533
+Luapula,Kawambwa,Munkanta,402022,Rural Health Centre,-9.79285,29.0505
+Luapula,Kawambwa,Kawambwa District Hospital,402001,1st Level Hospital,-9.793217,29.071667
+Luapula,Kawambwa,Kala Refugee Clinic,402031,Rural Health Centre,-9.608767,29.00955
+Luapula,Kawambwa,Mbereshi Hospital,402002,1st Level Hospital,-94.8502,28.7913
+Luapula,Kawambwa,Mukamba,402032,Rural Health Centre,-9.742333,28.7597
+Luapula,Mansa,Buntungwa,403011,Urban Health Centre,-11.203367,28.876283
+Luapula,Mansa,Mantubusa,403027,Rural Health Centre,-11.22135,28.9693
+Luapula,Mansa,Nsonga,403034,Rural Health Centre,-11.458417,29.269833
+Luapula,Mansa,Kasomalwela,403021,Rural Health Centre,-11.934017,28.90765
+Luapula,Mansa,Kundamfumu,403023,Rural Health Centre,-11.541567,28.752083
+Luapula,Mansa,Chembe,403013,Rural Health Centre,-11.96735,28.740833
+Luapula,Mansa,Kalyongo,403020,Rural Health Centre,-11.505617,28.401133
+Luapula,Mansa,Matanda,403028,Rural Health Centre,-11.373717,28.45655
+Luapula,Mansa,Bahati HP,403037,Health Post,-11.006983,28.80855
+Luapula,Mansa,Paul Mambilima,403035,Rural Health Centre,-11.134683,28.552767
+Luapula,Mansa,Chisembe,403015,Rural Health Centre,-11.073083,28.906233
+Luapula,Mansa,Chisunka,403016,Rural Health Centre,-10.759633,28.825483
+Luapula,Mansa,Mano,403026,Rural Health Centre,-10.891117,29.0009
+Luapula,Mansa,Mutiti ,403031,Rural Health Centre,-11.1066,28.951017
+Luapula,Mansa,Fimpulu,403017,Rural Health Centre,-11.404133,28.822967
+Luapula,Mansa,Moloshi,403030,Rural Health Centre,-11.204517,29.455133
+Luapula,Mansa,Mibenge,403029,Rural Health Centre,-11.301533,29.403167
+Luapula,Mansa,Katangwe,403022,Rural Health Centre,-11.285433,28.973417
+Luapula,Mansa,Ndoba,403033,Rural Health Centre,-11.266717,29.523567
+Luapula,Mansa,Kalaba,403019,Rural Health Centre,-11.069467,29.154083
+Luapula,Mansa,Mabumba,403025,Rural Health Centre,-11.259783,29.052233
+Luapula,Mansa,Kabunda,403018,Rural Health Centre,-11.206817,28.789433
+Luapula,Mansa,Muwanguni,403032,Rural Health Centre,-11.284233,28.868217
+Luapula,Mansa,Senama,403036,Urban Health Centre,-11.173317,28.884267
+Luapula,Mansa,Chipete,403014,Rural Health Centre,-11.840083,28.500683
+Luapula,Mansa,Central Clinic,403012,Urban Health Centre,-11.203383,28.886967
+Luapula,Milenge,Sokontwe,404015,Rural Health Centre,-12.306233,29.451567
+Luapula,Milenge,Lwela,404012,Rural Health Centre,-11.732933,29.117917
+Luapula,Milenge,Mulumbi,404014,Rural Health Centre,-11.553817,29.157733
+Luapula,Milenge,Kapalala,404010,Rural Health Centre,-12.40695,29.39285
+Luapula,Milenge,Lungo Mukuta,404011,Rural Health Centre,-12.202767,28.9889
+Luapula,Mwense,Mukonshi,405023,Rural Health Centre,-10.13342,29.150933
+Luapula,Mwense,Kapamba,405014,Rural Health Centre,-10.250637,28.750972
+Luapula,Mwense,CHIPILI,405011,Rural Health Centre,-10.7258,29.089617
+Luapula,Mwense,KATUTA,405016,Rural Health Centre,-10.7849,28.5906
+Luapula,Mwense,MWENDA,405029,Rural Health Centre,-10.47495,29.176283
+Luapula,Mwense,Chisheta,405012,Rural Health Centre,-10.65045,28.90915
+Luapula,Mwense,Mutipula,405028,Rural Health Centre,-10.600152,28.983392
+Luapula,Mwense,Kalundu,405013,Rural Health Centre,-10.285933,29.383628
+Luapula,Mwense,Mupeta,405025,Rural Health Centre,-10.4051,29.00935
+Luapula,Mwense,KASHIBA,405015,Rural Health Centre,-10.441783,28.653783
+Luapula,Mwense,Mununshi,405024,Rural Health Centre,-10.009917,28.68995
+Luapula,Mwense,MUSONDA,405027,Rural Health Centre,-10.7068,28.804933
+Luapula,Mwense,Luminu,405020,Rural Health Centre,-10.384167,29.1593
+Luapula,Mwense,Chibondo,405010,Rural Health Centre,-10.717633,28.669367
+Luapula,Mwense,Lubunda,405018,Rural Health Centre,-10.306667,28.670683
+Luapula,Mwense,LUPOSOSHI,405031,Rural Health Centre,-10.350317,29.471633
+Luapula,Mwense,Musangu,405026,Rural Health Centre,-10.234155,28.634293
+Luapula,Mwense,Kawama,405017,Rural Health Centre,-10.084025,28.633563
+Luapula,Mwense,Mambilima,405021,Rural Health Centre,-10.517302,28.650143
+Luapula,Mwense,Mubende,405022,Rural Health Centre,-10.283595,28.76737
+Luapula,Mwense,Mwense,405030,Rural Health Centre,-10.383733,28.70545
+Luapula,Mwense,Lukwesa,405019,Rural Health Centre,-10.166798,28.633502
+Luapula,Nchelenge,Kabuta,406013,Rural Health Centre,-9.17145,28.84215
+Luapula,Nchelenge,Kilwa,406017,Rural Health Centre,-9.269517,28.4048
+Luapula,Nchelenge,Kefulwa,406022,Health Post,-9.105583,28.9414
+Luapula,Nchelenge,Nchelenge,406018,Rural Health Centre,-9.342383,28.735533
+Luapula,Nchelenge,Kapambwe HP,406023,Health Post,-9.539067,28.703583
+Luapula,Nchelenge,Kafutuma,406014,Rural Health Centre,-9.238183,28.8044
+Luapula,Nchelenge,Chisenga,406011,Rural Health Centre,-9.5429,28.601867
+Luapula,Nchelenge,St Pauls Hospital,406001,1st Level Hospital,-9.3037,28.737717
+Luapula,Nchelenge,Kabalenge,406012,Rural Health Centre,-9.768783,28.856867
+Luapula,Nchelenge,Kashikishi,406019,Rural Health Centre,-9.318,28.74305
+Luapula,Nchelenge,Chabilikila,406010,Rural Health Centre,-9.542267,28.735517
+Luapula,Nchelenge,Kambwali,406015,Rural Health Centre,-9.408317,28.734017
+Luapula,Nchelenge,Kanyembo,406016,Rural Health Centre,-9.625783,28.739367
+Luapula,Samfya,Mundumbi,407033,Rural Health Centre,-11.171833,29.5711
+Luapula,Samfya,Mungulube,407030,Rural Health Centre,-11.605433,29.442233
+Luapula,Samfya,Kapata,407016,Rural Health Centre,-11.675717,29.70685
+Luapula,Samfya,Fwaka East 8,407013,Rural Health Centre,-12.143083,29.436483
+Luapula,Samfya,Lubwe HAHC,407098,Rural Health Centre,-11.117817,29.634098
+Luapula,Samfya,Nambale,407025,Rural Health Centre,-10.903317,29.77545
+Luapula,Samfya,Kabongo,407014,Rural Health Centre,-11.755967,29.5079
+Luapula,Samfya,Njipi,407026,Rural Health Centre,-11.525433,29.717317
+Luapula,Samfya,Shikamushile,407029,Rural Health Centre,-10.9709,29.690283
+Luapula,Samfya,Ninge ,407031,Rural Health Centre,-11.657867,29.623517
+Luapula,Samfya,Kasoma Lunga,407019,Rural Health Centre,-11.407067,30.139183
+Luapula,Samfya,Kalima Nkonde,407032,Rural Health Centre,-11.441733,30.068433
+Luapula,Samfya,Mbabala,407022,Rural Health Centre,-11.220017,29.801267
+Luapula,Samfya,Kapata East 1,407017,Rural Health Centre,-11.635867,29.736517
+Luapula,Samfya,Chibuye,407011,Rural Health Centre,-11.10039,29.433595
+Luapula,Samfya,Chishi,407012,Rural Health Centre,-11.085267,29.841867
+Luapula,Samfya,Katanshya,407020,Rural Health Centre,-11.454517,29.7216
+Luapula,Samfya,Bwalya Mponda,407010,Rural Health Centre,-11.66775,30.0681
+Luapula,Samfya,Kasaba HAHC,407099,Rural Health Centre,-10.75295,29.73415
+Luapula,Samfya,Kasuba,407034,Health Post,-10.740833,29.622717
+Luapula,Samfya,Chinsaka RHC,407037,Rural Health Centre,-11.558317,29.79115
+Luapula,Samfya,Mabo Kunda,407021,Rural Health Centre,-11.73555,29.619583
+Luapula,Samfya,Chimembe,407036,Rural Health Centre,-11.518683,29.784983
+Luapula,Samfya,Mwansakombe,407035,Rural Health Centre,-10.886467,29.656767
+Luapula,Samfya,Mushili,407024,Rural Health Centre,-12.140283,29.551367
+Luapula,Samfya,Nsalushi,407027,Rural Health Centre,-11.54305,30.3207
+Luapula,Samfya,Miponda,407023,Rural Health Centre,-10.937883,29.541783
+Luapula,Samfya,Kasanka,407018,Rural Health Centre,-11.967383,29.507733
+Luapula,Samfya,Chipako,407038,Rural Health Centre,-11.542517,29.672167
+Luapula,Samfya,Kalasa Mukoso,407015,Rural Health Centre,-11.817433,29.590083
+Luapula,Samfya,Samfya Stage II,407028,Rural Health Centre,-11.3686,29.552567
+Luapula,Samfya,Kasaba Mission Hospital,407001,1st Level Hospital,-10.753017,29.734017
+Luapula,Samfya,Lubwe Mission Hospital,407002,1st Level Hospital,-11.1183,29.641283

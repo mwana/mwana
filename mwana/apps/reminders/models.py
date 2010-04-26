@@ -63,11 +63,15 @@ class PatientEvent(models.Model):
     date_logged = models.DateTimeField()
     
     def save(self, *args, **kwargs):
-        self.date_logged = datetime.datetime.now()
+        if not self.pk:
+            self.date_logged = datetime.datetime.now()
         super(PatientEvent, self).save(*args, **kwargs)
         
     def __unicode__(self):
         return '%s %s on %s' % (self.patient, self.event, self.date)
+    
+    class Meta:
+        unique_together = (('patient', 'event', 'date'),)
 
 
 class SentNotification(models.Model):

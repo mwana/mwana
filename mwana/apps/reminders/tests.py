@@ -21,7 +21,7 @@ class TestApp(TestScript):
                                 type=ctr)
         script = """
             kk     > agent kdh 01 rupiah banda
-            kk     < Thank you rupiah banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital.
+            kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital.
             """
         self.runScript(script)
     
@@ -47,7 +47,7 @@ class TestApp(TestScript):
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(0, patients.count())
 
-    def Test(self):
+    def testEventRegistrationDateFormats(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
@@ -57,16 +57,16 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3-2010 anna
             kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4/3 maria
-            kk     < You have successfully registered a birth for maria on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4 3 laura
-            kk     < You have successfully registered a birth for laura on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4-3 anna
-            kk     < You have successfully registered a birth for anna on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4/3 rachel
+            kk     < You have successfully registered a birth for rachel on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4 3 nancy
+            kk     < You have successfully registered a birth for nancy on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4-3 katrina
+            kk     < You have successfully registered a birth for katrina on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % {'year': datetime.datetime.now().year}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(3, patients.count())
+        self.assertEqual(6, patients.count())
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
@@ -99,6 +99,19 @@ class TestApp(TestScript):
         patient_event = patient.patient_events.get()
         self.assertEqual(patient_event.date, datetime.date.today())
         self.assertEqual(patient_event.event.slug, "birth")
+
+    def testDuplicateEventRegistration(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
+        script = """
+            kk     > birth 4/3/2010 maria
+            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > birth 4/3/2010 maria
+            kk     < Sorry, but someone has already registered a birth for maria on 04/03/2010.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
         
     def testAgentRegistration(self):
         self.assertEqual(0, Contact.objects.count())
@@ -111,9 +124,9 @@ class TestApp(TestScript):
             lost   > agent
             lost   < To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
             rb     > agent kdh 01 rupiah banda
-            rb     < Thank you rupiah banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
+            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
             rb     > agent kdh 01 rupiah banda
-            rb     < Hello rupiah banda! You are already registered as a RemindMi Agent for Kafue District Hospital.
+            rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Kafue District Hospital. 
             kk     > agent whoops 01 kenneth kaunda
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > agent abc
@@ -123,7 +136,7 @@ class TestApp(TestScript):
         self.assertEqual(1, Contact.objects.count(), "Registration didn't create a new contact!")
         rb = Contact.objects.all()[0]
         self.assertEqual(rb.zone_code, 1)
-        self.assertEqual("rupiah banda", rb.name, "Name was not set correctly after registration!")
+        self.assertEqual("Rupiah Banda", rb.name, "Name was not set correctly after registration!")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, 'cba')
