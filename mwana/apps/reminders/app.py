@@ -43,6 +43,26 @@ class App(rapidsms.App):
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, minutes=ALL)
 
+    def _parse_date(self, date_str):
+        date = None
+        for format in self.DATE_FORMATS:
+            try:
+                date = datetime.datetime.strptime(date_str, format)
+            except ValueError:
+                pass
+        if date:
+            # is there a better way to do this?
+            if date.year == 1900:
+                date.year = datetime.datetime.now().year
+        return date
+
+    def _patient_type(self):
+        try:
+            return ContactType.objects.get(slug='patient')
+        except ContactType.DoesNotExist:
+            return ContactType.objects.create(name='Patient',
+                                              slug='patient')
+
     def handle(self, msg):
         """
         Handles the actual adding of events.  Other simpler commands are done
@@ -64,24 +84,19 @@ class App(rapidsms.App):
         if m is not None:
             date_str = (m.group('date') or '').strip()
             name = m.group('name').strip()
-            date = None
+
+            # parse the date
             if date_str:
-                for format in self.DATE_FORMATS:
-                    try:
-                        date = datetime.datetime.strptime(date_str, format)
-                    except ValueError:
-                        pass
+                date = self._parse_date(date_str)
                 if not date:
                     msg.respond("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
                                 "DAY MONTH YEAR, for example: 23 04 2010")
                     return
-                else:
-                    # is there a better way to do this?
-                    if date.year == 1900:
-                        date.year = datetime.datetime.now().year
             else:
                 date = datetime.datetime.today()
+
+            # fetch or create the patient
             if msg.contact.location and msg.contact.zone_code is not None:
                 patient, _ = Contact.objects.get_or_create(
                                             name=name,
@@ -89,12 +104,19 @@ class App(rapidsms.App):
                                             zone_code=msg.contact.zone_code)
             else:
                 patient = Contact.objects.create(name=name)
-            try:
-                patient_t = ContactType.objects.get(slug='patient')
-            except ContactType.DoesNotExist:
-                patient_t = ContactType.objects.create(name='Patient',
-                                                       slug='patient')
-            patient.types.add(patient_t)
+
+            # make sure the contact has the correct type (patient)
+            patient_t = self._patient_type()
+            if not patient.types.filter(pk=patient_t.pk).count():
+                patient.types.add(patient_t)
+
+            # make sure we don't create a duplicate patient event
+            if patient.patient_events.filter(event=event, date=date).count():
+                msg.respond("Sorry, but someone has already registered a "
+                            "%(event)s for %(name)s on %(date)s.",
+                            event=event.name.lower(), name=patient.name,
+                            date=date.strftime('%d/%m/%Y'))
+                return
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection)
             gender = event.possessive_pronoun

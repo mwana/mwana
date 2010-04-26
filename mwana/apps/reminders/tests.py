@@ -47,7 +47,7 @@ class TestApp(TestScript):
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(0, patients.count())
 
-    def Test(self):
+    def testEventRegistrationDateFormats(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
@@ -99,6 +99,19 @@ class TestApp(TestScript):
         patient_event = patient.patient_events.get()
         self.assertEqual(patient_event.date, datetime.date.today())
         self.assertEqual(patient_event.event.slug, "birth")
+
+    def testDuplicateEventRegistration(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
+        script = """
+            kk     > birth 4/3/2010 maria
+            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > birth 4/3/2010 maria
+            kk     < Sorry, but someone has already registered a birth for maria on 04/03/2010.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
         
     def testAgentRegistration(self):
         self.assertEqual(0, Contact.objects.count())
