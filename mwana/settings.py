@@ -34,6 +34,7 @@ INSTALLED_APPS = (
     
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
+    "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.location_importer",
