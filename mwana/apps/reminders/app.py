@@ -51,9 +51,10 @@ class App(rapidsms.App):
             except ValueError:
                 pass
         if date:
-            # is there a better way to do this?
+            # is there a better way to do this? if no year was specified in
+            # the string, it defaults to 1900
             if date.year == 1900:
-                date.year = datetime.datetime.now().year
+                date = date.replace(year=datetime.datetime.now().year)
         return date
 
     def _patient_type(self):
