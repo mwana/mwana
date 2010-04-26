@@ -66,6 +66,38 @@ class TestApp(TestScript):
             unknown_user < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
         """
         
+    testCheckResultsNone = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you as soon as more results are available.
+    """
+    def testCheckResultsWorkflow(self):
+        """Tests the "check" functionality"""
+        
+        # Save some results
+        res1, res2, res3 = self._bootstrap_results()
+        
+        # These would be automatically sent by a scheduled task, but we
+        # also support querying them via these magic keywords
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+        """ % {"name": self.contact.name, "other_name": self.other_contact.name, "count": 3 }
+        self.runScript(script)
+        
+        for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
+            self.assertEqual("notified", res.notification_status)
+        
+        script = """
+            clinic_worker > %(code)s
+            clinic_worker < Thank you! Here are your results: Sample 0001: HIV Negative, Sample 0002: HIV Positive, Sample 0003: HIV Negative
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
+        """ % {"name": self.contact.name, "code": "4567", }
+        
+        self.runScript(script)
+        
+        for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
+            self.assertEqual("sent", res.notification_status)
+    
     def testResultsWorkflow(self):
         """
         Tests basic results delivery mechanism.
@@ -73,26 +105,12 @@ class TestApp(TestScript):
         # Due to the intensive overhead of creating all these objects this is
         # much more of an integration test than a unit test.
         # Save some results
-        res1 = labresults.Result.objects.create(sample_id="0001", clinic=self.clinic, 
-                                     result="N", 
-                                     taken_on=datetime.datetime.today(),
-                                     entered_on=datetime.datetime.today(), 
-                                     notification_status="new")
+        res1, res2, res3 = self._bootstrap_results()
         
-        res2 = labresults.Result.objects.create(sample_id="0002", clinic=self.clinic, result="P", 
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(), 
-                              notification_status="new")
-        
-        res3 = labresults.Result.objects.create(sample_id="0003", clinic=self.clinic, result="N", 
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(), 
-                              notification_status="new")
-
         # These would be automatically sent by a scheduled task, but we
         # also support querying them via these magic keywords
         script = """
-            clinic_worker > CHECK RESULTS
+            clinic_worker > DEMO RESULTS
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             other_worker  < Hello %(other_name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
         """ % {"name": self.contact.name, "other_name": self.other_contact.name, "count": 3 }
@@ -114,7 +132,24 @@ class TestApp(TestScript):
         
         for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
             self.assertEqual("sent", res.notification_status)
-            
+    
+    def _bootstrap_results(self):
+        res1 = labresults.Result.objects.create(sample_id="0001", clinic=self.clinic, 
+                                     result="N", 
+                                     taken_on=datetime.datetime.today(),
+                                     entered_on=datetime.datetime.today(), 
+                                     notification_status="new")
+        
+        res2 = labresults.Result.objects.create(sample_id="0002", clinic=self.clinic, result="P", 
+                              taken_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(), 
+                              notification_status="new")
+        
+        res3 = labresults.Result.objects.create(sample_id="0003", clinic=self.clinic, result="N", 
+                              taken_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(), 
+                              notification_status="new")
+        return [res1,res2,res3]
     def test_raw_result_entry(self):
         user = User.objects.create_user(username='adh', email='',
                                         password='abc')

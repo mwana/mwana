@@ -39,7 +39,7 @@ INSTALLED_APPS = (
     "mwana.apps.reminders",
     "mwana.apps.tracing",
     "mwana.apps.location_importer",
-    "mwana.apps.supply",
+#    "mwana.apps.supply",
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
@@ -63,7 +63,8 @@ TABS = [
     ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.registration.views.registration', 'Registration'),
     ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-    ('mwana.apps.supply.views.dashboard', 'Supplies'),
+#    ('mwana.apps.supply.views.dashboard', 'Supplies'),
+    ('mwana.apps.labresults.views.dashboard', 'Results160'),
 ]
 
 # import local settings if we find them

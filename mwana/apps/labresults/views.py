@@ -1,13 +1,20 @@
-import json
-import datetime
-
 from django.http import HttpResponse
-from django.views.decorators.http import require_http_methods
-
+from django.views.decorators.http import require_http_methods, require_GET
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
+from rapidsms.contrib.locations.models import Location
+from rapidsms.utils import render_to_response
+import datetime
+import json
 
 
+
+@require_GET
+def dashboard(request):
+    locations = Location.objects.all()
+    return render_to_response(request, "labresults/dashboard.html", 
+                              {"locations": locations })
+    
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_rawresult', 'Lab Results')
 def accept_results(request):
