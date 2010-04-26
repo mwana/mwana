@@ -1,7 +1,5 @@
 from django.db import models
 
-from rapidsms.models import Contact
-
 
 class ContactType(models.Model):
     name = models.CharField(max_length=255)
