@@ -7,5 +7,7 @@ from mwana.apps.labresults import views
 
 
 urlpatterns = patterns('',
+    url(r"^labresults/$", views.dashboard, name="labresults_dashboard"),
     url(r"^labresults/incoming/$", views.accept_results, name="accept_results"),
+        
 )
