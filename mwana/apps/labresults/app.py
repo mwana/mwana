@@ -13,6 +13,7 @@ import mwana.apps.labresults.config as config
 import rapidsms
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you as soon as more results are available."
 BAD_PIN           = "Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'"
 RESULTS           = "Thank you! Here are your results: "
 RESULTS_PROCESSED = "%(name)s has collected these results"
@@ -34,7 +35,7 @@ class App (rapidsms.App):
         # this logic goes here to prevent all further processing of the message.
         # because we're not actually generating a response, this prevents the 
         # default app from responding. This is a bit wacky.
-        if message.text.strip().upper().startswith("CHECK") \
+        if message.text.strip().upper().startswith("DEMO") \
              and message.connection.contact \
              and message.connection.contact.is_results_receiver:
             # Fake like we need to prompt their clinic for results, as a means 
@@ -51,6 +52,23 @@ class App (rapidsms.App):
             else:
                 self.send_results(message)
             return True
+        elif message.text.strip().upper().startswith("CHECK") \
+             and message.connection.contact \
+             and message.connection.contact.is_results_receiver:
+            # this allows people to check the results for their clinic rather
+            # than wait for them to be initiated by us on a schedule
+            results = Result.objects.filter\
+                            (clinic=message.contact.location,
+                             notification_status__in=['new', 'notified'])
+            if results:
+                message.respond(RESULTS_READY,
+                                name=message.contact.name, count=results.count())
+                self._mark_results_pending(results, [message.connection])
+            else:
+                message.respond(NO_RESULTS,
+                                name=message.contact.name, clinic=message.contact.location.name)
+        
+        
         
     def send_results (self, message):
         
@@ -136,12 +154,14 @@ class App (rapidsms.App):
         messages, results  = self.results_avail_messages(clinic)
         if messages:
             self.send_messages(messages)
-            for msg in messages:
-                self.waiting_for_pin[msg.connection] = results
-            for r in results:
-                r.notification_status = 'notified'
-                r.save()
+            self._mark_results_pending(results, (msg.connection for msg in messages))
 
+    def _mark_results_pending(self, results, connections):
+        for connection in connections:
+            self.waiting_for_pin[connection] = results
+        for r in results:
+            r.notification_status = 'notified'
+            r.save()
 
     def results_avail_messages(self, clinic):
         results = Result.objects.filter\
