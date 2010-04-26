@@ -28,6 +28,11 @@ class AgentHelper(KeywordHandler):
             location_slug = m.group('clinic').strip()
             zone = m.group('zone').strip()
             name = m.group('name').strip()
+            
+            if self.msg.contact is not None:
+                self.respond("Hello %(name)s! You are already registered as a RemindMi Agent for %(location)s.", name=self.msg.contact.name, location=self.msg.contact.location)
+                return
+         
             try:
                 location = Location.objects.get(slug__iexact=location_slug)
                 contact = Contact.objects.create(name=name, location=location,

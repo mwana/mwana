@@ -112,6 +112,8 @@ class TestApp(TestScript):
             lost   < To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
             rb     > agent kdh 01 rupiah banda
             rb     < Thank you rupiah banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
+            rb     > agent kdh 01 rupiah banda
+            rb     < Hello rupiah banda! You are already registered as a RemindMi Agent for Kafue District Hospital.
             kk     > agent whoops 01 kenneth kaunda
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > agent abc
