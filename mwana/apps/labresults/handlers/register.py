@@ -50,6 +50,9 @@ class RegisterHandler(KeywordHandler):
             "Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.",pin=pin,
             count=self.PIN_LENGTH, sample=''.join(str(i) for i in range(1,int(self.PIN_LENGTH)+1)))
             return
+        if not name:
+            self.respond("Sorry, you must provide a name to register. %s"% self.HELP_TEXT)
+            return
         try:
             location = Location.objects.get(slug__iexact=clinic_code)
             contact = Contact.objects.create(name=name, location=location, pin=pin, 
