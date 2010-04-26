@@ -57,16 +57,16 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3-2010 anna
             kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4/3 maria
-            kk     < You have successfully registered a birth for maria on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4 3 laura
-            kk     < You have successfully registered a birth for laura on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 4-3 anna
-            kk     < You have successfully registered a birth for anna on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4/3 rachel
+            kk     < You have successfully registered a birth for rachel on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4 3 nancy
+            kk     < You have successfully registered a birth for nancy on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4-3 katrina
+            kk     < You have successfully registered a birth for katrina on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % {'year': datetime.datetime.now().year}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(3, patients.count())
+        self.assertEqual(6, patients.count())
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
