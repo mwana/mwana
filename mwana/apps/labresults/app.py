@@ -11,6 +11,7 @@ from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 import mwana.apps.labresults.config as config
 import rapidsms
+from mwana.apps.labresults.handlers.register import RegisterHandler
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
 NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you as soon as more results are available."
@@ -18,6 +19,7 @@ BAD_PIN           = "Sorry, that was not the correct security code. Your securit
 RESULTS           = "Thank you! Here are your results: "
 RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
+NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + RegisterHandler.HELP_TEXT
 
 class App (rapidsms.App):
     
@@ -52,9 +54,12 @@ class App (rapidsms.App):
             else:
                 self.send_results(message)
             return True
-        elif message.text.strip().upper().startswith("CHECK") \
-             and message.connection.contact \
-             and message.connection.contact.is_results_receiver:
+        elif message.text.strip().upper().startswith("CHECK"):
+            if not message.connection.contact or \
+               not message.connection.contact.is_results_receiver:
+                message.respond(NOT_REGISTERED)
+                return True
+            
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
             results = Result.objects.filter\

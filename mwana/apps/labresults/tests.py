@@ -66,6 +66,11 @@ class TestApp(TestScript):
             unknown_user < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
         """
         
+    testUnregisteredCheck = """
+            unknown_user > CHECK RESULTS
+            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+        """
+        
     testCheckResultsNone = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you as soon as more results are available.
