@@ -4,6 +4,9 @@ from rapidsms.models import Connection
 from django.contrib.auth.models import User
 
 class Result(models.Model):
+    """a DBS result, including patient tracking info, actual result, and status
+    of sending result back to clinic"""
+    
     RESULT_CHOICES = (
         ('P', 'HIV Positive'),
         ('N', 'HIV Negative'),
@@ -67,18 +70,26 @@ class Result(models.Model):
 
 
 class Payload(models.Model):
-    incoming_date = models.DateTimeField()
-    auth_user = models.ForeignKey(User)
+    """a raw incoming data payload from the DBS lab computer"""
     
-    version = models.CharField(max_length=10, null=True)
-    source = models.CharField(max_length=50, null=True)
-    client_timestamp = models.DateTimeField(null=True)
-    info = models.CharField(max_length=50, null=True)
+    incoming_date = models.DateTimeField()                  #date received by rapidsms
+    auth_user = models.ForeignKey(User)                     #http user used for authorization
     
-    parsed_json = models.BooleanField(default=False)
-    validated_schema = models.BooleanField(default=False)
+    version = models.CharField(max_length=10, null=True)    #version of extract script payload came from
+    source = models.CharField(max_length=50, null=True)     #source identifier (i.e., 'ndola')
+    client_timestamp = models.DateTimeField(null=True)      #timestamp on lab computer that payload was created
+                                                            #use to detect if lab computer clock is off
+    info = models.CharField(max_length=50, null=True)       #extra info about payload
     
-    raw = models.TextField()
+    parsed_json = models.BooleanField(default=False)        #whether this payload parsed as valid json
+    validated_schema = models.BooleanField(default=False)   #if parsed, whether this payload validated
+                                                            #completely according to the expectation of our
+                                                            #schema; if false, it is likely that some of the
+                                                            #data in this payload did NOT make it into Result
+                                                            #or LabLog records!
+    
+    raw = models.TextField()        #raw POST content of the payload; will always be present, even if other fields
+                                    #like version, source, etc., couldn't be parsed
     
     def __unicode__(self):
         return 'from %s/%s at %s (%sb)' % (self.source if self.source != None else '-',
@@ -87,13 +98,16 @@ class Payload(models.Model):
                                            len(self.raw))
 
 class LabLog(models.Model):
+    """a logging message from the lab computer extract script"""
+    
     timestamp = models.DateTimeField(null=True)
     message = models.TextField(null=True)
     level = models.CharField(max_length=20, null=True)
     line = models.IntegerField(null=True)
     
-    payload_id = models.ForeignKey(Payload)
-    raw = models.TextField(null=True)
+    payload_id = models.ForeignKey(Payload)     #payload this message came from
+    raw = models.TextField(null=True)           #raw content of log -- present only if log info couldn't be
+                                                #parsed/validated
     
     def __unicode__(self):
         return ('%d: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),

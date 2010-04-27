@@ -12,18 +12,21 @@ from mwana.decorators import has_perm_or_basicauth
 from rapidsms.contrib.locations.models import Location
 
 def json_datetime (val):
+    """convert a datetime value from the json into a python datetime"""
     try:
         return datetime.strptime(val, '%Y-%m-%d %H:%M:%S')
     except:
         return None
     
 def json_date (val):
+    """convert a date value from the json into a python date"""
     try:
         return date.strptime(val, '%Y-%m-%d')
     except:
         return None
 
 def json_timestamp (val):
+    """convert a timestamp value (with milliseconds) from the json into a python datetime"""
     if val[-4] in ('.', ','):
         return None
     
@@ -34,13 +37,16 @@ def json_timestamp (val):
         return None
 
 def dictval (dict, val, trans=lambda x: x):
+    """extract a value from a data dictionary, which may or may not be present in the dictionary,
+    and may also need to be transformed in some way"""
     return trans(dict[val]) if val in dict else None
 
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_rawresult', 'Lab Results')
 def accept_results(request):
-    """Accepts incoming results from the lab via HTTP POST.  see
-    connection() in extract.py for how to submit"""
+    """accept data submissions from the lab via POST. see connection() in extract.py
+    for how to submit; attempts to save raw data/partial data if for some reason the
+    full content is not parseable or does not validate to the model schema"""
     logger = logging.getLogger('mwana.apps.labresults.views.accept_results')
     
     if request.META['CONTENT_TYPE'] != 'text/json':
@@ -96,9 +102,11 @@ def accept_results(request):
     return HttpResponse('SUCCESS')
      
 def normalize_clinic_id (zpct_id):
+    """turn the ZPCT clinic id format into the MoH clinic id format"""
     return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) > 3 else zpct_id
      
 def map_result (verbose_result):
+    """map the result type from extract.py codes to Result model codes"""
     result_codes = {'positive': 'P',
                     'negative': 'N',
                     'rejected': 'R',
@@ -107,6 +115,8 @@ def map_result (verbose_result):
     return result_codes[verbose_result] if verbose_result in result_codes else ('x-' + verbose_result)
      
 def accept_record (record):
+    """parse and save an individual record, updating the notification flag if necessary; if record
+    does not validate, nothing is saved; existing records are updated as necessary"""
     logger = logging.getLogger('mwana.apps.labresults.views.accept_record')
     
     #retrieve existing record for id, if it exists
@@ -163,7 +173,7 @@ def accept_record (record):
         cant_save('validation errors in record: %s' % str(f_result.errors))
         return False
 
-    #validate record sync status (couldn't validate with the rest of the fields because has no
+    #validate record sync status (couldn't validate using the form because has no
     #direct analogue in the model)
     rec_status = dictval(record, 'sync')
     if rec_status not in ('new', 'update'):
@@ -194,13 +204,13 @@ def accept_record (record):
         elif old_record.notification_status == 'sent' and old_record.result != new_record.result:
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
             new_record.notification_status = 'updated'
+        #what to do if result changes from a reportable status (+, -, rej) to unreportable (indet, blank)??
                 
     new_record.save()
     return True
     
-
-
 def accept_log (log, payload_id):
+    """parse and save a single log message; if does not validate, save the raw data"""
     logger = logging.getLogger('mwana.apps.labresults.views.accept_log')
     
     logentry = labresults.LabLog(payload_id=payload_id)
