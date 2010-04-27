@@ -1,6 +1,7 @@
 from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS, \
-    RESULTS_READY, BAD_PIN, RESULTS_PROCESSED
+    RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL
 from mwana.apps.labresults.models import Result
+from rapidsms.contrib.locations.models import Location
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 import datetime
@@ -16,12 +17,28 @@ class MockResultUtility():
     waiting_for_pin = {}
 
     def filter(self, message):
-        if message.text.strip().upper().startswith("DEMO") \
-             and message.connection.contact \
-             and message.connection.contact.is_results_receiver:
-            # Fake like we need to prompt their clinic for results, as a means
-            # to conduct user testing.  The mocker does not touch the database
-            self.fake_pending_results(message.connection.contact.location)
+        if message.text.strip().upper().startswith("DEMO"):
+            rest = message.text.strip()[4:].strip()
+            clinic = None
+            if rest:
+                # optionally allow the tester to pass in a clinic code
+                try:
+                    clinic = Location.objects.get(slug__iexact=rest)
+                except Location.DoesNotExist:
+                    # maybe they just passed along some extra text
+                    pass 
+            if not clinic and message.connection.contact \
+               and message.connection.contact.location:
+                # They were already registered for a particular clinic
+                # so assume they want to use that one.
+                clinic = message.connection.contact.location 
+            
+            if not clinic:
+                message.respond(DEMO_FAIL)
+            else:
+                # Fake like we need to prompt their clinic for results, as a means
+                # to conduct user testing.  The mocker does not touch the database
+                self.fake_pending_results(clinic)
             return True
     
     def handle(self, message):

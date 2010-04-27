@@ -116,11 +116,15 @@ class TestApp(TestScript):
         # manually via the router apis
         self.startRouter()
         try:
-            # do this whole thing twice, so we know it can be demoed back to back
-            for i in range(2):
-                self.sendMessage("clinic_worker", "DEMO RESULTS")
+            # do this whole thing a few, so we know it can be demoed back to back
+            # and also test the format of specifying an explicit clinic code
+            for start_msg_spec in (("clinic_worker", "DEMO"), 
+                                   ("other_worker", "DEMO RESULTS"),
+                                   ("some_random_person", "DEMO mib")):
+                self.sendMessage(*start_msg_spec)
                 messages = self.receiveAllMessages()
-                self.assertEqual(2, len(messages))
+                self.assertEqual(2, len(messages), "Number of messages didn't match. "
+                                 "Messages back were: %s" % messages)
                 for msg in messages:
                     self.assertTrue(msg.connection.identity in ["clinic_worker", "other_worker"])
                     self.assertEqual("Hello %(name)s. We have 3 DBS test results ready for you. "

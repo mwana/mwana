@@ -7,6 +7,7 @@ RESULTS           = "Thank you! Here are your results: "
 RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + RegisterHandler.HELP_TEXT
+DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 
 
 def build_results_messages(results):
