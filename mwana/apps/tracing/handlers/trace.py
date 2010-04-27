@@ -37,7 +37,7 @@ class TraceHelper(KeywordHandler):
             zone_slug = (m.group('zone') or '').strip()
             
             if zone_slug:
-                zone_t, created = LocationType.objects.get_or_create(slug='zone')
+                zone_t, _ = LocationType.objects.get_or_create(slug='zone')
                 try:
                     # TODO: also filter on parent clinic?
                     location = Location.objects.get(slug__iexact=zone_slug,
@@ -51,9 +51,8 @@ class TraceHelper(KeywordHandler):
             patient, created = location.contact_set.get_or_create(
                                                      name__iexact=patient_name,
                                                      types__slug='patient')
-            patient_t, created = ContactType.objects.get_or_create(
-                                                                name='Patient',
-                                                                slug='patient')
+            patient_t, _ = ContactType.objects.get_or_create(name='Patient',
+                                                             slug='patient')
             if created or not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
             try:
@@ -62,11 +61,15 @@ class TraceHelper(KeywordHandler):
             except tracing.Trace.DoesNotExist:
                 trace = None
             if trace:
-                self.respond("Sorry, you (or someone else) has already "
+                if trace.worker == self.msg.contact:
+                    worker_name = 'you have'
+                else:
+                    worker_name = '%s has' % trace.worker.name
+                self.respond("Sorry, %s(worker_name)s already "
                              "entered a trace request for %(name)s today. I "
                              "have notified the responsible CBAs and they "
                              "should be contacting the patient shortly.",
-                             name=patient.name)
+                             name=patient.name, worker_name=worker_name)
                 return
             tracing.Trace.objects.create(patient=patient,
                                          worker=self.msg.contact,
