@@ -96,7 +96,7 @@ class TestApp(TestScript):
         
         script = """
             clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: Sample 0001: HIV Negative, Sample 0002: HIV Positive, Sample 0003: HIV Negative
+            clinic_worker < Thank you! Here are your results: Sample 0001: HIV Negative. Sample 0002: HIV Positive. Sample 0003: HIV Negative
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
         """ % {"name": self.contact.name, "code": "4567", }
         

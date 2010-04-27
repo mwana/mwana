@@ -27,7 +27,7 @@ def build_results_messages(results):
         responses.append(next_msg)
     return responses
 
-def combine_to_length(list, delimiter=", ", length=160):
+def combine_to_length(list, delimiter=". ", length=160):
     """
     Combine a list of strings to a maximum of a specified length, using the 
     delimiter to separate them.  Returns the combined strings and the 
