@@ -7,7 +7,8 @@ PATIENT_SLUG = 'patient'
 CLINIC_WORKER_SLUG = 'worker'
 
 # location types:
-CLINIC_SLUG = 'clinic'
+CLINIC_SLUGS = ('urban_health_centre', '1st_level_hospital',
+                'rural_health_centre', 'health_post')
 ZONE_SLUG = 'zone'
 
 
@@ -40,10 +41,6 @@ def get_patient_type():
 
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
-
-
-def get_clinic_type():
-    return _get_locationtype(CLINIC_SLUG, 'Clinic')
 
 
 def get_zone_type():

@@ -38,16 +38,16 @@ class AgentHelper(KeywordHandler):
             notify_text = ""
         return notify_text
 
-    def _get_or_create_zone(self, clinic, slug):
+    def _get_or_create_zone(self, clinic, name):
         # create the zone if it doesn't already exist
         zone_type = const.get_zone_type()
         try:
             # get_or_create does not work with iexact
-            zone = Location.objects.get(slug__iexact=slug,
+            zone = Location.objects.get(name__iexact=name,
                                         parent=clinic,
                                         type=zone_type)
         except Location.DoesNotExist:
-            zone = Location.objects.create(slug=slug,
+            zone = Location.objects.create(name=name,
                                            parent=clinic,
                                            type=zone_type)
         return zone
@@ -61,7 +61,7 @@ class AgentHelper(KeywordHandler):
             # require the clinic to be pre-populated
             try:
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
-                                              type__slug=const.CLINIC_SLUG)
+                                             type__slug__in=const.CLINIC_SLUGS)
             except Location.DoesNotExist:
                 self.respond("Sorry, I don't know about a clinic with code "
                              "%(code)s. Please check your code and try again.",
