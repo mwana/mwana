@@ -19,7 +19,8 @@ TODO
 * import facility list from ZPCT into rapidsms
 * write a migration
   - this migration should also parse the raw json that has been sent but unprocessed since friday april 23
-    - note that this json is from a different version of the script, so some fields will different slightly
+    - note that this json is from a different version of the script, so some fields will differ
+      slightly (Payload.version, Payload.info, and LabLog.line)
 """
 
 def json_datetime (val):
