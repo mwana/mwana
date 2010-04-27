@@ -11,6 +11,17 @@ from mwana.decorators import has_perm_or_basicauth
 
 from rapidsms.contrib.locations.models import Location
 
+"""
+TODO
+
+* test this code
+* write unit tests / fix existing unit tests
+* import facility list from ZPCT into rapidsms
+* write a migration
+  - this migration should also parse the raw json that has been sent but unprocessed since friday april 23
+    - note that this json is from a different version of the script, so some fields will different slightly
+"""
+
 def json_datetime (val):
     """convert a datetime value from the json into a python datetime"""
     try:
@@ -97,7 +108,7 @@ def accept_results(request):
         payload.validated_schema = (records_validate and logs_validate)
         payload.save()
     else:
-        logger.error('errors in json schema for payload: ' + str(f_payload.errors))
+        logger.error('errors in json schema for payload %d: %s' % (payload.id, str(f_payload.errors)))
                 
     return HttpResponse('SUCCESS')
      
