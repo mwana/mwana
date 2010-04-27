@@ -1,16 +1,16 @@
 import json
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 import logging
 
 from django.http import HttpResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_GET
 from django.forms import ModelForm
 from django.contrib.auth.models import AnonymousUser
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
-
 from rapidsms.contrib.locations.models import Location
+from rapidsms.utils import render_to_response
 
 """
 TODO
@@ -71,6 +71,13 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
     else:
         return default_val
 
+
+@require_GET
+def dashboard(request):
+    locations = Location.objects.all()
+    return render_to_response(request, "labresults/dashboard.html", 
+                              {"locations": locations })
+    
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_rawresult', 'Lab Results')
 def accept_results(request):

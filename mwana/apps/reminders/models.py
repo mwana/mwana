@@ -56,9 +56,12 @@ class PatientEvent(models.Model):
     """
     Event that happened to a patient at a given time
     """
-    patient = models.ForeignKey(Contact, related_name='patient_events')
+    patient = models.ForeignKey(Contact, related_name='patient_events',
+                                limit_choices_to={'types__slug': 'patient'})
     event = models.ForeignKey(Event, related_name='patient_events')
-    cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events')
+    cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events',
+                                 limit_choices_to={'contact__types__slug':
+                                                                        'cba'})
     date = models.DateField()
     date_logged = models.DateTimeField()
     
@@ -83,7 +86,9 @@ class SentNotification(models.Model):
     patient_event = models.ForeignKey(PatientEvent,
                                       related_name='sent_notifications')
     recipient = models.ForeignKey(Connection,
-                                  related_name='sent_notifications')
+                                  related_name='sent_notifications',
+                                  limit_choices_to={'contact__types__slug':
+                                                                        'cba'})
     date_logged = models.DateTimeField()
     
     def __unicode__(self):

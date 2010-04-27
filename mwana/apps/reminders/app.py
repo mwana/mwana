@@ -10,7 +10,6 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
-from mwana.apps.reminders.handlers.agent import AgentHelper
 
 
 class App(rapidsms.App):
@@ -51,9 +50,10 @@ class App(rapidsms.App):
             except ValueError:
                 pass
         if date:
-            # is there a better way to do this?
+            # is there a better way to do this? if no year was specified in
+            # the string, it defaults to 1900
             if date.year == 1900:
-                date.year = datetime.datetime.now().year
+                date = date.replace(year=datetime.datetime.now().year)
         return date
 
     def _patient_type(self):
@@ -97,11 +97,10 @@ class App(rapidsms.App):
                 date = datetime.datetime.today()
 
             # fetch or create the patient
-            if msg.contact.location and msg.contact.zone_code is not None:
+            if msg.contact.location:
                 patient, _ = Contact.objects.get_or_create(
                                             name=name,
-                                            location=msg.contact.location,
-                                            zone_code=msg.contact.zone_code)
+                                            location=msg.contact.location)
             else:
                 patient = Contact.objects.create(name=name)
 

@@ -1,23 +1,34 @@
 import datetime
+import logging
 
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from mwana.apps.reminders import models as reminders
+from mwana import const
+
 
 NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 
+logger = logging.getLogger('mwana.apps.reminders.tasks')
+
 
 def send_notification(patient_event, appointment):
+    logger.info('Sending notification to %s for %s appointment' % 
+                (patient_event.patient, appointment))
     patient = patient_event.patient
-    if patient.location and patient.zone_code is not None:
-        # if the cba was registered, we'll have a location and zone_code on
+    if patient.location:
+        logging.debug('using patient location (%s) to find CBAs' %
+                      patient.location)
+        # if the cba was registered, we'll have a location on
         # the patient and can use that information to find the CBAs to whom
         # we should send the appointment reminders
-        connections = Connection.objects.filter(contact__types__slug='cba',
-                                         contact__location=patient.location,
-                                         contact__zone_code=patient.zone_code)
+        # TODO: also check child locations?
+        connections = Connection.objects.filter(
+                                         contact__types__slug=const.CBA_SLUG,
+                                         contact__location=patient.location)
     else:
+        logging.debug('no patient location; using patient_event.cba_conn')
         # if the CBA was not registered, just send the notification to the
         # CBA who logged the event
         connections = [patient_event.cba_conn]
@@ -28,7 +39,10 @@ def send_notification(patient_event, appointment):
         else:
             cba_name = ''
         if patient_event.patient.location:
-            clinic_name = patient_event.patient.location
+            if patient_event.patient.location.type == const.get_zone_type():
+                clinic_name = patient_event.patient.location.parent.name
+            else:
+                clinic_name = patient_event.patient.location.name
         else:
             clinic_name = 'the clinic'
         msg = OutgoingMessage(connection, "Hello%(cba)s. %(patient)s is due "
@@ -47,6 +61,7 @@ def send_notification(patient_event, appointment):
 
 
 def send_notifications(router):
+    logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
         total_days = appointment.num_days - NOTIFICATION_NUM_DAYS
         date = datetime.datetime.now() -\
