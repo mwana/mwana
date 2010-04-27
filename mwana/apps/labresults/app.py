@@ -5,49 +5,37 @@ Created on Mar 31, 2010
 '''
 
 from datetime import date
+from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.messages import *
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 import mwana.apps.labresults.config as config
 import rapidsms
-from mwana.apps.labresults.handlers.register import RegisterHandler
-
-RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
-NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you as soon as more results are available."
-BAD_PIN           = "Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'"
-RESULTS           = "Thank you! Here are your results: "
-RESULTS_PROCESSED = "%(name)s has collected these results"
-INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
-NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + RegisterHandler.HELP_TEXT
 
 class App (rapidsms.App):
     
     # we store everyone who we think could be sending us a PIN for results 
     # here, so we can intercept the message.
     waiting_for_pin = {}
+    mocker = MockResultUtility()
     
     def start (self):
         """Configure your app in the start phase."""
         # this breaks on postgres
-        #self.schedule_notification_task()
-        pass
-    
+        # self.schedule_notification_task()
+        
     def filter (self, message):
         # this logic goes here to prevent all further processing of the message.
         # because we're not actually generating a response, this prevents the 
         # default app from responding. This is a bit wacky.
-        if message.text.strip().upper().startswith("DEMO") \
-             and message.connection.contact \
-             and message.connection.contact.is_results_receiver:
-            # Fake like we need to prompt their clinic for results, as a means 
-            # to bypass the scheduler
-            self.notify_clinic_pending_results(message.connection.contact.location)
-            return True
-    
+        return self.mocker.filter(message)
+        
         
     def handle (self, message):
-        if message.connection in self.waiting_for_pin:
+        if message.connection in self.waiting_for_pin \
+           and message.connection.contact:
             pin = message.text.strip()
             if pin.upper() != message.connection.contact.pin.upper():
                 message.respond(BAD_PIN)
@@ -72,11 +60,15 @@ class App (rapidsms.App):
             else:
                 message.respond(NO_RESULTS,
                                 name=message.contact.name, clinic=message.contact.location.name)
-        
+        elif self.mocker.handle(message):
+            return True
         
         
     def send_results (self, message):
-        
+        """
+        Sends the actual results in response to the message
+        (comes after PIN workflow).
+        """
         results = self.waiting_for_pin[message.connection]
         if not results:
             # how did this happen?
@@ -85,17 +77,7 @@ class App (rapidsms.App):
             message.respond("Sorry, there are no new EID results for %s." % message.connection.contact.location)
             self.waiting_for_pin.pop(message.connection)
         else: 
-            result_strings = ["Sample %s: %s" % (r.sample_id, r.get_result_display()) \
-                              for r in results]
-            content = [RESULTS_PROCESSED]
-            
-            result_text, remainder = combine_to_length(result_strings,
-                                                       length=160-len(RESULTS))
-            first_msg = RESULTS + result_text
-            responses = [first_msg]
-            while remainder:
-                next_msg, remainder = combine_to_length(remainder)
-                responses.append(next_msg)
+            responses = build_results_messages(results)
             
             for resp in responses: 
                 message.respond(resp)
@@ -197,25 +179,9 @@ class App (rapidsms.App):
     def send_messages (self, messages):
         for msg in messages:  msg.send()
 
-def combine_to_length(list, delimiter=", ", length=160):
-    """
-    Combine a list of strings to a maximum of a specified length, using the 
-    delimiter to separate them.  Returns the combined strings and the 
-    remainder as a tuple.
-    """
-    if not list:  return ("", [])
-    if len(list[0]) > length:
-        raise Exception("None of the messages will fit in the specified length of %s" % length)
-    
-    msg = ""
-    for i in range(len(list)):
-        item = list[i]
-        new_msg = item if not msg else msg + delimiter + item
-        if len(new_msg) <= length:
-            msg = new_msg
-        else:
-            return (msg, list[i:])
-    return (msg, [])
- 
+
 def days_ago (d):
     return (date.today() - d).days
+
+    
+    
