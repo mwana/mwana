@@ -15,13 +15,15 @@ from rapidsms.utils import render_to_response
 """
 TODO
 
-* test this code
 * write unit tests / fix existing unit tests
-* import facility list from ZPCT into rapidsms
 * write a migration
   - this migration should also parse the raw json that has been sent but unprocessed since friday april 23
     - note that this json is from a different version of the script, so some fields will differ
-      slightly (Payload.version, Payload.info, and LabLog.line)
+      slightly (Payload.version, Payload.info, and LabLog.line -- all missing)
+* rectify the current facility list with the ndola lab facility list (the lab list contains the facilities of
+  all provinces it services; our list only contains luapula. it is not required from incoming results to have
+  a facility in our list -- you can still save the result record, but not send it. however, it appeared that
+  the lab list even had a few luapula clinics that aren't on our internal list
 """
 
 #this seems very wrong; i find it hard to believe that i'm the first person to ever log something
