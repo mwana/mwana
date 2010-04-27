@@ -61,7 +61,7 @@ class AgentHelper(KeywordHandler):
             # require the clinic to be pre-populated
             try:
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
-                                              type__slug=const.CLINIC_SLUG)
+                                             type__slug__in=const.CLINIC_SLUGS)
             except Location.DoesNotExist:
                 self.respond("Sorry, I don't know about a clinic with code "
                              "%(code)s. Please check your code and try again.",

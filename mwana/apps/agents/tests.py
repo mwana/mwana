@@ -13,7 +13,7 @@ class TestApp(TestScript):
     
     def testAgentRegistration(self):
         self.assertEqual(0, Contact.objects.count())
-        clinic = const.get_clinic_type()
+        clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=clinic)
         reminders.Event.objects.create(name="Birth", slug="birth")

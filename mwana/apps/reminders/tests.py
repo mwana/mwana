@@ -17,7 +17,7 @@ class TestApp(TestScript):
     apps = (handler_app, App,)
     
     def _register(self):
-        clinic = const.get_clinic_type()
+        clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital", slug="kdh",
                                 type=clinic)
         script = """
@@ -120,7 +120,7 @@ class TestApp(TestScript):
         birth.appointments.create(name='2 day', num_days=2)
         birth.appointments.create(name='3 day', num_days=3)
         birth.appointments.create(name='4 day', num_days=4)
-        clinic = const.get_clinic_type()
+        clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         zone = const.get_zone_type()
         central = Location.objects.create(name='Central Clinic', type=clinic)
         zone1 = Location.objects.create(name='Zone 1', type=zone,
