@@ -197,14 +197,15 @@ def accept_record (record):
     try:
         clinic_obj = Location.objects.get(slug=clinic_code)
     except Location.DoesNotExist:
-        cant_save('clinic id %s is not a recognized clinic' % clinic_code)
-        return False
+        logger.warning('clinic id %s is not a recognized clinic' % clinic_code)
+        clinic_obj = None
         
     #general field validation
     record_fields = {
         'sample_id': sample_id,
         'requisition_id': dictval(record, 'pat_id'),
-        'clinic': clinic_obj.id,
+        'clinic': clinic_obj.id if clinic_obj != None else None,
+        'clinic_code_unrec': clinic_code if clinic_obj == None else None,
         'result': dictval(record, 'result', map_result),
         'result_detail': dictval(record, 'result_detail'),
         'collected_on': dictval(record, 'coll_on', json_date),

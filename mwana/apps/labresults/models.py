@@ -44,7 +44,9 @@ class Result(models.Model):
     sample_id = models.CharField(primary_key=True, max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
-    clinic = models.ForeignKey(Location)
+    clinic = models.ForeignKey(Location, null=True, blank=True)
+    clinic_code_unrec = models.CharField(max_length=20, null=True, blank=True) #if result is for clinic not registered as a Location
+                                                                               #store raw clinic code here
 
     result = models.CharField(choices=RESULT_CHOICES, max_length=1, null=True, blank=True)  #null == 'not tested yet'
     result_detail = models.CharField(max_length=200, null=True, blank=True)   #reason for rejection or explanation of inconsistency
@@ -65,8 +67,9 @@ class Result(models.Model):
     coll_hw_title = models.CharField(max_length=30, null=True, blank=True)
 
     def __unicode__(self):
-        return '%s/%s/%s %s (%s)' % (self.requisition_id, self.sample_id, self.clinic.slug,
-                                     self.result if self.result != None else '-', self.notification_status)
+        return '%s - %s - %s %s (%s)' % (self.requisition_id, self.sample_id,
+                                         self.clinic.slug if self.clinic != None else '%s[*]' % self.clinic_code_unrec,
+                                         self.result if self.result != None else '-', self.notification_status)
 
 
 class Payload(models.Model):
@@ -92,10 +95,10 @@ class Payload(models.Model):
                                     #like version, source, etc., couldn't be parsed
     
     def __unicode__(self):
-        return 'from %s/%s at %s (%sb)' % (self.source if self.source != None else '-',
-                                           self.version if self.version != None else '-',
-                                           self.incoming_date.strftime('%Y-%m-%d %H:%M:%S'),
-                                           len(self.raw))
+        return 'from %s::%s at %s (%s bytes)' % (self.source if self.source != None else '-',
+                                                 self.version if self.version != None else '-',
+                                                 self.incoming_date.strftime('%Y-%m-%d %H:%M:%S'),
+                                                 len(self.raw))
 
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
