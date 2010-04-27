@@ -128,7 +128,8 @@ def map_result (verbose_result):
      
 def accept_record (record):
     """parse and save an individual record, updating the notification flag if necessary; if record
-    does not validate, nothing is saved; existing records are updated as necessary"""
+    does not validate, nothing is saved; existing records are updated as necessary; return whether
+    the record validated"""
     logger = logging.getLogger('mwana.apps.labresults.views.accept_record')
     
     #retrieve existing record for id, if it exists
@@ -222,7 +223,8 @@ def accept_record (record):
     return True
     
 def accept_log (log, payload_id):
-    """parse and save a single log message; if does not validate, save the raw data"""
+    """parse and save a single log message; if does not validate, save the raw data;
+    return whether the record validated"""
     logger = logging.getLogger('mwana.apps.labresults.views.accept_log')
     
     logentry = labresults.LabLog(payload_id=payload_id)
