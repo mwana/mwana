@@ -1,0 +1,22 @@
+[
+  {
+    "pk": 1, 
+    "model": "locations.locationtype", 
+    "fields": {
+      "exists_in": null, 
+      "plural": "clinics", 
+      "slug": "clinics", 
+      "singular": "clinic"
+    }
+  }, 
+  {
+    "pk": 1, 
+    "model": "locations.location", 
+    "fields": {
+      "point": null, 
+      "type": 1, 
+      "name": "Mansa Central Clinic", 
+      "slug": "403012"
+    }
+  }
+]

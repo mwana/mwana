@@ -6,11 +6,9 @@ Created on Mar 31, 2010
 
 from datetime import date
 from mwana.apps.labresults.models import Result
-from rapidsms.contrib.locations.models import Location
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
-import logging
 import mwana.apps.labresults.config as config
 import rapidsms
 
@@ -28,9 +26,23 @@ class App (rapidsms.App):
     
     def start (self):
         """Configure your app in the start phase."""
-        self.schedule_notification_task()
+        # this breaks on postgres
+        #self.schedule_notification_task()
         pass
-
+    
+    def filter (self, message):
+        # this logic goes here to prevent all further processing of the message.
+        # because we're not actually generating a response, this prevents the 
+        # default app from responding. This is a bit wacky.
+        if message.text.strip().upper().startswith("CHECK") \
+             and message.connection.contact \
+             and message.connection.contact.is_results_receiver:
+            # Fake like we need to prompt their clinic for results, as a means 
+            # to bypass the scheduler
+            self.notify_clinic_pending_results(message.connection.contact.location)
+            return True
+    
+        
     def handle (self, message):
         if message.connection in self.waiting_for_pin:
             pin = message.text.strip()
@@ -39,14 +51,7 @@ class App (rapidsms.App):
             else:
                 self.send_results(message)
             return True
-        elif message.text.strip().upper().startswith("CHECK") \
-             and message.connection.contact \
-             and message.connection.contact.is_results_receiver:
-            # Fake like we need to prompt their clinic for results, as a means 
-            # to bypass the scheduler
-            self.notify_clinic_pending_results(message.connection.contact.location)
-            return True
-    
+        
     def send_results (self, message):
         
         results = self.waiting_for_pin[message.connection]
@@ -83,7 +88,9 @@ class App (rapidsms.App):
             # remove pending contacts for this clinic and notify them it 
             # was taken care of 
             clinic_connections = [contact.default_connection for contact in \
-                                  Contact.objects.filter(location=message.connection.contact.location)]
+                                  Contact.objects.filter\
+                                  (location=message.connection.contact.location)]
+            
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
                     self.waiting_for_pin.pop(conn)

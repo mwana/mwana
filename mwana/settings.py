@@ -32,10 +32,12 @@ INSTALLED_APPS = (
     "rapidsms.contrib.djangoadmin",
     "django.contrib.admin",
     
+    "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.supply",
+    "mwana.apps.help",
     
     "rapidsms.contrib.default",
 )

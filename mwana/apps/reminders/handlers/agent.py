@@ -6,6 +6,7 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 import re
 
+from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 
 
@@ -31,6 +32,12 @@ class AgentHelper(KeywordHandler):
                 location = Location.objects.get(slug__iexact=location_slug)
                 contact = Contact.objects.create(name=name, location=location,
                                                  zone_code=zone)
+                try:
+                    cba_t = ContactType.objects.get(slug='cba')
+                except ContactType.DoesNotExist:
+                    cba_t = ContactType.objects.create(name='Community Based Agents',
+                                                       slug='cba')
+                contact.types.add(cba_t)
                 self.msg.connection.contact = contact
                 self.msg.connection.save()
                 events = list(reminders.Event.objects.values_list('slug',
@@ -39,7 +46,7 @@ class AgentHelper(KeywordHandler):
                     events = ' or '.join(events)
                 elif len(events) > 0:
                     if len(events) > 2:
-                        events[-1] = 'or %s' % event[-1]
+                        events[-1] = 'or %s' % events[-1]
                     events = ', '.join(events)
                 if events:
                     notify_text = " Please notify us next time there is a "\
@@ -47,7 +54,7 @@ class AgentHelper(KeywordHandler):
                 else:
                     notify_text = ""
                 self.respond("Thank you %(name)s! You have successfully "
-                             "registered at as a RemindMi Agent for "
+                             "registered as a RemindMi Agent for "
                              "%(location)s.%(notify_text)s",
                              name=contact.name, location=location.name,
                              notify_text=notify_text)
