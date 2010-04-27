@@ -10,7 +10,6 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
-from mwana.apps.agents.handlers.agent import AgentHelper
 
 
 class App(rapidsms.App):
@@ -98,11 +97,10 @@ class App(rapidsms.App):
                 date = datetime.datetime.today()
 
             # fetch or create the patient
-            if msg.contact.location and msg.contact.zone_code is not None:
+            if msg.contact.location:
                 patient, _ = Contact.objects.get_or_create(
                                             name=name,
-                                            location=msg.contact.location,
-                                            zone_code=msg.contact.zone_code)
+                                            location=msg.contact.location)
             else:
                 patient = Contact.objects.create(name=name)
 
