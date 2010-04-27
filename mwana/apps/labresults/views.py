@@ -44,7 +44,7 @@ def json_datetime (val):
 def json_date (val):
     """convert a date value from the json into a python date"""
     try:
-        return date.strptime(val, '%Y-%m-%d')
+        return datetime.strptime(val, '%Y-%m-%d').date()
     except:
         return None
 
@@ -59,10 +59,17 @@ def json_timestamp (val):
     except:
         return None
 
-def dictval (dict, val, trans=lambda x: x):
+def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None):
     """extract a value from a data dictionary, which may or may not be present in the dictionary,
     and may also need to be transformed in some way"""
-    return trans(dict[val]) if val in dict else None
+    if field in dict:
+        val = dict[field]
+        if val != None or trans_none:
+            return trans(val)
+        else:
+            return None
+    else:
+        return default_val
 
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_rawresult', 'Lab Results')
@@ -166,18 +173,18 @@ def accept_record (record):
             return False
     
     #validate clinic id
-    clinic_id = normalize_clinic_id(dictval(record, 'fac'))
+    clinic_code = normalize_clinic_id(str(dictval(record, 'fac')))
     try:
-        clinic_obj = Location.objects.get(slug=clinic_id)
+        clinic_obj = Location.objects.get(slug=clinic_code)
     except Location.DoesNotExist:
-        cant_save('clinic id %s is not a recognized clinic' % clinic_id)
+        cant_save('clinic id %s is not a recognized clinic' % clinic_code)
         return False
         
     #general field validation
     record_fields = {
         'sample_id': sample_id,
         'requisition_id': dictval(record, 'pat_id'),
-        'clinic': clinic_obj,
+        'clinic': clinic_obj.id,
         'result': dictval(record, 'result', map_result),
         'result_detail': dictval(record, 'result_detail'),
         'collected_on': dictval(record, 'coll_on', json_date),
@@ -190,7 +197,10 @@ def accept_record (record):
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
     }
-    f_result = ResultForm(record_fields)
+    
+    #need to keep old record 'pristine' so we can check which fields have changed
+    old_record_copy = labresults.Result.objects.get(sample_id=sample_id) if old_record != None else None
+    f_result = ResultForm(record_fields, instance=old_record_copy)
     if f_result.is_valid():
         new_record = f_result.save(commit=False)
     else:
@@ -210,6 +220,9 @@ def accept_record (record):
         
         new_record.notification_status = 'new' if new_record.result != None else 'unprocessed'
     else:
+        if rec_status == 'new':
+            logger.info('received a \'new\' record that already exists; may have been deleted in lab?; treating as update...')
+        
         new_record.notification_status = old_record.notification_status
 
         #change to requisition id

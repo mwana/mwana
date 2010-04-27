@@ -46,23 +46,23 @@ class Result(models.Model):
                                                        #id, clinic-assigned sample id, or even patient name
     clinic = models.ForeignKey(Location)
 
-    result = models.CharField(choices=RESULT_CHOICES, max_length=1, null=True)  #null == 'not tested yet'
-    result_detail = models.CharField(max_length=200, null=True)   #reason for rejection or explanation of inconsistency
+    result = models.CharField(choices=RESULT_CHOICES, max_length=1, null=True, blank=True)  #null == 'not tested yet'
+    result_detail = models.CharField(max_length=200, null=True, blank=True)   #reason for rejection or explanation of inconsistency
     
-    collected_on = models.DateField(null=True)   #date collected at clinic
-    entered_on = models.DateField(null=True)     #date received at lab
-    processed_on = models.DateField(null=True)   #date tested at lab
+    collected_on = models.DateField(null=True, blank=True)   #date collected at clinic
+    entered_on = models.DateField(null=True, blank=True)     #date received at lab
+    processed_on = models.DateField(null=True, blank=True)   #date tested at lab
     #all date fields are entered by lab -- not based on date result entered or such
     
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
 
     #ancillary demographic data that can help matching up results back to patients
-    birthdate = models.DateField(null=True)
-    child_age = models.IntegerField(null=True)  #age in weeks
-    sex = models.CharField(choices=SEX_CHOICES, max_length=1, null=True)
-    mother_age = models.IntegerField(null=True) #age in years
-    collecting_health_worker = models.CharField(max_length=100, null=True)
-    coll_hw_title = models.CharField(max_length=30, null=True)
+    birthdate = models.DateField(null=True, blank=True)
+    child_age = models.IntegerField(null=True, blank=True)  #age in weeks
+    sex = models.CharField(choices=SEX_CHOICES, max_length=1, null=True, blank=True)
+    mother_age = models.IntegerField(null=True, blank=True) #age in years
+    collecting_health_worker = models.CharField(max_length=100, null=True, blank=True)
+    coll_hw_title = models.CharField(max_length=30, null=True, blank=True)
 
     def __unicode__(self):
         return '%s/%s/%s %s (%s)' % (self.requisition_id, self.sample_id, self.clinic.slug,
@@ -73,13 +73,13 @@ class Payload(models.Model):
     """a raw incoming data payload from the DBS lab computer"""
     
     incoming_date = models.DateTimeField()                  #date received by rapidsms
-    auth_user = models.ForeignKey(User, null=True)          #http user used for authorization (blank == anon)
+    auth_user = models.ForeignKey(User, null=True, blank=True) #http user used for authorization (blank == anon)
     
-    version = models.CharField(max_length=10, null=True)    #version of extract script payload came from
-    source = models.CharField(max_length=50, null=True)     #source identifier (i.e., 'ndola')
-    client_timestamp = models.DateTimeField(null=True)      #timestamp on lab computer that payload was created
-                                                            #use to detect if lab computer clock is off
-    info = models.CharField(max_length=50, null=True)       #extra info about payload
+    version = models.CharField(max_length=10, null=True, blank=True)    #version of extract script payload came from
+    source = models.CharField(max_length=50, null=True, blank=True)     #source identifier (i.e., 'ndola')
+    client_timestamp = models.DateTimeField(null=True, blank=True)      #timestamp on lab computer that payload was created
+                                                                        #use to detect if lab computer clock is off
+    info = models.CharField(max_length=50, null=True, blank=True)       #extra info about payload
     
     parsed_json = models.BooleanField(default=False)        #whether this payload parsed as valid json
     validated_schema = models.BooleanField(default=False)   #if parsed, whether this payload validated
@@ -100,14 +100,14 @@ class Payload(models.Model):
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
     
-    timestamp = models.DateTimeField(null=True)
-    message = models.TextField(null=True)
-    level = models.CharField(max_length=20, null=True)
-    line = models.IntegerField(null=True)
+    timestamp = models.DateTimeField(null=True, blank=True)
+    message = models.TextField(null=True, blank=True)
+    level = models.CharField(max_length=20, null=True, blank=True)
+    line = models.IntegerField(null=True, blank=True)
     
-    payload_id = models.ForeignKey(Payload)     #payload this message came from
-    raw = models.TextField(null=True)           #raw content of log -- present only if log info couldn't be
-                                                #parsed/validated
+    payload_id = models.ForeignKey(Payload)       #payload this message came from
+    raw = models.TextField(null=True, blank=True) #raw content of log -- present only if log info couldn't be
+                                                  #parsed/validated
     
     def __unicode__(self):
         return ('%d: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
