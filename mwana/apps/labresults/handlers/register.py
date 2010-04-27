@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+import re
+from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
-import re
 
 
 class RegisterHandler(KeywordHandler):
     """
     """
 
-    keyword = "join"
+    keyword = "join|j0in|jo1n|j01n"
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
     HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
@@ -26,10 +27,12 @@ class RegisterHandler(KeywordHandler):
             "like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.")
 
     def handle(self, text):
+        b=InputCleaner()
         if self.msg.contact is not None:
             self.respond("I already have a contact with phone %(identity)s.", identity=self.msg.connection.identity)
             return
         text=text.strip()
+        text=b.remove_double_spaces(text)
         group=self.PATTERN.search(text)
         if group is None:
             self.mulformed_msg_help()
@@ -41,6 +44,7 @@ class RegisterHandler(KeywordHandler):
             return
 
         clinic_code=tokens[0].strip()
+        clinic_code=b.replace_oil_with_011(clinic_code)
         name=tokens[2]
         name=name.title().strip()
         pin=tokens[4].strip()

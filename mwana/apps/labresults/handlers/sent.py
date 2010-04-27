@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
-from mwana.apps.supply.models import SupplyType, SupplyRequest
-from mwana.apps.registration.handlers.register import RegisterHandler
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
 SENT          = "Hello %(name)s! We received your notification that %(count)s DBS samples were sent to us today from %(clinic)s. We will notify you when the results are ready."
@@ -24,12 +23,16 @@ class SentHandler(KeywordHandler):
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
-        
+        b=InputCleaner()
         try:
-            count = int(text.strip())
+            count = int(b.replace_oil_with_011(text.strip()))
         except ValueError:
-            self.respond("%s %s" % (SORRY, HELP))
-            return
+            text=b.words_to_digits(text)
+            if not text:
+                self.respond("%s %s" % (SORRY, HELP))
+                return
+            else:
+                count=int(text)
             
         # TODO: maybe record this somewhere 
         self.respond(SENT, name=self.msg.contact.name, count=count,

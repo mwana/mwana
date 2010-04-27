@@ -25,7 +25,7 @@ class ResultsHandler(KeywordHandler):
     * this may not be possible, depending on the data we are able to collect
     """
 
-    keyword = "result|results"
+    keyword = "result|results|resut|resuts"
     PATTERN = re.compile(r'^(\s*)(\S+)$')
 
     def help(self):
@@ -33,6 +33,8 @@ class ResultsHandler(KeywordHandler):
 
     def handle(self, text):
         text = text.strip()
+#        b = InputCleaner()
+
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
