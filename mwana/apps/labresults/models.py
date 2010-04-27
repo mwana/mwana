@@ -8,8 +8,8 @@ class Result(models.Model):
     of sending result back to clinic"""
     
     RESULT_CHOICES = (
-        ('P', 'HIV Positive'),
-        ('N', 'HIV Negative'),
+        ('P', 'Detected'),
+        ('N', 'Not Detected'),
         ('R', 'Rejected Sample'),   #this could include samples that failed to give a definitive result
                                     #  i.e., 'rejected -- indeterminate'
         ('I', 'Indeterminate'),     #could mean 'unable to get definitive result', but most likely means

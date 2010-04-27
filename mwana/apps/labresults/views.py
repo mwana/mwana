@@ -111,8 +111,21 @@ def accept_results(request):
     
     #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
     #record failed to validate
-    records_validate = all(accept_record(r) for r in data['records']) if 'records' in data else False
-    logs_validate = all(accept_log(l, payload) for l in data['logs']) if 'logs' in data else False
+    if 'samples' in data:
+        records_validate = True
+        for rec in data['samples']:
+            if not accept_record(rec):
+                records_validate = False
+    else:
+        records_validate = False
+
+    if 'logs' in data:
+        logs_validate = True
+        for log in data['logs']:
+            if not accept_log(log, payload):
+                logs_validate = False
+    else:
+        logs_validate = False
     
     meta_fields = {
         'version': dictval(data, 'version'),
