@@ -73,7 +73,7 @@ class Payload(models.Model):
     """a raw incoming data payload from the DBS lab computer"""
     
     incoming_date = models.DateTimeField()                  #date received by rapidsms
-    auth_user = models.ForeignKey(User)                     #http user used for authorization
+    auth_user = models.ForeignKey(User, null=True)          #http user used for authorization (blank == anon)
     
     version = models.CharField(max_length=10, null=True)    #version of extract script payload came from
     source = models.CharField(max_length=50, null=True)     #source identifier (i.e., 'ndola')
@@ -112,4 +112,4 @@ class LabLog(models.Model):
     def __unicode__(self):
         return ('%d: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                                 self.message if len(self.message) < 20 else (self.message[:17] + '...'))) \
-            if self.raw != None else 'parse error'
+            if self.raw == None else 'parse error'

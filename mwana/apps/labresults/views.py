@@ -5,6 +5,7 @@ import logging
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.forms import ModelForm
+from django.contrib.auth.models import AnonymousUser
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
@@ -23,6 +24,16 @@ TODO
       slightly (Payload.version, Payload.info, and LabLog.line)
 """
 
+#this seems very wrong; i find it hard to believe that i'm the first person to ever log something
+#from a rapidsms view. feels like there must be some blessed way of doing it.
+def get_logger (module_name):
+    logger = logging.getLogger(module_name)
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+    return logger
+
 def json_datetime (val):
     """convert a datetime value from the json into a python datetime"""
     try:
@@ -39,7 +50,7 @@ def json_date (val):
 
 def json_timestamp (val):
     """convert a timestamp value (with milliseconds) from the json into a python datetime"""
-    if val[-4] in ('.', ','):
+    if val[-4] not in ('.', ','):
         return None
     
     try:
@@ -59,7 +70,7 @@ def accept_results(request):
     """accept data submissions from the lab via POST. see connection() in extract.py
     for how to submit; attempts to save raw data/partial data if for some reason the
     full content is not parseable or does not validate to the model schema"""
-    logger = logging.getLogger('mwana.apps.labresults.views.accept_results')
+    logger = get_logger('mwana.apps.labresults.views.accept_results')
     
     if request.META['CONTENT_TYPE'] != 'text/json':
         logger.warn('incoming post does not have text/json content type')
@@ -67,7 +78,7 @@ def accept_results(request):
     content = request.raw_post_data
     
     payload_date = datetime.now()
-    payload_user = request.user
+    payload_user = request.user if not isinstance(request.user, AnonymousUser) else None
     try:
         data = json.loads(content)
     except:
@@ -94,7 +105,7 @@ def accept_results(request):
     #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
     #record failed to validate
     records_validate = all(accept_record(r) for r in data['records']) if 'records' in data else False
-    logs_validate = all(accept_log(l, payload.id) for l in data['logs']) if 'logs' in data else False
+    logs_validate = all(accept_log(l, payload) for l in data['logs']) if 'logs' in data else False
     
     meta_fields = {
         'version': dictval(data, 'version'),
@@ -130,7 +141,7 @@ def accept_record (record):
     """parse and save an individual record, updating the notification flag if necessary; if record
     does not validate, nothing is saved; existing records are updated as necessary; return whether
     the record validated"""
-    logger = logging.getLogger('mwana.apps.labresults.views.accept_record')
+    logger = get_logger('mwana.apps.labresults.views.accept_record')
     
     #retrieve existing record for id, if it exists
     sample_id = dictval(record, 'id')
@@ -222,13 +233,12 @@ def accept_record (record):
     new_record.save()
     return True
     
-def accept_log (log, payload_id):
+def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
-    logger = logging.getLogger('mwana.apps.labresults.views.accept_log')
+    logger = get_logger('mwana.apps.labresults.views.accept_log')
     
-    logentry = labresults.LabLog(payload_id=payload_id)
-
+    logentry = labresults.LabLog(payload_id=payload)
     logfields = {
         'timestamp': dictval(log, 'at', json_timestamp),
         'message': dictval(log, 'msg'),
