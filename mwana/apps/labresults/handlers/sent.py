@@ -20,7 +20,6 @@ class SentHandler(KeywordHandler):
         self.respond(HELP)
 
     def handle(self, text):
-        
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return

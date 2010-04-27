@@ -16,7 +16,7 @@ class MockResultUtility():
     
     waiting_for_pin = {}
 
-    def filter(self, message):
+    def handle(self, message):
         if message.text.strip().upper().startswith("DEMO"):
             rest = message.text.strip()[4:].strip()
             clinic = None
@@ -40,14 +40,10 @@ class MockResultUtility():
                 # to conduct user testing.  The mocker does not touch the database
                 self.fake_pending_results(clinic)
             return True
-    
-    def handle(self, message):
-        if message.connection in self.waiting_for_pin \
+        elif message.connection in self.waiting_for_pin \
            and message.connection.contact:
             pin = message.text.strip()
-            if pin.upper() != message.connection.contact.pin.upper():
-                message.respond(BAD_PIN)
-            else:
+            if pin.upper() == message.connection.contact.pin.upper():
                 results = self.waiting_for_pin[message.connection]
                 responses = build_results_messages(results)
             
@@ -69,8 +65,17 @@ class MockResultUtility():
                         self.waiting_for_pin.pop(conn)
                         OutgoingMessage(conn, RESULTS_PROCESSED, 
                                         name=message.connection.contact.name).send()
-            return True
+                return True
+            else:
+                # pass a secret message to default phase, see app.py
+                message.possible_bad_mock_pin = True
+
         
+    def default(self, message):
+        if hasattr(message, "possible_bad_mock_pin"):
+            message.respond(BAD_PIN)                
+            return True
+
     def fake_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms, except
            this is fake!"""

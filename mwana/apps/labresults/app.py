@@ -26,23 +26,8 @@ class App (rapidsms.App):
         # this breaks on postgres
         # self.schedule_notification_task()
         
-    def filter (self, message):
-        # this logic goes here to prevent all further processing of the message.
-        # because we're not actually generating a response, this prevents the 
-        # default app from responding. This is a bit wacky.
-        return self.mocker.filter(message)
-        
-        
     def handle (self, message):
-        if message.connection in self.waiting_for_pin \
-           and message.connection.contact:
-            pin = message.text.strip()
-            if pin.upper() != message.connection.contact.pin.upper():
-                message.respond(BAD_PIN)
-            else:
-                self.send_results(message)
-            return True
-        elif message.text.strip().upper().startswith("CHECK"):
+        if message.text.strip().upper().startswith("CHECK"):
             if not message.connection.contact or \
                not message.connection.contact.is_results_receiver:
                 message.respond(NOT_REGISTERED)
@@ -60,9 +45,32 @@ class App (rapidsms.App):
             else:
                 message.respond(NO_RESULTS,
                                 name=message.contact.name, clinic=message.contact.location.name)
+        
+        elif message.connection in self.waiting_for_pin \
+           and message.connection.contact:
+            pin = message.text.strip()
+            if pin.upper() == message.connection.contact.pin.upper():
+                self.send_results(message)
+                return True
+            else:
+                # lets hide a magic field in the message so we can respond 
+                # in the default phase if no one else catches this.  We 
+                # don't respond here or return true in case this was a 
+                # valid keyword for another app.
+                message.possible_bad_pin = True
+        
+        # Finally, check if our mocker wants to do anything with this message, 
+        # and notify the router if so.
         elif self.mocker.handle(message):
             return True
-        
+    
+    def default(self, message):
+        # collect our bad pin responses, if they were generated.  See comment
+        # in handle()
+        if hasattr(message, "possible_bad_pin"):
+            message.respond(BAD_PIN)                
+            return True
+        return self.mocker.default(message)
         
     def send_results (self, message):
         """
