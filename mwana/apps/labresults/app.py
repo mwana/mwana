@@ -8,6 +8,7 @@ from datetime import date
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.messages import *
+import mwana.const as const
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
@@ -29,7 +30,8 @@ class App (rapidsms.App):
     def handle (self, message):
         if message.text.strip().upper().startswith("CHECK"):
             if not message.connection.contact or \
-               not message.connection.contact.is_results_receiver:
+               not const.get_clinic_worker_type() in \
+               message.connection.contact.types.all():
                 message.respond(NOT_REGISTERED)
                 return True
             
@@ -163,7 +165,8 @@ class App (rapidsms.App):
                             (clinic=clinic,
                              notification_status__in=['new', 'notified'])
         
-        contacts = Contact.active.filter(location=clinic, is_results_receiver=True)
+        contacts = Contact.active.filter(location=clinic, 
+                                         types=const.get_clinic_worker_type())
         if not contacts:
             self.error("No contacts registered to receiver results at %s! These will go unreported." % clinic)
         

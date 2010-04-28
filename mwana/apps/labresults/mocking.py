@@ -1,6 +1,7 @@
 from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS, \
     RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL
 from mwana.apps.labresults.models import Result
+import mwana.const as const
 from rapidsms.contrib.locations.models import Location
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -82,7 +83,7 @@ class MockResultUtility(LoggerMixin):
     def fake_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms, except
            this is fake!"""
-        contacts = Contact.active.filter(location=clinic, is_results_receiver=True)
+        contacts = Contact.active.filter(types=const.get_clinic_worker_type()).location(clinic)
         results = get_fake_results(3, clinic)
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection, 

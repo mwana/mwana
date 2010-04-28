@@ -84,8 +84,7 @@ class RegisterHandler(KeywordHandler):
             return
         try:
             location = Location.objects.get(slug__iexact=clinic_code)
-            contact = Contact.objects.create(name=name, location=location, pin=pin, 
-                                             is_results_receiver=True)
+            contact = Contact.objects.create(name=name, location=location, pin=pin) 
             contact.types.add(const.get_clinic_worker_type())
             self.msg.connection.contact = contact
             self.msg.connection.save()
