@@ -85,9 +85,9 @@ class AgentHelper(KeywordHandler):
             self.msg.connection.contact = cba
             self.msg.connection.save()
             self.respond("Thank you %(name)s! You have successfully "
-                         "registered as a RemindMi Agent for %(clinic)s."
+                         "registered as a RemindMi Agent for zone %(zone)s of %(clinic)s."
                          "%(notify_text)s",
-                         name=cba.name, clinic=clinic.name,
+                         name=cba.name, zone=zone.name , clinic=clinic.name,
                          notify_text=self._get_notify_text())
         else:
             self.respond("Sorry, I didn't understand that. Make sure you send "
