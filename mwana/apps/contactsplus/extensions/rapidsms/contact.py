@@ -12,3 +12,4 @@ class ContactType(models.Model):
     
     class Meta:
         abstract = True
+

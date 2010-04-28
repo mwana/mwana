@@ -10,32 +10,32 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
+from mwana import const
 
 
 class App(rapidsms.App):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
     
-    PATTERN = re.compile(r"^\s*(?P<event_slug>\S+)(?:\s+(?P<date>[\d/ -]+))?\s+"
-                          "(?P<name>.+)\s*$")
+    DATE_RE = re.compile(r"[\d/.-]+")
     HELP_TEXT = "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
                 " The date is optional and is logged as TODAY if left out."
     DATE_FORMATS = (
-        '%d %m %y',
-        '%d %m %Y',
-        '%d %m',
         '%d/%m/%y',
         '%d/%m/%Y',
         '%d/%m',
-        '%d-%m-%y',
-        '%d-%m-%Y',
-        '%d-%m',
+        '%d%m%y',
+        '%d%m%Y',
+        '%d%m',
     )
 
     def start(self):
         self.schedule_notification_task()
-        pass
     
     def schedule_notification_task (self):
+        """
+        Resets (removes and re-creates) the task in the scheduler app that is
+        used to send notifications to CBAs.
+        """
         callback = 'mwana.apps.reminders.tasks.send_notifications'
         
         #remove existing schedule tasks; reschedule based on the current setting from config
@@ -43,7 +43,14 @@ class App(rapidsms.App):
         EventSchedule.objects.create(callback=callback, minutes=ALL)
 
     def _parse_date(self, date_str):
+        """
+        Tries each of the supported date formats in turn.  If the year was not
+        specified, it defaults to the current year.
+        """
         date = None
+        date_str = re.sub('[. -]', '/', date_str)
+        while '//' in date_str:
+            date_str = date_str.replace('//', '/')
         for format in self.DATE_FORMATS:
             try:
                 date = datetime.datetime.strptime(date_str, format)
@@ -56,12 +63,24 @@ class App(rapidsms.App):
                 date = date.replace(year=datetime.datetime.now().year)
         return date
 
-    def _patient_type(self):
-        try:
-            return ContactType.objects.get(slug='patient')
-        except ContactType.DoesNotExist:
-            return ContactType.objects.create(name='Patient',
-                                              slug='patient')
+    def _parse_message(self, msg):
+        """
+        Attempts to parse the message iteratively; regular expressions are not
+        greedy enough and will, if the date doesn't match for some reason, end
+        up generating messages like "You have successfully registered a birth
+        for 24. 06. 2010" (since the date is optional).
+        """
+        parts = msg.text.split()[1:] # exclude the keyword (e.g., "birth")
+        date_str = ''
+        name = ''
+        for part in parts:
+            if self.DATE_RE.match(part):
+                if date_str: date_str += ' '
+                date_str += part
+            else:
+                if name: name += ' '
+                name += part
+        return date_str, name
 
     def handle(self, msg):
         """
@@ -80,12 +99,8 @@ class App(rapidsms.App):
         except reminders.Event.DoesNotExist:
             return False
         
-        m = self.PATTERN.match(msg.text)
-        if m is not None:
-            date_str = (m.group('date') or '').strip()
-            name = m.group('name').strip()
-
-            # parse the date
+        date_str, name = self._parse_message(msg)
+        if name: # the date is optional
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
@@ -95,7 +110,6 @@ class App(rapidsms.App):
                     return
             else:
                 date = datetime.datetime.today()
-
             # fetch or create the patient
             if msg.contact.location:
                 patient, _ = Contact.objects.get_or_create(
@@ -105,7 +119,7 @@ class App(rapidsms.App):
                 patient = Contact.objects.create(name=name)
 
             # make sure the contact has the correct type (patient)
-            patient_t = self._patient_type()
+            patient_t = const.get_patient_type()
             if not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
 

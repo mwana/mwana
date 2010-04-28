@@ -32,6 +32,8 @@ class TestApp(TestScript):
         script = """
             kk     > birth
             kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
+            kk     > birth 24 3 2010
+            kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -58,16 +60,28 @@ class TestApp(TestScript):
             kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3-2010 anna
             kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4.3.2010 michelle
+            kk     < You have successfully registered a birth for michelle on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4. 3. 2010 anne
+            kk     < You have successfully registered a birth for anne on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 04032010 heidi
+            kk     < You have successfully registered a birth for heidi on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4/3 rachel
             kk     < You have successfully registered a birth for rachel on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4 3 nancy
             kk     < You have successfully registered a birth for nancy on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3 katrina
             kk     < You have successfully registered a birth for katrina on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4.3 molly
+            kk     < You have successfully registered a birth for molly on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 4. 3 lisa
+            kk     < You have successfully registered a birth for lisa on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 0403 lauren
+            kk     < You have successfully registered a birth for lauren on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % {'year': datetime.datetime.now().year}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(6, patients.count())
+        self.assertEqual(12, patients.count())
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()

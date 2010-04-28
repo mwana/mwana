@@ -26,7 +26,8 @@ def send_notification(patient_event, appointment):
         # TODO: also check child locations?
         connections = Connection.objects.filter(
                                          contact__types__slug=const.CBA_SLUG,
-                                         contact__location=patient.location)
+                                         contact__location=patient.location,
+                                         contact__is_active=True)
     else:
         logging.debug('no patient location; using patient_event.cba_conn')
         # if the CBA was not registered, just send the notification to the
@@ -70,6 +71,7 @@ def send_notifications(router):
         patient_events = reminders.PatientEvent.objects.filter(
             event=appointment.event,
             date__lte=date,
+            patient__is_active=True
         ).exclude(
             sent_notifications__appointment=appointment
         )
