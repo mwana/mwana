@@ -10,7 +10,7 @@ from rapidsms.tests.scripted import TestScript
 import datetime
 import json
 from mwana.apps.labresults.mocking import get_fake_results
-
+import mwana.const as const
 
 
 
@@ -27,15 +27,17 @@ class TestApp(TestScript):
         connection = Connection.objects.get(identity="clinic_worker")
         
         self.contact = Contact.objects.create(alias="banda", name="John Banda", 
-                                              location=self.clinic, pin="4567", 
-                                              is_results_receiver=True)
+                                              location=self.clinic, pin="4567")
+        self.contact.types.add(const.get_clinic_worker_type())
+                                
         connection.contact = self.contact
         connection.save()
         
         # create another one
         self.other_contact = Contact.objects.create(alias="mary", name="Mary Phiri", 
-                                                    location=self.clinic, pin="6789", 
-                                                    is_results_receiver=True)
+                                                    location=self.clinic, pin="6789")
+        self.other_contact.types.add(const.get_clinic_worker_type())
+        
         Connection.objects.create(identity="other_worker", backend=connection.backend, 
                                   contact=self.other_contact)
         connection.save()
@@ -50,7 +52,7 @@ class TestApp(TestScript):
         self.assertEqual("clinic_worker", contact.default_connection.identity)
         self.assertEqual(self.clinic, contact.location)
         self.assertEqual("4567", contact.pin)
-        self.assertEqual(True, contact.is_results_receiver)
+        self.assertTrue(const.get_clinic_worker_type() in contact.types.all())
     
     testReportResults = """
             clinic_worker > SENT 3
