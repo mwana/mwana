@@ -7,8 +7,8 @@ from mwana.apps.contactsplus import models as contactsplus
 
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
-    list_display = ('unicode', 'alias', 'language', 'location', 'types_list',
-                    'is_active',)
+    list_display = ('unicode', 'alias', 'language', 'location',
+                    'default_connection', 'types_list', 'is_active',)
     list_filter = ('types', 'is_active', 'language',)
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
