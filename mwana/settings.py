@@ -68,6 +68,13 @@ TABS = [
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
 ]
 
+# Override the default log settings
+LOG_LEVEL   = "DEBUG"
+LOG_FILE    = "/var/log/rapidsms/rapidsms.log"
+LOG_FORMAT  = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
+LOG_SIZE    = 1000000 # in bytes
+LOG_BACKUPS = 256     # number of logs to keep around
+
 # import local settings if we find them
 try:
     from localsettings import *

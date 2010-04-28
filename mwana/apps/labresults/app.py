@@ -163,7 +163,7 @@ class App (rapidsms.App):
                             (clinic=clinic,
                              notification_status__in=['new', 'notified'])
         
-        contacts = Contact.objects.filter(location=clinic, is_results_receiver=True)
+        contacts = Contact.active.filter(location=clinic, is_results_receiver=True)
         if not contacts:
             self.error("No contacts registered to receiver results at %s! These will go unreported." % clinic)
         
