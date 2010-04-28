@@ -22,14 +22,14 @@ NUMBER_DICTIONARY = {
 , 17: "Seventeen"
 , 18: "Eighteen"
 , 19: "Nineteen"
-, 20: "Twenty "
-, 30: "Thirty "
-, 40: "Forty "
-, 50: "Fifty "
-, 60: "Sixty "
-, 70: "Seventy "
-, 80: "Eighty "
-, 90: "Ninety "
+, 20: "Twenty"
+, 30: "Thirty"
+, 40: "Forty"
+, 50: "Fifty"
+, 60: "Sixty"
+, 70: "Seventy"
+, 80: "Eighty"
+, 90: "Ninety"
 , 'One': 1
 , 'Two': 2
 , 'Three': 3
