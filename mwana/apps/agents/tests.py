@@ -21,11 +21,11 @@ class TestApp(TestScript):
         script = """
             lost   > agent
             lost   < To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
-            rb     > agent kdh zone1 rupiah banda
-            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital. Please notify us next time there is a birth in your zone.
-            rb     > agent kdh zone1 rupiah banda
+            rb     > agent kdh 03 rupiah banda
+            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 03 of Kafue District Hospital. Please notify us next time there is a birth in your zone.
+            rb     > agent kdh 03 rupiah banda
             rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Kafue District Hospital. 
-            kk     > agent whoops zone1 kenneth kaunda
+            kk     > agent whoops 03 kenneth kaunda
             kk     < Sorry, I don't know about a clinic with code whoops. Please check your code and try again.
             noname > agent abc
             noname < Sorry, I didn't understand that. Make sure you send your clinic, zone #, and name like: AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
@@ -34,6 +34,6 @@ class TestApp(TestScript):
         self.assertEqual(1, Contact.objects.count(), "Registration didn't create a new contact!")
         rb = Contact.objects.all()[0]
         self.assertEqual("Rupiah Banda", rb.name, "Name was not set correctly after registration!")
-        self.assertEqual(rb.location.slug, "zone1", "Location was not set correctly after registration!")
+        self.assertEqual(rb.location.slug, "03", "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, 'cba')
