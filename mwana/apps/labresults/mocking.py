@@ -2,13 +2,14 @@ from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS,
     RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL
 from mwana.apps.labresults.models import Result
 from rapidsms.contrib.locations.models import Location
+from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 import datetime
 import random
 
 
-class MockResultUtility():
+class MockResultUtility(LoggerMixin):
     """
     A mock data utility.  This allows you to script some demo/testing scripts
     while not reading or writing any results data to the database.
@@ -32,12 +33,12 @@ class MockResultUtility():
                 # They were already registered for a particular clinic
                 # so assume they want to use that one.
                 clinic = message.connection.contact.location 
-            
             if not clinic:
                 message.respond(DEMO_FAIL)
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
+                self.info("Initiating a demo sequence to clinic: %s" % clinic)
                 self.fake_pending_results(clinic)
             return True
         elif message.connection in self.waiting_for_pin \
@@ -68,6 +69,8 @@ class MockResultUtility():
                 return True
             else:
                 # pass a secret message to default phase, see app.py
+                self.debug("caught a potential bad pin: %s for %s" % \
+                           (message.text, message.connection))
                 message.possible_bad_mock_pin = True
 
         
