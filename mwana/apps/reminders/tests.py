@@ -22,7 +22,7 @@ class TestApp(TestScript):
                                 type=clinic)
         script = """
             kk     > agent kdh 01 rupiah banda
-            kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital.
+            kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
             """
         self.runScript(script)
     
