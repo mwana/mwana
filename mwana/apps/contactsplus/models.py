@@ -10,20 +10,6 @@ class ContactType(models.Model):
     def __unicode__(self):
         return self.name
 
-class ActiveContactManager(models.Manager):
-    """Filter contacts by who is active"""
-    
-    def get_query_set(self):
-        return super(ActiveContactManager, self).get_query_set()\
-                    .filter(is_active=True)
-
-# add the active manager to the Contact class.  You can reference this
-# instead of objects like:
-#     Contact.active.all()   
-#     Contact.active.filter(name="mary")
-# etc.
-Contact.add_to_class("active", ActiveContactManager())
-
 class SelfOrParentLocationQuerySet(QuerySet):
     """
     Query set to filter by a location looking in both the location 
@@ -53,4 +39,19 @@ class SelfOrParentLocationContactManager(models.Manager):
 
 # override the Contacts manager so you can do location aware queries
 Contact.add_to_class("objects",SelfOrParentLocationContactManager())
+
+
+class ActiveContactManager(SelfOrParentLocationContactManager):
+    """Filter contacts by who is active"""
+    
+    def get_query_set(self):
+        return super(ActiveContactManager, self).get_query_set()\
+                    .filter(is_active=True)
+
+# add the active manager to the Contact class.  You can reference this
+# instead of objects like:
+#     Contact.active.all()   
+#     Contact.active.filter(name="mary")
+# etc.
+Contact.add_to_class("active", ActiveContactManager())
 
