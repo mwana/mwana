@@ -21,6 +21,8 @@ class TestApp(TestScript):
         ctr = LocationType.objects.create()
         kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=ctr)
+        central_clinic = Location.objects.create(name="Central Clinic",
+                                      slug="403012", type=ctr)
         script = """
             lost   > join
             lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
@@ -38,3 +40,17 @@ class TestApp(TestScript):
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
+
+
+        script = """
+            jb     > join 4o30i2 jacob banda 1234
+            jb     < Hi Jacob Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Reply with keyword 'HELP' if your information is not correct.
+            kk     > join 4f30i2 kenneth kaunda 1234
+            kk     < Sorry, I don't know about a location with code 4f30i2. Please check your code and try again.
+        """
+        self.runScript(script)
+        self.assertEqual(2, Contact.objects.count())
+        jb = Contact.objects.get(name='Jacob Banda')
+        self.assertEqual(central_clinic, jb.location)
+        self.assertEqual(jb.types.count(), 1)
+        self.assertEqual(jb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)

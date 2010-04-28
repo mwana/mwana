@@ -45,7 +45,7 @@ class RegisterHandler(KeywordHandler):
             return
 
         clinic_code=tokens[0].strip()
-        clinic_code=b.replace_oil_with_011(clinic_code)
+        clinic_code=b.try_replace_oil_with_011(clinic_code)
         name=tokens[2]
         name=name.title().strip()
         pin=tokens[4].strip()

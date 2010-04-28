@@ -22,14 +22,14 @@ NUMBER_DICTIONARY = {
 , 17: "Seventeen"
 , 18: "Eighteen"
 , 19: "Nineteen"
-, 20: "Twenty "
-, 30: "Thirty "
-, 40: "Forty "
-, 50: "Fifty "
-, 60: "Sixty "
-, 70: "Seventy "
-, 80: "Eighty "
-, 90: "Ninety "
+, 20: "Twenty"
+, 30: "Thirty"
+, 40: "Forty"
+, 50: "Fifty"
+, 60: "Sixty"
+, 70: "Seventy"
+, 80: "Eighty"
+, 90: "Ninety"
 , 'One': 1
 , 'Two': 2
 , 'Three': 3
@@ -70,7 +70,18 @@ PLACE_VALUE = {
 , 'Million':1000000
 }
 
-DIGIT_FOR_LETTER = {'i': '1', 'l': '1', 'o': '0', 'I':'1', 'O':'0'}
+DIGIT_FOR_LETTER = {'i': '1', 'l': '1', 'o': '0', 'I':'1', 'O':'0',
+'0':'0',
+'1':'1',
+'2':'2',
+'3':'3',
+'4':'4',
+'5':'5',
+'6':'6',
+'7':'7',
+'8':'8',
+'9':'9'
+}
 
 class InputCleaner:
     def soundex(self, name, len=4):
@@ -181,10 +192,14 @@ class InputCleaner:
             return None
 
 
-    def replace_oil_with_011(self, str):
+    def try_replace_oil_with_011(self, str):
+        original=str
+        result=''
         """returns string with every occurence of i,I,l,o, and O replaced with 1 or 0 as appropriate"""
-        for key in DIGIT_FOR_LETTER.keys():
-            while key in str:
-                str = str.replace(key, DIGIT_FOR_LETTER[key])
-        return str
+        try:
+            for char in original:
+                result=result + DIGIT_FOR_LETTER[char]
+        except KeyError:
+            return original
+        return result
 
