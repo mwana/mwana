@@ -71,7 +71,7 @@ class ResultsHandler(KeywordHandler):
 
         if unfound_sample_results:
             if len(unfound_sample_results)==1:
-                self.respond("Sorry man, no sample with id %s was found for your clinic. "
+                self.respond("Sorry, no sample with id %s was found for your clinic. "
                             "Please check your DBS records and try again." % sample_id)
             else:
                 self.respond("Sorry, no samples with ids %(sample_id)s were found for your clinic. "
