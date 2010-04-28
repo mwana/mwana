@@ -10,15 +10,16 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders.app import App
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders import tasks
+from mwana import const
 
 
 class TestApp(TestScript):
     apps = (handler_app, App,)
     
     def _register(self):
-        ctr = LocationType.objects.create()
+        clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital", slug="kdh",
-                                type=ctr)
+                                type=clinic)
         script = """
             kk     > agent kdh 01 rupiah banda
             kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for Kafue District Hospital.
@@ -119,12 +120,16 @@ class TestApp(TestScript):
         birth.appointments.create(name='2 day', num_days=2)
         birth.appointments.create(name='3 day', num_days=3)
         birth.appointments.create(name='4 day', num_days=4)
-        clinic = LocationType.objects.create(singular='Clinic',
-                                             plural='Clinics', slug='clinic')
+        clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        zone = const.get_zone_type()
         central = Location.objects.create(name='Central Clinic', type=clinic)
-        patient1 = Contact.objects.create(name='patient 1', location=central)
-        patient2 = Contact.objects.create(name='patient 2', location=central)
-        patient3 = Contact.objects.create(name='patient 3', location=central)
+        zone1 = Location.objects.create(name='Zone 1', type=zone,
+                                        parent=central, slug='zone1')
+        zone2 = Location.objects.create(name='Zone 2', type=zone,
+                                        parent=central, slug='zone2')
+        patient1 = Contact.objects.create(name='patient 1', location=zone1)
+        patient2 = Contact.objects.create(name='patient 2', location=zone1)
+        patient3 = Contact.objects.create(name='patient 3', location=zone2)
         
         # this gets the backend and connection in the db
         self.runScript("""
@@ -134,12 +139,15 @@ class TestApp(TestScript):
         # take a break to allow the router thread to catch up; otherwise we
         # get some bogus messages when they're retrieved below
         time.sleep(.1)
+        cba_t = const.get_cba_type()
         cba1_conn = Connection.objects.get(identity="cba1")
-        cba1 = Contact.objects.create(name='cba1')
+        cba1 = Contact.objects.create(name='cba1', location=zone1)
+        cba1.types.add(cba_t)
         cba1_conn.contact = cba1
         cba1_conn.save()
         cba2_conn = Connection.objects.get(identity="cba2")
-        cba2 = Contact.objects.create(name='cba2')
+        cba2 = Contact.objects.create(name='cba2', location=zone2)
+        cba2.types.add(cba_t)
         cba2_conn.contact = cba2
         cba2_conn.save()
         birth.patient_events.create(patient=patient1, cba_conn=cba1_conn,
@@ -236,8 +244,7 @@ class TestApp(TestScript):
         clinic = LocationType.objects.create(singular='Clinic',
                                              plural='Clinics', slug='clinic')
         central = Location.objects.create(name='Central Clinic', type=clinic)
-        patient1 = Contact.objects.create(name='patient 1', zone_code=1,
-                                          location=central)
+        patient1 = Contact.objects.create(name='patient 1', location=central)
         
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
@@ -245,7 +252,7 @@ class TestApp(TestScript):
         # get some bogus messages when they're retrieved below
         time.sleep(.1)
         cba_conn = Connection.objects.get(identity="cba")
-        cba = Contact.objects.create(name='cba', zone_code=1, location=central)
+        cba = Contact.objects.create(name='cba', location=central)
         cba_type = ContactType.objects.create(name='CBA', slug='cba')
         cba.types.add(cba_type)
         cba_conn.contact = cba

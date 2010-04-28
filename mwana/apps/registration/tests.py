@@ -10,6 +10,8 @@ from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from rapidsms.contrib.locations.models import Location, LocationType
 
+from mwana import const
+
 
 class TestApp(TestScript):
     apps = (handler_app,)
@@ -21,16 +23,18 @@ class TestApp(TestScript):
                                       slug="kdh", type=ctr)
         script = """
             lost   > join
-            lost   < To register, send JOIN <LOCATION CODE> <NAME>
-            rb     > join kdh rupiah banda
-            rb     < Thank you for registering, rupiah banda! I've got you at Kafue District Hospital.
-            kk     > join whoops kenneth kaunda
+            lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+            rb     > join kdh rupiah banda 1234
+            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
+            kk     > join whoops kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > join abc
-            noname < Sorry, I didn't understand that. Make sure you send your location and name like: JOIN <LOCATION CODE> <NAME>
+            noname < Sorry, I didn't understand that. Make sure you send your location, name and pin like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.
         """
         self.runScript(script)
         self.assertEqual(1, Contact.objects.count(), "Registration didn't create a new contact!")
         rb = Contact.objects.all()[0]
-        self.assertEqual("rupiah banda", rb.name, "Name was not set correctly after registration!")
+        self.assertEqual("Rupiah Banda", rb.name, "Name was not set correctly after registration!")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
+        self.assertEqual(rb.types.count(), 1)
+        self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)

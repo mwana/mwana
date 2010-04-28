@@ -7,6 +7,7 @@ from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 
+from mwana import const
 
 class RegisterHandler(KeywordHandler):
     """
@@ -61,6 +62,7 @@ class RegisterHandler(KeywordHandler):
             location = Location.objects.get(slug__iexact=clinic_code)
             contact = Contact.objects.create(name=name, location=location, pin=pin, 
                                              is_results_receiver=True)
+            contact.types.add(const.get_clinic_worker_type())
             self.msg.connection.contact = contact
             self.msg.connection.save()
             self.respond("Hi %(name)s, thanks for registering for DBS "
