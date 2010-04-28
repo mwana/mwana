@@ -1,9 +1,9 @@
 """
 Provides utilities to cleanup text
 """
-
 NUMBER_DICTIONARY = {
-1: "One"
+0 :'Zero'
+, 1: "One"
 , 2: "Two"
 , 3: "Three"
 , 4: "Four"
@@ -30,6 +30,7 @@ NUMBER_DICTIONARY = {
 , 70: "Seventy"
 , 80: "Eighty"
 , 90: "Ninety"
+, 'Zero': 0
 , 'One': 1
 , 'Two': 2
 , 'Three': 3
@@ -85,7 +86,7 @@ DIGIT_FOR_LETTER = {'i': '1', 'l': '1', 'o': '0', 'I':'1', 'O':'0',
 
 class InputCleaner:
     def soundex(self, name, len=4):
-        name=str(name)#make sure its a string--Trevor
+        name = str(name)#make sure its a string--Trevor
         """ soundex module conforming to Knuth's algorithm
             implementation 2000-12-24 by Gregory Jorgensen
             public domain
@@ -143,18 +144,18 @@ class InputCleaner:
         tokens = text.strip().title().split(" ")
         #correct tokens
         for i in range(len(tokens)):
-            found=False
+            found = False
             for key in NUMBER_DICTIONARY.keys():
                 if tokens[i] not in NUMBER_DICTIONARY.keys():
-                    if self.soundex(tokens[i])==self.soundex(key):
-                        tokens[i]=key
-                        found=True
+                    if self.soundex(tokens[i]) == self.soundex(key):
+                        tokens[i] = key
+                        found = True
                         break
             if not found:
                 for key in PLACE_VALUE.keys():
                     if tokens[i] not in PLACE_VALUE.keys():
-                        if self.soundex(tokens[i])==self.soundex(key):
-                            tokens[i]=key
+                        if self.soundex(tokens[i]) == self.soundex(key):
+                            tokens[i] = key
                             break
 
         if not tokens:
@@ -193,12 +194,12 @@ class InputCleaner:
 
 
     def try_replace_oil_with_011(self, str):
-        original=str
-        result=''
+        original = str
+        result = ''
         """returns string with every occurence of i,I,l,o, and O replaced with 1 or 0 as appropriate"""
         try:
             for char in original:
-                result=result + DIGIT_FOR_LETTER[char]
+                result = result + DIGIT_FOR_LETTER[char]
         except KeyError:
             return original
         return result

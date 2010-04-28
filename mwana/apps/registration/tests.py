@@ -26,6 +26,8 @@ class TestApp(TestScript):
         script = """
             lost   > join
             lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+            rb     > join kdh rupiah banda 123q
+            rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 1234
             rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
             kk     > join whoops kenneth kaunda 1234

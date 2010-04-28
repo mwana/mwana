@@ -53,10 +53,24 @@ class TestApp(TestScript):
         self.assertEqual(True, contact.is_results_receiver)
     
     testReportResults = """
-            clinic_worker > SENT 3
-            clinic_worker < Hello John Banda! We received your notification that 3 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+            clinic_worker > SENT 33
+            clinic_worker < Hello John Banda! We received your notification that 33 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+        """
+
+    testReportResultsCorrection = """
+            clinic_worker > SENT twenti two
+            clinic_worker < Hello John Banda! We received your notification that 22 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
         
+    testZeroSampleNumber = """
+            clinic_worker > SENT 0
+            clinic_worker < Sorry, the number of DBS samples sent must be greater than 0 (zero).
+        """
+    testNegativeSampleNumber = """
+            clinic_worker > SENT -1
+            clinic_worker < Sorry, the number of DBS samples sent must be greater than 0 (zero).
+        """
+
     testBadReportFormat = """
             clinic_worker > SENT some samples yo!
             clinic_worker < Sorry, we didn't understand that message. To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
@@ -263,6 +277,11 @@ class TestApp(TestScript):
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
+        res4b = labresults.Result.objects.create(sample_id="0004b", clinic=self.clinic,
+                              taken_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
         res5 = labresults.Result.objects.create(sample_id="0000", clinic=self.clinic, result="B",
                               taken_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
@@ -277,9 +296,11 @@ class TestApp(TestScript):
 
         script = """
             clinic_worker > RESULT 000 1
-            clinic_worker < The sample id must not have spaces in between. To request for results for a DBS sample, send RESULT <sampleid>. E.g result ID45
+            clinic_worker < Sorry, no samples with ids 000, 1 were found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0004
-            clinic_worker < The results for sample 0004 are not yet ready. You will be notified when they are ready.
+            clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
+            clinic_worker > RESULT 0004,0004b
+            clinic_worker < The results for sample(s) 0004, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 6006
             clinic_worker < Sorry, no sample with id 6006 was found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0001

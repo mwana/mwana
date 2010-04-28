@@ -22,18 +22,22 @@ class SentHandler(KeywordHandler):
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
-        b=InputCleaner()
+        b = InputCleaner()
         try:
             count = int(b.try_replace_oil_with_011(text.strip()))
         except ValueError:
-            text=b.words_to_digits(text)
+            text = b.words_to_digits(text)
             if not text:
                 self.respond("%s %s" % (SORRY, HELP))
                 return
             else:
-                count=int(text)
+                count = int(text)
             
-        # TODO: maybe record this somewhere 
+        if count < 1:
+            self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
+            return
+
+        # TODO: maybe record this somewhere
         self.respond(SENT, name=self.msg.contact.name, count=count,
                      clinic=self.msg.contact.location)
                      
