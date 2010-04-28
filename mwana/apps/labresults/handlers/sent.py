@@ -24,7 +24,7 @@ class SentHandler(KeywordHandler):
             return
         b=InputCleaner()
         try:
-            count = int(b.replace_oil_with_011(text.strip()))
+            count = int(b.try_replace_oil_with_011(text.strip()))
         except ValueError:
             text=b.words_to_digits(text)
             if not text:
