@@ -26,8 +26,6 @@ class TestApp(TestScript):
         script = """
             lost   > join
             lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
-            rb     > join 403012 rupiah banda 10000
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
             rb     > join kdh rupiah banda 1234
             rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
             kk     > join whoops kenneth kaunda 1234
