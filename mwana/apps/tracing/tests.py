@@ -26,13 +26,17 @@ class TestApp(TestScript):
         rb.save()
         script = """
             lost   > trace
-            lost   < To trace a patient, send TRACE <PATIENT NAME> VIA <ZONE>. The zone is optional and the notification will be sent to all CBAs for this clinic if it is left out.
+            lost   < To trace a patient, send TRACE <PATIENT NAME> ZONE <ZONE>. The zone is optional and the notification will be sent to all CBAs for this clinic if it is left out.
             rb     > trace maria
-            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace  and tell him or her to come to the clinic.
-            rb     > trace leah via kdh
-            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace  and tell him or her to come to the clinic.
+            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace maria and tell him or her to come to the clinic.
+            rb     > trace leah zone kdh
+            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace leah and tell him or her to come to the clinic.
+            rb     > trace john james
+            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace john james and tell him or her to come to the clinic.
+            rb     > trace joe fischer zone kdh
+            rb     < Thank you Rupiah Banda. I will send a message to the responsible RemindMi agents to trace joe fischer and tell him or her to come to the clinic.
         """
         self.runScript(script)
-        self.assertEqual(2, Contact.objects.filter(types__slug='patient').count(),
+        self.assertEqual(4, Contact.objects.filter(types__slug='patient').count(),
                          "Tracing didn't create the right number of contacts!")
-        self.assertEqual(2, tracing.Trace.objects.count())
+        self.assertEqual(4, tracing.Trace.objects.count())

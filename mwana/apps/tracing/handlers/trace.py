@@ -10,6 +10,7 @@ from rapidsms.models import Contact
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.tracing import models as tracing
+from mwana import const
 
 
 class TraceHelper(KeywordHandler):
@@ -18,8 +19,9 @@ class TraceHelper(KeywordHandler):
 
     keyword = "trace"
 
-    PATTERN = re.compile(r"^\s*(?P<patient>\S+)(:?\s+(:?VIA|via)\s+(?P<zone>\w+))?$")
-    HELP_TEXT = "To trace a patient, send TRACE <PATIENT NAME> VIA <ZONE>. "\
+    PATTERN = re.compile(r"^\s*(?P<patient>.+?)(:?\s+ZONE\s+(?P<zone>\w+))?$",
+                         re.IGNORECASE)
+    HELP_TEXT = "To trace a patient, send TRACE <PATIENT NAME> ZONE <ZONE>. "\
                 "The zone is optional and the notification will be sent to "\
                 "all CBAs for this clinic if it is left out."
     
@@ -35,7 +37,6 @@ class TraceHelper(KeywordHandler):
         if m is not None:
             patient_name = m.group('patient').strip()
             zone_slug = (m.group('zone') or '').strip()
-            
             if zone_slug:
                 zone_t, _ = LocationType.objects.get_or_create(slug='zone')
                 try:
@@ -48,11 +49,15 @@ class TraceHelper(KeywordHandler):
                                  code=zone_slug)
             else:
                 location = self.msg.contact.location
-            patient, created = location.contact_set.get_or_create(
-                                                     name__iexact=patient_name,
-                                                     types__slug='patient')
-            patient_t, _ = ContactType.objects.get_or_create(name='Patient',
-                                                             slug='patient')
+            try:
+                patient = location.contact_set.get(name__iexact=patient_name,
+                                                types__slug=const.PATIENT_SLUG)
+                created = False
+            except Contact.DoesNotExist:
+                patient = location.contact_set.create(name=patient_name)
+                patient_t = const.get_patient_type()
+                patient.types.add(patient_t)
+                created = True
             if created or not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
             try:
@@ -82,4 +87,4 @@ class TraceHelper(KeywordHandler):
         else:
             self.respond("Sorry, I didn't understand that. Make sure you send "
                          "your patient name and zone like: TRACE <PATIENT> "
-                         "VIA <ZONE>")
+                         "ZONE <ZONE>")
