@@ -25,43 +25,59 @@ class ResultsHandler(KeywordHandler):
     * this may not be possible, depending on the data we are able to collect
     """
 
-    keyword = "result|results"
-    PATTERN = re.compile(r'^(\s*)(\S+)$')
+    keyword = "result|results|resut|resuts"
+    PATTERN = re.compile(r'(\S+)')
 
     def help(self):
         self.respond(HELP)
 
     def handle(self, text):
         text = text.strip()
+
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
 
-        if not self.PATTERN.match(text):
-            if " " in text.strip():
-                self.respond("The sample id must not have spaces in between. %s" % HELP)
-            else:
-                self.respond("%s %s" % (SORRY, HELP))
+        sample_ids=self.PATTERN.findall(text)
+        #we do nott expect this
+        if sample_ids is None:
+            self.respond("%s %s" % (SORRY, HELP))
             return
-        sample_id = text.strip()
-        sample_results = []
-        try:
-            results = Result.objects.filter(sample_id__iexact=sample_id, clinic=self.msg.contact.location)
-            if results:
-                for result in results:
-                    if result.result and len(result.result.strip()) > 0:
-                        sample_results.append("%s: %s" % (result.sample_id, result.get_result_display()))
-                        result.notification_status = "sent"
-                        result.save()
-                    else:
-                        self.respond("The results for sample %(sample_id)s are "
-                                     "not yet ready. You will be notified when they are ready.", sample_id=sample_id)
-            else:
+        ready_sample_results = []
+        unready_sample_results = []
+        unfound_sample_results = []
+        for sample_id in sample_ids:
+            try:
+                results = Result.objects.filter(sample_id__iexact=sample_id, clinic=self.msg.contact.location)
+                if results:
+                    for result in results:
+                        if result.result and len(result.result.strip()) > 0:
+                            ready_sample_results.append("%s: %s" % (result.sample_id, result.get_result_display()))
+                            result.notification_status = "sent"
+                            result.save()
+                        else:
+                            unready_sample_results.append(sample_id)
+                else:
+                    unfound_sample_results.append(sample_id)
+            except Exception, e:
+                self.error(e)
+        if ready_sample_results:
+            self.respond(", ".join(rst for rst in ready_sample_results))
+
+        if unready_sample_results:
+            self.respond("The results for sample(s) %(sample_id)s are "
+                        "not yet ready. You will be notified when they are ready.",
+                        sample_id=', '.join(str(sample_id) for sample_id in unready_sample_results))
+
+        if unfound_sample_results:
+            if len(unfound_sample_results)==1:
                 self.respond("Sorry, no sample with id %s was found for your clinic. "
-                             "Please check your DBS records and try again." % sample_id)
-        except Exception, e:
-            self.error(e)
-        if sample_results:
-            self.respond(", ".join(rst for rst in sample_results))
+                            "Please check your DBS records and try again." % sample_id)
+            else:
+                self.respond("Sorry, no samples with ids %(sample_id)s were found for your clinic. "
+                            "Please check your DBS records and try again." ,
+                            sample_id=', '.join(str(sample_id) for sample_id in unfound_sample_results))
+
+
 
 
