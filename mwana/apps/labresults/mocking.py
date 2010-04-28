@@ -57,7 +57,7 @@ class MockResultUtility():
                 # remove pending contacts for this clinic and notify them it 
                 # was taken care of 
                 clinic_connections = [contact.default_connection for contact in \
-                                      Contact.objects.filter\
+                                      Contact.active.filter\
                                       (location=message.connection.contact.location)]
                 
                 for conn in clinic_connections:
