@@ -7,7 +7,8 @@ from mwana.apps.contactsplus import models as contactsplus
 
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
-    list_display = ('unicode', 'alias', 'language', 'location', 'types_list',
+    list_display = ('unicode', 'alias', 'language', 'parent_location',
+                    'location', 'default_connection', 'types_list',
                     'is_active',)
     list_filter = ('types', 'is_active', 'language',)
     list_editable = ('is_active',)
@@ -15,7 +16,11 @@ class ContactAdmin(ContactAdmin):
     
     def unicode(self, obj):
         return unicode(obj)
-    
+
+    def parent_location(self, obj):
+        if obj.location:
+            return obj.location.parent
+
     def types_list(self, obj):
         return ', '.join(obj.types.values_list('name', flat=True))
 admin.site.register(Contact, ContactAdmin)
