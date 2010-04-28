@@ -79,7 +79,7 @@ class MockResultUtility():
     def fake_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms, except
            this is fake!"""
-        contacts = Contact.objects.filter(location=clinic, is_results_receiver=True)
+        contacts = Contact.active.filter(location=clinic, is_results_receiver=True)
         results = get_fake_results(3, clinic)
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection, 
