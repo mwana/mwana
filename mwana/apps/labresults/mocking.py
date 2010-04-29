@@ -107,7 +107,7 @@ def get_fake_results(count, clinic, starting_sample_id=25, sample_id_format="%04
             Result(sample_id=sample_id_format % (current_sample_id + i), 
                    clinic=clinic, 
                    result=random.choice(Result.RESULT_CHOICES)[0],
-                   taken_on=datetime.datetime.today(),
+                   collected_on=datetime.datetime.today(),
                    entered_on=datetime.datetime.today(), 
                    notification_status=random.choice(notification_status_choices)))
     return results

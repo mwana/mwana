@@ -48,7 +48,8 @@ class ResultsHandler(KeywordHandler):
         unfound_sample_results = []
         for sample_id in sample_ids:
             try:
-                results = Result.objects.filter(sample_id__iexact=sample_id, clinic=self.msg.contact.location)
+                results = Result.objects.filter(sample_id__iexact=sample_id,
+                                                clinic=self.msg.contact.location)
                 if results:
                     for result in results:
                         if result.result and len(result.result.strip()) > 0:

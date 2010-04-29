@@ -220,39 +220,45 @@ class TestApp(TestScript):
         """
         Tests getting of results for given samples.
         """
-        res1 = labresults.Result.objects.create(sample_id="0001", clinic=self.clinic,
-                                     result="N",
-                                     taken_on=datetime.datetime.today(),
+        res1 = labresults.Result.objects.create(sample_id="0001",
+                                     clinic=self.clinic, result="N",
+                                     collected_on=datetime.datetime.today(),
                                      entered_on=datetime.datetime.today(),
                                      notification_status="new")
 
-        res2 = labresults.Result.objects.create(sample_id="0002", clinic=self.clinic, result="P",
-                              taken_on=datetime.datetime.today(),
+        res2 = labresults.Result.objects.create(sample_id="0002",
+                              clinic=self.clinic, result="P",
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res3 = labresults.Result.objects.create(sample_id="0003", clinic=self.clinic, result="B",
-                              taken_on=datetime.datetime.today(),
+        res3 = labresults.Result.objects.create(sample_id="0003",
+                              clinic=self.clinic, result="B",
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res4 = labresults.Result.objects.create(sample_id="0004", clinic=self.clinic,
-                              taken_on=datetime.datetime.today(),
+        res4 = labresults.Result.objects.create(sample_id="0004",
+                              clinic=self.clinic,
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res4b = labresults.Result.objects.create(sample_id="0004b", clinic=self.clinic,
-                              taken_on=datetime.datetime.today(),
+        res4b = labresults.Result.objects.create(sample_id="0004b",
+                              clinic=self.clinic,
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res5 = labresults.Result.objects.create(sample_id="0000", clinic=self.clinic, result="B",
-                              taken_on=datetime.datetime.today(),
+        res5 = labresults.Result.objects.create(sample_id="0000",
+                              clinic=self.clinic, result="B",
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res6 = labresults.Result.objects.create(sample_id="0000", clinic=self.clinic, result="P",
-                              taken_on=datetime.datetime.today(),
+        res6 = labresults.Result.objects.create(sample_id="0000a",
+                              clinic=self.clinic, result="P",
+                              collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 

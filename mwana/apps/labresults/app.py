@@ -140,7 +140,8 @@ class App (rapidsms.App):
         task.save()
         
     def send_results_notification (self):
-        clinics_with_results = Result.objects.filter(notification_status__in=['new', 'notified'])\
+        clinics_with_results =\
+          Result.objects.filter(notification_status__in=['new', 'notified'])\
                                 .values_list("clinic", flat=True).distinct()
         
         for clinic in clinics_with_results:
