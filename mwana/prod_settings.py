@@ -3,7 +3,6 @@ from mwana.settings import *
 DEBUG = False
 
 ADMINS = (
-    ('Tobias McNulty', 'tobias@caktusgroup.com'),
     ('Mwana Developers', 'mwana-dev@googlegroups.com'),
 )
 
