@@ -32,7 +32,7 @@ class App (rapidsms.App):
                     logger_msg = getattr(response, "logger_msg", None) 
                     if not logger_msg:
                         self.error("No logger message found for %s. Do you have the message log app running?" %\
-                                   self.msg)
+                                   message)
                     BroadcastResponse.objects.create(broadcast=latest_broadcast,
                                                      contact=message.contact,
                                                      text=message.text,
