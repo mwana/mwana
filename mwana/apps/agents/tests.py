@@ -24,7 +24,7 @@ class TestApp(TestScript):
             rb     > agent kdh 03 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 03 of Kafue District Hospital. Please notify us next time there is a birth in your zone.
             rb     > agent kdh 03 rupiah banda
-            rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Kafue District Hospital. 
+            rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 03 of Kafue District Hospital. 
             kk     > agent whoops 03 kenneth kaunda
             kk     < Sorry, I don't know about a clinic with code whoops. Please check your code and try again.
             noname > agent abc
