@@ -66,6 +66,9 @@ class Result(models.Model):
     collecting_health_worker = models.CharField(max_length=100, null=True, blank=True)
     coll_hw_title = models.CharField(max_length=30, null=True, blank=True)
 
+    class Meta:
+        ordering = ('collected_on', 'requisition_id')
+
     def __unicode__(self):
         return '%s - %s - %s %s (%s)' % (self.requisition_id, self.sample_id,
                                          self.clinic.slug if self.clinic != None else '%s[*]' % self.clinic_code_unrec,

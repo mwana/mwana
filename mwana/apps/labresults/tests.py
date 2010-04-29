@@ -291,7 +291,7 @@ class TestApp(TestScript):
             clinic_worker > RESULT 0003
             clinic_worker < 0003: Rejected Sample
             clinic_worker > RESULT 0000
-            clinic_worker < 0000: Detected, 0000: Rejected Sample
+            clinic_worker < 0000: Rejected Sample, 0000: Detected
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
