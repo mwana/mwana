@@ -71,15 +71,16 @@ class AgentHelper(KeywordHandler):
             zone = self._get_or_create_zone(clinic, zone_slug)
             if self.msg.contact is not None and\
                self.msg.contact.location in (clinic, zone):
-                if self.msg.contact.location.type == zone.type:
+                if self.msg.contact.location == (clinic, zone):
                     location = zone.parent
                 else:
                     location = self.msg.contact.location
                 self.respond("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for %(location)s.", 
-                             name=self.msg.contact.name,
-                             location=location.name)
+                             "a RemindMi Agent for zone %(zone)s of %(clinic)s.", 
+                             name=self.msg.contact.name, zone=zone.name,
+                             clinic=clinic.name)
                 return
+                        
             cba = Contact.objects.create(name=name, location=zone)
             cba.types.add(const.get_cba_type())
             self.msg.connection.contact = cba

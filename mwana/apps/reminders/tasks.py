@@ -18,7 +18,7 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
         pronouns = {}
     logger.info('Sending appointment reminder for %s' % patient)
     if patient.location:
-        logging.debug('using patient location (%s) to find CBAs' %
+        logger.debug('using patient location (%s) to find CBAs' %
                       patient.location)
         # if the cba was registered, we'll have a location on
         # the patient and can use that information to find the CBAs to whom
@@ -28,15 +28,15 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
                                          contact__types__slug=const.CBA_SLUG,
                                          contact__location=patient.location,
                                          contact__is_active=True))
-        logging.debug('found %d CBAs to deliver reminders to' %
+        logger.debug('found %d CBAs to deliver reminders to' %
                       len(connections))
     elif default_conn:
-        logging.debug('no patient location; using default_conn')
+        logger.debug('no patient location; using default_conn')
         # if the CBA was not registered, just send the notification to the
         # CBA who logged the event
         connections = [default_conn]
     else:
-        logging.debug('no patient location or default_conn; not sending any '
+        logger.debug('no patient location or default_conn; not sending any '
                       'reminders')
 
     for connection in connections:
