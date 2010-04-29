@@ -8,9 +8,7 @@ from rapidsms.djangoproject.settings import *
 
 
 # then add your django settings:
-
-DATABASE_ENGINE = "sqlite3"
-DATABASE_NAME = "db.sqlite3"
+TIME_ZONE = 'UTC-2'
 
 INSTALLED_APPS = (
     "django.contrib.sessions",
@@ -40,6 +38,7 @@ INSTALLED_APPS = (
     "mwana.apps.reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
+    "mwana.apps.broadcast",
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
@@ -66,16 +65,3 @@ TABS = [
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
 ]
-
-# Override the default log settings
-LOG_LEVEL   = "DEBUG"
-LOG_FILE    = "/var/log/rapidsms/rapidsms.log"
-LOG_FORMAT  = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
-LOG_SIZE    = 1000000 # in bytes
-LOG_BACKUPS = 256     # number of logs to keep around
-
-# import local settings if we find them
-try:
-    from localsettings import *
-except ImportError:
-    pass

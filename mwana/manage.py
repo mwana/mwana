@@ -5,6 +5,13 @@
 import sys, os
 from django.core.management import execute_manager
 
+# use a default settings module if none was specified on the command line
+DEFAULT_SETTINGS = 'mwana.localsettings'
+settings_specified = any([arg.startswith('--settings=') for arg in sys.argv])
+if not settings_specified and len(sys.argv) >= 2:
+    print "NOTICE: using default settings module '%s'" % DEFAULT_SETTINGS
+    sys.argv.append('--settings=%s' % DEFAULT_SETTINGS)
+
 """
 This is basically a clone of the rapidsms runner, but it lives here because 
 we will do some automatic editing of the python path in order to avoid 
@@ -13,6 +20,9 @@ this project.
 """
 
 if __name__ == "__main__":
+    # remove '.' from sys.path (anything in this package should be referenced
+    # with the 'mwana.' prefix)
+    sys.path.pop(0)
 
     project_root = os.path.abspath(os.path.dirname(__file__))
     
