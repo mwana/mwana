@@ -5,16 +5,16 @@ unittest). These will both pass when you run "manage.py test".
 Replace these with more appropriate tests for your application.
 """
 
+from mwana import const
 from rapidsms.contrib.handlers.app import App as handler_app
+from rapidsms.contrib.locations.models import Location
+from rapidsms.contrib.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
-from rapidsms.contrib.locations.models import Location, LocationType
-
-from mwana import const
 
 
 class TestApp(TestScript):
-    apps = (handler_app,)
+    apps = (handler_app, )
     
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
@@ -22,12 +22,22 @@ class TestApp(TestScript):
         kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=ctr)
         central_clinic = Location.objects.create(name="Central Clinic",
-                                      slug="403012", type=ctr)
+                                                 slug="403012", type=ctr)
         script = """
             lost   > join
             lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
             rb     > join kdh rupiah banda 123q
             rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     > join kdh rupiah banda -1000
+            rb     < Sorry, -1000 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     > join kdh rupiah banda +1000
+            rb     < Sorry, +1000 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     > join kdh rupiah banda1000
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     > join kdh rupiah banda 2001234
+            rb     < Sorry, 2001234 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     > join kdh rupiah banda4004444
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 1234
             rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
             kk     > join whoops kenneth kaunda 1234

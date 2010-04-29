@@ -48,6 +48,21 @@ class RegisterHandler(KeywordHandler):
             self.mulformed_msg_help()
             return
 
+        #signed pin
+        if text[-5:-4] == '-' or text[-5:-4] == '+':
+            self.invalid_pin(text[-5:])
+            return
+        #too long pin
+        if ' ' in text and text[1 + text.rindex(' '):].isdigit() and len(text[1 + text.rindex(' '):]) > self.PIN_LENGTH:
+            self.invalid_pin(text[1 + text.rindex(' '):])
+            return
+        #non-white space before pin
+        if text[-5:-4] != ' ':
+            self.respond("Sorry, you should put a space before your pin. "
+                         "Please make sure your code is a %s-digit number like %s. "
+                         "Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>." % (
+                         self.PIN_LENGTH, ''.join(str(i) for i in range(1, int(self.PIN_LENGTH) + 1))))
+            return
         #reject invalid pin
         user_pin = text[-4:]
         if not user_pin:
