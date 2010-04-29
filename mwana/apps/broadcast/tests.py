@@ -4,10 +4,11 @@ from rapidsms.contrib.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type
+from mwana.apps.broadcast.app import App as broadcast_app
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 
 class TestApp(TestScript):
-    apps = (handler_app, logger_app)
+    apps = (broadcast_app, handler_app, logger_app)
     
     def setUp(self):
         super(TestApp, self).setUp()
@@ -36,6 +37,7 @@ class TestApp(TestScript):
         self.assertEqual(0, BroadcastMessage.objects.count())
         self.assertEqual(0, BroadcastResponse.objects.count())
         running_count = 0
+        response_count = 0
         self.startRouter()
         try:
             # test from each person so we know it works from all cases
@@ -43,6 +45,7 @@ class TestApp(TestScript):
                 for keyword, recipients in self.expected_keyword_to_groups.items():
                     running_count += 1
                     message_body = "what up fools!"
+                    response = "not much G!"
                     self.sendMessage(contact.default_connection.identity, "%s %s" %\
                                      (keyword, message_body))
                     messages = self.receiveAllMessages()
@@ -58,11 +61,6 @@ class TestApp(TestScript):
                                           "keyword": keyword}, 
                                          msg.text)
                     
-                    msg_recipients = [msg.peer for msg in messages]
-                    for responder in recipients_minus_self:
-                        self.assertTrue(responder.default_connection.identity in msg_recipients)
-                        # TODO: response workflow
-                    
                     # check DB objects
                     self.assertEqual(running_count, BroadcastMessage.objects.count())
                     last_msg = BroadcastMessage.objects.order_by("-date")[0]
@@ -72,6 +70,28 @@ class TestApp(TestScript):
                     for responder in recipients_minus_self:
                         self.assertTrue(responder in last_msg.recipients.all(),
                                         "Recipient %s was linked in the db" % responder)
+                        
+                    msg_recipients = [msg.peer for msg in messages]
+                    for responder in recipients_minus_self:
+                        self.assertTrue(responder.default_connection.identity in msg_recipients)
+                        
+                        # response workflow
+                        self.sendMessage(responder.default_connection.identity, response)
+                        responses = self.receiveAllMessages()
+                        self.assertEqual(1, len(responses))
+                        self.assertEqual(contact.default_connection.identity, responses[0].peer)
+                        self.assertEqual("%(text)s [from %(from)s]" % \
+                                         {"text": response, "from": responder.name},
+                                         responses[0].text)
+                        
+                        # check models
+                        response_count += 1
+                        self.assertEqual(response_count, BroadcastResponse.objects.count())
+                        last_resp = BroadcastResponse.objects.order_by("-date")[0]
+                        self.assertEqual(last_msg, last_resp.broadcast)
+                        self.assertEqual(response, last_resp.text)
+                        self.assertEqual(responder, last_resp.contact)
+
         finally:
             self.stopRouter()
     

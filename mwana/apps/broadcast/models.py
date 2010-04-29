@@ -24,10 +24,10 @@ class BroadcastMessage(models.Model):
             
 class BroadcastResponse(models.Model):
     
-    broadcast_message = models.ForeignKey(BroadcastMessage)
-    contact           = models.ForeignKey(Contact)
-    text              = models.CharField(max_length=30)
-    date              = models.DateTimeField(default=datetime.utcnow)
+    broadcast = models.ForeignKey(BroadcastMessage)
+    contact   = models.ForeignKey(Contact)
+    text      = models.CharField(max_length=30)
+    date      = models.DateTimeField(default=datetime.utcnow)
     
     logger_message = models.ForeignKey(Message)
     
