@@ -81,7 +81,7 @@ def dashboard(request):
                               {"locations": locations })
     
 @require_http_methods(['POST'])
-@has_perm_or_basicauth('labresults.add_rawresult', 'Lab Results')
+@has_perm_or_basicauth('labresults.add_payload', 'Lab Results')
 def accept_results(request):
     """accept data submissions from the lab via POST. see connection() in extract.py
     for how to submit; attempts to save raw data/partial data if for some reason the
