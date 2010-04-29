@@ -1,11 +1,13 @@
 from rapidsms.contrib.handlers.app import App as handler_app
+from rapidsms.contrib.messagelog.app import App as logger_app
 from rapidsms.contrib.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type
+from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 
 class TestApp(TestScript):
-    apps = (handler_app,)
+    apps = (handler_app, logger_app)
     
     def setUp(self):
         super(TestApp, self).setUp()
@@ -31,11 +33,15 @@ class TestApp(TestScript):
              }
         
     def testGroupMessaging(self):
+        self.assertEqual(0, BroadcastMessage.objects.count())
+        self.assertEqual(0, BroadcastResponse.objects.count())
+        running_count = 0
         self.startRouter()
         try:
             # test from each person so we know it works from all cases
             for contact in self.all:
                 for keyword, recipients in self.expected_keyword_to_groups.items():
+                    running_count += 1
                     message_body = "what up fools!"
                     self.sendMessage(contact.default_connection.identity, "%s %s" %\
                                      (keyword, message_body))
@@ -51,11 +57,21 @@ class TestApp(TestScript):
                                          {"text": message_body, "from": contact.name,
                                           "keyword": keyword}, 
                                          msg.text)
+                    
                     msg_recipients = [msg.peer for msg in messages]
                     for responder in recipients_minus_self:
                         self.assertTrue(responder.default_connection.identity in msg_recipients)
                         # TODO: response workflow
-                        
+                    
+                    # check DB objects
+                    self.assertEqual(running_count, BroadcastMessage.objects.count())
+                    last_msg = BroadcastMessage.objects.order_by("-date")[0]
+                    self.assertEqual(contact, last_msg.contact)
+                    self.assertEqual(keyword, last_msg.group)
+                    self.assertEqual(message_body, last_msg.text)
+                    for responder in recipients_minus_self:
+                        self.assertTrue(responder in last_msg.recipients.all(),
+                                        "Recipient %s was linked in the db" % responder)
         finally:
             self.stopRouter()
     
