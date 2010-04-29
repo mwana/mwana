@@ -22,10 +22,13 @@ class BroadcastHandler(KeywordHandler):
         message_body = "%(text)s [from %(user)s to %(group)s]"
         
         for contact in contacts:
-            OutgoingMessage(contact.default_connection, message_body,
-                            **{"text": text, 
-                               "user": self.msg.contact.name, 
-                               "group": self.group_name}).send()
+            if contact.default_connection is None:
+                self.info("Can't send to %s as they have no connections" % contact)
+            else:
+                OutgoingMessage(contact.default_connection, message_body,
+                                **{"text": text, 
+                                   "user": self.msg.contact.name, 
+                                   "group": self.group_name}).send()
         
         logger_msg = getattr(self.msg, "logger_msg", None) 
         if not logger_msg:
