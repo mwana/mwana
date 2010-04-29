@@ -41,12 +41,12 @@ class App (rapidsms.App):
                             (clinic=message.contact.location,
                              notification_status__in=['new', 'notified'])
             if results:
-                message.respond(RESULTS_READY,
-                                name=message.contact.name, count=results.count())
+                message.respond(RESULTS_READY, name=message.contact.name,
+                                count=results.count())
                 self._mark_results_pending(results, [message.connection])
             else:
-                message.respond(NO_RESULTS,
-                                name=message.contact.name, clinic=message.contact.location.name)
+                message.respond(NO_RESULTS, name=message.contact.name,
+                                clinic=message.contact.location.name)
         
         elif message.connection in self.waiting_for_pin \
            and message.connection.contact:

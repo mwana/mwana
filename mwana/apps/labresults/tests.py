@@ -144,7 +144,8 @@ class TestApp(TestScript):
         """ % {"name": self.contact.name, "count": 3}
         self.runScript(script)
         
-        for res in [results.get(id=res.id) for res in [res1, res2, res3]]:
+        for res in [labresults.Result.objects.get(id=res.id)
+                    for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
         
         script = """
@@ -158,7 +159,8 @@ class TestApp(TestScript):
                 
         self.runScript(script)
         
-        for res in [results.get(id=res.id) for res in [res1, res2, res3]]:
+        for res in [labresults.Result.objects.get(id=res.id)
+                    for res in [res1, res2, res3]]:
             self.assertEqual("sent", res.notification_status)
     
     def testDemoResultsWorkflow(self):

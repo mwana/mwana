@@ -15,6 +15,7 @@ def build_results_messages(results):
     From a list of lab results, build a list of messages reporting 
     their status
     """
+    results = results.order_by('requisition_id')
     result_strings = ["Sample %s: %s" % (r.requisition_id, r.get_result_display()) \
                               for r in results]
     
