@@ -215,45 +215,7 @@ class TestApp(TestScript):
         results = get_fake_results(3, self.clinic, notification_status_choices=("new",))
         for res in results:  res.save()
         return results
-        
-    def test_raw_result_entry(self):
-        user = User.objects.create_user(username='adh', email='',
-                                        password='abc')
-        perm = Permission.objects.get(content_type__app_label='labresults',
-                                      codename='add_rawresult')
-        user.user_permissions.add(perm)
-        self.client.login(username='adh', password='abc')
-        data = {'varname': 'data'}
-        now = datetime.datetime.now()
-        response = self.client.post(reverse('accept_results'), data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(labresults.RawResult.objects.count(), 1)
-        raw_result = labresults.RawResult.objects.get()
-        self.assertEqual(raw_result.data, json.dumps(data))
-        self.assertFalse(raw_result.processed)
-        self.assertEqual(raw_result.date.year, now.year)
-        self.assertEqual(raw_result.date.month, now.month)
-        self.assertEqual(raw_result.date.day, now.day)
-        self.assertEqual(raw_result.date.hour, now.hour)
     
-    def test_raw_result_login_required(self):
-        data = {'varname': 'data'}
-        response = self.client.post(reverse('accept_results'), data)
-        self.assertEqual(response.status_code, 401) # authorization required
-        self.assertEqual(labresults.RawResult.objects.count(), 0)
-    
-    def test_raw_result_permission_required(self):
-        User.objects.create_user(username='adh', email='', password='abc')
-        self.client.login(username='adh', password='abc')
-        data = {'varname': 'data'}
-        response = self.client.post(reverse('accept_results'), data)
-        self.assertEqual(response.status_code, 401) # authorization required
-        self.assertEqual(labresults.RawResult.objects.count(), 0)
-    
-    def test_raw_result_post_required(self):
-        response = self.client.get(reverse('accept_results'))
-        self.assertEqual(response.status_code, 405) # method not supported
-
     def testResultsSample(self):
         """
         Tests getting of results for given samples.
@@ -323,3 +285,50 @@ class TestApp(TestScript):
         for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3, res5, res6]]:
             self.assertEqual("sent", res.notification_status)
         self.assertEqual("new", res4.notification_status)
+
+
+class ResultsAcceptor(TestScript):
+    apps = (handler_app, App)
+    
+    def _post_json(self, url, data):
+        return self.client.post(url, json.dumps(data),
+                                content_type='text/json')
+    
+    def test_payload_entry(self):
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        data = {'varname': 'data'}
+        now = datetime.datetime.now()
+        response = self._post_json(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(labresults.Payload.objects.count(), 1)
+        payload = labresults.Payload.objects.get()
+        self.assertEqual(payload.raw, json.dumps(data))
+        self.assertTrue(payload.parsed_json)
+        self.assertFalse(payload.validated_schema)
+        self.assertEqual(payload.incoming_date.year, now.year)
+        self.assertEqual(payload.incoming_date.month, now.month)
+        self.assertEqual(payload.incoming_date.day, now.day)
+        self.assertEqual(payload.incoming_date.hour, now.hour)
+    
+    def test_payload_login_required(self):
+        data = {'varname': 'data'}
+        response = self._post_json(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 401) # authorization required
+        self.assertEqual(labresults.Payload.objects.count(), 0)
+    
+    def test_payload_permission_required(self):
+        User.objects.create_user(username='adh', email='', password='abc')
+        self.client.login(username='adh', password='abc')
+        data = {'varname': 'data'}
+        response = self._post_json(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 401) # authorization required
+        self.assertEqual(labresults.Payload.objects.count(), 0)
+    
+    def test_payload_post_required(self):
+        response = self.client.get(reverse('accept_results'))
+        self.assertEqual(response.status_code, 405) # method not supported
