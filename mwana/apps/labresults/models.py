@@ -41,7 +41,7 @@ class Result(models.Model):
         ('f', 'Female'),
     )
 
-    sample_id = models.CharField(primary_key=True, max_length=10)    #lab-assigned sample id
+    sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
     clinic = models.ForeignKey(Location, null=True, blank=True)

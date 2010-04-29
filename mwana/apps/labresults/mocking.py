@@ -97,14 +97,14 @@ class MockResultUtility(LoggerMixin):
         self.waiting_for_pin[connection] = results
         
     
-def get_fake_results(count, clinic, starting_sample_id=25, sample_id_format="%04d",
+def get_fake_results(count, clinic, starting_requisition_id=25, requisition_id_format="%04d",
                      notification_status_choices=("new",)):
     """Fake results for demos and trainings"""
     results = []
-    current_sample_id = starting_sample_id
+    current_requisition_id = starting_requisition_id
     for i in range(count):
         results.append(
-            Result(sample_id=sample_id_format % (current_sample_id + i), 
+            Result(requisition_id=requisition_id_format % (current_requisition_id + i), 
                    clinic=clinic, 
                    result=random.choice(Result.RESULT_CHOICES)[0],
                    collected_on=datetime.datetime.today(),

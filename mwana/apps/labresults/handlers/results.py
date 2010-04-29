@@ -17,11 +17,11 @@ class ResultsHandler(KeywordHandler):
     clinic_worker << <sampleid>: <result>
 
     Unknown Sample
-    clinic_worker << Sorry, I don't know about a sample with id %(sample_id)s.
+    clinic_worker << Sorry, I don't know about a sample with id %(requisition_id)s.
     Please check your DBS records and try again.
 
     No results yet*
-    clinic_worker << The results for sample %(sample_id)s are not yet ready. You will be notified when they are.
+    clinic_worker << The results for sample %(requisition_id)s are not yet ready. You will be notified when they are.
     * this may not be possible, depending on the data we are able to collect
     """
 
@@ -38,46 +38,46 @@ class ResultsHandler(KeywordHandler):
             self.respond(UNGREGISTERED)
             return
 
-        sample_ids=self.PATTERN.findall(text)
+        requisition_ids=self.PATTERN.findall(text)
         #we do nott expect this
-        if sample_ids is None:
+        if requisition_ids is None:
             self.respond("%s %s" % (SORRY, HELP))
             return
         ready_sample_results = []
         unready_sample_results = []
         unfound_sample_results = []
-        for sample_id in sample_ids:
+        for requisition_id in requisition_ids:
             try:
-                results = Result.objects.filter(sample_id__iexact=sample_id,
+                results = Result.objects.filter(requisition_id__iexact=requisition_id,
                                                 clinic=self.msg.contact.location)
                 if results:
                     for result in results:
                         if result.result and len(result.result.strip()) > 0:
-                            ready_sample_results.append("%s: %s" % (result.sample_id, result.get_result_display()))
+                            ready_sample_results.append("%s: %s" % (result.requisition_id, result.get_result_display()))
                             result.notification_status = "sent"
                             result.save()
                         else:
-                            unready_sample_results.append(sample_id)
+                            unready_sample_results.append(requisition_id)
                 else:
-                    unfound_sample_results.append(sample_id)
+                    unfound_sample_results.append(requisition_id)
             except Exception, e:
                 self.error(e)
         if ready_sample_results:
             self.respond(", ".join(rst for rst in ready_sample_results))
 
         if unready_sample_results:
-            self.respond("The results for sample(s) %(sample_id)s are "
+            self.respond("The results for sample(s) %(requisition_id)s are "
                         "not yet ready. You will be notified when they are ready.",
-                        sample_id=', '.join(str(sample_id) for sample_id in unready_sample_results))
+                        requisition_id=', '.join(str(requisition_id) for requisition_id in unready_sample_results))
 
         if unfound_sample_results:
             if len(unfound_sample_results)==1:
                 self.respond("Sorry, no sample with id %s was found for your clinic. "
-                            "Please check your DBS records and try again." % sample_id)
+                            "Please check your DBS records and try again." % requisition_id)
             else:
-                self.respond("Sorry, no samples with ids %(sample_id)s were found for your clinic. "
+                self.respond("Sorry, no samples with ids %(requisition_id)s were found for your clinic. "
                             "Please check your DBS records and try again." ,
-                            sample_id=', '.join(str(sample_id) for sample_id in unfound_sample_results))
+                            requisition_id=', '.join(str(requisition_id) for requisition_id in unfound_sample_results))
 
 
 

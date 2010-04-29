@@ -123,9 +123,9 @@ class TestApp(TestScript):
             clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
         """ % {"name": self.contact.name, "count": 3, "code": "4567", 
-            "id1": res1.sample_id, "res1": res1.get_result_display(),
-            "id2": res2.sample_id, "res2": res2.get_result_display(),
-            "id3": res3.sample_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_display(),
+            "id2": res2.requisition_id, "res2": res2.get_result_display(),
+            "id3": res3.requisition_id, "res3": res3.get_result_display()}
         
         self.runScript(script)
         
@@ -152,9 +152,9 @@ class TestApp(TestScript):
             clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
         """ % {"name": self.contact.name, "code": "4567", 
-            "id1": res1.sample_id, "res1": res1.get_result_display(),
-            "id2": res2.sample_id, "res2": res2.get_result_display(),
-            "id3": res3.sample_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_display(),
+            "id2": res2.requisition_id, "res2": res2.get_result_display(),
+            "id3": res3.requisition_id, "res3": res3.get_result_display()}
                 
         self.runScript(script)
         
@@ -226,43 +226,47 @@ class TestApp(TestScript):
         Tests getting of results for given samples.
         """
         results = labresults.Result.objects.all()
-        res1 = results.create(sample_id="0001", clinic=self.clinic,
+        res1 = results.create(requisition_id="0001", clinic=self.clinic,
                               result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res2 = results.create(sample_id="0002", clinic=self.clinic, result="P",
+        res2 = results.create(requisition_id="0002", clinic=self.clinic,
+                              result="P",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res3 = results.create(sample_id="0003", clinic=self.clinic, result="B",
+        res3 = results.create(requisition_id="0003", clinic=self.clinic,
+                              result="R",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res4 = results.create(sample_id="0004", clinic=self.clinic,
+        res4 = results.create(requisition_id="0004", clinic=self.clinic,
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res4a = results.create(sample_id="0004a", clinic=self.clinic,
+        res4a = results.create(requisition_id="0004a", clinic=self.clinic,
                                collected_on=datetime.datetime.today(),
                                entered_on=datetime.datetime.today(),
                                notification_status="new")
 
-        res4b = results.create(sample_id="0004b", clinic=self.clinic,
+        res4b = results.create(requisition_id="0004b", clinic=self.clinic,
                                collected_on=datetime.datetime.today(),
                                entered_on=datetime.datetime.today(),
                                notification_status="new")
 
-        res5 = results.create(sample_id="0000", clinic=self.clinic, result="B",
+        res5 = results.create(requisition_id="0000", clinic=self.clinic,
+                              result="R",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res6 = results.create(sample_id="0000", clinic=self.clinic, result="P",
+        res6 = results.create(requisition_id="0000", clinic=self.clinic,
+                              result="P",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
@@ -279,13 +283,13 @@ class TestApp(TestScript):
             clinic_worker > RESULT 6006
             clinic_worker < Sorry, no sample with id 6006 was found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0001
-            clinic_worker < 0001: HIV Negative
+            clinic_worker < 0001: Not Detected
             clinic_worker > RESULT 0002
-            clinic_worker < 0002: HIV Positive
+            clinic_worker < 0002: Detected
             clinic_worker > RESULT 0003
-            clinic_worker < 0003: Bad Sample
+            clinic_worker < 0003: Rejected Sample
             clinic_worker > RESULT 0000
-            clinic_worker < 0000: Bad Sample, 0000: HIV Positive
+            clinic_worker < 0000: Detected, 0000: Rejected Sample
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
