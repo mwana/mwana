@@ -37,7 +37,7 @@ class App (rapidsms.App):
             
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = Result.objects.order_by('requisition_id').filter(
+            results = Result.objects.order_by('pk').filter(
                             clinic=message.contact.location,
                             notification_status__in=['new', 'notified'])
             if results:
