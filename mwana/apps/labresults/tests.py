@@ -1,21 +1,26 @@
-from django.contrib.auth.models import User, Permission
+import json
+
+import datetime
+import mwana.const as const
+from django.contrib.auth.models import Permission
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from mwana.apps.labresults import models as labresults
 from mwana.apps.labresults.app import App
-from mwana.apps.labresults.models import Result
-from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.contrib.locations.models import LocationType, Location
-from rapidsms.models import Contact, Connection
-from rapidsms.tests.scripted import TestScript
-import datetime
-import json
 from mwana.apps.labresults.mocking import get_fake_results
-import mwana.const as const
+from mwana.apps.labresults.models import Result
+from mwana.apps.stringcleaning.app import App as cleaner_App
+from rapidsms.contrib.handlers.app import App as handler_app
+from rapidsms.contrib.locations.models import Location
+from rapidsms.contrib.locations.models import LocationType
+from rapidsms.models import Connection
+from rapidsms.models import Contact
+from rapidsms.tests.scripted import TestScript
 
 
 
 class TestApp(TestScript):
-    apps = (handler_app, App)
+    apps = (cleaner_App, handler_app, App)
     
     def setUp(self):
         super(TestApp, self).setUp()
@@ -104,7 +109,7 @@ class TestApp(TestScript):
         script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
-            clinic_worker > 5555
+            clinic_worker > 55555
             clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
             clinic_worker > Help
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
@@ -118,9 +123,9 @@ class TestApp(TestScript):
             clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
         """ % {"name": self.contact.name, "count": 3, "code": "4567", 
-               "id1": res1.sample_id, "res1": res1.get_result_display(),
-               "id2": res2.sample_id, "res2": res2.get_result_display(),
-               "id3": res3.sample_id, "res3": res3.get_result_display()} 
+            "id1": res1.sample_id, "res1": res1.get_result_display(),
+            "id2": res2.sample_id, "res2": res2.get_result_display(),
+            "id3": res3.sample_id, "res3": res3.get_result_display()}
         
         self.runScript(script)
         
@@ -136,7 +141,7 @@ class TestApp(TestScript):
         script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
-        """ % {"name": self.contact.name, "count": 3 }
+        """ % {"name": self.contact.name, "count": 3}
         self.runScript(script)
         
         for res in [labresults.Result.objects.get(id=res.id) for res in [res1, res2, res3]]:
@@ -147,9 +152,9 @@ class TestApp(TestScript):
             clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
         """ % {"name": self.contact.name, "code": "4567", 
-               "id1": res1.sample_id, "res1": res1.get_result_display(),
-               "id2": res2.sample_id, "res2": res2.get_result_display(),
-               "id3": res3.sample_id, "res3": res3.get_result_display()}
+            "id1": res1.sample_id, "res1": res1.get_result_display(),
+            "id2": res2.sample_id, "res2": res2.get_result_display(),
+            "id3": res3.sample_id, "res3": res3.get_result_display()}
                 
         self.runScript(script)
         
@@ -212,7 +217,7 @@ class TestApp(TestScript):
             self.stopRouter()
     
     def _bootstrap_results(self):
-        results = get_fake_results(3, self.clinic, notification_status_choices=("new",))
+        results = get_fake_results(3, self.clinic, notification_status_choices=("new", ))
         for res in results:  res.save()
         return results
         
@@ -259,40 +264,45 @@ class TestApp(TestScript):
         Tests getting of results for given samples.
         """
         res1 = labresults.Result.objects.create(sample_id="0001", clinic=self.clinic,
-                                     result="N",
-                                     taken_on=datetime.datetime.today(),
-                                     entered_on=datetime.datetime.today(),
-                                     notification_status="new")
+                                                result="N",
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
 
         res2 = labresults.Result.objects.create(sample_id="0002", clinic=self.clinic, result="P",
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
 
         res3 = labresults.Result.objects.create(sample_id="0003", clinic=self.clinic, result="B",
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
 
         res4 = labresults.Result.objects.create(sample_id="0004", clinic=self.clinic,
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
+
+        res4a = labresults.Result.objects.create(sample_id="0004a", clinic=self.clinic,
+                                                 taken_on=datetime.datetime.today(),
+                                                 entered_on=datetime.datetime.today(),
+                                                 notification_status="new")
 
         res4b = labresults.Result.objects.create(sample_id="0004b", clinic=self.clinic,
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                 taken_on=datetime.datetime.today(),
+                                                 entered_on=datetime.datetime.today(),
+                                                 notification_status="new")
 
         res5 = labresults.Result.objects.create(sample_id="0000", clinic=self.clinic, result="B",
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
 
         res6 = labresults.Result.objects.create(sample_id="0000", clinic=self.clinic, result="P",
-                              taken_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                                                taken_on=datetime.datetime.today(),
+                                                entered_on=datetime.datetime.today(),
+                                                notification_status="new")
 
 
 
@@ -301,8 +311,10 @@ class TestApp(TestScript):
             clinic_worker < Sorry, no samples with ids 000, 1 were found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0004
             clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
-            clinic_worker > RESULT 0004,0004b
-            clinic_worker < The results for sample(s) 0004, 0004b are not yet ready. You will be notified when they are ready.
+            clinic_worker > RESULT 0004a 0004b
+            clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
+            clinic_worker > RESULT 0004a , 0004b
+            clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 6006
             clinic_worker < Sorry, no sample with id 6006 was found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0001
