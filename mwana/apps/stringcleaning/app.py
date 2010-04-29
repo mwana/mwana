@@ -18,14 +18,25 @@ class App (rapidsms.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '+', '-']
-        for mark in separators:
-           msgtxt = msgtxt.replace(mark, ' ')
+        replace_plus_minus = True
+        join_commands = ['join', 'j0in', 'jo1n', 'j01n', 'sent']
+        for js in join_commands:
+            if js.lower() in message.text.lower():
+                replace_plus_minus = False                
+                break
+                
+        if replace_plus_minus:
+            plus_minus = ['+', '-']
+            for mark in plus_minus:
+                msgtxt = msgtxt.replace(mark, ' ')
 
+        separators = [',', '/', ';', '*']
+        for mark in separators:
+            msgtxt = msgtxt.replace(mark, ' ')
         # remove other marks (we'll deal with . later)
         junk = ['\'', '\"', '`', '(', ')']
         for mark in junk:
-           msgtxt = msgtxt.replace(mark, '')
+            msgtxt = msgtxt.replace(mark, '')
 
         # split the text into chunks
         blobs = msgtxt.split(" ")
@@ -36,13 +47,13 @@ class App (rapidsms.App):
                 # clean up blobs only if they have a digit in the first few
                 # characters -- so we don't clean up things like user1
                 try:
-                   if blob[n].isdigit():
+                    if blob[n].isdigit():
                         clean_blob = self.letters_for_numbers(blob)
                         break
                 except IndexError:
-                   # if the blob doesnt have the first few characters,
-                   # and there is no digit yet, move on
-                   break
+                    # if the blob doesnt have the first few characters,
+                    # and there is no digit yet, move on
+                    break
             # add the cleaned blob (or untouched blob) to a running list
             clean_blobs.append(clean_blob)
 
@@ -71,7 +82,7 @@ class App (rapidsms.App):
             # location of the next . within the substring beyond the marker
             marker = marker + txt[marker:].index('.')
 
-            if txt[marker-1].isdigit() and txt[marker+1].isdigit():
+            if txt[marker-1].isdigit() and txt[marker + 1].isdigit():
                 # if the . is between two digits, move the marker to the
                 # next character and find another .
                 marker += 1
@@ -79,14 +90,14 @@ class App (rapidsms.App):
             else:
                 # save the slice up to and the slice beyond this . and move on
                 # (leave out the .)
-                txt = txt[:marker] + txt[marker+1:]
+                txt = txt[:marker] + txt[marker + 1:]
                 marker += 1
         return txt
 
 
     def letters_for_numbers(self, str):
         # dict of letters and the numerals they are intended to be
-        gaffes = {'i' : '1', 'l' : '1', 'o' : '0'}
+        gaffes = {'i': '1', 'l': '1', 'o': '0'}
 
         # don't worry about case
         numeralized = str.lower()
