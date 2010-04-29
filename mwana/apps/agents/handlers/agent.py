@@ -70,11 +70,7 @@ class AgentHelper(KeywordHandler):
                 return
             zone = self._get_or_create_zone(clinic, zone_slug)
             if self.msg.contact is not None and\
-               self.msg.contact.location in (clinic, zone):
-                if self.msg.contact.location == (clinic, zone):
-                    location = zone.parent
-                else:
-                    location = self.msg.contact.location
+               self.msg.contact.location == zone:
                 self.respond("Hello %(name)s! You are already registered as "
                              "a RemindMi Agent for zone %(zone)s of %(clinic)s.", 
                              name=self.msg.contact.name, zone=zone.name,
