@@ -1,0 +1,53 @@
+import time
+
+from mwana.apps.labresults.app import App as labresults_App
+from mwana.apps.stringcleaning.app import App as cleaning_App
+from mwana.apps.stringcleaning.inputcleaner import InputCleaner
+from mwana.apps.tracing import models as tracing
+from rapidsms.contrib.handlers.app import App as handler_app
+from rapidsms.contrib.locations.models import Location
+from rapidsms.contrib.locations.models import LocationType
+from rapidsms.models import Connection
+from rapidsms.models import Contact
+from rapidsms.tests.scripted import TestScript
+
+
+class TestApp(TestScript):
+    apps = (cleaning_App, handler_app, labresults_App)
+    ic = InputCleaner()
+    def testSoundEx(self):
+        print '*' * 70
+        print 'Testing soundex\n'
+        self.assertEqual(self.ic.soundex('thri'), self.ic.soundex('three'))
+
+    def testWordsToDigits(self):
+        print '*' * 70
+        print 'Testing testWordsToDigits\n'
+        self.assertEqual(2, self.ic.words_to_digits('two'))
+        self.assertEqual(2, self.ic.words_to_digits('too'))
+        self.assertEqual(302, self.ic.words_to_digits('thri hundred two'))
+        self.assertEqual(302, self.ic.words_to_digits('thri hundred and two'))
+        self.assertEqual(26, self.ic.words_to_digits('twenti six'))
+        self.assertEqual(8002, self.ic.words_to_digits('Eight thousand and two'))
+
+    def testReplaceoilWith011(self):
+        print '*' * 70
+        print 'Testing testReplaceoilWith011\n'
+        self.assertEqual('00111', self.ic.try_replace_oil_with_011('oOiIl'))
+        self.assertEqual('403012', self.ic.try_replace_oil_with_011('4o3oi2'))
+
+
+    def testRemoveDoubleSpaces(self):
+        print '*' * 70
+        print 'Testing testRemoveDoubleSpaces\n'
+        self.assertEqual('request 10 for db samples',
+                         self.ic.remove_double_spaces('request  10    for  db      samples'))
+
+    def testDigitToWord(self):
+        print '*' * 70
+        print 'Testing testDigitToWord\n'
+        self.assertEqual('One', self.ic.digit_to_word(1))
+        self.assertEqual('Two', self.ic.digit_to_word(2))
+        self.assertEqual('Thirty', self.ic.digit_to_word(30))
+        self.assertEqual(None, self.ic.digit_to_word(31))
+
