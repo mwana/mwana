@@ -310,6 +310,7 @@ class ResultsAcceptor(TestScript):
         self.assertEqual(payload.raw, json.dumps(data))
         self.assertTrue(payload.parsed_json)
         self.assertFalse(payload.validated_schema)
+        self.assertEqual(user, payload.auth_user)
         self.assertEqual(payload.incoming_date.year, now.year)
         self.assertEqual(payload.incoming_date.month, now.month)
         self.assertEqual(payload.incoming_date.day, now.day)
