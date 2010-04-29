@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     "mwana.apps.reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
+    "mwana.apps.broadcast",
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
