@@ -9,7 +9,7 @@ from mwana.util import get_clinic_or_default
 class AllHandler(BroadcastHandler):
     
     group_name = "ALL"
-    keyword = "ALL"
+    keyword = "ALL|al|ajj|aj|o|oh"
     
     def handle(self, text):
         if self.msg.contact is None or \

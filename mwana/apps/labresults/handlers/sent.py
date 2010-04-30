@@ -13,7 +13,7 @@ class SentHandler(KeywordHandler):
     """
     """
 
-    keyword = "sent|send"
+    keyword = "sent|send|sen|snt|cent"
 
     def help(self):
         self.respond(HELP)
