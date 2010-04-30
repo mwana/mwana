@@ -3,7 +3,7 @@ import time
 from mwana.apps.labresults.app import App as labresults_App
 from mwana.apps.stringcleaning.app import App as cleaning_App
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
-from mwana.apps.tracing import models as tracing
+
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.locations.models import Location
 from rapidsms.contrib.locations.models import LocationType

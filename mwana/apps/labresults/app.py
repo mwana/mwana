@@ -47,7 +47,7 @@ class App (rapidsms.App):
             else:
                 message.respond(NO_RESULTS, name=message.contact.name,
                                 clinic=message.contact.location.name)
-        
+            return True
         elif message.connection in self.waiting_for_pin \
            and message.connection.contact:
             pin = message.text.strip()

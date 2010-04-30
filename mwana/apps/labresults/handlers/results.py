@@ -38,8 +38,8 @@ class ResultsHandler(KeywordHandler):
             self.respond(UNGREGISTERED)
             return
 
-        requisition_ids=self.PATTERN.findall(text)
-        #we do nott expect this
+        requisition_ids = self.PATTERN.findall(text)
+        #we do not expect this
         if requisition_ids is None:
             self.respond("%s %s" % (SORRY, HELP))
             return
@@ -47,39 +47,39 @@ class ResultsHandler(KeywordHandler):
         unready_sample_results = []
         unfound_sample_results = []
         for requisition_id in requisition_ids:
-            try:
-                results = Result.objects.filter(
-                                    requisition_id__iexact=requisition_id,
-                                    clinic=self.msg.contact.location)
-                if results:
-                    for result in results:
-                        if result.result and len(result.result.strip()) > 0:
-                            ready_sample_results.append("%s: %s" % (result.requisition_id, result.get_result_display()))
-                            result.notification_status = "sent"
-                            result.save()
-                        else:
-                            unready_sample_results.append(requisition_id)
-                else:
-                    unfound_sample_results.append(requisition_id)
-            except Exception, e:
-                self.error(e)
+            results = Result.objects.order_by('pk').filter(
+                                         requisition_id__iexact=requisition_id,
+                                         clinic=self.msg.contact.location)
+            if results:
+                for result in results:
+                    if result.result and len(result.result.strip()) > 0:
+                        ready_sample_results.append("%s: %s" %
+                                                 (result.requisition_id,
+                                                  result.get_result_display()))
+                        result.notification_status = "sent"
+                        result.save()
+                    else:
+                        unready_sample_results.append(requisition_id)
+            else:
+                unfound_sample_results.append(requisition_id)
         if ready_sample_results:
             self.respond(", ".join(rst for rst in ready_sample_results))
 
         if unready_sample_results:
+            ids = ', '.join(str(requisition_id)
+                            for requisition_id in unready_sample_results)
             self.respond("The results for sample(s) %(requisition_id)s are "
-                        "not yet ready. You will be notified when they are ready.",
-                        requisition_id=', '.join(str(requisition_id) for requisition_id in unready_sample_results))
+                        "not yet ready. You will be notified when they are "
+                        "ready.", requisition_id=ids)
 
         if unfound_sample_results:
-            if len(unfound_sample_results)==1:
-                self.respond("Sorry, no sample with id %s was found for your clinic. "
-                            "Please check your DBS records and try again." % requisition_id)
+            if len(unfound_sample_results) == 1:
+                self.respond("Sorry, no sample with id %s was found for your "
+                             "clinic. Please check your DBS records and try "
+                             "again." % requisition_id)
             else:
-                self.respond("Sorry, no samples with ids %(requisition_id)s were found for your clinic. "
-                            "Please check your DBS records and try again." ,
-                            requisition_id=', '.join(str(requisition_id) for requisition_id in unfound_sample_results))
-
-
-
-
+                ids = ', '.join(str(requisition_id)
+                                for requisition_id in unfound_sample_results)
+                self.respond("Sorry, no samples with ids %(requisition_id)s "
+                             "were found for your clinic. Please check your "
+                             "DBS records and try again.", requisition_id=ids)
