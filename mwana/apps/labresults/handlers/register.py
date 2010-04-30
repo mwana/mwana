@@ -12,7 +12,7 @@ class RegisterHandler(KeywordHandler):
     """
     """
 
-    keyword = "join|j0in|jo1n|j01n"
+    keyword = "join|j0in|jo1n|j01n|jon|jin|jion|"
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
     HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
