@@ -3,6 +3,7 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Connection
 from django.contrib.auth.models import User
 
+
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status
     of sending result back to clinic"""
@@ -102,6 +103,26 @@ class Payload(models.Model):
                                                  self.version if self.version != None else '-',
                                                  self.incoming_date.strftime('%Y-%m-%d %H:%M:%S'),
                                                  len(self.raw))
+
+
+class LegacyPayload(models.Model):
+    """The legacy payload model used to store the first set of results from
+    the lab. This is added as a temporary measure to facilitate migrating the
+    legacy data to the new schema."""
+    
+    date = models.DateTimeField()
+    processed = models.BooleanField('Whether or not this result was saved to '
+                                    'the final results table in the database',
+                                    default=False)
+    data = models.TextField()
+    parsed = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'labresults_rawresult'
+
+    def __unicode__(self):
+        return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')
+
 
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
