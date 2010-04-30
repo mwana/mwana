@@ -94,7 +94,7 @@ def accept_results(request):
     content = request.raw_post_data
     
     payload_date = datetime.now()
-    payload_user = request.user if not isinstance(request.user, AnonymousUser) else None
+    payload_user = request.user
     try:
         data = json.loads(content)
     except:
