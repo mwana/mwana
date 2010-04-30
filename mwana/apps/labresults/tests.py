@@ -71,6 +71,11 @@ class TestApp(TestScript):
             clinic_worker > SENT twenti two
             clinic_worker < Hello John Banda! We received your notification that 22 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+
+    testReportRemovalOfExtraWords = """
+            clinic_worker > SENT 40 samples anythin
+            clinic_worker < Hello John Banda! We received your notification that 40 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+        """
         
     testZeroSampleNumber = """
             clinic_worker > SENT 0
