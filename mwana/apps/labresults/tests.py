@@ -235,66 +235,79 @@ class TestApp(TestScript):
                               result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id = "lb01")
 
         res2 = results.create(requisition_id="0002", clinic=self.clinic,
                               result="P",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id = "lb02")
 
         res3 = results.create(requisition_id="0003", clinic=self.clinic,
                               result="R",
+                              result_detail="contaminated",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id="lb03")
 
         res4 = results.create(requisition_id="0004", clinic=self.clinic,
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id = "lb04")
 
         res4a = results.create(requisition_id="0004a", clinic=self.clinic,
                                collected_on=datetime.datetime.today(),
                                entered_on=datetime.datetime.today(),
-                               notification_status="new")
+                               notification_status="new",
+                              sample_id = "lb04a")
 
         res4b = results.create(requisition_id="0004b", clinic=self.clinic,
                                collected_on=datetime.datetime.today(),
                                entered_on=datetime.datetime.today(),
-                               notification_status="new")
+                               notification_status="new",
+                              sample_id = "lb04b")
 
         res5 = results.create(requisition_id="0000", clinic=self.clinic,
                               result="R",
+                              result_detail="machine is down",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id = "lb00")
 
         res6 = results.create(requisition_id="0000", clinic=self.clinic,
                               result="P",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new")
+                              notification_status="new",
+                              sample_id = "lb00")
         
         script = """
             clinic_worker > RESULT 000 1
             clinic_worker < Sorry, no samples with ids 000, 1 were found for your clinic. Please check your DBS records and try again.
+            clinic_worker > RESULT 0003
+            clinic_worker < Results not ready, 0003: Rejected Sample, Lab ID = lb03, contaminated
             clinic_worker > RESULT 0004
-            clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
+            clinic_worker < Results not ready, 0004: Not Yet Tested, Lab ID = lb04
             clinic_worker > RESULT 0004a 0004b
-            clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
-            clinic_worker > RESULT 0004a , 0004b
-            clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
+            clinic_worker < Results not ready, 0004a: Not Yet Tested, Lab ID = lb04a; 0004b: Not Yet Tested, Lab ID = lb04b
+            clinic_worker > RESULT 0004a,0004b
+            clinic_worker < Results not ready, 0004a: Not Yet Tested, Lab ID = lb04a; 0004b: Not Yet Tested, Lab ID = lb04b
+            clinic_worker > RESULT 0004a,0003
+            clinic_worker < Results not ready, 0004a: Not Yet Tested, Lab ID = lb04a; 0003: Rejected Sample, Lab ID = lb03, contaminated
             clinic_worker > RESULT 6006
             clinic_worker < Sorry, no sample with id 6006 was found for your clinic. Please check your DBS records and try again.
             clinic_worker > RESULT 0001
-            clinic_worker < 0001: Not Detected
+            clinic_worker < 0001: Not Detected, Lab ID = lb01
             clinic_worker > RESULT 0002
-            clinic_worker < 0002: Detected
-            clinic_worker > RESULT 0003
-            clinic_worker < 0003: Rejected Sample
+            clinic_worker < 0002: Detected, Lab ID = lb02
             clinic_worker > RESULT 0000
-            clinic_worker < 0000: Rejected Sample, 0000: Detected
+            clinic_worker < 0000: Detected, Lab ID = lb00
+            clinic_worker < Results not ready, 0000: Rejected Sample, Lab ID = lb00, machine is down
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
