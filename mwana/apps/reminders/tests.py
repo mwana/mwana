@@ -23,6 +23,8 @@ class TestApp(TestScript):
         script = """
             kk     > agent kdh 01 rupiah banda
             kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
+            kk     > agent kdh 01 rupiah banda
+            kk     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
             """
         self.runScript(script)
     
@@ -55,30 +57,30 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth 4/3/2010 maria
-            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4 3 2010 laura
-            kk     < You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3-2010 anna
-            kk     < You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4.3.2010 michelle
-            kk     < You have successfully registered a birth for michelle on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4. 3. 2010 anne
-            kk     < You have successfully registered a birth for anne on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 04032010 heidi
-            kk     < You have successfully registered a birth for heidi on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4/3 rachel
-            kk     < You have successfully registered a birth for rachel on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for rachel on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4 3 nancy
-            kk     < You have successfully registered a birth for nancy on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for nancy on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4-3 katrina
-            kk     < You have successfully registered a birth for katrina on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for katrina on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4.3 molly
-            kk     < You have successfully registered a birth for molly on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for molly on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 4. 3 lisa
-            kk     < You have successfully registered a birth for lisa on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you %(cba)s! You have successfully registered a birth for lisa on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 0403 lauren
-            kk     < You have successfully registered a birth for lauren on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-        """ % {'year': datetime.datetime.now().year}
+            kk     < Thank you %(cba)s! You have successfully registered a birth for lauren on 04/03/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+        """ % {'year': datetime.datetime.now().year, 'cba': "Rupiah Banda"}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(12, patients.count())
@@ -93,7 +95,7 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
             kk     > birth 4/3/2010 maria
-            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -104,7 +106,7 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth maria
-            kk     < You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % datetime.date.today().strftime('%d/%m/%Y')
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -120,7 +122,7 @@ class TestApp(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
             kk     > birth 4/3/2010 maria
-            kk     < You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > birth 4/3/2010 maria
             kk     < Sorry, but someone has already registered a birth for maria on 04/03/2010.
         """
@@ -229,7 +231,7 @@ class TestApp(TestScript):
     def testRemindersNoLocation(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth")
         birth.appointments.create(name='1 day', num_days=2)
-        patient1 = Contact.objects.create(name='patient 1')
+        patient1 = Contact.objects.create(name='Henry')
         
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
@@ -245,8 +247,8 @@ class TestApp(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello. patient 1 is due for his "
-                         "or her next clinic appointment. Please deliver a "
+        self.assertEqual(messages[0].text, "Hello. Henry is due for "
+                         "his or her next clinic appointment. Please deliver a "
                          "reminder to this person and ensure he or she visits "
                          "the clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
@@ -258,7 +260,7 @@ class TestApp(TestScript):
         clinic = LocationType.objects.create(singular='Clinic',
                                              plural='Clinics', slug='clinic')
         central = Location.objects.create(name='Central Clinic', type=clinic)
-        patient1 = Contact.objects.create(name='patient 1', location=central)
+        patient1 = Contact.objects.create(name='Henry', location=central)
         
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
