@@ -23,6 +23,7 @@ class TestApp(TestScript):
     apps = (cleaner_App, handler_app, App)
     
     def setUp(self):
+        # this call is required if you want to override setUp
         super(TestApp, self).setUp()
         self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug="clinics")[0]
         self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="mib")
@@ -49,6 +50,8 @@ class TestApp(TestScript):
         
 
     def tearDown(self):
+        # this call is required if you want to override tearDown
+        super(TestApp, self).tearDown()
         self.clinic.delete()
         self.type.delete()
     
