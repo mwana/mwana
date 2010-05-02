@@ -87,9 +87,14 @@ class ResultsHandler(KeywordHandler):
                 unfound_sample_results.append(requisition_id)
         if ready_sample_results:
             self.respond("; ".join(rst for rst in ready_sample_results))
+            self.respond("Please record these results in your clinic records and"
+            " promptly delete them from your phone. Thank you again.")
 
         if unready_sample_results:
-            self.respond("Results not ready, %(infor)s", infor="; ".join(rst for rst in unready_sample_results))
+            self.respond("Results not ready, %(infor)s", infor="; ".join(rst for\
+            rst in unready_sample_results))
+            self.respond("Please record these results in your clinic records and"
+            " promptly delete them from your phone. Thank you again.")
 
         if unfound_sample_results:
             if len(unfound_sample_results) == 1:
