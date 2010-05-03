@@ -1,6 +1,8 @@
 import datetime
 import logging
 
+from django.utils.translation import ugettext as _
+
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
 
@@ -52,10 +54,10 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
                 clinic_name = patient.location.name
         else:
             clinic_name = 'the clinic'
-        msg = OutgoingMessage(connection, "Hello%(cba)s. %(patient)s is due "
+        msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
                               "for %(gender)s next clinic appointment. Please "
                               "deliver a reminder to this person and ensure "
-                              "%(pronoun)s visits %(clinic)s within 3 days.",
+                              "%(pronoun)s visits %(clinic)s within 3 days."),
                               cba=cba_name, patient=patient.name,
                               gender=pronouns.get('possessive', 'his or her'),
                               pronoun=pronouns.get('standard', 'he or she'),

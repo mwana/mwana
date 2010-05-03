@@ -37,6 +37,13 @@ class ResultsHandler(KeywordHandler):
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
+        if text == '9999':
+            try:
+                Result.objects.get(requisition_id =text,
+                                            clinic = self.msg.contact.location)                
+            except Result.DoesNotExist:
+                self.respond("9999: Detected")
+                return
 
         requisition_ids = self.PATTERN.findall(text)
         #we do not expect this

@@ -14,6 +14,8 @@ DEFAULT_FROM_EMAIL = 'no-reply@unicefinnovation.org'
 
 TIME_ZONE = 'GMT+2'
 
+LANGUAGE_CODE = 'bem-zm'
+
 INSTALLED_BACKENDS.update({
     "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
                "port": "/dev/ttyUSB0",

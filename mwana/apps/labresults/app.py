@@ -37,7 +37,7 @@ class App (rapidsms.App):
     def start (self):
         """Configure your app in the start phase."""
         # this breaks on postgres
-        # self.schedule_notification_task()
+        self.schedule_notification_task()
         
     def handle (self, message):
         key = message.text.strip().upper()
@@ -160,9 +160,9 @@ class App (rapidsms.App):
             yield message
         
     def schedule_notification_task (self):
-        callback = 'mwana.apps.labresults.app.send_results_notification'
+        callback = 'mwana.apps.labresults.tasks.send_results_notification'
         
-        #remove existing schedule tasks; reschedule based on the current setting from config
+        # remove existing schedule tasks; reschedule based on the current setting from config
         try:
             EventSchedule.objects.filter(callback=callback).delete()
         except EventSchedule.DoesNotExist:

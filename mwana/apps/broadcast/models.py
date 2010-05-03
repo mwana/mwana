@@ -7,7 +7,7 @@ class BroadcastMessage(models.Model):
     
     contact = models.ForeignKey(Contact, related_name="broadcast_messages")
     group   = models.CharField(max_length=30)
-    text    = models.CharField(max_length=30)
+    text    = models.TextField()
     date       = models.DateTimeField(default=datetime.utcnow)
     recipients = models.ManyToManyField(Contact, blank=True,
                                         related_name="broadcast_messages_received")
@@ -26,7 +26,7 @@ class BroadcastResponse(models.Model):
     
     broadcast = models.ForeignKey(BroadcastMessage)
     contact   = models.ForeignKey(Contact)
-    text      = models.CharField(max_length=30)
+    text      = models.TextField()
     date      = models.DateTimeField(default=datetime.utcnow)
     
     logger_message = models.ForeignKey(Message)
