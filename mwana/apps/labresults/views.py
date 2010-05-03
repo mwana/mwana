@@ -27,15 +27,7 @@ TODO
   the lab list even had a few luapula clinics that aren't on our internal list
 """
 
-#this seems very wrong; i find it hard to believe that i'm the first person to ever log something
-#from a rapidsms view. feels like there must be some blessed way of doing it.
-def get_logger (module_name):
-    logger = logging.getLogger(module_name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-    return logger
+logger = logging.getLogger('mwana.apps.labresults.views')
 
 def json_datetime (val):
     """convert a datetime value from the json into a python datetime"""
@@ -88,7 +80,6 @@ def accept_results(request):
     """accept data submissions from the lab via POST. see connection() in extract.py
     for how to submit; attempts to save raw data/partial data if for some reason the
     full content is not parseable or does not validate to the model schema"""
-    logger = get_logger('mwana.apps.labresults.views.accept_results')
     
     if request.META['CONTENT_TYPE'] != 'text/json':
         logger.warn('incoming post does not have text/json content type')
@@ -175,7 +166,6 @@ def accept_record (record):
     """parse and save an individual record, updating the notification flag if necessary; if record
     does not validate, nothing is saved; existing records are updated as necessary; return whether
     the record validated"""
-    logger = get_logger('mwana.apps.labresults.views.accept_record')
     
     #retrieve existing record for id, if it exists
     sample_id = dictval(record, 'id')
@@ -277,7 +267,6 @@ def accept_record (record):
 def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
-    logger = get_logger('mwana.apps.labresults.views.accept_log')
     
     logentry = labresults.LabLog(payload_id=payload)
     logfields = {
