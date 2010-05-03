@@ -302,3 +302,115 @@ class ResultForm(ModelForm):
         model = labresults.Result
         exclude = ['notification_status']
         
+log_rotation_threshold = 5000
+def log_viewer (daysback='7'):
+    try:
+        daysback = int(daysback)
+    except ValueError:        
+        #todo: return error - parameter is not an int
+        pass
+    
+    if daysback <= 0 or daysback >= 10000:
+        #todo: return error - parameter out of range
+        pass
+    
+    #get log records to display
+    cutoff_date = (datetime.now() - timedelta(days=daysback))
+    payloads = labresults.Payload.objects.filter(incoming_date__gte=cutoff_date)
+    logs = labresults.LabLog.objects.filter(payload_id__in=payloads)
+    
+    #extract displayable info from log records, remove duplicate (re-sent) entries
+    log_info = {}
+    for log_record in logs:
+        if log_record.message == None:
+            #skip log entries that weren't parseable
+            continue
+        
+        log_entry = {
+            'line': log_record.line,
+            'timestamp': log_record.timestamp,
+            'level': log_record.level,
+            'message': log_record.message,
+            'received_on': log_record.payload_id.incoming_date,
+            'received_from': log_record.payload_id.source,
+            'version': log_record.payload_id.version,
+        }
+        log_uid = (log_entry['line'], log_entry['timestamp'])
+        
+        if log_uid in log_info:
+            if log_entry['received_on'] < log_info[log_uid]['received_on']:
+                #save the earliest 'received on' date for re-sent entries
+                log_info[log_uid] = log_entry
+        else:
+            log_info[log_uid] = log_entry
+    log_entries = log_info.values()
+                
+    #sort records into chronological order (best-faith effort)
+    lines = set(lg['line'] for lg in log_entries)
+    #if log entry buffer contains both high- and low-numbered lines, recent log file rotation may have occurred
+    wraparound = len(lines | set(range(0, 100))) > 0 and max(lines) >= log_rotation_threshold
+    #if multiple log messages have the same line #, could suggest the log file was recently erased
+    collisions = any(len(lg for lg in log_entries if lg['line'] == ln) > 1 for ln in lines)
+    log_entries.sort(cmp=lambda x, y: log_cmp(x, y, wraparound))
+    
+    #format information for display
+    log_display_items = []
+    for le in log_entries:
+        if len(log_display_items) > 0:
+            prev_line = log_display_items[-1]['line']
+            expected_next_line = prev_line + len(log_display_items[-1]['message'].split('\n'))
+            cur_line = le['line']
+            
+            if cur_line > expected_next_line:
+                log_display_items.append({'type': 'alert', 'message': 'missing log entries (%d lines)' % (cur_line - expected_next_line)})
+            elif cur_line < expected_next_line:
+                log_display_items.append({'type': 'alert', 'message': 'logfile rotation'})
+
+        ldi = {
+            'type': 'log',
+            'line': le['line'],
+            'timestamp': le['timestamp'],
+            'level': le['level'],
+            'message': le['message'],
+            'received_on': le['received_on'],
+            'received_from': recvd_from(le['received_from'], le['version'])
+        }
+        log_display_items.append(ldi)
+        
+    return render_to_response('labresults/logview.html', {'display_info': log_display_items, 'collisions': collisions})
+        
+        
+def log_cmp (a, b, wraparound):
+    def get_line (lg):
+        ln = int(lg['line'])
+        if wraparound and ln != -1 and ln < log_rotation_threshold / 2:
+            ln += 1000000
+        return ln
+    
+    line_a = get_line(a)
+    line_b = get_line(b)        
+    cmp = line_a.__cmp__(line_b)
+    if cmp != 0:
+        return cmp
+    
+    ts_a = a['timestamp']
+    ts_b = b['timestamp']
+    return ts_a.__cmp__(ts_b)        
+ 
+def recvd_from (source, version):
+    deployments = {
+        'ndola/arthur-davison': 'adch',
+        'lusaka/kalingalinga': 'kaling',
+        'lusaka/uth': 'uth',
+    }
+    
+    if source in deployments:
+        source_tag = deployments[source]
+    elif len(source) <= 10:
+        source_tag = source
+    else:
+        source_tag = source[:5] + '...' + source[-3:]
+    
+    return '%s/v%s' % (source_tag, version)
+        
+    
