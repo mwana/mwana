@@ -16,7 +16,7 @@ class AgentHelper(KeywordHandler):
 
     keyword = "agent|agemt|urgent|ajent|agdmt|agnt|agant"
 
-    PATTERN = re.compile(r"^\s*(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?P<name>.+)$")
+    PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
     HELP_TEXT = "To register as a RemindMi agent, send AGENT <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>"
     
@@ -53,23 +53,6 @@ class AgentHelper(KeywordHandler):
                                            type=zone_type)
         return zone
 
-    def _get_clinic_and_zone(self, contact):
-        """
-        Determines the contact's current clinic and zone, if any.
-        """
-        if contact and contact.location and\
-           contact.location.type.slug == const.ZONE_SLUG:
-            contact_clinic = contact.location.parent
-            contact_zone = contact.location
-        elif contact and contact.location and\
-             contact.location.type.slug in const.CLINIC_SLUGS:
-            contact_clinic = contact.location
-            contact_zone = None
-        else:
-            contact_clinic = None
-            contact_zone = None
-        return contact_clinic, contact_zone
-
     def handle(self, text):
         m = self.PATTERN.search(text)
         if m is not None:
@@ -86,45 +69,21 @@ class AgentHelper(KeywordHandler):
                              code=clinic_slug)
                 return
             zone = self._get_or_create_zone(clinic, zone_slug)
-            contact_clinic, contact_zone =\
-              self._get_clinic_and_zone(self.msg.contact)
-            
-            if contact_zone == zone:
-                # don't let agents register twice for the same zone
+            if self.msg.contact is not None and\
+               self.msg.contact.location == zone:
                 self.respond("Hello %(name)s! You are already registered as "
                              "a RemindMi Agent for zone %(zone)s of %(clinic)s.", 
                              name=self.msg.contact.name, zone=zone.name,
                              clinic=clinic.name)
                 return
-            elif contact_clinic and contact_clinic != clinic:
-                # force agents to leave if they appear to be switching clinics
-                self.respond("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for %(old_clinic)s. To leave "
-                             "your current clinic and join %(new_clinic)s, "
-                             "reply with LEAVE and then re-send your message.",
-                             name=self.msg.contact.name,
-                             old_clinic=contact_clinic.name,
-                             new_clinic=clinic.name)
-                return
-            elif self.msg.contact:
-                # if the contact exists but wasn't registered at a location,
-                # or was registered at the clinic level instead of the zone
-                # level, update the record and save it
-                cba = self.msg.contact
-                cba.name = name
-                cba.location = zone
-                cba.save()
-            else:
-                # lastly, if no contact exists, create one and save it in the
-                # connection
-                cba = Contact.objects.create(name=name, location=zone)
-                self.msg.connection.contact = cba
-                self.msg.connection.save()
-            if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
-                cba.types.add(const.get_cba_type())
+                        
+            cba = Contact.objects.create(name=name, location=zone)
+            cba.types.add(const.get_cba_type())
+            self.msg.connection.contact = cba
+            self.msg.connection.save()
             self.respond("Thank you %(name)s! You have successfully "
-                         "registered as a RemindMi Agent for zone %(zone)s of "
-                         "%(clinic)s.%(notify_text)s",
+                         "registered as a RemindMi Agent for zone %(zone)s of %(clinic)s."
+                         "%(notify_text)s",
                          name=cba.name, zone=zone.name , clinic=clinic.name,
                          notify_text=self._get_notify_text())
         else:
