@@ -93,3 +93,6 @@ def run_tests():
 def touch():
     run('touch %s' % PATH_SEP.join((env.path, 'mwana', 'apache', 'project.wsgi')))
 
+
+def install_init_script():
+    put('scripts/mwana-route-init-script.sh', '/etc/init.d/mwana-route', 0755)
