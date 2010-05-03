@@ -6,8 +6,8 @@ def is_eligible_for_results(connection):
     for receiving lab results
     """
     return connection.contact is not None \
-        and const.get_clinic_worker_type() in \
-            connection.contact.types.all() \
+        and connection.contact.is_active \
+        and const.get_clinic_worker_type() in connection.contact.types.all() \
         and connection.contact.pin is not None \
         and connection.contact.location is not None
            
