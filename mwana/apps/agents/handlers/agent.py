@@ -14,7 +14,7 @@ class AgentHelper(KeywordHandler):
     """
     """
 
-    keyword = "agent"
+    keyword = "agent|agemt|urgent|ajent"
 
     PATTERN = re.compile(r"^\s*(?P<clinic>\S+)\s+(?P<zone>\S+)\s+(?P<name>.+)$")
     HELP_TEXT = "To register as a RemindMi agent, send AGENT <CLINIC CODE> "\

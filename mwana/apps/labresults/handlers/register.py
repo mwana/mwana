@@ -12,7 +12,7 @@ class RegisterHandler(KeywordHandler):
     """
     """
 
-    keyword = "join|j0in|jo1n|j01n"
+    keyword = "j0in|join|jin|john|jo1n|jion|j01n|jon"
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
     HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
@@ -99,7 +99,7 @@ class RegisterHandler(KeywordHandler):
             return
         try:
             location = Location.objects.get(slug__iexact=clinic_code)
-            contact = Contact.objects.create(name=name, location=location, pin=pin) 
+            contact = Contact.objects.create(name=name, location=location, pin=pin)
             contact.types.add(const.get_clinic_worker_type())
             self.msg.connection.contact = contact
             self.msg.connection.save()

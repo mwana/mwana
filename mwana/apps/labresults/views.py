@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_GET
 from django.forms import ModelForm
 from django.contrib.auth.models import AnonymousUser
+from django.db import transaction
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
@@ -26,15 +27,7 @@ TODO
   the lab list even had a few luapula clinics that aren't on our internal list
 """
 
-#this seems very wrong; i find it hard to believe that i'm the first person to ever log something
-#from a rapidsms view. feels like there must be some blessed way of doing it.
-def get_logger (module_name):
-    logger = logging.getLogger(module_name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        logger.addHandler(handler)
-        logger.setLevel(logging.DEBUG)
-    return logger
+logger = logging.getLogger('mwana.apps.labresults.views')
 
 def json_datetime (val):
     """convert a datetime value from the json into a python datetime"""
@@ -66,7 +59,7 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
     and may also need to be transformed in some way"""
     if field in dict:
         val = dict[field]
-        if val != None or trans_none:
+        if val or trans_none:
             return trans(val)
         else:
             return None
@@ -82,11 +75,11 @@ def dashboard(request):
     
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_payload', 'Lab Results')
+@transaction.commit_on_success
 def accept_results(request):
     """accept data submissions from the lab via POST. see connection() in extract.py
     for how to submit; attempts to save raw data/partial data if for some reason the
     full content is not parseable or does not validate to the model schema"""
-    logger = get_logger('mwana.apps.labresults.views.accept_results')
     
     if request.META['CONTENT_TYPE'] != 'text/json':
         logger.warn('incoming post does not have text/json content type')
@@ -94,7 +87,7 @@ def accept_results(request):
     content = request.raw_post_data
     
     payload_date = datetime.now()
-    payload_user = request.user if not isinstance(request.user, AnonymousUser) else None
+    payload_user = request.user
     try:
         data = json.loads(content)
     except:
@@ -118,39 +111,42 @@ def accept_results(request):
         logger.exception('could not save raw incoming data from DBS lab!! raw data: %s' % content)
         raise
     
-    #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
-    #record failed to validate
-    if 'samples' in data:
-        records_validate = True
-        for rec in data['samples']:
-            if not accept_record(rec):
-                records_validate = False
-    else:
-        records_validate = False
-
-    if 'logs' in data:
-        logs_validate = True
-        for log in data['logs']:
-            if not accept_log(log, payload):
-                logs_validate = False
-    else:
-        logs_validate = False
+    try:
+        #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
+        #record failed to validate
+        if 'samples' in data and hasattr(data['samples'], '__iter__'):
+            records_validate = True
+            for rec in data['samples']:
+                if not accept_record(rec):
+                    records_validate = False
+        else:
+            records_validate = False
     
-    meta_fields = {
-        'version': dictval(data, 'version'),
-        'source': dictval(data, 'source'), 
-        'client_timestamp': dictval(data, 'now', json_datetime),
-        'info':  dictval(data, 'info'),
-    }
+        if 'logs' in data and hasattr(data['samples'], '__iter__'):
+            logs_validate = True
+            for log in data['logs']:
+                if not accept_log(log, payload):
+                    logs_validate = False
+        else:
+            logs_validate = False
+        
+        meta_fields = {
+            'version': dictval(data, 'version'),
+            'source': dictval(data, 'source'), 
+            'client_timestamp': dictval(data, 'now', json_datetime),
+            'info':  dictval(data, 'info'),
+        }
+        
+        f_payload = PayloadForm(meta_fields, instance=payload)
+        if f_payload.is_valid():
+            payload = f_payload.save(commit=False)
+            payload.validated_schema = (records_validate and logs_validate)
+            payload.save()
+        else:
+            logger.error('errors in json schema for payload %d: %s' % (payload.id, str(f_payload.errors)))
+    except Exception, e:
+        logging.exception('second stage result parsing failed unexpectedly')
     
-    f_payload = PayloadForm(meta_fields, instance=payload)
-    if f_payload.is_valid():
-        payload = f_payload.save(commit=False)
-        payload.validated_schema = (records_validate and logs_validate)
-        payload.save()
-    else:
-        logger.error('errors in json schema for payload %d: %s' % (payload.id, str(f_payload.errors)))
-                
     return HttpResponse('SUCCESS')
      
 def normalize_clinic_id (zpct_id):
@@ -170,12 +166,11 @@ def accept_record (record):
     """parse and save an individual record, updating the notification flag if necessary; if record
     does not validate, nothing is saved; existing records are updated as necessary; return whether
     the record validated"""
-    logger = get_logger('mwana.apps.labresults.views.accept_record')
     
     #retrieve existing record for id, if it exists
     sample_id = dictval(record, 'id')
     old_record = None
-    if sample_id != None:
+    if sample_id:
         try:
             old_record = labresults.Result.objects.get(sample_id=sample_id)
         except labresults.Result.DoesNotExist:
@@ -183,14 +178,14 @@ def accept_record (record):
     
     def cant_save (message):
         message = 'cannot save record: ' + message
-        if old_record != None:
+        if old_record:
             message += '; original record [%s] untouched' % sample_id
         message += '\nrecord: %s' % str(record)
         logger.error(message)
     
     #validate required identifying fields
     for reqd_field in ('id', 'pat_id', 'fac'):
-        if dictval(record, reqd_field) == None:
+        if not dictval(record, reqd_field):
             cant_save('required field %s missing' % reqd_field)
             return False
     
@@ -206,8 +201,8 @@ def accept_record (record):
     record_fields = {
         'sample_id': sample_id,
         'requisition_id': dictval(record, 'pat_id'),
-        'clinic': clinic_obj.id if clinic_obj != None else None,
-        'clinic_code_unrec': clinic_code if clinic_obj == None else None,
+        'clinic': clinic_obj.id if clinic_obj else None,
+        'clinic_code_unrec': clinic_code if not clinic_obj else None,
         'result': dictval(record, 'result', map_result),
         'result_detail': dictval(record, 'result_detail'),
         'collected_on': dictval(record, 'coll_on', json_date),
@@ -222,7 +217,7 @@ def accept_record (record):
     }
     
     #need to keep old record 'pristine' so we can check which fields have changed
-    old_record_copy = labresults.Result.objects.get(sample_id=sample_id) if old_record != None else None
+    old_record_copy = labresults.Result.objects.get(sample_id=sample_id) if old_record else None
     f_result = ResultForm(record_fields, instance=old_record_copy)
     if f_result.is_valid():
         new_record = f_result.save(commit=False)
@@ -237,11 +232,11 @@ def accept_record (record):
         cant_save('sync_status not an allowed value')
         return False
 
-    if old_record == None:
+    if not old_record:
         if rec_status == 'update':
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
         
-        new_record.notification_status = 'new' if new_record.result != None else 'unprocessed'
+        new_record.notification_status = 'new' if new_record.result else 'unprocessed'
     else:
         if rec_status == 'new':
             logger.info('received a \'new\' record that already exists; may have been deleted in lab?; treating as update...')
@@ -259,7 +254,7 @@ def accept_record (record):
                            (sample_id, old_record.clinic.slug, new_record.clinic.slug))
 
         #change to test result
-        if old_record.result == None and new_record.result != None:
+        if not old_record.result and new_record.result:
             new_record.notification_status = 'new'   #sample was processed by lab
         elif old_record.notification_status == 'sent' and old_record.result != new_record.result:
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
@@ -272,14 +267,13 @@ def accept_record (record):
 def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
-    logger = get_logger('mwana.apps.labresults.views.accept_log')
     
     logentry = labresults.LabLog(payload_id=payload)
     logfields = {
         'timestamp': dictval(log, 'at', json_timestamp),
         'message': dictval(log, 'msg'),
         'level': dictval(log, 'lvl'),
-        'line': dictval(log, 'ln')
+        'line': dictval(log, 'ln'),
     }
 
     f_log = LogForm(logfields, instance=logentry)

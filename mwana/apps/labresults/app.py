@@ -28,7 +28,9 @@ class App (rapidsms.App):
         # self.schedule_notification_task()
         
     def handle (self, message):
-        if message.text.strip().upper().startswith("CHECK"):
+        key = message.text.strip().upper()
+        key =key[:4]
+        if key in "CHECKCHEK":
             if not message.connection.contact or \
                not const.get_clinic_worker_type() in \
                message.connection.contact.types.all():

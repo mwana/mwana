@@ -10,7 +10,7 @@ from mwana.const import get_cba_type
 class ClinicHandler(BroadcastHandler):
     
     group_name = "CBA"
-    keyword = "CBA"
+    keyword = "CBA|aaa|cab"
     
     def handle(self, text):
         if self.msg.contact is None or \

@@ -111,7 +111,7 @@ class App(rapidsms.App):
             else:
                 date = datetime.datetime.today()
             # fetch or create the patient
-            if msg.contact.location:
+            if msg.contact and msg.contact.location:
                 patient, _ = Contact.objects.get_or_create(
                                             name=name,
                                             location=msg.contact.location)
@@ -133,10 +133,10 @@ class App(rapidsms.App):
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection)
             gender = event.possessive_pronoun
-            msg.respond("You have successfully registered a %(event)s for "
+            msg.respond("Thank you %(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic.", event=event.name.lower(), gender=gender,
+                        "clinic.", cba=msg.contact.name, event=event.name.lower(), gender=gender,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond("Sorry, I didn't understand that. " +

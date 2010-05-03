@@ -15,8 +15,17 @@ def build_results_messages(results):
     From a list of lab results, build a list of messages reporting 
     their status
     """
-    result_strings = ["Sample %s: %s" % (r.requisition_id, r.get_result_display()) \
-                              for r in results]
+    result_strings = []
+    for r in results:
+        if r.result is None or len(r.result.strip()) == 0:
+            result_strings.append("Sample %s: Not Yet Tested, Lab ID = %s"
+                        % (r.requisition_id, r.sample_id))
+        elif r.result.upper() in 'IXR':
+            result_strings.append("Sample %s: Not Ready, Lab ID = %s, %s" %
+            (r.requisition_id, r.sample_id, r.result_detail))
+        else:
+            result_strings.append("Sample %s: %s, Lab ID = %s" %
+            (r.requisition_id, r.get_result_display(), r.sample_id))
     
     result_text, remainder = combine_to_length(result_strings,
                                                length=160-len(RESULTS))
