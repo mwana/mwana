@@ -107,8 +107,8 @@ class App(rapidsms.App):
         event = self._get_event(event_slug)
         if not event:
             return False
-        date_str, name = self._parse_message(msg)
-        if name: # the date is optional
+        date_str, patient_name = self._parse_message(msg)
+        if patient_name: # the date is optional
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
@@ -121,10 +121,10 @@ class App(rapidsms.App):
             # fetch or create the patient
             if msg.contact and msg.contact.location:
                 patient, _ = Contact.objects.get_or_create(
-                                            name=name,
+                                            name=patient_name,
                                             location=msg.contact.location)
             else:
-                patient = Contact.objects.create(name=name)
+                patient = Contact.objects.create(name=patient_name)
 
             # make sure the contact has the correct type (patient)
             patient_t = const.get_patient_type()
