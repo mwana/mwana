@@ -92,13 +92,45 @@ def run_tests():
 
 
 def touch():
+    """
+    Forces a reload of the WSGI Django application in Apache by modifying
+    the last-modified time on the wsgi file.
+    """
     run('touch %s' % PATH_SEP.join((env.path, 'mwana', 'apache', 'project.wsgi')))
 
 
 def install_init_script():
+    """
+    Installs the init script for the RapidSMS route script in the /etc/init.d
+    directory for the first time and adds it to the default run levels so that
+    it's started and stopped appropriately on boot/shutdown.  Requires sudo
+    permissions on /etc/init.d/mwana-route, e.g.:
+    
+    deployer ALL=NOPASSWD: ALL    
+    """
+    run('sudo touch /etc/init.d/mwana-route')
+    run('sudo chown %s /etc/init.d/mwana-route' % env.user)
+    run('sudo update-rc.d mwana-route defaults')
+    update_init_script()
+
+
+def update_init_script():
+    """
+    Updates the init script for the RapidSMS route script in the /etc/init.d
+    directory.  Requires that the file (/etc/init.d/mwana-route) already exists
+    with write permissions for the deploying user.
+    
+    Run install_init_script before calling this method.
+    """
     put('scripts/mwana-route-init-script.sh', '/etc/init.d/mwana-route', 0755)
 
 
 def restart_route():
+    """
+    Restarts the RapidSMS route process on the remote server.  Requires sudo
+    permissions on /etc/init.d/mwana-route, e.g.:
+    
+    deployer ALL=NOPASSWD: ALL
+    """
     # using run instead of sudo because sudo prompts for a password
     run('sudo /etc/init.d/mwana-route restart')
