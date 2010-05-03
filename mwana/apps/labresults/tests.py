@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from mwana.apps.labresults import models as labresults
 from mwana.apps.labresults.app import App
 from mwana.apps.labresults.mocking import get_fake_results
-from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.models import Result, SampleNotification
 from mwana.apps.stringcleaning.app import App as cleaner_App
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.locations.models import Location
@@ -16,7 +16,6 @@ from rapidsms.contrib.locations.models import LocationType
 from rapidsms.models import Connection
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
-
 
 
 class TestApp(TestScript):
@@ -103,9 +102,22 @@ class TestApp(TestScript):
         
     testCheckResultsNone = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you as soon as more results are available.
+            clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
     """
     
+    def testSentCreatesDbObjects(self):
+        self.assertEqual(0, SampleNotification.objects.count())
+        script = """
+            clinic_worker > SENT 5
+            clinic_worker < Hello John Banda! We received your notification that 5 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+        """
+        self.runScript(script)
+        self.assertEqual(1, SampleNotification.objects.count())
+        notification = SampleNotification.objects.all()[0]
+        self.assertEqual(5, notification.count)
+        self.assertEqual(self.clinic, notification.location)
+        self.assertEqual(self.contact, notification.contact)
+        
     def testResultsPIN(self):
         # NOTE: this test is failing and I'm not sure why.
         # It works fine in the message tester.
