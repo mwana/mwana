@@ -90,7 +90,7 @@ class App(rapidsms.App):
         multiple |-separated slugs in the "slug" field in the database.
         """
         for event in reminders.Event.objects.filter(slug__icontains=slug):
-            keywords = [k.strip() for k in event.slug.split('|')]
+            keywords = [k.strip().lower() for k in event.slug.split('|')]
             if slug in keywords:
                 return event
 
@@ -105,7 +105,7 @@ class App(rapidsms.App):
         what keyword was actually typed by the user.
         """
         
-        event_slug = msg.text.split()[0]
+        event_slug = msg.text.split()[0].lower()
         event = self._get_event(event_slug)
         if not event:
             return False

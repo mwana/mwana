@@ -105,13 +105,13 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", gender="f",
                                        slug="birth|bith|bilth|mwana")
         script = """
-            kk     > birth 4/3/2010 maria
+            kk     > bIrth 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > bith 4/3/2010 anna
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > bilth 4/3/2010 laura
+            kk     > BILTH 4/3/2010 laura
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwana 4/3/2010 lynn
+            kk     > mwaNA 4/3/2010 lynn
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > unknownevent 4/3/2010 lynn
         """
