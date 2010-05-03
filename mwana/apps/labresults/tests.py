@@ -19,7 +19,6 @@ from rapidsms.tests.scripted import TestScript
 
 
 class TestApp(TestScript):
-    apps = (cleaner_App, handler_app, App)
     
     def setUp(self):
         # this call is required if you want to override setUp
@@ -103,6 +102,14 @@ class TestApp(TestScript):
     testCheckResultsNone = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
+    """
+    
+    # TODO: flesh out this test
+    """
+        524754 > join 402010 cory 1234
+        524754 < Your phone is already registered to Tba at 1. To change name or clinic first reply with keyword 'LEAVE' and try again.
+        524754 > join 401010 cory 1234
+        524754 < Hi Cory, thanks for registering for DBS results from Results160 as staff of Chipungu. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
     """
     
     def testSentCreatesDbObjects(self):
@@ -327,7 +334,6 @@ class TestApp(TestScript):
 
 
 class ResultsAcceptor(TestScript):
-    apps = (handler_app, App)
     
     def _post_json(self, url, data):
         return self.client.post(url, json.dumps(data),

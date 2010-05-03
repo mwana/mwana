@@ -8,7 +8,6 @@ from mwana.apps.broadcast.app import App as broadcast_app
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 
 class TestApp(TestScript):
-    apps = (broadcast_app, handler_app, logger_app)
     
     def setUp(self):
         super(TestApp, self).setUp()

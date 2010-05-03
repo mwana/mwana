@@ -10,7 +10,7 @@ from rapidsms.tests.scripted import TestScript
 
 
 class TestApp (TestScript):
-    apps = (handler_app, App,)
+
     fixtures = ['camping_supplies', 'health_centers']
     
     def testBootstrap(self):

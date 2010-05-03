@@ -14,7 +14,10 @@ class Event(models.Model):
         ('f', 'Female'),
     )
     name = models.CharField(max_length=255)
-    slug = models.CharField(max_length=255)
+    slug = models.CharField(max_length=255, help_text='The keyword(s) to match '
+                            'in messages from the user. Specify multiple '
+                            'keywords by separating them with vertical bars, '
+                            'e.g., "birth|bith|bilth"')
     gender = models.CharField(max_length=1, blank=True, help_text='If this '
                               'event is gender-specific, specify the gender '
                               'here.', choices=GENDER_CHOICES)
