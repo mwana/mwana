@@ -67,8 +67,8 @@ class TestApp(TestScript):
         """
 
     testReportResultsCorrection = """
-            clinic_worker > SENT twenti two
-            clinic_worker < Hello John Banda! We received your notification that 22 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+            clinic_worker > snt hundred twenti 5 samples
+            clinic_worker < Hello John Banda! We received your notification that 125 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
 
     testReportRemovalOfExtraWords = """
