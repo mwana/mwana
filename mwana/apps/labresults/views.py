@@ -303,7 +303,7 @@ class ResultForm(ModelForm):
         exclude = ['notification_status']
         
 log_rotation_threshold = 5000
-def log_viewer (daysback='7'):
+def log_viewer (request, daysback='7'):
     try:
         daysback = int(daysback)
     except ValueError:        
@@ -321,6 +321,7 @@ def log_viewer (daysback='7'):
     
     #extract displayable info from log records, remove duplicate (re-sent) entries
     log_info = {}
+    meta_logs = []
     for log_record in logs:
         if log_record.message == None:
             #skip log entries that weren't parseable
@@ -337,47 +338,55 @@ def log_viewer (daysback='7'):
         }
         log_uid = (log_entry['line'], log_entry['timestamp'])
         
-        if log_uid in log_info:
+        if log_entry['line'] == -1:
+            meta_logs.append(log_entry)
+        elif log_uid in log_info:
             if log_entry['received_on'] < log_info[log_uid]['received_on']:
                 #save the earliest 'received on' date for re-sent entries
                 log_info[log_uid] = log_entry
         else:
             log_info[log_uid] = log_entry
     log_entries = log_info.values()
-                
+    log_entries.extend(meta_logs)
+    
     #sort records into chronological order (best-faith effort)
     lines = set(lg['line'] for lg in log_entries)
     #if log entry buffer contains both high- and low-numbered lines, recent log file rotation may have occurred
-    wraparound = len(lines | set(range(0, 100))) > 0 and max(lines) >= log_rotation_threshold
+    wraparound = len(lines | set(range(0, 100))) > 0 and (max(lines) if lines else 0) >= log_rotation_threshold
     #if multiple log messages have the same line #, could suggest the log file was recently erased
-    collisions = any(len(lg for lg in log_entries if lg['line'] == ln) > 1 for ln in lines)
+    collisions = any(len([lg for lg in log_entries if lg['line'] == ln]) > 1 for ln in lines if ln != -1)
     log_entries.sort(cmp=lambda x, y: log_cmp(x, y, wraparound))
     
     #format information for display
     log_display_items = []
     for le in log_entries:
-        if len(log_display_items) > 0:
-            prev_line = log_display_items[-1]['line']
-            expected_next_line = prev_line + len(log_display_items[-1]['message'].split('\n'))
-            cur_line = le['line']
-            
-            if cur_line > expected_next_line:
-                log_display_items.append({'type': 'alert', 'message': 'missing log entries (%d lines)' % (cur_line - expected_next_line)})
-            elif cur_line < expected_next_line:
-                log_display_items.append({'type': 'alert', 'message': 'logfile rotation'})
-
         ldi = {
             'type': 'log',
             'line': le['line'],
-            'timestamp': le['timestamp'],
-            'level': le['level'],
+            'timestamp': '%s.%03d' % (le['timestamp'].strftime('%Y-%m-%d %H:%M:%S'), le['timestamp'].microsecond / 1000),
+            'level': level_abbr(le['level']),
             'message': le['message'],
             'received_on': le['received_on'],
             'received_from': recvd_from(le['received_from'], le['version'])
         }
+        
+        if ldi['line'] == -1:
+            ldi['type'] = 'meta-log'
+        elif len(log_display_items) > 0:
+            prev_line = log_display_items[-1]['line']
+            if prev_line != -1:
+                expected_next_line = prev_line + len(log_display_items[-1]['message'].split('\n'))
+                cur_line = le['line']
+                
+                if cur_line > expected_next_line:
+                    log_display_items.append({'type': 'alert', 'message': 'missing log entries (%d lines)' % (cur_line - expected_next_line)})
+                elif cur_line < expected_next_line:
+                    log_display_items.append({'type': 'alert', 'message': 'logfile rotation'})
+
         log_display_items.append(ldi)
         
-    return render_to_response('labresults/logview.html', {'display_info': log_display_items, 'collisions': collisions})
+    return render_to_response(request, 'labresults/logview.html',
+                              {'display_info': log_display_items, 'collisions': collisions, 'days': daysback})
         
         
 def log_cmp (a, b, wraparound):
@@ -389,13 +398,13 @@ def log_cmp (a, b, wraparound):
     
     line_a = get_line(a)
     line_b = get_line(b)        
-    cmp = line_a.__cmp__(line_b)
-    if cmp != 0:
-        return cmp
+    result = cmp(line_a, line_b)
+    if result != 0:
+        return result
     
     ts_a = a['timestamp']
     ts_b = b['timestamp']
-    return ts_a.__cmp__(ts_b)        
+    return cmp(ts_a, ts_b)        
  
 def recvd_from (source, version):
     deployments = {
@@ -412,5 +421,9 @@ def recvd_from (source, version):
         source_tag = source[:5] + '...' + source[-3:]
     
     return '%s/v%s' % (source_tag, version)
+
+def level_abbr (level):
+    return level[0] if level in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] else level
+    
         
     

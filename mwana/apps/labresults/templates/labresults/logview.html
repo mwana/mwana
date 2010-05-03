@@ -1,9 +1,65 @@
-{% extends "labresults/base.html" %}
+{% extends "layout.html" %}
 {% load forms_tags %}
 {% load labresults_tags %}
 
 {% block title %}Results160 - {{ block.super }}{% endblock %}
 
+{% block content %}
+
+<p>Showing logs received in the past <b>{{ days }}</b> days</p>
+
+{% if collisions %}
+<p><b>Warning:</b> there are line number collisions (multiple log entries with the same line #); this means
+the log file could have been erased recently.</p>
+{% endif %}
+
+{% if display_info %}
+
+<table style="font-size: x-small;">
+<tr>
+<td>ln</td>
+<td>timestamp</td>
+<td>lvl</td>
+<td>message</td>
+<td>received on</td>
+<td>from</td>
+</tr>
+
 {% for row in display_info %}
-<p>row</p>
+
+<tr>
+{% ifequal row.type "log" %}
+
+<td>{{ row.line }}</td>
+<td style="white-space: nowrap;">{{ row.timestamp }}</td>
+<td>{{ row.level }}</td>
+<td style="font-size: small;"><code>{{ row.message|linebreaksbr }}</code></td>
+<td style="white-space: nowrap;">{{ row.received_on|date:"Y-m-d H:i:s" }}</td>
+<td>{{ row.received_from }}</td>
+
+{% else %}{% ifequal row.type "meta-log" %}
+
+<td colspan="3">meta-log entry:</td>
+<td style="font-size: small;"><code>{{ row.message|linebreaksbr }}</code></td>
+<td style="white-space: nowrap;">{{ row.received_on|date:"Y-m-d H:i:s" }}</td>
+<td>{{ row.received_from }}</td>
+
+{% else %}
+
+<td colspan="6">... {{ row.message }} ...</td>
+
+{% endifequal %}
+{% endifequal %}
+</tr>
+
 {% endfor %}
+
+</table>
+
+{% else %}
+
+<p>No log entries to display from this time interval</p>
+
+{% endif %}
+
+{% endblock %}
