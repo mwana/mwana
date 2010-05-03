@@ -303,7 +303,7 @@ class ResultForm(ModelForm):
         exclude = ['notification_status']
         
 log_rotation_threshold = 5000
-def log_viewer (request, daysback='7'):
+def log_viewer (request, daysback='7', source_filter=''):
     try:
         daysback = int(daysback)
     except ValueError:        
@@ -325,6 +325,9 @@ def log_viewer (request, daysback='7'):
     for log_record in logs:
         if log_record.message == None:
             #skip log entries that weren't parseable
+            continue
+        
+        if not log_record.payload_id.source.startswith(source_filter):
             continue
         
         log_entry = {
@@ -386,7 +389,8 @@ def log_viewer (request, daysback='7'):
         log_display_items.append(ldi)
         
     return render_to_response(request, 'labresults/logview.html',
-                              {'display_info': log_display_items, 'collisions': collisions, 'days': daysback})
+                              {'display_info': log_display_items, 'collisions': collisions,
+                               'days': daysback, 'source': source_filter})
         
         
 def log_cmp (a, b, wraparound):
