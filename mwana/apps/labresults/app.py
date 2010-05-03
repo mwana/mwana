@@ -16,6 +16,7 @@ import mwana.apps.labresults.config as config
 import mwana.const as const
 import rapidsms
 import re
+from mwana.util import get_clinic_or_default
 
 class App (rapidsms.App):
     
@@ -29,7 +30,9 @@ class App (rapidsms.App):
     
     mocker = MockResultUtility()
     
+    # regex format stolen from KeywordHandler
     CHECK_KEYWORD = "CHECK|CHEK|CHEC|CHK"
+    CHECK_REGEX   = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (CHECK_KEYWORD)
     
     def start (self):
         """Configure your app in the start phase."""
@@ -40,18 +43,16 @@ class App (rapidsms.App):
         key = message.text.strip().upper()
         key =key[:4]
         
-        # regex format stolen from KeywordHandler
-        check_prefix = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (self.CHECK_KEYWORD)
-        
-        if re.match(check_prefix, message.text, re.IGNORECASE):
+        if re.match(self.CHECK_REGEX, message.text, re.IGNORECASE):
             if not is_eligible_for_results(message.connection):
                 message.respond(NOT_REGISTERED)
                 return True
             
+            clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
             results = Result.objects.filter(
-                            clinic=message.contact.location,
+                            clinic=clinic,
                             notification_status__in=['new', 'notified'])
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
@@ -59,7 +60,7 @@ class App (rapidsms.App):
                 self._mark_results_pending(results, [message.connection])
             else:
                 message.respond(NO_RESULTS, name=message.contact.name,
-                                clinic=message.contact.location.name)
+                                clinic=clinic.name)
             return True
         elif message.connection in self.waiting_for_pin \
            and message.connection.contact:
@@ -90,14 +91,15 @@ class App (rapidsms.App):
         # has already processed the results (this assumes the only reason
         # you'd ever send your PIN in would be after receiving a notification)
         # This could be more robust, but keeping it simple.
+        clinic = get_clinic_or_default(message.contact)
         if is_eligible_for_results(message.connection) \
-           and message.connection.contact.location in self.last_collectors \
-           and message.text.strip().upper() == message.connection.contact.pin.upper():
-            if message.connection.contact == self.last_collectors[message.connection.contact.location]:
+           and clinic in self.last_collectors \
+           and message.text.strip().upper() == message.contact.pin.upper():
+            if message.contact == self.last_collectors[clinic]:
                 message.respond(SELF_COLLECTED, name=message.connection.contact.name)
             else:
                 message.respond(ALREADY_COLLECTED, name=message.connection.contact.name, 
-                         collector=self.last_collectors[message.connection.contact.location])
+                         collector=self.last_collectors[clinic])
             return True
         return self.mocker.default(message)
         
@@ -107,11 +109,12 @@ class App (rapidsms.App):
         (comes after PIN workflow).
         """
         results = self.waiting_for_pin[message.connection]
+        clinic  = get_clinic_or_default(message.contact)
         if not results:
             # how did this happen?
             self.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
-                       (message.connection.contact.location, message.connection.contact))
-            message.respond("Sorry, there are no new EID results for %s." % message.connection.contact.location)
+                       (clinic, message.connection.contact))
+            message.respond("Sorry, there are no new EID results for %s." % clinic)
             self.waiting_for_pin.pop(message.connection)
         else: 
             responses = build_results_messages(results)
@@ -131,7 +134,7 @@ class App (rapidsms.App):
             # was taken care of 
             clinic_connections = [contact.default_connection for contact in \
                                   Contact.active.filter\
-                                  (location=message.connection.contact.location)]
+                                  (location=clinic)]
             
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
@@ -139,8 +142,8 @@ class App (rapidsms.App):
                     OutgoingMessage(conn, RESULTS_PROCESSED, 
                                     name=message.connection.contact.name).send()
             
-            self.last_collectors[message.connection.contact.location] = \
-                                    message.connection.contact
+            self.last_collectors[clinic] = \
+                        message.connection.contact
         
     def chunk_messages(self, content):
         message = ''
