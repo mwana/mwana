@@ -14,7 +14,6 @@ from mwana import const
 
 
 class TestApp(TestScript):
-    apps = (handler_app, App,)
     
     def _register(self):
         clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])

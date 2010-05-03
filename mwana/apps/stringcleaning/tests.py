@@ -13,7 +13,7 @@ from rapidsms.tests.scripted import TestScript
 
 
 class TestApp(TestScript):
-    apps = (cleaning_App, handler_app, labresults_App)
+    
     ic = InputCleaner()
     def testSoundEx(self):
         print '*' * 70
