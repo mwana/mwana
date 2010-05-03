@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+import re
+
+from django.utils.translation import ugettext as _
+
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
-import re
 
 from mwana.apps.reminders import models as reminders
 from mwana import const
@@ -17,8 +20,8 @@ class AgentHelper(KeywordHandler):
     keyword = "agent|agemt|urgent|ajent|agdmt|agnt|agant"
 
     PATTERN = re.compile(r"^\s*(?P<clinic>\S+)\s+(?P<zone>\S+)\s+(?P<name>.+)$")
-    HELP_TEXT = "To register as a RemindMi agent, send AGENT <CLINIC CODE> "\
-                "<ZONE #> <YOUR NAME>"
+    HELP_TEXT = _("To register as a RemindMi agent, send AGENT <CLINIC CODE> "\
+                "<ZONE #> <YOUR NAME>")
     
     def help(self):
         self.respond(self.HELP_TEXT)
@@ -26,14 +29,14 @@ class AgentHelper(KeywordHandler):
     def _get_notify_text(self):
         events = list(reminders.Event.objects.values_list('slug', flat=True))
         if len(events) == 2:
-            events = ' or '.join(events)
+            events = (' ' + _('or') + ' ').join(events)
         elif len(events) > 0:
             if len(events) > 2:
-                events[-1] = 'or %s' % events[-1]
+                events[-1] = _('or') + ' ' + events[-1]
             events = ', '.join(events)
         if events:
-            notify_text = " Please notify us next time there is a "\
-                          "%s in your zone." % events
+            notify_text = " " + _("Please notify us next time there is a "\
+                          "%(event)s in your zone.") % {'event': events}
         else:
             notify_text = ""
         return notify_text
@@ -53,6 +56,23 @@ class AgentHelper(KeywordHandler):
                                            type=zone_type)
         return zone
 
+    def _get_clinic_and_zone(self, contact):
+        """
+        Determines the contact's current clinic and zone, if any.
+        """
+        if contact and contact.location and\
+           contact.location.type.slug == const.ZONE_SLUG:
+            contact_clinic = contact.location.parent
+            contact_zone = contact.location
+        elif contact and contact.location and\
+             contact.location.type.slug in const.CLINIC_SLUGS:
+            contact_clinic = contact.location
+            contact_zone = None
+        else:
+            contact_clinic = None
+            contact_zone = None
+        return contact_clinic, contact_zone
+
     def handle(self, text):
         m = self.PATTERN.search(text)
         if m is not None:
@@ -64,32 +84,56 @@ class AgentHelper(KeywordHandler):
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
                                              type__slug__in=const.CLINIC_SLUGS)
             except Location.DoesNotExist:
-                self.respond("Sorry, I don't know about a clinic with code "
-                             "%(code)s. Please check your code and try again.",
+                self.respond(_("Sorry, I don't know about a clinic with code "
+                             "%(code)s. Please check your code and try again."),
                              code=clinic_slug)
                 return
             zone = self._get_or_create_zone(clinic, zone_slug)
-            if self.msg.contact is not None and\
-               self.msg.contact.location == zone:
-                self.respond("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for zone %(zone)s of %(clinic)s.", 
+            contact_clinic, contact_zone =\
+              self._get_clinic_and_zone(self.msg.contact)
+            
+            if contact_zone == zone:
+                # don't let agents register twice for the same zone
+                self.respond(_("Hello %(name)s! You are already registered as "
+                             "a RemindMi Agent for zone %(zone)s of %(clinic)s."), 
                              name=self.msg.contact.name, zone=zone.name,
                              clinic=clinic.name)
                 return
-                        
-            cba = Contact.objects.create(name=name, location=zone)
-            cba.types.add(const.get_cba_type())
-            self.msg.connection.contact = cba
-            self.msg.connection.save()
-            self.respond("Thank you %(name)s! You have successfully "
-                         "registered as a RemindMi Agent for zone %(zone)s of %(clinic)s."
-                         "%(notify_text)s",
+            elif contact_clinic and contact_clinic != clinic:
+                # force agents to leave if they appear to be switching clinics
+                self.respond(_("Hello %(name)s! You are already registered as "
+                             "a RemindMi Agent for %(old_clinic)s. To leave "
+                             "your current clinic and join %(new_clinic)s, "
+                             "reply with LEAVE and then re-send your message."),
+                             name=self.msg.contact.name,
+                             old_clinic=contact_clinic.name,
+                             new_clinic=clinic.name)
+                return
+            elif self.msg.contact:
+                # if the contact exists but wasn't registered at a location,
+                # or was registered at the clinic level instead of the zone
+                # level, update the record and save it
+                cba = self.msg.contact
+                cba.name = name
+                cba.location = zone
+                cba.save()
+            else:
+                # lastly, if no contact exists, create one and save it in the
+                # connection
+                cba = Contact.objects.create(name=name, location=zone)
+                self.msg.connection.contact = cba
+                self.msg.connection.save()
+            if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
+                cba.types.add(const.get_cba_type())
+            self.respond(_("Thank you %(name)s! You have successfully "
+                         "registered as a RemindMi Agent for zone %(zone)s of "
+                         "%(clinic)s.%(notify_text)s"),
                          name=cba.name, zone=zone.name , clinic=clinic.name,
                          notify_text=self._get_notify_text())
         else:
-            self.respond("Sorry, I didn't understand that. Make sure you send "
+            self.respond(_("Sorry, I didn't understand that. Make sure you send "
                          "your clinic, zone #, and name like: AGENT <CLINIC "
-                         "CODE> <ZONE #> <YOUR NAME>")
+                         "CODE> <ZONE #> <YOUR NAME>"))
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular

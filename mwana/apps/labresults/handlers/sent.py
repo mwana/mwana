@@ -46,9 +46,10 @@ class SentHandler(KeywordHandler):
                     self.respond("%s %s" % (SORRY, HELP))
                     return
             else:
+                self.info("Converted %s to %s" % (original_text, text))
                 count = int(text)
-                count = abs(count) #just in case we change our general cleaning routine
-            
+                count = abs(count) #just in case we change our general cleaning routine           
+        
         if count < 1:
             self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
             return

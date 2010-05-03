@@ -1,14 +1,9 @@
-import time
 
 from mwana.apps.labresults.app import App as labresults_App
 from mwana.apps.stringcleaning.app import App as cleaning_App
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 
 from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.contrib.locations.models import Location
-from rapidsms.contrib.locations.models import LocationType
-from rapidsms.models import Connection
-from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 
 
@@ -29,6 +24,7 @@ class TestApp(TestScript):
         self.assertEqual(302, self.ic.words_to_digits('thri hundred and two'))
         self.assertEqual(26, self.ic.words_to_digits('twenti six'))
         self.assertEqual(8002, self.ic.words_to_digits('Eight thousand and two'))
+        self.assertEqual(2001082, self.ic.words_to_digits('2 milion one thouzand Eighty too samples'))
 
     def testReplaceoilWith011(self):
         print '*' * 70

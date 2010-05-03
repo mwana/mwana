@@ -5,6 +5,8 @@ import re
 import rapidsms
 import datetime
 
+from django.utils.translation import ugettext as _
+
 from rapidsms.models import Contact
 from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
@@ -17,8 +19,8 @@ class App(rapidsms.App):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
     
     DATE_RE = re.compile(r"[\d/.-]+")
-    HELP_TEXT = "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
-                " The date is optional and is logged as TODAY if left out."
+    HELP_TEXT = _("To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
+                " The date is optional and is logged as TODAY if left out.")
     DATE_FORMATS = (
         '%d/%m/%y',
         '%d/%m/%Y',
@@ -112,15 +114,15 @@ class App(rapidsms.App):
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
-                    msg.respond("Sorry, I couldn't understand that date. "
+                    msg.respond(_("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
-                                "DAY MONTH YEAR, for example: 23 04 2010")
+                                "DAY MONTH YEAR, for example: 23 04 2010"))
                     return
             else:
                 date = datetime.datetime.today()
             # fetch or create the patient
             if msg.contact and msg.contact.location:
-                patient, _ = Contact.objects.get_or_create(
+                patient, created = Contact.objects.get_or_create(
                                             name=patient_name,
                                             location=msg.contact.location)
             else:
@@ -137,22 +139,22 @@ class App(rapidsms.App):
             else:
                 cba_name = ''
             if patient.patient_events.filter(event=event, date=date).count():
-                msg.respond("Hello%(cba)s! I am sorry, but someone has already"
-                            " registered a %(event)s for %(name)s on %(date)s.",
+                msg.respond(_("Hello%(cba)s! I am sorry, but someone has already"
+                            " registered a %(event)s for %(name)s on %(date)s."),
                             cba=cba_name, event=event.name.lower(),
                             name=patient.name, date=date.strftime('%d/%m/%Y'))
                 return
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection)
             gender = event.possessive_pronoun
-            msg.respond("Thank you%(cba)s! You have successfully registered a %(event)s for "
+            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic.", cba=cba_name, gender=gender,
+                        "clinic."), cba=cba_name, gender=gender,
                         event=event.name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
-            msg.respond("Sorry, I didn't understand that. " +
+            msg.respond(_("Sorry, I didn't understand that.") + " " +
                         self.HELP_TEXT % {'event_lower': event.name.lower(),
                                           'event_upper': event.name.upper()})
         return True

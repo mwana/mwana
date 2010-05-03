@@ -66,8 +66,8 @@ class TestApp(TestScript):
         """
 
     testReportResultsCorrection = """
-            clinic_worker > SENT twenti two
-            clinic_worker < Hello John Banda! We received your notification that 22 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
+            clinic_worker > snt hundred twenti 5 samples
+            clinic_worker < Hello John Banda! We received your notification that 125 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
 
     testReportRemovalOfExtraWords = """
@@ -141,7 +141,7 @@ class TestApp(TestScript):
             clinic_worker > Help
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
             clinic_worker > RESULT 12345
-            clinic_worker < Sorry, no sample with id 12345 was found for your clinic. Please check your DBS records and try again.
+            clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             clinic_worker > here's some stuff that you won't understand
@@ -301,8 +301,10 @@ class TestApp(TestScript):
                               notification_status="new")
         
         script = """
+            clinic_worker > RESULT 9999
+            clinic_worker < 9999: Detected
             clinic_worker > RESULT 000 1
-            clinic_worker < Sorry, no samples with ids 000, 1 were found for your clinic. Please check your DBS records and try again.
+            clinic_worker < There are currently no results available for 000, 1. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
             clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0004a 0004b
@@ -310,7 +312,7 @@ class TestApp(TestScript):
             clinic_worker > RESULT 0004a , 0004b
             clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 6006
-            clinic_worker < Sorry, no sample with id 6006 was found for your clinic. Please check your DBS records and try again.
+            clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0001
             clinic_worker < 0001: Not Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
             clinic_worker > RESULT 0003
