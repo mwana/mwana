@@ -124,7 +124,7 @@ class TestApp(TestScript):
             kk     > birth 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > birth 4/3/2010 maria
-            kk     < Sorry, but someone has already registered a birth for maria on 04/03/2010.
+            kk     < Hello Rupiah Banda! I am sorry, but someone has already registered a birth for maria on 04/03/2010.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -239,6 +239,9 @@ class TestApp(TestScript):
         # get some bogus messages when they're retrieved below
         time.sleep(.1)
         cba_conn = Connection.objects.get(identity="cba")
+        cba = Contact.objects.create(name='Rupiah Banda')
+        cba_conn.contact = cba
+        cba_conn.save()
         birth.patient_events.create(patient=patient1, cba_conn=cba_conn,
                                     date=datetime.datetime.today())
         self.startRouter()
@@ -247,7 +250,7 @@ class TestApp(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello. Henry is due for "
+        self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due for "
                          "his or her next clinic appointment. Please deliver a "
                          "reminder to this person and ensure he or she visits "
                          "the clinic within 3 days.")
@@ -281,9 +284,9 @@ class TestApp(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello cba. patient 1 is due for "
+        self.assertEqual(messages[0].text, "Hello cba. Henry is due for "
                          "his or her next clinic appointment. Please deliver a "
-                         "reminder to this person and ensure he or she visits "
+                         "reminder to this person and ensure that he or she visits "
                          "Central Clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
