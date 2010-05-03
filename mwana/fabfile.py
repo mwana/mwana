@@ -123,6 +123,10 @@ def update_init_script():
     Run install_init_script before calling this method.
     """
     put('scripts/mwana-route-init-script.sh', '/etc/init.d/mwana-route', 0755)
+    run("sudo sed -i 's/PROJECT_DIR=/PROJECT_DIR=%s/' /etc/init.d/mwana-route"
+        % env.path.replace('/', '\/'))
+    run("sudo sed -i 's/USER=/USER=%s/' /etc/init.d/mwana-route"
+        % env.user)
 
 
 def restart_route():
@@ -134,3 +138,25 @@ def restart_route():
     """
     # using run instead of sudo because sudo prompts for a password
     run('sudo /etc/init.d/mwana-route restart')
+    # print out the top of the log file in case there are errors
+    import time
+    time.sleep(2)
+    run('head -n 15 %s/route.log' % env.path)
+
+
+def syncdb():
+    """
+    Runs ./manage.py syncdb on the remote server.
+    """
+    run('%s/mwana/manage.py syncdb' % env.path)
+
+
+def bootstrap():
+    """
+    Bootstraps the remote server for the first time.  This is just a shortcut
+    for the other more granular methods.
+    """
+    deploy()
+    install_init_script()
+    put('localsettings.py.example', '%s/mwana/localsettings.py')
+    print 'Now add your database settings to localsettings.py and run syncdb'
