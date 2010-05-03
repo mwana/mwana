@@ -2,3 +2,4 @@
 *.db
 mwana/localsettings.py
 *~
+mwana/logs/*

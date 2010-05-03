@@ -109,13 +109,15 @@ class JoinHandler(KeywordHandler):
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
                 # receiving results.
-                if get_clinic_or_default(self.msg.connection.contact) != location:
+                clinic = get_clinic_or_default(self.msg.connection.contact) 
+                if clinic != location:
                     self.respond(self.ALREADY_REGISTERED,
                                  name=self.msg.connection.contact.name,
-                                 location=self.msg.connection.contact.location)
+                                 location=clinic)
                     return True
                 else: 
                     contact = self.msg.contact
+                    location = clinic
             else:
                 contact = Contact(location=location)
             contact.name = name
@@ -130,7 +132,7 @@ class JoinHandler(KeywordHandler):
                          "results from Results160 as staff of %(location)s. "
                          "Your PIN is %(pin)s. "
                          "Reply with keyword 'HELP' if your information is not "
-                         "correct.", name=contact.name, location=location.name,
+                         "correct.", name=contact.name, location=clinic.name,
                          pin =pin)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",

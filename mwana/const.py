@@ -11,6 +11,8 @@ CLINIC_SLUGS = ('urban_health_centre', '1st_level_hospital',
                 'rural_health_centre', 'health_post')
 ZONE_SLUG = 'zone'
 
+# apps
+LAB_RESULTS_APP = "mwana.apps.labresults"
 
 def _get_contacttype(slug, name):
     try:
