@@ -27,7 +27,8 @@ class AgentHelper(KeywordHandler):
         self.respond(self.HELP_TEXT)
 
     def _get_notify_text(self):
-        events = list(reminders.Event.objects.values_list('slug', flat=True))
+        events = reminders.Event.objects.values_list('name', flat=True)
+        events = [event_name.lower() for event_name in events]
         if len(events) == 2:
             events = (' ' + _('or') + ' ').join(events)
         elif len(events) > 0:

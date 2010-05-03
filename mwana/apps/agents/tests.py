@@ -17,7 +17,7 @@ class TestApp(TestScript):
                                       slug="kdh", type=clinic)
         kdh = Location.objects.create(name="Mansa Central Clinic",
                                       slug="mansa", type=clinic)
-        reminders.Event.objects.create(name="Birth", slug="birth")
+        reminders.Event.objects.create(name="Birth", slug="birth|bith")
         self.assertEqual(reminders.Event.objects.count(), 1)
         script = """
             lost   > agent
