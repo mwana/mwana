@@ -352,7 +352,7 @@ def log_viewer (request, daysback='7'):
     #sort records into chronological order (best-faith effort)
     lines = set(lg['line'] for lg in log_entries)
     #if log entry buffer contains both high- and low-numbered lines, recent log file rotation may have occurred
-    wraparound = len(lines | set(range(0, 100))) > 0 and (max(lines) if lines else 0) >= log_rotation_threshold
+    wraparound = len(lines | set(range(0, 500))) > 0 and (max(lines) if lines else 0) >= log_rotation_threshold
     #if multiple log messages have the same line #, could suggest the log file was recently erased
     collisions = any(len([lg for lg in log_entries if lg['line'] == ln]) > 1 for ln in lines if ln != -1)
     log_entries.sort(cmp=lambda x, y: log_cmp(x, y, wraparound))
@@ -381,7 +381,7 @@ def log_viewer (request, daysback='7'):
                 if cur_line > expected_next_line:
                     log_display_items.append({'type': 'alert', 'message': 'missing log entries (%d lines)' % (cur_line - expected_next_line)})
                 elif cur_line < expected_next_line:
-                    log_display_items.append({'type': 'alert', 'message': 'logfile rotation'})
+                    log_display_items.append({'type': 'alert', 'message': 'logfile rotation (?)'})
 
         log_display_items.append(ldi)
         
@@ -391,7 +391,7 @@ def log_viewer (request, daysback='7'):
         
 def log_cmp (a, b, wraparound):
     def get_line (lg):
-        ln = int(lg['line'])
+        ln = lg['line']
         if wraparound and ln != -1 and ln < log_rotation_threshold / 2:
             ln += 1000000
         return ln
