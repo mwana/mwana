@@ -40,7 +40,7 @@ class TestApp(TestScript):
             noname < Sorry, I didn't understand that. Make sure you send your clinic, zone #, and name like: AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
         """
         self.runScript(script)
-        self.assertEqual(2, Contact.objects.count())
+        self.assertEqual(2, Contact.objects.count()) # 1 for mansa, one for kdh
         rb = Contact.objects.all()[0]
         self.assertEqual("Rupiah Banda", rb.name, "Name was not set correctly after registration!")
         self.assertEqual(rb.location.slug, "03", "Location was not set correctly after registration!")
