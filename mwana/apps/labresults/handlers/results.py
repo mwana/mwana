@@ -80,12 +80,14 @@ class ResultsHandler(KeywordHandler):
 
         if unfound_sample_results:
             if len(unfound_sample_results) == 1:
-                self.respond("Sorry, no sample with id %s was found for your "
-                             "clinic. Please check your DBS records and try "
-                             "again." % requisition_id)
+                self.respond("There are currently no results available for "
+                             "%s. Please check if the SampleID is "
+                             "correct or sms HELP if you have been waiting "
+                             "for 2 months or more" % requisition_id)
             else:
                 ids = ', '.join(str(requisition_id)
                                 for requisition_id in unfound_sample_results)
-                self.respond("Sorry, no samples with ids %(requisition_id)s "
-                             "were found for your clinic. Please check your "
-                             "DBS records and try again.", requisition_id=ids)
+                self.respond("There are currently no results available for "
+                             "%s. Please check if the SampleID's are "
+                             "correct or sms HELP if you have been waiting "
+                             "for 2 months or more" % ids)
