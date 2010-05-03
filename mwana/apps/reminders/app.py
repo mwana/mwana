@@ -82,6 +82,16 @@ class App(rapidsms.App):
                 name += part
         return date_str, name
 
+    def _get_event(self, slug):
+        """
+        Returns a single matching event based on the slug, allowing for
+        multiple |-separated slugs in the "slug" field in the database.
+        """
+        for event in reminders.Event.objects.filter(slug__icontains=slug):
+            keywords = [k.strip() for k in event.slug.split('|')]
+            if slug in keywords:
+                return event
+
     def handle(self, msg):
         """
         Handles the actual adding of events.  Other simpler commands are done
@@ -94,11 +104,9 @@ class App(rapidsms.App):
         """
         
         event_slug = msg.text.split()[0]
-        try:
-            event = reminders.Event.objects.get(slug__iexact=event_slug)
-        except reminders.Event.DoesNotExist:
+        event = self._get_event(event_slug)
+        if not event:
             return False
-        
         date_str, name = self._parse_message(msg)
         if name: # the date is optional
             if date_str:

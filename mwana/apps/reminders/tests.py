@@ -13,7 +13,7 @@ from mwana.apps.reminders import tasks
 from mwana import const
 
 
-class TestApp(TestScript):
+class EventRegistration(TestScript):
     apps = (handler_app, App,)
     
     def _register(self):
@@ -100,6 +100,25 @@ class TestApp(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
+
+    def testCorrectMessageWithManyKeywords(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", gender="f",
+                                       slug="birth|bith|bilth|mwana")
+        script = """
+            kk     > birth 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > bith 4/3/2010 anna
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > bilth 4/3/2010 laura
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwana 4/3/2010 lynn
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > unknownevent 4/3/2010 lynn
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(4, patients.count())
         
     def testCorrectMessageWithoutDate(self):
         self._register()
@@ -130,6 +149,11 @@ class TestApp(TestScript):
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
 
+
+class Reminders(TestScript):
+
+    apps = (handler_app, App,)
+    
     def testSendReminders(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth",
                                                gender="f")
@@ -286,7 +310,7 @@ class TestApp(TestScript):
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].text, "Hello cba. Henry is due for "
                          "his or her next clinic appointment. Please deliver a "
-                         "reminder to this person and ensure that he or she visits "
+                         "reminder to this person and ensure he or she visits "
                          "Central Clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
