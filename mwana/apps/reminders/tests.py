@@ -99,6 +99,17 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
+        
+    def testCorrectMessageWithoutRegisteringAgent(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth")
+        script = """
+            aa     > birth 4/3/2010 maria
+            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
 
     def testCorrectMessageWithManyKeywords(self):
         self._register()
