@@ -202,13 +202,13 @@ class Reminders(TestScript):
         messages = self.receiveAllMessages()
         expected_messages =\
             ['Hello cba1. patient 1 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure that she '
+             'Please deliver a reminder to this person and ensure she '
              'visits Central Clinic within 3 days.',
              'Hello cba1. patient 2 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure that she '
+             'Please deliver a reminder to this person and ensure she '
              'visits Central Clinic within 3 days.',
              'Hello cba2. patient 3 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure that she '
+             'Please deliver a reminder to this person and ensure she '
              'visits Central Clinic within 3 days.']
         self.assertEqual(len(messages), len(expected_messages))
         for msg in messages:
@@ -275,7 +275,7 @@ class Reminders(TestScript):
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due for "
                          "his or her next clinic appointment. Please deliver a "
-                         "reminder to this person and ensure that he or she visits "
+                         "reminder to this person and ensure he or she visits "
                          "the clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
