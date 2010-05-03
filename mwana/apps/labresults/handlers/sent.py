@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
 import re
@@ -51,7 +52,10 @@ class SentHandler(KeywordHandler):
             self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
             return
 
-        # TODO: maybe record this somewhere
+        # record this in our records    
+        SampleNotification.objects.create(contact=self.msg.contact, 
+                                          location=self.msg.contact.location,
+                                          count=count)
         self.respond(SENT, name=self.msg.contact.name, count=count,
                      clinic=self.msg.contact.location)
                      
