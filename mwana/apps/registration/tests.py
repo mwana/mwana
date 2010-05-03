@@ -11,10 +11,11 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.contrib.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
+from mwana.apps.stringcleaning.app import App as cleaner_App
 
 
 class TestApp(TestScript):
-    apps = (handler_app, )
+    apps = (cleaner_App, handler_app, )
     
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
@@ -28,10 +29,10 @@ class TestApp(TestScript):
             lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
             rb     > join kdh rupiah banda 123q
             rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            rb     > join kdh rupiah banda -1000
-            rb     < Sorry, -1000 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            rb     > join kdh rupiah banda +1000
-            rb     < Sorry, +1000 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
+            tk     > join kdh tizie kays -1000
+            tk     < Hi Tizie Kays, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            jk     > join kdh jordan katembula -1000
+            jk     < Hi Jordan Katembula, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
             rb     > join kdh rupiah banda1000
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 2001234
@@ -39,16 +40,15 @@ class TestApp(TestScript):
             rb     > join kdh rupiah banda4004444
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 1234
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Reply with keyword 'HELP' if your information is not correct.
+            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
             kk     > join whoops kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > join abc
             noname < Sorry, I didn't understand that. Make sure you send your location, name and pin like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.
         """
         self.runScript(script)
-        self.assertEqual(1, Contact.objects.count(), "Registration didn't create a new contact!")
-        rb = Contact.objects.all()[0]
-        self.assertEqual("Rupiah Banda", rb.name, "Name was not set correctly after registration!")
+        self.assertEqual(3, Contact.objects.count(), "Registration didn't create a new contact!")
+        rb = Contact.objects.get(name = "Rupiah Banda")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
@@ -56,12 +56,12 @@ class TestApp(TestScript):
 
         script = """
             jb     > join 4o30i2 jacob banda 1234
-            jb     < Hi Jacob Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Reply with keyword 'HELP' if your information is not correct.
+            jb     < Hi Jacob Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
             kk     > join 4f30i2 kenneth kaunda 1234
-            kk     < Sorry, I don't know about a location with code 4f30i2. Please check your code and try again.
+            kk     < Sorry, I don't know about a location with code 4f3012. Please check your code and try again.
         """
         self.runScript(script)
-        self.assertEqual(2, Contact.objects.count())
+        self.assertEqual(4, Contact.objects.count())
         jb = Contact.objects.get(name='Jacob Banda')
         self.assertEqual(central_clinic, jb.location)
         self.assertEqual(jb.types.count(), 1)

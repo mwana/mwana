@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# the following lines will be automatically populated with the correct
+# project directory and user when the init script is deployed
+PROJECT_DIR=
+USER=
+
 stop() {
         echo -n Stopping mwana route process...
         PID=`ps aux|grep "manage.py route"|grep -v grep|awk '{print $2}'`
@@ -10,8 +15,10 @@ stop() {
 }
 
 start() {
+        # unfortunately we don't know of a way to tell if the route process
+        # started successfully
         echo -n Starting mwana route process...
-        sudo -u deployer /home/deployer/staging/mwana/manage.py route > /home/deployer/staging/route.log 2>&1 &
+        sudo -u $USER $PROJECT_DIR/mwana/manage.py route > $PROJECT_DIR/route.log 2>&1 &
         echo done.
 }
 

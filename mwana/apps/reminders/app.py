@@ -125,9 +125,9 @@ class App(rapidsms.App):
 
             # make sure we don't create a duplicate patient event
             if patient.patient_events.filter(event=event, date=date).count():
-                msg.respond("Sorry, but someone has already registered a "
-                            "%(event)s for %(name)s on %(date)s.",
-                            event=event.name.lower(), name=patient.name,
+                msg.respond("Hello %(cba)s! I am sorry, but someone has already"
+                            " registered a %(event)s for %(name)s on %(date)s.",
+                            cba=msg.contact.name, event=event.name.lower(), name=patient.name,
                             date=date.strftime('%d/%m/%Y'))
                 return
             patient.patient_events.create(event=event, date=date,

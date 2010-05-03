@@ -7,6 +7,7 @@ from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
+from mwana.apps.labresults.util import is_eligible_for_results
 
 class RegisterHandler(KeywordHandler):
     """
@@ -16,6 +17,7 @@ class RegisterHandler(KeywordHandler):
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
     HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
+    ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
     PIN_LENGTH = 4     
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 1
@@ -37,11 +39,13 @@ class RegisterHandler(KeywordHandler):
 
     def handle(self, text):
         b = InputCleaner()
-        #refuse re-registration
-        if self.msg.contact is not None:
-            self.respond("I already have a contact with phone %(identity)s.", identity=self.msg.connection.identity)
+        if is_eligible_for_results(self.msg.connection):
+            # refuse re-registration if they're still active and eligible
+            self.respond(self.ALREADY_REGISTERED, 
+                         name=self.msg.connection.contact.name,
+                         location=self.msg.connection.contact.location)
             return
-
+        
         text = text.strip()
         text = b.remove_double_spaces(text)
         if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 3):
@@ -99,14 +103,28 @@ class RegisterHandler(KeywordHandler):
             return
         try:
             location = Location.objects.get(slug__iexact=clinic_code)
-            contact = Contact.objects.create(name=name, location=location, pin=pin)
+            if self.msg.connection.contact is not None \
+               and self.msg.connection.contact.is_active:
+                # this means they were already registered and active, but not yet 
+                # receiving results.
+                contact = self.msg.contact
+            else:
+                contact = Contact()
+            contact.name = name
+            contact.location = location
+            contact.pin = pin
+            contact.save()
             contact.types.add(const.get_clinic_worker_type())
+            
             self.msg.connection.contact = contact
             self.msg.connection.save()
+            
             self.respond("Hi %(name)s, thanks for registering for DBS "
                          "results from Results160 as staff of %(location)s. "
+                         "Your PIN is %(pin)s. "
                          "Reply with keyword 'HELP' if your information is not "
-                         "correct.", name=contact.name, location=location.name)
+                         "correct.", name=contact.name, location=location.name,
+                         pin =pin)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
                          code=clinic_code)

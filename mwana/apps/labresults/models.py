@@ -1,8 +1,25 @@
-from django.db import models
-from rapidsms.contrib.locations.models import Location
-from rapidsms.models import Connection
 from django.contrib.auth.models import User
+from django.db import models
+from datetime import datetime
+from rapidsms.contrib.locations.models import Location
+from rapidsms.models import Connection, Contact
 
+
+class SampleNotification(models.Model):
+    """
+    Records notifications that samples were sent.  This class
+    is not linked to the Result class because we don't have 
+    individual sample ids, so we just include them in bulk.
+    """
+    
+    contact  = models.ForeignKey(Contact)
+    location = models.ForeignKey(Location)
+    count    = models.PositiveIntegerField()
+    date     = models.DateTimeField(default=datetime.utcnow)
+    
+    def __unicode__(self):
+        "%s DBS Samples from %s on %s" % \
+            (self.count, self.location, self.date.date())
 
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status

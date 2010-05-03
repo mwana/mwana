@@ -57,44 +57,26 @@ class ResultsHandler(KeywordHandler):
                     if result.result and len(result.result.strip()) > 0:
                         if result.result.upper() in 'PN':
                             ready_sample_results.append(
-                                    "%(req_id)s: %(res)s, Lab ID = %(lab_id)s" %
+                                    "%(req_id)s: %(res)s" %
                                     {'req_id':result.requisition_id,
-                                    'res':result.get_result_display(),
-                                    'lab_id':result.sample_id})
-                            result.notification_status = "sent"
-                            result.save()
-                        elif result.result.upper() == 'R':
-                            unready_sample_results.append(
-                                    "%(req_id)s: %(res)s, Lab ID = %(lab_id)s, "
-                                    "%(detail)s" %
-                                      {'req_id':result.requisition_id,
-                                      'res':result.get_result_display(),
-                                      'lab_id':result.sample_id,
-                                      'detail':result.result_detail})
+                                    'res':result.get_result_display()})
                             result.notification_status = "sent"
                             result.save()
                         else:
-                            unready_sample_results.append("%(req_id)s: %(detail)s"
-                                    ", Lab ID = %(lab_id)s" %
-                                      {'req_id':result.requisition_id,
-                                      'lab_id':result.sample_id,
-                                      'detail':result.result_detail})
+                            unready_sample_results.append(requisition_id)
                     else:
-                        unready_sample_results.append(
-                        "%s: Not Yet Tested, Lab ID = %s"
-                        % (result.requisition_id, result.sample_id))
+                        unready_sample_results.append(requisition_id)
             else:
                 unfound_sample_results.append(requisition_id)
         if ready_sample_results:
-            self.respond("; ".join(rst for rst in ready_sample_results))
-            self.respond("Please record these results in your clinic records and"
-            " promptly delete them from your phone. Thank you again.")
+            resultsmsg = ". ".join(rst for rst in ready_sample_results)
+            self.respond("%s. Please record these results in your clinic records and"
+            " promptly delete them from your phone. Thank you again." % resultsmsg)
 
         if unready_sample_results:
-            self.respond("Results not ready, %(infor)s", infor="; ".join(rst for\
-            rst in unready_sample_results))
-            self.respond("Please record these results in your clinic records and"
-            " promptly delete them from your phone. Thank you again.")
+            self.respond("The results for sample(s) %(requisition_id)s are "
+                        "not yet ready. You will be notified when they are ready.",
+                        requisition_id=', '.join(str(requisition_id) for requisition_id in unready_sample_results))
 
         if unfound_sample_results:
             if len(unfound_sample_results) == 1:

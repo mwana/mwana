@@ -1,8 +1,10 @@
 from mwana.apps.labresults.handlers.register import RegisterHandler
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
-NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you as soon as more results are available."
+NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you know as soon as more results are available."
 BAD_PIN           = "Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'"
+SELF_COLLECTED    = "Hi %(name)s. It looks like you already collected your DBS results. To check for new results reply with keyword 'CHECK'"
+ALREADY_COLLECTED = "Hi %(name)s. It looks like the results you are looking for were already collected by %(collector)s. To check for new results reply with keyword 'CHECK'"
 RESULTS           = "Thank you! Here are your results: "
 RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
@@ -10,22 +12,14 @@ NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 
 
+
 def build_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting 
     their status
     """
-    result_strings = []
-    for r in results:
-        if r.result is None or len(r.result.strip()) == 0:
-            result_strings.append("Sample %s: Not Yet Tested, Lab ID = %s"
-                        % (r.requisition_id, r.sample_id))
-        elif r.result.upper() in 'IXR':
-            result_strings.append("Sample %s: Not Ready, Lab ID = %s, %s" %
-            (r.requisition_id, r.sample_id, r.result_detail))
-        else:
-            result_strings.append("Sample %s: %s, Lab ID = %s" %
-            (r.requisition_id, r.get_result_display(), r.sample_id))
+    result_strings = ["Sample %s: %s" % (r.requisition_id, r.get_result_display()) \
+                              for r in results]
     
     result_text, remainder = combine_to_length(result_strings,
                                                length=160-len(RESULTS))
@@ -35,6 +29,7 @@ def build_results_messages(results):
         next_msg, remainder = combine_to_length(remainder)
         responses.append(next_msg)
     return responses
+
 
 def combine_to_length(list, delimiter=". ", length=160):
     """
