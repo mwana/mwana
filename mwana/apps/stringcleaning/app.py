@@ -18,21 +18,10 @@ class App (rapidsms.App):
         msgtxt = msgtxt.strip()
 
         # replace separation marks with a space
-        replace_plus_minus = True
-        join_commands = ['join', 'j0in', 'jo1n', 'j01n', 'sent']
-        for js in join_commands:
-            if js.lower() in message.text.lower():
-                replace_plus_minus = False                
-                break
-                
-        if replace_plus_minus:
-            plus_minus = ['+', '-']
-            for mark in plus_minus:
+        separators = [',', '/', ';', '*', '+', '-']
+        for mark in separators:
                 msgtxt = msgtxt.replace(mark, ' ')
 
-        separators = [',', '/', ';', '*']
-        for mark in separators:
-            msgtxt = msgtxt.replace(mark, ' ')
         # remove other marks (we'll deal with . later)
         junk = ['\'', '\"', '`', '(', ')']
         for mark in junk:
