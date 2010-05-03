@@ -10,6 +10,8 @@ stop() {
 }
 
 start() {
+        # unfortunately we don't know of a way to tell if the route process
+        # started successfully
         echo -n Starting mwana route process...
         sudo -u deployer /home/deployer/staging/mwana/manage.py route > /home/deployer/staging/route.log 2>&1 &
         echo done.

@@ -4,7 +4,7 @@ import os
 import sys
 import tempfile
 
-from fabric.api import run, local, settings, env, put, hide, show
+from fabric.api import run, local, settings, env, put, hide, show, sudo
 from fabric.contrib import files, console, project
 from fabric import utils
 
@@ -84,6 +84,7 @@ def deploy():
         extra_opts=extra_opts,
     )
     touch()
+    restart_route()
 
 
 def run_tests():
@@ -96,3 +97,8 @@ def touch():
 
 def install_init_script():
     put('scripts/mwana-route-init-script.sh', '/etc/init.d/mwana-route', 0755)
+
+
+def restart_route():
+    # using run instead of sudo because sudo prompts for a password
+    run('sudo /etc/init.d/mwana-route restart')
