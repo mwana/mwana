@@ -52,10 +52,10 @@ TEST_EXCLUDED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "rapidsms",
-    "rapidsms.contrib.ajax", 
-    "rapidsms.contrib.httptester", 
+    "rapidsms.contrib.ajax",
+    "rapidsms.contrib.httptester",
+    "rapidsms.contrib.scheduler",
 )
-
 
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
