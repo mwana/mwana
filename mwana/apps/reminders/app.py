@@ -132,19 +132,24 @@ class App(rapidsms.App):
                 patient.types.add(patient_t)
 
             # make sure we don't create a duplicate patient event
+            if msg.contact:
+                cba_name = ' %s' % msg.contact.name
+            else:
+                cba_name = ''
             if patient.patient_events.filter(event=event, date=date).count():
-                msg.respond("Hello %(cba)s! I am sorry, but someone has already"
+                msg.respond("Hello%(cba)s! I am sorry, but someone has already"
                             " registered a %(event)s for %(name)s on %(date)s.",
-                            cba=msg.contact.name, event=event.name.lower(), name=patient.name,
-                            date=date.strftime('%d/%m/%Y'))
+                            cba=cba_name, event=event.name.lower(),
+                            name=patient.name, date=date.strftime('%d/%m/%Y'))
                 return
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection)
             gender = event.possessive_pronoun
-            msg.respond("Thank you %(cba)s! You have successfully registered a %(event)s for "
+            msg.respond("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic.", cba=msg.contact.name, event=event.name.lower(), gender=gender,
+                        "clinic.", cba=cba_name, gender=gender,
+                        event=event.name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond("Sorry, I didn't understand that. " +
