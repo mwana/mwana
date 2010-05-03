@@ -109,7 +109,7 @@ class JoinHandler(KeywordHandler):
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
                 # receiving results.
-                if get_clinic_or_default(self.msg.connection.contact.location) != location:
+                if get_clinic_or_default(self.msg.connection.contact) != location:
                     self.respond(self.ALREADY_REGISTERED,
                                  name=self.msg.connection.contact.name,
                                  location=self.msg.connection.contact.location)
