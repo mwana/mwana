@@ -44,6 +44,19 @@ INSTALLED_APPS = (
     "rapidsms.contrib.default",
 )
 
+# These apps should not be started by rapidsms in your tests
+# However the models + bootstrap will still be available through
+# django
+TEST_EXCLUDED_APPS = (
+    "django.contrib.sessions",
+    "django.contrib.contenttypes",
+    "django.contrib.auth",
+    "rapidsms",
+    "rapidsms.contrib.ajax", 
+    "rapidsms.contrib.httptester", 
+)
+
+
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 # TODO: make a better default response, include other apps, and maybe 
