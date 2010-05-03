@@ -23,7 +23,8 @@ try:
     for dir in [PROJECT_ROOT, rapidsms_lib, django_settings_root, django_tables_root]:
         sys.path.insert(0, dir)
     
-    import mwana.settings
+    from mwana.logconfig import init_django_logging
+    init_django_logging()
     import django.core.handlers.wsgi
     django_app = django.core.handlers.wsgi.WSGIHandler()
 except:

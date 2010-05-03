@@ -1,12 +1,14 @@
 from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS, \
-    RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL
+    RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL, ALREADY_COLLECTED, \
+    SELF_COLLECTED
 from mwana.apps.labresults.models import Result
-import mwana.const as const
+from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.locations.models import Location
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 import datetime
+import mwana.const as const
 import random
 
 
@@ -17,7 +19,8 @@ class MockResultUtility(LoggerMixin):
     """
     
     waiting_for_pin = {}
-
+    last_collectors = {}
+    
     def handle(self, message):
         if message.text.strip().upper().startswith("DEMO"):
             rest = message.text.strip()[4:].strip()
@@ -67,6 +70,8 @@ class MockResultUtility(LoggerMixin):
                         self.waiting_for_pin.pop(conn)
                         OutgoingMessage(conn, RESULTS_PROCESSED, 
                                         name=message.connection.contact.name).send()
+                
+                self.last_collectors[message.connection.contact.location] = message.connection.contact
                 return True
             else:
                 # pass a secret message to default phase, see app.py
@@ -78,6 +83,15 @@ class MockResultUtility(LoggerMixin):
     def default(self, message):
         if hasattr(message, "possible_bad_mock_pin"):
             message.respond(BAD_PIN)                
+            return True
+        elif is_eligible_for_results(message.connection) \
+           and message.connection.contact.location in self.last_collectors \
+           and message.text.strip().upper() == message.connection.contact.pin.upper():
+            if message.connection.contact == self.last_collectors[message.connection.contact.location]:
+                message.respond(SELF_COLLECTED, name=message.connection.contact.name)
+            else:
+                message.respond(ALREADY_COLLECTED, name=message.connection.contact.name, 
+                            collector=self.last_collectors[message.connection.contact.location])
             return True
 
     def fake_pending_results(self, clinic):

@@ -5,22 +5,31 @@ Created on Mar 31, 2010
 '''
 
 from datetime import date
+from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
-from mwana.apps.labresults.messages import *
-import mwana.const as const
+from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 import mwana.apps.labresults.config as config
+import mwana.const as const
 import rapidsms
+import re
 
 class App (rapidsms.App):
     
     # we store everyone who we think could be sending us a PIN for results 
     # here, so we can intercept the message.
     waiting_for_pin = {}
+    
+    # we keep a mapping of locations to who collected last, so we can respond
+    # when we receive stale pins
+    last_collectors = {}
+    
     mocker = MockResultUtility()
+    
+    CHECK_KEYWORD = "CHECK|CHEK|CHEC|CHK"
     
     def start (self):
         """Configure your app in the start phase."""
@@ -30,10 +39,12 @@ class App (rapidsms.App):
     def handle (self, message):
         key = message.text.strip().upper()
         key =key[:4]
-        if key in "CHECKCHEK":
-            if not message.connection.contact or \
-               not const.get_clinic_worker_type() in \
-               message.connection.contact.types.all():
+        
+        # regex format stolen from KeywordHandler
+        check_prefix = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (self.CHECK_KEYWORD)
+        
+        if re.match(check_prefix, message.text, re.IGNORECASE):
+            if not is_eligible_for_results(message.connection):
                 message.respond(NOT_REGISTERED)
                 return True
             
@@ -74,6 +85,20 @@ class App (rapidsms.App):
         if hasattr(message, "possible_bad_pin"):
             message.respond(BAD_PIN)                
             return True
+        
+        # additionally if this is your correct pin then respond that someone
+        # has already processed the results (this assumes the only reason
+        # you'd ever send your PIN in would be after receiving a notification)
+        # This could be more robust, but keeping it simple.
+        if is_eligible_for_results(message.connection) \
+           and message.connection.contact.location in self.last_collectors \
+           and message.text.strip().upper() == message.connection.contact.pin.upper():
+            if message.connection.contact == self.last_collectors[message.connection.contact.location]:
+                message.respond(SELF_COLLECTED, name=message.connection.contact.name)
+            else:
+                message.respond(ALREADY_COLLECTED, name=message.connection.contact.name, 
+                         collector=self.last_collectors[message.connection.contact.location])
+            return True
         return self.mocker.default(message)
         
     def send_results (self, message):
@@ -113,7 +138,9 @@ class App (rapidsms.App):
                     self.waiting_for_pin.pop(conn)
                     OutgoingMessage(conn, RESULTS_PROCESSED, 
                                     name=message.connection.contact.name).send()
-                                    
+            
+            self.last_collectors[message.connection.contact.location] = \
+                                    message.connection.contact
         
     def chunk_messages(self, content):
         message = ''
@@ -193,9 +220,7 @@ class App (rapidsms.App):
     def send_messages (self, messages):
         for msg in messages:  msg.send()
 
-
 def days_ago (d):
     return (date.today() - d).days
 
-    
     
