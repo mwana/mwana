@@ -8,21 +8,23 @@ from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_eligible_for_results
+from mwana.util import get_clinic_or_default
 
-class RegisterHandler(KeywordHandler):
+class JoinHandler(KeywordHandler):
     """
     """
 
     keyword = "j0in|join|jin|john|jo1n|jion|j01n|jon"
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
-    HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
-    ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
+    
     PIN_LENGTH = 4     
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 1
 
-    
+    HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
+    ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
+        
     def help(self):
         self.respond(self.HELP_TEXT)
 
@@ -107,11 +109,16 @@ class RegisterHandler(KeywordHandler):
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
                 # receiving results.
-                contact = self.msg.contact
+                if get_clinic_or_default(self.msg.connection.contact.location) != location:
+                    self.respond(self.ALREADY_REGISTERED,
+                                 name=self.msg.connection.contact.name,
+                                 location=self.msg.connection.contact.location)
+                    return True
+                else: 
+                    contact = self.msg.contact
             else:
-                contact = Contact()
+                contact = Contact(location=location)
             contact.name = name
-            contact.location = location
             contact.pin = pin
             contact.save()
             contact.types.add(const.get_clinic_worker_type())
