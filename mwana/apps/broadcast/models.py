@@ -33,6 +33,6 @@ class BroadcastResponse(models.Model):
     
     def __unicode__(self):
         return "%s from %s in response to %s" % \
-            (self.text, self.contact, self.broadcast_message)
+            (self.text, self.contact, self.broadcast)
              
     
