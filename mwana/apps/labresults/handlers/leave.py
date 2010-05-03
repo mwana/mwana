@@ -6,7 +6,7 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
 import re
 
-BYE_MSG   = "You have successfully unregisterd from Results160, %(name)s. We're sorry to see you go."
+BYE_MSG   = "You have successfully unregistered from Results160, %(name)s. We're sorry to see you go."
 ERROR_MSG = "Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us."
     
 class UnregisterHandler(KeywordHandler):
