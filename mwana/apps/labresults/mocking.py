@@ -102,21 +102,12 @@ def get_fake_results(count, clinic, starting_requisition_id=25, requisition_id_f
     """Fake results for demos and trainings"""
     results = []
     current_requisition_id = starting_requisition_id
-    for i in range(count-1):
+    for i in range(count):
         results.append(
             Result(requisition_id=requisition_id_format % (current_requisition_id + i), 
                    clinic=clinic, 
                    result=random.choice(Result.RESULT_CHOICES)[0],
                    collected_on=datetime.datetime.today(),
                    entered_on=datetime.datetime.today(), 
-                   notification_status=random.choice(notification_status_choices),
-                   sample_id = "lb0" + str(i+1),
-                   result_detail = random.choice(("equipment is down", "still processing","best known to us"))))
-    blankres=Result(requisition_id='030',
-                   clinic = clinic,
-                   collected_on=datetime.datetime.today(),
-                   entered_on=datetime.datetime.today(),
-                   notification_status=random.choice(notification_status_choices),
-                   sample_id = "lb04")
-    results.append(blankres)
+                   notification_status=random.choice(notification_status_choices)))
     return results
