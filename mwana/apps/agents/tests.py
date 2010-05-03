@@ -9,7 +9,6 @@ from mwana import const
 
 
 class TestApp(TestScript):
-    apps = (handler_app, App,)
     
     def testAgentRegistration(self):
         self.assertEqual(0, Contact.objects.count())
