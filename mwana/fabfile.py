@@ -23,24 +23,16 @@ RSYNC_EXCLUDE = (
 WRITABLE_MEDIA_DIRS = (
     'photos',
 )
+# if you get errors checking out "master", you probably need to run
+# "git branch master" in the offending repository on the server
 COMMITS = (
-    ('mwana', 'bca5793b050f7db1aa32f2334e86ca0562f689a0'),
-    ('rapidsms-core-dev', '3cefc6ac8c8e0bf83789eef29a378c01673597b2'),
-    ('rapidsms-contrib-apps-dev', 'd0f8dd5ce9c94f5ba78b1725a277915841c8a685'),
-#    ('pygsm', '99d9823d05a38c385a5ea0eb865806f6f2a2537e'),
+    ('mwana', 'master'),
+    ('rapidsms-core-dev', 'master'),
+    ('rapidsms-contrib-apps-dev', 'master'),
+#    ('pygsm', 'master'),
     ('django-tables', '2433617df7bf60025a32d56b36e081f7ef1aa5e6'),
     ('django-app-settings', '54935e8bcd155206ff4f296d8fa067006ba7bbda'),
 )
-#COMMITS = (
-#    ('mwana', 'master'),
-#    ('rapidsms-core-dev', 'master'),
-#    ('rapidsms-contrib-apps-dev', 'master'),
-##    ('pygsm', 'master'),
-#    ('django-tables', 'master'),
-#    ('django-app-settings', 'master'),
-#)
-
-
 DEST_DIRS = {
     'mwana': '',
     'rapidsms-core-dev': 'mwana/submodules/rapidsms',
