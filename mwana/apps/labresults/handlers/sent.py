@@ -3,6 +3,7 @@
 
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
+from mwana.util import get_clinic_or_default
 from rapidsms.contrib.handlers import KeywordHandler
 import re
 
@@ -58,7 +59,8 @@ class SentHandler(KeywordHandler):
         SampleNotification.objects.create(contact=self.msg.contact, 
                                           location=self.msg.contact.location,
                                           count=count)
+        clinic = get_clinic_or_default(self.msg.contact)
         self.respond(SENT, name=self.msg.contact.name, count=count,
-                     clinic=self.msg.contact.location)
+                     clinic=clinic)
                      
         
