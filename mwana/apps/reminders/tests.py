@@ -99,19 +99,30 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
+        
+    def testCorrectMessageWithoutRegisteringAgent(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth")
+        script = """
+            aa     > birth 4/3/2010 maria
+            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(1, patients.count())
 
     def testCorrectMessageWithManyKeywords(self):
         self._register()
         reminders.Event.objects.create(name="Birth", gender="f",
                                        slug="birth|bith|bilth|mwana")
         script = """
-            kk     > birth 4/3/2010 maria
+            kk     > bIrth 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > bith 4/3/2010 anna
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > bilth 4/3/2010 laura
+            kk     > BILTH 4/3/2010 laura
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwana 4/3/2010 lynn
+            kk     > mwaNA 4/3/2010 lynn
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > unknownevent 4/3/2010 lynn
         """
@@ -201,15 +212,15 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         expected_messages =\
-            ['Hello cba1. patient 1 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure she '
-             'visits Central Clinic within 3 days.',
-             'Hello cba1. patient 2 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure she '
-             'visits Central Clinic within 3 days.',
-             'Hello cba2. patient 3 is due for her next clinic appointment. '
-             'Please deliver a reminder to this person and ensure she '
-             'visits Central Clinic within 3 days.']
+            ['Hello cba1. patient 1 is due for their next clinic appointment. '
+             'Please deliver a reminder to this person and ensure they '
+             'visit Central Clinic within 3 days.',
+             'Hello cba1. patient 2 is due for their next clinic appointment. '
+             'Please deliver a reminder to this person and ensure they '
+             'visit Central Clinic within 3 days.',
+             'Hello cba2. patient 3 is due for their next clinic appointment. '
+             'Please deliver a reminder to this person and ensure they '
+             'visit Central Clinic within 3 days.']
         self.assertEqual(len(messages), len(expected_messages))
         for msg in messages:
             self.assertTrue(msg.text in expected_messages, msg)
@@ -273,9 +284,9 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due for "
-                         "his or her next clinic appointment. Please deliver a "
-                         "reminder to this person and ensure he or she visits "
+        self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due "
+                         "for their next clinic appointment. Please deliver a "
+                         "reminder to this person and ensure they visit "
                          "the clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
@@ -308,8 +319,8 @@ class Reminders(TestScript):
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
         self.assertEqual(messages[0].text, "Hello cba. Henry is due for "
-                         "his or her next clinic appointment. Please deliver a "
-                         "reminder to this person and ensure he or she visits "
+                         "their next clinic appointment. Please deliver a "
+                         "reminder to this person and ensure they visit "
                          "Central Clinic within 3 days.")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)

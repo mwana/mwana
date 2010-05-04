@@ -19,7 +19,7 @@ class AgentHelper(KeywordHandler):
 
     keyword = "agent|agemt|urgent|ajent|agdmt|agnt|agant"
 
-    PATTERN = re.compile(r"^\s*(?P<clinic>\S+)\s+(?P<zone>\S+)\s+(?P<name>.+)$")
+    PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
     HELP_TEXT = _("To register as a RemindMi agent, send AGENT <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
     
@@ -27,7 +27,8 @@ class AgentHelper(KeywordHandler):
         self.respond(self.HELP_TEXT)
 
     def _get_notify_text(self):
-        events = list(reminders.Event.objects.values_list('slug', flat=True))
+        events = reminders.Event.objects.values_list('name', flat=True)
+        events = [event_name.lower() for event_name in events]
         if len(events) == 2:
             events = (' ' + _('or') + ' ').join(events)
         elif len(events) > 0:
@@ -131,9 +132,8 @@ class AgentHelper(KeywordHandler):
                          name=cba.name, zone=zone.name , clinic=clinic.name,
                          notify_text=self._get_notify_text())
         else:
-            self.respond(_("Sorry, I didn't understand that. Make sure you send "
-                         "your clinic, zone #, and name like: AGENT <CLINIC "
-                         "CODE> <ZONE #> <YOUR NAME>"))
+            self.respond(_("Sorry, I didn't understand that. ") +
+                         self.HELP_TEXT)
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular

@@ -104,7 +104,8 @@ class JoinHandler(KeywordHandler):
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
             return
         try:
-            location = Location.objects.get(slug__iexact=clinic_code)
+            location = Location.objects.get(slug__iexact=clinic_code,
+                                            type__slug__in=const.CLINIC_SLUGS)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
@@ -117,9 +118,9 @@ class JoinHandler(KeywordHandler):
                     return True
                 else: 
                     contact = self.msg.contact
-                    location = clinic
             else:
                 contact = Contact(location=location)
+                clinic = get_clinic_or_default(contact)
             contact.name = name
             contact.pin = pin
             contact.save()
@@ -133,7 +134,7 @@ class JoinHandler(KeywordHandler):
                          "Your PIN is %(pin)s. "
                          "Reply with keyword 'HELP' if your information is not "
                          "correct.", name=contact.name, location=clinic.name,
-                         pin =pin)
+                         pin=pin)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
                          code=clinic_code)

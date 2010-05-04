@@ -17,7 +17,7 @@ class TestApp(TestScript):
                                       slug="kdh", type=clinic)
         kdh = Location.objects.create(name="Mansa Central Clinic",
                                       slug="mansa", type=clinic)
-        reminders.Event.objects.create(name="Birth", slug="birth")
+        reminders.Event.objects.create(name="Birth", slug="birth|bith")
         self.assertEqual(reminders.Event.objects.count(), 1)
         script = """
             lost   > agent
@@ -37,7 +37,7 @@ class TestApp(TestScript):
             kk     > agent whoops 03 kenneth kaunda
             kk     < Sorry, I don't know about a clinic with code whoops. Please check your code and try again.
             noname > agent abc
-            noname < Sorry, I didn't understand that. Make sure you send your clinic, zone #, and name like: AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
+            noname < Sorry, I didn't understand that. To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR NAME>
         """
         self.runScript(script)
         self.assertEqual(2, Contact.objects.count()) # 1 for mansa, one for kdh

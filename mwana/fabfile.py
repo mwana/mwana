@@ -23,6 +23,24 @@ RSYNC_EXCLUDE = (
 WRITABLE_MEDIA_DIRS = (
     'photos',
 )
+# if you get errors checking out "master", you probably need to run
+# "git branch master" in the offending repository on the server
+COMMITS = (
+    ('mwana', 'master'),
+    ('rapidsms-core-dev', 'master'),
+    ('rapidsms-contrib-apps-dev', 'master'),
+#    ('pygsm', 'master'),
+    ('django-tables', '2433617df7bf60025a32d56b36e081f7ef1aa5e6'),
+    ('django-app-settings', '54935e8bcd155206ff4f296d8fa067006ba7bbda'),
+)
+DEST_DIRS = {
+    'mwana': '',
+    'rapidsms-core-dev': 'mwana/submodules/rapidsms',
+    'rapidsms-contrib-apps-dev': 'mwana/submodules/rapidsms/lib/rapidsms/contrib',
+#    'pygsm': '',
+    'django-tables': 'mwana/submodules/rapidsms/submodules/django-tables',
+    'django-app-settings': 'mwana/submodules/rapidsms/submodules/django-app-settings',
+}
 env.project = 'mwana'
 # remove -l from env.shell, "mesg n" in ~/.profile was causing issues
 # see Why do I sometimes see ``err: stdin: is not a tty``?
@@ -49,6 +67,14 @@ def staging():
     env.user = 'deployer'
     env.root = '/home/deployer'
     env.dbname = 'mwana_staging'
+    env.repos = {
+        'mwana': '/home/projects/mwana',
+        'rapidsms-core-dev': '/home/projects/rapidsms-core-dev',
+        'rapidsms-contrib-apps-dev': '/home/projects/rapidsms-contrib-apps-dev',
+#        'pygsm': '/home/projects/pygsm',
+        'django-tables': '/home/projects/django-tables',
+        'django-app-settings': '/home/projects/django-app-settings',
+    }
     setup_path()
 
 
@@ -64,7 +90,7 @@ def production():
     setup_path()
 
 
-def deploy():
+def deploy_from_local():
     # don't die if tests fail
     # with settings(warn_only=True):
     #     run_tests()
@@ -83,6 +109,34 @@ def deploy():
         delete=True,
         extra_opts=extra_opts,
     )
+    touch()
+    restart_route()
+
+
+def iter_commits():
+    for name, commit in COMMITS:
+        repo = env.repos.get(name, '')
+        # don't use os.path on the off chance that we're deploying
+        # from windows to linux
+        dest = env.path + '/' + DEST_DIRS.get(name, '')
+        yield name, commit, repo, dest
+
+
+def clone_all():
+    for name, commit, repo, dest in iter_commits():
+        if repo:
+            run('git clone %s %s' % (repo, dest))
+
+
+def pull_and_checkout_all():
+    for name, commit, repo, dest in iter_commits():
+        if repo:
+            run('cd %s && git pull origin master && git checkout %s' %
+                (dest, commit))
+
+
+def deploy():
+    pull_and_checkout_all()
     touch()
     restart_route()
 
@@ -156,7 +210,8 @@ def bootstrap():
     Bootstraps the remote server for the first time.  This is just a shortcut
     for the other more granular methods.
     """
-    deploy()
     install_init_script()
-    put('localsettings.py.example', '%s/mwana/localsettings.py')
-    print 'Now add your database settings to localsettings.py and run syncdb'
+    clone_all()
+    put('localsettings.py.example', '%s/mwana/localsettings.py' % env.path)
+    pull_and_checkout_all()
+    print '\nNow add your database settings to localsettings.py and run syncdb'

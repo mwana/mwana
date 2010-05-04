@@ -19,7 +19,7 @@ class TestApp(TestScript):
     
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
-        ctr = LocationType.objects.create()
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=ctr)
         central_clinic = Location.objects.create(name="Central Clinic",
@@ -66,3 +66,63 @@ class TestApp(TestScript):
         self.assertEqual(central_clinic, jb.location)
         self.assertEqual(jb.types.count(), 1)
         self.assertEqual(jb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
+    
+    def testAgentThenJoinRegistrationSameClinic(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        # the same clinic
+        script = """
+            rb     > agent kdh 02 rupiah banda
+            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+            rb     > join kdh rupiah banda -1000
+            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+        """
+        self.runScript(script)
+    
+    def testAgentThenJoinRegistrationDifferentClinics(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        central_clinic = Location.objects.create(name="Central Clinic",
+                                                 slug="central", type=ctr)
+        # different clinics
+        script = """
+            rb     > agent central 02 rupiah banda
+            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Central Clinic.
+            rb     > join kdh rupiah banda -1000
+            rb     < Your phone is already registered to Rupiah Banda at Central Clinic. To change name or clinic first reply with keyword 'LEAVE' and try again.
+        """
+        self.runScript(script)
+
+    def testJoinThenAgentRegistrationSameClinic(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        # the same clinic
+        script = """
+            rb     > join kdh rupiah banda -1000
+            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            rb     > agent kdh 02 rupiah banda
+            rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+        """
+        self.runScript(script)
+
+    def testJoinThenAgentRegistrationDifferentClinics(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        central_clinic = Location.objects.create(name="Central Clinic",
+                                                 slug="central", type=ctr)
+        # different clinics
+        script = """
+            rb     > join central rupiah banda -1000
+            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            rb     > agent kdh 02 rupiah banda
+            rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Central Clinic. To leave your current clinic and join Kafue District Hospital, reply with LEAVE and then re-send your message.
+        """
+        self.runScript(script)
