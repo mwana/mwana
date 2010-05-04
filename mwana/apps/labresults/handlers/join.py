@@ -120,6 +120,7 @@ class JoinHandler(KeywordHandler):
                     location = clinic
             else:
                 contact = Contact(location=location)
+                clinic = location
             contact.name = name
             contact.pin = pin
             contact.save()
