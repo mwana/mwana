@@ -55,12 +55,10 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
         else:
             clinic_name = 'the clinic'
         msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
-                              "for %(gender)s next clinic appointment. Please "
+                              "for their next clinic appointment. Please "
                               "deliver a reminder to this person and ensure "
-                              "%(pronoun)s visits %(clinic)s within 3 days."),
+                              "they visit %(clinic)s within 3 days."),
                               cba=cba_name, patient=patient.name,
-                              gender=pronouns.get('possessive', 'his or her'),
-                              pronoun=pronouns.get('standard', 'he or she'),
                               clinic=clinic_name)
         msg.send()
     return connections
@@ -81,13 +79,8 @@ def send_notifications(router):
             sent_notifications__appointment=appointment
         )
         for patient_event in patient_events:
-            pronouns = {
-                'possessive': patient_event.event.possessive_pronoun,
-                'standard': patient_event.event.pronoun,
-            }
             connections = send_appointment_reminder(patient_event.patient,
-                                                    patient_event.cba_conn,
-                                                    pronouns)
+                                                    patient_event.cba_conn)
             for connection in connections:
                 reminders.SentNotification.objects.create(
                                            appointment=appointment,

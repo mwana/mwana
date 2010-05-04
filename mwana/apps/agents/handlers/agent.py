@@ -132,9 +132,8 @@ class AgentHelper(KeywordHandler):
                          name=cba.name, zone=zone.name , clinic=clinic.name,
                          notify_text=self._get_notify_text())
         else:
-            self.respond(_("Sorry, I didn't understand that. Make sure you send "
-                         "your clinic, zone #, and name like: AGENT <CLINIC "
-                         "CODE> <ZONE #> <YOUR NAME>"))
+            self.respond(_("Sorry, I didn't understand that. ") +
+                         self.HELP_TEXT)
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular
