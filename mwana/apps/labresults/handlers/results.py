@@ -42,7 +42,8 @@ class ResultsHandler(KeywordHandler):
                 Result.objects.get(requisition_id =text,
                                             clinic = self.msg.contact.location)                
             except Result.DoesNotExist:
-                self.respond("9999: Detected")
+                self.respond("9999: Detected. Please record these results in your clinic records and"
+            " promptly delete them from your phone. Thank you again.")
                 return
 
         requisition_ids = self.PATTERN.findall(text)
