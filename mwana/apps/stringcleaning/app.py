@@ -27,6 +27,10 @@ class App (rapidsms.App):
         for mark in junk:
             msgtxt = msgtxt.replace(mark, '')
 
+        #remove trailing period (.)
+        if msgtxt[-1:] == '.':
+            msgtxt = msgtxt[:-1]
+
         # split the text into chunks
         blobs = msgtxt.split(" ")
         clean_blobs = []

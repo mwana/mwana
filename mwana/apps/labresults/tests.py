@@ -301,8 +301,10 @@ class TestApp(TestScript):
                               notification_status="new")
         
         script = """
+            clinic_worker > RESULT 9999.
+            clinic_worker < 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
             clinic_worker > RESULT 9999
-            clinic_worker < 9999: Detected
+            clinic_worker < 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
             clinic_worker > RESULT 000 1
             clinic_worker < There are currently no results available for 000, 1. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004

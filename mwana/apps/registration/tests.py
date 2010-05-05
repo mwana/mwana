@@ -15,7 +15,7 @@ from mwana.apps.stringcleaning.app import App as cleaner_App
 
 
 class TestApp(TestScript):
-    apps = (cleaner_App, handler_app, )
+#    apps = (cleaner_App, handler_app, )
     
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
