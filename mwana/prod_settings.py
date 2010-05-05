@@ -4,12 +4,14 @@ DEBUG = False
 
 ADMINS = (
     ('Tobias McNulty', 'tobias@caktusgroup.com'),
-    ('Mwana Developers', 'mwana-dev@googlegroups.com'),
+    ('Drew Roos', 'droos@dimagi.com'),
+#    ('Mwana Developers', 'mwana-dev@googlegroups.com'),
 )
 
 MANAGERS = ADMINS
 
 EMAIL_SUBJECT_PREFIX = '[Mwana] '
+EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@unicefinnovation.org'
 
 TIME_ZONE = 'GMT+2'
@@ -31,3 +33,53 @@ DJANGO_LOG_FILE = "/var/log/rapidsms/rapidsms.django.log"
 LOG_FORMAT = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
 LOG_SIZE = 1000000 # in bytes
 LOG_BACKUPS = 256     # number of logs to keep around
+
+import logging.handlers
+
+class EmailMsgFormatter(logging.Formatter):
+    def format(self, record):
+        import pprint
+        import traceback
+        pp = pprint.PrettyPrinter(indent=4)
+        # remove 9 lines from the end of traceback, which are all standard
+        # logging module code
+        stack = '\n'.join(traceback.format_list(traceback.extract_stack())[:-9])
+
+        return logging.Formatter.format(self, record) + """
+
+Traceback:
+%s
+
+Full log record:
+%s""" % (stack, pp.pformat(record.__dict__))
+
+
+def init_email_handler():
+    """
+    Adds an email handler for errors and warnings, using a little hack
+    to ensure that it only gets initialized once.  Derived from:
+    
+    http://stackoverflow.com/questions/342434/python-logging-in-django
+    
+    This is in settings because settings is loaded by both the route process
+    and the wsgi process(es), and we want to email errors from both processes.
+    There's also no other place (that I know of) to successfully add a handler
+    to the route process, without monkey patching the route command itself.
+    """
+    root_logger = logging.getLogger()
+    if getattr(root_logger, 'email_handler_log_init_done', False):
+        return
+    root_logger.email_handler_log_init_done = True
+    smtp = logging.handlers.SMTPHandler(EMAIL_HOST,
+                                        DEFAULT_FROM_EMAIL,
+                                        [email for name, email in ADMINS],
+                                        EMAIL_SUBJECT_PREFIX + 'log message')
+    smtp.getSubject = lambda record: EMAIL_SUBJECT_PREFIX + record.levelname +\
+                                     ': ' + record.msg
+    smtp.setLevel(logging.ERROR)
+    smtp.setFormatter(EmailMsgFormatter(LOG_FORMAT))
+    root_logger.addHandler(smtp)
+    logger = logging.getLogger(__name__)
+    logger.info('email handler added')
+
+init_email_handler()
