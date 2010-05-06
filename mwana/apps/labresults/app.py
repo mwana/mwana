@@ -36,7 +36,6 @@ class App (rapidsms.App):
     
     def start (self):
         """Configure your app in the start phase."""
-        # this breaks on postgres
         self.schedule_notification_task()
         
     def handle (self, message):
