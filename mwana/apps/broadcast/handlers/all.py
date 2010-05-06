@@ -15,6 +15,7 @@ class AllHandler(BroadcastHandler):
         if self.msg.contact is None or \
            self.msg.contact.location is None:
             self.respond(UNREGISTERED)
+            return
         
         location = get_clinic_or_default(self.msg.contact)
         
