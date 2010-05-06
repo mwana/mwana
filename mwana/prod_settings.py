@@ -5,7 +5,7 @@ DEBUG = False
 ADMINS = (
     ('Tobias McNulty', 'tobias@caktusgroup.com'),
     ('Drew Roos', 'droos@dimagi.com'),
-#    ('Mwana Developers', 'mwana-dev@googlegroups.com'),
+    ('Mwana Developers', 'mwana-dev@googlegroups.com'),
 )
 
 MANAGERS = ADMINS
@@ -26,6 +26,10 @@ INSTALLED_BACKENDS.update({
                'timeout': 10}
 })
 
+#CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+
 # Override the default log settings
 LOG_LEVEL = "DEBUG"
 LOG_FILE = "/var/log/rapidsms/rapidsms.route.log"
@@ -34,10 +38,15 @@ LOG_FORMAT = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
 LOG_SIZE = 1000000 # in bytes
 LOG_BACKUPS = 256     # number of logs to keep around
 
+import hashlib
 import logging.handlers
 
 class EmailMsgFormatter(logging.Formatter):
+    
     def format(self, record):
+        """
+        Extends the parent's format with a traceback at the end.
+        """
         import pprint
         import traceback
         pp = pprint.PrettyPrinter(indent=4)
@@ -52,6 +61,29 @@ Traceback:
 
 Full log record:
 %s""" % (stack, pp.pformat(record.__dict__))
+
+
+class RateLimitingSMTPHandler(logging.handlers.SMTPHandler):
+    
+    timeout = 3600
+    
+    def emit(self, record):
+        """
+        Silently drops log records that have been sent with the past
+        ``self.timeout`` seconds.  Uses a hash of the message text, level,
+        file path, and line number as a key to determine if the message has
+        already been sent.
+        """
+        from django.core.cache import cache
+        m = hashlib.md5()
+        m.update(record.pathname)
+        m.update(str(record.lineno))
+        m.update(record.msg)
+        m.update(record.levelname)
+        cache_key = 'mwana-log-' + m.hexdigest()
+        if not cache.get(cache_key):
+            cache.set(cache_key, True, self.timeout)
+            logging.handlers.SMTPHandler.emit(self, record)
 
 
 def init_email_handler():
@@ -70,10 +102,10 @@ def init_email_handler():
     if getattr(root_logger, 'email_handler_log_init_done', False):
         return
     root_logger.email_handler_log_init_done = True
-    smtp = logging.handlers.SMTPHandler(EMAIL_HOST,
-                                        DEFAULT_FROM_EMAIL,
-                                        [email for name, email in ADMINS],
-                                        EMAIL_SUBJECT_PREFIX + 'log message')
+    smtp = RateLimitingSMTPHandler(EMAIL_HOST,
+                                   DEFAULT_FROM_EMAIL,
+                                   [email for name, email in ADMINS],
+                                   EMAIL_SUBJECT_PREFIX + 'log message')
     smtp.getSubject = lambda record: EMAIL_SUBJECT_PREFIX + record.levelname +\
                                      ': ' + record.msg
     smtp.setLevel(logging.ERROR)
