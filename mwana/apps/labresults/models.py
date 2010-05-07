@@ -15,6 +15,7 @@ class SampleNotification(models.Model):
     contact  = models.ForeignKey(Contact)
     location = models.ForeignKey(Location)
     count    = models.PositiveIntegerField()
+    count_in_text = models.CharField(max_length=160, null=True, blank = True)
     date     = models.DateTimeField(default=datetime.utcnow)
     
     def __unicode__(self):

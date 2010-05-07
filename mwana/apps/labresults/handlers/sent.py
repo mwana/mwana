@@ -58,7 +58,8 @@ class SentHandler(KeywordHandler):
         # record this in our records    
         SampleNotification.objects.create(contact=self.msg.contact, 
                                           location=self.msg.contact.location,
-                                          count=count)
+                                          count=count,
+                                          count_in_text=original_text[0:160])
         clinic = get_clinic_or_default(self.msg.contact)
         self.respond(SENT, name=self.msg.contact.name, count=count,
                      clinic=clinic)
