@@ -94,6 +94,8 @@ class JoinHandler(KeywordHandler):
 
         clinic_code = tokens[0].strip()
         clinic_code = b.try_replace_oil_with_011(clinic_code)
+        #we expect all codes have format PPDDFF or PPDDFFS
+        clinic_code = clinic_code[0:6]
         name = tokens[2]
         name = name.title().strip()
         pin = tokens[4].strip()
