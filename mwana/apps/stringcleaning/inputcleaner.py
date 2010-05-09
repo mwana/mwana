@@ -264,3 +264,49 @@ class InputCleaner:
         except (NameError, SyntaxError):
             return None
 
+    def mdarray(self, n,m):
+        """
+        utility method to create a multidimensional array
+        """
+        lists=[]
+        i=0
+        while i<n:
+            i=i+1
+            lists.append([0]*m)
+        return lists
+
+    def ldistance(self, s,t):
+        """
+        Levenshtein distance (LD) is a measure of the similarity between two strings
+        , (s) and (t). The distance is the number of deletions, insertions, or
+        substitutions required to transform s into t
+        """
+        s = s.lower()
+        t = t.lower()
+        n = len(s)
+        m = len(t)
+
+        if n==0:
+            return m
+        if m==0:
+            return n
+        matrix = self.mdarray(n+1,m+1)
+        i = 0
+        while i<m+1:
+            matrix[0][i] = i
+            i = i + 1
+        i = 0
+        while i<n+1:
+            matrix[i][0] = i
+            i = i + 1
+        cost = 0
+        for i in range(1,n+1):
+            for j in range(1,m+1):
+                if s[i-1]==t[j-1]:
+                    cost = 0
+                else:
+                    cost =1
+                matrix[i][j] = min(matrix[i-1][j]+1,matrix[i][j-1]+1, matrix[i-1][j-1] + cost)
+
+        return matrix[n][m]
+

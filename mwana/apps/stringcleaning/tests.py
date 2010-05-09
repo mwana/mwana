@@ -47,3 +47,11 @@ class TestApp(TestScript):
         self.assertEqual('Thirty', self.ic.digit_to_word(30))
         self.assertEqual(None, self.ic.digit_to_word(31))
 
+    def testLdistance(self):
+        print '*' * 70
+        print 'Testing ldistance\n'
+        self.assertEqual(0, self.ic.ldistance('pea', 'PeA'))
+        self.assertEqual(1, self.ic.ldistance('peac', 'PeA'))
+        self.assertEqual(1, self.ic.ldistance('pea', 'PeAc'))
+        self.assertEqual(1, self.ic.ldistance('pea', 'PeAc'))
+        self.assertEqual(4, self.ic.ldistance('trev', 'nanc'))
