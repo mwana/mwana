@@ -33,7 +33,7 @@ INSTALLED_BACKENDS.update({
                'timeout': 10}
 })
 
-#CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
+CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
