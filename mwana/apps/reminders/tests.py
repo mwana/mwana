@@ -159,7 +159,18 @@ class EventRegistration(TestScript):
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
 
+    def testFutureEventRegistration(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
+        script = """
+            kk     > birth 4/6/2010 maria
+            kk     < Sorry, you can not register a birth with a date after today's.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(0, patients.count())
 
+    
 class Reminders(TestScript):
 
     apps = (handler_app, App,)

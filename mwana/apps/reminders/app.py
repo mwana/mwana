@@ -120,6 +120,13 @@ class App(rapidsms.App):
                     return
             else:
                 date = datetime.datetime.today()
+
+            # make sure the birth date is not in the future
+            if date > datetime.datetime.today():
+                msg.respond(_("Sorry, you can not register a %s with a date "
+                "after today's." % event.name.lower()))
+                return
+
             # fetch or create the patient
             if msg.contact and msg.contact.location:
                 patient, created = Contact.objects.get_or_create(
