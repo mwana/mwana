@@ -63,7 +63,8 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
-    clinic = models.ForeignKey(Location, null=True, blank=True)
+    clinic = models.ForeignKey(Location, null=True, blank=True,
+                               related_name='lab_results')
     clinic_code_unrec = models.CharField(max_length=20, blank=True) #if result is for clinic not registered as a Location
                                                                     #store raw clinic code here
 
