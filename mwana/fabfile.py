@@ -83,10 +83,19 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production'
-    env.hosts = ['41.72.110.86']
+    env.hosts = ['41.72.110.86:80']
     env.user = 'mwana'
     env.root = '/home/mwana'
     env.dbname = 'mwana_production'
+    env.repos = {
+        'mwana': 'git://github.com/mwana/mwana.git',
+        'rapidsms-core-dev': 'git://github.com/mwana/rapidsms-core-dev.git',
+        'rapidsms-contrib-apps-dev':
+            'git://github.com/mwana/rapidsms-contrib-apps-dev.git',
+#       'pygsm': 'git://github.com/mwana/pygsm',
+        'django-tables': 'git://github.com/adammck/django-tables.git',
+        'django-app-settings': 'git://github.com/adammck/django-app-settings.git',
+    }
     setup_path()
 
 
@@ -102,7 +111,7 @@ def deploy_from_local():
     # -r recurse into directories
     # -v increase verbosity
     # -z compress file data during the transfer
-    extra_opts = '--omit-dir-times'
+    extra_opts = '--omit-dir-times -e "ssh -p 80"'
     project.rsync_project(
         env.path,
         exclude=RSYNC_EXCLUDE,
