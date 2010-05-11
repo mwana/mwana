@@ -10,7 +10,7 @@ from rapidsms.djangoproject.settings import *
 # then add your django settings:
 TIME_ZONE = 'UTC-2'
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.auth",
@@ -42,7 +42,7 @@ INSTALLED_APPS = (
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
-)
+]
 
 # These apps should not be started by rapidsms in your tests
 # However the models + bootstrap will still be available through
