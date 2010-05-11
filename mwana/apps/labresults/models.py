@@ -129,25 +129,6 @@ class Payload(models.Model):
                                                  len(self.raw))
 
 
-class LegacyPayload(models.Model):
-    """The legacy payload model used to store the first set of results from
-    the lab. This is added as a temporary measure to facilitate migrating the
-    legacy data to the new schema."""
-    
-    date = models.DateTimeField()
-    processed = models.BooleanField('Whether or not this result was saved to '
-                                    'the final results table in the database',
-                                    default=False)
-    data = models.TextField()
-    parsed = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'labresults_rawresult'
-
-    def __unicode__(self):
-        return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')
-
-
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
     
