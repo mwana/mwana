@@ -463,6 +463,9 @@ class ResultsAcceptor(TestScript):
         result1 = labresults.Result.objects.get(sample_id="10-09997")
         result2 = labresults.Result.objects.get(sample_id="10-09998")
         result3 = labresults.Result.objects.get(sample_id="10-09999")
+        self.assertEqual(result1.payload, payload)
+        self.assertEqual(result2.payload, payload)
+        self.assertEqual(result3.payload, payload)
 
     def test_payload_login_required(self):
         data = {'varname': 'data'}

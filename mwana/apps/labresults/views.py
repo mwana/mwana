@@ -117,7 +117,7 @@ def accept_results(request):
         if 'samples' in data and hasattr(data['samples'], '__iter__'):
             records_validate = True
             for rec in data['samples']:
-                if not accept_record(rec):
+                if not accept_record(rec, payload):
                     records_validate = False
         else:
             records_validate = False
@@ -162,7 +162,7 @@ def map_result (verbose_result):
                     'inconsistent': 'X'}
     return result_codes[verbose_result] if verbose_result in result_codes else ('x-' + verbose_result)
      
-def accept_record (record):
+def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
     does not validate, nothing is saved; existing records are updated as necessary; return whether
     the record validated"""
@@ -201,6 +201,7 @@ def accept_record (record):
     record_fields = {
         'sample_id': sample_id,
         'requisition_id': dictval(record, 'pat_id'),
+        'payload': payload.id if payload else None,
         'clinic': clinic_obj.id if clinic_obj else None,
         'clinic_code_unrec': clinic_code if not clinic_obj else None,
         'result': dictval(record, 'result', map_result),
@@ -268,7 +269,7 @@ def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
     
-    logentry = labresults.LabLog(payload_id=payload)
+    logentry = labresults.LabLog(payload=payload)
     logfields = {
         'timestamp': dictval(log, 'at', json_timestamp),
         'message': dictval(log, 'msg'),
@@ -317,7 +318,7 @@ def log_viewer (request, daysback='7'):
     #get log records to display
     cutoff_date = (datetime.now() - timedelta(days=daysback))
     payloads = labresults.Payload.objects.filter(incoming_date__gte=cutoff_date)
-    logs = labresults.LabLog.objects.filter(payload_id__in=payloads)
+    logs = labresults.LabLog.objects.filter(payload__in=payloads)
     
     #extract displayable info from log records, remove duplicate (re-sent) entries
     log_info = {}
@@ -332,9 +333,9 @@ def log_viewer (request, daysback='7'):
             'timestamp': log_record.timestamp,
             'level': log_record.level,
             'message': log_record.message,
-            'received_on': log_record.payload_id.incoming_date,
-            'received_from': log_record.payload_id.source,
-            'version': log_record.payload_id.version,
+            'received_on': log_record.payload.incoming_date,
+            'received_from': log_record.payload.source,
+            'version': log_record.payload.version,
         }
         log_uid = (log_entry['line'], log_entry['timestamp'])
         

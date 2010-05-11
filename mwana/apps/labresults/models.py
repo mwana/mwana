@@ -63,6 +63,8 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
+    payload = models.ForeignKey('Payload', null=True, blank=True,
+                                related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
                                related_name='lab_results')
     clinic_code_unrec = models.CharField(max_length=20, blank=True) #if result is for clinic not registered as a Location
@@ -151,7 +153,7 @@ class LabLog(models.Model):
     level = models.CharField(max_length=20, blank=True)
     line = models.IntegerField(null=True, blank=True)
     
-    payload_id = models.ForeignKey(Payload)       #payload this message came from
+    payload = models.ForeignKey(Payload)       #payload this message came from
     raw = models.TextField(blank=True) #raw content of log -- present only if log info couldn't be
                                                   #parsed/validated
     
