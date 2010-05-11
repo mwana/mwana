@@ -17,7 +17,7 @@ class HelpHandler(KeywordHandler):
     A simple help app, that optionally lets you forward requests to help admins
     """
 
-    keyword = "help|helpme|support"
+    keyword = "help|helpme|support|heip|hellp|heup"
     
     
     
