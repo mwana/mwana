@@ -131,11 +131,11 @@ class JoinHandler(KeywordHandler):
             self.msg.connection.contact = contact
             self.msg.connection.save()
             
-            self.respond("Hi %(name)s, thanks for registering for DBS "
-                         "results from Results160 as staff of %(location)s. "
+            self.respond("Hi %(name)s, thanks for registering for "
+                         "Results160 from %(location)s. "
                          "Your PIN is %(pin)s. "
-                         "Reply with keyword 'HELP' if your information is not "
-                         "correct.", name=contact.name, location=clinic.name,
+                         "Reply with keyword 'HELP' if this is "
+                         "incorrect", name=contact.name, location=clinic.name,
                          pin=pin)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
