@@ -5,7 +5,6 @@ import logging
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_GET
 from django.forms import ModelForm
-from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
 
 from mwana.apps.labresults import models as labresults
@@ -72,7 +71,7 @@ def dashboard(request):
     locations = Location.objects.all()
     return render_to_response(request, "labresults/dashboard.html", 
                               {"locations": locations })
-    
+
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_payload', 'Lab Results')
 @transaction.commit_on_success
@@ -91,64 +90,76 @@ def accept_results(request):
     try:
         data = json.loads(content)
     except:
-        #if payload does not parse as valid json, save raw content and return error
-        payload = labresults.Payload(incoming_date=payload_date,
-                                     auth_user=payload_user,
-                                     parsed_json=False,
-                                     raw=content)
-        payload.save()
-        return HttpResponse('CANNOT PARSE (%d bytes received)' % len(content))
-    
+        data = None
     #safety -- no matter what else happens, we'll have the original data
-    payload = labresults.Payload(incoming_date=payload_date,
-                                 auth_user=payload_user,
-                                 parsed_json=True,
-                                 raw=content)
+    payload = labresults.Payload.objects.create(incoming_date=payload_date,
+                                                auth_user=payload_user,
+                                                parsed_json=data is not None,
+                                                raw=content)
+    sid = transaction.savepoint()
+    if not data:
+        #if payload does not parse as valid json, save raw content and return error
+        return HttpResponse('CANNOT PARSE (%d bytes received)' % len(content))
     try:
-        payload.save()
+        process_payload(payload, data)
     except:
-        #failed to save raw data; attempt to leave it in the log
-        logger.exception('could not save raw incoming data from DBS lab!! raw data: %s' % content)
-        raise
-    
-    try:
-        #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
-        #record failed to validate
-        if 'samples' in data and hasattr(data['samples'], '__iter__'):
-            records_validate = True
-            for rec in data['samples']:
-                if not accept_record(rec, payload):
-                    records_validate = False
-        else:
-            records_validate = False
-    
-        if 'logs' in data and hasattr(data['samples'], '__iter__'):
-            logs_validate = True
-            for log in data['logs']:
-                if not accept_log(log, payload):
-                    logs_validate = False
-        else:
-            logs_validate = False
-        
-        meta_fields = {
-            'version': dictval(data, 'version'),
-            'source': dictval(data, 'source'), 
-            'client_timestamp': dictval(data, 'now', json_datetime),
-            'info':  dictval(data, 'info'),
-        }
-        
-        f_payload = PayloadForm(meta_fields, instance=payload)
-        if f_payload.is_valid():
-            payload = f_payload.save(commit=False)
-            payload.validated_schema = (records_validate and logs_validate)
-            payload.save()
-        else:
-            logger.error('errors in json schema for payload %d: %s' % (payload.id, str(f_payload.errors)))
-    except Exception, e:
-        logging.exception('second stage result parsing failed unexpectedly')
-    
+        logging.exception('second stage result parsing failed; rolling back '
+                          'to savepoint.')
+        transaction.savepoint_rollback(sid)
     return HttpResponse('SUCCESS')
-     
+
+def process_payload(payload, data=None):
+    """
+    Attempts to parse a payload's raw content and create the corresponding
+    results in the database.
+    """
+    logger.debug('in process_payload')
+    if data is None:
+        data = json.loads(payload.raw)
+    pre_record_creation = transaction.savepoint()
+    #parse/save the individual result and logs entries; aggregate whether all succeeded, or if any
+    #record failed to validate
+    if 'samples' in data and hasattr(data['samples'], '__iter__'):
+        records_validate = True
+        for rec in data['samples']:
+            if not accept_record(rec, payload):
+                logger.debug('record %s did not validate' % rec)
+                records_validate = False
+    else:
+        records_validate = False
+
+    if 'logs' in data and hasattr(data['logs'], '__iter__'):
+        logs_validate = True
+        for log in data['logs']:
+            if not accept_log(log, payload):
+                logger.debug('log %s did not validate' % log)
+                logs_validate = False
+    else:
+        logger.debug('no logs in data')
+        logs_validate = False
+
+    if not (records_validate and logs_validate):
+        transaction.savepoint_rollback(pre_record_creation)
+
+    meta_fields = {
+        'version': dictval(data, 'version'),
+        'source': dictval(data, 'source'), 
+        'client_timestamp': dictval(data, 'now', json_datetime),
+        'info':  dictval(data, 'info'),
+    }
+    
+    f_payload = PayloadForm(meta_fields, instance=payload)
+    if f_payload.is_valid():
+        payload = f_payload.save(commit=False)
+        payload.validated_schema = (records_validate and logs_validate)
+        payload.save()
+        logger.info('saving payload %s with records_validate=%s and '
+                    'logs_validate=%s' %
+                    (payload, records_validate, logs_validate))
+    else:
+        logger.error('errors in json schema for payload %d: %s' %
+                     (payload.id, str(f_payload.errors)))
+
 def normalize_clinic_id (zpct_id):
     """turn the ZPCT clinic id format into the MoH clinic id format"""
     return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) > 3 else zpct_id

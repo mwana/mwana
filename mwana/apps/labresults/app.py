@@ -37,6 +37,7 @@ class App (rapidsms.App):
     def start (self):
         """Configure your app in the start phase."""
         self.schedule_notification_task()
+        self.schedule_process_payloads_tasks()
         
     def handle (self, message):
         key = message.text.strip().upper()
@@ -158,12 +159,18 @@ class App (rapidsms.App):
         if len(message) > 0:
             yield message
         
-    def schedule_notification_task (self):
+    def schedule_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
-        # remove existing schedule tasks; reschedule based on the current setting from config
+        # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
 #        EventSchedule.objects.create(callback=callback, hours=[12],
 #                                     minutes=[0])
+
+    def schedule_process_payloads_tasks(self):
+        callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
 
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""

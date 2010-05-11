@@ -110,11 +110,14 @@ class Payload(models.Model):
     info = models.CharField(max_length=50, blank=True)       #extra info about payload
     
     parsed_json = models.BooleanField(default=False)        #whether this payload parsed as valid json
-    validated_schema = models.BooleanField(default=False)   #if parsed, whether this payload validated
-                                                            #completely according to the expectation of our
-                                                            #schema; if false, it is likely that some of the
-                                                            #data in this payload did NOT make it into Result
-                                                            #or LabLog records!
+    validated_schema = models.BooleanField(default=False, help_text='If parsed'
+                                           ', whether this payload validated '
+                                           'completely according to the '
+                                           'expectation of our schema; if '
+                                           'false, it is likely that some of '
+                                           'the data in this payload did NOT '
+                                           'make it into Result or LabLog '
+                                           'records!')
     
     raw = models.TextField()        #raw POST content of the payload; will always be present, even if other fields
                                     #like version, source, etc., couldn't be parsed
