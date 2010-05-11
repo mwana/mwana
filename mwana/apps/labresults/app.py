@@ -40,7 +40,7 @@ class App (rapidsms.App):
         
     def handle (self, message):
         key = message.text.strip().upper()
-        key =key[:4]
+        key = key[:4]
         
         if re.match(self.CHECK_REGEX, message.text, re.IGNORECASE):
             if not is_eligible_for_results(message.connection):
@@ -160,24 +160,15 @@ class App (rapidsms.App):
         
     def schedule_notification_task (self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
-        
         # remove existing schedule tasks; reschedule based on the current setting from config
         try:
             EventSchedule.objects.filter(callback=callback).delete()
         except EventSchedule.DoesNotExist:
             pass
-        
-        task = EventSchedule(callback=callback, days_of_month='*', hours=[8], minutes=[0]) #**config.sched)
+        task = EventSchedule(callback=callback, days_of_month='*', hours=[12],
+                             minutes=[0]) #**config.sched)
         task.save()
-        
-    def send_results_notification (self):
-        clinics_with_results =\
-          Result.objects.filter(notification_status__in=['new', 'notified'])\
-                                .values_list("clinic", flat=True).distinct()
-        
-        for clinic in clinics_with_results:
-            self.notify_clinic_pending_results(clinic)
-            
+
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""
         messages, results  = self.results_avail_messages(clinic)
@@ -200,7 +191,9 @@ class App (rapidsms.App):
         contacts = Contact.active.filter(location=clinic, 
                                          types=const.get_clinic_worker_type())
         if not contacts:
-            self.error("No contacts registered to receiver results at %s! These will go unreported." % clinic)
+            self.warning("No contacts registered to receiver results at %s! "
+                         "These will go unreported until clinic staff "
+                         "register at this clinic." % clinic)
         
         all_msgs = []
         for contact in contacts:

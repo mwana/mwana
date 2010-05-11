@@ -6,7 +6,8 @@ class ResultAdmin(admin.ModelAdmin):
     list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
                     'result', 'collected_on', 'entered_on', 'processed_on',
                     'notification_status',)
-    list_filter = ('result', 'collected_on', 'entered_on', 'processed_on', 'clinic', )
+    list_filter = ('result', 'notification_status', 'collected_on',
+                   'entered_on', 'processed_on', 'clinic', )
 admin.site.register(Result, ResultAdmin)
 
 admin.site.register(LabLog)
