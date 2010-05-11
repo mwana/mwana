@@ -43,7 +43,7 @@ class ResultsHandler(KeywordHandler):
                                             clinic = self.msg.contact.location)                
             except Result.DoesNotExist:
                 self.respond("Sample 9999: Detected. Please record these results in your clinic records and"
-            " promptly delete them from your phone. Thank you again.")
+            " promptly delete them from your phone. Thanks again")
                 return
 
         requisition_ids = self.PATTERN.findall(text)
@@ -79,7 +79,7 @@ class ResultsHandler(KeywordHandler):
         if ready_sample_results:
             resultsmsg = ". ".join(rst for rst in ready_sample_results)
             self.respond("%s. Please record these results in your clinic records and"
-            " promptly delete them from your phone. Thank you again." % resultsmsg)
+            " promptly delete them from your phone. Thanks again" % resultsmsg)
 
         if unready_sample_results:
             self.respond("The results for sample(s) %(requisition_id)s are "
