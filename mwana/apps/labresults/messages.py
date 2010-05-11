@@ -18,7 +18,7 @@ def build_results_messages(results):
     From a list of lab results, build a list of messages reporting 
     their status
     """
-    result_strings = ["Sample %s: %s" % (r.requisition_id, r.get_result_display()) \
+    result_strings = ["**** %s:%s" % (r.requisition_id, r.get_result_display()) \
                               for r in results]
     
     result_text, remainder = combine_to_length(result_strings,

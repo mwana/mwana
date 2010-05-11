@@ -147,7 +147,7 @@ class TestApp(TestScript):
             clinic_worker > here's some stuff that you won't understand
             clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
             clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
+            clinic_worker < Thank you! Here are your results: **** %(id1)s:%(res1)s. **** %(id2)s:%(res2)s. **** %(id3)s:%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "count": 3, "code": "4567",
             "id1": res1.requisition_id, "res1": res1.get_result_display(),
@@ -177,7 +177,7 @@ class TestApp(TestScript):
 
             script = """
                 clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: Sample %(id1)s: %(res1)s. Sample %(id2)s: %(res2)s. Sample %(id3)s: %(res3)s
+            clinic_worker < Thank you! Here are your results: **** %(id1)s:%(res1)s. **** %(id2)s:%(res2)s. **** %(id3)s:%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "code": "4567",
             "id1": res1.requisition_id, "res1": res1.get_result_display(),

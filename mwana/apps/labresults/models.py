@@ -28,8 +28,8 @@ class Result(models.Model):
     
     RESULT_CHOICES = (
         ('P', 'Detected'),
-        ('N', 'Not Detected'),
-        ('R', 'Rejected Sample'),   #this could include samples that failed to give a definitive result
+        ('N', 'NotDetected'),
+        ('R', 'Rejected'),   #this could include samples that failed to give a definitive result
                                     #  i.e., 'rejected -- indeterminate'
         ('I', 'Indeterminate'),     #could mean 'unable to get definitive result', but most likely means
                                     #  'sample on hold while we investigate missing critical data, such
