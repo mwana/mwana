@@ -302,9 +302,9 @@ class TestApp(TestScript):
         
         script = """
             clinic_worker > RESULT 9999.
-            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 9999
-            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
             clinic_worker < There are currently no results available for 000, 1. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
@@ -316,16 +316,16 @@ class TestApp(TestScript):
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0001
-            clinic_worker < 0001: Not Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < 0001: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0003
-            clinic_worker < 0003: Not Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < 0003: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
-            clinic_worker < 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
-            clinic_worker < 0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < 0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker < The results for sample(s) 0000 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0001 0002
-            clinic_worker < 0001: Not Detected. 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thank you again.
+            clinic_worker < 0001: NotDetected. 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
