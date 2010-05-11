@@ -161,13 +161,9 @@ class App (rapidsms.App):
     def schedule_notification_task (self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting from config
-        try:
-            EventSchedule.objects.filter(callback=callback).delete()
-        except EventSchedule.DoesNotExist:
-            pass
-        task = EventSchedule(callback=callback, days_of_month='*', hours=[12],
-                             minutes=[0]) #**config.sched)
-        task.save()
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours=[12],
+                                     minutes=[0])
 
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""
