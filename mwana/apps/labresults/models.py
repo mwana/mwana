@@ -40,6 +40,12 @@ class Result(models.Model):
                                     #  sense; sit on it indefinitely, hoping it will resolve to a
                                     #  different status
     )
+    
+    def get_result(self):
+        if self.result in ('X', 'I'):
+            return 'Rejected'
+        else:
+            return super(Result, self).get_result_display()
 
     STATUS_CHOICES = (
         ('in-transit', 'En route to lab'),      #not supported currently
