@@ -16,9 +16,9 @@ class App(rapidsms.App):
     hours = 4
 
     def handle(self, msg):
-        keyword = msg.text.split()[0]
+        keyword = msg.text.split()[0].lower()
         handled = False
-        if keyword in self.keywords.split("|"):
+        if keyword in [k.lower() for k in self.keywords.split("|")]:
             expire_date = datetime.datetime.now() +\
                           datetime.timedelta(hours=self.hours)
             TrialPeriod.objects.create(connection=msg.connection,
@@ -31,7 +31,10 @@ class App(rapidsms.App):
                               expire_date__gt=datetime.datetime.now()).count():
             logger.info('connection from %s DENIED (not whitelisted)' %
                         msg.connection)
-            msg.respond(getattr(settings, 'WHITELIST_RESPONSE', self.response))
+            if hasattr(settings, 'WHITELIST_RESPONSE'):
+                msg.respond(settings.WHITELIST_RESPONSE)
+            else:
+                msg.respond(self.response)
             handled = True
         else:
             logger.info('connection from %s ALLOWED (whitelisted)' %
