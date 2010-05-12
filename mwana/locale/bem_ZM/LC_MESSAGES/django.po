@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-05-04 18:13+0200\n"
+"POT-Creation-Date: 2010-05-12 17:20+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,7 @@ msgstr "nangu"
 #: apps/agents/handlers/agent.py:39
 #, python-format
 msgid "Please notify us next time there is a %(event)s in your zone."
-msgstr "Twapapata twishibishini elyo ukukafya lwa %(event)s libili."
+msgstr "Twapapata twishibisheni elyo ukukafya lwa %(event)s libili."
 
 #: apps/agents/handlers/agent.py:88
 #, python-format
@@ -68,7 +68,7 @@ msgid ""
 "Thank you %(name)s! You have successfully registered as a RemindMi Agent for "
 "zone %(zone)s of %(clinic)s.%(notify_text)s"
 msgstr ""
-"Ba %(name)s twamitotela, na mulenibwa nga umwiminishi wa RemindMi mu zone %"
+"Ba %(name)s twamitotela, na mulembwa nga umwiminishi wa RemindMi mu zone %"
 "(zone)s ku %(clinic)s.%(notify_text)s"
 
 #: apps/agents/handlers/agent.py:135
@@ -98,7 +98,7 @@ msgstr ""
 "Nga kwafyalikako %(event_lower)s, tumeni %(event_upper)s <inshiku> <ishina "
 "lyabanyina>. Inshiku yena nangu tamubikilepo tebwafya sana."
 
-#: apps/reminders/app.py:117
+#: apps/reminders/app.py:118
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
 "MONTH YEAR, for example: 23 04 2010"
@@ -106,24 +106,29 @@ msgstr ""
 "Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - ubushiku umwenshi "
 "umwaka - 23 04 2010."
 
-#: apps/reminders/app.py:142
+#: apps/reminders/app.py:127
+#, python-format
+msgid "Sorry, you can not register a %s with a date after today's."
+msgstr ""
+
+#: apps/reminders/app.py:150
 #, python-format
 msgid ""
 "Hello%(cba)s! I am sorry, but someone has already registered a %(event)s for "
 "%(name)s on %(date)s."
 msgstr ""
 
-#: apps/reminders/app.py:150
+#: apps/reminders/app.py:158
 #, fuzzy, python-format
 msgid ""
 "Thank you%(cba)s! You have successfully registered a %(event)s for %(name)s "
 "on %(date)s. You will be notified when it is time for %(gender)s next "
 "appointment at the clinic."
 msgstr ""
-"Twamitotela ba %(cba)s, namulembesha ukufyalwa kwa %(event)s (%(name)s) pa "
+"Twamitotela ba%(cba)s, namulembesha ukufyalwa kwa %(event)s %(name)s pa "
 "bushibuku bwapa %(date)s."
 
-#: apps/reminders/app.py:157
+#: apps/reminders/app.py:165
 msgid "Sorry, I didn't understand that."
 msgstr "Munjeleleko, nshumfwile amashiwi mutumine."
 
