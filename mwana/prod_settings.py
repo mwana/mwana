@@ -3,9 +3,10 @@ from mwana.settings import *
 # temporarily disable the entire project in the production environment
 # until we get approval
 INSTALLED_APPS.insert(INSTALLED_APPS.index("rapidsms"),
-                      "mwana.apps.autoresponder")
-DEFAULT_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
-                   "phase. We will notify you when the system is live."
+                      "mwana.apps.whitelist")
+WHITELIST_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
+                     "phase. We will notify you when the system is live."
+SEND_LIVE_LABRESULTS = False
 
 DEBUG = False
 

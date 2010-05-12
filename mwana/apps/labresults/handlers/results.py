@@ -2,8 +2,9 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 import re
-from mwana.apps.labresults.models import Result
+from django.conf import settings
 from rapidsms.contrib.handlers import KeywordHandler
+from mwana.apps.labresults.models import Result
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS \
 samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
@@ -31,21 +32,19 @@ class ResultsHandler(KeywordHandler):
     def help(self):
         self.respond(HELP)
 
+    def _get_results(self, clinic, requisition_id):
+        if settings.SEND_LIVE_LABRESULTS:
+            return Result.objects.order_by('pk').filter(
+                                         requisition_id__iexact=requisition_id,
+                                         clinic=clinic)
+        else:
+            return Result.objects.none()
+
     def handle(self, text):
         text = text.strip()
-
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
             return
-        if text == '9999':
-            try:
-                Result.objects.get(requisition_id =text,
-                                            clinic = self.msg.contact.location)                
-            except Result.DoesNotExist:
-                self.respond("Sample 9999: Detected. Please record these results in your clinic records and"
-            " promptly delete them from your phone. Thanks again")
-                return
-
         requisition_ids = self.PATTERN.findall(text)
         #we do not expect this
         if requisition_ids is None:
@@ -55,12 +54,17 @@ class ResultsHandler(KeywordHandler):
         unready_sample_results = []
         unfound_sample_results = []
         for requisition_id in requisition_ids:
-            results = Result.objects.order_by('pk').filter(
-                                                           requisition_id__iexact
-                                                           =requisition_id,
-                                                           clinic
-                                                           =self.msg.contact.location)
-            if results:
+            results = self._get_results(self.msg.contact.location,
+                                        requisition_id)
+            if len(requisition_ids) == 1 and requisition_id == '9999' and\
+               not results:
+                # demo functionality - if '9999' was specified and no results
+                # were found with that requisition ID, return a sample result
+                self.respond("Sample 9999: Detected. Please record these "
+                             "results in your clinic records and promptly "
+                             "delete them from your phone. Thanks again")
+                return
+            elif results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
                         if result.result.upper() in 'PN':

@@ -5,6 +5,9 @@ Created on Mar 31, 2010
 '''
 
 from datetime import date
+
+from django.conf import settings
+
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
@@ -51,9 +54,7 @@ class App (rapidsms.App):
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = Result.objects.filter(
-                            clinic=clinic,
-                            notification_status__in=['new', 'notified'])
+            results = self._pending_results(clinic)
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
                                 count=results.count())
@@ -177,7 +178,15 @@ class App (rapidsms.App):
         messages, results  = self.results_avail_messages(clinic)
         if messages:
             self.send_messages(messages)
-            self._mark_results_pending(results, (msg.connection for msg in messages))
+            self._mark_results_pending(results,
+                                       (msg.connection for msg in messages))
+
+    def _pending_results(self, clinic):
+        if settings.SEND_LIVE_LABRESULTS:
+            return Result.objects.filter(clinic=clinic,
+                                   notification_status__in=['new', 'notified'])
+        else:
+            return Result.objects.none()
 
     def _mark_results_pending(self, results, connections):
         for connection in connections:
@@ -187,10 +196,7 @@ class App (rapidsms.App):
             r.save()
 
     def results_avail_messages(self, clinic):
-        results = Result.objects.filter\
-                            (clinic=clinic,
-                             notification_status__in=['new', 'notified'])
-        
+        results = self._pending_results(clinic)
         contacts = Contact.active.filter(location=clinic, 
                                          types=const.get_clinic_worker_type())
         if not contacts:
