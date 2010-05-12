@@ -5,8 +5,6 @@ import re
 import rapidsms
 import datetime
 
-from django.utils.translation import ugettext as _
-
 from rapidsms.models import Contact
 from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
@@ -14,6 +12,10 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana import const
 
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that ./manage.py makemessages
+# finds our text.
+_ = lambda s: s
 
 class App(rapidsms.App):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
