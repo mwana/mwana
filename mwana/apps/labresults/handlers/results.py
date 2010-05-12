@@ -3,6 +3,7 @@
 
 import re
 from django.conf import settings
+from django.db.models import Q
 from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.labresults.models import Result
 
@@ -34,9 +35,12 @@ class ResultsHandler(KeywordHandler):
 
     def _get_results(self, clinic, requisition_id):
         if settings.SEND_LIVE_LABRESULTS:
-            return Result.objects.order_by('pk').filter(
-                                         requisition_id__iexact=requisition_id,
-                                         clinic=clinic)
+            q = Q(requisition_id__iexact=requisition_id) 
+            if requisition_id.startswith(clinic.slug):
+                short_id = re.sub('^%s' % clinic.slug, '', requisition_id)
+                q |= Q(requisition_id__iexact=short_id)
+            q &= Q(clinic=clinic)
+            return Result.objects.order_by('pk').filter(q)
         else:
             return Result.objects.none()
 
