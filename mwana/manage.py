@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys, os
 from django.core.management import execute_manager
 
@@ -20,15 +22,15 @@ if __name__ == "__main__":
     # with the 'mwana.' prefix)
     sys.path.pop(0)
 
-    project_root = os.path.abspath(os.path.dirname(__file__))
+    project_root = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
     
-    rapidsms_root = os.path.join(project_root, "submodules", "rapidsms")
+    rapidsms_root = os.path.join(project_root, "mwana", "submodules", "rapidsms")
     rapidsms_lib = os.path.join(rapidsms_root, "lib")
     django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
     django_tables_root = os.path.join(rapidsms_root, "submodules", "django-tables")
     
-    for dir in [project_root, rapidsms_lib, django_settings_root, django_tables_root]:
+    for dir in [django_settings_root, django_tables_root, rapidsms_lib, project_root]:
         sys.path.insert(0, dir)
-
-    import settings
+    
+    from mwana import settings
     execute_manager(settings)
