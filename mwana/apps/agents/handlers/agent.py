@@ -3,8 +3,6 @@
 
 import re
 
-from django.utils.translation import ugettext as _
-
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
@@ -12,6 +10,10 @@ from rapidsms.models import Contact
 from mwana.apps.reminders import models as reminders
 from mwana import const
 
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that makemessages finds
+# our text.
+_ = lambda s: s
 
 class AgentHelper(KeywordHandler):
     """
@@ -36,11 +38,10 @@ class AgentHelper(KeywordHandler):
                 events[-1] = _('or') + ' ' + events[-1]
             events = ', '.join(events)
         if events:
-            notify_text = " " + _("Please notify us next time there is a "\
-                          "%(event)s in your zone.") % {'event': events}
+            return _("Please notify us next time there is a %(event)s in your "
+                     "zone."), {'event': events}
         else:
-            notify_text = ""
-        return notify_text
+            return "", {}
 
     def _get_or_create_zone(self, clinic, name):
         # create the zone if it doesn't already exist
@@ -126,14 +127,16 @@ class AgentHelper(KeywordHandler):
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
-            self.respond(_("Thank you %(name)s! You have successfully "
-                         "registered as a RemindMi Agent for zone %(zone)s of "
-                         "%(clinic)s.%(notify_text)s"),
-                         name=cba.name, zone=zone.name , clinic=clinic.name,
-                         notify_text=self._get_notify_text())
+            msg = self.respond(_("Thank you %(name)s! You have successfully "
+                                 "registered as a RemindMi Agent for zone "
+                                 "%(zone)s of %(clinic)s."), name=cba.name,
+                                 zone=zone.name, clinic=clinic.name)
+            notify_text, kwargs = self._get_notify_text()
+            if notify_text:
+                msg.append(notify_text, **kwargs)
         else:
-            self.respond(_("Sorry, I didn't understand that. ") +
-                         self.HELP_TEXT)
+            msg = self.respond(_("Sorry, I didn't understand that."))
+            msg.append(self.HELP_TEXT)
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular

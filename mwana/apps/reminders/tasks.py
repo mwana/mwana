@@ -1,14 +1,16 @@
 import datetime
 import logging
 
-from django.utils.translation import ugettext as _
-
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from mwana.apps.reminders import models as reminders
 from mwana import const
 
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that makemessages finds
+# our text.
+_ = lambda s: s
 
 NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 

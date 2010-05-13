@@ -193,13 +193,22 @@ def accept_record (record, payload):
             message += '; original record [%s] untouched' % sample_id
         message += '\nrecord: %s' % str(record)
         logger.error(message)
-    
+
     #validate required identifying fields
-    for reqd_field in ('id', 'pat_id', 'fac'):
+    for reqd_field in ('id', 'fac'):
         if not dictval(record, reqd_field):
             cant_save('required field %s missing' % reqd_field)
             return False
-    
+
+    # If pat_id is missing, log the error and return success without saving.
+    # We can't save the record, but this is an expected error condition
+    # because pat_id is not required in the source (Access) database.
+    # The only way to recover is if they update the database (the record will
+    # be resent at that time).
+    if not dictval(record, 'pat_id'):
+        cant_save('ignoring record without pat_id field')
+        return True
+
     #validate clinic id
     clinic_code = normalize_clinic_id(str(dictval(record, 'fac')))
     try:
