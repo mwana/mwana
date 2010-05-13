@@ -309,6 +309,8 @@ class TestApp(TestScript):
             clinic_worker < There are currently no results available for 000, 1. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
             clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
+            clinic_worker > RESULT mib0004
+            clinic_worker < The results for sample(s) mib0004 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0004a 0004b
             clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0004a , 0004b
