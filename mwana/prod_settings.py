@@ -22,7 +22,7 @@ EMAIL_SUBJECT_PREFIX = '[Mwana] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@unicefinnovation.org'
 
-TIME_ZONE = 'GMT+2'
+TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'bem-zm'
 

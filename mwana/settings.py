@@ -8,8 +8,6 @@ from rapidsms.djangoproject.settings import *
 
 
 # then add your django settings:
-TIME_ZONE = 'UTC-2'
-
 SEND_LIVE_LABRESULTS = True
 
 INSTALLED_APPS = [
