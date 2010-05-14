@@ -3,8 +3,7 @@ import os.path
 import sys
 
 #Calculate the project path based on the location of the WSGI script.
-PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
-sys.path.insert(0, os.path.dirname(PROJECT_ROOT))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 
 SHOW_UPGRADE_MESSAGE = False
 ADMIN_IPS = ('127.0.0.1',)
@@ -15,16 +14,19 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'mwana.localsettings'
 os.environ['PYTHON_EGG_CACHE'] = '/var/data/.python_eggs'
 
 try:
-    rapidsms_root = os.path.join(PROJECT_ROOT, "submodules", "rapidsms")
+    rapidsms_root = os.path.join(PROJECT_ROOT, "mwana", "submodules", "rapidsms")
     rapidsms_lib = os.path.join(rapidsms_root, "lib")
     django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
     django_tables_root = os.path.join(rapidsms_root, "submodules", "django-tables")
     
-    for dir in [PROJECT_ROOT, rapidsms_lib, django_settings_root, django_tables_root]:
+    for dir in [django_settings_root, django_tables_root, rapidsms_lib, PROJECT_ROOT]:
         sys.path.insert(0, dir)
     
-    from mwana.logconfig import init_django_logging
-    init_django_logging()
+    from mwana import localsettings as settings
+    from mwana.logconfig import init_file_logging
+    init_file_logging(settings.DJANGO_LOG_FILE, settings.LOG_SIZE,
+                      settings.LOG_BACKUPS, settings.LOG_LEVEL,
+                      settings.LOG_FORMAT)
     import django.core.handlers.wsgi
     django_app = django.core.handlers.wsgi.WSGIHandler()
 except:

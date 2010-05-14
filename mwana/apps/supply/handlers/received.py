@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from mwana.apps.registration.handlers.register import RegisterHandler

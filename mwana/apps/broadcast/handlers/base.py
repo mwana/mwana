@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.broadcast.models import BroadcastMessage

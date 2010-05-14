@@ -406,7 +406,7 @@ class ResultsAcceptor(TestScript):
                     "fac": 2020200, 
                     "id": "10-09999", 
                     "hw_tit": "NURSE", 
-                    "pat_id": "999/10", 
+                    "pat_id": "", 
                     "dob": "2010-02-08", 
                     "proc_on": "2010-04-11", 
                     "child_age": 3
@@ -461,13 +461,12 @@ class ResultsAcceptor(TestScript):
         self.assertEqual(payload.incoming_date.day, now.day)
         self.assertEqual(payload.incoming_date.hour, now.hour)
 
-        self.assertEqual(labresults.Result.objects.count(), 3)
+        self.assertEqual(labresults.Result.objects.count(), 2)
         result1 = labresults.Result.objects.get(sample_id="10-09997")
         result2 = labresults.Result.objects.get(sample_id="10-09998")
-        result3 = labresults.Result.objects.get(sample_id="10-09999")
+        # 10-09999 will not make it in because it's missing a pat_id
         self.assertEqual(result1.payload, payload)
         self.assertEqual(result2.payload, payload)
-        self.assertEqual(result3.payload, payload)
 
     def test_payload_login_required(self):
         data = {'varname': 'data'}
