@@ -288,11 +288,11 @@ class TestApp(TestScript):
                                entered_on=datetime.datetime.today(),
                                notification_status="new")
 
-        res5 = results.create(requisition_id="0000", clinic=self.clinic,
-                              result="R",
-                              collected_on=datetime.datetime.today(),
-                              entered_on=datetime.datetime.today(),
-                              notification_status="new")
+#        res5 = results.create(requisition_id="0000", clinic=self.clinic,
+#                              result="R",
+#                              collected_on=datetime.datetime.today(),
+#                              entered_on=datetime.datetime.today(),
+#                              notification_status="new")
 
         res6 = results.create(requisition_id="0000", clinic=self.clinic,
                               result="P",
@@ -325,7 +325,6 @@ class TestApp(TestScript):
             clinic_worker < 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
             clinic_worker < 0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
-            clinic_worker < The results for sample(s) 0000 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0001 0002
             clinic_worker < 0001: NotDetected. 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
