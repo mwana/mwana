@@ -5,7 +5,19 @@ sched = ['0930', '1310', '1645']  #scheduling parameters for sync task
 #list of clinic ids to send data for; if present, ONLY data for these clinics will be sent
 #(though data for all clinics will still accumulate in the staging db); if empty or None,
 #data for all clinics will be sent
-clinics = None
+clinics = [
+  '4020260',
+  '4020300',
+  '4020230',
+  '4030110',
+  '4030170',
+  '4030290',
+  '4030320',
+  '4030120',
+  '4060130',
+  '4060150',
+  '4060160',
+]
 
 #path to the ZPCT database
 #prod_db_path = 'C:\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                                        #ZPCT production DB
