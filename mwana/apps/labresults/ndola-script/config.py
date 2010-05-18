@@ -1,6 +1,11 @@
-version = '1.0.1'
+version = '1.0.3'
 
 sched = ['0930', '1310', '1645']  #scheduling parameters for sync task
+
+#list of clinic ids to send data for; if present, ONLY data for these clinics will be sent
+#(though data for all clinics will still accumulate in the staging db); if empty or None,
+#data for all clinics will be sent
+clinics = None
 
 #path to the ZPCT database
 #prod_db_path = 'C:\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                                        #ZPCT production DB
@@ -31,7 +36,10 @@ init_lookback = 14     #when initializing the system, how many days back from th
                        #results for (everything before that is 'archived')
                       
                       
-transport_chunk = 5000 #maximum size per POST to rapidsms server (bytes) (approximate)
+transport_chunk = 5000  #maximum size per POST to rapidsms server (bytes) (approximate)
+send_compressed = True  #if True, payloads will be sent bz2-compressed
+compression_factor = .2 #estimated compression factor
+
 
 #wait times if exception during db access (minutes)
 db_access_retries = [2, 3, 5, 5, 10]
