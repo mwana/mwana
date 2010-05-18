@@ -5,6 +5,9 @@ Created on Mar 31, 2010
 '''
 
 from datetime import date
+
+from django.conf import settings
+
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
@@ -36,12 +39,12 @@ class App (rapidsms.App):
     
     def start (self):
         """Configure your app in the start phase."""
-        # this breaks on postgres
-        # self.schedule_notification_task()
+        self.schedule_notification_task()
+        self.schedule_process_payloads_tasks()
         
     def handle (self, message):
         key = message.text.strip().upper()
-        key =key[:4]
+        key = key[:4]
         
         if re.match(self.CHECK_REGEX, message.text, re.IGNORECASE):
             if not is_eligible_for_results(message.connection):
@@ -51,9 +54,7 @@ class App (rapidsms.App):
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = Result.objects.filter(
-                            clinic=clinic,
-                            notification_status__in=['new', 'notified'])
+            results = self._pending_results(clinic)
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
                                 count=results.count())
@@ -159,32 +160,33 @@ class App (rapidsms.App):
         if len(message) > 0:
             yield message
         
-    def schedule_notification_task (self):
-        callback = 'mwana.apps.labresults.app.send_results_notification'
-        
-        #remove existing schedule tasks; reschedule based on the current setting from config
-        try:
-            EventSchedule.objects.filter(callback=callback).delete()
-        except EventSchedule.DoesNotExist:
-            pass
-        
-        task = EventSchedule(callback=callback, days_of_month='*', hours=[8], minutes=[0]) #**config.sched)
-        task.save()
-        
-    def send_results_notification (self):
-        clinics_with_results =\
-          Result.objects.filter(notification_status__in=['new', 'notified'])\
-                                .values_list("clinic", flat=True).distinct()
-        
-        for clinic in clinics_with_results:
-            self.notify_clinic_pending_results(clinic)
-            
+    def schedule_notification_task(self):
+        callback = 'mwana.apps.labresults.tasks.send_results_notification'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+#        EventSchedule.objects.create(callback=callback, hours=[12],
+#                                     minutes=[0])
+
+    def schedule_process_payloads_tasks(self):
+        callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
+
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""
         messages, results  = self.results_avail_messages(clinic)
         if messages:
             self.send_messages(messages)
-            self._mark_results_pending(results, (msg.connection for msg in messages))
+            self._mark_results_pending(results,
+                                       (msg.connection for msg in messages))
+
+    def _pending_results(self, clinic):
+        if settings.SEND_LIVE_LABRESULTS:
+            return Result.objects.filter(clinic=clinic,
+                                   notification_status__in=['new', 'notified'])
+        else:
+            return Result.objects.none()
 
     def _mark_results_pending(self, results, connections):
         for connection in connections:
@@ -194,14 +196,13 @@ class App (rapidsms.App):
             r.save()
 
     def results_avail_messages(self, clinic):
-        results = Result.objects.filter\
-                            (clinic=clinic,
-                             notification_status__in=['new', 'notified'])
-        
+        results = self._pending_results(clinic)
         contacts = Contact.active.filter(location=clinic, 
                                          types=const.get_clinic_worker_type())
         if not contacts:
-            self.error("No contacts registered to receiver results at %s! These will go unreported." % clinic)
+            self.warning("No contacts registered to receiver results at %s! "
+                         "These will go unreported until clinic staff "
+                         "register at this clinic." % clinic)
         
         all_msgs = []
         for contact in contacts:

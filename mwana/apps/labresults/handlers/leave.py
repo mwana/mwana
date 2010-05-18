@@ -1,14 +1,13 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from rapidsms.contrib.handlers import KeywordHandler
-from rapidsms.contrib.locations.models import Location
-from rapidsms.models import Contact
-import re
 
-BYE_MSG   = "You have successfully unregistered from Results160, %(name)s. We're sorry to see you go."
-ERROR_MSG = "Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us."
-    
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that makemessages finds
+# our text.
+_ = lambda s: s
+
+BYE_MSG   = _("You have successfully unregistered, %(name)s. We're sorry to see you go.")
+ERROR_MSG = _("Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us.")
+
 class UnregisterHandler(KeywordHandler):
     """
     """

@@ -1,8 +1,6 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
+from mwana.util import get_clinic_or_default
 from rapidsms.contrib.handlers import KeywordHandler
 import re
 
@@ -46,9 +44,10 @@ class SentHandler(KeywordHandler):
                     self.respond("%s %s" % (SORRY, HELP))
                     return
             else:
+                self.info("Converted %s to %s" % (original_text, text))
                 count = int(text)
-                count = abs(count) #just in case we change our general cleaning routine
-            
+                count = abs(count) #just in case we change our general cleaning routine           
+        
         if count < 1:
             self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
             return
@@ -56,8 +55,10 @@ class SentHandler(KeywordHandler):
         # record this in our records    
         SampleNotification.objects.create(contact=self.msg.contact, 
                                           location=self.msg.contact.location,
-                                          count=count)
+                                          count=count,
+                                          count_in_text=original_text[0:160])
+        clinic = get_clinic_or_default(self.msg.contact)
         self.respond(SENT, name=self.msg.contact.name, count=count,
-                     clinic=self.msg.contact.location)
+                     clinic=clinic)
                      
         

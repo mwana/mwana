@@ -15,6 +15,7 @@ class SampleNotification(models.Model):
     contact  = models.ForeignKey(Contact)
     location = models.ForeignKey(Location)
     count    = models.PositiveIntegerField()
+    count_in_text = models.CharField(max_length=160, null=True, blank = True)
     date     = models.DateTimeField(default=datetime.utcnow)
     
     def __unicode__(self):
@@ -27,8 +28,8 @@ class Result(models.Model):
     
     RESULT_CHOICES = (
         ('P', 'Detected'),
-        ('N', 'Not Detected'),
-        ('R', 'Rejected Sample'),   #this could include samples that failed to give a definitive result
+        ('N', 'NotDetected'),
+        ('R', 'Rejected'),   #this could include samples that failed to give a definitive result
                                     #  i.e., 'rejected -- indeterminate'
         ('I', 'Indeterminate'),     #could mean 'unable to get definitive result', but most likely means
                                     #  'sample on hold while we investigate missing critical data, such
@@ -39,6 +40,12 @@ class Result(models.Model):
                                     #  sense; sit on it indefinitely, hoping it will resolve to a
                                     #  different status
     )
+    
+    def get_result(self):
+        if self.result in ('X', 'I'):
+            return 'Rejected'
+        else:
+            return super(Result, self).get_result_display()
 
     STATUS_CHOICES = (
         ('in-transit', 'En route to lab'),      #not supported currently
@@ -62,7 +69,10 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
-    clinic = models.ForeignKey(Location, null=True, blank=True)
+    payload = models.ForeignKey('Payload', null=True, blank=True,
+                                related_name='lab_results') # originating payload
+    clinic = models.ForeignKey(Location, null=True, blank=True,
+                               related_name='lab_results')
     clinic_code_unrec = models.CharField(max_length=20, blank=True) #if result is for clinic not registered as a Location
                                                                     #store raw clinic code here
 
@@ -106,11 +116,14 @@ class Payload(models.Model):
     info = models.CharField(max_length=50, blank=True)       #extra info about payload
     
     parsed_json = models.BooleanField(default=False)        #whether this payload parsed as valid json
-    validated_schema = models.BooleanField(default=False)   #if parsed, whether this payload validated
-                                                            #completely according to the expectation of our
-                                                            #schema; if false, it is likely that some of the
-                                                            #data in this payload did NOT make it into Result
-                                                            #or LabLog records!
+    validated_schema = models.BooleanField(default=False, help_text='If parsed'
+                                           ', whether this payload validated '
+                                           'completely according to the '
+                                           'expectation of our schema; if '
+                                           'false, it is likely that some of '
+                                           'the data in this payload did NOT '
+                                           'make it into Result or LabLog '
+                                           'records!')
     
     raw = models.TextField()        #raw POST content of the payload; will always be present, even if other fields
                                     #like version, source, etc., couldn't be parsed
@@ -122,25 +135,6 @@ class Payload(models.Model):
                                                  len(self.raw))
 
 
-class LegacyPayload(models.Model):
-    """The legacy payload model used to store the first set of results from
-    the lab. This is added as a temporary measure to facilitate migrating the
-    legacy data to the new schema."""
-    
-    date = models.DateTimeField()
-    processed = models.BooleanField('Whether or not this result was saved to '
-                                    'the final results table in the database',
-                                    default=False)
-    data = models.TextField()
-    parsed = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'labresults_rawresult'
-
-    def __unicode__(self):
-        return '%s (%s)' % (self.date, self.processed and 'saved' or 'unsaved')
-
-
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
     
@@ -149,7 +143,7 @@ class LabLog(models.Model):
     level = models.CharField(max_length=20, blank=True)
     line = models.IntegerField(null=True, blank=True)
     
-    payload_id = models.ForeignKey(Payload)       #payload this message came from
+    payload = models.ForeignKey(Payload)       #payload this message came from
     raw = models.TextField(blank=True) #raw content of log -- present only if log info couldn't be
                                                   #parsed/validated
     

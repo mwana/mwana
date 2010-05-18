@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.models import Contact
 from mwana.apps.help.models import HelpRequest
@@ -17,7 +14,7 @@ class HelpHandler(KeywordHandler):
     A simple help app, that optionally lets you forward requests to help admins
     """
 
-    keyword = "help|helpme|support"
+    keyword = "help|helpme|support|heip|hellp|heup"
     
     
     

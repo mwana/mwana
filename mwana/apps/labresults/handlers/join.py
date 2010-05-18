@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 import re
 from mwana import const
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
@@ -94,6 +91,8 @@ class JoinHandler(KeywordHandler):
 
         clinic_code = tokens[0].strip()
         clinic_code = b.try_replace_oil_with_011(clinic_code)
+        #we expect all codes have format PPDDFF or PPDDFFS
+        clinic_code = clinic_code[0:6]
         name = tokens[2]
         name = name.title().strip()
         pin = tokens[4].strip()
@@ -104,20 +103,23 @@ class JoinHandler(KeywordHandler):
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
             return
         try:
-            location = Location.objects.get(slug__iexact=clinic_code)
+            location = Location.objects.get(slug__iexact=clinic_code,
+                                            type__slug__in=const.CLINIC_SLUGS)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
                 # receiving results.
-                if get_clinic_or_default(self.msg.connection.contact) != location:
+                clinic = get_clinic_or_default(self.msg.connection.contact) 
+                if clinic != location:
                     self.respond(self.ALREADY_REGISTERED,
                                  name=self.msg.connection.contact.name,
-                                 location=self.msg.connection.contact.location)
+                                 location=clinic)
                     return True
                 else: 
                     contact = self.msg.contact
             else:
                 contact = Contact(location=location)
+                clinic = get_clinic_or_default(contact)
             contact.name = name
             contact.pin = pin
             contact.save()
@@ -126,12 +128,12 @@ class JoinHandler(KeywordHandler):
             self.msg.connection.contact = contact
             self.msg.connection.save()
             
-            self.respond("Hi %(name)s, thanks for registering for DBS "
-                         "results from Results160 as staff of %(location)s. "
+            self.respond("Hi %(name)s, thanks for registering for "
+                         "Results160 from %(location)s. "
                          "Your PIN is %(pin)s. "
-                         "Reply with keyword 'HELP' if your information is not "
-                         "correct.", name=contact.name, location=location.name,
-                         pin =pin)
+                         "Reply with keyword 'HELP' if this is "
+                         "incorrect", name=contact.name, location=clinic.name,
+                         pin=pin)
         except Location.DoesNotExist:
             self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
                          code=clinic_code)

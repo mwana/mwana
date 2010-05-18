@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-
 from mwana.apps.supply.app import App
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from rapidsms.contrib.handlers.app import App as handler_app

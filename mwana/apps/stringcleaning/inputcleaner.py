@@ -2,7 +2,7 @@
 Provides utilities to cleanup text
 """
 NUMBER_DICTIONARY = {
-0 :'Zero'
+0:'Zero'
 , 1: "One"
 , 2: "Two"
 , 3: "Three"
@@ -47,6 +47,7 @@ NUMBER_DICTIONARY = {
 , 'Thirteen': 13
 , 'Fourteen': 14
 , 'Forteen': 14
+, 'Foteen': 14
 , 'Fifteen': 15
 , 'Sixteen': 16
 , 'Seventeen': 17
@@ -69,6 +70,8 @@ PLACE_VALUE = {
 'Hundred':100
 , 'Thousand':1000
 , 'Million':1000000
+, 'Billion':1000000000
+, 'trillion':1000000000000
 }
 
 DIGIT_FOR_LETTER = {'i': '1', 'l': '1', 'o': '0', 'I':'1', 'O':'0',
@@ -133,9 +136,10 @@ class InputCleaner:
             return None
 
 
-    def words_to_digits(self, text):
+    def words_to_digits_old_impl(self, text):
         """
-        Returns integer representation of numbers entered as words
+        Returns integer representation of numbers entered as words. None on failure.
+        Limited to 4 words. words_to_digits() allows more words and ignores gabbage
         """
         if not text.strip():
             return None
@@ -203,4 +207,106 @@ class InputCleaner:
         except KeyError:
             return original
         return result
+
+    def words_to_digits(self, text):
+        """
+        Returns Integer from numbers entered as words. None on failure.
+        Corrects spelling based on soundeex and ignores invalid words for numbers.
+        This method suffices for this project but for others it has following issue:
+        phrases like "ninety nine thousand" are understood as "ninety plus nine thousand"
+        (90 + 9 * 1000)
+        """
+        if not text.strip():
+            return None
+        text = text.replace('-', '')
+        text = text.replace('+', '')
+        text = text.title().replace(" And", "")
+        text = self.remove_double_spaces(text)
+        tokens = text.strip().title().split(" ")
+        #correct tokens
+        for i in range(len(tokens)):
+            found = False
+            if str(tokens[i]).isdigit():
+                continue
+            for key in NUMBER_DICTIONARY.keys():
+                if tokens[i] not in NUMBER_DICTIONARY.keys():
+                    if self.soundex(tokens[i]) == self.soundex(key):
+                        tokens[i] = key
+                        found = True
+                        break
+            if not found:
+                for key in PLACE_VALUE.keys():
+                    if tokens[i] not in PLACE_VALUE.keys():
+                        if self.soundex(tokens[i]) == self.soundex(key):
+                            tokens[i] = key
+                            break
+
+        if not tokens:
+            return None
+        result = 0
+        expr = "result = "
+        for i, val in enumerate(tokens):
+            if str(val).isdigit():
+                expr = expr + "+" + str(val)
+            elif val in NUMBER_DICTIONARY.keys():
+                expr = expr + "+" + str(NUMBER_DICTIONARY[val])
+            elif val in PLACE_VALUE.keys():
+                if i == 0:
+                    expr = expr + str(PLACE_VALUE[val])
+                else:
+                    expr = expr + "*" + str(PLACE_VALUE[val])
+            else:
+                #ignore bad tokens
+                continue
+        try:
+            exec(expr)
+            return result
+        except (NameError, SyntaxError):
+            return None
+
+    def mdarray(self, n, m):
+        """
+        utility method to create a multidimensional array
+        """
+        lists = []
+        i = 0
+        while i < n:
+            i = i + 1
+            lists.append([0] * m)
+        return lists
+
+    def ldistance(self, s, t):
+        """
+        Levenshtein distance (LD) is a measure of the similarity between two strings
+        , (s) and (t). The distance is the number of deletions, insertions, or
+        substitutions required to transform s into t
+        """
+        s = s.lower()
+        t = t.lower()
+        n = len(s)
+        m = len(t)
+
+        if n == 0:
+            return m
+        if m == 0:
+            return n
+        matrix = self.mdarray(n + 1, m + 1)
+        i = 0
+        while i < m + 1:
+            matrix[0][i] = i
+            i = i + 1
+        i = 0
+        while i < n + 1:
+            matrix[i][0] = i
+            i = i + 1
+        cost = 0
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
+                if s[i-1] == t[j-1]:
+                    cost = 0
+                else:
+                    cost = 1
+                matrix[i][j] = min(matrix[i-1][j] + 1, matrix[i][j-1] + 1, matrix[i-1][j-1] + cost)
+
+        return matrix[n][m]
 

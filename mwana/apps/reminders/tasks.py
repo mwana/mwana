@@ -7,6 +7,10 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.reminders import models as reminders
 from mwana import const
 
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that makemessages finds
+# our text.
+_ = lambda s: s
 
 NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 
@@ -52,13 +56,11 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
                 clinic_name = patient.location.name
         else:
             clinic_name = 'the clinic'
-        msg = OutgoingMessage(connection, "Hello%(cba)s. %(patient)s is due "
-                              "for %(gender)s next clinic appointment. Please "
+        msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
+                              "for their next clinic appointment. Please "
                               "deliver a reminder to this person and ensure "
-                              "%(pronoun)s visits %(clinic)s within 3 days.",
+                              "they visit %(clinic)s within 3 days."),
                               cba=cba_name, patient=patient.name,
-                              gender=pronouns.get('possessive', 'his or her'),
-                              pronoun=pronouns.get('standard', 'he or she'),
                               clinic=clinic_name)
         msg.send()
     return connections
@@ -79,13 +81,8 @@ def send_notifications(router):
             sent_notifications__appointment=appointment
         )
         for patient_event in patient_events:
-            pronouns = {
-                'possessive': patient_event.event.possessive_pronoun,
-                'standard': patient_event.event.pronoun,
-            }
             connections = send_appointment_reminder(patient_event.patient,
-                                                    patient_event.cba_conn,
-                                                    pronouns)
+                                                    patient_event.cba_conn)
             for connection in connections:
                 reminders.SentNotification.objects.create(
                                            appointment=appointment,

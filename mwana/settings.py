@@ -1,16 +1,12 @@
-#!/usr/bin/env python
-# vim: et ts=4 sw=4
-
-
 # inherit everything from rapidsms, as default
 # (this is optional. you can provide your own.)
 from rapidsms.djangoproject.settings import *
 
 
 # then add your django settings:
-TIME_ZONE = 'UTC-2'
+SEND_LIVE_LABRESULTS = True
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.auth",
@@ -42,7 +38,7 @@ INSTALLED_APPS = (
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
-)
+]
 
 # These apps should not be started by rapidsms in your tests
 # However the models + bootstrap will still be available through
@@ -52,16 +48,16 @@ TEST_EXCLUDED_APPS = (
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "rapidsms",
-    "rapidsms.contrib.ajax", 
-    "rapidsms.contrib.httptester", 
+    "rapidsms.contrib.ajax",
+    "rapidsms.contrib.httptester",
+    "rapidsms.contrib.scheduler",
 )
-
 
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
-DEFAULT_RESPONSE = "Sorry we couldn't understand that.  Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
+DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
 
 INSTALLED_BACKENDS = {
     "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
