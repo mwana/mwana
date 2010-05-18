@@ -314,14 +314,14 @@ def log_viewer (request, daysback='7', source_filter=''):
         #todo: return error - parameter out of range
         pass
     
-    #get log records to display
+    #get log records to display - any log entry in a payload that was received in the past N days
     cutoff_date = (datetime.now() - timedelta(days=daysback))
     payloads = labresults.Payload.objects.filter(incoming_date__gte=cutoff_date)
     logs = labresults.LabLog.objects.filter(payload_id__in=payloads)
     
     #extract displayable info from log records, remove duplicate (re-sent) entries
     log_info = {}
-    meta_logs = []
+    meta_logs = [] #meta logs are log messages related to logging itself; they have no line numbers or timestamps
     for log_record in logs:
         if log_record.message == None:
             #skip log entries that weren't parseable
@@ -354,7 +354,7 @@ def log_viewer (request, daysback='7', source_filter=''):
     
     #sort records into chronological order (best-faith effort)
     lines = set(lg['line'] for lg in log_entries)
-    #if log entry buffer contains both high- and low-numbered lines, recent log file rotation may have occurred
+    #if log entry buffer contains both high- and low-numbered lines, log file rotation may have occurred recently
     wraparound = len(lines | set(range(0, 500))) > 0 and (max(lines) if lines else 0) >= log_rotation_threshold
     #if multiple log messages have the same line #, could suggest the log file was recently erased
     collisions = any(len([lg for lg in log_entries if lg['line'] == ln]) > 1 for ln in lines if ln != -1)
