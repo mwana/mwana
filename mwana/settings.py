@@ -6,6 +6,13 @@ from rapidsms.djangoproject.settings import *
 # then add your django settings:
 SEND_LIVE_LABRESULTS = True
 
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'mwana.middleware.LoginRequired',
+)
+
 INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",

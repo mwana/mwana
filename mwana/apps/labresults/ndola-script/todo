@@ -3,5 +3,11 @@
 - handling of non-ascii characters (delegate to receiver end)
   
 - call rasdial as retryable task
-- since logs are sent first, we can separately log when logs are sync and when everything is synced. this is helpful because if
+
+
+x since logs are sent first, we can separately log when logs are synced and when everything is synced. this is helpful because if
   anything fails in a single send batch, all logs are resent... even those that got through before the fail
+  i don't think this feature is useful anymore, because there is only a small window of failure where it helps us
+  if there are few logs, there is little penalty to resending them; if there are many logs, we still have to get most of the way
+  through the transmission before we wouldn't have to resend all of them. without recording the individual log entries sent, there
+  isn't much we can do.

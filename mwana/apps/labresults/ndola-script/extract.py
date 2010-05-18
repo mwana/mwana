@@ -14,12 +14,13 @@ from urlparse import urlparse
 from threading import Thread
 import os
 import os.path
+import bz2
 
 identity = lambda x: x
 
 db_fields = ['sample_id', 'imported_on', 'resolved_on', 'patient_id', 'facility_code', 'collected_on',
-             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 'sex',
-             'mother_age', 'health_worker', 'health_worker_title', 'sync_status']
+             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 
+             'health_worker', 'health_worker_title', 'sync_status']
 
 def init_logging ():
   """initialize the logging framework"""
@@ -75,8 +76,6 @@ def create_staging_db ():
       result_detail varchar(100),         --e.g., reason rejected
       birthdate date,
       child_age int,                      --in months (may be inconsistent with birthdate)
-      sex varchar(1),
-      mother_age int,
       health_worker varchar(50),          --name of clinic worker collecting sample
       health_worker_title varchar(50),    --title of clinic worker
       sync_status varchar(10) not null default 'new'  --status of record's sync with rapidsms server: 'new', 'updated',
@@ -336,15 +335,25 @@ def pull_records ():
     
     newcount = 0
     updatecount = 0
+    newcount_filt = 0
+    updatecount_filt = 0
     for (source, record) in records:
-      result = process_record(record, source, curs)
+      (result, filt) = process_record(record, source, curs)
       if result == 'new':
         newcount += 1
+        if filt:
+          newcount_filt += 1
       elif result == 'update':
         updatecount += 1
+        if filt:
+          updatecount_filt += 1
       
     conn.commit()
-    log.info('staging db: added %d new records, updated %d existing records, deleted %d records' % (newcount, updatecount, len(deleted_ids)))
+    if config.clinics:
+      log.info('staging db: added %d (%d) new records, updated %d (%d) existing records, deleted %d records' %
+          (newcount, newcount_filt, updatecount, updatecount_filt, len(deleted_ids)))
+    else:
+      log.info('staging db: added %d new records, updated %d existing records, deleted %d records' % (newcount, updatecount, len(deleted_ids)))
   except:
     log.exception('error syncing data to staging database; attemping to rollback')
     conn.rollback()
@@ -355,12 +364,14 @@ def pull_records ():
   
 def process_record (record, source, curs):
   """process a single record of interest an mirror data to the staging db"""
+  filt = record['facility_code'] in config.clinics if config.clinics else True
+  
   if source == 'new':
     record['imported_on'] = date.today()
     record['sync_status'] = 'new'
     record['resolved_on'] = date.today() if record['result'] != None else None
     add_record(record, curs)
-    return 'new'
+    return ('new', filt)
     
   else: #existing record
     #check if any fields changed
@@ -384,7 +395,9 @@ def process_record (record, source, curs):
         record['resolved_on'] = date.today()
         
       update_record(record, curs)
-      return 'update'
+      return ('update', filt)
+    else:
+      return (None, None)
 
 def update_resolved_date (old_result, new_result):
   """whether to reset the 'resolved on' counter based on change in result status"""
@@ -481,8 +494,14 @@ def get_unsynced_records ():
   records = []
   for id in unsynced_ids:
     records.append(read_staged_record(id, conn))
-
   conn.close()
+  
+  #filter by active clinics, thereby addressing the ministry's concerns
+  if config.clinics:
+    orig_count = len(records)
+    records = [r for r in records if r['facility_code'] in config.clinics]
+    log.info('filtering clinics: %d total unsynced => %d to send' % (orig_count, len(records)))
+  
   return records
   
 def retry_task (task, retry_sched):
@@ -657,13 +676,15 @@ def to_json (data):
   
 def chunk_submissions (data_stream):
   """turn the stream of data objects into transmission chunks of (approximate) max size"""
+  chunk_size_limit = config.transport_chunk / (config.compression_factor if config.send_compressed else 1.)
+  
   chunk, size = [], 0
   for datum in data_stream:
     (type, data) = datum
     chunk.append(datum)
     size += len(to_json(data))
     
-    if size >= config.transport_chunk:
+    if size >= chunk_size_limit:
       yield chunk
       chunk, size = [], 0
   
@@ -694,6 +715,9 @@ class Payload:
     json_struct['logs'] = types['log']
     json = to_json(json_struct)
     
+    if config.send_compressed:
+      json = bz2.compress(json)
+    
     return (json, record_ids)
 
 def connection (payload):
@@ -705,8 +729,12 @@ def connection (payload):
     opener = urllib2.build_opener(authinfo)
     urllib2.install_opener(opener)
 
+    headers = {'Content-Type': 'text/json'}
+    if config.send_compressed:
+      headers['Content-Transfer-Encoding'] = 'bzip2'
+    
     try:
-      f = urllib2.urlopen(urllib2.Request(config.submit_url, payload.json, headers={'Content-Type': 'text/json'}))
+      f = urllib2.urlopen(urllib2.Request(config.submit_url, payload.json, headers=headers))
       response = f.read()
       code = f.code
       
@@ -839,7 +867,8 @@ def send_data ():
     payloads = [Payload()]
     log.info('no data to send; sending ping message only')
   else:
-    log.info('%d payloads to send (%d bytes)' % (len(payloads), sum(len(p.json) for p in payloads)))
+    log.info('%d payloads to send (%d bytes%s)' % (len(payloads), sum(len(p.json) for p in payloads),
+                  ', compressed' if config.send_compressed else ''))
   
   transport_payloads(payloads)
   
@@ -1017,7 +1046,7 @@ def parse_sched_params ():
 def daemon ():
   """ENTRY POINT: background daemon that runs the extract/sync task at scheduled intervals"""
   try:
-    log.info('booting daemon...')
+    log.info('booting daemon... (v%s)' % config.version)
   
     times = parse_sched_params()
     if len(times) == 0:
@@ -1025,6 +1054,11 @@ def daemon ():
       return
     else:
       log.info('scheduled to run at: %s' % ', '.join(t.strftime('%H:%M') for t in sorted(times)))
+  
+    if config.clinics:
+      log.info('filtering by %d clinics: %s' % (len(config.clinics), ', '.join(config.clinics)))
+    else:
+      log.info('all clinics enabled')
   
     last_ping = SingletonTask(None, config.daemon_lock).read_lockfile()
     SingletonTask(lambda: daemon_loop(times, last_ping), config.daemon_lock, name='daemon').start()
