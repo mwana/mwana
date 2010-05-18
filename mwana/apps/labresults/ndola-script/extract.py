@@ -19,8 +19,8 @@ import bz2
 identity = lambda x: x
 
 db_fields = ['sample_id', 'imported_on', 'resolved_on', 'patient_id', 'facility_code', 'collected_on',
-             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 'sex',
-             'mother_age', 'health_worker', 'health_worker_title', 'sync_status']
+             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 
+             'health_worker', 'health_worker_title', 'sync_status']
 
 def init_logging ():
   """initialize the logging framework"""
@@ -76,8 +76,6 @@ def create_staging_db ():
       result_detail varchar(100),         --e.g., reason rejected
       birthdate date,
       child_age int,                      --in months (may be inconsistent with birthdate)
-      sex varchar(1),
-      mother_age int,
       health_worker varchar(50),          --name of clinic worker collecting sample
       health_worker_title varchar(50),    --title of clinic worker
       sync_status varchar(10) not null default 'new'  --status of record's sync with rapidsms server: 'new', 'updated',
