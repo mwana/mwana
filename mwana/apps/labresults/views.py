@@ -324,7 +324,7 @@ class ResultForm(ModelForm):
         exclude = ['notification_status']
         
 log_rotation_threshold = 5000
-def log_viewer (request, daysback='7'):
+def log_viewer (request, daysback='7', source_filter=''):
     try:
         daysback = int(daysback)
     except ValueError:        
@@ -335,17 +335,20 @@ def log_viewer (request, daysback='7'):
         #todo: return error - parameter out of range
         pass
     
-    #get log records to display
+    #get log records to display - any log entry in a payload that was received in the past N days
     cutoff_date = (datetime.now() - timedelta(days=daysback))
     payloads = labresults.Payload.objects.filter(incoming_date__gte=cutoff_date)
     logs = labresults.LabLog.objects.filter(payload__in=payloads)
     
     #extract displayable info from log records, remove duplicate (re-sent) entries
     log_info = {}
-    meta_logs = []
+    meta_logs = [] #meta logs are log messages related to logging itself; they have no line numbers or timestamps
     for log_record in logs:
         if log_record.message == None:
             #skip log entries that weren't parseable
+            continue
+        
+        if not log_record.payload_id.source.startswith(source_filter):
             continue
         
         log_entry = {
@@ -372,7 +375,7 @@ def log_viewer (request, daysback='7'):
     
     #sort records into chronological order (best-faith effort)
     lines = set(lg['line'] for lg in log_entries)
-    #if log entry buffer contains both high- and low-numbered lines, recent log file rotation may have occurred
+    #if log entry buffer contains both high- and low-numbered lines, log file rotation may have occurred recently
     wraparound = len(lines | set(range(0, 500))) > 0 and (max(lines) if lines else 0) >= log_rotation_threshold
     #if multiple log messages have the same line #, could suggest the log file was recently erased
     collisions = any(len([lg for lg in log_entries if lg['line'] == ln]) > 1 for ln in lines if ln != -1)
@@ -407,7 +410,8 @@ def log_viewer (request, daysback='7'):
         log_display_items.append(ldi)
         
     return render_to_response(request, 'labresults/logview.html',
-                              {'display_info': log_display_items, 'collisions': collisions, 'days': daysback})
+                              {'display_info': log_display_items, 'collisions': collisions,
+                               'days': daysback, 'source': source_filter})
         
         
 def log_cmp (a, b, wraparound):
