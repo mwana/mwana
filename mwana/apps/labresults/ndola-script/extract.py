@@ -504,6 +504,11 @@ def get_unsynced_records ():
     records = [r for r in records if r['facility_code'] in config.clinics]
     log.info('filtering clinics: %d total unsynced => %d to send' % (orig_count, len(records)))
   
+  #remove all strictly non-essential fields from being sent
+  for rec in records:
+    rec['sex'] = None
+    rec['mother_age'] = None
+  
   return records
   
 def retry_task (task, retry_sched):
