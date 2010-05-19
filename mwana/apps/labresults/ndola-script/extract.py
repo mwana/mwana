@@ -31,6 +31,8 @@ def init_logging ():
   formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s")
   handler.setFormatter(formatter)
   log.addHandler(handler)
+# uncomment for logging to console, if desired
+#  log.addHandler(logging.StreamHandler())
 init_logging()
 
 def days_ago (n):
@@ -41,6 +43,8 @@ def dbconn (db):
   """return a database connected to the production (ZPCT access) or staging (UNICEF sqlite) databases"""
   if db == 'prod':
     return pyodbc.connect('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s' % config.prod_db_path)
+# to use the Easysoft Access ODBC driver from linux:
+#    return pyodbc.connect('DRIVER={Easysoft ODBC-ACCESS};MDBFILE=%s' % config.prod_db_path)
   elif db == 'staging':
     return sqlite3.connect(config.staging_db_path, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
   else:
@@ -91,7 +95,8 @@ def archive_old_samples (lookback):
   """pre-populate very old samples in the prod db into staging, so they don't show up in 'new record' queries"""
   conn = dbconn('prod')
   curs = conn.cursor()
-  curs.execute('select LabID from tbl_Patient where DateReceived < ?', [days_ago(lookback)])
+  curs.execute('select LabID from tbl_Patient where DateReceived < ?',
+               [days_ago(lookback).strftime('%Y-%m-%d')])
   archive_ids = set(norm_id(rec[0]) for rec in curs.fetchall())
   log.info('archiving %d records' % len(archive_ids))
   curs.close()
@@ -128,8 +133,9 @@ def denorm_id (sample_id):
   if len(sample_id) != 8 or sample_id[2] != '-':
     log.warning('sample id not in expected format [%s]' % sample_id)
     return sample_id
-
-  return sample_id[3:8] + sample_id[0:2] 
+  # make sure it's a string, not unicode, because the ODBC driver doesn't
+  # like unicode
+  return str(sample_id[3:8] + sample_id[0:2])
  
 def check_new_records ():
   """poll if any new records have appeared in the production db (since last time it was synced to staging)"""
@@ -162,8 +168,8 @@ def query_sample (sample_id, conn=None):
            BirthDate, Age, Sex, MotherAge,
            RequestingHealthWorker, Designation
     from tbl_Patient
-    where LabID = '%s'
-    ''' % denorm_id(sample_id))
+    where LabID = ?
+    ''', [denorm_id(sample_id)])
     
   results = curs.fetchall()
   curs.close()
@@ -377,8 +383,8 @@ def process_record (record, source, curs):
     #check if any fields changed
     existing_record = read_staged_record(record['sample_id'])
     changed_fields = []
-    for f in record:
-      if record[f] != existing_record[f]:
+    for k, v in record.items():
+      if k in existing_record and v != existing_record[k]:
         changed_fields.append(f)
     
     #if the record has changed
