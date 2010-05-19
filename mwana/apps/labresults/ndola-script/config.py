@@ -19,22 +19,17 @@ clinics = [
   '4060160',
 ]
 
-#path to the ZPCT database
-#prod_db_path = 'C:\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                                        #ZPCT production DB
-#prod_db_path = 'C:\\unicef-mwana\\test\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                    #testing copy of DB -- local copy on lab computer
-prod_db_path = 'C:\\Documents and Settings\\Drew Roos\\Desktop\\muana\\db\\ZPCT_PCR_DATABASE_be.mdb' #testing copy of DB -- local machine
+#path to the Lab database                                        
 
-#base_path = 'C:\\unicef-mwana\\script\\'
-base_path = 'C:\\Documents and Settings\\Drew Roos\\Desktop\\muana\\script\\'
+#base_path = 'PATH TO SCRIPT'
 
 staging_db_path = base_path + 'rapidsms_results.db3'
 log_path = base_path + 'extract.log'
 
-#submit_url = 'https://mwana-zambia.unicefinnovation.org/labresults/incoming/'    #production rapidsms server at MoH
+#production rapidsms server at MoH
 submit_url = 'http://127.0.0.1:8000/labresults/incoming/'                        #testing server on local machine
 
-#auth_params = dict(realm='Lab Results', user='adh', passwd='')
-auth_params = dict(realm='Lab Results', user='admin', passwd='admin')
+auth_params = dict(realm='Lab Results', user='USERNAME', passwd='PASSWORD')
 
 always_on_connection = True       #if True, assume computer 'just has' internet
 
@@ -59,7 +54,7 @@ db_access_retries = [2, 3, 5, 5, 10]
 #wait times if error during http send (seconds)
 send_retries = [0, 0, 0, 30, 30, 30, 60, 120, 300, 300]
 
-#source_tag = 'ndola/arthur-davison'
+#source_tag Just a tag for identification
 source_tag = 'ndola/arthur-davison [TEST]'
 
 
