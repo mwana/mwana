@@ -20,11 +20,12 @@ clinics = [
 ]
 
 #path to the Lab database                                        
+import os.path
+base_path = os.path.dirname(os.path.abspath(__file__))
 
-#base_path = 'PATH TO SCRIPT'
-
-staging_db_path = base_path + 'rapidsms_results.db3'
-log_path = base_path + 'extract.log'
+staging_db_path = os.path.join(base_path, 'rapidsms_results.db3')
+prod_db_path = os.path.join('path', 'to', 'access_db.mdb')
+log_path = os.path.join(base_path, 'extract.log')
 
 #production rapidsms server at MoH
 submit_url = 'http://127.0.0.1:8000/labresults/incoming/'                        #testing server on local machine
@@ -44,7 +45,7 @@ init_lookback = 14     #when initializing the system, how many days back from th
                       
                       
 transport_chunk = 5000  #maximum size per POST to rapidsms server (bytes) (approximate)
-send_compressed = True  #if True, payloads will be sent bz2-compressed
+send_compressed = False  #if True, payloads will be sent bz2-compressed
 compression_factor = .2 #estimated compression factor
 
 
