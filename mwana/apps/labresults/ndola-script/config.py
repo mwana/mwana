@@ -27,6 +27,32 @@ staging_db_path = os.path.join(base_path, 'rapidsms_results.db3')
 prod_db_path = os.path.join('path', 'to', 'access_db.mdb')
 log_path = os.path.join(base_path, 'extract.log')
 
+# the name of the column containing the lab-based ID of the record
+prod_db_id_column = 'ID'
+
+# a list of the column names to select from the lab database, in the following
+# order: sample_id, patient_id, facility_code, collected_on, received_on,
+# processed_on, result, rejected (boolean), rejection_reason,
+# reject_reason_other, birthdate, child_age, sex, mother_age, health_worker,
+# health_worker_title 
+prod_db_columns = [
+  'PatientIDReference',
+  'Facility',
+  'CollectionDate',
+  'DateReceived',
+  'HivPcrDate',
+  'Detection',
+  'HasSampleBeenRejected',
+  'RejectionReasons',
+  'RejectionReasonOther',
+  'BirthDate',
+  'Age',
+  'Sex',
+  'MotherAge',
+  'RequestingHealthWorker',
+  'Designation',
+]
+
 #production rapidsms server at MoH
 submit_url = 'http://127.0.0.1:8000/labresults/incoming/'                        #testing server on local machine
 
@@ -56,7 +82,7 @@ db_access_retries = [2, 3, 5, 5, 10]
 send_retries = [0, 0, 0, 30, 30, 30, 60, 120, 300, 300]
 
 #source_tag Just a tag for identification
-source_tag = 'ndola/arthur-davison [TEST]'
+source_tag = 'lusaka/uth'
 
 
 daemon_lock = base_path + 'daemon.lock'
