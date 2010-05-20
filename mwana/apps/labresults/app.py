@@ -39,6 +39,7 @@ class App (rapidsms.App):
     
     def start (self):
         """Configure your app in the start phase."""
+        self.schedule_change_notification_task()
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
         
@@ -167,6 +168,13 @@ class App (rapidsms.App):
 #        EventSchedule.objects.create(callback=callback, hours=[12],
 #                                     minutes=[0])
 
+    def schedule_change_notification_task(self):
+        callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        
+#        EventSchedule.objects.create(callback=callback, hours=[2])
+
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
         # remove existing schedule tasks; reschedule based on the current setting
@@ -187,6 +195,58 @@ class App (rapidsms.App):
                                    notification_status__in=['new', 'notified'])
         else:
             return Result.objects.none()
+
+    def _updated_results(self, clinic):
+        if settings.SEND_LIVE_LABRESULTS:
+            return Result.objects.filter(clinic=clinic,
+                                   notification_status='updated')
+        else:
+            return Result.objects.none()
+
+    def notify_clinic_of_changed_records(self, clinic):
+        """Notifies clinic of the new status for changed results."""
+        changed_results = []
+        updated_results = self._updated_results(clinic)
+        if not updated_results:
+            return
+        for updated_result in updated_results:
+            if updated_result.record_change:
+                changed_results.append(updated_result)
+
+        if not changed_results:
+            return
+        contacts = Contact.active.filter(location=clinic,
+                                         types=const.get_clinic_worker_type())
+        if not contacts:
+            self.warning("No contacts registered to receive results at %s! "
+                         "These will go unreported until clinic staff "
+                         "register at this clinic." % clinic)
+
+        RESULTS_CHANGED     = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result and update your logbooks."
+        if len(changed_results) > 1:
+            RESULTS_CHANGED     = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
+
+        all_msgs = []
+        help_msgs = []
+        for contact in contacts:
+            msg = OutgoingMessage(connection=contact.default_connection,
+                                  template=RESULTS_CHANGED)
+            all_msgs.append(msg)
+        if all_msgs:
+            self.send_messages(all_msgs)
+            self._mark_results_pending(changed_results,
+                                       (msg.connection for msg in all_msgs))
+            for help_admin in Contact.active.filter(is_help_admin=True):
+                h_msg = OutgoingMessage(help_admin.default_connection,
+                "Make a followup for changed results %s: %s" %
+                (clinic.name,";".join(res.requisition_id + ", " + res.result + ", old value:" + res.old_value for res in changed_results)))
+                help_msgs.append(h_msg)
+            if help_msgs:
+                self.send_messages(help_msgs)
+            else:
+                print "there are no help addmins"
+
+    
 
     def _mark_results_pending(self, results, connections):
         for connection in connections:

@@ -16,6 +16,7 @@ from rapidsms.contrib.locations.models import LocationType
 from rapidsms.models import Connection
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
+from mwana.apps.labresults import tasks
 
 
 class TestApp(TestScript):
@@ -25,6 +26,7 @@ class TestApp(TestScript):
         super(TestApp, self).setUp()
         self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug="clinics")[0]
         self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="mib")
+        self.support_clinic = Location.objects.create(type=self.type, name="Support Clinic", slug="spt")
         # this gets the backend and connection in the db
         script = "clinic_worker > hello world"
         self.runScript(script)
@@ -44,6 +46,15 @@ class TestApp(TestScript):
         
         Connection.objects.create(identity="other_worker", backend=connection.backend, 
                                   contact=self.other_contact)
+        connection.save()
+
+        # create support staff
+        self.support_contact = Contact.objects.create(alias="trazy", name="Trezy Mwanza",
+                                                    location=self.support_clinic, pin="1111", is_help_admin=True)
+        self.support_contact.types.add(const.get_clinic_worker_type())
+
+        Connection.objects.create(identity="support_contact", backend=connection.backend,
+                                  contact=self.support_contact)
         connection.save()
         
 
@@ -139,6 +150,7 @@ class TestApp(TestScript):
             clinic_worker > 55555
             clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
             clinic_worker > Help
+            support_contact < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
@@ -306,7 +318,7 @@ class TestApp(TestScript):
             clinic_worker > RESULT 9999
             clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
-            clinic_worker < There are currently no results available for 000, 1. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
+            clinic_worker < There are currently no results available for 1, 000. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
             clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT mib0004
@@ -318,15 +330,15 @@ class TestApp(TestScript):
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0001
-            clinic_worker < 0001: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < ****0001: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0003
-            clinic_worker < 0003: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < ****0003: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
-            clinic_worker < 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < ****0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
-            clinic_worker < 0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < ****0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0001 0002
-            clinic_worker < 0001: NotDetected. 0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < ****0001: NotDetected. ****0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
@@ -338,7 +350,7 @@ class TestApp(TestScript):
         self.assertEqual("new", res4.notification_status)
 
 
-class ResultsAcceptor(TestScript):
+class ResultsAcceptor(TestApp):
     
     def _post_json(self, url, data):
         if not isinstance(data, basestring):
@@ -484,3 +496,222 @@ class ResultsAcceptor(TestScript):
     def test_payload_post_required(self):
         response = self.client.get(reverse('accept_results'))
         self.assertEqual(response.status_code, 405) # method not supported
+
+    def test_results_changed_notification(self):
+        # TODO extend test for all scenarios. ensure results are saved fine.
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        type = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+#        Location.objects.create(name='Clinic', slug='202020',
+#                                type=type)
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        data = {
+            "source": "ndola/arthur-davison",
+            "now": "2010-04-22 10:30:00",
+            "logs": [
+                {
+                    "msg": "booting daemon...",
+                    "lvl": "INFO",
+                    "at": "2010-04-22 07:18:03,140"
+                },
+                {
+                    "msg": "archiving 124 records",
+                    "lvl": "INFO",
+                    "at": "2010-04-22 09:18:23,248"
+                }
+            ],
+            "samples": [
+                {
+                    "coll_on": "2010-03-31",
+                    "hw": "JANE SMITH",
+                    "mother_age": 19,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "rejected",
+                    "recv_on": "2010-04-08",
+                    "fac": 'mib',
+                    "id": "10-09999",
+                    "hw_tit": "NURSE",
+                    "pat_id": "",
+                    "dob": "2010-02-08",
+                    "proc_on": "2010-04-11",
+                    "child_age": 3
+                },
+                {
+                    "coll_on": "2010-03-25",
+                    "hw": "JENNY HOWARD",
+                    "mother_age": 41,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "negative",
+                    "recv_on": "2010-04-11",
+                    "fac": 'mib',
+                    "id": "10-09998",
+                    "hw_tit": "AMM",
+                    "pat_id": "1029023412",
+                    "dob": "2009-03-30",
+                    "proc_on": "2010-04-13",
+                    "child_age": 8
+                },
+                {
+                    "coll_on": "2010-04-08",
+                    "hw": "MOLLY",
+                    "mother_age": 31,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "negative",
+                    "recv_on": "2010-04-15",
+                    "fac": 'mib',
+                    "id": "10-09997",
+                    "hw_tit": "ZAN",
+                    "pat_id": "21234987",
+                    "dob": "2010-01-12",
+                    "proc_on": "2010-04-17",
+                    "child_age": 4
+                }
+            ]
+        }
+        changed_data = {
+            "source": "ndola/arthur-davison",
+            "now": "2010-04-22 10:30:00",
+            "logs": [
+                {
+                    "msg": "booting daemon...",
+                    "lvl": "INFO",
+                    "at": "2010-04-22 07:18:03,140"
+                },
+                {
+                    "msg": "archiving 124 records",
+                    "lvl": "INFO",
+                    "at": "2010-04-22 09:18:23,248"
+                }
+            ],
+            "samples": [
+                {
+                    "coll_on": "2010-03-31",
+                    "hw": "JANE SMITH",
+                    "mother_age": 19,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "positive",
+                    "recv_on": "2010-04-08",
+                    "fac": 'mib',
+                    "id": "10-09999",
+                    "hw_tit": "NURSE",
+                    "pat_id": "",
+                    "dob": "2010-02-08",
+                    "proc_on": "2010-04-11",
+                    "child_age": 3
+                },
+                {
+                    "coll_on": "2010-03-25",
+                    "hw": "JENNY HOWARD",
+                    "mother_age": 41,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "rejected",
+                    "recv_on": "2010-04-11",
+                    "fac": 'mib',
+                    "id": "10-09998",
+                    "hw_tit": "AMM",
+                    "pat_id": "1029023412",
+                    "dob": "2009-03-30",
+                    "proc_on": "2010-04-13",
+                    "child_age": 8
+                },
+                {
+                    "coll_on": "2010-04-08",
+                    "hw": "MOLLY",
+                    "mother_age": 31,
+                    "result_detail": None,
+                    "sync": "new",
+                    "sex": "f",
+                    "result": "positive",
+                    "recv_on": "2010-04-15",
+                    "fac": 'mib',
+                    "id": "10-09997",
+                    "hw_tit": "ZAN",
+                    "pat_id": "21234987",
+                    "dob": "2010-01-12",
+                    "proc_on": "2010-04-17",
+                    "child_age": 4
+                }
+            ]
+        }
+        now = datetime.datetime.now()
+        response = self._post_json(reverse('accept_results'), data)
+        # let the clinic worker get some results
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412:NotDetected. **** 21234987:NotDetected
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """        
+        self.runScript(script)
+
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(labresults.Payload.objects.count(), 1)
+        payload = labresults.Payload.objects.get()
+        self.assertEqual(payload.raw, json.dumps(data))
+        self.assertTrue(payload.parsed_json)
+        self.assertTrue(payload.validated_schema)
+        self.assertEqual(user, payload.auth_user)
+        self.assertEqual(payload.incoming_date.year, now.year)
+        self.assertEqual(payload.incoming_date.month, now.month)
+        self.assertEqual(payload.incoming_date.day, now.day)
+        self.assertEqual(payload.incoming_date.hour, now.hour)
+
+        self.assertEqual(labresults.Result.objects.count(), 2)
+        result1 = labresults.Result.objects.get(sample_id="10-09997")
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        # 10-09999 will not make it in because it's missing a pat_id
+        self.assertEqual(result1.payload, payload)
+        self.assertEqual(result2.payload, payload)
+
+#        time.sleep(.1)# whatever this does
+
+
+        # process changed results
+        response = self._post_json(reverse('accept_results'), changed_data)
+#        self.assertEqual(response.status_code, 200)
+#        self.assertEqual(labresults.Payload.objects.count(), 1)
+        payload = labresults.Payload.objects.all()
+#        self.assertEqual(payload.raw, json.dumps(data))
+#        self.assertTrue(payload.parsed_json)
+#        self.assertTrue(payload.validated_schema)
+#        self.assertEqual(user, payload.auth_user)
+#        self.assertEqual(payload.incoming_date.year, now.year)
+#        self.assertEqual(payload.incoming_date.month, now.month)
+#        self.assertEqual(payload.incoming_date.day, now.day)
+#        self.assertEqual(payload.incoming_date.hour, now.hour)
+
+        self.assertEqual(labresults.Result.objects.count(), 2)
+        result1 = labresults.Result.objects.get(sample_id="10-09997")
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        # 10-09999 will not make it in because it's missing a pat_id
+#        self.assertEqual(result1.payload, payload)
+#        self.assertEqual(result2.payload, payload)
+        self.startRouter()
+        tasks.send_changed_records_notification(self.router)
+        msgs = self.receiveAllMessages()
+        print "****" * 25
+        print "Outgoing messages"
+        for msg in msgs:
+            print msg.connection.contact,":",msg.text
+        script = """
+            clinic_worker > 4567
+            other_worker  < John Banda has collected these results
+            clinic_worker < Thank you! Here are your results: **** 1029023412:Rejected. **** 21234987:Detected
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """
+        self.runScript(script)

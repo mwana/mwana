@@ -266,6 +266,8 @@ def accept_record (record, payload):
 
         #change to requisition id
         if old_record.notification_status == 'sent' and old_record.requisition_id != new_record.requisition_id:
+            new_record.record_change = 'req_id'
+            new_record.old_value = old_record.requisition_id
             logger.warning('requisition id in record [%s] has changed (%s -> %s)! how do we handle this?' %
                            (sample_id, old_record.requisition_id, new_record.requisition_id))
 
@@ -281,6 +283,14 @@ def accept_record (record, payload):
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
             new_record.notification_status = 'updated'
         #what to do if result changes from a reportable status (+, -, rej) to unreportable (indet, blank)??
+            if old_record.result in 'PN' or new_record.result in 'PN':
+                if not new_record.record_change: #if requisition id hasn't changed
+                    new_record.record_change = 'result'
+                    new_record.old_value = old_record.result
+                else: #both requisition id and result have changed
+                    new_record.record_change = 'both'
+                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
+
                 
     new_record.save()
     return True
@@ -321,7 +331,7 @@ class LogForm(ModelForm):
 class ResultForm(ModelForm):
     class Meta:
         model = labresults.Result
-        exclude = ['notification_status']
+        exclude = ['notification_status','record_change','old_value']
         
 log_rotation_threshold = 5000
 def log_viewer (request, daysback='7'):

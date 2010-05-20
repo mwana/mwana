@@ -25,7 +25,13 @@ class SampleNotification(models.Model):
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status
     of sending result back to clinic"""
-    
+
+    RECORD_CHANGE_CHOICES = (
+    ('result','Result changed'),
+    ('req_id','Requisition ID changed'),
+    ('both','Both the result and requisition id changed')
+    )
+
     RESULT_CHOICES = (
         ('P', 'Detected'),
         ('N', 'NotDetected'),
@@ -93,6 +99,8 @@ class Result(models.Model):
     mother_age = models.IntegerField(null=True, blank=True) #age in years
     collecting_health_worker = models.CharField(max_length=100, blank=True)
     coll_hw_title = models.CharField(max_length=30, blank=True)
+    record_change = models.CharField(choices=RECORD_CHANGE_CHOICES, max_length=6, null=True, blank=True)
+    old_value = models.CharField(max_length=50, null=True, blank=True)
 
     class Meta:
         ordering = ('collected_on', 'requisition_id')
