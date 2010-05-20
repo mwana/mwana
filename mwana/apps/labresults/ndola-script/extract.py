@@ -91,11 +91,15 @@ def create_staging_db ():
   curs.close()
   conn.close()
 
+def facilities_where_clause ():
+  """ensures that only the clinics specified in the config file are entered into the staging database"""
+  return 'Facility in (%s)' % ', '.join(config.clinics)
+
 def archive_old_samples (lookback):
   """pre-populate very old samples in the prod db into staging, so they don't show up in 'new record' queries"""
   conn = dbconn('prod')
   curs = conn.cursor()
-  curs.execute('select LabID from tbl_Patient where DateReceived < ?',
+  curs.execute("select LabID from tbl_Patient where DateReceived < ? and %s" % facilities_where_clause(),
                [days_ago(lookback).strftime('%Y-%m-%d')])
   archive_ids = set(norm_id(rec[0]) for rec in curs.fetchall())
   log.info('archiving %d records' % len(archive_ids))
@@ -114,7 +118,12 @@ def get_ids (db, col, table, normfunc=identity):
   """return a set of all primary key IDs in the given database"""
   conn = dbconn(db)
   curs = conn.cursor()
-  curs.execute('select %s from %s' % (col, table))
+  sql = 'select %s from %s' % (col, table)
+  if db == 'prod':
+    # if this is the production database, add a filter to ensure that only
+    # results for the proper facilities are entered into the staging database
+    sql += ' where %s' % facilities_where_clause()
+  curs.execute(sql)
   ids = set(normfunc(rec[0]) for rec in curs.fetchall())
   curs.close()
   conn.close()
@@ -136,7 +145,7 @@ def denorm_id (sample_id):
   # make sure it's a string, not unicode, because the ODBC driver doesn't
   # like unicode
   return str(sample_id[3:8] + sample_id[0:2])
- 
+
 def check_new_records ():
   """poll if any new records have appeared in the production db (since last time it was synced to staging)"""
   prod_ids = get_ids('prod', 'LabID', 'tbl_Patient', norm_id)
@@ -168,8 +177,8 @@ def query_sample (sample_id, conn=None):
            BirthDate, Age, Sex, MotherAge,
            RequestingHealthWorker, Designation
     from tbl_Patient
-    where LabID = ?
-    ''', [denorm_id(sample_id)])
+    where LabID = ? AND %s
+    ''' % facilities_where_clause(), [denorm_id(sample_id)])
     
   results = curs.fetchall()
   curs.close()
@@ -501,12 +510,6 @@ def get_unsynced_records ():
   for id in unsynced_ids:
     records.append(read_staged_record(id, conn))
   conn.close()
-  
-  #filter by active clinics, thereby addressing the ministry's concerns
-  if config.clinics:
-    orig_count = len(records)
-    records = [r for r in records if r['facility_code'] in config.clinics]
-    log.info('filtering clinics: %d total unsynced => %d to send' % (orig_count, len(records)))
   
   return records
   
@@ -1073,4 +1076,3 @@ def daemon ():
   
 if __name__ == "__main__":
   daemon()
-  
