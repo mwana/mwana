@@ -83,16 +83,18 @@ class ResultsHandler(KeywordHandler):
             else:
                 unfound_sample_results.append(requisition_id)
         if ready_sample_results:
-            resultsmsg = ". ".join(rst for rst in ready_sample_results)
+            resultsmsg = ". ".join("****"+rst for rst in ready_sample_results)
             self.respond("%s. Please record these results in your clinic records and"
             " promptly delete them from your phone. Thanks again" % resultsmsg)
 
         if unready_sample_results:
+            unready_sample_results = set(unready_sample_results)
             self.respond("The results for sample(s) %(requisition_id)s are "
                         "not yet ready. You will be notified when they are ready.",
                         requisition_id=', '.join(str(requisition_id) for requisition_id in unready_sample_results))
 
         if unfound_sample_results:
+            unfound_sample_results = set(unfound_sample_results)
             if len(unfound_sample_results) == 1:
                 self.respond("There are currently no results available for "
                              "%s. Please check if the SampleID is "
