@@ -68,15 +68,16 @@ class ResultsHandler(KeywordHandler):
             elif results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
-                        if result.result.upper() in 'PN':
-                            ready_sample_results.append(
-                                    "%(req_id)s: %(res)s" %
-                                    {'req_id':result.requisition_id,
-                                    'res':result.get_result_display()})
-                            result.notification_status = "sent"
-                            result.save()
+                        if result.result in ('X', 'I'):
+                            reply = 'Rejected'
                         else:
-                            unready_sample_results.append(requisition_id)
+                            reply = result.get_result_display()
+                        ready_sample_results.append(
+                                "%(req_id)s: %(res)s" %
+                                {'req_id':result.requisition_id,
+                                'res':reply})
+                        result.notification_status = "sent"
+                        result.save()
                     else:
                         unready_sample_results.append(requisition_id)
             else:
