@@ -1,23 +1,62 @@
-version = '1.0.1'
+version = '1.0.3'
 
 sched = ['0930', '1310', '1645']  #scheduling parameters for sync task
 
-#path to the ZPCT database
-#prod_db_path = 'C:\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                                        #ZPCT production DB
-#prod_db_path = 'C:\\unicef-mwana\\test\\ZPCT_PCR\\Data\\ZPCT_PCR_DATABASE_be.mdb'                    #testing copy of DB -- local copy on lab computer
-prod_db_path = 'C:\\Documents and Settings\\Drew Roos\\Desktop\\muana\\db\\ZPCT_PCR_DATABASE_be.mdb' #testing copy of DB -- local machine
+# List of clinic ids to send data for; if present, ONLY data for these clinics 
+# will accumulate in the staging db and, subsequently, be sent to the MOH 
+# server.  If empty or None, data for all clinics will be sent.
+clinics = [
+  '4020260',
+  '4020300',
+  '4020230',
+  '4030110',
+  '4030170',
+  '4030290',
+  '4030320',
+  '4030120',
+  '4060130',
+  '4060150',
+  '4060160',
+]
 
-#base_path = 'C:\\unicef-mwana\\script\\'
-base_path = 'C:\\Documents and Settings\\Drew Roos\\Desktop\\muana\\script\\'
+#path to the Lab database                                        
+import os.path
+base_path = os.path.dirname(os.path.abspath(__file__))
 
-staging_db_path = base_path + 'rapidsms_results.db3'
-log_path = base_path + 'extract.log'
+staging_db_path = os.path.join(base_path, 'rapidsms_results.db3')
+prod_db_path = os.path.join('path', 'to', 'access_db.mdb')
+log_path = os.path.join(base_path, 'extract.log')
 
-#submit_url = 'https://mwana-zambia.unicefinnovation.org/labresults/incoming/'    #production rapidsms server at MoH
+# the name of the column containing the lab-based ID of the record
+prod_db_id_column = 'ID'
+
+# a list of the column names to select from the lab database, in the following
+# order: sample_id, patient_id, facility_code, collected_on, received_on,
+# processed_on, result, rejected (boolean), rejection_reason,
+# reject_reason_other, birthdate, child_age, sex, mother_age, health_worker,
+# health_worker_title 
+prod_db_columns = [
+  'PatientIDReference',
+  'Facility',
+  'CollectionDate',
+  'DateReceived',
+  'HivPcrDate',
+  'Detection',
+  'HasSampleBeenRejected',
+  'RejectionReasons',
+  'RejectionReasonOther',
+  'BirthDate',
+  'Age',
+  'Sex',
+  'MotherAge',
+  'RequestingHealthWorker',
+  'Designation',
+]
+
+#production rapidsms server at MoH
 submit_url = 'http://127.0.0.1:8000/labresults/incoming/'                        #testing server on local machine
 
-#auth_params = dict(realm='Lab Results', user='adh', passwd='')
-auth_params = dict(realm='Lab Results', user='admin', passwd='admin')
+auth_params = dict(realm='Lab Results', user='USERNAME', passwd='PASSWORD')
 
 always_on_connection = True       #if True, assume computer 'just has' internet
 
@@ -31,7 +70,10 @@ init_lookback = 14     #when initializing the system, how many days back from th
                        #results for (everything before that is 'archived')
                       
                       
-transport_chunk = 5000 #maximum size per POST to rapidsms server (bytes) (approximate)
+transport_chunk = 5000  #maximum size per POST to rapidsms server (bytes) (approximate)
+send_compressed = False  #if True, payloads will be sent bz2-compressed
+compression_factor = .2 #estimated compression factor
+
 
 #wait times if exception during db access (minutes)
 db_access_retries = [2, 3, 5, 5, 10]
@@ -39,8 +81,8 @@ db_access_retries = [2, 3, 5, 5, 10]
 #wait times if error during http send (seconds)
 send_retries = [0, 0, 0, 30, 30, 30, 60, 120, 300, 300]
 
-#source_tag = 'ndola/arthur-davison'
-source_tag = 'ndola/arthur-davison [TEST]'
+#source_tag Just a tag for identification
+source_tag = 'lusaka/uth'
 
 
 daemon_lock = base_path + 'daemon.lock'

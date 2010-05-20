@@ -8,6 +8,10 @@
 
 <p>Showing logs received in the past <b>{{ days }}</b> days</p>
 
+{% if source %}
+<p>Filtering by source: <b>{{ source }}</b></p>
+{% endif %}
+
 {% if collisions %}
 <p><b>Warning:</b> there are line number collisions (multiple log entries with the same line #); this means
 the log file could have been erased recently.</p>
@@ -58,7 +62,7 @@ the log file could have been erased recently.</p>
 
 {% else %}
 
-<p>No log entries to display from this time interval</p>
+<p>No log entries to display from this time interval and/or source</p>
 
 {% endif %}
 

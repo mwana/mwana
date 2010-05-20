@@ -14,12 +14,13 @@ from urlparse import urlparse
 from threading import Thread
 import os
 import os.path
+import bz2
 
 identity = lambda x: x
 
 db_fields = ['sample_id', 'imported_on', 'resolved_on', 'patient_id', 'facility_code', 'collected_on',
-             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 'sex',
-             'mother_age', 'health_worker', 'health_worker_title', 'sync_status']
+             'received_on', 'processed_on', 'result', 'result_detail', 'birthdate', 'child_age', 
+             'health_worker', 'health_worker_title', 'sync_status']
 
 def init_logging ():
   """initialize the logging framework"""
@@ -30,6 +31,8 @@ def init_logging ():
   formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s")
   handler.setFormatter(formatter)
   log.addHandler(handler)
+# uncomment for logging to console, if desired
+#  log.addHandler(logging.StreamHandler())
 init_logging()
 
 def days_ago (n):
@@ -37,9 +40,11 @@ def days_ago (n):
   return date.today() - timedelta(days=n)
 
 def dbconn (db):
-  """return a database connected to the production (ZPCT access) or staging (UNICEF sqlite) databases"""
+  """return a database connected to the production (lab access) or staging (UNICEF sqlite) databases"""
   if db == 'prod':
     return pyodbc.connect('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s' % config.prod_db_path)
+# to use the Easysoft Access ODBC driver from linux:
+#    return pyodbc.connect('DRIVER={Easysoft ODBC-ACCESS};MDBFILE=%s' % config.prod_db_path)
   elif db == 'staging':
     return sqlite3.connect(config.staging_db_path, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
   else:
@@ -75,8 +80,6 @@ def create_staging_db ():
       result_detail varchar(100),         --e.g., reason rejected
       birthdate date,
       child_age int,                      --in months (may be inconsistent with birthdate)
-      sex varchar(1),
-      mother_age int,
       health_worker varchar(50),          --name of clinic worker collecting sample
       health_worker_title varchar(50),    --title of clinic worker
       sync_status varchar(10) not null default 'new'  --status of record's sync with rapidsms server: 'new', 'updated',
@@ -88,11 +91,22 @@ def create_staging_db ():
   curs.close()
   conn.close()
 
+def facilities_where_clause ():
+  """ensures that only the clinics specified in the config file are entered into the staging database"""
+  if config.clinics:
+    return 'Facility in (%s)' % ', '.join(config.clinics)
+  else:
+    return ''
+
 def archive_old_samples (lookback):
   """pre-populate very old samples in the prod db into staging, so they don't show up in 'new record' queries"""
   conn = dbconn('prod')
   curs = conn.cursor()
-  curs.execute('select LabID from tbl_Patient where DateReceived < ?', [days_ago(lookback)])
+  sql = "select %s from tbl_Patient where DateReceived < ?" % config.prod_db_id_column
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [days_ago(lookback).strftime('%Y-%m-%d')])
   archive_ids = set(norm_id(rec[0]) for rec in curs.fetchall())
   log.info('archiving %d records' % len(archive_ids))
   curs.close()
@@ -110,14 +124,20 @@ def get_ids (db, col, table, normfunc=identity):
   """return a set of all primary key IDs in the given database"""
   conn = dbconn(db)
   curs = conn.cursor()
-  curs.execute('select %s from %s' % (col, table))
+  sql = 'select %s from %s' % (col, table)
+  facilities = facilities_where_clause()
+  if db == 'prod' and facilities:
+    # if this is the production database, add a filter to ensure that only
+    # results for the proper facilities are entered into the staging database
+    sql += ' WHERE %s' % facilities
+  curs.execute(sql)
   ids = set(normfunc(rec[0]) for rec in curs.fetchall())
   curs.close()
   conn.close()
   return ids
   
 def norm_id (lab_id):
-  """convert the ZPCT lab id to a more legible, sortable format"""
+  """convert the lab lab id to a more legible, sortable format"""
   if len(lab_id) != 7:
     log.warning('lab id not in expected format [%s]' % lab_id)
     return lab_id
@@ -129,19 +149,20 @@ def denorm_id (sample_id):
   if len(sample_id) != 8 or sample_id[2] != '-':
     log.warning('sample id not in expected format [%s]' % sample_id)
     return sample_id
+  # make sure it's a string, not unicode, because the ODBC driver doesn't
+  # like unicode
+  return str(sample_id[3:8] + sample_id[0:2])
 
-  return sample_id[3:8] + sample_id[0:2] 
- 
 def check_new_records ():
   """poll if any new records have appeared in the production db (since last time it was synced to staging)"""
-  prod_ids = get_ids('prod', 'LabID', 'tbl_Patient', norm_id)
+  prod_ids = get_ids('prod', config.prod_db_id_column, 'tbl_Patient', norm_id)
   rsms_ids = get_ids('staging', 'sample_id', 'samples')
   
   deleted_ids = rsms_ids - prod_ids
   new_ids = prod_ids - rsms_ids
 
   if len(deleted_ids) > 0:
-    log.warning('records deleted from ZPCT database! (%s)' % ', '.join(sorted(list(deleted_ids))))
+    log.warning('records deleted from lab database! (%s)' % ', '.join(sorted(list(deleted_ids))))
 
   return (new_ids, deleted_ids)
   
@@ -156,15 +177,15 @@ def query_sample (sample_id, conn=None):
     conn = dbconn('prod')
     
   curs = conn.cursor()
-  curs.execute('''
-    select PatientID, Facility,
-           CollectionDate, DateReceived, HivPcrDate,
-           Detection, HasSampleBeenRejected, RejectionReasons, RejectionReasonOther,
-           BirthDate, Age, Sex, MotherAge,
-           RequestingHealthWorker, Designation
+  sql = '''
+    select %s
     from tbl_Patient
-    where LabID = '%s'
-    ''' % denorm_id(sample_id))
+    where %s = ?
+''' % (', '.join(config.prod_db_columns), config.prod_db_id_column)
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [denorm_id(sample_id)])
     
   results = curs.fetchall()
   curs.close()
@@ -178,7 +199,7 @@ def query_sample (sample_id, conn=None):
   return results[0]
     
 def read_sample_record (sample_id, conn=None):
-  """read and process/clean up a single sample row for the ZPCT db"""
+  """read and process/clean up a single sample row for the lab db"""
   sample_row = query_sample(sample_id, conn)
   
   sample = {}
@@ -293,12 +314,12 @@ def get_update_ids (deleted_ids):
   return (update_window_ids, incomplete_window_ids, testing_window_ids)
   
 def query_prod_records ():
-  """get all records of interest from the ZPCT database (new records and records for which still listening for updates)"""
+  """get all records of interest from the lab database (new records and records for which still listening for updates)"""
   (new_ids, deleted_ids) = check_new_records()
   (update_window_ids, incomplete_window_ids, testing_window_ids) = get_update_ids(deleted_ids)
   ids_of_interest = new_ids | update_window_ids | incomplete_window_ids | testing_window_ids
   
-  log.info('querying records of interest from ZPCT: %d total%s; %d new; %d resolved; %d in limbo; %d untested' %
+  log.info('querying records of interest from lab: %d total%s; %d new; %d resolved; %d in limbo; %d untested' %
             (len(ids_of_interest), (' (+ %d to delete)' % len(deleted_ids)) if len(deleted_ids) > 0 else '',
             len(new_ids), len(update_window_ids), len(incomplete_window_ids), len(testing_window_ids)))
   
@@ -320,11 +341,11 @@ def query_prod_records ():
   return (records, deleted_ids)
   
 def pull_records ():
-  """pull record updates from ZPCT to the staging db"""
+  """pull record updates from lab to the staging db"""
   try:
     (records, deleted_ids) = query_prod_records()
   except:
-    log.exception('error accessing ZPCT database (read-only); staging database not touched')
+    log.exception('error accessing lab database (read-only); staging database not touched')
     raise RuntimeError('caught')
   
   try:
@@ -336,15 +357,25 @@ def pull_records ():
     
     newcount = 0
     updatecount = 0
+    newcount_filt = 0
+    updatecount_filt = 0
     for (source, record) in records:
-      result = process_record(record, source, curs)
+      (result, filt) = process_record(record, source, curs)
       if result == 'new':
         newcount += 1
+        if filt:
+          newcount_filt += 1
       elif result == 'update':
         updatecount += 1
+        if filt:
+          updatecount_filt += 1
       
     conn.commit()
-    log.info('staging db: added %d new records, updated %d existing records, deleted %d records' % (newcount, updatecount, len(deleted_ids)))
+    if config.clinics:
+      log.info('staging db: added %d (%d) new records, updated %d (%d) existing records, deleted %d records' %
+          (newcount, newcount_filt, updatecount, updatecount_filt, len(deleted_ids)))
+    else:
+      log.info('staging db: added %d new records, updated %d existing records, deleted %d records' % (newcount, updatecount, len(deleted_ids)))
   except:
     log.exception('error syncing data to staging database; attemping to rollback')
     conn.rollback()
@@ -355,19 +386,21 @@ def pull_records ():
   
 def process_record (record, source, curs):
   """process a single record of interest an mirror data to the staging db"""
+  filt = record['facility_code'] in config.clinics if config.clinics else True
+  
   if source == 'new':
     record['imported_on'] = date.today()
     record['sync_status'] = 'new'
     record['resolved_on'] = date.today() if record['result'] != None else None
     add_record(record, curs)
-    return 'new'
+    return ('new', filt)
     
   else: #existing record
     #check if any fields changed
     existing_record = read_staged_record(record['sample_id'])
     changed_fields = []
-    for f in record:
-      if record[f] != existing_record[f]:
+    for k, v in record.items():
+      if k in existing_record and v != existing_record[k]:
         changed_fields.append(f)
     
     #if the record has changed
@@ -384,7 +417,9 @@ def process_record (record, source, curs):
         record['resolved_on'] = date.today()
         
       update_record(record, curs)
-      return 'update'
+      return ('update', filt)
+    else:
+      return (None, None)
 
 def update_resolved_date (old_result, new_result):
   """whether to reset the 'resolved on' counter based on change in result status"""
@@ -481,8 +516,8 @@ def get_unsynced_records ():
   records = []
   for id in unsynced_ids:
     records.append(read_staged_record(id, conn))
-
   conn.close()
+  
   return records
   
 def retry_task (task, retry_sched):
@@ -532,7 +567,7 @@ class Task:
 """
 
 class DBSyncTask:
-  """retryable task for syncing the ZPCT and staging databases"""
+  """retryable task for syncing the lab and staging databases"""
   
   def do (self):
     try:
@@ -581,7 +616,7 @@ class GetUnsyncedRecordsTask:
     return self.records if success else []
   
 def sync_databases ():
-  """sync the ZPCT and staging databases"""
+  """sync the lab and staging databases"""
   retry_task(DBSyncTask(), [60*x for x in config.db_access_retries])
 
 def condense_record (record):
@@ -657,13 +692,15 @@ def to_json (data):
   
 def chunk_submissions (data_stream):
   """turn the stream of data objects into transmission chunks of (approximate) max size"""
+  chunk_size_limit = config.transport_chunk / (config.compression_factor if config.send_compressed else 1.)
+  
   chunk, size = [], 0
   for datum in data_stream:
     (type, data) = datum
     chunk.append(datum)
     size += len(to_json(data))
     
-    if size >= config.transport_chunk:
+    if size >= chunk_size_limit:
       yield chunk
       chunk, size = [], 0
   
@@ -694,6 +731,9 @@ class Payload:
     json_struct['logs'] = types['log']
     json = to_json(json_struct)
     
+    if config.send_compressed:
+      json = bz2.compress(json)
+    
     return (json, record_ids)
 
 def connection (payload):
@@ -705,8 +745,12 @@ def connection (payload):
     opener = urllib2.build_opener(authinfo)
     urllib2.install_opener(opener)
 
+    headers = {'Content-Type': 'text/json'}
+    if config.send_compressed:
+      headers['Content-Transfer-Encoding'] = 'bzip2'
+    
     try:
-      f = urllib2.urlopen(urllib2.Request(config.submit_url, payload.json, headers={'Content-Type': 'text/json'}))
+      f = urllib2.urlopen(urllib2.Request(config.submit_url, payload.json, headers=headers))
       response = f.read()
       code = f.code
       
@@ -839,7 +883,8 @@ def send_data ():
     payloads = [Payload()]
     log.info('no data to send; sending ping message only')
   else:
-    log.info('%d payloads to send (%d bytes)' % (len(payloads), sum(len(p.json) for p in payloads)))
+    log.info('%d payloads to send (%d bytes%s)' % (len(payloads), sum(len(p.json) for p in payloads),
+                  ', compressed' if config.send_compressed else ''))
   
   transport_payloads(payloads)
   
@@ -1017,7 +1062,7 @@ def parse_sched_params ():
 def daemon ():
   """ENTRY POINT: background daemon that runs the extract/sync task at scheduled intervals"""
   try:
-    log.info('booting daemon...')
+    log.info('booting daemon... (v%s)' % config.version)
   
     times = parse_sched_params()
     if len(times) == 0:
@@ -1026,6 +1071,11 @@ def daemon ():
     else:
       log.info('scheduled to run at: %s' % ', '.join(t.strftime('%H:%M') for t in sorted(times)))
   
+    if config.clinics:
+      log.info('filtering by %d clinics: %s' % (len(config.clinics), ', '.join(config.clinics)))
+    else:
+      log.info('all clinics enabled')
+  
     last_ping = SingletonTask(None, config.daemon_lock).read_lockfile()
     SingletonTask(lambda: daemon_loop(times, last_ping), config.daemon_lock, name='daemon').start()
   except:
@@ -1033,4 +1083,3 @@ def daemon ():
   
 if __name__ == "__main__":
   daemon()
-  
