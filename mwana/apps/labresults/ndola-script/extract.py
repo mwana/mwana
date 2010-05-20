@@ -31,6 +31,8 @@ def init_logging ():
   formatter = logging.Formatter("%(asctime)s;%(levelname)s;%(message)s")
   handler.setFormatter(formatter)
   log.addHandler(handler)
+# uncomment for logging to console, if desired
+#  log.addHandler(logging.StreamHandler())
 init_logging()
 
 def days_ago (n):
@@ -38,9 +40,11 @@ def days_ago (n):
   return date.today() - timedelta(days=n)
 
 def dbconn (db):
-  """return a database connected to the production (ZPCT access) or staging (UNICEF sqlite) databases"""
+  """return a database connected to the production (lab access) or staging (UNICEF sqlite) databases"""
   if db == 'prod':
     return pyodbc.connect('DRIVER={Microsoft Access Driver (*.mdb)};DBQ=%s' % config.prod_db_path)
+# to use the Easysoft Access ODBC driver from linux:
+#    return pyodbc.connect('DRIVER={Easysoft ODBC-ACCESS};MDBFILE=%s' % config.prod_db_path)
   elif db == 'staging':
     return sqlite3.connect(config.staging_db_path, detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES)
   else:
@@ -87,11 +91,22 @@ def create_staging_db ():
   curs.close()
   conn.close()
 
+def facilities_where_clause ():
+  """ensures that only the clinics specified in the config file are entered into the staging database"""
+  if config.clinics:
+    return 'Facility in (%s)' % ', '.join(config.clinics)
+  else:
+    return ''
+
 def archive_old_samples (lookback):
   """pre-populate very old samples in the prod db into staging, so they don't show up in 'new record' queries"""
   conn = dbconn('prod')
   curs = conn.cursor()
-  curs.execute('select LabID from tbl_Patient where DateReceived < ?', [days_ago(lookback)])
+  sql = "select %s from tbl_Patient where DateReceived < ?" % config.prod_db_id_column
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [days_ago(lookback).strftime('%Y-%m-%d')])
   archive_ids = set(norm_id(rec[0]) for rec in curs.fetchall())
   log.info('archiving %d records' % len(archive_ids))
   curs.close()
@@ -109,14 +124,20 @@ def get_ids (db, col, table, normfunc=identity):
   """return a set of all primary key IDs in the given database"""
   conn = dbconn(db)
   curs = conn.cursor()
-  curs.execute('select %s from %s' % (col, table))
+  sql = 'select %s from %s' % (col, table)
+  facilities = facilities_where_clause()
+  if db == 'prod' and facilities:
+    # if this is the production database, add a filter to ensure that only
+    # results for the proper facilities are entered into the staging database
+    sql += ' WHERE %s' % facilities
+  curs.execute(sql)
   ids = set(normfunc(rec[0]) for rec in curs.fetchall())
   curs.close()
   conn.close()
   return ids
   
 def norm_id (lab_id):
-  """convert the ZPCT lab id to a more legible, sortable format"""
+  """convert the lab lab id to a more legible, sortable format"""
   if len(lab_id) != 7:
     log.warning('lab id not in expected format [%s]' % lab_id)
     return lab_id
@@ -128,19 +149,20 @@ def denorm_id (sample_id):
   if len(sample_id) != 8 or sample_id[2] != '-':
     log.warning('sample id not in expected format [%s]' % sample_id)
     return sample_id
+  # make sure it's a string, not unicode, because the ODBC driver doesn't
+  # like unicode
+  return str(sample_id[3:8] + sample_id[0:2])
 
-  return sample_id[3:8] + sample_id[0:2] 
- 
 def check_new_records ():
   """poll if any new records have appeared in the production db (since last time it was synced to staging)"""
-  prod_ids = get_ids('prod', 'LabID', 'tbl_Patient', norm_id)
+  prod_ids = get_ids('prod', config.prod_db_id_column, 'tbl_Patient', norm_id)
   rsms_ids = get_ids('staging', 'sample_id', 'samples')
   
   deleted_ids = rsms_ids - prod_ids
   new_ids = prod_ids - rsms_ids
 
   if len(deleted_ids) > 0:
-    log.warning('records deleted from ZPCT database! (%s)' % ', '.join(sorted(list(deleted_ids))))
+    log.warning('records deleted from lab database! (%s)' % ', '.join(sorted(list(deleted_ids))))
 
   return (new_ids, deleted_ids)
   
@@ -155,15 +177,15 @@ def query_sample (sample_id, conn=None):
     conn = dbconn('prod')
     
   curs = conn.cursor()
-  curs.execute('''
-    select PatientID, Facility,
-           CollectionDate, DateReceived, HivPcrDate,
-           Detection, HasSampleBeenRejected, RejectionReasons, RejectionReasonOther,
-           BirthDate, Age, Sex, MotherAge,
-           RequestingHealthWorker, Designation
+  sql = '''
+    select %s
     from tbl_Patient
-    where LabID = '%s'
-    ''' % denorm_id(sample_id))
+    where %s = ?
+''' % (', '.join(config.prod_db_columns), config.prod_db_id_column)
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [denorm_id(sample_id)])
     
   results = curs.fetchall()
   curs.close()
@@ -177,7 +199,7 @@ def query_sample (sample_id, conn=None):
   return results[0]
     
 def read_sample_record (sample_id, conn=None):
-  """read and process/clean up a single sample row for the ZPCT db"""
+  """read and process/clean up a single sample row for the lab db"""
   sample_row = query_sample(sample_id, conn)
   
   sample = {}
@@ -292,12 +314,12 @@ def get_update_ids (deleted_ids):
   return (update_window_ids, incomplete_window_ids, testing_window_ids)
   
 def query_prod_records ():
-  """get all records of interest from the ZPCT database (new records and records for which still listening for updates)"""
+  """get all records of interest from the lab database (new records and records for which still listening for updates)"""
   (new_ids, deleted_ids) = check_new_records()
   (update_window_ids, incomplete_window_ids, testing_window_ids) = get_update_ids(deleted_ids)
   ids_of_interest = new_ids | update_window_ids | incomplete_window_ids | testing_window_ids
   
-  log.info('querying records of interest from ZPCT: %d total%s; %d new; %d resolved; %d in limbo; %d untested' %
+  log.info('querying records of interest from lab: %d total%s; %d new; %d resolved; %d in limbo; %d untested' %
             (len(ids_of_interest), (' (+ %d to delete)' % len(deleted_ids)) if len(deleted_ids) > 0 else '',
             len(new_ids), len(update_window_ids), len(incomplete_window_ids), len(testing_window_ids)))
   
@@ -319,11 +341,11 @@ def query_prod_records ():
   return (records, deleted_ids)
   
 def pull_records ():
-  """pull record updates from ZPCT to the staging db"""
+  """pull record updates from lab to the staging db"""
   try:
     (records, deleted_ids) = query_prod_records()
   except:
-    log.exception('error accessing ZPCT database (read-only); staging database not touched')
+    log.exception('error accessing lab database (read-only); staging database not touched')
     raise RuntimeError('caught')
   
   try:
@@ -377,8 +399,8 @@ def process_record (record, source, curs):
     #check if any fields changed
     existing_record = read_staged_record(record['sample_id'])
     changed_fields = []
-    for f in record:
-      if record[f] != existing_record[f]:
+    for k, v in record.items():
+      if k in existing_record and v != existing_record[k]:
         changed_fields.append(f)
     
     #if the record has changed
@@ -496,12 +518,6 @@ def get_unsynced_records ():
     records.append(read_staged_record(id, conn))
   conn.close()
   
-  #filter by active clinics, thereby addressing the ministry's concerns
-  if config.clinics:
-    orig_count = len(records)
-    records = [r for r in records if r['facility_code'] in config.clinics]
-    log.info('filtering clinics: %d total unsynced => %d to send' % (orig_count, len(records)))
-  
   return records
   
 def retry_task (task, retry_sched):
@@ -551,7 +567,7 @@ class Task:
 """
 
 class DBSyncTask:
-  """retryable task for syncing the ZPCT and staging databases"""
+  """retryable task for syncing the lab and staging databases"""
   
   def do (self):
     try:
@@ -600,7 +616,7 @@ class GetUnsyncedRecordsTask:
     return self.records if success else []
   
 def sync_databases ():
-  """sync the ZPCT and staging databases"""
+  """sync the lab and staging databases"""
   retry_task(DBSyncTask(), [60*x for x in config.db_access_retries])
 
 def condense_record (record):
@@ -1067,4 +1083,3 @@ def daemon ():
   
 if __name__ == "__main__":
   daemon()
-  

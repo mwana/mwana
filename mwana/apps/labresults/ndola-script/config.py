@@ -2,9 +2,9 @@ version = '1.0.3'
 
 sched = ['0930', '1310', '1645']  #scheduling parameters for sync task
 
-#list of clinic ids to send data for; if present, ONLY data for these clinics will be sent
-#(though data for all clinics will still accumulate in the staging db); if empty or None,
-#data for all clinics will be sent
+# List of clinic ids to send data for; if present, ONLY data for these clinics 
+# will accumulate in the staging db and, subsequently, be sent to the MOH 
+# server.  If empty or None, data for all clinics will be sent.
 clinics = [
   '4020260',
   '4020300',
@@ -20,11 +20,38 @@ clinics = [
 ]
 
 #path to the Lab database                                        
+import os.path
+base_path = os.path.dirname(os.path.abspath(__file__))
 
-#base_path = 'PATH TO SCRIPT'
+staging_db_path = os.path.join(base_path, 'rapidsms_results.db3')
+prod_db_path = os.path.join('path', 'to', 'access_db.mdb')
+log_path = os.path.join(base_path, 'extract.log')
 
-staging_db_path = base_path + 'rapidsms_results.db3'
-log_path = base_path + 'extract.log'
+# the name of the column containing the lab-based ID of the record
+prod_db_id_column = 'ID'
+
+# a list of the column names to select from the lab database, in the following
+# order: sample_id, patient_id, facility_code, collected_on, received_on,
+# processed_on, result, rejected (boolean), rejection_reason,
+# reject_reason_other, birthdate, child_age, sex, mother_age, health_worker,
+# health_worker_title 
+prod_db_columns = [
+  'PatientIDReference',
+  'Facility',
+  'CollectionDate',
+  'DateReceived',
+  'HivPcrDate',
+  'Detection',
+  'HasSampleBeenRejected',
+  'RejectionReasons',
+  'RejectionReasonOther',
+  'BirthDate',
+  'Age',
+  'Sex',
+  'MotherAge',
+  'RequestingHealthWorker',
+  'Designation',
+]
 
 #production rapidsms server at MoH
 submit_url = 'http://127.0.0.1:8000/labresults/incoming/'                        #testing server on local machine
@@ -44,7 +71,7 @@ init_lookback = 14     #when initializing the system, how many days back from th
                       
                       
 transport_chunk = 5000  #maximum size per POST to rapidsms server (bytes) (approximate)
-send_compressed = True  #if True, payloads will be sent bz2-compressed
+send_compressed = False  #if True, payloads will be sent bz2-compressed
 compression_factor = .2 #estimated compression factor
 
 
@@ -55,7 +82,7 @@ db_access_retries = [2, 3, 5, 5, 10]
 send_retries = [0, 0, 0, 30, 30, 30, 60, 120, 300, 300]
 
 #source_tag Just a tag for identification
-source_tag = 'ndola/arthur-davison [TEST]'
+source_tag = 'lusaka/uth'
 
 
 daemon_lock = base_path + 'daemon.lock'
