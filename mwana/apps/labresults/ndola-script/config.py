@@ -2,9 +2,9 @@ version = '1.0.3'
 
 sched = ['0930', '1310', '1645']  #scheduling parameters for sync task
 
-#list of clinic ids to send data for; if present, ONLY data for these clinics will be sent
-#(though data for all clinics will still accumulate in the staging db); if empty or None,
-#data for all clinics will be sent
+# List of clinic ids to send data for; if present, ONLY data for these clinics 
+# will accumulate in the staging db and, subsequently, be sent to the MOH 
+# server.  If empty or None, data for all clinics will be sent.
 clinics = [
   '4020260',
   '4020300',

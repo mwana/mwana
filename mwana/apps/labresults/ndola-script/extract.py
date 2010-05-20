@@ -93,14 +93,20 @@ def create_staging_db ():
 
 def facilities_where_clause ():
   """ensures that only the clinics specified in the config file are entered into the staging database"""
-  return 'Facility in (%s)' % ', '.join(config.clinics)
+  if config.clinics:
+    return 'Facility in (%s)' % ', '.join(config.clinics)
+  else:
+    return ''
 
 def archive_old_samples (lookback):
   """pre-populate very old samples in the prod db into staging, so they don't show up in 'new record' queries"""
   conn = dbconn('prod')
   curs = conn.cursor()
-  curs.execute("select LabID from tbl_Patient where DateReceived < ? and %s" % facilities_where_clause(),
-               [days_ago(lookback).strftime('%Y-%m-%d')])
+  sql = "select LabID from tbl_Patient where DateReceived < ?"
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [days_ago(lookback).strftime('%Y-%m-%d')])
   archive_ids = set(norm_id(rec[0]) for rec in curs.fetchall())
   log.info('archiving %d records' % len(archive_ids))
   curs.close()
@@ -119,10 +125,11 @@ def get_ids (db, col, table, normfunc=identity):
   conn = dbconn(db)
   curs = conn.cursor()
   sql = 'select %s from %s' % (col, table)
-  if db == 'prod':
+  facilities = facilities_where_clause()
+  if db == 'prod' and facilities:
     # if this is the production database, add a filter to ensure that only
     # results for the proper facilities are entered into the staging database
-    sql += ' where %s' % facilities_where_clause()
+    sql += ' WHERE %s' % facilities
   curs.execute(sql)
   ids = set(normfunc(rec[0]) for rec in curs.fetchall())
   curs.close()
@@ -170,15 +177,19 @@ def query_sample (sample_id, conn=None):
     conn = dbconn('prod')
     
   curs = conn.cursor()
-  curs.execute('''
+  sql = '''
     select PatientID, Facility,
            CollectionDate, DateReceived, HivPcrDate,
            Detection, HasSampleBeenRejected, RejectionReasons, RejectionReasonOther,
            BirthDate, Age, Sex, MotherAge,
            RequestingHealthWorker, Designation
     from tbl_Patient
-    where LabID = ? AND %s
-    ''' % facilities_where_clause(), [denorm_id(sample_id)])
+    where LabID = ?
+'''
+  facilities = facilities_where_clause()
+  if facilities:
+    sql += ' AND %s' % facilities
+  curs.execute(sql, [denorm_id(sample_id)])
     
   results = curs.fetchall()
   curs.close()
