@@ -58,7 +58,7 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
     and may also need to be transformed in some way"""
     if field in dict:
         val = dict[field]
-        if val or trans_none:
+        if val is not None or trans_none:
             return trans(val)
         else:
             return None
