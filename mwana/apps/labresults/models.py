@@ -66,12 +66,6 @@ class Result(models.Model):
         ('f', 'Female'),
     )
 
-    AGE_UNIT_CHOICES = (
-        ('days', 'Days'),
-        ('weeks', 'Weeks'),
-        ('months', 'Months'),
-        ('years', 'Years'),
-    )
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
@@ -95,8 +89,7 @@ class Result(models.Model):
     #ancillary demographic data that can help matching up results back to patients
     birthdate = models.DateField(null=True, blank=True)
     child_age = models.IntegerField(null=True, blank=True)
-    child_age_unit = models.CharField(null=True, blank=True, max_length=20,
-                                      choices=AGE_UNIT_CHOICES)
+    child_age_unit = models.CharField(null=True, blank=True, max_length=20)
     sex = models.CharField(choices=SEX_CHOICES, max_length=1, blank=True)
     mother_age = models.IntegerField(null=True, blank=True) #age in years
     collecting_health_worker = models.CharField(max_length=100, blank=True)
