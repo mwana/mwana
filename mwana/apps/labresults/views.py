@@ -196,7 +196,7 @@ def accept_record (record, payload):
 
     #validate required identifying fields
     for reqd_field in ('id', 'fac'):
-        if not dictval(record, reqd_field):
+        if dictval(record, reqd_field) is None:
             cant_save('required field %s missing' % reqd_field)
             return False
 
