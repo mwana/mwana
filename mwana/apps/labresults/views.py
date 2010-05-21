@@ -231,10 +231,12 @@ def accept_record (record, payload):
         'processed_on': dictval(record, 'proc_on', json_date),
         'birthdate': dictval(record, 'dob', json_date),
         'child_age': dictval(record, 'child_age'),
+        'child_age_unit': dictval(record, 'child_age_unit'),
         'sex': dictval(record, 'sex'),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
+        'verified': dictval(record, 'verified'),
     }
     
     #need to keep old record 'pristine' so we can check which fields have changed

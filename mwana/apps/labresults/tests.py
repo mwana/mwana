@@ -408,7 +408,9 @@ class ResultsAcceptor(TestScript):
                     "pat_id": "", 
                     "dob": "2010-02-08", 
                     "proc_on": "2010-04-11", 
-                    "child_age": 3
+                    "child_age": 3,
+                    "child_age_unit": "weeks",
+                    "verified": False
                 }, 
                 {
                     "coll_on": "2010-03-25", 
@@ -425,7 +427,9 @@ class ResultsAcceptor(TestScript):
                     "pat_id": "1029023412", 
                     "dob": "2009-03-30", 
                     "proc_on": "2010-04-13", 
-                    "child_age": 8
+                    "child_age": 8,
+                    "child_age_unit": "weeks",
+                    "verified": True
                 }, 
                 {
                     "coll_on": "2010-04-08", 
@@ -442,7 +446,9 @@ class ResultsAcceptor(TestScript):
                     "pat_id": "21234987", 
                     "dob": "2010-01-12", 
                     "proc_on": "2010-04-17", 
-                    "child_age": 4
+                    "child_age": 4,
+                    "child_age_unit": "days",
+                    "verified": False
                 }
             ]
         }
@@ -461,11 +467,15 @@ class ResultsAcceptor(TestScript):
         self.assertEqual(payload.incoming_date.hour, now.hour)
 
         self.assertEqual(labresults.Result.objects.count(), 2)
-        result1 = labresults.Result.objects.get(sample_id="10-09997")
-        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result1 = labresults.Result.objects.get(sample_id="10-09998")
+        result2 = labresults.Result.objects.get(sample_id="10-09997")
         # 10-09999 will not make it in because it's missing a pat_id
         self.assertEqual(result1.payload, payload)
         self.assertEqual(result2.payload, payload)
+        self.assertTrue(result1.verified)
+        self.assertEqual(result1.child_age_unit, 'weeks')
+        self.assertFalse(result2.verified)
+        self.assertEqual(result2.child_age_unit, 'days')
 
     def test_payload_missing_fac(self):
         user = User.objects.create_user(username='adh', email='',
