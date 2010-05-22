@@ -1,6 +1,7 @@
 import logging
 
 from django.db import transaction
+from django.conf import settings
 
 from mwana import const
 from mwana.apps.labresults.models import Payload
@@ -12,13 +13,17 @@ logger = logging.getLogger(__name__)
 
 def send_results_notification(router):
     logger.debug('in send_results_notification')
-    clinics_with_results =\
-      Location.objects.filter(lab_results__notification_status__in=
-                              ['new', 'notified']).distinct()
-    labresults_app = router.get_app(const.LAB_RESULTS_APP)
-    for clinic in clinics_with_results:
-        logger.info('notifying %s of new results' % clinic)
-        labresults_app.notify_clinic_pending_results(clinic)
+    if settings.SEND_LIVE_LABRESULTS:
+        clinics_with_results =\
+          Location.objects.filter(lab_results__notification_status__in=
+                                  ['new', 'notified']).distinct()
+        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+        for clinic in clinics_with_results:
+            logger.info('notifying %s of new results' % clinic)
+            labresults_app.notify_clinic_pending_results(clinic)
+    else:
+        logger.info('not notifying any clinics of new results because '
+                    'settings.SEND_LIVE_LABRESULTS is False')
 
 
 @transaction.commit_manually
