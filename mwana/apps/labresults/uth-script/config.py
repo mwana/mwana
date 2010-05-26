@@ -23,7 +23,7 @@ import os.path
 base_path = os.path.dirname(os.path.abspath(__file__))
 
 staging_db_path = os.path.join(base_path, 'rapidsms_results.db3')
-prod_db_path = 'C:\\UTH_PCR\\Data\\UTH_PCR_DATABASE.mdb'
+prod_db_path = 'DATABASE PATH'
 log_path = os.path.join(base_path, 'extract.log')
 
 # the name of the column containing the lab-based ID of the record
@@ -65,9 +65,9 @@ result_map = {
 }
 
 #production rapidsms server at MoH
-submit_url = 'https://mwana-zambia.unicefinnovation.org/labresults/incoming/'
+submit_url = 'HTTPS SERVER PATH'
 
-auth_params = dict(realm='Lab Results', user='uth', passwd='Eedoos9seh')
+auth_params = dict(realm='Lab Results', user='USERNAME', passwd='PASSWORD')
 
 always_on_connection = False       #if True, assume computer 'just has' internet
 
