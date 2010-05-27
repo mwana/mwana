@@ -182,6 +182,11 @@ class App (rapidsms.App):
                                        (msg.connection for msg in messages))
 
     def _pending_results(self, clinic):
+        """
+        Returns the pending results for a clinic. This is limited to 9 results
+        (about 3 SMSes) at a time, so clinics aren't overwhelmed with new
+        results.
+        """
         if settings.SEND_LIVE_LABRESULTS:
             return Result.objects.filter(clinic=clinic,
                                notification_status__in=['new', 'notified'])[:9]
