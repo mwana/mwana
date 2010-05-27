@@ -184,7 +184,7 @@ class App (rapidsms.App):
     def _pending_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
             return Result.objects.filter(clinic=clinic,
-                                   notification_status__in=['new', 'notified'])
+                               notification_status__in=['new', 'notified'])[:9]
         else:
             return Result.objects.none()
 
