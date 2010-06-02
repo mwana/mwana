@@ -173,7 +173,7 @@ class App (rapidsms.App):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         
-#        EventSchedule.objects.create(callback=callback, hours=[2])
+        EventSchedule.objects.create(callback=callback, hours=[2], minutes=[0])
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
@@ -228,18 +228,29 @@ class App (rapidsms.App):
 
         all_msgs = []
         help_msgs = []
+        if not contacts:
+            return
+
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection,
                                   template=RESULTS_CHANGED)
             all_msgs.append(msg)
+
+        contact_details = []
+        for contact in contacts:
+            contact_details.append("%s:%s" % (contact.name, contact.default_connection.identity))
+
         if all_msgs:
             self.send_messages(all_msgs)
             self._mark_results_pending(changed_results,
                                        (msg.connection for msg in all_msgs))
             for help_admin in Contact.active.filter(is_help_admin=True):
                 h_msg = OutgoingMessage(help_admin.default_connection,
-                "Make a followup for changed results %s: %s" %
-                (clinic.name,";".join(res.requisition_id + ", " + res.result + ", old value:" + res.old_value for res in changed_results)))
+                "Make a followup for changed results %s: %s. Contacts = %s" %
+                (clinic.name,";****".join("ID=" + res.requisition_id + ", Result="
+                + res.result
+                + ", old value=" + res.old_value for res in changed_results),
+                ", ".join(contact_detail for contact_detail in contact_details)))
                 help_msgs.append(h_msg)
             if help_msgs:
                 self.send_messages(help_msgs)

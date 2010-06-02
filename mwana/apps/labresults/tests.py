@@ -558,7 +558,7 @@ class ResultsAcceptor(TestApp):
         response = self.client.get(reverse('accept_results'))
         self.assertEqual(response.status_code, 405) # method not supported
 
-    def test_results_changed_notification(self):
+    def test_results_changed_notification(self):        
         # TODO extend test for all scenarios. ensure results are saved fine.
         user = User.objects.create_user(username='adh', email='',
                                         password='abc')
@@ -592,12 +592,12 @@ class ResultsAcceptor(TestApp):
                     "result_detail": None,
                     "sync": "new",
                     "sex": "f",
-                    "result": "rejected",
+                    "result": "negative",
                     "recv_on": "2010-04-08",
                     "fac": 'mib',
                     "id": "10-09999",
                     "hw_tit": "NURSE",
-                    "pat_id": "",
+                    "pat_id": "78",
                     "dob": "2010-02-08",
                     "proc_on": "2010-04-11",
                     "child_age": 3
@@ -666,7 +666,7 @@ class ResultsAcceptor(TestApp):
                     "fac": 'mib',
                     "id": "10-09999",
                     "hw_tit": "NURSE",
-                    "pat_id": "",
+                    "pat_id": "87",
                     "dob": "2010-02-08",
                     "proc_on": "2010-04-11",
                     "child_age": 3
@@ -695,7 +695,7 @@ class ResultsAcceptor(TestApp):
                     "result_detail": None,
                     "sync": "new",
                     "sex": "f",
-                    "result": "positive",
+                    "result": "negative",
                     "recv_on": "2010-04-15",
                     "fac": 'mib',
                     "id": "10-09997",
@@ -712,9 +712,9 @@ class ResultsAcceptor(TestApp):
         # let the clinic worker get some results
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello John Banda. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 1029023412:NotDetected. **** 21234987:NotDetected
+            clinic_worker < Thank you! Here are your results: **** 1029023412:NotDetected. **** 78:NotDetected. **** 21234987:NotDetected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """        
         self.runScript(script)
@@ -732,7 +732,7 @@ class ResultsAcceptor(TestApp):
         self.assertEqual(payload.incoming_date.day, now.day)
         self.assertEqual(payload.incoming_date.hour, now.hour)
 
-        self.assertEqual(labresults.Result.objects.count(), 2)
+        self.assertEqual(labresults.Result.objects.count(), 3)
         result1 = labresults.Result.objects.get(sample_id="10-09997")
         result2 = labresults.Result.objects.get(sample_id="10-09998")
         # 10-09999 will not make it in because it's missing a pat_id
@@ -756,7 +756,7 @@ class ResultsAcceptor(TestApp):
 #        self.assertEqual(payload.incoming_date.day, now.day)
 #        self.assertEqual(payload.incoming_date.hour, now.hour)
 
-        self.assertEqual(labresults.Result.objects.count(), 2)
+        self.assertEqual(labresults.Result.objects.count(), 3)
         result1 = labresults.Result.objects.get(sample_id="10-09997")
         result2 = labresults.Result.objects.get(sample_id="10-09998")
         # 10-09999 will not make it in because it's missing a pat_id
@@ -765,14 +765,16 @@ class ResultsAcceptor(TestApp):
         self.startRouter()
         tasks.send_changed_records_notification(self.router)
         msgs = self.receiveAllMessages()
-        print "****" * 25
-        print "Outgoing messages"
-        for msg in msgs:
-            print msg.connection.contact,":",msg.text
+        
+        msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        self.assertEqual(msg1,msgs[0].text)
+        self.assertEqual(msg2,msgs[1].text)
+        self.assertEqual(msg3,msgs[2].text)
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412:Rejected. **** 21234987:Detected
+            clinic_worker < Thank you! Here are your results: **** 1029023412:Rejected. **** 87:Detected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """
         self.runScript(script)
