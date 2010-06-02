@@ -420,7 +420,9 @@ class ResultsAcceptor(TestApp):
                     "pat_id": "", 
                     "dob": "2010-02-08", 
                     "proc_on": "2010-04-11", 
-                    "child_age": 3
+                    "child_age": 3,
+                    "child_age_unit": "weeks",
+                    "verified": False
                 }, 
                 {
                     "coll_on": "2010-03-25", 
@@ -437,7 +439,9 @@ class ResultsAcceptor(TestApp):
                     "pat_id": "1029023412", 
                     "dob": "2009-03-30", 
                     "proc_on": "2010-04-13", 
-                    "child_age": 8
+                    "child_age": 8,
+                    "child_age_unit": "weeks",
+                    "verified": True
                 }, 
                 {
                     "coll_on": "2010-04-08", 
@@ -454,7 +458,9 @@ class ResultsAcceptor(TestApp):
                     "pat_id": "21234987", 
                     "dob": "2010-01-12", 
                     "proc_on": "2010-04-17", 
-                    "child_age": 4
+                    "child_age": 4,
+                    "child_age_unit": "days",
+                    "verified": False
                 }
             ]
         }
@@ -473,11 +479,66 @@ class ResultsAcceptor(TestApp):
         self.assertEqual(payload.incoming_date.hour, now.hour)
 
         self.assertEqual(labresults.Result.objects.count(), 2)
-        result1 = labresults.Result.objects.get(sample_id="10-09997")
-        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result1 = labresults.Result.objects.get(sample_id="10-09998")
+        result2 = labresults.Result.objects.get(sample_id="10-09997")
         # 10-09999 will not make it in because it's missing a pat_id
         self.assertEqual(result1.payload, payload)
         self.assertEqual(result2.payload, payload)
+        self.assertTrue(result1.verified)
+        self.assertEqual(result1.child_age_unit, 'weeks')
+        self.assertFalse(result2.verified)
+        self.assertEqual(result2.child_age_unit, 'days')
+
+    def test_payload_missing_fac(self):
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        type = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        Location.objects.create(name='Clinic', slug='202020',
+                                type=type)
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        data = {
+            "source": "ndola/arthur-davison", 
+            "now": "2010-04-22 10:30:00", 
+            "logs": [
+                {
+                    "msg": "booting daemon...", 
+                    "lvl": "INFO", 
+                    "at": "2010-04-22 07:18:03,140"
+                }
+            ], 
+            "samples": [
+                {
+                    "coll_on": "2010-03-31", 
+                    "hw": "JANE SMITH", 
+                    "mother_age": 19, 
+                    "result_detail": None, 
+                    "sync": "new", 
+                    "sex": "f", 
+                    "result": "negative", 
+                    "recv_on": "2010-04-08", 
+                    "fac": 0, 
+                    "id": "10-09999", 
+                    "hw_tit": "NURSE", 
+                    "pat_id": "1234", 
+                    "dob": "2010-02-08", 
+                    "proc_on": "2010-04-11", 
+                    "child_age": 3
+                }
+            ]
+        }
+        now = datetime.datetime.now()
+        response = self._post_json(reverse('accept_results'), data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(labresults.Payload.objects.count(), 1)
+        payload = labresults.Payload.objects.get()
+        self.assertEqual(payload.raw, json.dumps(data))
+        self.assertTrue(payload.parsed_json)
+        self.assertTrue(payload.validated_schema)
+        self.assertEqual(labresults.Result.objects.count(), 1)
+        self.assertEqual(labresults.LabLog.objects.count(), 1)
 
     def test_payload_login_required(self):
         data = {'varname': 'data'}

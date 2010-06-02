@@ -58,7 +58,7 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
     and may also need to be transformed in some way"""
     if field in dict:
         val = dict[field]
-        if val or trans_none:
+        if val is not None or trans_none:
             return trans(val)
         else:
             return None
@@ -196,7 +196,7 @@ def accept_record (record, payload):
 
     #validate required identifying fields
     for reqd_field in ('id', 'fac'):
-        if not dictval(record, reqd_field):
+        if dictval(record, reqd_field) is None:
             cant_save('required field %s missing' % reqd_field)
             return False
 
@@ -231,10 +231,12 @@ def accept_record (record, payload):
         'processed_on': dictval(record, 'proc_on', json_date),
         'birthdate': dictval(record, 'dob', json_date),
         'child_age': dictval(record, 'child_age'),
+        'child_age_unit': dictval(record, 'child_age_unit'),
         'sex': dictval(record, 'sex'),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
+        'verified': dictval(record, 'verified'),
     }
     
     #need to keep old record 'pristine' so we can check which fields have changed

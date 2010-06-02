@@ -94,13 +94,16 @@ class Result(models.Model):
 
     #ancillary demographic data that can help matching up results back to patients
     birthdate = models.DateField(null=True, blank=True)
-    child_age = models.IntegerField(null=True, blank=True)  #age in weeks
+    child_age = models.IntegerField(null=True, blank=True)
+    child_age_unit = models.CharField(null=True, blank=True, max_length=20)
     sex = models.CharField(choices=SEX_CHOICES, max_length=1, blank=True)
     mother_age = models.IntegerField(null=True, blank=True) #age in years
     collecting_health_worker = models.CharField(max_length=100, blank=True)
     coll_hw_title = models.CharField(max_length=30, blank=True)
     record_change = models.CharField(choices=RECORD_CHANGE_CHOICES, max_length=6, null=True, blank=True)
     old_value = models.CharField(max_length=50, null=True, blank=True)
+    verified = models.NullBooleanField(null=True, blank=True)
+
 
     class Meta:
         ordering = ('collected_on', 'requisition_id')

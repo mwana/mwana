@@ -165,8 +165,8 @@ class App (rapidsms.App):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-#        EventSchedule.objects.create(callback=callback, hours=[12],
-#                                     minutes=[0])
+        EventSchedule.objects.create(callback=callback, hours=[12],
+                                     minutes=[0])
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
