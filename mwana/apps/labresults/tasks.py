@@ -12,37 +12,33 @@ from rapidsms.contrib.locations.models import Location
 logger = logging.getLogger(__name__)
 
 def send_results_notification(router):
-    logger.debug('in send_results_notification')
-    clinics_with_results =\
-      Location.objects.filter(lab_results__notification_status__in=
-                              ['new', 'notified']).distinct()
-    labresults_app = router.get_app(const.LAB_RESULTS_APP)
-    for clinic in clinics_with_results:
-        logger.info('notifying %s of new results' % clinic)
-        labresults_app.notify_clinic_pending_results(clinic)
+    if settings.SEND_LIVE_LABRESULTS:
+        logger.debug('in send_results_notification')
+        clinics_with_results =\
+          Location.objects.filter(lab_results__notification_status__in=
+                                  ['new', 'notified']).distinct()
+        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+        for clinic in clinics_with_results:
+            logger.info('notifying %s of new results' % clinic)
+            labresults_app.notify_clinic_pending_results(clinic)
+    else:
+        logger.info('not notifying any clinics of new results because '
+                    'settings.SEND_LIVE_LABRESULTS is False')
         
 def send_changed_records_notification(router):
-    logger.debug('in send_changed_records_notification')
-    clinics_with_results =\
-      Location.objects.filter(lab_results__notification_status__in=
-                              ['updated', 'notified']).distinct()
-    labresults_app = router.get_app(const.LAB_RESULTS_APP)
-    for clinic in clinics_with_results:
-        logger.info('notifying %s of changed results' % clinic)
-        logger.debug('notifying %s of changed results' % clinic)
-        labresults_app.notify_clinic_of_changed_records(clinic)
-
-#    if settings.SEND_LIVE_LABRESULTS:
-#        clinics_with_results =\
-#          Location.objects.filter(lab_results__notification_status__in=
-#                                  ['new', 'notified']).distinct()
-#        labresults_app = router.get_app(const.LAB_RESULTS_APP)
-#        for clinic in clinics_with_results:
-#            logger.info('notifying %s of new results' % clinic)
-#            labresults_app.notify_clinic_pending_results(clinic)
-#    else:
-#        logger.info('not notifying any clinics of new results because '
-#                    'settings.SEND_LIVE_LABRESULTS is False')
+    if settings.SEND_LIVE_LABRESULTS:
+        logger.debug('in send_changed_records_notification')
+        clinics_with_results =\
+          Location.objects.filter(lab_results__notification_status__in=
+                                  ['updated', 'notified']).distinct()
+        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+        for clinic in clinics_with_results:
+            logger.info('notifying %s of changed results' % clinic)
+            logger.debug('notifying %s of changed results' % clinic)
+            labresults_app.notify_clinic_of_changed_records(clinic)
+    else:
+        logger.info('not notifying any clinics of changed results because '
+                    'settings.SEND_LIVE_LABRESULTS is False')
 
 
 @transaction.commit_manually
