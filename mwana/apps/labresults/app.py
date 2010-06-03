@@ -20,6 +20,9 @@ import mwana.const as const
 import rapidsms
 import re
 from mwana.util import get_clinic_or_default
+import logging
+
+logger = logging.getLogger(__name__)
 
 class App (rapidsms.App):
     
@@ -261,8 +264,9 @@ class App (rapidsms.App):
                 help_msgs.append(h_msg)
             if help_msgs:
                 self.send_messages(help_msgs)
+                logger.info("sent following message to help admins: %s" % help_msgs[0].text)
             else:
-                print "there are no help addmins"
+                logger.info("There are no help admins")
 
     
 
