@@ -17,6 +17,7 @@ from rapidsms.models import Connection
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
+from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 
 
 class TestApp(TestScript):
@@ -351,7 +352,10 @@ class TestApp(TestScript):
 
 
 class ResultsAcceptor(TestApp):
-    
+    """
+    Tests processing of payloads
+    """
+
     def _post_json(self, url, data):
         if not isinstance(data, basestring):
             data = json.dumps(data)
@@ -559,157 +563,22 @@ class ResultsAcceptor(TestApp):
         self.assertEqual(response.status_code, 405) # method not supported
 
     def test_results_changed_notification(self):        
-        # TODO extend test for all scenarios. ensure results are saved fine.
+        """
+        Tests sending of notifications for previously sent later change in either
+        requisition id, or actual results (from or to Positive/Negative). One
+        notification goes to all clinic workers and another to all support staff.
+        """
         user = User.objects.create_user(username='adh', email='',
                                         password='abc')
         perm = Permission.objects.get(content_type__app_label='labresults',
                                       codename='add_payload')
-        type = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
-#        Location.objects.create(name='Clinic', slug='202020',
-#                                type=type)
         user.user_permissions.add(perm)
         self.client.login(username='adh', password='abc')
-        data = {
-            "source": "ndola/arthur-davison",
-            "now": "2010-04-22 10:30:00",
-            "logs": [
-                {
-                    "msg": "booting daemon...",
-                    "lvl": "INFO",
-                    "at": "2010-04-22 07:18:03,140"
-                },
-                {
-                    "msg": "archiving 124 records",
-                    "lvl": "INFO",
-                    "at": "2010-04-22 09:18:23,248"
-                }
-            ],
-            "samples": [
-                {
-                    "coll_on": "2010-03-31",
-                    "hw": "JANE SMITH",
-                    "mother_age": 19,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "negative",
-                    "recv_on": "2010-04-08",
-                    "fac": 'mib',
-                    "id": "10-09999",
-                    "hw_tit": "NURSE",
-                    "pat_id": "78",
-                    "dob": "2010-02-08",
-                    "proc_on": "2010-04-11",
-                    "child_age": 3
-                },
-                {
-                    "coll_on": "2010-03-25",
-                    "hw": "JENNY HOWARD",
-                    "mother_age": 41,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "negative",
-                    "recv_on": "2010-04-11",
-                    "fac": 'mib',
-                    "id": "10-09998",
-                    "hw_tit": "AMM",
-                    "pat_id": "1029023412",
-                    "dob": "2009-03-30",
-                    "proc_on": "2010-04-13",
-                    "child_age": 8
-                },
-                {
-                    "coll_on": "2010-04-08",
-                    "hw": "MOLLY",
-                    "mother_age": 31,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "negative",
-                    "recv_on": "2010-04-15",
-                    "fac": 'mib',
-                    "id": "10-09997",
-                    "hw_tit": "ZAN",
-                    "pat_id": "21234987",
-                    "dob": "2010-01-12",
-                    "proc_on": "2010-04-17",
-                    "child_age": 4
-                }
-            ]
-        }
-        changed_data = {
-            "source": "ndola/arthur-davison",
-            "now": "2010-04-22 10:30:00",
-            "logs": [
-                {
-                    "msg": "booting daemon...",
-                    "lvl": "INFO",
-                    "at": "2010-04-22 07:18:03,140"
-                },
-                {
-                    "msg": "archiving 124 records",
-                    "lvl": "INFO",
-                    "at": "2010-04-22 09:18:23,248"
-                }
-            ],
-            "samples": [
-                {
-                    "coll_on": "2010-03-31",
-                    "hw": "JANE SMITH",
-                    "mother_age": 19,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "positive",
-                    "recv_on": "2010-04-08",
-                    "fac": 'mib',
-                    "id": "10-09999",
-                    "hw_tit": "NURSE",
-                    "pat_id": "87",
-                    "dob": "2010-02-08",
-                    "proc_on": "2010-04-11",
-                    "child_age": 3
-                },
-                {
-                    "coll_on": "2010-03-25",
-                    "hw": "JENNY HOWARD",
-                    "mother_age": 41,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "rejected",
-                    "recv_on": "2010-04-11",
-                    "fac": 'mib',
-                    "id": "10-09998",
-                    "hw_tit": "AMM",
-                    "pat_id": "1029023412",
-                    "dob": "2009-03-30",
-                    "proc_on": "2010-04-13",
-                    "child_age": 8
-                },
-                {
-                    "coll_on": "2010-04-08",
-                    "hw": "MOLLY",
-                    "mother_age": 31,
-                    "result_detail": None,
-                    "sync": "new",
-                    "sex": "f",
-                    "result": "negative",
-                    "recv_on": "2010-04-15",
-                    "fac": 'mib',
-                    "id": "10-09997",
-                    "hw_tit": "ZAN",
-                    "pat_id": "21234987",
-                    "dob": "2010-01-12",
-                    "proc_on": "2010-04-17",
-                    "child_age": 4
-                }
-            ]
-        }
-        now = datetime.datetime.now()
-        response = self._post_json(reverse('accept_results'), data)
-        # let the clinic worker get some results
+        
+        # get results from initial payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # let the clinic worker get the results
         script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
@@ -719,58 +588,34 @@ class ResultsAcceptor(TestApp):
             """        
         self.runScript(script)
 
+        # testing if the payload is processed fine is done in other test methods
+
+        # process changed payload with changes in results and one req_id
+        self._post_json(reverse('accept_results'), CHANGED_PAYLOAD)
         
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(labresults.Payload.objects.count(), 1)
-        payload = labresults.Payload.objects.get()
-        self.assertEqual(payload.raw, json.dumps(data))
-        self.assertTrue(payload.parsed_json)
-        self.assertTrue(payload.validated_schema)
-        self.assertEqual(user, payload.auth_user)
-        self.assertEqual(payload.incoming_date.year, now.year)
-        self.assertEqual(payload.incoming_date.month, now.month)
-        self.assertEqual(payload.incoming_date.day, now.day)
-        self.assertEqual(payload.incoming_date.hour, now.hour)
 
+        # The number of results records should remain to be 3
         self.assertEqual(labresults.Result.objects.count(), 3)
-        result1 = labresults.Result.objects.get(sample_id="10-09997")
-        result2 = labresults.Result.objects.get(sample_id="10-09998")
-        # 10-09999 will not make it in because it's missing a pat_id
-        self.assertEqual(result1.payload, payload)
-        self.assertEqual(result2.payload, payload)
 
-#        time.sleep(.1)# whatever this does
-
-
-        # process changed results
-        response = self._post_json(reverse('accept_results'), changed_data)
-#        self.assertEqual(response.status_code, 200)
-#        self.assertEqual(labresults.Payload.objects.count(), 1)
-        payload = labresults.Payload.objects.all()
-#        self.assertEqual(payload.raw, json.dumps(data))
-#        self.assertTrue(payload.parsed_json)
-#        self.assertTrue(payload.validated_schema)
-#        self.assertEqual(user, payload.auth_user)
-#        self.assertEqual(payload.incoming_date.year, now.year)
-#        self.assertEqual(payload.incoming_date.month, now.month)
-#        self.assertEqual(payload.incoming_date.day, now.day)
-#        self.assertEqual(payload.incoming_date.hour, now.hour)
-
-        self.assertEqual(labresults.Result.objects.count(), 3)
-        result1 = labresults.Result.objects.get(sample_id="10-09997")
-        result2 = labresults.Result.objects.get(sample_id="10-09998")
-        # 10-09999 will not make it in because it's missing a pat_id
-#        self.assertEqual(result1.payload, payload)
-#        self.assertEqual(result2.payload, payload)
+        # Start router and manually call send_changed_records_notification()
         self.startRouter()
         tasks.send_changed_records_notification(self.router)
+
+        # Get all the messages sent
         msgs = self.receiveAllMessages()
         
+        # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
+        # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
         msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
+        self.assertEqual("John Banda",msgs[0].connection.contact.name)
+        self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
+        self.assertEqual("Trezy Mwanza",msgs[2].connection.contact.name)
+
+        # clinic_worker should be able to get the results by replying with PIN
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
