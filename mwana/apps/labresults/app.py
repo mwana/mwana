@@ -229,6 +229,7 @@ class App (rapidsms.App):
             self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
+            return
 
         RESULTS_CHANGED     = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result and update your logbooks."
         if len(changed_results) > 1:
@@ -236,8 +237,6 @@ class App (rapidsms.App):
 
         all_msgs = []
         help_msgs = []
-        if not contacts:
-            return
 
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection,
