@@ -1,4 +1,4 @@
-from mwana.apps.broadcast.handlers.base import BroadcastHandler
+from mwana.apps.broadcast.handlers.base import BroadcastHandler, UNREGISTERED
 from rapidsms.models import Contact
 from mwana.util import get_clinic_or_default
 
@@ -6,8 +6,10 @@ from mwana.util import get_clinic_or_default
 class BlastHandler(BroadcastHandler):
     
     group_name = "Mwana Users"
-    keyword = "BLAST|blast|blaster|blastar|blasta|blust|bluster|blusta|blustar"
+    keyword = "blast|blust|blaster|bluster|blastar|blustar|blasta|blusta"
     
     def handle(self, text):
-        contacts = Contact.active.exclude(id=self.msg.contact.id)
-        return self.broadcast(text, contacts)
+        if self.msg.contact is not None and self.msg.contact.is_help_admin and self.msg.contact.is_active:
+            contacts = Contact.active.exclude(id=self.msg.contact.id)
+            return self.broadcast(text, contacts)
+              

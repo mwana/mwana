@@ -6,6 +6,7 @@ from rapidsms.tests.scripted import TestScript
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type
 from mwana.apps.broadcast.app import App as broadcast_app
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
+import mwana.const as const
 
 class TestApp(TestScript):
     
@@ -15,23 +16,37 @@ class TestApp(TestScript):
                                                      plural="clinics", 
                                                      slug="clinics")
         clinic = Location.objects.create(type=type, name="demo", slug="demo") 
-        clinic_zone= Location.objects.create(type=get_zone_type(), name="child", 
+        self.clinic_zone= Location.objects.create(type=get_zone_type(), name="child", 
                                              slug="child", parent=clinic) 
         clinic_worker = self.create_contact(name="clinic_worker", location=clinic, 
                                             types=[get_clinic_worker_type()])
-        clinic_worker2 = self.create_contact(name="clinic_worker2", location=clinic_zone,
+        clinic_worker2 = self.create_contact(name="clinic_worker2", location=self.clinic_zone,
                                              types=[get_clinic_worker_type()])
+        
+#        script = "help_admin > hello world"
+#        self.runScript(script)
+#        connection = Connection.objects.get(identity="help_admin")
+#        help_admin = Contact.objects.create(alias='help_admin', is_active = True, name="help_admin",
+#                                         location=clinic_zone,is_help_admin = True)
+#        help_admin.types.add(const.get_clinic_worker_type())
+#                                
+#        connection.contact = help_admin
+#        connection.save()
+        
         cba = self.create_contact(name="cba", location=clinic,
                                   types=[get_cba_type()])
-        cba2 = self.create_contact(name="cba2", location=clinic_zone,
+        cba2 = self.create_contact(name="cba2", location=self.clinic_zone,
                                    types=[get_cba_type()])
+        active_contacts = Contact.active.all()
         
         self.all = [clinic_worker, clinic_worker2, cba, cba2]
         self.expected_keyword_to_groups = \
             {"ALL":    [clinic_worker, clinic_worker2, cba, cba2],
              "CLINIC": [clinic_worker, clinic_worker2],
-             "CBA":    [cba, cba2]
+             "CBA":    [cba, cba2],
              }
+        
+   
         
     def testGroupMessaging(self):
         self.assertEqual(0, BroadcastMessage.objects.count())
@@ -105,4 +120,23 @@ class TestApp(TestScript):
         connection.contact = contact
         connection.save()
         return contact
+    
+    def testBlaster(self):
+        script = "help_admin > hello world"
+        self.runScript(script)
+        connection = Connection.objects.get(identity="help_admin")
+        help_admin = Contact.objects.create(alias='help_admin', is_active = True, name="help_admin",
+                                         location=self.clinic_zone,is_help_admin = True)
+        help_admin.types.add(const.get_clinic_worker_type())
+                                
+        connection.contact = help_admin
+        connection.save()
         
+        script = """
+            help_admin > blast hello
+            clinic_worker < hello [from help_admin to Mwana Users]
+            clinic_worker2 < hello [from help_admin to Mwana Users]
+            cba < hello [from help_admin to Mwana Users]
+            cba2 < hello [from help_admin to Mwana Users]                 
+        """
+               
