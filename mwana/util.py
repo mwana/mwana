@@ -1,5 +1,6 @@
 from rapidsms.contrib.locations.models import LocationType
 from mwana.const import get_zone_type
+import datetime
 
 def get_clinic_or_default(contact):
     """Gets a clinic associated with the contact"""
@@ -17,3 +18,15 @@ def get_clinic_or_default(contact):
             return location
         location = location.parent
     return contact.location
+
+def is_today_a_weekend():
+    """
+    Returns true if current date is a weekend. Monday => 0
+    """
+    return datetime.date.today().weekday() in [5, 6]
+
+def is_weekend(input_date):
+    """
+    Returns true if passed date is a weekend. Monday => 0
+    """
+    return input_date.weekday() in [5, 6]
