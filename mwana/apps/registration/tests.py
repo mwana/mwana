@@ -30,9 +30,9 @@ class TestApp(TestScript):
             rb     > join kdh rupiah banda 123q
             rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             tk     > join kdh tizie kays -1000
-            tk     < Hi Tizie Kays, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            tk     < Hi Tizie Kays, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             jk     > join kdh jordan katembula -1000
-            jk     < Hi Jordan Katembula, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            jk     < Hi Jordan Katembula, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > join kdh rupiah banda1000
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 2001234
@@ -40,13 +40,15 @@ class TestApp(TestScript):
             rb     > join kdh rupiah banda4004444
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join kdh rupiah banda 1234
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
-            ts     > join 4030120 tom simpson 1234
-            ts     < Hi Tom Simpson, thanks for registering for DBS results from Results160 as staff of Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            ts     > join 4030120 li  1234
+            ts     < Hi Li, thanks for registering for Results160 from Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             kk     > join whoops kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > join abc
             noname < Sorry, I didn't understand that. Make sure you send your location, name and pin like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.
+            tooshortname > join kdh j 1234
+            tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
         """
         self.runScript(script)
         self.assertEqual(4, Contact.objects.count(), "Registration didn't create a new contact!")
@@ -58,7 +60,7 @@ class TestApp(TestScript):
 
         script = """
             jb     > join 4o30i2 jacob banda 1234
-            jb     < Hi Jacob Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
+            jb     < Hi Jacob Banda, thanks for registering for Results160 from Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             kk     > join 4f30i2 kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code 4f3012. Please check your code and try again.
         """
@@ -79,7 +81,7 @@ class TestApp(TestScript):
             rb     > agent kdh 02 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
             rb     > join kdh rupiah banda -1000
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
         """
         self.runScript(script)
     
@@ -107,7 +109,7 @@ class TestApp(TestScript):
         # the same clinic
         script = """
             rb     > join kdh rupiah banda -1000
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > agent kdh 02 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
         """
@@ -123,7 +125,7 @@ class TestApp(TestScript):
         # different clinics
         script = """
             rb     > join 101010 rupiah banda -1000
-            rb     < Hi Rupiah Banda, thanks for registering for DBS results from Results160 as staff of Central Clinic. Your PIN is 1000. Reply with keyword 'HELP' if your information is not correct.
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Central Clinic. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > agent kdh 02 rupiah banda
             rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Central Clinic. To leave your current clinic and join Kafue District Hospital, reply with LEAVE and then re-send your message.
         """

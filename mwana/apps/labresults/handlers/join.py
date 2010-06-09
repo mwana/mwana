@@ -12,12 +12,12 @@ class JoinHandler(KeywordHandler):
     """
 
     keyword = "j0in|join|jin|john|jo1n|jion|j01n|jon"
-
-    PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
+    
+    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")
     
     PIN_LENGTH = 4     
     MIN_CLINIC_CODE_LENGTH = 3
-    MIN_NAME_LENGTH = 1
+    MIN_NAME_LENGTH = 2
 
     HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
     ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
@@ -47,7 +47,7 @@ class JoinHandler(KeywordHandler):
         
         text = text.strip()
         text = b.remove_double_spaces(text)
-        if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 3):
+        if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 1):
             self.mulformed_msg_help()
             return
 
@@ -101,6 +101,9 @@ class JoinHandler(KeywordHandler):
             return
         if not name:
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
+            return
+        elif len(name) < self.MIN_NAME_LENGTH:
+            self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
             return
         try:
             location = Location.objects.get(slug__iexact=clinic_code,
