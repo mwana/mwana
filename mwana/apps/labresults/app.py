@@ -168,15 +168,16 @@ class App (rapidsms.App):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[12],
-                                     minutes=[0])
+        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[30],
+                                     days_of_week=[0, 1, 2, 3, 4 ])
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[0])
+        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[0],
+                                     days_of_week=[0, 1, 2, 3, 4])
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
@@ -185,7 +186,7 @@ class App (rapidsms.App):
         EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
 
     def notify_clinic_pending_results(self, clinic):
-        """Notifies clinic staff that results are ready via sms."""
+        """Notifies clinic staff that results are ready via sms."""     
         messages, results  = self.results_avail_messages(clinic)
         if messages:
             self.send_messages(messages)

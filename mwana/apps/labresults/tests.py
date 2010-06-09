@@ -17,6 +17,7 @@ from rapidsms.models import Connection
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
+from mwana.util import is_today_a_weekend, is_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 
 
@@ -50,12 +51,21 @@ class TestApp(TestScript):
         connection.save()
 
         # create support staff
-        self.support_contact = Contact.objects.create(alias="trazy", name="Trezy Mwanza",
+        self.support_contact = Contact.objects.create(alias="ha1", name="Help Admin",
                                                     location=self.support_clinic, pin="1111", is_help_admin=True)
         self.support_contact.types.add(const.get_clinic_worker_type())
 
         Connection.objects.create(identity="support_contact", backend=connection.backend,
                                   contact=self.support_contact)
+        connection.save()
+
+        # create second support staff
+        self.support_contact2 = Contact.objects.create(alias="ha2", name="Help Admin2",
+                                                    location=self.support_clinic, pin="2222", is_help_admin=True)
+        self.support_contact2.types.add(const.get_clinic_worker_type())
+
+        Connection.objects.create(identity="support_contact2", backend=connection.backend,
+                                  contact=self.support_contact2)
         connection.save()
         
 
@@ -152,6 +162,7 @@ class TestApp(TestScript):
             clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
             clinic_worker > Help
             support_contact < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
+            support_contact2 < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
@@ -568,6 +579,9 @@ class ResultsAcceptor(TestApp):
         requisition id, or actual results (from or to Positive/Negative). One
         notification goes to all clinic workers and another to all support staff.
         """
+        # Scheduled task will not run on a weekend
+        if is_today_a_weekend():
+            return
         user = User.objects.create_user(username='adh', email='',
                                         password='abc')
         perm = Permission.objects.get(content_type__app_label='labresults',
@@ -613,7 +627,8 @@ class ResultsAcceptor(TestApp):
         self.assertEqual(msg3,msgs[2].text)
         self.assertEqual("John Banda",msgs[0].connection.contact.name)
         self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
-        self.assertEqual("Trezy Mwanza",msgs[2].connection.contact.name)
+        self.assertEqual("Help Admin",msgs[2].connection.contact.name)
+        self.assertEqual("Help Admin2",msgs[3].connection.contact.name)
 
         # clinic_worker should be able to get the results by replying with PIN
         script = """
