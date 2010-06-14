@@ -634,7 +634,7 @@ class ResultsAcceptor(TestApp):
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 87;Detected
+            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;NotDetected changed to 87;Detected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """
         self.runScript(script)

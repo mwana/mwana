@@ -21,10 +21,7 @@ def urgent_requisitionid_update(result):
     toreturn = False
     if result.record_change:
         if result.record_change in ['req_id','both']:
-            r_results = Result.objects.filter(requisition_id=result.requisition_id,
-            clinic=result.clinic).distinct()
-            if r_results and len(r_results) > 1:
-                toreturn = True
+            toreturn = True
     return toreturn
 
 def get_full_result_text(char_string):
@@ -52,8 +49,8 @@ def build_results_messages(results):
         if urgent_requisitionid_update(res):
             try:
                 result_strings.append("**** %s;%s changed to %s;%s" % (
-                res.old_value.split()[0], 
-                get_full_result_text(res.old_value.split()[0]),res.requisition_id,
+                res.old_value.split(":")[0],
+                get_full_result_text(res.old_value.split(":")[1]),res.requisition_id,
                 res.get_result_display()))
             except IndexError:
                 result_strings.append("**** %s;%s changed to %s;%s" % (
