@@ -15,7 +15,7 @@ DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in yo
 
 def urgent_requisitionid_update(result):
     """
-    Returns True if there has been an critical update in requisition id. That is
+    Returns True if there has been a critical update in requisition id. That is
     if a result had a req_id for another person.
     """
     toreturn = False
@@ -51,17 +51,17 @@ def build_results_messages(results):
     for res in results:
         if urgent_requisitionid_update(res):
             try:
-                result_strings.append("**** %s:%s changed to %s:%s" % (
+                result_strings.append("**** %s;%s changed to %s;%s" % (
                 res.old_value.split()[0], 
                 get_full_result_text(res.old_value.split()[0]),res.requisition_id,
                 res.get_result_display()))
             except IndexError:
-                result_strings.append("**** %s:%s changed to %s:%s" % (
+                result_strings.append("**** %s;%s changed to %s;%s" % (
                 res.old_value, 
                 res.get_result_display(),res.requisition_id,
                 res.get_result_display()))            
         else:
-            result_strings.append("**** %s:%s" % (res.requisition_id,
+            result_strings.append("**** %s;%s" % (res.requisition_id,
             res.get_result_display()))
             
     result_text, remainder = combine_to_length(result_strings,
