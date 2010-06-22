@@ -6,11 +6,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from mwana.apps.labresults import models as labresults
-from mwana.apps.labresults.app import App
 from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
-from mwana.apps.stringcleaning.app import App as cleaner_App
-from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.locations.models import Location
 from rapidsms.contrib.locations.models import LocationType
 from rapidsms.models import Connection
@@ -19,6 +16,7 @@ from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.util import is_today_a_weekend, is_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.reports import *
 
 
 class TestApp(TestScript):
@@ -26,8 +24,16 @@ class TestApp(TestScript):
     def setUp(self):
         # this call is required if you want to override setUp
         super(TestApp, self).setUp()
-        self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug="clinics")[0]
-        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="mib")
+        self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug=const.CLINIC_SLUGS[2])[0]
+        self.type1 = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]        
+        self.type2 = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]        
+        self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="luapula")
+        self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="mansa", parent = self.luapula)
+        self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya", parent = self.luapula)
+        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya)
+        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa)
+
+        
         self.support_clinic = Location.objects.create(type=self.type, name="Support Clinic", slug="spt")
         # this gets the backend and connection in the db
         script = "clinic_worker > hello world"
@@ -50,6 +56,15 @@ class TestApp(TestScript):
                                   contact=self.other_contact)
         connection.save()
 
+        # create another worker for a different clinic
+        self.central_clinic_worker = Contact.objects.create(alias="jp", name="James Phiri",
+                                                    location=self.mansa_central, pin="1111")
+        self.central_clinic_worker.types.add(const.get_clinic_worker_type())
+
+        Connection.objects.create(identity="central_clinic_worker", backend=connection.backend,
+                                  contact=self.central_clinic_worker)
+        connection.save()
+
         # create support staff
         self.support_contact = Contact.objects.create(alias="ha1", name="Help Admin",
                                                     location=self.support_clinic, pin="1111", is_help_admin=True)
@@ -67,6 +82,8 @@ class TestApp(TestScript):
         Connection.objects.create(identity="support_contact2", backend=connection.backend,
                                   contact=self.support_contact2)
         connection.save()
+
+
         
 
     def tearDown(self):
@@ -230,7 +247,7 @@ class TestApp(TestScript):
             # code
             for start_msg_spec in (("clinic_worker", "DEMO"), 
                                    ("other_worker", "DEMO RESULTS"),
-                                   ("some_random_person", "DEMO mib")):
+                                   ("some_random_person", "DEMO 402029")):
                 self.sendMessage(*start_msg_spec)
                 messages = self.receiveAllMessages()
                 self.assertEqual(2, len(messages), "Number of messages didn't match. "
@@ -333,8 +350,6 @@ class TestApp(TestScript):
             clinic_worker < There are currently no results available for 1, 000. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
             clinic_worker < The results for sample(s) 0004 are not yet ready. You will be notified when they are ready.
-            clinic_worker > RESULT mib0004
-            clinic_worker < The results for sample(s) mib0004 are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0004a 0004b
             clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 0004a , 0004b
@@ -361,6 +376,100 @@ class TestApp(TestScript):
             self.assertEqual("sent", res.notification_status)
         self.assertEqual("new", res4.notification_status)
 
+    def testReports(self):
+        """
+        Tests getting of report for sent results. A report for a district
+        aggregates counts from the facilities it has. Same applies to a Province
+        """
+        # create 7 results. 5 for Mibenge in Samfya district of Luapula province
+        #, 2 for Central Clinic of Mansa district in Luapula Provice
+        results = labresults.Result.objects.all()
+        res1 = results.create(requisition_id="0001", clinic=self.clinic,
+                              result="N",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        res2 = results.create(requisition_id="0002", clinic=self.clinic,
+                              result="P",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        res3 = results.create(requisition_id="0003", clinic=self.clinic,
+                              result="N",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        res4 = results.create(requisition_id="0004", clinic=self.clinic,
+                              result="N",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        res5 = results.create(requisition_id="0004a", clinic=self.clinic,
+                               result="R",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        res6 = results.create(requisition_id="0004b", clinic=self.mansa_central,
+                               result="N",
+                               collected_on=datetime.datetime.today(),
+                               entered_on=datetime.datetime.today(),
+                               notification_status="new")
+
+
+        res7 = results.create(requisition_id="0000", clinic=self.mansa_central,
+                              result="P",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+        
+        #collect the results. get some reports
+        script = """
+            central_clinic_worker > CHECK
+            central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            central_clinic_worker > 1111
+            central_clinic_worker < Thank you! Here are your results: **** 0000;Detected. **** 0004b;NotDetected
+            central_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again James Phiri!
+            clinic_worker > CHECK
+            clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 0001;NotDetected. **** 0002;Detected. **** 0003;NotDetected. **** 0004;NotDetected. **** 0004a;Rejected
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            clinic_worker > Reports 403029
+            clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
+            clinic_worker > Reports 402029
+            clinic_worker > Reports 403012
+            clinic_worker > Reports 403012 jun
+            clinic_worker > Reports 403012 6
+            clinic_worker > Reports 402000
+            clinic_worker > Reports 403000
+            clinic_worker > Reports 4030
+            clinic_worker > Reports mansa
+            clinic_worker > Reports 400000
+            clinic_worker > Reports 40 jun
+            clinic_worker > Reports Luapula
+        """
+        self.runScript(script)        
+        msgs=self.receiveAllMessages()
+        
+        #test that the correct reports were received
+        self.assertEqual(msgs[len(msgs)-1].text,province_report2)
+        self.assertEqual(msgs[len(msgs)-2].text,province_report1)
+        self.assertEqual(msgs[len(msgs)-3].text,province_report1)
+        self.assertEqual(msgs[len(msgs)-4].text,mansa_report1)
+        self.assertEqual(msgs[len(msgs)-5].text,mansa_report1)
+        self.assertEqual(msgs[len(msgs)-6].text,mansa_report1)
+        self.assertEqual(msgs[len(msgs)-7].text,samfya_report1)
+        self.assertEqual(msgs[len(msgs)-8].text,central_clinc_rpt)
+        self.assertEqual(msgs[len(msgs)-8].text,central_clinc_rpt)
+        self.assertEqual(msgs[len(msgs)-9].text,central_clinc_rpt)
+        self.assertEqual(msgs[len(msgs)-10].text,central_clinc_rpt)
+        self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
+        
 
 class ResultsAcceptor(TestApp):
     """
@@ -621,12 +730,12 @@ class ResultsAcceptor(TestApp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = Mary Phiri:other_worker, John Banda:clinic_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
-        self.assertEqual("John Banda",msgs[0].connection.contact.name)
-        self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
+        self.assertEqual("Mary Phiri",msgs[0].connection.contact.name)
+        self.assertEqual("John Banda",msgs[1].connection.contact.name)
         self.assertEqual("Help Admin",msgs[2].connection.contact.name)
         self.assertEqual("Help Admin2",msgs[3].connection.contact.name)
 
