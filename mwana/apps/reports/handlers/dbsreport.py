@@ -95,8 +95,8 @@ class JoinHandler(KeywordHandler):
             month = today.month
         if month not in range(1, 13):
             month = today.month
-        startdate = datetime.date(today.year, month, 1)
-        enddate = datetime.date(today.year, month + 1, 1) - datetime.timedelta(days=1)
+        startdate = datetime.datetime(today.year, month, 1)
+        enddate = datetime.datetime(today.year, month + 1, 1) - datetime.timedelta(seconds=1)
         report_values = self.get_facility_report(location, startdate, enddate,
                                                  district_facilities,
                                                  province_facilities)
