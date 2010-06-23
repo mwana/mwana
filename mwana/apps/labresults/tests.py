@@ -439,6 +439,8 @@ class TestApp(TestScript):
             clinic_worker > 4567
             clinic_worker < Thank you! Here are your results: **** 0001;NotDetected. **** 0002;Detected. **** 0003;NotDetected. **** 0004;NotDetected. **** 0004a;Rejected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            clinic_worker > Reports
+            clinic_worker < To view a report, send REPORT <CLINIC_CODE> [MONTH]
             clinic_worker > Reports 403029
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
@@ -730,12 +732,12 @@ class ResultsAcceptor(TestApp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = Mary Phiri:other_worker, John Banda:clinic_worker"
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
-        self.assertEqual("Mary Phiri",msgs[0].connection.contact.name)
-        self.assertEqual("John Banda",msgs[1].connection.contact.name)
+        self.assertEqual("John Banda",msgs[0].connection.contact.name)
+        self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
         self.assertEqual("Help Admin",msgs[2].connection.contact.name)
         self.assertEqual("Help Admin2",msgs[3].connection.contact.name)
 

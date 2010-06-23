@@ -24,7 +24,7 @@ class JoinHandler(KeywordHandler):
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 1
 
-    HELP_TEXT = "To view a report, send REPORT <MONTH> [include facilities]"
+    HELP_TEXT = "To view a report, send REPORT <CLINIC_CODE> [MONTH]"
     NOT_ELIGIBLE = "I am sorry, you do not have permission to view reports."
         
     def help(self):
@@ -101,7 +101,7 @@ class JoinHandler(KeywordHandler):
                                                  district_facilities,
                                                  province_facilities)
 
-        rpt_header = "SENT SAMPLES\n%s\n%s to %s" % (location.name,
+        rpt_header = "SENT RESULTS\n%s\n%s to %s" % (location.name,
                                                      startdate.strftime("%d/%m/%Y"), enddate.strftime("%d/%m/%Y"))
         rpt_data = '\n'.join(key + ";" + str(value) for key, value in
                              report_values.items())
@@ -130,15 +130,15 @@ class JoinHandler(KeywordHandler):
                                       direction__iexact='O', contact__in=contacts,
                                       text__icontains='ected')
 
-        rejected_samples = negative_samples = positive_samples = 0
+        rejected_results = negative_results = positive_results = 0
         for msg in msgs:
-            rejected_samples  = rejected_samples + msg.text.count(';Rejected')
-            negative_samples = negative_samples + msg.text.count(';NotDetected')
-            positive_samples = positive_samples + msg.text.count(';Detected')
+            rejected_results  = rejected_results + msg.text.count(';Rejected')
+            negative_results = negative_results + msg.text.count(';NotDetected')
+            positive_results = positive_results + msg.text.count(';Detected')
 
-        total = rejected_samples + negative_samples + positive_samples
-        results = {'Rejected':rejected_samples, 'NotDetected':negative_samples,
-            'Detected':positive_samples, 'TT':total}
+        total = rejected_results + negative_results + positive_results
+        results = {'Rejected':rejected_results, 'NotDetected':negative_results,
+            'Detected':positive_results, 'TT':total}
         return results
 
     def get_facilities_summed_report(self, many_locations, startdate, enddate):
@@ -147,7 +147,7 @@ class JoinHandler(KeywordHandler):
         logs for given locations. Results will be counted twice if received
         twice, ie via CHECK and RESULT
         """
-        rejected_samples = negative_samples = positive_samples = 0
+        rejected_results = negative_results = positive_results = 0
         for location in many_locations:
             contacts = Contact.objects.filter(location=location)
             msgs = Message.objects.filter(Q(date__gt=startdate)
@@ -158,13 +158,13 @@ class JoinHandler(KeywordHandler):
 
             
             for msg in msgs:
-                rejected_samples  = rejected_samples + msg.text.count(';Rejected')
-                negative_samples = negative_samples + msg.text.count(';NotDetected')
-                positive_samples = positive_samples + msg.text.count(';Detected')
+                rejected_results  = rejected_results + msg.text.count(';Rejected')
+                negative_results = negative_results + msg.text.count(';NotDetected')
+                positive_results = positive_results + msg.text.count(';Detected')
 
-            total = rejected_samples + negative_samples + positive_samples
-            results = {'Rejected':rejected_samples, 'NotDetected':negative_samples,
-                'Detected':positive_samples, 'TT':total}
+            total = rejected_results + negative_results + positive_results
+            results = {'Rejected':rejected_results, 'NotDetected':negative_results,
+                'Detected':positive_results, 'TT':total}
         return results
 
     def fake_send_message(self,text):
