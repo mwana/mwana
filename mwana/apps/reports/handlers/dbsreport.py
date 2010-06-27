@@ -28,14 +28,7 @@ class JoinHandler(KeywordHandler):
     NOT_ELIGIBLE = "I am sorry, you do not have permission to view reports."
         
     def help(self):
-        self.respond(self.HELP_TEXT)
-
-    def fake_send_message(self,text):
-        clinic_connections = [contact.default_connection for contact in \
-                                  Contact.active.all(location=clinic)]
-        for conn in clinic_connections:
-                    OutgoingMessage(conn, text,
-                                        name=self.msg.connection.contact.name).send()
+        self.respond(self.HELP_TEXT)    
 
     def handle(self, text):
         b = InputCleaner()
@@ -166,8 +159,3 @@ class JoinHandler(KeywordHandler):
             results = {'Rejected':rejected_results, 'NotDetected':negative_results,
                 'Detected':positive_results, 'TT':total}
         return results
-
-    def fake_send_message(self,text):
-        contacts = Contact.active.all()
-        for contact in contacts:
-                    OutgoingMessage(contact.default_connection, text).send()
