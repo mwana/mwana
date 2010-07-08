@@ -102,7 +102,19 @@ class JoinHandler(KeywordHandler):
         
         self.respond(msg)
 
-    def get_facility_report(self, location, startdate, 
+    def get_msgs_with_live_results(self, startdate, enddate, contacts):
+        return Message.objects.filter(Q(date__gt=startdate)
+                                          | Q(date=startdate),
+                                          Q(date__lt=enddate) | Q(date=enddate),
+                                          direction__iexact='O', 
+                                          contact__in=contacts,
+                                          text__icontains='ected').exclude(
+                                          Q(text__icontains='Sample 9999') |
+                                          (Q(text__icontains='**** 9990;') &
+                                          Q(text__icontains='**** 9991;') &
+                                          Q(text__icontains='**** 9992;')))
+                                          
+    def get_facility_report(self, location, startdate,
                             enddate, district_facilities, province_facilities):
         """
         Returns report values as a dictionary of indicators/values from message
@@ -117,11 +129,7 @@ class JoinHandler(KeywordHandler):
                                                      startdate, enddate)
 
         contacts = Contact.objects.filter(location=location)
-        msgs = Message.objects.filter(Q(date__gt=startdate)
-                                      | Q(date=startdate),
-                                      Q(date__lt=enddate) | Q(date=enddate),
-                                      direction__iexact='O', contact__in=contacts,
-                                      text__icontains='ected')
+        msgs = self.get_msgs_with_live_results(startdate, enddate, contacts)
 
         rejected_results = negative_results = positive_results = 0
         for msg in msgs:
@@ -143,12 +151,7 @@ class JoinHandler(KeywordHandler):
         rejected_results = negative_results = positive_results = 0
         for location in many_locations:
             contacts = Contact.objects.filter(location=location)
-            msgs = Message.objects.filter(Q(date__gt=startdate)
-                                          | Q(date=startdate),
-                                          Q(date__lt=enddate) | Q(date=enddate),
-                                          direction__iexact='O', contact__in=contacts,
-                                          text__icontains='ected')
-
+            msgs = self.get_msgs_with_live_results(startdate, enddate, contacts)
             
             for msg in msgs:
                 rejected_results  = rejected_results + msg.text.count(';Rejected')
@@ -159,3 +162,4 @@ class JoinHandler(KeywordHandler):
             results = {'Rejected':rejected_results, 'NotDetected':negative_results,
                 'Detected':positive_results, 'TT':total}
         return results
+
