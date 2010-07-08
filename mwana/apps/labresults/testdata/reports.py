@@ -44,11 +44,11 @@ TT;5""" % {"date1" : startdate, "date2" : enddate}
 
 province_report1 = """SENT RESULTS
 Luapula Province
-01/06/2010 to 30/06/2010
+%(date1)s to %(date2)s
 Detected;2
 NotDetected;4
 Rejected;1
-TT;7"""
+TT;7""" % {"date1" : startdate, "date2" : enddate}
 
 province_report2 = """SENT RESULTS
 Luapula Province
