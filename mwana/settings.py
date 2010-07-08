@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.broadcast",
+    "mwana.apps.reports",
+    "mwana.apps.training",
     "mwana.apps.help",
     
     "rapidsms.contrib.default",
@@ -67,7 +69,7 @@ ADMIN_MEDIA_PREFIX = '/admin-media/'
 DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
 
 INSTALLED_BACKENDS = {
-    "message_tester" : {"ENGINE": "rapidsms.backends.bucket" } 
+    "message_tester" : {"ENGINE": "rapidsms.backends.bucket" }
 }
 
 TABS = [
