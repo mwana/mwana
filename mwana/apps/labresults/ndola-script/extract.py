@@ -401,7 +401,7 @@ def process_record (record, source, curs):
     changed_fields = []
     for k, v in record.items():
       if k in existing_record and v != existing_record[k]:
-        changed_fields.append(f)
+        changed_fields.append(k)
     
     #if the record has changed
     if len(changed_fields) > 0:
