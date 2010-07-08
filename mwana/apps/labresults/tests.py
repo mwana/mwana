@@ -342,8 +342,6 @@ class TestApp(TestScript):
                               notification_status="new")
         
         script = """
-            clinic_worker > RESULT 9999.
-            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 9999
             clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
@@ -357,15 +355,15 @@ class TestApp(TestScript):
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0001
-            clinic_worker < ****0001: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0001;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0003
-            clinic_worker < ****0003: NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0003;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
-            clinic_worker < ****0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
-            clinic_worker < ****0000: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0000;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0001 0002
-            clinic_worker < ****0001: NotDetected. ****0002: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0001;NotDetected. **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
            """
@@ -445,14 +443,14 @@ class TestApp(TestScript):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 jun
-            clinic_worker > Reports 403012 6
+            clinic_worker > Reports 403012 jul
+            clinic_worker > Reports 403012 7
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 jun
+            clinic_worker > Reports 40 jul
             clinic_worker > Reports Luapula
         """
         self.runScript(script)        
@@ -460,7 +458,7 @@ class TestApp(TestScript):
         
         #test that the correct reports were received
         self.assertEqual(msgs[len(msgs)-1].text,province_report2)
-        self.assertEqual(msgs[len(msgs)-2].text,province_report1)
+        self.assertEqual(msgs[len(msgs)-2].text,province_report1)#month dependent
         self.assertEqual(msgs[len(msgs)-3].text,province_report1)
         self.assertEqual(msgs[len(msgs)-4].text,mansa_report1)
         self.assertEqual(msgs[len(msgs)-5].text,mansa_report1)

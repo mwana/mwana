@@ -73,7 +73,7 @@ class ResultsHandler(KeywordHandler):
                         else:
                             reply = result.get_result_display()
                         ready_sample_results.append(
-                                "%(req_id)s: %(res)s" %
+                                "%(req_id)s;%(res)s" %
                                 {'req_id':result.requisition_id,
                                 'res':reply})
                         result.notification_status = "sent"
@@ -83,7 +83,7 @@ class ResultsHandler(KeywordHandler):
             else:
                 unfound_sample_results.append(requisition_id)
         if ready_sample_results:
-            resultsmsg = ". ".join("****"+rst for rst in ready_sample_results)
+            resultsmsg = ". ".join("**** "+rst for rst in ready_sample_results)
             self.respond("%s. Please record these results in your clinic records and"
             " promptly delete them from your phone. Thanks again" % resultsmsg)
 
