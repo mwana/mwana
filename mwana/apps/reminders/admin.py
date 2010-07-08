@@ -27,7 +27,9 @@ admin.site.register(reminders.Appointment, AppointmentAdmin)
 
 
 class PatientEventAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('patient', 'event', 'date','date_logged',)
+    list_filter = ('event','date_logged',)
+    date_hierarchy = 'date_logged'
 admin.site.register(reminders.PatientEvent, PatientEventAdmin)
 
 
