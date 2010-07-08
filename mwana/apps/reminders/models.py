@@ -63,8 +63,8 @@ class PatientEvent(models.Model):
                                 limit_choices_to={'types__slug': 'patient'})
     event = models.ForeignKey(Event, related_name='patient_events')
     cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events',
-                                 limit_choices_to={'contact__types__slug':
-                                                                        'cba'})
+                                 limit_choices_to={'contact__types__slug': 
+                                          'cba'},verbose_name='CBA Connection')
     date = models.DateField()
     date_logged = models.DateTimeField()
     
