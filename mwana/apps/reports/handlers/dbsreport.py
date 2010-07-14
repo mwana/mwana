@@ -12,7 +12,7 @@ from rapidsms.contrib.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
-class JoinHandler(KeywordHandler):
+class ReportHandler(KeywordHandler):
     """
     """
 
