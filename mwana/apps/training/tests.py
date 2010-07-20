@@ -93,11 +93,13 @@ class TestApp(TestScript):
         tasks.send_endof_training_notification(self.router)
 
         msgs = self.receiveAllMessages()
-        admin_msg = "Hi Trainer Zulu, please send TRAINING STOP if you have stopped training for today at Central Clinic"
-        trainer_msg ="A reminder was sent to Trainer Zulu, tz to state if training has ended for Central Clinic, 403012"
+        trainer_msg = "Hi Trainer Zulu, please send TRAINING STOP if you have stopped training for today at Central Clinic"
+        admin_msg ="A reminder was sent to Trainer Zulu, tz to state if training has ended for Central Clinic, 403012"
 
-        self.assertEqual(msgs[-1].text,trainer_msg)
-        self.assertEqual(msgs[-2].text,admin_msg)
+        self.assertEqual(msgs[-1].text,admin_msg)
+        self.assertEqual(msgs[-2].text,trainer_msg)
+        self.assertEqual(msgs[-1].connection.identity,"ha")
+        self.assertEqual(msgs[-2].connection.identity,"tz")
 
 
         script = """
