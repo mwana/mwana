@@ -1,8 +1,10 @@
 from django.contrib import admin
 from mwana.apps.training import models as training
 
-
-admin.site.register(training.TrainingSession)
+class TrainingSessionAdmin(admin.ModelAdmin):
+    list_display = ("start_date", "end_date", "is_on", "trainer", "location", )
+    list_filter = ("start_date", "is_on", "location", )
+admin.site.register(training.TrainingSession, TrainingSessionAdmin)
 
 
 

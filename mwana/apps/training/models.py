@@ -10,3 +10,6 @@ class TrainingSession(models.Model):
     trainer = models.ForeignKey(Contact)
     is_on = models.BooleanField(default=True)
     location = models.ForeignKey(Location)
+
+    def __unicode__(self):
+        return 'Training on %s by %s at %s' % (self.start_date, self.trainer, self.location)
