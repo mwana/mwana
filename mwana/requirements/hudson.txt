@@ -1,0 +1,4 @@
+coverage
+unittest-xml-reporting
+pylint
+-e git://git.chris-lamb.co.uk/django-lint#egg=django-lint
