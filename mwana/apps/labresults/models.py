@@ -100,9 +100,11 @@ class Result(models.Model):
     mother_age = models.IntegerField(null=True, blank=True) #age in years
     collecting_health_worker = models.CharField(max_length=100, blank=True)
     coll_hw_title = models.CharField(max_length=30, blank=True)
+
     record_change = models.CharField(choices=RECORD_CHANGE_CHOICES, max_length=6, null=True, blank=True)
     old_value = models.CharField(max_length=50, null=True, blank=True)
     verified = models.NullBooleanField(null=True, blank=True)
+    result_sent_date = models.DateTimeField(null=True, blank=True)
 
 
     class Meta:

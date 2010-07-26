@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
 from rapidsms.contrib.handlers import KeywordHandler
@@ -77,6 +78,7 @@ class ResultsHandler(KeywordHandler):
                                 {'req_id':result.requisition_id,
                                 'res':reply})
                         result.notification_status = "sent"
+                        result.result_sent_date = datetime.now()
                         result.save()
                     else:
                         unready_sample_results.append(requisition_id)
