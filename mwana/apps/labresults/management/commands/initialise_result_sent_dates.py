@@ -61,6 +61,8 @@ def import_sent_dates():
                 replace(' ', '').split('.')
         if '' in result_texts:
             result_texts.remove('')
+
+        possible_payloads = []
         for result_text in result_texts:
             req_id = result_text.split(';')[0]
             actual_results = get_results_from_display(result_text.split(';')[1])            
@@ -72,40 +74,56 @@ def import_sent_dates():
                 if result.result_sent_date is None:
                     result.result_sent_date = msg.date
                     result.save()
+                    possible_payloads.append(result.payload)
                     num_of_updates = num_of_updates + 1
                     print '.',
             except Result.MultipleObjectsReturned:
-                results = Result.objects.filter(clinic=location,
+                try:
+                    result = Result.objects.get(clinic=location,
                                                 requisition_id=req_id,
                                                 result__in=actual_results,
-                                                notification_status='sent')
-                result = results[0].result
-                results_are_same = True
-                for r in results:
-                    if result != r.result:
-                        results_are_same = False
-                        break
-                if results_are_same:
-                    for r in results:
-                        if r.result_sent_date is None:
-                            r.result_sent_date = msg.date
-                            r.save()
-                            num_of_updates = num_of_updates + 1
-                            print '.',
-                else:
-                    print \
-                    "\nPossible ambiguity for results ".join("SampleID:" +
-                                                           r.sample_id +
-                                                           ", Req_ID:" +
-                                                           r.requisition_id
-                                                           + ", Result: "
-                                                           + r.result for r in results)
-            except Result.DoesNotExist:
-                print "\nCould not find result to match: %s:%s:%s; Req_ID:%s  Result:%s ; Sent on:%s" % \
-                (location.id,
-                 location.slug, location.name,
-                 req_id,
-                 actual_results, msg.date)
+                                                notification_status='sent',
+                                                payload__in=possible_payloads,
+                                                result_sent_date=None)
+                    result.result_sent_date = msg.date
+                    result.save()
+                    num_of_updates = num_of_updates + 1
+                    print '.',
+                except Result.DoesNotExist:
+#                    print possible_payload.id
+                    try:
+                        result = Result.objects.get(clinic=location,
+                                                    requisition_id=req_id,
+                                                    result__in=actual_results,
+                                                    notification_status='sent',
+                                                    result_sent_date=None)
+                        result.result_sent_date = msg.date
+                        result.save()
+                        num_of_updates = num_of_updates + 1
+                        print '.',
+                    except (Result.DoesNotExist,Result.MultipleObjectsReturned):
+    #                    print possible_payload.id
+                        results = Result.objects.filter(clinic=location,
+                                                    requisition_id=req_id,
+                                                    result__in=actual_results,
+                                                    notification_status='sent',
+                                                    result_sent_date=None)
+                        if not results:
+                            continue
+                        print "\nFailed to map %s results:" %len(results)
+                        print "".join("SampleID:" +
+                                                               r.sample_id +
+                                                               ", Req_ID:" +
+                                                               r.requisition_id
+                                                               + ", Result: "
+                                                               + r.result for r in results)
+                        print '.',
+                except Result.DoesNotExist:
+                    print "\nCould not find result to match: %s:%s:%s; Req_ID:%s  Result:%s ; Sent on:%s" % \
+                    (location.id,
+                     location.slug, location.name,
+                     req_id,
+                     actual_results, msg.date)
 
     print '\nFinished updating %s records' % num_of_updates
 
