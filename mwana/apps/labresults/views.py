@@ -483,29 +483,33 @@ def mwana_reports (request):
 #                    enddate=datetime.today().date(
     from mwana.apps.reports.webreports.reportcreator import Results160Reports
    
-    
+    today = datetime.today().date()
     try:
         startdate = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
-        startdate = datetime.today().date()-timedelta(days=30)
+        startdate = today -timedelta(days=30)
 
     try:
         enddate = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):
         enddate = datetime.today().date()
+    if startdate > enddate:
+        startdate, enddate = enddate, startdate
 
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
     samples = r.dbs_samples_report(startdate, enddate)
     pending = r.dbs_pending_results_report(startdate, enddate)
-#        date=request.REQUEST['startdate']
+    payloads = r.dbs_payloads_report(startdate, enddate)
+    births = r.reminders_patient_events_report(startdate, enddate)
+
     return render_to_response(request, 'labresults/reports.html',
-                                {'startdate':startdate,'enddate':enddate,
+                                {'startdate':startdate,
+                                'enddate':enddate,
+                                'today':today,
                                 'sent_results_rpt':res,
                                 'samples_rpt':samples,
                                 'pending_results':pending,
+                                'payloads_rpt':payloads,
+                                'births_rpt':births,
                                 })
-#,
-#                              {'display_info': log_display_items, 'collisions': collisions,
-#                               'days': daysback, 'source': source_filter})
-#

@@ -25,83 +25,135 @@
     <div class="left">
         <div class="module">
             <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
-            <div class="toolbar">
-                <a href="">All Reports</a>
-            </div>
             <div><form name="getValues" action="" method="GET">
                     <p> Period
-                    <input type="text" name="startdate" size="9" value={{ startdate }} />
-                           to
-                   <input type="text" name="enddate" size="9" value={{ enddate }} />
-                   <input type="submit" value="Ok" name="SubmitValues" /></form>
+                        <input type="text" name="startdate" size="9" value={{ startdate }} />
+                               to
+                               <input type="text" name="enddate" size="9" value={{ enddate }} />
+                    <input type="submit" value="Ok" name="SubmitValues" /></form>
                 <p align="center"><h3>Results Sent By Facility</h3>
                 <p>
-                    <table width="100%">
-                        {% for record in sent_results_rpt %}
-                        <tr>                            
-                            <td width="20">
-                                {% if forloop.counter0 %}
-                                    {% if not forloop.last %}
-                                        {{ forloop.counter0 }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            {% for column in record %}
-                            {% if column %}
-                                <td width="20">{{ column }}</td>
-                            {% else %}
-                            <td> 0 </td>
+                <table width="100%">
+                    {% for record in sent_results_rpt %}
+                    <tr>
+                        <td width="20">
+                            {% if forloop.counter0 %}
+                            {% if not forloop.last %}
+                            {{ forloop.counter0 }}
                             {% endif %}
-                            {% endfor %}
-                        </tr>
+                            {% endif %}
+                        </td>
+                        {% for column in record %}
+                        {% if column %}
+                        <td width="20">{{ column }}</td>
+                        {% else %}
+                        <td> 0 </td>
+                        {% endif %}
                         {% endfor %}
-                    </table>           
+                    </tr>
+                    {% endfor %}
+                </table>
             </div>
             <p>
-            
-                 <h3>Samples from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-                    <p align="left">
-                        NB: Only reporting for facilities that have started receiving results<p>
-                        <p>
-                    <table width="100%">
-                        {% for record in samples_rpt %}
-                        <tr>
-                            <td width="20">
-                                {% if forloop.counter0 %}
-                                    {% if not forloop.last %}
-                                        {{ forloop.counter0 }}
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                            {% for column in record %}
-                            {% if column %}
-                                <td width="20">{{ column }}</td>
-                            {% else %}
-                            <td> 0 </td>
-                            {% endif %}
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </table>     
-        <p>
 
-                 <h3>Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-                    <p align="left">
-                        NB: Only reporting for facilities that have started receiving results<p>
-                        <p>
+            <h3>Samples from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <p align="left">
+                NB: Only reporting for facilities that have started receiving results<p>
+            <p>
+            <table width="100%">
+                {% for record in samples_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    <td width="20">{{ column }}</td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+
+            <h3>Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;Date: {{ today }}</h3>
+            <p align="left">
+                NB: Only reporting for facilities that have started receiving results<p>
+            <p>
+            <table width="100%">
+                {% for record in pending_results %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    <td width="20">{{ column }}</td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+
+            <h3>Payloads from Labs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <p>
+            <table width="100%">
+                {% for record in payloads_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    <td width="20">{{ column }}</td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+            <p><p><p>
+            <div class="left">
+                <div class="module">
+                    <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
+                    <p>
+
+                    <h3>Births from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+                    <p>
                     <table width="100%">
-                        {% for record in pending_results %}
+                        {% for record in births_rpt %}
                         <tr>
                             <td width="20">
                                 {% if forloop.counter0 %}
-                                    {% if not forloop.last %}
-                                        {{ forloop.counter0 }}
-                                    {% endif %}
+                                {% if not forloop.last %}
+                                {{ forloop.counter0 }}
+                                {% endif %}
                                 {% endif %}
                             </td>
                             {% for column in record %}
                             {% if column %}
-                                <td width="20">{{ column }}</td>
+                            <td width="20">{{ column }}</td>
                             {% else %}
                             <td> 0 </td>
                             {% endif %}
@@ -109,67 +161,11 @@
                         </tr>
                         {% endfor %}
                     </table>
-
-
-                
-
-                <!--<li> <b><u>Results Pending Delivery to Clinics</u></b>
-                    <p align="left">
-                        New, known clinic : <b> {{ new_results }} </b><br>
-                        New, Unkown clinic : <b> {{ lost_new_results }} </b><br>
-                        Notified : <b> {{ notified_results }} </b><br>
-                        Updated : <b> {{ updated_results }} </b><br>
-                        Not yet processed : <b> {{ unprocessed_rts }} </b><br>
-                        Total : <b> {{ total_pending_results }} </b><br>
-                </li>
-
-                <li>
-                    <div class="report">1028</div>
-                    <div class="caption">Total EIDs Performed</div>
-                </li>
-                <li>
-                    <div class="report">92%</div>
-                    <div class="caption">Results Delivered to Clinic by SMS</div>
-                </li>
-                <li>
-                    <div class="report">23 days</div>
-                    <div class="caption">Transit Time of Samples to Lab</div>
-                </li> 
-           </div>
-    </div>
-
-    <div class="right">
-        <div class="module">
-            <h2>RemindMi</h2>
-            <div class="toolbar">
-                <a href="">All Stats</a>
+                </div>
             </div>
-            <ul class="stats">
-                <li>
-                    <div class="report">1487</div>
-                    <div class="caption">Births Reported</div>
-                </li>
-
-                <li>
-                    <div class="report">108</div>
-                    <div class="caption">Infants Started on Treatment</div>
-                </li>
-                <li>
-                    <div class="report">1798</div>
-                    <div class="caption">"All" Messages Sent</div>
-                </li>
-                <li>
-                    <div class="report">1487</div>
-                    <div class="caption">Births Reported</div>
-                </li>
-            </ul>-->
         </div>
+        <div class="clear-hack"></div>
     </div>
-
 
 </div>
-<div class="clear-hack"></div>
-
-
-
 {% endblock %}

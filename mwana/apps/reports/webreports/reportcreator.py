@@ -9,6 +9,7 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
+from django.db import connection
 
 class Results160Reports:
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
@@ -39,12 +40,8 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_pending_rsts(self):
-        return Location.objects.filter(Q(lab_results__notification_status__in=[
-                                       'unprocessed', 'new', 'notified', 'updated']),
-                                       Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
-                                       | Q(lab_results__result_sent_date=self.dbsr_startdate),
-                                       Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
-                                       Q(lab_results__result_sent_date=self.dbsr_enddate)
+        return self.get_active_facilities().filter(Q(lab_results__notification_status__in=[
+                                       'unprocessed', 'new', 'notified', 'updated'])
                                        ).distinct()
 
 
@@ -67,13 +64,8 @@ class Results160Reports:
 
     def get_results_by_status_and_location(self, status, location):
         """Returns results query set by status in reporting period"""
-
-        return Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
-                                     | Q(result_sent_date=self.dbsr_startdate),
-                                     Q(result_sent_date__lt=self.dbsr_enddate) |
-                                     Q(result_sent_date=self.dbsr_enddate))\
-            .filter(notification_status__in
-                    =status, clinic=location)
+        return Result.objects.filter(notification_status__in=status, clinic=location)
+            
 
     def get_sent_results(self, location):
         """Returns results query set for sent results in reporting period"""
@@ -83,6 +75,30 @@ class Results160Reports:
                                      Q(result_sent_date=self.dbsr_enddate))\
             .filter(clinic=location,
                     notification_status='sent')
+    # Reports
+    def dbs_payloads_report(self, startdate=None, enddate=None):
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+        table = []
+        
+        table.append([' Source', 'Count'])
+
+        cursor = connection.cursor()
+
+        cursor.execute('select source, count(*) as count from \
+             labresults_payload where incoming_date BETWEEN %s AND %s group by \
+             source', [startdate, enddate])
+        total = 0
+        for row in cursor.fetchall():
+            total = total + row[1]
+            table.append(row)
+        table.append(['TT (All)',total])
+        return table
 
     def dbs_pending_results_report(self, startdate=None, enddate=None):
         if startdate:
@@ -93,7 +109,7 @@ class Results160Reports:
             datetime(enddate.year, enddate.month, enddate.day)\
             + timedelta(days=1) - timedelta(seconds=0.01)
         table = []
-        
+
         table.append([' Facility', 'District', 'New', 'Notified', 'Updated',
                      'Unprocessed', 'TT Pending'])
         new = notified = updated = unprocessed = total = 0
@@ -179,4 +195,34 @@ class Results160Reports:
         table.append(['TT (All)', 'TT (All)', tt_positive, tt_negative, tt_rejected, tt_total])
         return table
 
+#Reminders
+    def reminders_patient_events_report(self, startdate=None, enddate=None):
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+        table = []
+
+        table.append([' Facility', 'Count of Births'])
+
+        cursor = connection.cursor()
+
+        cursor.execute('SELECT locations_location.name AS Facility, count(reminders_patientevent.id) as Count ' +
+                          'FROM reminders_patientevent \
+                          LEFT JOIN reminders_event ON reminders_patientevent.event_id = reminders_event.id\
+                          LEFT JOIN rapidsms_connection ON rapidsms_connection.id = reminders_patientevent.cba_conn_id\
+                          LEFT JOIN rapidsms_contact ON rapidsms_connection.contact_id = rapidsms_contact.id\
+                          LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
+                          LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
+                          WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
+                          GROUP BY reminders_event.name, locations_location.name', ['Birth',startdate, enddate])
+        total = 0
+        for row in cursor.fetchall():
+            total = total + row[1]
+            table.append(row)
+        table.append(['TT (All)',total])
+        return table
 
