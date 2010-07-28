@@ -7,7 +7,7 @@ message logs
 from django.core.management.base import CommandError
 from django.core.management.base import LabelCommand
 from django.db.models import Q
-from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.models import Result, Payload
 from rapidsms.contrib.messagelog.models import Message
 
 class Command(LabelCommand):
@@ -16,7 +16,7 @@ class Command(LabelCommand):
 #    label = 'valid file path'
     
     def handle(self, * args, ** options):
-        import_sent_dates()
+        try_importing_dates()
                 
     def __del__(self):
         pass
@@ -40,16 +40,31 @@ def get_results_from_display(key):
     }
     return dict[key]
 
+def get_payloads(datetime):
+    return Payload.objects.filter(lab_results__result_sent_date=datetime)
+
+def try_importing_dates():
+    if not import_sent_dates():
+        print "---" * 20
+        print "Trying again to import dates using more infomation"
+        import_sent_dates()
+    import_sent_dates()# Tell them you are done
+
 def import_sent_dates():
     """
     If labresults.Result.result_sent_date is null update it by extracting from 
     message logs the date when the result was sent
     """
     print ''
+    success =True
     if Result.objects.filter(result_sent_date=None,
-                             notification_status='sent').count() == 0:        
-        print "\nAll sent results already have result_sent_dates"
-        return
+                             notification_status='sent').count() == 0:
+        print "---" * 20
+        print "---" * 20
+        print "\nDB table OK. All sent results already have result_sent_dates"
+        print "---" * 20
+        print "---" * 20
+        return True
     
     messages = get_msgs_with_live_results()
 
@@ -110,21 +125,38 @@ def import_sent_dates():
                                                     result_sent_date=None)
                         if not results:
                             continue
-                        print "\nFailed to map %s results:" %len(results)
-                        print "".join("SampleID:" +
-                                                               r.sample_id +
-                                                               ", Req_ID:" +
-                                                               r.requisition_id
-                                                               + ", Result: "
-                                                               + r.result for r in results)
-                        print '.',
+                                               
+                        try:
+                            result = Result.objects.get(clinic=location,
+                                                    requisition_id=req_id,
+                                                    result__in=actual_results,
+                                                    notification_status='sent',
+                                                    payload__in=get_payloads(msg.date),
+                                                    result_sent_date=None)
+                            result.result_sent_date = msg.date
+                            result.save()
+                            num_of_updates = num_of_updates + 1
+                            print '.',
+                        except Result.DoesNotExist:
+                            print "Difficult to match %s sent on %s" % (req_id, msg.date)
+                            print "\nFailed to map %s results due to possible ambiguity:" %len(results)
+                            print "".join("SampleID:" +
+                                                                   r.sample_id +
+                                                                   ", Req_ID:" +
+                                                                   r.requisition_id
+                                                                   + ", Result: "
+                                                                   + r.result for r in results)
+                            print 'Possible dates include %s\n.' %  msg.date,
+                            success = False
+
                 except Result.DoesNotExist:
                     print "\nCould not find result to match: %s:%s:%s; Req_ID:%s  Result:%s ; Sent on:%s" % \
                     (location.id,
                      location.slug, location.name,
                      req_id,
-                     actual_results, msg.date)
+                     actual_results, msg.date)               
 
     print '\nFinished updating %s records' % num_of_updates
+    return success
 
 
