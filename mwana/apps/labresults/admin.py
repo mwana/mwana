@@ -8,6 +8,8 @@ class ResultAdmin(admin.ModelAdmin):
                     'result_sent_date', 'notification_status',)
     list_filter = ('result', 'notification_status', 'result_sent_date','collected_on',
                    'entered_on', 'processed_on', 'clinic', )
+    search_fields = ('sample_id','requisition_id')
+    date_hierarchy = 'result_sent_date'
 admin.site.register(Result, ResultAdmin)
 
 
