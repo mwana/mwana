@@ -129,7 +129,7 @@ class Results160Reports:
             tt_updated = tt_updated + updated
             tt_unprocessed = tt_unprocessed + unprocessed
             tt_total = tt_total + total
-            print table
+            
         table.append(['TT (All)', 'TT (All)', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
         return table
 
