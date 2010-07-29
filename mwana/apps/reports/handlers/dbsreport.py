@@ -89,7 +89,10 @@ class ReportHandler(KeywordHandler):
         if month not in range(1, 13):
             month = today.month
         startdate = datetime.datetime(today.year, month, 1)
-        enddate = datetime.datetime(today.year, month + 1, 1) - datetime.timedelta(seconds=1)
+        if month == 12:
+            enddate = datetime.datetime(today.year, 12, 31)
+        else:
+            enddate = datetime.datetime(today.year, month + 1, 1) - datetime.timedelta(seconds=1)
         report_values = self.get_facility_report(location, startdate, enddate,
                                                  district_facilities,
                                                  province_facilities)
