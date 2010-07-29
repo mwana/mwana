@@ -4,7 +4,7 @@ Created on Mar 31, 2010
 @author: Drew Roos
 '''
 
-from datetime import date
+from datetime import date, datetime
 
 from django.conf import settings
 
@@ -131,6 +131,7 @@ class App (rapidsms.App):
             
             for r in results:
                 r.notification_status = 'sent'
+                r.result_sent_date = datetime.now()
                 r.save()
                 
             self.waiting_for_pin.pop(message.connection)
