@@ -17,4 +17,6 @@ DATABASE_NAME = 'mwana_devel'
 #DATABASE_PASSWORD = ''
 #DATABASE_HOST = ''
 #DATABASE_PORT = ''
-#TEST_DATABASE_NAME = 'test_mwana_devel'
+# This is set to "/tmp/rapidsms.test.sqlite3" by RapidSMS, so we have to
+# override it here:
+TEST_DATABASE_NAME = 'test_mwana_devel'
