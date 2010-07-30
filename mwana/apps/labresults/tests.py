@@ -83,15 +83,12 @@ class TestApp(TestScript):
                                   contact=self.support_contact2)
         connection.save()
 
-
-        
-
     def tearDown(self):
         # this call is required if you want to override tearDown
         super(TestApp, self).tearDown()
         self.clinic.delete()
         self.type.delete()
-    
+
     def testBootstrap(self):
         contact = Contact.objects.get(id=self.contact.id)
         self.assertEqual("clinic_worker", contact.default_connection.identity)
@@ -471,7 +468,7 @@ class TestApp(TestScript):
         self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
         
 
-class ResultsAcceptor(TestApp):
+class ResultsAcceptor(TestScript):
     """
     Tests processing of payloads
     """
