@@ -10,6 +10,7 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
 from django.db import connection
+from operator import itemgetter
 
 class Results160Reports:
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
@@ -89,16 +90,15 @@ class Results160Reports:
         table.append([' Source', 'Count'])
 
         cursor = connection.cursor()
-
         cursor.execute('select source, count(*) as count from \
              labresults_payload where incoming_date BETWEEN %s AND %s group by \
-             source', [startdate, enddate])
+             source', [self.dbsr_startdate, self.dbsr_enddate])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
             table.append(row)
         table.append(['TT (All)',total])
-        return table
+        return sorted(table,  key=lambda table: table[0].lower())
 
     def dbs_pending_results_report(self, startdate=None, enddate=None):
         if startdate:
@@ -110,7 +110,7 @@ class Results160Reports:
             + timedelta(days=1) - timedelta(seconds=0.01)
         table = []
 
-        table.append([' Facility', 'District', 'New', 'Notified', 'Updated',
+        table.append([' Facility', ' District', 'New', 'Notified', 'Updated',
                      'Unprocessed', 'TT Pending'])
         new = notified = updated = unprocessed = total = 0
         tt_new = tt_notified = tt_updated = tt_unprocessed = tt_total = 0
@@ -131,7 +131,7 @@ class Results160Reports:
             tt_total = tt_total + total
             
         table.append(['TT (All)', 'TT (All)', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
-        return table
+        return sorted(table, key=itemgetter(1,0))
 
     def dbs_samples_report(self, startdate=None, enddate=None):
         if startdate:
@@ -143,7 +143,7 @@ class Results160Reports:
             + timedelta(days=1) - timedelta(seconds=0.01)
         table = []
 
-        table.append([' Facility', 'District', 'Notifications', 'Received'])
+        table.append([' Facility', ' District', 'Notifications', 'Received'])
 
         reported = received = 0
         tt_reported = tt_received = 0
@@ -163,7 +163,7 @@ class Results160Reports:
                          received,
                          ])
         table.append(['TT (All)', 'TT (All)', tt_reported, tt_received])
-        return table
+        return sorted(table, key=itemgetter(1,0))
 
     def dbs_sent_results_report(self, startdate=None, enddate=None):
         if startdate:
@@ -175,7 +175,7 @@ class Results160Reports:
             + timedelta(days=1) - timedelta(seconds=0.01)
         table = []
 
-        table.append([' Facility', 'District',
+        table.append([' Facility', ' District',
                      'Positive', 'Negative', 'Rejected', 'Total Sent'])
         tt_positive = tt_negative = tt_rejected = tt_total = 0
         positive = negative = rejected = total = 0
@@ -193,7 +193,8 @@ class Results160Reports:
             tt_rejected = tt_rejected + rejected
             tt_total = tt_total + total
         table.append(['TT (All)', 'TT (All)', tt_positive, tt_negative, tt_rejected, tt_total])
-        return table
+        return sorted(table, key=itemgetter(1,0))
+
 
 #Reminders
     def reminders_patient_events_report(self, startdate=None, enddate=None):
@@ -218,11 +219,11 @@ class Results160Reports:
                           LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
                           LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
                           WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
-                          GROUP BY reminders_event.name, locations_location.name', ['Birth',startdate, enddate])
+                          GROUP BY reminders_event.name, locations_location.name', ['Birth',self.dbsr_startdate, self.dbsr_enddate])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
             table.append(row)
         table.append(['TT (All)',total])
-        return table
+        return sorted(table, key=itemgetter(0))
 
