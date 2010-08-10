@@ -19,11 +19,11 @@ from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAY
 from mwana.apps.labresults.testdata.reports import *
 
 
-class TestApp(TestScript):
+class LabresultsSetUp(TestScript):
     
     def setUp(self):
         # this call is required if you want to override setUp
-        super(TestApp, self).setUp()
+        super(LabresultsSetUp, self).setUp()
         self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug=const.CLINIC_SLUGS[2])[0]
         self.type1 = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]        
         self.type2 = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]        
@@ -85,7 +85,7 @@ class TestApp(TestScript):
 
     def tearDown(self):
         # this call is required if you want to override tearDown
-        super(TestApp, self).tearDown()
+        super(LabresultsSetUp, self).tearDown()
         self.clinic.delete()
         self.type.delete()
 
@@ -95,7 +95,8 @@ class TestApp(TestScript):
         self.assertEqual(self.clinic, contact.location)
         self.assertEqual("4567", contact.pin)
         self.assertTrue(const.get_clinic_worker_type() in contact.types.all())
-    
+
+class TestApp(LabresultsSetUp):
     testReportResults = """
             clinic_worker > SENT 33
             clinic_worker < Hello John Banda! We received your notification that 33 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
@@ -440,14 +441,14 @@ class TestApp(TestScript):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 jul
-            clinic_worker > Reports 403012 7
+            clinic_worker > Reports 403012 Aug
+            clinic_worker > Reports 403012 8
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 jul
+            clinic_worker > Reports 40 Aug
             clinic_worker > Reports Luapula
         """
         self.runScript(script)        
@@ -468,7 +469,7 @@ class TestApp(TestScript):
         self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
         
 
-class ResultsAcceptor(TestScript):
+class TestResultsAcceptor(LabresultsSetUp):
     """
     Tests processing of payloads
     """

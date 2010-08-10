@@ -226,7 +226,8 @@ class App (rapidsms.App):
         if not changed_results:
             return
         contacts = Contact.active.filter(location=clinic,
-                                         types=const.get_clinic_worker_type())
+                                         types=const.get_clinic_worker_type()).\
+                                         order_by('pk')
         if not contacts:
             self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
