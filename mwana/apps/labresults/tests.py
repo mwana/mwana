@@ -86,8 +86,13 @@ class LabresultsSetUp(TestScript):
     def tearDown(self):
         # this call is required if you want to override tearDown
         super(LabresultsSetUp, self).tearDown()
-        self.clinic.delete()
-        self.type.delete()
+        try:
+            self.clinic.delete()
+            self.type.delete()
+            self.client.logout()
+        except:
+            pass
+            #TODO catch specific exception
 
     def testBootstrap(self):
         contact = Contact.objects.get(id=self.contact.id)
@@ -724,7 +729,7 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # Get all the messages sent
         msgs = self.receiveAllMessages()
-        
+        self.stopRouter()
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
