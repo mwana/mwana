@@ -20,11 +20,20 @@ class Results160Reports:
     dbsr_startdate = datetime(today.year, today.month, today.day)-timedelta(days=30)
 
 
+    def set_reporting_period(self, startdate, enddate):
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+
     def get_active_facilities(self):
         return Location.objects.filter(lab_results__notification_status__in=
                                        ['sent']).distinct()
 
-    def get_facilities_for_samples_reporting(self):
+    def get_facilities_for_dbs_notifications(self):
         return Location.objects.filter(Q(lab_results__notification_status__in=['sent']),
                                        Q(samplenotification__date__gt=self.dbsr_startdate)
                                        | Q(samplenotification__date=self.dbsr_startdate),
@@ -38,6 +47,14 @@ class Results160Reports:
                                        | Q(lab_results__result_sent_date=self.dbsr_startdate),
                                        Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
                                        Q(lab_results__result_sent_date=self.dbsr_enddate)
+                                       ).distinct()
+
+    def get_facilities_for_samples_at_lab(self):
+        return Location.objects.filter(Q(lab_results__notification_status__in=self.STATUS_CHOICES),
+                                       Q(lab_results__entered_on__gt=self.dbsr_startdate)
+                                       | Q(lab_results__entered_on=self.dbsr_startdate),
+                                       Q(lab_results__entered_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__entered_on=self.dbsr_enddate)
                                        ).distinct()
 
     def get_facilities_for_pending_rsts(self):
@@ -78,16 +95,10 @@ class Results160Reports:
                     notification_status='sent')
     # Reports
     def dbs_payloads_report(self, startdate=None, enddate=None):
-        if startdate:
-            self.dbsr_startdate = datetime(startdate.year, startdate.month,
-                                           startdate.day)
-        if enddate:
-            self.dbsr_enddate = \
-            datetime(enddate.year, enddate.month, enddate.day)\
-            + timedelta(days=1) - timedelta(seconds=0.01)
+        self.set_reporting_period(startdate, enddate)
         table = []
         
-        table.append([' Source', 'Count'])
+        table.append(['  Source Lab', 'Count'])
 
         cursor = connection.cursor()
         cursor.execute('select source, count(*) as count from \
@@ -96,22 +107,16 @@ class Results160Reports:
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
-            table.append(row)
-        table.append(['TT (All)',total])
+            table.append([' '+ row[0], row[1]])
+        table.append(['All listed sources',total])
         return sorted(table,  key=lambda table: table[0].lower())
 
     def dbs_pending_results_report(self, startdate=None, enddate=None):
-        if startdate:
-            self.dbsr_startdate = datetime(startdate.year, startdate.month,
-                                           startdate.day)
-        if enddate:
-            self.dbsr_enddate = \
-            datetime(enddate.year, enddate.month, enddate.day)\
-            + timedelta(days=1) - timedelta(seconds=0.01)
+        self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append([' Facility', ' District', 'New', 'Notified', 'Updated',
-                     'Unprocessed', 'TT Pending'])
+        table.append(['  Facility', '  District', 'New', 'Notified', 'Updated',
+                     'Unprocessed', 'Total Pending'])
         new = notified = updated = unprocessed = total = 0
         tt_new = tt_notified = tt_updated = tt_unprocessed = tt_total = 0
         for location in self.get_facilities_for_pending_rsts():
@@ -122,7 +127,7 @@ class Results160Reports:
             total = self.get_results_by_status_and_location(['updated', 'new',
                                                             'notified', 'unprocessed'], location).count()
 
-            table.append([location.name, location.parent.name, \
+            table.append([' ' + location.name, ' ' + location.parent.name, \
                          new, notified, updated, unprocessed, total])
             tt_new = tt_new + new
             tt_notified = tt_notified + notified
@@ -130,52 +135,49 @@ class Results160Reports:
             tt_unprocessed = tt_unprocessed + unprocessed
             tt_total = tt_total + total
             
-        table.append(['TT (All)', 'TT (All)', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
+        table.append(['All listed clinics', 'All listed  districts', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
         return sorted(table, key=itemgetter(1,0))
 
-    def dbs_samples_report(self, startdate=None, enddate=None):
-        if startdate:
-            self.dbsr_startdate = datetime(startdate.year, startdate.month,
-                                           startdate.day)
-        if enddate:
-            self.dbsr_enddate = \
-            datetime(enddate.year, enddate.month, enddate.day)\
-            + timedelta(days=1) - timedelta(seconds=0.01)
+    def dbs_sample_notifications_report(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
         table = []
-
-        table.append([' Facility', ' District', 'Notifications', 'Received'])
-
-        reported = received = 0
-        tt_reported = tt_received = 0
-        for location in self.get_facilities_for_samples_reporting():
+        table.append(['  Facility', '  District', 'Notifications'])
+        reported = 0
+        tt_reported = 0
+        for location in self.get_facilities_for_dbs_notifications():
             reported = SampleNotification.objects.filter(Q(location=location),
                                                          Q(date__gt=self.dbsr_startdate)
                                                          | Q(date=self.dbsr_startdate),
                                                          Q(date__lt=self.dbsr_enddate) |
                                                          Q(date=self.dbsr_enddate)).\
                 aggregate(sum=Sum("count"))['sum']
-            received = self.get_sent_results(location).count()
-            tt_reported = tt_reported + reported
+            
+            tt_reported = tt_reported + reported         
+            table.append([' ' + location.name, ' ' + location.parent.name, reported])
+        table.append(['All listed clinics', 'All listed  districts', tt_reported])
+        return sorted(table, key=itemgetter(1,0))
+
+    def dbs_samples_at_lab_report(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  Facility', '  District', 'Entered Samples'])
+
+        received = 0
+        tt_received = 0
+        for location in self.get_facilities_for_samples_at_lab():
+            received = self.get_results_by_status_and_location(self.STATUS_CHOICES, location).count()
             tt_received = tt_received + received
 
-            table.append([location.name, location.parent.name,
-                         reported,
-                         received,
-                         ])
-        table.append(['TT (All)', 'TT (All)', tt_reported, tt_received])
+            table.append([' ' + location.name, ' ' + location.parent.name, received,])
+        table.append(['All listed clinics', 'All listed  districts', tt_received])
         return sorted(table, key=itemgetter(1,0))
 
     def dbs_sent_results_report(self, startdate=None, enddate=None):
-        if startdate:
-            self.dbsr_startdate = datetime(startdate.year, startdate.month,
-                                           startdate.day)
-        if enddate:
-            self.dbsr_enddate = \
-            datetime(enddate.year, enddate.month, enddate.day)\
-            + timedelta(days=1) - timedelta(seconds=0.01)
+        self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append([' Facility', ' District',
+        table.append(['  Facility', '  District',
                      'Positive', 'Negative', 'Rejected', 'Total Sent'])
         tt_positive = tt_negative = tt_rejected = tt_total = 0
         positive = negative = rejected = total = 0
@@ -185,14 +187,14 @@ class Results160Reports:
             rejected = self.get_sent_results(location).filter(result__in=['R', 'X', 'I']).count()
             total = self.get_sent_results(location).count()
 
-            table.append([location.name, location.parent.name, positive,
+            table.append([' ' + location.name, ' ' + location.parent.name, positive,
                          negative, rejected, total,])
 
             tt_positive = tt_positive + positive
             tt_negative = tt_negative + negative
             tt_rejected = tt_rejected + rejected
             tt_total = tt_total + total
-        table.append(['TT (All)', 'TT (All)', tt_positive, tt_negative, tt_rejected, tt_total])
+        table.append(['All listed clinics', 'All listed  districts', tt_positive, tt_negative, tt_rejected, tt_total])
         return sorted(table, key=itemgetter(1,0))
 
 
@@ -207,7 +209,7 @@ class Results160Reports:
             + timedelta(days=1) - timedelta(seconds=0.01)
         table = []
 
-        table.append([' Facility', 'Count of Births'])
+        table.append(['  Facility', 'Count of Births'])
 
         cursor = connection.cursor()
 
@@ -223,7 +225,7 @@ class Results160Reports:
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
-            table.append(row)
-        table.append(['TT (All)',total])
+            table.append([' '+ row[0], row[1]])
+        table.append(['All listed clinics',total])
         return sorted(table, key=itemgetter(0))
 

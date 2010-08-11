@@ -2,7 +2,7 @@
 {% load forms_tags %}
 {% load labresults_tags %}
 
-{% block title %}Results160 - {{ block.super }}{% endblock %}
+{% block title %}Mwana Reports - {{ block.super }}{% endblock %}
 
 {% block javascripts %}
 {{ block.super }}
@@ -24,15 +24,18 @@
 <div class="split-2">
     <div class="left">
         <div class="module">
+            <form name="getValues" action="" method="GET">
+                <p>Select Period
+                    <input type="text" name="startdate" size="9" value={{ startdate }} />
+                           to
+                           <input type="text" name="enddate" size="9" value={{ enddate }} />
+                <input type="submit" value="Ok" name="SubmitValues" /></form>
             <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
-            <div><form name="getValues" action="" method="GET">
-                    <p> Period
-                        <input type="text" name="startdate" size="9" value={{ startdate }} />
-                               to
-                               <input type="text" name="enddate" size="9" value={{ enddate }} />
-                    <input type="submit" value="Ok" name="SubmitValues" /></form>
+            <br>
+            Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
+            <div>
                 <p align="center"><h3>Results Sent By Facility</h3>
-                <p>
+
                 <table width="100%">
                     {% for record in sent_results_rpt %}
                     <tr>
@@ -45,7 +48,11 @@
                         </td>
                         {% for column in record %}
                         {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                        <td width="20"><u>{{ column }}</u></td>
+                        {% else %}
                         <td width="20">{{ column }}</td>
+                        {% endif %}
                         {% else %}
                         <td> 0 </td>
                         {% endif %}
@@ -56,12 +63,10 @@
             </div>
             <p>
 
-            <h3>Samples from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-            <p align="left">
-                NB: Only reporting for facilities that have started receiving results<p>
-            <p>
+            <h3>Sample Notifications from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+
             <table width="100%">
-                {% for record in samples_rpt %}
+                {% for record in samples_reported_rpt %}
                 <tr>
                     <td width="20">
                         {% if forloop.counter0 %}
@@ -72,7 +77,39 @@
                     </td>
                     {% for column in record %}
                     {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
                     <td width="20">{{ column }}</td>
+                    {% endif %}
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+
+            <h3>Samples Entered at Labs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+
+            <table width="100%">
+                {% for record in samples_at_lab_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
+                    <td width="20">{{ column }}</td>
+                    {% endif %}
                     {% else %}
                     <td> 0 </td>
                     {% endif %}
@@ -85,9 +122,7 @@
             <h3>Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;Date: {{ today }}</h3>
-            <p align="left">
-                NB: Only reporting for facilities that have started receiving results<p>
-            <p>
+
             <table width="100%">
                 {% for record in pending_results %}
                 <tr>
@@ -100,7 +135,11 @@
                     </td>
                     {% for column in record %}
                     {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
                     <td width="20">{{ column }}</td>
+                    {% endif %}
                     {% else %}
                     <td> 0 </td>
                     {% endif %}
@@ -111,7 +150,7 @@
             <p>
 
             <h3>Payloads from Labs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-            <p>
+
             <table width="100%">
                 {% for record in payloads_rpt %}
                 <tr>
@@ -124,7 +163,11 @@
                     </td>
                     {% for column in record %}
                     {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
                     <td width="20">{{ column }}</td>
+                    {% endif %}
                     {% else %}
                     <td> 0 </td>
                     {% endif %}
@@ -138,9 +181,8 @@
                 <div class="module">
                     <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
                     <p>
-
                     <h3>Births from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-                    <p>
+
                     <table width="100%">
                         {% for record in births_rpt %}
                         <tr>
@@ -153,7 +195,11 @@
                             </td>
                             {% for column in record %}
                             {% if column %}
+                            {% if not forloop.parentloop.counter0 %}
+                            <td width="20"><u>{{ column }}</u></td>
+                            {% else %}
                             <td width="20">{{ column }}</td>
+                            {% endif %}
                             {% else %}
                             <td> 0 </td>
                             {% endif %}

@@ -498,7 +498,8 @@ def mwana_reports (request):
 
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
-    samples = r.dbs_samples_report(startdate, enddate)
+    samples_reported = r.dbs_sample_notifications_report(startdate, enddate)
+    samples_at_lab = r.dbs_samples_at_lab_report(startdate, enddate)
     pending = r.dbs_pending_results_report(startdate, enddate)
     payloads = r.dbs_payloads_report(startdate, enddate)
     births = r.reminders_patient_events_report(startdate, enddate)
@@ -508,8 +509,11 @@ def mwana_reports (request):
                                 'enddate':enddate,
                                 'today':today,
                                 'sent_results_rpt':res,
-                                'samples_rpt':samples,
+                                'samples_reported_rpt':samples_reported,
+                                'samples_at_lab_rpt':samples_at_lab,
                                 'pending_results':pending,
                                 'payloads_rpt':payloads,
                                 'births_rpt':births,
+                                'formattedtoday':today.strftime("%d %b %Y"),
+                                'formattedtime':datetime.today().strftime("%I:%M %p"),
                                 })
