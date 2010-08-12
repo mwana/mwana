@@ -136,7 +136,7 @@ class Results160Reports:
             tt_total = tt_total + total
             
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
-        return sorted(table, key=itemgetter(1,0))
+        return sorted(table, key=itemgetter(0,1))
 
     def dbs_sample_notifications_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -155,7 +155,7 @@ class Results160Reports:
             tt_reported = tt_reported + reported         
             table.append([' ' + location.parent.name, ' ' + location.name, reported])
         table.append(['All listed districts', 'All listed  clinics', tt_reported])
-        return sorted(table, key=itemgetter(1,0))
+        return sorted(table, key=itemgetter(0,1))
 
     def dbs_samples_at_lab_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -171,7 +171,7 @@ class Results160Reports:
 
             table.append([' ' + location.parent.name, ' ' + location.name, received,])
         table.append(['All listed districts', 'All listed  clinics', tt_received])
-        return sorted(table, key=itemgetter(1,0))
+        return sorted(table, key=itemgetter(0,1))
 
     def dbs_sent_results_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -195,7 +195,7 @@ class Results160Reports:
             tt_rejected = tt_rejected + rejected
             tt_total = tt_total + total
         table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected, tt_total])
-        return sorted(table, key=itemgetter(1,0))
+        return sorted(table, key=itemgetter(0,1))
 
 
 #Reminders
