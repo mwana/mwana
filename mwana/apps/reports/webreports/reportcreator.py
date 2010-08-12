@@ -58,7 +58,7 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_pending_rsts(self):
-        return self.get_active_facilities().filter(Q(lab_results__notification_status__in=[
+        return Location.objects.filter(Q(lab_results__notification_status__in=[
                                        'unprocessed', 'new', 'notified', 'updated'])
                                        ).distinct()
 
@@ -115,7 +115,7 @@ class Results160Reports:
         self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append(['  Facility', '  District', 'New', 'Notified', 'Updated',
+        table.append(['  District', '  Facility', 'New', 'Notified', 'Updated',
                      'Unprocessed', 'Total Pending'])
         new = notified = updated = unprocessed = total = 0
         tt_new = tt_notified = tt_updated = tt_unprocessed = tt_total = 0
@@ -127,7 +127,7 @@ class Results160Reports:
             total = self.get_results_by_status_and_location(['updated', 'new',
                                                             'notified', 'unprocessed'], location).count()
 
-            table.append([' ' + location.name, ' ' + location.parent.name, \
+            table.append([' ' + location.parent.name, ' ' + location.name, \
                          new, notified, updated, unprocessed, total])
             tt_new = tt_new + new
             tt_notified = tt_notified + notified
@@ -135,13 +135,13 @@ class Results160Reports:
             tt_unprocessed = tt_unprocessed + unprocessed
             tt_total = tt_total + total
             
-        table.append(['All listed clinics', 'All listed  districts', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
+        table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
         return sorted(table, key=itemgetter(1,0))
 
     def dbs_sample_notifications_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
         table = []
-        table.append(['  Facility', '  District', 'Notifications'])
+        table.append(['  District', '  Facility', 'Samples'])
         reported = 0
         tt_reported = 0
         for location in self.get_facilities_for_dbs_notifications():
@@ -153,15 +153,15 @@ class Results160Reports:
                 aggregate(sum=Sum("count"))['sum']
             
             tt_reported = tt_reported + reported         
-            table.append([' ' + location.name, ' ' + location.parent.name, reported])
-        table.append(['All listed clinics', 'All listed  districts', tt_reported])
+            table.append([' ' + location.parent.name, ' ' + location.name, reported])
+        table.append(['All listed districts', 'All listed  clinics', tt_reported])
         return sorted(table, key=itemgetter(1,0))
 
     def dbs_samples_at_lab_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append(['  Facility', '  District', 'Entered Samples'])
+        table.append(['  District', '  Facility', 'Samples'])
 
         received = 0
         tt_received = 0
@@ -169,15 +169,15 @@ class Results160Reports:
             received = self.get_results_by_status_and_location(self.STATUS_CHOICES, location).count()
             tt_received = tt_received + received
 
-            table.append([' ' + location.name, ' ' + location.parent.name, received,])
-        table.append(['All listed clinics', 'All listed  districts', tt_received])
+            table.append([' ' + location.parent.name, ' ' + location.name, received,])
+        table.append(['All listed districts', 'All listed  clinics', tt_received])
         return sorted(table, key=itemgetter(1,0))
 
     def dbs_sent_results_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append(['  Facility', '  District',
+        table.append(['  District', '  Facility',
                      'Positive', 'Negative', 'Rejected', 'Total Sent'])
         tt_positive = tt_negative = tt_rejected = tt_total = 0
         positive = negative = rejected = total = 0
@@ -187,14 +187,14 @@ class Results160Reports:
             rejected = self.get_sent_results(location).filter(result__in=['R', 'X', 'I']).count()
             total = self.get_sent_results(location).count()
 
-            table.append([' ' + location.name, ' ' + location.parent.name, positive,
+            table.append([' ' + location.parent.name, ' ' + location.name, positive,
                          negative, rejected, total,])
 
             tt_positive = tt_positive + positive
             tt_negative = tt_negative + negative
             tt_rejected = tt_rejected + rejected
             tt_total = tt_total + total
-        table.append(['All listed clinics', 'All listed  districts', tt_positive, tt_negative, tt_rejected, tt_total])
+        table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected, tt_total])
         return sorted(table, key=itemgetter(1,0))
 
 
