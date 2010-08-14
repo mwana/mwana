@@ -498,6 +498,10 @@ def mwana_reports (request):
 
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
+    min_processing_time, max_processing_time, num_of_rsts, num_of_facilities,\
+    processing_time = r.dbs_avg_processing_time_report(startdate, enddate)
+    min_transport_time, max_transport_time, num_of_dbs, num_of_facs,\
+    transport_time = r.dbs_avg_transport_time_report(startdate, enddate)
     samples_reported = r.dbs_sample_notifications_report(startdate, enddate)
     samples_at_lab = r.dbs_samples_at_lab_report(startdate, enddate)
     pending = r.dbs_pending_results_report(startdate, enddate)
@@ -509,6 +513,16 @@ def mwana_reports (request):
                                 'enddate':enddate,
                                 'today':today,
                                 'sent_results_rpt':res,
+                                'processing_time_rpt':processing_time,
+                                'min_processing_time':min_processing_time,
+                                'max_processing_time':max_processing_time,
+                                'num_of_results':num_of_rsts,
+                                'num_of_facilities':num_of_facilities,
+                                'transport_time_rpt':transport_time,
+                                'min_transport_time':min_transport_time,
+                                'max_transport_time':max_transport_time,
+                                'num_of_dbs':num_of_dbs,
+                                'num_of_facs':num_of_facs,
                                 'samples_reported_rpt':samples_reported,
                                 'samples_at_lab_rpt':samples_at_lab,
                                 'pending_results':pending,

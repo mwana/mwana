@@ -1,7 +1,9 @@
+from operator import itemgetter
+
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
-
+from django.db import connection
 from django.db.models import Count
 from django.db.models import Q
 from django.db.models import Sum
@@ -9,11 +11,10 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
-from django.db import connection
-from operator import itemgetter
 
 class Results160Reports:
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
+    SOME_INVALID_DAYS = 3650
     today = date.today()
     dbsr_enddate = datetime(today.year, today.month, today.day) + timedelta(days=1)
     -timedelta(seconds=0.01)
@@ -48,6 +49,16 @@ class Results160Reports:
                                        Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
                                        Q(lab_results__result_sent_date=self.dbsr_enddate)
                                        ).distinct()
+
+    def get_facilities_for_transport_reporting(self):
+        return Location.objects.filter(Q(lab_results__collected_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__collected_on=self.dbsr_enddate),
+                                       Q(lab_results__entered_on__gt=self.dbsr_startdate)
+                                       | Q(lab_results__entered_on=self.dbsr_startdate),
+                                       Q(lab_results__entered_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__entered_on=self.dbsr_enddate)
+                                       ).distinct()
+
 
     def get_facilities_for_samples_at_lab(self):
         return Location.objects.filter(Q(lab_results__notification_status__in=self.STATUS_CHOICES),
@@ -93,6 +104,36 @@ class Results160Reports:
                                      Q(result_sent_date=self.dbsr_enddate))\
             .filter(clinic=location,
                     notification_status='sent')
+
+    def get_avg_dbs_processing_time(self, location):
+        results = Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
+                                        | Q(result_sent_date=self.dbsr_startdate),
+                                        Q(result_sent_date__lt=self.dbsr_enddate) |
+                                        Q(result_sent_date=self.dbsr_enddate))\
+            .filter(clinic=location,
+                    notification_status='sent')
+        if not results:
+            return (0, None)
+        tt_diff = 0
+        for result in results:
+            tt_diff = tt_diff + (result.result_sent_date.date() - result.entered_on).days
+        return (results.count(), tt_diff / results.count())
+
+    def get_avg_dbs_transport_time(self, location):
+        results = Result.objects.filter(Q(collected_on__lt=self.dbsr_enddate) |
+                                        Q(collected_on=self.dbsr_enddate),
+                                        Q(entered_on__gt=self.dbsr_startdate)
+                                        | Q(entered_on=self.dbsr_startdate),
+                                        Q(entered_on__lt=self.dbsr_enddate) |
+                                        Q(entered_on=self.dbsr_enddate))\
+            .filter(clinic=location)
+        if not results:
+            return (0, None)
+        tt_diff = 0
+        for result in results:
+            tt_diff = tt_diff + (result.entered_on - result.collected_on).days
+        return (results.count(), tt_diff / results.count())
+
     # Reports
     def dbs_payloads_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -107,9 +148,9 @@ class Results160Reports:
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
-            table.append([' '+ row[0], row[1]])
-        table.append(['All listed sources',total])
-        return sorted(table,  key=lambda table: table[0].lower())
+            table.append([' ' + row[0], row[1]])
+        table.append(['All listed sources', total])
+        return sorted(table, key=lambda table: table[0].lower())
 
     def dbs_pending_results_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -136,7 +177,7 @@ class Results160Reports:
             tt_total = tt_total + total
             
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
-        return sorted(table, key=itemgetter(0,1))
+        return sorted(table, key=itemgetter(0, 1))
 
     def dbs_sample_notifications_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -155,7 +196,7 @@ class Results160Reports:
             tt_reported = tt_reported + reported         
             table.append([' ' + location.parent.name, ' ' + location.name, reported])
         table.append(['All listed districts', 'All listed  clinics', tt_reported])
-        return sorted(table, key=itemgetter(0,1))
+        return sorted(table, key=itemgetter(0, 1))
 
     def dbs_samples_at_lab_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -171,7 +212,7 @@ class Results160Reports:
 
             table.append([' ' + location.parent.name, ' ' + location.name, received,])
         table.append(['All listed districts', 'All listed  clinics', tt_received])
-        return sorted(table, key=itemgetter(0,1))
+        return sorted(table, key=itemgetter(0, 1))
 
     def dbs_sent_results_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
@@ -195,7 +236,69 @@ class Results160Reports:
             tt_rejected = tt_rejected + rejected
             tt_total = tt_total + total
         table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected, tt_total])
-        return sorted(table, key=itemgetter(0,1))
+        return sorted(table, key=itemgetter(0, 1))
+
+    def dbs_avg_processing_time_report(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility', 'Results', 'Processing Time (Days)'])
+        days = number_sent = 0
+        sum_days = tt_number_sent = 0
+        min_days = self.SOME_INVALID_DAYS
+        max_days = None
+
+        locations = self.get_facilities_for_rsts_reporting()
+        for location in locations:
+            number_sent, days = self.get_avg_dbs_processing_time(location)
+            tt_number_sent = tt_number_sent + number_sent
+            sum_days = sum_days + days
+            min_days = min(days, min_days)
+            max_days = max(days, max_days)
+
+            table.append([' ' + location.parent.name, ' ' + location.name,
+                         number_sent, days])
+
+        avg = None
+        if locations:
+            avg = sum_days / locations.count()
+        if min_days == self.SOME_INVALID_DAYS:
+            min_days = None
+
+        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, avg])
+        return min_days, max_days, tt_number_sent, locations.count(), \
+            sorted(table, key=itemgetter(0, 1))
+
+    def dbs_avg_transport_time_report(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility', 'DBS', 'Transport Time (Days)'])
+        days = number_sent = 0
+        sum_days = tt_samples = 0
+        min_days = self.SOME_INVALID_DAYS
+        max_days = None
+
+        locations = self.get_facilities_for_transport_reporting()
+        for location in locations:
+            number_sent, days = self.get_avg_dbs_transport_time(location)
+            tt_samples = tt_samples + number_sent
+            sum_days = sum_days + days
+            min_days = min(days, min_days)
+            max_days = max(days, max_days)
+
+            table.append([' ' + location.parent.name, ' ' + location.name,
+                         number_sent, days])
+
+        avg = None
+        if locations:
+            avg = sum_days / locations.count()
+        if min_days == self.SOME_INVALID_DAYS:
+            min_days = None
+
+        table.append(['All listed districts', 'All listed  clinics', tt_samples, avg])
+        return min_days, max_days, tt_samples, locations.count(), \
+            sorted(table, key=itemgetter(0, 1))
 
 
 #Reminders
@@ -214,18 +317,18 @@ class Results160Reports:
         cursor = connection.cursor()
 
         cursor.execute('SELECT locations_location.name AS Facility, count(reminders_patientevent.id) as Count ' +
-                          'FROM reminders_patientevent \
+                       'FROM reminders_patientevent \
                           LEFT JOIN reminders_event ON reminders_patientevent.event_id = reminders_event.id\
                           LEFT JOIN rapidsms_connection ON rapidsms_connection.id = reminders_patientevent.cba_conn_id\
                           LEFT JOIN rapidsms_contact ON rapidsms_connection.contact_id = rapidsms_contact.id\
                           LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
                           LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
                           WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
-                          GROUP BY reminders_event.name, locations_location.name', ['Birth',self.dbsr_startdate, self.dbsr_enddate])
+                          GROUP BY reminders_event.name, locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
-            table.append([' '+ row[0], row[1]])
-        table.append(['All listed clinics',total])
+            table.append([' ' + row[0], row[1]])
+        table.append(['All listed clinics', total])
         return sorted(table, key=itemgetter(0))
 
