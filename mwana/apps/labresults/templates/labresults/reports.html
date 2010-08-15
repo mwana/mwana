@@ -67,6 +67,32 @@
                     </tr>
                     {% endfor %}
                 </table>
+                <p><p>
+                <h3>Graph - Daily Receipt of Results &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+                <p>
+
+                <p>
+                    Showing a total of {{ tt_in_graph }} results sent in the
+                    period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+                </p>
+
+                {% for record in graph %}
+
+                {% for column in record %}
+                {% if not forloop.counter0 %}
+                {{column}}&nbsp;
+                {% else %}
+                {% if column %}
+                <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" alt="missing bar" height="10"
+                            width="{% widthratio column single_bar_length 100 %}" /> {{column}}
+
+                {% else %}
+                Nil
+                {% endif %}
+                <br>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
             </div>
             <p>
 
@@ -342,32 +368,7 @@
                 </tr>
                 {% endfor %}
             </table>
-            <p><p>
-                <h3>Graph - Daily Receipt of Results &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
-                <p>
-                  
-                <p>
-                    Showing a total of {{ tt_in_graph }} results sent in the 
-                    period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
-                </p>
-
-                {% for record in graph %}
-
-                {% for column in record %}
-                {% if not forloop.counter0 %}
-                {{column}}&nbsp;
-                {% else %}
-                {% if column %}
-                <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" alt="missing bar" height="10"
-                            width="{% widthratio column single_bar_length 100 %}" /> {{column}}
-
-                {% else %}
-                Nil
-                {% endif %}
-                <br>
-                {% endif %}
-                {% endfor %}
-                {% endfor %}
+            
             <p><p><p>
             <div class="left">
                 <div class="module">
