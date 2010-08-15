@@ -14,7 +14,10 @@ from rapidsms.contrib.locations.models import Location
 
 class Results160Reports:
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
+    # Arbitrary values
     SOME_INVALID_DAYS = 3650
+    MAX_REPORTING_PERIOD = 100 # days
+    BAR_LENGTH = 5.0
     today = date.today()
     dbsr_enddate = datetime(today.year, today.month, today.day) + timedelta(days=1)
     -timedelta(seconds=0.01)
@@ -346,7 +349,7 @@ class Results160Reports:
         start = max(start, earliest_start)
         end = min(end,date.today())
         diff = (end - start).days
-        if diff > 100:
+        if diff > self.MAX_REPORTING_PERIOD:
             return {"Sorry, I think the date range you selected is just too wide.":0}
 
         days = {}
@@ -366,7 +369,7 @@ class Results160Reports:
             except KeyError:
                 if len(days)==1:break
         # assign some variable with a value, not so friendly to calculate in templates
-        single_bar_length = max(days.values()) / 5.0
+        single_bar_length = max(days.values()) / self.BAR_LENGTH
 
         # for easy sorting, create a list of lists from the dictionary
         table = []
