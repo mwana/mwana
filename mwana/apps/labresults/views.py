@@ -493,9 +493,9 @@ def mwana_reports (request):
         enddate = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):
         enddate = datetime.today().date()
-    if startdate > enddate:
-        startdate, enddate = enddate, startdate
-
+    startdate = min(startdate, enddate, datetime.today().date())
+    enddate = min(enddate, datetime.today().date())
+    
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
     min_processing_time, max_processing_time, num_of_rsts, num_of_facilities,\
@@ -507,6 +507,7 @@ def mwana_reports (request):
     pending = r.dbs_pending_results_report(startdate, enddate)
     payloads = r.dbs_payloads_report(startdate, enddate)
     births = r.reminders_patient_events_report(startdate, enddate)
+    single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate, enddate)
 
     return render_to_response(request, 'labresults/reports.html',
                                 {'startdate':startdate,
@@ -530,4 +531,7 @@ def mwana_reports (request):
                                 'births_rpt':births,
                                 'formattedtoday':today.strftime("%d %b %Y"),
                                 'formattedtime':datetime.today().strftime("%I:%M %p"),
+                                'graph':graph,
+                                'single_bar_length':single_bar_length,
+                                'tt_in_graph':tt_in_graph,
                                 })

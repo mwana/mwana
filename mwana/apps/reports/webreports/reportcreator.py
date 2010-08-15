@@ -210,7 +210,7 @@ class Results160Reports:
             received = self.get_results_by_status_and_location(self.STATUS_CHOICES, location).count()
             tt_received = tt_received + received
 
-            table.append([' ' + location.parent.name, ' ' + location.name, received,])
+            table.append([' ' + location.parent.name, ' ' + location.name, received, ])
         table.append(['All listed districts', 'All listed  clinics', tt_received])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -229,7 +229,7 @@ class Results160Reports:
             total = self.get_sent_results(location).count()
 
             table.append([' ' + location.parent.name, ' ' + location.name, positive,
-                         negative, rejected, total,])
+                         negative, rejected, total, ])
 
             tt_positive = tt_positive + positive
             tt_negative = tt_negative + negative
@@ -331,4 +331,47 @@ class Results160Reports:
             table.append([' ' + row[0], row[1]])
         table.append(['All listed clinics', total])
         return sorted(table, key=itemgetter(0))
+
+#Graphing
+    def get_all_dates_dictionary(self):
+        """
+        Returns a dictionary whose keys are all dates between startdate and
+        endate
+        """
+        start = self.dbsr_startdate.date()
+        end = self.dbsr_enddate.date()
+        earliest_start = Result.objects.order_by('result_sent_date').\
+        filter(notification_status='sent')[0].result_sent_date.date()
+
+        start = max(start, earliest_start)
+        end = min(end,date.today())
+        diff = (end - start).days
+        if diff > 100:
+            return {"Sorry, I think the date range you selected is just too wide.":0}
+
+        days = {}
+        for i in range(diff + 1):
+            days[start + timedelta(days=i)] = 0
+        return days
+
+    def dbs_graph_data(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
+
+        days = self.get_all_dates_dictionary()
+        sent_results = self.get_results_by_status(['sent'])
+
+        for result in sent_results:
+            try:
+                days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
+            except KeyError:
+                if len(days)==1:break
+        # assign some variable with a value, not so friendly to calculate in templates
+        single_bar_length = max(days.values()) / 5.0
+
+        # for easy sorting, create a list of lists from the dictionary
+        table = []
+        for key, value in days.items():
+            table.append([key, value])
+
+        return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
 
