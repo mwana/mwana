@@ -96,21 +96,21 @@
             </div>
             <p>
 
-            <h3>Average Processing Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3>Average Turnaround &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
                 Showing average time between the Date DBS
-                samples arrive at the testing Lab and the Date the results
+                samples are collected at the facilities and the Date the results
                 for these samples are received at the facility.
                 <br>
-                Minimum Average Days = {{min_processing_time}}; &nbsp;
-                Maximum Average Days = {{max_processing_time}}; &nbsp;
+                Minimum Average Days = {{min_turnaround_time}}; &nbsp;
+                Maximum Average Days = {{max_turnaround_time}}; &nbsp;
                 Out of {{num_of_results}} results in {{num_of_facilities}} 
                 facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
                 <p>
             <table width="100%">
-                {% for record in processing_time_rpt %}
+                {% for record in turnaround_time_rpt %}
                 <tr>
                     <td width="20">
                         {% if forloop.counter0 %}
@@ -127,14 +127,14 @@
                             {% if forloop.parentloop.last %}
                                 <td width="20"><b>{{ column }}</b></td>
                             {% else %}
-                                {%ifequal column min_processing_time%}
+                                {%ifequal column min_turnaround_time%}
                                      {%if forloop.last %}
                                         <td width="20" bgcolor="#66CC00">{{ column }}</td>
                                      {%else%}
                                         <td width="20">{{ column }}</td>
                                      {%endif%}
                                 {% else %}
-                                    {%ifequal column max_processing_time%}
+                                    {%ifequal column max_turnaround_time%}
                                         {%if forloop.last %}
                                              <td width="20" bgcolor="#FFFF33">{{ column }}</td>
                                         {%else%}
@@ -199,6 +199,131 @@
                                      {%endif%}
                                 {% else %}
                                     {%ifequal column max_transport_time%}
+                                        {%if forloop.last %}
+                                             <td width="20" bgcolor="#FFFF33">{{ column }}</td>
+                                        {%else%}
+                                            <td width="20">{{ column }}</td>
+                                        {%endif%}
+                                    {% else %}
+                                        <td width="20">{{ column }}</td>
+                                    {% endifequal %}
+                                {% endifequal %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+
+            <h3>Average Processing Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <p>
+                Showing average time between the Date DBS
+                samples arrive at the testing Lab and the Date the results
+                for these samples are ready.
+                <br>
+                Minimum Average Days = {{min_processing_time}}; &nbsp;
+                Maximum Average Days = {{max_processing_time}}; &nbsp;
+                Out of {{num_of_dbs_processed}} results in {{num_facs_processing}}
+                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+                <p>
+            <table width="100%">
+                {% for record in processing_time_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                            <td width="20"><u>{{ column }}</u></td>
+                        {% else %}
+                            {% if forloop.parentloop.last %}
+                                <td width="20"><b>{{ column }}</b></td>
+                            {% else %}
+                                {%ifequal column min_processing_time%}
+                                     {%if forloop.last %}
+                                        <td width="20" bgcolor="#66CC00">{{ column }}</td>
+                                     {%else%}
+                                        <td width="20">{{ column }}</td>
+                                     {%endif%}
+                                {% else %}
+                                    {%ifequal column max_processing_time%}
+                                        {%if forloop.last %}
+                                             <td width="20" bgcolor="#FFFF33">{{ column }}</td>
+                                        {%else%}
+                                            <td width="20">{{ column }}</td>
+                                        {%endif%}
+                                    {% else %}
+                                        <td width="20">{{ column }}</td>
+                                    {% endifequal %}
+                                {% endifequal %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+
+            <h3>Average Retrieving Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <p>
+                Showing average time between the Date results are tested at
+				the lab to the time they are received at the facilities
+                <br>
+                Minimum Average Days = {{min_retrieving_time}}; &nbsp;
+                Maximum Average Days = {{max_retrieving_time}}; &nbsp;
+                Out of {{num_of_dbs_retrieved}} results in {{num_facs_retrieving}}
+                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+                <p>
+            <table width="100%">
+                {% for record in retrieval_time_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                            <td width="20"><u>{{ column }}</u></td>
+                        {% else %}
+                            {% if forloop.parentloop.last %}
+                                <td width="20"><b>{{ column }}</b></td>
+                            {% else %}
+                                {%ifequal column min_retrieving_time%}
+                                     {%if forloop.last %}
+                                        <td width="20" bgcolor="#66CC00">{{ column }}</td>
+                                     {%else%}
+                                        <td width="20">{{ column }}</td>
+                                     {%endif%}
+                                {% else %}
+                                    {%ifequal column max_retrieving_time%}
                                         {%if forloop.last %}
                                              <td width="20" bgcolor="#FFFF33">{{ column }}</td>
                                         {%else%}

@@ -62,6 +62,32 @@ class Results160Reports:
                                        Q(lab_results__entered_on=self.dbsr_enddate)
                                        ).distinct()
 
+    def get_facilities_for_processing_reporting(self):
+        return Location.objects.filter(Q(lab_results__entered_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__entered_on=self.dbsr_enddate),
+                                       Q(lab_results__processed_on__gt=self.dbsr_startdate)
+                                       | Q(lab_results__processed_on=self.dbsr_startdate),
+                                       Q(lab_results__processed_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__processed_on=self.dbsr_enddate)
+                                       ).distinct()
+
+    def get_facilities_for_turnarround_reporting(self):
+        return Location.objects.filter(Q(lab_results__collected_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__collected_on=self.dbsr_enddate),
+                                       Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
+                                       | Q(lab_results__result_sent_date=self.dbsr_startdate),
+                                       Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
+                                       Q(lab_results__result_sent_date=self.dbsr_enddate)
+                                       ).distinct()
+
+    def get_facilities_for_retrieval_reporting(self):
+        return Location.objects.filter(Q(lab_results__processed_on__lt=self.dbsr_enddate) |
+                                       Q(lab_results__processed_on=self.dbsr_enddate),
+                                       Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
+                                       | Q(lab_results__result_sent_date=self.dbsr_startdate),
+                                       Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
+                                       Q(lab_results__result_sent_date=self.dbsr_enddate)
+                                       ).distinct()
 
     def get_facilities_for_samples_at_lab(self):
         return Location.objects.filter(Q(lab_results__notification_status__in=self.STATUS_CHOICES),
@@ -108,8 +134,10 @@ class Results160Reports:
             .filter(clinic=location,
                     notification_status='sent')
 
-    def get_avg_dbs_processing_time(self, location):
-        results = Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
+    def get_avg_dbs_turnaround_time(self, location):
+        results = Result.objects.filter(Q(collected_on__lt=self.dbsr_enddate) |
+                                        Q(collected_on=self.dbsr_enddate),
+                                        Q(result_sent_date__gt=self.dbsr_startdate)
                                         | Q(result_sent_date=self.dbsr_startdate),
                                         Q(result_sent_date__lt=self.dbsr_enddate) |
                                         Q(result_sent_date=self.dbsr_enddate))\
@@ -119,7 +147,36 @@ class Results160Reports:
             return (0, None)
         tt_diff = 0
         for result in results:
-            tt_diff = tt_diff + (result.result_sent_date.date() - result.entered_on).days
+            tt_diff = tt_diff + (result.result_sent_date.date() - result.collected_on).days
+        return (results.count(), tt_diff / results.count())
+
+    def get_avg_dbs_retrieval_time(self, location):
+        results = Result.objects.filter(Q(processed_on__lt=self.dbsr_enddate) |
+                                        Q(processed_on=self.dbsr_enddate),
+                                        Q(result_sent_date__gt=self.dbsr_startdate)
+                                        | Q(result_sent_date=self.dbsr_startdate),
+                                        Q(result_sent_date__lt=self.dbsr_enddate) |
+                                        Q(result_sent_date=self.dbsr_enddate))\
+            .filter(clinic=location,
+                    notification_status='sent')
+        if not results:
+            return (0, None)
+        tt_diff = 0
+        for result in results:
+            tt_diff = tt_diff + (result.result_sent_date.date() - result.processed_on).days
+        return (results.count(), tt_diff / results.count())
+
+    def get_avg_dbs_processing_time(self, location):
+        results = Result.objects.filter(Q(processed_on__gt=self.dbsr_startdate)
+                                        | Q(processed_on=self.dbsr_startdate),
+                                        Q(processed_on__lt=self.dbsr_enddate) |
+                                        Q(processed_on=self.dbsr_enddate))\
+            .filter(clinic=location)
+        if not results:
+            return (0, None)
+        tt_diff = 0
+        for result in results:
+            tt_diff = tt_diff + (result.processed_on - result.entered_on).days
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_transport_time(self, location):
@@ -241,19 +298,27 @@ class Results160Reports:
         table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected, tt_total])
         return sorted(table, key=itemgetter(0, 1))
 
-    def dbs_avg_processing_time_report(self, startdate=None, enddate=None):
+    def dbs_avg_turnaround_time_report(self, startdate=None, enddate=None):
+        """
+        Equivalent to
+        select sum(result_sent_date-collected_on) sum,count(*) count,
+        sum(result_sent_date-collected_on)/count(*) avg,clinic_id
+        FROM labresults_result
+        group by clinic_id
+        order by 3 asc
+        """
         self.set_reporting_period(startdate, enddate)
         table = []
 
-        table.append(['  District', '  Facility', 'Results', 'Processing Time (Days)'])
+        table.append(['  District', '  Facility', 'Results', 'Turnaround (Days)'])
         days = number_sent = 0
         sum_days = tt_number_sent = 0
         min_days = self.SOME_INVALID_DAYS
         max_days = None
 
-        locations = self.get_facilities_for_rsts_reporting()
+        locations = self.get_facilities_for_turnarround_reporting()
         for location in locations:
-            number_sent, days = self.get_avg_dbs_processing_time(location)
+            number_sent, days = self.get_avg_dbs_turnaround_time(location)
             tt_number_sent = tt_number_sent + number_sent
             sum_days = sum_days + days
             min_days = min(days, min_days)
@@ -270,6 +335,83 @@ class Results160Reports:
 
         table.append(['All listed districts', 'All listed  clinics', tt_number_sent, avg])
         return min_days, max_days, tt_number_sent, locations.count(), \
+            sorted(table, key=itemgetter(0, 1))
+
+    def dbs_avg_retrieval_time_report(self, startdate=None, enddate=None):
+        """
+        Equivalent to
+        select sum(result_sent_date-processed_on) sum,count(*) count,
+        sum(result_sent_date-processed_on)/count(*) avg,clinic_id
+        FROM labresults_result
+        group by clinic_id
+        order by 3 asc
+        """
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility', 'Results', 'Retieval Time(Days)'])
+        days = number_sent = 0
+        sum_days = tt_number_sent = 0
+        min_days = self.SOME_INVALID_DAYS
+        max_days = None
+
+        locations = self.get_facilities_for_retrieval_reporting()
+        for location in locations:
+            number_sent, days = self.get_avg_dbs_retrieval_time(location)
+            tt_number_sent = tt_number_sent + number_sent
+            sum_days = sum_days + days
+            min_days = min(days, min_days)
+            max_days = max(days, max_days)
+
+            table.append([' ' + location.parent.name, ' ' + location.name,
+                         number_sent, days])
+
+        avg = None
+        if locations:
+            avg = sum_days / locations.count()
+        if min_days == self.SOME_INVALID_DAYS:
+            min_days = None
+
+        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, avg])
+        return min_days, max_days, tt_number_sent, locations.count(), \
+            sorted(table, key=itemgetter(0, 1))
+
+    def dbs_avg_processing_time_report(self, startdate=None, enddate=None):
+        """
+        Equvalent to
+        select sum(processed_on-entered_on) sum,count(*) count,sum(processed_on-entered_on)/count(*) avg,clinic_id
+        FROM labresults_result
+        group by clinic_id
+        order by 3 asc
+        """
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility', 'Results', 'Processing Time (Days)'])
+        days = number_processed = 0
+        sum_days = tt_number_processed = 0
+        min_days = self.SOME_INVALID_DAYS
+        max_days = None
+
+        locations = self.get_facilities_for_processing_reporting()
+        for location in locations:
+            number_processed, days = self.get_avg_dbs_processing_time(location)
+            tt_number_processed = tt_number_processed + number_processed
+            sum_days = sum_days + days
+            min_days = min(days, min_days)
+            max_days = max(days, max_days)
+
+            table.append([' ' + location.parent.name, ' ' + location.name,
+                         number_processed, days])
+
+        avg = None
+        if locations:
+            avg = sum_days / locations.count()
+        if min_days == self.SOME_INVALID_DAYS:
+            min_days = None
+
+        table.append(['All listed districts', 'All listed  clinics', tt_number_processed, avg])
+        return min_days, max_days, tt_number_processed, locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
     def dbs_avg_transport_time_report(self, startdate=None, enddate=None):

@@ -498,8 +498,14 @@ def mwana_reports (request):
     
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
-    min_processing_time, max_processing_time, num_of_rsts, num_of_facilities,\
-    processing_time = r.dbs_avg_processing_time_report(startdate, enddate)
+    min_processing_time, max_processing_time, num_of_dbs_processed, \
+    num_facs_processing, processing_time =\
+    r.dbs_avg_processing_time_report(startdate, enddate)
+    min_retrieval_time, max_retrieval_time, num_of_dbs_retrieved, \
+    num_facs_retrieving, retrieval_time =\
+    r.dbs_avg_retrieval_time_report(startdate, enddate)
+    min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
+    turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
     min_transport_time, max_transport_time, num_of_dbs, num_of_facs,\
     transport_time = r.dbs_avg_transport_time_report(startdate, enddate)
     samples_reported = r.dbs_sample_notifications_report(startdate, enddate)
@@ -514,11 +520,21 @@ def mwana_reports (request):
                                 'enddate':enddate,
                                 'today':today,
                                 'sent_results_rpt':res,
+                                'turnaround_time_rpt':turnaround_time,
+                                'min_turnaround_time':min_turnaround_time,
+                                'max_turnaround_time':max_turnaround_time,
+                                'num_of_results':num_of_rsts,
+                                'num_of_facilities':num_of_facilities,
                                 'processing_time_rpt':processing_time,
                                 'min_processing_time':min_processing_time,
                                 'max_processing_time':max_processing_time,
-                                'num_of_results':num_of_rsts,
-                                'num_of_facilities':num_of_facilities,
+                                'num_of_dbs_processed':num_of_dbs_processed,
+                                'num_facs_processing':num_facs_processing,
+                                'retrieval_time_rpt':retrieval_time,
+                                'min_retrieving_time':min_retrieval_time,
+                                'max_retrieving_time':max_retrieval_time,
+                                'num_of_dbs_retrieved':num_of_dbs_retrieved,
+                                'num_facs_retrieving':num_facs_retrieving,
                                 'transport_time_rpt':transport_time,
                                 'min_transport_time':min_transport_time,
                                 'max_transport_time':max_transport_time,
