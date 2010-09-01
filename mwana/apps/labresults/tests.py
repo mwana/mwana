@@ -733,7 +733,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=21234987b, Result=N, old value=21234987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
@@ -747,6 +747,9 @@ class TestResultsAcceptor(LabresultsSetUp):
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
             clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;NotDetected changed to 87;Detected
+            clinic_worker < **** 21234987;NotDetected changed to 21234987b;NotDetected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """
         self.runScript(script)
+        self.assertEqual(0,Result.objects.filter(notification_status='sent',
+                            result_sent_date=None).count())

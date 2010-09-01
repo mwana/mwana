@@ -77,6 +77,7 @@ INITIAL_PAYLOAD = {
 # another payload with the same result records but with some values changed:
 # 1st sample has results changed from N to P and req_id changed form 78 to 87.
 # 2nd sample has results changed from N to R.
+# 3rd sample has requisition id changed
 CHANGED_PAYLOAD = {
     "source": "ndola/arthur-davison",
     "now": "2010-04-22 10:30:00",
@@ -139,7 +140,7 @@ CHANGED_PAYLOAD = {
             "fac": '402029',
             "id": "10-09997",
             "hw_tit": "ZAN",
-            "pat_id": "21234987",
+            "pat_id": "21234987b",
             "dob": "2010-01-12",
             "proc_on": "2010-04-17",
             "child_age": 4

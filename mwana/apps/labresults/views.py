@@ -275,6 +275,7 @@ def accept_record (record, payload):
         if old_record.notification_status == 'sent' and old_record.requisition_id != new_record.requisition_id:
             new_record.record_change = 'req_id'
             new_record.old_value = old_record.requisition_id
+            new_record.notification_status = 'updated'
             logger.warning('requisition id in record [%s] has changed (%s -> %s)! how do we handle this?' %
                            (sample_id, old_record.requisition_id, new_record.requisition_id))
 
