@@ -23,6 +23,11 @@ class Results160Reports:
     -timedelta(seconds=0.01)
     dbsr_startdate = datetime(today.year, today.month, today.day)-timedelta(days=30)
 
+    def safe_rounding(self, float):
+        try:
+            return int(round(float))
+        except TypeError:
+            return None
 
     def set_reporting_period(self, startdate, enddate):
         if startdate:
@@ -322,7 +327,7 @@ class Results160Reports:
             max_days = max(days, max_days)
 
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, int(round(days))])
+                         number_sent, self.safe_rounding(days)])
 
         avg = None
         if locations:
@@ -330,8 +335,8 @@ class Results160Reports:
         if min_days == self.SOME_INVALID_DAYS:
             min_days = None
 
-        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, int(round(avg))])
-        return int(round(min_days)), int(round(max_days)), int(round(tt_number_sent)), locations.count(), \
+        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, self.safe_rounding(avg)])
+        return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_number_sent), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
     def dbs_avg_retrieval_time_report(self, startdate=None, enddate=None):
@@ -357,7 +362,7 @@ class Results160Reports:
             max_days = max(days, max_days)
 
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, int(round(days))])
+                         number_sent, self.safe_rounding(days)])
 
         avg = None
         if locations:
@@ -365,8 +370,8 @@ class Results160Reports:
         if min_days == self.SOME_INVALID_DAYS:
             min_days = None
 
-        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, int(round(avg))])
-        return int(round(min_days)), int(round(max_days)), int(round(tt_number_sent)), locations.count(), \
+        table.append(['All listed districts', 'All listed  clinics', tt_number_sent, self.safe_rounding(avg)])
+        return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_number_sent), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
     def dbs_avg_processing_time_report(self, startdate=None, enddate=None):
@@ -392,7 +397,7 @@ class Results160Reports:
             max_days = max(days, max_days)
 
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_processed, int(round(days))])
+                         number_processed, self.safe_rounding(days)])
 
         avg = None
         if locations:
@@ -400,8 +405,8 @@ class Results160Reports:
         if min_days == self.SOME_INVALID_DAYS:
             min_days = None
 
-        table.append(['All listed districts', 'All listed  clinics', tt_number_processed, int(round(avg))])
-        return int(round(min_days)), int(round(max_days)), int(round(tt_number_processed)), locations.count(), \
+        table.append(['All listed districts', 'All listed  clinics', tt_number_processed, self.safe_rounding(avg)])
+        return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_number_processed), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
 
@@ -428,7 +433,7 @@ class Results160Reports:
             max_days = max(days, max_days)
 
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, int(round(days))])
+                         number_sent, self.safe_rounding(days)])
 
         avg = None
         if locations:
@@ -436,8 +441,8 @@ class Results160Reports:
         if min_days == self.SOME_INVALID_DAYS:
             min_days = None
 
-        table.append(['All listed districts', 'All listed  clinics', tt_samples, int(round(avg))])
-        return int(round(min_days)), int(round(max_days)), int(round(tt_samples)), locations.count(), \
+        table.append(['All listed districts', 'All listed  clinics', tt_samples, self.safe_rounding(avg)])
+        return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_samples), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
 
