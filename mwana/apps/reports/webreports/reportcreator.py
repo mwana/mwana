@@ -128,7 +128,7 @@ class Results160Reports:
     def get_results_by_status_and_location(self, status, location):
         """Returns results query set by status in reporting period"""
         return Result.objects.filter(notification_status__in=status, clinic=location)
-            
+
 
     def get_sent_results(self, location):
         """Returns results query set for sent results in reporting period"""
@@ -257,8 +257,8 @@ class Results160Reports:
                                                          Q(date__lt=self.dbsr_enddate) |
                                                          Q(date=self.dbsr_enddate)).\
                 aggregate(sum=Sum("count"))['sum']
-            
-            tt_reported = tt_reported + reported         
+                
+            tt_reported = tt_reported + reported
             table.append([' ' + location.parent.name, ' ' + location.name, reported])
         table.append(['All listed districts', 'All listed  clinics', tt_reported])
         return sorted(table, key=itemgetter(0, 1))
@@ -469,11 +469,14 @@ class Results160Reports:
                           LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
                           LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
                           WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
-                          GROUP BY reminders_event.name, locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate])
+                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
-            table.append([' ' + row[0], row[1]])
+            if row[0]:
+                table.append([' ' + row[0], row[1]])
+            else :
+                table.append([' Unknown', row[1]])
         table.append(['All listed clinics', total])
         return sorted(table, key=itemgetter(0))
 
@@ -493,7 +496,8 @@ class Results160Reports:
         diff = (end - start).days
         if diff > self.MAX_REPORTING_PERIOD:
             return {"Sorry, I think the date range you selected is just too wide.":0}
-
+        elif diff < 0:
+            return {"Sorry, there were no DBS results received in the period you selected.":0}
         days = {}
         for i in range(diff + 1):
             days[start + timedelta(days=i)] = 0
