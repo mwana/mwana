@@ -5,8 +5,8 @@ from django.db.models import Q
 from rapidsms.contrib.handlers import KeywordHandler
 from mwana.apps.labresults.models import Result
 
-UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS \
-samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
+UNGREGISTERED = "Sorry, you must be registered with Results160 to receive DBS \
+results. If you think this message is a mistake, respond with keyword 'HELP'"
 HELP          = "To request for results for a DBS sample, send RESULT <sampleid>. \
 E.g result ID45"
 SORRY         = "Sorry, we didn't understand that message."
