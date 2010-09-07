@@ -82,4 +82,5 @@ TABS = [
     ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
+    ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
 ]

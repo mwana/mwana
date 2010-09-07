@@ -478,7 +478,7 @@ def text_date(text):
     else:
         return date(int(c), int(b), int(a))
 
-
+@require_GET
 def mwana_reports (request):
 #    , startdate=datetime.today().date()-timedelta(days=30),
 #                    enddate=datetime.today().date(
