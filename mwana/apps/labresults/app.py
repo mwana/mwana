@@ -7,6 +7,7 @@ Created on Mar 31, 2010
 from datetime import date, datetime
 
 from django.conf import settings
+from django.db.models import Q
 
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
@@ -225,8 +226,9 @@ class App (rapidsms.App):
 
         if not changed_results:
             return
-        contacts = Contact.active.filter(location=clinic,
-                                         types=const.get_clinic_worker_type()).\
+        contacts = \
+        Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
+                                         Q(types=const.get_clinic_worker_type())).\
                                          order_by('pk')
         if not contacts:
             self.warning("No contacts registered to receive results at %s! "
@@ -281,8 +283,9 @@ class App (rapidsms.App):
 
     def results_avail_messages(self, clinic):
         results = self._pending_results(clinic)
-        contacts = Contact.active.filter(location=clinic, 
-                                         types=const.get_clinic_worker_type())
+        contacts = \
+        Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
+                                         Q(types=const.get_clinic_worker_type()))
         if not contacts:
             self.warning("No contacts registered to receiver results at %s! "
                          "These will go unreported until clinic staff "

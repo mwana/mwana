@@ -1,3 +1,4 @@
+import time
 import json
 
 import datetime
@@ -368,7 +369,7 @@ class TestApp(LabresultsSetUp):
             clinic_worker > RESULT 0001 0002
             clinic_worker < **** 0001;NotDetected. **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
-            unkown_worker < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
+            unkown_worker < Sorry, you must be registered with Results160 to receive DBS results. If you think this message is a mistake, respond with keyword 'HELP'
            """
 
         self.runScript(script)
@@ -446,14 +447,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Aug
-            clinic_worker > Reports 403012 8
+            clinic_worker > Reports 403012 Sep
+            clinic_worker > Reports 403012 9
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Aug
+            clinic_worker > Reports 40 Sep
             clinic_worker > Reports Luapula
         """
         self.runScript(script)        
@@ -467,7 +468,6 @@ class TestApp(LabresultsSetUp):
         self.assertEqual(msgs[len(msgs)-5].text,mansa_report1)
         self.assertEqual(msgs[len(msgs)-6].text,mansa_report1)
         self.assertEqual(msgs[len(msgs)-7].text,samfya_report1)
-        self.assertEqual(msgs[len(msgs)-8].text,central_clinc_rpt)
         self.assertEqual(msgs[len(msgs)-8].text,central_clinc_rpt)
         self.assertEqual(msgs[len(msgs)-9].text,central_clinc_rpt)
         self.assertEqual(msgs[len(msgs)-10].text,central_clinc_rpt)
@@ -753,3 +753,61 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
+
+    def test_send_results_notification(self):
+        """
+        Tests sending of notifications for new results.
+        """
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+
+        # get results from a payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # The number of results records should be 3
+        self.assertEqual(labresults.Result.objects.count(), 3)
+
+        # start router and send a notification
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+
+        # Get all the messages sent
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+        msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+
+        self.assertTrue(msg1 in (msgs[0].text, msgs[1].text ),
+        "Following message was not sent:\n%s" % msg1)
+        self.assertTrue(msg2 in (msgs[0].text, msgs[1].text ),
+        "Following message was not sent:\n%s" % msg2)
+        self.assertEqual(2,len(msgs))
+
+        # let clinic worker also become a cba, let other worker leave
+        script = """
+            clinic_worker > agent 402029 3 John Banda
+            clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
+            other_worker > leave
+            other_worker  < You have successfully unregistered, Mary Phiri. We're sorry to see you go.
+            """
+        self.runScript(script)
+
+        # start router and send a notification
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+
+        # Get all the messages sent
+        msgs = self.receiveAllMessages()
+        
+        self.assertEqual(1,len(msgs))
+        self.assertEqual(msg2,msgs[0].text)
+
+        self.assertEqual(0,Result.objects.filter(notification_status='sent',
+                            result_sent_date=None).count())
+        time.sleep(1)
+        self.stopRouter()
