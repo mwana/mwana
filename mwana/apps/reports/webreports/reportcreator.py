@@ -284,7 +284,7 @@ class Results160Reports:
         table = []
 
         table.append(['  District', '  Facility',
-                     'Positive', 'Negative', 'Rejected', 'Total Sent'])
+                     'Positive', 'Negative', 'Rejected', 'Total Received'])
         tt_positive = tt_negative = tt_rejected = tt_total = 0
         positive = negative = rejected = total = 0
         for location in self.get_facilities_for_rsts_reporting():

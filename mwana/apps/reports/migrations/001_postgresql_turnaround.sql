@@ -1,6 +1,6 @@
-DROP TABLE reports_turnarround;
+DROP TABLE reports_turnaround;
 
-CREATE VIEW reports_turnarround
+CREATE VIEW reports_turnaround
 AS
 SELECT
      labresults_result.id,
@@ -10,7 +10,7 @@ SELECT
      (processed_on-entered_on)+1 processing,
      (date(labresults_payload.incoming_date)-(processed_on)) +1 delays,
      (date(result_sent_date)-date(labresults_payload.incoming_date)) +1 retrieving,
-     (date(result_sent_date)-collected_on)+1 turnarround,
+     (date(result_sent_date)-collected_on)+1 turnaround,
      date(result_sent_date) date
 FROM
      labresults_result join labresults_payload

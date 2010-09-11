@@ -1,8 +1,8 @@
 from django.db import models
 
-class Turnarround(models.Model):
+class Turnaround(models.Model):
     """
-    A stub to display a view in django admin format for turnarroud data
+    A stub to display a view in django admin format for turnaround data
     """
     district = models.CharField(max_length=50)
     facility = models.CharField(max_length=100)
@@ -10,5 +10,5 @@ class Turnarround(models.Model):
     processing = models.IntegerField(blank=True, null=True)
     delays = models.IntegerField(blank=True, null=True)
     retrieving = models.IntegerField(blank=True, null=True)
-    turnarround = models.IntegerField(blank=True, null=True)
+    turnaround = models.IntegerField(blank=True, null=True)
     date = models.DateField(blank=True, null=True)
