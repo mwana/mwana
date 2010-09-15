@@ -60,7 +60,7 @@ class JoinHandler(KeywordHandler):
             self.invalid_pin(text[1 + text.rindex(' '):])
             return
         #non-white space before pin
-        if text[-5:-4] != ' ':
+        if text[-5:-4] != ' ' and text[-4:-3] != ' ':
             self.respond("Sorry, you should put a space before your pin. "
                          "Please make sure your code is a %s-digit number like %s. "
                          "Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>." % (

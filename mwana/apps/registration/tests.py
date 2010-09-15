@@ -130,3 +130,109 @@ class TestApp(TestScript):
             rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Central Clinic. To leave your current clinic and join Kafue District Hospital, reply with LEAVE and then re-send your message.
         """
         self.runScript(script)
+
+    def testCbaDeregistration(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        Location.objects.create(name="Kafue District Hospital",
+                                      slug="202020", type=ctr)
+        Location.objects.create(name="Central Clinic",
+                                                 slug="101010", type=ctr)
+        # create support contacts
+        script = """
+            +260979565991     > join 202020 support 1 1000
+            +260979565991     < Hi Support 1, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            +260979565992     > join 202020 support 2 1000
+            +260979565992     < Hi Support 2, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            +260979565993     > join 202020 support 3 1000
+            +260979565993     < Hi Support 3, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        admins = Contact.objects.all()
+        for admin in admins:
+            admin.is_help_admin = True
+            admin.save()
+
+        # create clinic workers
+        script = """
+            +260979565994     > join 202020 James Phiri 1000
+            +260979565994     < Hi James Phiri, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            +260979565995     > join 202020 James Banda 1000
+            +260979565995     < Hi James Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            +260979565996     > join 202020 Peter Kunda 1000
+            +260979565996     < Hi Peter Kunda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+
+        # create CBA's
+        script = """
+            +260977777751     > agent 202020 02 rupiah banda
+            +260977777751     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+            +260977777752     > agent 101010 02 rupiah banda
+            +260977777752     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Central Clinic.
+            +260977777753     > agent 202020 02 kunda banda
+            +260977777753     < Thank you Kunda Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+            +260977777754     > agent 202020 02 kunda banda
+            +260977777754     < Thank you Kunda Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+            +260977777755     > agent 202020 02 James Banda
+            +260977777755     < Thank you James Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+            +260977777756     > agent 202020 02 Trevor Sinkala
+            +260977777756     < Thank you Trevor Sinkala! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
+
+            """
+        self.runScript(script)
+
+        #test deregistering by a cba
+        script = """
+            +260977777756 > deregister James Banda
+            +260977777756 < Sorry, you are NOT allowed to deregister anyone. If you think this message is a mistake reply with keyword HELP
+        """
+        self.runScript(script)
+
+        #test deregistering fellow clinic worker
+        script = """
+            +260979565994 > deregister Peter Kunda
+            +260979565994 < The name Peter Kunda does not belong to any CBA at Kafue District Hospital. Make sure you typed it correctly
+            +260979565994 > deregister 260979565996
+            +260979565994 < The phone number 260979565996 does not belong to any CBA at Kafue District Hospital. Make sure you typed it correctly
+        """
+        self.runScript(script)
+
+        #test deregistering cba whose name is not unique at same clinic
+        script = """
+            +260979565994 > deregister Kunda Banda
+            +260979565994 < Try sending DEREGISTER <CBA_PHONE_NUMBER>. Which CBA did you mean? Kunda Banda:+260977777754 or Kunda Banda:+260977777753
+            +260979565994 > deregister +260977777754
+            +260979565991 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
+            +260979565992 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
+            +260979565993 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
+            +260979565994 < You have successfully deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
+        """
+        self.runScript(script)
+        cba = Contact.objects.get(connection__identity="+260977777754")
+        self.assertEqual(cba.is_active, False)
+
+        #test deregistering cba whose name is not unique in system but at clinic
+        script = """
+            +260979565996 > deregister rupiah BandA
+            +260979565991 < Peter Kunda:+260979565996 has deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
+            +260979565992 < Peter Kunda:+260979565996 has deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
+            +260979565993 < Peter Kunda:+260979565996 has deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
+            +260979565996 < You have successfully deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
+        """
+        self.runScript(script)
+        cba = Contact.objects.get(connection__identity="+260977777751")
+        self.assertEqual(cba.is_active, False)
+
+        #test deregistering cba using phone number without country code
+        script = """
+            +260979565996 > deregister 0977777756
+            +260979565991 < Peter Kunda:+260979565996 has deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
+            +260979565992 < Peter Kunda:+260979565996 has deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
+            +260979565993 < Peter Kunda:+260979565996 has deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
+            +260979565996 < You have successfully deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
+        """
+        self.runScript(script)
+        cba = Contact.objects.get(connection__identity="+260977777756")
+        self.assertEqual(cba.is_active, False)
+       
