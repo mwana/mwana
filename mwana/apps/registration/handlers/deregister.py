@@ -75,9 +75,10 @@ results. If you think this message is a mistake, respond with keyword 'HELP'"
                              for cba in cbas))
                 return
             else:
-                self.respond("There are %(len)s CBA's with the name %(name)s "
-                             + "at %(clinic)s. Try to use the phone number "
-                             + "instead", name=text, clinic=self.msg.location)
+                self.respond("There are %(len)s CBA's who's names match %(name)s"
+                             + " at %(clinic)s. Try to use the phone number "
+                             + "instead", len=len(cbas), name=text,
+                             clinic=location.name)
                 return
         if cba:
             cba.is_active = False

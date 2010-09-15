@@ -198,6 +198,13 @@ class TestApp(TestScript):
         """
         self.runScript(script)
 
+        #test deregistering cba whose name(or name part) is common to too many people
+        script = """
+            +260979565994 > deregister a
+            +260979565994 < There are 5 CBA's who's names match a at Kafue District Hospital. Try to use the phone number instead
+            """
+        self.runScript(script)
+
         #test deregistering cba whose name is not unique at same clinic
         script = """
             +260979565994 > deregister Kunda Banda
