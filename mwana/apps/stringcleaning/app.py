@@ -16,6 +16,11 @@ class App (rapidsms.App):
         # remove leading/trailing whitespace
         # get out your featherduster
         msgtxt = msgtxt.strip()
+        if msgtxt:
+            keyword = msgtxt.split()[0].upper()
+            if keyword in ['ALL','CBA','CLINIC']:
+                self.info('Skipping string cleaning. this is a broacast message')
+                return
 
         # replace separation marks with a space
         separators = [',', '/', ';', '*', '+', '-']
