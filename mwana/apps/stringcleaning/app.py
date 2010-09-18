@@ -1,5 +1,10 @@
 import rapidsms
 import re
+from mwana.apps.labresults.handlers.results import ResultsHandler
+from mwana.apps.broadcast.handlers.all import AllHandler
+from mwana.apps.broadcast.handlers.clinic import ClinicHandler
+from mwana.apps.broadcast.handlers.cba import ClinicHandler as CbaHandler
+from mwana.apps.broadcast.handlers.blaster import BlastHandler
 
 class App (rapidsms.App):
 
@@ -13,19 +18,32 @@ class App (rapidsms.App):
         # dont mess with the real message text until the end
         msgtxt = message.text
 
+        # TODO find a better way of knowing which hanlers should skip cleaning
+
+        # assuming all keywords are declared in lower case
+        results_keywords = ResultsHandler.keyword.split('|')
+        broadcast_keywords = self.to_lower(AllHandler.keyword.split('|'))
+        broadcast_keywords.extend(self.to_lower(CbaHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(ClinicHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(BlastHandler.keyword.split('|')))
+        
         # remove leading/trailing whitespace
         # get out your featherduster
         msgtxt = msgtxt.strip()
+        keyword = ''
         if msgtxt:
-            keyword = msgtxt.split()[0].upper()
-            if keyword in ['ALL','CBA','CLINIC']:
+            keyword = msgtxt.split()[0].lower()
+            if keyword in broadcast_keywords:
+                message.text = msgtxt
                 self.info('Skipping string cleaning. this is a broacast message')
                 return
 
         # replace separation marks with a space
         separators = [',', '/', ';', '*', '+', '-']
-        for mark in separators:
-                msgtxt = msgtxt.replace(mark, ' ')
+        for mark in separators:            
+            if (keyword in results_keywords and mark =='/'):
+                continue
+            msgtxt = msgtxt.replace(mark, ' ')
 
         # remove other marks (we'll deal with . later)
         junk = ['\'', '\"', '`', '(', ')']
@@ -105,6 +123,12 @@ class App (rapidsms.App):
                 # replace each of the letters with its appropriate numeral
                 numeralized = numeralized.replace(g, gaffes[g])
             except Exception, e:
-                print e
+                self.info(e)
         # return the string once all gaffes have been replaced
         return numeralized
+
+    def to_lower(self,list):
+        new_list = []
+        for val in list:
+            new_list.append(val.lower())
+        return new_list
