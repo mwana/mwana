@@ -4,10 +4,8 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from django.db import connection
-from django.db.models import Count
 from django.db.models import Q
 from django.db.models import Sum
-from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
@@ -43,7 +41,7 @@ class Results160Reports:
                                        ['sent']).distinct()
 
     def get_facilities_for_dbs_notifications(self):
-        return Location.objects.filter(lab_results__notification_status__in=['sent'],
+        return Location.objects.filter(supportedlocation__supported=True,
                                        samplenotification__date__gte=self.dbsr_startdate,
                                        samplenotification__date__lte=self.dbsr_enddate
                                        ).distinct()
@@ -55,12 +53,9 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_transport_reporting(self):
-        return Location.objects.filter(Q(lab_results__collected_on__lt=self.dbsr_enddate) |
-                                       Q(lab_results__collected_on=self.dbsr_enddate),
-                                       Q(lab_results__entered_on__gt=self.dbsr_startdate)
-                                       | Q(lab_results__entered_on=self.dbsr_startdate),
-                                       Q(lab_results__entered_on__lt=self.dbsr_enddate) |
-                                       Q(lab_results__entered_on=self.dbsr_enddate)
+        return Location.objects.filter(lab_results__collected_on__lte=self.dbsr_enddate,
+                                       lab_results__entered_on__gte=self.dbsr_startdate,
+                                       lab_results__entered_on__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_processing_reporting(self):
@@ -103,13 +98,6 @@ class Results160Reports:
                                        'unprocessed', 'new', 'notified', 'updated'])
                                        ).distinct()
 
-
-    def get_results_for_reporting(self):
-        """Returns results query set in reporting period"""
-        return Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
-                                     | Q(result_sent_date=self.dbsr_startdate),
-                                     Q(result_sent_date__lt=self.dbsr_enddate) |
-                                     Q(result_sent_date=self.dbsr_enddate))
 
     def get_results_by_status(self, status):
         """Returns results query set by status in reporting period"""
