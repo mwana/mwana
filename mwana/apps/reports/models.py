@@ -1,4 +1,5 @@
 from django.db import models
+from rapidsms.contrib.locations.models import Location
 
 class Turnaround(models.Model):
     """
@@ -11,4 +12,9 @@ class Turnaround(models.Model):
     delays = models.IntegerField(blank=True, null=True)
     retrieving = models.IntegerField(blank=True, null=True)
     turnaround = models.IntegerField(blank=True, null=True)
-    date = models.DateField(blank=True, null=True)
+    date_reached_moh = models.DateTimeField(blank=True, null=True)
+    date_retrieved = models.DateField(blank=True, null=True)
+
+class SupportedLocation(models.Model):
+    location = models.ForeignKey(Location)
+    supported =models.BooleanField(default=True)
