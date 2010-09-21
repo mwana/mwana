@@ -38,7 +38,10 @@ def get_results_from_display(key):
     'Rejected':['R', 'X', 'I'],
     'Indeterminate':['R', 'X', 'I'],
     }
-    return dict[key]
+    try:
+        return dict[key]
+    except KeyError:
+        return ['Unkown']
 
 def get_payloads(datetime):
     return Payload.objects.filter(lab_results__result_sent_date=datetime)
@@ -155,6 +158,12 @@ def import_sent_dates():
                      location.slug, location.name,
                      req_id,
                      actual_results, msg.date)               
+            except Result.DoesNotExist:
+                    print "\nCould not find result to match: %s:%s:%s; Req_ID:%s  Result:%s ; Sent on:%s" % \
+                    (location.id,
+                     location.slug, location.name,
+                     req_id,
+                     actual_results, msg.date)
 
     print '\nFinished updating %s records' % num_of_updates
     return success

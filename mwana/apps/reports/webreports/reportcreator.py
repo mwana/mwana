@@ -43,19 +43,15 @@ class Results160Reports:
                                        ['sent']).distinct()
 
     def get_facilities_for_dbs_notifications(self):
-        return Location.objects.filter(Q(lab_results__notification_status__in=['sent']),
-                                       Q(samplenotification__date__gt=self.dbsr_startdate)
-                                       | Q(samplenotification__date=self.dbsr_startdate),
-                                       Q(samplenotification__date__lt=self.dbsr_enddate) |
-                                       Q(samplenotification__date=self.dbsr_enddate)
+        return Location.objects.filter(lab_results__notification_status__in=['sent'],
+                                       samplenotification__date__gte=self.dbsr_startdate,
+                                       samplenotification__date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_rsts_reporting(self):
-        return Location.objects.filter(Q(lab_results__notification_status__in=['sent']),
-                                       Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
-                                       | Q(lab_results__result_sent_date=self.dbsr_startdate),
-                                       Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
-                                       Q(lab_results__result_sent_date=self.dbsr_enddate)
+        return Location.objects.filter(lab_results__notification_status__in=['sent'],
+                                       lab_results__result_sent_date__gte=self.dbsr_startdate,
+                                       lab_results__result_sent_date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_transport_reporting(self):
