@@ -266,6 +266,10 @@ def accept_record (record, payload):
 
         new_record.notification_status = 'new' if new_record.result else 'unprocessed'
     else:
+        # if result was previously sent update new record with result_sent_date
+        if old_record.result_sent_date:
+            new_record.result_sent_date = old_record.result_sent_date
+
         if rec_status == 'new':
             logger.info('received a \'new\' record that already exists; may have been deleted in lab?; treating as update...')
 

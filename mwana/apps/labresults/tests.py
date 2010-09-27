@@ -718,7 +718,10 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # process changed payload with changes in results and one req_id
         self._post_json(reverse('accept_results'), CHANGED_PAYLOAD)
-        
+
+        sent_results = Result.objects.filter(notification_status='updated')
+        for sent_result in sent_results:
+            self.assertTrue(sent_result.result_sent_date != None)
 
         # The number of results records should remain to be 3
         self.assertEqual(labresults.Result.objects.count(), 3)
