@@ -447,14 +447,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Sep
-            clinic_worker > Reports 403012 9
+            clinic_worker > Reports 403012 Oct
+            clinic_worker > Reports 403012 10
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Sep
+            clinic_worker > Reports 40 Oct
             clinic_worker > Reports Luapula
         """
         self.runScript(script)        

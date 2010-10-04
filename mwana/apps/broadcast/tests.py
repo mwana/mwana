@@ -139,4 +139,5 @@ class TestApp(TestScript):
             cba < hello [from help_admin to Mwana Users]
             cba2 < hello [from help_admin to Mwana Users]                 
         """
-               
+        self.runScript(script)
+        
