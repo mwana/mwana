@@ -111,7 +111,11 @@ class Results160Reports:
 
     def get_results_by_status_and_location(self, status, location):
         """Returns results query set by status in reporting period"""
-        return Result.objects.filter(notification_status__in=status, clinic=location)
+        return Result.objects.filter(notification_status__in=status,
+                                     clinic=location,
+                                     entered_on__gte=self.dbsr_startdate,
+                                     entered_on__lte=self.dbsr_enddate
+                                     )
 
 
     def get_sent_results(self, location):
@@ -459,7 +463,7 @@ class Results160Reports:
             total = total + row[1]
             if row[0]:
                 table.append([' ' + row[0], row[1]])
-            else :
+            else:
                 table.append([' Unknown', row[1]])
         table.append(['All listed clinics', total])
         return sorted(table, key=itemgetter(0))
@@ -476,7 +480,7 @@ class Results160Reports:
         filter(notification_status='sent')[0].result_sent_date.date()
 
         start = max(start, earliest_start)
-        end = min(end,date.today())
+        end = min(end, date.today())
         diff = (end - start).days
         if diff > self.MAX_REPORTING_PERIOD:
             return {"Sorry, I think the date range you selected is just too wide.":0}
@@ -497,7 +501,7 @@ class Results160Reports:
             try:
                 days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
             except KeyError:
-                if len(days)==1:break
+                if len(days) == 1:break
         # assign some variable with a value, not so friendly to calculate in templates
         single_bar_length = max(days.values()) / self.BAR_LENGTH
 
