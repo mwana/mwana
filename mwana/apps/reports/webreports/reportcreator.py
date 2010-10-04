@@ -111,11 +111,7 @@ class Results160Reports:
 
     def get_results_by_status_and_location(self, status, location):
         """Returns results query set by status in reporting period"""
-        return Result.objects.filter(notification_status__in=status,
-                                     clinic=location,
-                                     entered_on__gte=self.dbsr_startdate,
-                                     entered_on__lte=self.dbsr_enddate
-                                     )
+        return Result.objects.filter(notification_status__in=status, clinic=location)
 
 
     def get_sent_results(self, location):
@@ -260,7 +256,9 @@ class Results160Reports:
         received = 0
         tt_received = 0
         for location in self.get_facilities_for_samples_at_lab():
-            received = self.get_results_by_status_and_location(self.STATUS_CHOICES, location).count()
+            received = Result.objects.filter(clinic=location,
+                                             entered_on__gte=self.dbsr_startdate,
+                                             entered_on__lt=self.dbsr_enddate).count()
             tt_received = tt_received + received
 
             table.append([' ' + location.parent.name, ' ' + location.name, received, ])
@@ -282,7 +280,7 @@ class Results160Reports:
             total = self.get_sent_results(location).count()
 
             table.append([' ' + location.parent.name, ' ' + location.name, positive,
-                         negative, rejected, total, ])
+                         negative, rejected, total,])
 
             tt_positive = tt_positive + positive
             tt_negative = tt_negative + negative
