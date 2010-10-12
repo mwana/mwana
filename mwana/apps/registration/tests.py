@@ -208,7 +208,7 @@ class TestApp(TestScript):
         #test deregistering cba whose name is not unique at same clinic
         script = """
             +260979565994 > deregister Kunda Banda
-            +260979565994 < Try sending DEREGISTER <CBA_PHONE_NUMBER>. Which CBA did you mean? Kunda Banda:+260977777754 or Kunda Banda:+260977777753
+            +260979565994 < Try sending REMOVE <CBA_PHONE_NUMBER>. Which CBA did you mean? Kunda Banda:+260977777754 or Kunda Banda:+260977777753
             +260979565994 > deregister +260977777754
             +260979565991 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
             +260979565992 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
