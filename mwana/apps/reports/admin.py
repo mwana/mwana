@@ -16,7 +16,7 @@ class MessageGroupAdmin(admin.ModelAdmin):
                     'keyword', 'backend', 'changed_res',
                     'new_results', 'app', 'clinic', 'phone')
     date_hierarchy = 'date'
-    list_filter = ('direction', 'contact_type', 'keyword', 'backend',
+    list_filter = ('before_pilot','direction', 'contact_type', 'keyword', 'backend',
                    'new_results', 'changed_res','clinic', 'phone')
     search_fields = ('text', )
 admin.site.register(MessageGroup, MessageGroupAdmin)

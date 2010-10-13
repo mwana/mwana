@@ -38,4 +38,5 @@ class MessageGroup(models.Model):
     phone = models.CharField(max_length=12)
     backend = models.CharField(max_length=15)
     clinic = models.CharField(max_length=20)
+    before_pilot = models.BooleanField()
 

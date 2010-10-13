@@ -1,8 +1,8 @@
-drop view reports_messagegroup;
-drop table reports_messagegroup;
+DROP VIEW reports_messagegroup;
+DROP TABLE reports_messagegroup;
 
 
-create view reports_messagegroup
+CREATE VIEW reports_messagegroup
 as
 SELECT messagelog_message.id, rapidsms_connection.identity  as
  phone,
@@ -43,7 +43,11 @@ END
  CASE
  WHEN locations_locationtype.slug='zone' then parentlocation.name
  else mylocation.name
- END as clinic
+ END as clinic,
+ CASE
+ WHEN date >= '2010-06-14' then false
+ WHEN date < '2010-06-14' then true
+ END as before_pilot
 
   FROM messagelog_message
   LEFT JOIN rapidsms_connection ON rapidsms_connection.id=messagelog_message.connection_id
