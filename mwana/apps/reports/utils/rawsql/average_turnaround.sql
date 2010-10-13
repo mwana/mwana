@@ -16,7 +16,9 @@ FROM
 WHERE
      notification_status = 'sent'
      AND entered_on>='2010-06-14'
-     AND province.slug='luapula' ) a
+     and date(result_sent_date) between '2010-09-12' and '2010-10-12'
+     AND province.slug='luapula'
+     and labresults_result.id not in(3163,3157)) a
       GROUP BY
 province,district,facility
  ORDER BY
