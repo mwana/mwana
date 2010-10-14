@@ -810,7 +810,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertEqual(1,len(msgs))
         self.assertEqual(msg2,msgs[0].text)
 
-        self.assertEqual(0,Result.objects.filter(notification_status='sent',
+        self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
+        self.assertEqual(0, Result.objects.filter(
+                            arrival_date=None).exclude(result=None).count())
         time.sleep(1)
         self.stopRouter()

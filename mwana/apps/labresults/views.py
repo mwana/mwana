@@ -265,7 +265,13 @@ def accept_record (record, payload):
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
         new_record.notification_status = 'new' if new_record.result else 'unprocessed'
+        if new_record.result:
+            new_record.arrival_date = new_record.payload.incoming_date
     else:
+        #keep track of original date for payload with result
+        if old_record.arrival_date and old_record.result:
+            new_record.arrival_date = old_record.arrival_date
+
         # if result was previously sent update new record with result_sent_date
         if old_record.result_sent_date:
             new_record.result_sent_date = old_record.result_sent_date
