@@ -286,12 +286,75 @@
             </table>
             <p>
 
-            <h3>Average Retrieving Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3>Average Entering Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
                 Showing average time between the Date results are tested at
-				the lab to the time they are received at the facilities
+				the lab to the time their values are entered/updated in
+                                the machine at the lab
+                <br>
+                Minimum Average Days = {{min_entering_time}}; &nbsp;
+                Maximum Average Days = {{max_entering_time}}; &nbsp;
+                Out of {{num_of_rsts_entered}} results in {{num_facs_entered}}
+                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+                <p>
+            <table width="100%">
+                {% for record in entering_time_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                            <td width="20"><u>{{ column }}</u></td>
+                        {% else %}
+                            {% if forloop.parentloop.last %}
+                                <td width="20"><b>{{ column }}</b></td>
+                            {% else %}
+                                {%ifequal column min_entering_time%}
+                                     {%if forloop.last %}
+                                        <td width="20" bgcolor="#66CC00">{{ column }}</td>
+                                     {%else%}
+                                        <td width="20">{{ column }}</td>
+                                     {%endif%}
+                                {% else %}
+                                    {%ifequal column max_entering_time%}
+                                        {%if forloop.last %}
+                                             <td width="20" bgcolor="#FFFF33">{{ column }}</td>
+                                        {%else%}
+                                            <td width="20">{{ column }}</td>
+                                        {%endif%}
+                                    {% else %}
+                                        <td width="20">{{ column }}</td>
+                                    {% endifequal %}
+                                {% endifequal %}
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+            <p>
+            <h3>Average Retrieving Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <p>
+                Showing average time between the Date results arrive at MoH Mwana Server
+				 to the time they are received at the facilities
                 <br>
                 Minimum Average Days = {{min_retrieving_time}}; &nbsp;
                 Maximum Average Days = {{max_retrieving_time}}; &nbsp;

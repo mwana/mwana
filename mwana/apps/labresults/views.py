@@ -496,34 +496,48 @@ def mwana_reports (request):
    
     today = datetime.today().date()
     try:
-        startdate = text_date(request.REQUEST['startdate'])
+        startdate1 = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
-        startdate = today -timedelta(days=30)
+        startdate1 = today -timedelta(days=30)
 
     try:
-        enddate = text_date(request.REQUEST['enddate'])
+        enddate1 = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):
-        enddate = datetime.today().date()
-    startdate = min(startdate, enddate, datetime.today().date())
-    enddate = min(enddate, datetime.today().date())
+        enddate1 = datetime.today().date()
+    startdate = min(startdate1, enddate1, datetime.today().date())
+    enddate = min(max(enddate1, startdate1), datetime.today().date())
     
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
+
     min_processing_time, max_processing_time, num_of_dbs_processed, \
     num_facs_processing, processing_time =\
     r.dbs_avg_processing_time_report(startdate, enddate)
+
+    min_entering_time, max_entering_time, num_of_rsts_entered, \
+    num_facs_entering, entering_time =\
+    r.dbs_avg_entering_time_report(startdate, enddate)
+
     min_retrieval_time, max_retrieval_time, num_of_dbs_retrieved, \
     num_facs_retrieving, retrieval_time =\
     r.dbs_avg_retrieval_time_report(startdate, enddate)
+
     min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
     turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
+
     min_transport_time, max_transport_time, num_of_dbs, num_of_facs,\
     transport_time = r.dbs_avg_transport_time_report(startdate, enddate)
+
     samples_reported = r.dbs_sample_notifications_report(startdate, enddate)
+
     samples_at_lab = r.dbs_samples_at_lab_report(startdate, enddate)
+
     pending = r.dbs_pending_results_report(startdate, enddate)
+
     payloads = r.dbs_payloads_report(startdate, enddate)
+
     births = r.reminders_patient_events_report(startdate, enddate)
+
     single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate, enddate)
 
     return render_to_response(request, 'labresults/reports.html',
@@ -546,6 +560,11 @@ def mwana_reports (request):
                                 'max_retrieving_time':max_retrieval_time,
                                 'num_of_dbs_retrieved':num_of_dbs_retrieved,
                                 'num_facs_retrieving':num_facs_retrieving,
+                                'entering_time_rpt':entering_time,
+                                'min_entering_time':min_entering_time,
+                                'max_entering_time':max_entering_time,
+                                'num_of_rsts_entered':num_of_rsts_entered,
+                                'num_facs_entering':num_facs_entering,
                                 'transport_time_rpt':transport_time,
                                 'min_transport_time':min_transport_time,
                                 'max_transport_time':max_transport_time,
