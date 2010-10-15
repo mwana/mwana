@@ -5,10 +5,14 @@ result arrived
 
 import json
 
+from datetime import datetime
 from django.core.management.base import LabelCommand
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.views import dictval
+
+BU_START_DATE = datetime(2010, 7, 9)
+UNICEF_START_DATE = datetime(2010, 6, 14)
 
 class Command(LabelCommand):
     help = "Sets the arrival date to the the value the result first arrived."
@@ -34,7 +38,12 @@ def import_arrival_dates():
         print "---" * 20
         print "\nDB table OK. All results already have arrival_dates"
         print "---" * 20
-        return True
+        input = raw_input("Do you still want to update (y/n)?\n")
+        if not (input[:1] in "yY"):
+            return
+    for res in Result.objects.exclude(arrival_date=None):
+        res.arrival_date = None
+        res.save()
 
     for payload in Payload.objects.filter():
         print '.',
@@ -45,21 +54,28 @@ def import_arrival_dates():
             clinic_code = str(dictval(record, 'fac'))[:6]
             pat_id = str(dictval(record, 'pat_id'))
 
-            if sample_id:                
+            if sample_id:
                 try:
                     old_record = \
                     Result.objects.get(sample_id=sample_id,
                                        requisition_id=pat_id,
                                        clinic__slug__iexact=clinic_code)
-                    if old_record.arrival_date:
-                        old_record.arrival_date = min(old_record.arrival_date,
-                                                      payload.incoming_date)
+                    # for BU skip payloads before pilot
+                    if old_record.clinic.slug.startswith('80') and payload.incoming_date < BU_START_DATE:
+                        continue
+                    if old_record.clinic.slug.startswith('80'):
+                        date_to_use = BU_START_DATE
                     else:
-                        old_record.arrival_date = payload.incoming_date
+                        date_to_use =UNICEF_START_DATE
+                    if old_record.arrival_date:
+                        old_record.arrival_date = max(date_to_use, min(old_record.arrival_date,
+                                                      payload.incoming_date))
+                    else:
+                        old_record.arrival_date = max(payload.incoming_date, date_to_use)
                     old_record.save()
                     count = count + 1
                 except Result.DoesNotExist:
                     pass
 
     print "\nupdated %s results" % count
-    
+
