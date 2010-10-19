@@ -14,6 +14,7 @@ from rapidsms.models import Connection
 from rapidsms.models import Contact
 from mwana.apps.training import tasks
 from mwana.apps.training.models import TrainingSession
+import time
 
 
 class TestApp(TestScript):
@@ -88,7 +89,7 @@ class TestApp(TestScript):
         self.runScript(script)
 
         self.assertEqual(1, TrainingSession.objects.filter(is_on=True).count())
-        self.startRouter()
+#        self.startRouter()
         #manually call scheduled task
         tasks.send_endof_training_notification(self.router)
 

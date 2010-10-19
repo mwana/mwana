@@ -32,6 +32,7 @@ class TestApp(TestScript):
         script = """
             0971 > join kdh worker one  1234
             0972 > join 403012 worker two  1234
+            0972 > agent 403012 2 worker two
             0973 > join 403012 worker three  1234
             0974 > join 403012 help admin  1234
         """
@@ -60,19 +61,19 @@ class TestApp(TestScript):
             0974 > contacts kdh
             0974 < Contacts at Kafue District Hospital: Worker One;0971.
             0974 > contacts 403012
-            0974 < Contacts at Central Clinic: Help Admin;0974. ****Worker Three;0973. ****Worker Two;0972.
+            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
             0974 > contacts 403012 what ever
-            0974 < Contacts at Central Clinic: Help Admin;0974. ****Worker Three;0973. ****Worker Two;0972.
+            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
             0974 > contacts 403012 0
-            0974 < Contacts at Central Clinic: Help Admin;0974. ****Worker Three;0973. ****Worker Two;0972.
+            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
             0974 > contacts 403012 2
-            0974 < Contacts at Central Clinic: Help Admin;0974. ****Worker Three;0973.
+            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973.
             0974 > contacts 403012 two
-            0974 < Contacts at Central Clinic: Help Admin;0974. ****Worker Three;0973.
+            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973.
             0974 > contacts 403012 -1
-            0974 < Contacts at Central Clinic: Help Admin;0974.
+            0974 < Contacts at Central Clinic: Worker Two;0972.
             0974 > contacts 403012 -one
-            0974 < Contacts at Central Clinic: Help Admin;0974.
+            0974 < Contacts at Central Clinic: Worker Two;0972.
         """
         self.runScript(script)
         
