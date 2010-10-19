@@ -29,10 +29,9 @@
                 <div>
                     <p align="center">
                     <h3>
-
                         Not Sending Samples in the last 
                         <select name="input_transport_time" size="1">
-                            {% for a in t_days%}
+                            {% for a in days%}
                             {% ifequal a transport_time%}
                             <option selected value="{{a}}">{{a}}</option>
                             {% else%}
@@ -43,8 +42,6 @@
                         </select>
                         days.
                         <input type="submit" value="Update" name="SubmitValues" />
-
-
                     </h3>
 
                     <ol type="1">
@@ -53,12 +50,12 @@
                         {% endfor %}
                     </ol>
                     <p><p>
+                    <!-- Report 2-->
                     <p align="center">
                     <h3>
-
                         Not Retrieving Results in the last
                         <select name="input_retrieving_time" size="1">
-                            {% for a in r_days%}
+                            {% for a in days%}
                             {% ifequal a retrieving_time%}
                             <option selected value="{{a}}">{{a}}</option>
                             {% else%}
@@ -69,8 +66,6 @@
                         </select>
                         days.
                         <input type="submit" value="Update" name="SubmitValues2" />
-
-
                     </h3>
 
                     <ol type="1">
@@ -79,6 +74,78 @@
                         {% endfor %}
                     </ol>
                     <p><p>                      
+                    <!-- Report 3-->
+                    <p align="center">
+                    <h3>
+                        Not Sending DBS or using Results160 in the last
+                        <select name="input_notifying_time" size="1">
+                            {% for a in days%}
+                            {% ifequal a notifying_time %}
+                            <option selected value="{{a}}">{{a}}</option>
+                            {% else%}
+                            <option value="{{a}}">{{a}}</option>
+                            {% endifequal %}
+                            {%endfor%}
+
+                        </select>
+                        days.
+                        <input type="submit" value="Update" name="SubmitValues2" />
+                    </h3>
+
+                    <ol type="1">
+                        {% for record in not_notifying_or_using_results %}
+                        <li>{{ forloop.counter }}) {{ record.message|safe }}</li>
+                        {% endfor %}
+                    </ol>
+                    <p><p>
+                    <!-- Alert Report 4-->
+                    <p align="center">
+                    <h3>
+                        Not Processing DBS in the last
+                        <select name="input_lab_processing_days" size="1">
+                            {% for a in days%}
+                            {% ifequal a lab_processing_days %}
+                            <option selected value="{{a}}">{{a}}</option>
+                            {% else%}
+                            <option value="{{a}}">{{a}}</option>
+                            {% endifequal %}
+                            {%endfor%}
+
+                        </select>
+                        days.
+                        <input type="submit" value="Update" name="SubmitValues2" />
+                    </h3>
+
+                    <ol type="1">
+                        {% for record in not_processing_dbs %}
+                        <li>{{ forloop.counter }}) {{ record.message|safe }}</li>
+                        {% endfor %}
+                    </ol>
+                    <p><p>
+                    <!-- Alert Report 5-->
+                    <p align="center">
+                    <h3>
+                        Not Sending Payloads in the last
+                        <select name="input_lab_sending_days" size="1">
+                            {% for a in days%}
+                            {% ifequal a lab_sending_days %}
+                            <option selected value="{{a}}">{{a}}</option>
+                            {% else%}
+                            <option value="{{a}}">{{a}}</option>
+                            {% endifequal %}
+                            {%endfor%}
+
+                        </select>
+                        days.
+                        <input type="submit" value="Update" name="SubmitValues2" />
+                    </h3>
+
+                    <ol type="1">
+                        {% for record in not_sending_dbs %}
+                        <li>{{ forloop.counter }}) {{ record.message|safe }}</li>
+                        {% endfor %}
+                    </ol>
+                    <p><p>
 
 
                 </div>
