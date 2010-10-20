@@ -201,7 +201,7 @@ class Alerter:
                                    Q(parent__parent=dist)
                                    )
                     if clinics:
-                        additional = "These clinics have sent results to the"\
+                        additional = "These clinics have sent results to the "\
                         "hub: %s" % ",".join(clinic.name for clinic in clinics)
                     self.add_to_elerts(Alert.DISTRICT_NOT_SENDING_DBS,
                                        self.NOT_SENT_SAMPLE_MSG %
