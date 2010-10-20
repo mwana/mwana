@@ -12,7 +12,7 @@ class Hub(models.Model):
                                                    self.phone)
 class Lab(models.Model):
     source_key = models.CharField(max_length=50)
-    name = models.CharField(max_length=15, null=True, blank=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
     phone = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):
