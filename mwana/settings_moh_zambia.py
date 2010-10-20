@@ -11,8 +11,8 @@ SEND_LIVE_LABRESULTS = True
 DEBUG = False
 
 ADMINS = (
-    ('Tobias McNulty', 'tobias@caktusgroup.com'),
-    ('Drew Roos', 'droos@dimagi.com'),
+    ('Trevor Sinkala', 'sinkalation@gmail.com'),
+    ('Drew Roos', 'nchimunya@gmail.com'),
     ('Mwana Developers', 'mwana-dev@googlegroups.com'),
 )
 
