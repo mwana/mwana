@@ -274,7 +274,7 @@ class Results160Reports:
                                              entered_on__lt=self.dbsr_enddate).count()
             tt_received = tt_received + received
 
-            table.append([' ' + location.parent.name, ' ' + location.name, received,])
+            table.append([' ' + location.parent.name, ' ' + location.name, received, ])
         table.append(['All listed districts', 'All listed  clinics', tt_received])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -293,7 +293,7 @@ class Results160Reports:
             total = self.get_sent_results(location).count()
 
             table.append([' ' + location.parent.name, ' ' + location.name, positive,
-                         negative, rejected, total, ])
+                         negative, rejected, total,])
 
             tt_positive = tt_positive + positive
             tt_negative = tt_negative + negative
@@ -565,19 +565,22 @@ class Results160Reports:
             parents.append(location.parent)
         return list(set(parents))
 
+    def get_total_results_in_province(self, province):
+        return Result.objects.filter(clinic__parent__parent=province).exclude(result=None).count()
+
     def dbs_positivity_data(self, year=None):
 
-        def percent(num,den):
+        def percent(num, den):
             if not num:
                 return 0
             elif not den:
                 return 0
             else:
-                return self.safe_rounding(100.0 * num / den)
+                return "%4.1f" % (100.0 * num / den)
 
         if not year:
             year = date.today().year
-        results=Result.objects.exclude(result=None)
+        results = Result.objects.exclude(result=None)
         total_dbs = results.count()
 
         percent_positive_country = percent(results.filter(result__iexact='P').count(), total_dbs)
@@ -590,25 +593,25 @@ class Results160Reports:
         provinces = self.get_distinct_parents(self.get_distinct_parents(self.get_active_facilities()))
 
         for province in provinces:
-            percent_positive_provinces.append((percent(results.filter(result__iexact='P',clinic__parent__parent=province).count(), total_dbs),province.name))
-            percent_negative_provinces.append((percent(results.filter(result__iexact='N',clinic__parent__parent=province).count(), total_dbs),province.name))
-            percent_rejected_provinces.append((percent(results.filter(result__in='XIR',clinic__parent__parent=province).count(), total_dbs),province.name))
+            percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+            percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+            percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
             
                     
         
         months_reporting = 0
         days_reporting = 0
         if results:
-            start_date=results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
-            days_reporting= (date.today()-start_date).days
+            start_date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
+            days_reporting = (date.today()-start_date).days
         
         year_reporting = year
 
 
         return percent_positive_country, percent_negative_country, \
-                percent_rejected_country, percent_positive_provinces,\
-                percent_negative_provinces, percent_rejected_provinces,\
-                total_dbs, months_reporting, days_reporting, year_reporting
+            percent_rejected_country, percent_positive_provinces, \
+            percent_negative_provinces, percent_rejected_provinces, \
+            total_dbs, months_reporting, days_reporting, year_reporting
 
 
 
