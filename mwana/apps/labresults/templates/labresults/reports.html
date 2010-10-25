@@ -24,10 +24,7 @@
     <div class="left">
         <div class="module">
             <div class="module">
-                <h2>Percentage (%) Positivity</h2>
-                <div class="toolbar">
-                    <a href="">{{ reporting_year }}</a>
-                </div>
+                <h2>Percentage (%) Positivity</h2>                
                 <table width="100%" class="th" bgcolor="#EEEEEE">
 
                     <tr class="th" >
@@ -80,14 +77,19 @@
                 </table>               
 
             </div>
+            
+            
+            <h1>Date range reports:</h1>
+            
+                
+            <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+            <br>
             <form name="getValues" action="" method="GET">
                 <p>Select Period
                     <input type="text" name="startdate" size="9" value={{ startdate }} />
                            to
                            <input type="text" name="enddate" size="9" value={{ enddate }} />
                 <input type="submit" value="Ok" name="SubmitValues" /></form>
-            <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
-            <br>
             Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
             <div>
                 <p align="center"><h3>Results Received By Facilities</h3>
