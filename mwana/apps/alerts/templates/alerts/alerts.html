@@ -43,16 +43,16 @@
 
                     </select>
                     <input type="submit" value="Update" name="SubmitValues2" />
-                    <p>
+                    <p align="center">
                     {% for record in not_retrieving_results %}
                     <table border="1" width="100%">
                             <tr>
                                 {% ifequal record.level record.HIGH_LEVEL %}
-                                <td width="50" bgcolor="#FF0000"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FF0000"></td>
                                 {% else%}
-                                <td width="50" bgcolor="#FFFF00"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <!--td width="50" bgcolor="#FFFFFF"><h1>{{ record.days_late }}</h1></td-->
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
                             </tr>
@@ -83,11 +83,11 @@
                         <table border="1"  width="100%">
                             <tr>
                                 {% ifequal record.level record.HIGH_LEVEL %}
-                                <td width="50" bgcolor="#FF0000"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FF0000"></td>
                                 {% else%}
-                                <td width="50" bgcolor="#FFFF00"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <!--td width="50" bgcolor="#FFFFFF"><h1>{{ record.days_late }}</h1></td-->
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
                             </tr>
@@ -121,11 +121,11 @@
                         <table border="1"  width="100%">
                             <tr>
                                 {% ifequal record.level record.HIGH_LEVEL %}
-                                <td width="50" bgcolor="#FF0000"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FF0000"></td>
                                 {% else%}
-                                <td width="50" bgcolor="#FFFF00"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <!--td width="50" bgcolor="#FFFFFF"><h1>{{ record.days_late }}</h1></td-->
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
                             </tr>
@@ -157,11 +157,11 @@
                         <table border="1"  width="100%">
                             <tr>
                                 {% ifequal record.level record.HIGH_LEVEL %}
-                                <td width="50" bgcolor="#FF0000"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FF0000"></td>
                                 {% else%}
-                                <td width="50" bgcolor="#FFFF00"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <!--td width="50" bgcolor="#FFFFFF"><h1>{{ record.days_late }}</h1></td-->
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
                             </tr>
@@ -192,11 +192,11 @@
                         <table border="1"  width="100%">
                             <tr>
                                 {% ifequal record.level record.HIGH_LEVEL %}
-                                <td width="50" bgcolor="#FF0000"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FF0000"></td>
                                 {% else%}
-                                <td width="50" bgcolor="#FFFF00"><h1>{{ record.days_late }}</h1></td>
+                                <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <!--td width="50" bgcolor="#FFFFFF"><h1>{{ record.days_late }}</h1></td-->
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
                             </tr>
