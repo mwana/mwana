@@ -2,7 +2,7 @@
 from mwana.apps.supply.models import STATUS_CHOICES
 from mwana.apps.supply.models import SupplyRequest
 from mwana.apps.supply.models import SupplyType
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.registration.handlers.register import RegisterHandler
 import re
 

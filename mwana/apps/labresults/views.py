@@ -14,7 +14,8 @@ from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.labresults.models import Payload
 from mwana.decorators import has_perm_or_basicauth
 from rapidsms.contrib.locations.models import Location
-from rapidsms.utils import render_to_response
+from django.template import RequestContext
+from django.shortcuts import render_to_response
 
 """
 TODO
@@ -73,8 +74,8 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
 @require_GET
 def dashboard(request):
     locations = Location.objects.all()
-    return render_to_response(request, "labresults/dashboard.html",
-                              {"locations": locations })
+    return render_to_response("labresults/dashboard.html",
+                              {"locations": locations },context_instance=RequestContext(request))
                              
 
 @require_http_methods(['POST'])
@@ -437,9 +438,10 @@ def log_viewer (request, daysback='7', source_filter=''):
 
         log_display_items.append(ldi)
 
-    return render_to_response(request, 'labresults/logview.html',
+    return render_to_response('labresults/logview.html',
                               {'display_info': log_display_items, 'collisions': collisions,
-                               'days': daysback, 'source': source_filter})
+                               'days': daysback, 'source': source_filter},
+                               context_instance=RequestContext(request))
 
 
 def log_cmp (a, b, wraparound):
@@ -545,7 +547,7 @@ def mwana_reports (request):
                 , percent_rejected_provinces, total_dbs, months_reporting,\
                 days_reporting, year_reporting =r.dbs_positivity_data()
 
-    return render_to_response(request, 'labresults/reports.html',
+    return render_to_response('labresults/reports.html',
                                 {'startdate':startdate,
                                 'enddate':enddate,
                                 'today':today,
@@ -595,4 +597,5 @@ def mwana_reports (request):
                                 'months_reporting':months_reporting,
                                 'days_reporting':days_reporting,
                                 'year_reporting':year_reporting,
-                                })
+                                },
+                                context_instance=RequestContext(request))

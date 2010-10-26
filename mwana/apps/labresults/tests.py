@@ -25,9 +25,9 @@ class LabresultsSetUp(TestScript):
     def setUp(self):
         # this call is required if you want to override setUp
         super(LabresultsSetUp, self).setUp()
-        self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug=const.CLINIC_SLUGS[2])[0]
-        self.type1 = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]        
-        self.type2 = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]        
+        self.type = LocationType.objects.get_or_create(name="clinic", slug=const.CLINIC_SLUGS[2])[0]
+        self.type1 = LocationType.objects.get_or_create(name="district", slug="districts")[0]        
+        self.type2 = LocationType.objects.get_or_create(name="province", slug="provinces")[0]        
         self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="luapula")
         self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="mansa", parent = self.luapula)
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya", parent = self.luapula)

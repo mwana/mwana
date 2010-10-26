@@ -33,13 +33,13 @@ def load_locations(file_path):
         province_type = LocationType.objects.get(slug="provinces")
     except LocationType.DoesNotExist:
         province_type = LocationType.objects.create\
-            (slug="provinces", singular="Province", plural="Provinces")
+            (slug="provinces", name="Provinces")
 
     try:
         district_type = LocationType.objects.get(slug="districts")
     except LocationType.DoesNotExist:
         district_type = LocationType.objects.create\
-            (slug="districts", singular="district", plural="districts")
+            (slug="districts", name="Districts")
 
     csv_file = open(file_path, 'r')
 
@@ -64,9 +64,9 @@ def load_locations(file_path):
         #create/load facility type    
         try:
             facility_type = facility_type.strip()
-            type = LocationType.objects.get(slug=clean(facility_type), singular=facility_type)
+            type = LocationType.objects.get(slug=clean(facility_type), name=facility_type)
         except LocationType.DoesNotExist:
-            type = LocationType.objects.create(slug=clean(facility_type), singular=facility_type, plural=facility_type + "s")
+            type = LocationType.objects.create(slug=clean(facility_type), name=facility_type)
         #create/load facility
         try:
             facility = Location.objects.get(slug=code)

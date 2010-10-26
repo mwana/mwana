@@ -8,7 +8,7 @@ from mwana.apps.whitelist.models import TrialPeriod
 
 logger = logging.getLogger(__name__)
 
-class App(rapidsms.App):
+class App(rapidsms.apps.base.AppBase):
 
     response = "I'm sorry, the system is not currently active. Please try "\
                "again later."

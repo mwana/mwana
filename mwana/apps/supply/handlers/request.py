@@ -1,4 +1,4 @@
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from mwana.apps.registration.handlers.register import RegisterHandler
 

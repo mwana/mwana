@@ -5,7 +5,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule
 
 logger = logging.getLogger(__name__)
 
-class App (rapidsms.App):
+class App (rapidsms.apps.base.AppBase):
 
 
     def start (self):

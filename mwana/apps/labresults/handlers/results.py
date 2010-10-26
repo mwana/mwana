@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.labresults.models import Result
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to receive DBS \

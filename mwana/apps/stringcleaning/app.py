@@ -6,7 +6,7 @@ from mwana.apps.broadcast.handlers.clinic import ClinicHandler
 from mwana.apps.broadcast.handlers.cba import ClinicHandler as CbaHandler
 from mwana.apps.broadcast.handlers.blaster import BlastHandler
 
-class App (rapidsms.App):
+class App (rapidsms.apps.base.AppBase):
 
     def parse (self, message):
         ''' Cleans up messages by removing punctuation, and replacing intended

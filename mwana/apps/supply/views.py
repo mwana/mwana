@@ -7,9 +7,11 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods, require_GET
 from rapidsms.contrib.locations.models import Location
-from rapidsms.utils import render_to_response, web_message
+from rapidsms.utils import web_message
 from rapidsms.contrib.messaging.utils import send_message
-
+from django.template import RequestContext
+from django.shortcuts import render_to_response
+#from django.contrib.auth.views import context_instance
 
 @require_GET
 def dashboard(request):
@@ -18,9 +20,10 @@ def dashboard(request):
     locations = set((req.location for req in active_requests))
     for location in locations:
         location.active_requests = active_requests.filter(location=location)
-    return render_to_response(request, "supply/dashboard.html", 
+    return render_to_response( "supply/dashboard.html", 
                               {"active_requests": active_requests,
-                               "locations": locations })
+                               "locations": locations },
+                               context_instance=RequestContext(request))
 
 @require_http_methods(["GET", "POST"])
 def request_details(request, request_pk):
@@ -55,8 +58,9 @@ def request_details(request, request_pk):
     elif request.method == "GET":
         form = SupplyRequestForm(instance=sreq)
     
-    return render_to_response(request, "supply/single_request.html", 
-                                  {"sreq": sreq, "form": form})
+    return render_to_response("supply/single_request.html", 
+                                  {"sreq": sreq, "form": form},
+                                  context_instance=RequestContext(request))
 
 @require_GET
 def location_details(request, location_pk):
@@ -67,6 +71,7 @@ def location_details(request, location_pk):
     # this is sneaky, but allows us to access this list from
     # template tags without doing extra querying.
     loc.active_requests = SupplyRequest.active().filter(location=loc)
-    return render_to_response(request, "supply/single_location.html", 
-                              {"location": loc} )
+    return render_to_response("supply/single_location.html", 
+                              {"location": loc} ,
+                              context_instance=RequestContext(request))
     

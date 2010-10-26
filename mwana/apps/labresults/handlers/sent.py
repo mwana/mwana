@@ -1,7 +1,7 @@
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from mwana.util import get_clinic_or_default
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 import re
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
