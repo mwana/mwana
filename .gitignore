@@ -4,3 +4,5 @@ mwana/localsettings.py
 *~
 mwana/logs/*
 mwana/db.sqlite3
+.project
+.pydevproject
