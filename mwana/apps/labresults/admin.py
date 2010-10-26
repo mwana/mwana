@@ -5,7 +5,7 @@ from mwana.apps.labresults.models import *
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
                     'result', 'collected_on', 'entered_on', 'processed_on',
-                    'result_sent_date', 'notification_status',)
+                    'arrival_date', 'result_sent_date', 'notification_status',)
     list_filter = ('result', 'notification_status', 'result_sent_date','collected_on',
                    'entered_on', 'processed_on', 'clinic', )
     search_fields = ('sample_id','requisition_id')

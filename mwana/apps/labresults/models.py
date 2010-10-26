@@ -105,6 +105,7 @@ class Result(models.Model):
     old_value = models.CharField(max_length=50, null=True, blank=True)
     verified = models.NullBooleanField(null=True, blank=True)
     result_sent_date = models.DateTimeField(null=True, blank=True)
+    arrival_date = models.DateTimeField(null=True, blank=True)#date when 1st related payload with result came
 
 
     class Meta:

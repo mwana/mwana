@@ -1,5 +1,7 @@
 from django.db import models
 from rapidsms.contrib.locations.models import Location
+#from rapidsms.models import Connection
+#from rapidsms.models import Contact
 
 class Turnaround(models.Model):
     """
@@ -17,4 +19,24 @@ class Turnaround(models.Model):
 
 class SupportedLocation(models.Model):
     location = models.ForeignKey(Location)
-    supported =models.BooleanField(default=True)
+    supported = models.BooleanField(default=True)
+
+class MessageGroup(models.Model):
+    APP_LIST = (
+                ('results160', 'Results160'),
+                ('reminders', 'RemindMI')
+                )
+#    id = models.IntegerField()
+    date = models.DateTimeField()
+    text = models.TextField()
+    direction = models.CharField(max_length=1)
+    contact_type = models.CharField(max_length=50)
+    keyword = models.CharField(max_length=15)
+    changed_res = models.BooleanField()
+    new_results = models.BooleanField()
+    app = models.CharField(choices=APP_LIST, max_length=10)
+    phone = models.CharField(max_length=12)
+    backend = models.CharField(max_length=15)
+    clinic = models.CharField(max_length=20)
+    before_pilot = models.BooleanField()
+

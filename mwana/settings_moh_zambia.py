@@ -11,8 +11,8 @@ SEND_LIVE_LABRESULTS = True
 DEBUG = False
 
 ADMINS = (
-    ('Tobias McNulty', 'tobias@caktusgroup.com'),
-    ('Drew Roos', 'droos@dimagi.com'),
+    ('Trevor Sinkala', 'sinkalation@gmail.com'),
+    ('Drew Roos', 'nchimunya@gmail.com'),
     ('Mwana Developers', 'mwana-dev@googlegroups.com'),
 )
 
@@ -58,6 +58,7 @@ TABS = [
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
+    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
 
 from mwana.logconfig import init_email_handler

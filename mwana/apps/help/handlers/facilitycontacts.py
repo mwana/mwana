@@ -1,3 +1,5 @@
+import mwana.const as const
+from django.db.models import Q
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
@@ -49,7 +51,11 @@ facility contacts. If you think this message is a mistake, respond with keyword 
                          code=location_slug)
             return
 
-        active_contacts = Contact.active.filter(location=location)
+        active_contacts = Contact.active.filter(Q(location=location) |
+                                                Q(location__parent=location),
+                                                Q(types=
+                                                const.get_clinic_worker_type()))\
+                                                .order_by('pk')
         if active_contacts:
             contact_list = " ****".join(contact.name + ";"
                                         + contact.default_connection.identity + "."

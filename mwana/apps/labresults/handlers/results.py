@@ -78,7 +78,8 @@ class ResultsHandler(KeywordHandler):
                                 {'req_id':result.requisition_id,
                                 'res':reply})
                         result.notification_status = "sent"
-                        result.result_sent_date = datetime.now()
+                        if not result.result_sent_date:
+                            result.result_sent_date = datetime.now()
                         result.save()
                     else:
                         unready_sample_results.append(requisition_id)

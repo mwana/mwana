@@ -265,7 +265,13 @@ def accept_record (record, payload):
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
         new_record.notification_status = 'new' if new_record.result else 'unprocessed'
+        if new_record.result:
+            new_record.arrival_date = new_record.payload.incoming_date
     else:
+        #keep track of original date for payload with result
+        if old_record.arrival_date and old_record.result:
+            new_record.arrival_date = old_record.arrival_date
+
         # if result was previously sent update new record with result_sent_date
         if old_record.result_sent_date:
             new_record.result_sent_date = old_record.result_sent_date
@@ -490,35 +496,54 @@ def mwana_reports (request):
    
     today = datetime.today().date()
     try:
-        startdate = text_date(request.REQUEST['startdate'])
+        startdate1 = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
-        startdate = today -timedelta(days=30)
+        startdate1 = today -timedelta(days=30)
 
     try:
-        enddate = text_date(request.REQUEST['enddate'])
+        enddate1 = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):
-        enddate = datetime.today().date()
-    startdate = min(startdate, enddate, datetime.today().date())
-    enddate = min(enddate, datetime.today().date())
+        enddate1 = datetime.today().date()
+    startdate = min(startdate1, enddate1, datetime.today().date())
+    enddate = min(max(enddate1, startdate1), datetime.today().date())
     
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
+
     min_processing_time, max_processing_time, num_of_dbs_processed, \
     num_facs_processing, processing_time =\
     r.dbs_avg_processing_time_report(startdate, enddate)
+
+    min_entering_time, max_entering_time, num_of_rsts_entered, \
+    num_facs_entering, entering_time =\
+    r.dbs_avg_entering_time_report(startdate, enddate)
+
     min_retrieval_time, max_retrieval_time, num_of_dbs_retrieved, \
     num_facs_retrieving, retrieval_time =\
     r.dbs_avg_retrieval_time_report(startdate, enddate)
+
     min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
     turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
+
     min_transport_time, max_transport_time, num_of_dbs, num_of_facs,\
     transport_time = r.dbs_avg_transport_time_report(startdate, enddate)
+
     samples_reported = r.dbs_sample_notifications_report(startdate, enddate)
+
     samples_at_lab = r.dbs_samples_at_lab_report(startdate, enddate)
+
     pending = r.dbs_pending_results_report(startdate, enddate)
+
     payloads = r.dbs_payloads_report(startdate, enddate)
+
     births = r.reminders_patient_events_report(startdate, enddate)
+
     single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate, enddate)
+
+    percent_positive_country, percent_negative_country, percent_rejected_country\
+                , percent_positive_provinces, percent_negative_provinces\
+                , percent_rejected_provinces, total_dbs, months_reporting,\
+                days_reporting, year_reporting =r.dbs_positivity_data()
 
     return render_to_response(request, 'labresults/reports.html',
                                 {'startdate':startdate,
@@ -540,6 +565,11 @@ def mwana_reports (request):
                                 'max_retrieving_time':max_retrieval_time,
                                 'num_of_dbs_retrieved':num_of_dbs_retrieved,
                                 'num_facs_retrieving':num_facs_retrieving,
+                                'entering_time_rpt':entering_time,
+                                'min_entering_time':min_entering_time,
+                                'max_entering_time':max_entering_time,
+                                'num_of_rsts_entered':num_of_rsts_entered,
+                                'num_facs_entering':num_facs_entering,
                                 'transport_time_rpt':transport_time,
                                 'min_transport_time':min_transport_time,
                                 'max_transport_time':max_transport_time,
@@ -555,4 +585,14 @@ def mwana_reports (request):
                                 'graph':graph,
                                 'single_bar_length':single_bar_length,
                                 'tt_in_graph':tt_in_graph,
+                                'percent_positive_country':percent_positive_country,
+                                'percent_negative_country':percent_negative_country,
+                                'percent_rejected_country':percent_rejected_country,
+                                'percent_positive_provinces':percent_positive_provinces,
+                                'percent_negative_provinces':percent_negative_provinces,
+                                'percent_rejected_provinces':percent_rejected_provinces,
+                                'total_dbs':total_dbs,
+                                'months_reporting':months_reporting,
+                                'days_reporting':days_reporting,
+                                'year_reporting':year_reporting,
                                 })

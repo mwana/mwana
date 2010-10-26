@@ -76,13 +76,16 @@ class Results160Reports:
                                        Q(lab_results__result_sent_date=self.dbsr_enddate)
                                        ).distinct()
 
+    def get_facilities_for_entering_reporting(self):
+        return Location.objects.filter(lab_results__entered_on__lte=self.dbsr_enddate,
+                                       lab_results__result_sent_date__gte=self.dbsr_startdate,
+                                       lab_results__result_sent_date__lte=self.dbsr_enddate
+                                       ).distinct()
+
     def get_facilities_for_retrieval_reporting(self):
-        return Location.objects.filter(Q(lab_results__processed_on__lt=self.dbsr_enddate) |
-                                       Q(lab_results__processed_on=self.dbsr_enddate),
-                                       Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
-                                       | Q(lab_results__result_sent_date=self.dbsr_startdate),
-                                       Q(lab_results__result_sent_date__lt=self.dbsr_enddate) |
-                                       Q(lab_results__result_sent_date=self.dbsr_enddate)
+        return Location.objects.filter(lab_results__arrival_date__lte=self.dbsr_enddate,
+                                       lab_results__result_sent_date__gte=self.dbsr_startdate,
+                                       lab_results__result_sent_date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_samples_at_lab(self):
@@ -139,20 +142,30 @@ class Results160Reports:
             tt_diff = 1 + tt_diff + (result.result_sent_date.date() - result.collected_on).days
         return (results.count(), tt_diff / results.count())
 
-    def get_avg_dbs_retrieval_time(self, location):
-        results = Result.objects.filter(Q(processed_on__lt=self.dbsr_enddate) |
-                                        Q(processed_on=self.dbsr_enddate),
-                                        Q(result_sent_date__gt=self.dbsr_startdate)
-                                        | Q(result_sent_date=self.dbsr_startdate),
-                                        Q(result_sent_date__lt=self.dbsr_enddate) |
-                                        Q(result_sent_date=self.dbsr_enddate))\
-            .filter(clinic=location,
-                    notification_status='sent')
+    def get_avg_rsts_entering_time(self, location):
+        results = Result.objects.filter(clinic=location,
+                                        processed_on__lte=self.dbsr_enddate,
+                                        result_sent_date__gte=self.dbsr_startdate,
+                                        result_sent_date__lte=self.dbsr_enddate)
+            
         if not results:
             return (0, None)
         tt_diff = 0.0
         for result in results:
-            tt_diff = 1 + tt_diff + (result.result_sent_date.date() - result.processed_on).days
+            tt_diff = 1 + tt_diff + (result.arrival_date.date() - result.processed_on).days
+        return (results.count(), tt_diff / results.count())
+
+    def get_avg_dbs_retrieval_time(self, location):
+        results = Result.objects.filter(arrival_date__lte=self.dbsr_enddate,
+                                        result_sent_date__gte=self.dbsr_startdate,
+                                        result_sent_date__lte=self.dbsr_enddate)\
+        .filter(clinic=location,
+                notification_status='sent')
+        if not results:
+            return (0, None)
+        tt_diff = 0.0
+        for result in results:
+            tt_diff = 1 + tt_diff + (result.result_sent_date.date() - result.arrival_date.date()).days
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_processing_time(self, location):
@@ -160,7 +173,7 @@ class Results160Reports:
                                         | Q(processed_on=self.dbsr_startdate),
                                         Q(processed_on__lt=self.dbsr_enddate) |
                                         Q(processed_on=self.dbsr_enddate))\
-            .filter(clinic=location)
+        .filter(clinic=location)
         if not results:
             return (0, None)
         tt_diff = 0.0
@@ -175,7 +188,7 @@ class Results160Reports:
                                         | Q(entered_on=self.dbsr_startdate),
                                         Q(entered_on__lt=self.dbsr_enddate) |
                                         Q(entered_on=self.dbsr_enddate))\
-            .filter(clinic=location)
+        .filter(clinic=location)
         if not results:
             return (0, None)
         tt_diff = 0.0
@@ -240,7 +253,7 @@ class Results160Reports:
                                                          | Q(date=self.dbsr_startdate),
                                                          Q(date__lt=self.dbsr_enddate) |
                                                          Q(date=self.dbsr_enddate)).\
-                aggregate(sum=Sum("count"))['sum']
+            aggregate(sum=Sum("count"))['sum']
                 
             tt_reported = tt_reported + reported
             table.append([' ' + location.parent.name, ' ' + location.name, reported])
@@ -325,10 +338,45 @@ class Results160Reports:
         return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_number_sent), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
-    def dbs_avg_retrieval_time_report(self, startdate=None, enddate=None):
+    def dbs_avg_entering_time_report(self, startdate=None, enddate=None):
         """
         Returns the average number of days (INCLUSIVE) from the day results are
-        tested to the day are sent to the facilities
+        tested to the day are updated in the machine at the lab
+        """
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility', 'Results', 'Entering Time(Days)'])
+        days = number_entered = 0
+        sum_days = tt_number_entered = 0
+        min_days = self.SOME_INVALID_DAYS
+        max_days = None
+
+        locations = self.get_facilities_for_entering_reporting()
+        for location in locations:
+            number_entered, days = self.get_avg_rsts_entering_time(location)
+            tt_number_entered = tt_number_entered + number_entered
+            sum_days = sum_days + days
+            min_days = min(days, min_days)
+            max_days = max(days, max_days)
+
+            table.append([' ' + location.parent.name, ' ' + location.name,
+                         number_entered, self.safe_rounding(days)])
+
+        avg = None
+        if locations:
+            avg = sum_days / locations.count()
+        if min_days == self.SOME_INVALID_DAYS:
+            min_days = None
+
+        table.append(['All listed districts', 'All listed  clinics', tt_number_entered, self.safe_rounding(avg)])
+        return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_number_entered), locations.count(), \
+            sorted(table, key=itemgetter(0, 1))
+
+    def dbs_avg_retrieval_time_report(self, startdate=None, enddate=None):
+        """
+        Returns the average number of days (INCLUSIVE) from the day tested
+        results are updated to the day are sent to the facilities
         """
         self.set_reporting_period(startdate, enddate)
         table = []
@@ -491,6 +539,81 @@ class Results160Reports:
 
     def dbs_graph_data(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
+
+        days = self.get_all_dates_dictionary()
+        sent_results = self.get_results_by_status(['sent'])
+
+        for result in sent_results:
+            try:
+                days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
+            except KeyError:
+                if len(days) == 1:break
+        # assign some variable with a value, not so friendly to calculate in templates
+        single_bar_length = max(days.values()) / self.BAR_LENGTH
+
+        # for easy sorting, create a list of lists from the dictionary
+        table = []
+        for key, value in days.items():
+            table.append([key, value])
+
+        return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
+    def get_distinct_parents(self, locations):
+        if not locations:
+            return None
+        parents = []
+        for location in locations:
+            parents.append(location.parent)
+        return list(set(parents))
+
+    def get_total_results_in_province(self, province):
+        return Result.objects.filter(clinic__parent__parent=province).exclude(result=None).count()
+
+    def dbs_positivity_data(self, year=None):
+
+        def percent(num, den):
+            if not num:
+                return 0
+            elif not den:
+                return 0
+            else:
+                return "%4.1f" % (100.0 * num / den)
+
+        if not year:
+            year = date.today().year
+        results = Result.objects.exclude(result=None)
+        total_dbs = results.count()
+
+        percent_positive_country = percent(results.filter(result__iexact='P').count(), total_dbs)
+        percent_negative_country = percent(results.filter(result__iexact='N').count(), total_dbs)
+        percent_rejected_country = percent(results.filter(result__in='XIR').count(), total_dbs)
+
+        percent_positive_provinces = []
+        percent_negative_provinces = []
+        percent_rejected_provinces = []
+        provinces = self.get_distinct_parents(self.get_distinct_parents(self.get_active_facilities()))
+
+        for province in provinces:
+            percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+            percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+            percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+            
+                    
+        
+        months_reporting = 0
+        days_reporting = 0
+        if results:
+            start_date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
+            days_reporting = (date.today()-start_date).days
+        
+        year_reporting = year
+
+
+        return percent_positive_country, percent_negative_country, \
+            percent_rejected_country, percent_positive_provinces, \
+            percent_negative_provinces, percent_rejected_provinces, \
+            total_dbs, months_reporting, days_reporting, year_reporting
+
+
 
         days = self.get_all_dates_dictionary()
         sent_results = self.get_results_by_status(['sent'])

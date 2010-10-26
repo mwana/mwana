@@ -14,6 +14,7 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS = [
+    "mwana.apps.broadcast",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.auth",
@@ -41,8 +42,9 @@ INSTALLED_APPS = [
     "mwana.apps.reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
-    "mwana.apps.broadcast",
+    
     "mwana.apps.reports",
+    "mwana.apps.alerts",
     "mwana.apps.training",
     "mwana.apps.help",
     
@@ -83,6 +85,7 @@ TABS = [
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
+    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
 
 TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.auth', 'django.core.context_processors.debug', 'django.core.context_processors.i18n', 'django.core.context_processors.media', 'django.core.context_processors.request',"mwana.request_context.static_project_media")
