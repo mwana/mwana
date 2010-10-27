@@ -4,6 +4,8 @@
 
 import datetime
 from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
+
 from mwana import const
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
@@ -45,9 +47,11 @@ class ReportHandler(KeywordHandler):
         district_facilities = None
         province_facilities = None
         try:
+            location_type = ContentType.objects.get_for_model(Location)
             location = Location.objects.get(slug__iexact=clinic_code)
             if location.type.slug == 'districts':
-                district_facilities = Location.objects.filter(parent=location,
+                district_facilities = Location.objects.filter(parent_id=location.pk,
+                                                              parent_type=location_type,
                                                               type__slug__in=
                                                               const.CLINIC_SLUGS)
             elif location.type.slug == 'provinces':
