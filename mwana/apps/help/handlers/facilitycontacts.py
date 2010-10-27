@@ -1,9 +1,12 @@
-import mwana.const as const
 from django.db.models import Q
-from mwana.apps.stringcleaning.inputcleaner import InputCleaner
+from django.contrib.contenttypes.models import ContentType
+
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
+
+import mwana.const as const
+from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 
 
 class ContactsHandler(KeywordHandler):
@@ -51,8 +54,10 @@ facility contacts. If you think this message is a mistake, respond with keyword 
                          code=location_slug)
             return
 
+        location_type = ContentType.objects.get_for_model(Location)
         active_contacts = Contact.active.filter(Q(location=location) |
-                                                Q(location__parent=location),
+                                                (Q(location__parent_id=location.pk) &
+                                                 Q(location__parent_type=location_type)),
                                                 Q(types=
                                                 const.get_clinic_worker_type()))\
                                                 .order_by('pk')

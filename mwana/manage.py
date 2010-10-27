@@ -14,11 +14,10 @@ if not settings_specified and len(sys.argv) >= 2:
 
 
 if __name__ == "__main__":
-#    project_root = os.path.abspath(
-#        os.path.dirname(__file__))
+    # all imports should begin with the full Python package ('mwana.'):
+    project_root = os.path.abspath(os.path.dirname(__file__))
+    if project_root in sys.path:
+        sys.path.remove(project_root)
+    sys.path.insert(0, os.path.dirname(project_root))
 
-#    path = os.path.join(project_root, "apps")
-#    sys.path.insert(0, path)
-
-#    sys.path.insert(0, project_root)
     execute_manager(settings)

@@ -1,17 +1,35 @@
 from mwana.settings import *
 
+# you should configure your database here before doing any real work.
+# see: http://docs.djangoproject.com/en/dev/ref/settings/#databases
+
 # for sqlite3:
-#DATABASE_ENGINE = 'sqlite3'
-#DATABASE_NAME = 'db.sqlite3'
-#TEST_DATABASE_NAME = '/tmp/mwana-test.db.sqlite3'
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "django.db.backends.sqlite3",
+#        "NAME": "db.sqlite3",
+#        "USER": "",
+#        "PASSWORD": "",
+#        "HOST": "",
+# since we might hit the database from any thread during testing, the
+# in-memory sqlite database isn't sufficient. it spawns a separate
+# virtual database for each thread, and syncdb is only called for the
+# first. this leads to confusing "no such table" errors. We create
+# a named temporary instance instead.
+#        "TEST_NAME": "test_db.sqlite3",
+#    }
+#}
 
 # for postgresql:
-DATABASE_ENGINE = 'postgresql_psycopg2'
-DATABASE_NAME = 'mwana_devel'
-DATABASE_USER = ''
-DATABASE_PASSWORD = ''
-DATABASE_HOST = ''
-DATABASE_PORT = ''
-TEST_DATABASE_NAME = 'test_mwana_devel'
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "mwana_devel",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+    }
+}
 
 PROJECT_LOGO_URL = '/opt/mwana/mwana/data/mylogo.jpg'
+

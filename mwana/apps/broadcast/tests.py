@@ -12,8 +12,7 @@ class TestApp(TestScript):
     
     def setUp(self):
         super(TestApp, self).setUp()
-        type, _ = LocationType.objects.get_or_create(singular="clinic", 
-                                                     plural="clinics", 
+        type, _ = LocationType.objects.get_or_create(name="clinic", 
                                                      slug="clinics")
         clinic = Location.objects.create(type=type, name="demo", slug="demo") 
         self.clinic_zone= Location.objects.create(type=get_zone_type(), name="child", 

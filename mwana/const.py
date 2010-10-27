@@ -22,14 +22,11 @@ def _get_contacttype(slug, name):
     return type
 
 
-def _get_locationtype(slug, singular, plural=None):
-    if not plural:
-        plural = singular + 's'
+def _get_locationtype(slug, name):
     try:
         type = LocationType.objects.get(slug__iexact=slug)
     except LocationType.DoesNotExist:
-        type = LocationType.objects.create(singular=singular, slug=slug,
-                                           plural=plural)
+        type = LocationType.objects.create(name=name, slug=slug)
     return type
 
 

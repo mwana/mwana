@@ -1,11 +1,15 @@
 import logging
 
+from django.contrib.contenttypes.models import ContentType
+
 from mwana import const
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
+from rapidsms.contrib.locations.models import Location
+
 logger = logging.getLogger(__name__)
 
 class DeregisterHandler(KeywordHandler):
@@ -44,13 +48,15 @@ class DeregisterHandler(KeywordHandler):
             location = location.parent
         cba = None
 
+        location_type = ContentType.objects.get_for_model(Location)
         # we expect phone numbers like +260977123456, 0977123456, 977123456
         # (a phone number is unique to each cba at a clinic)
         if text[1:].isdigit() and len(text) >= self.MIN_PHONE_LENGTH:
             try:
                 cba = \
                 Contact.active.get(connection__identity__endswith=text,
-                                   location__parent=location,
+                                   location__parent_id=location.pk,
+                                   location__parent_type=location_type,
                                    types=const.get_cba_type())
             except Contact.DoesNotExist:
                 self.respond('The phone number %(phone)s does not belong to any'
@@ -76,7 +82,8 @@ class DeregisterHandler(KeywordHandler):
         if not cba:
             cbas = \
             Contact.active.filter(name__icontains=text,
-                                  location__parent=location,
+                                  location__parent_id=location.pk,
+                                  location__parent_type=location_type,
                                   types=const.get_cba_type())
             if not cbas:
                 self.respond('The name %(name)s does not belong to any'

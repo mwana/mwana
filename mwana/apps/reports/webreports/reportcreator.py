@@ -6,6 +6,8 @@ from datetime import timedelta
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Sum
+from django.contrib.contenttypes.models import ContentType
+
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
@@ -566,7 +568,21 @@ class Results160Reports:
         return list(set(parents))
 
     def get_total_results_in_province(self, province):
-        return Result.objects.filter(clinic__parent__parent=province).exclude(result=None).count()
+        location_type = ContentType.objects.get_for_model(Location)
+        cursor = connection.cursor()
+        cursor.execute(
+        '''SELECT COUNT(*)
+           FROM labresults_result r
+           JOIN locations_location l ON (r.clinic_id = l.id)
+           JOIN locations_location p1 ON (l.parent_id = p1.id AND p1.parent_type_id = %s)
+           JOIN locations_location p2 ON (p1.parent_id = p2.id AND p2.parent_type_id = %s)
+           WHERE p2.id = %s
+             AND r.result IS NOT NULL''', [location_type.pk, location_type.pk,
+                                           province.pk])
+        return cursor.fetchall()[0][0]
+        # TODO: trevor review the above and delete this and the below line
+        # once complete.
+#        return Result.objects.filter(clinic__parent__parent=province).exclude(result=None).count()
 
     def dbs_positivity_data(self, year=None):
 

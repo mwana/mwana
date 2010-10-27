@@ -1,7 +1,10 @@
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
+from django.contrib.contenttypes.models import ContentType
+
 from rapidsms.models import Contact
+from rapidsms.contrib.locations.models import Location
 
 class ContactType(models.Model):
     name = models.CharField(max_length=255)
@@ -20,7 +23,10 @@ class SelfOrParentLocationQuerySet(QuerySet):
     """
     
     def location(self, location):
-        return self.filter(Q(location=location)|Q(location__parent=location))
+        location_type = ContentType.objects.get_for_model(Location)
+        return self.filter(Q(location=location)|
+                           (Q(location__parent_id=location.pk) &
+                            Q(location__parent_type=location_type)))
 
 class SelfOrParentLocationContactManager(models.Manager):
     """
