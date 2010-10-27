@@ -540,6 +540,11 @@ def mwana_reports (request):
 
     single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate, enddate)
 
+    percent_positive_country, percent_negative_country, percent_rejected_country\
+                , percent_positive_provinces, percent_negative_provinces\
+                , percent_rejected_provinces, total_dbs, months_reporting,\
+                days_reporting, year_reporting =r.dbs_positivity_data()
+
     return render_to_response(request, 'labresults/reports.html',
                                 {'startdate':startdate,
                                 'enddate':enddate,
@@ -580,4 +585,14 @@ def mwana_reports (request):
                                 'graph':graph,
                                 'single_bar_length':single_bar_length,
                                 'tt_in_graph':tt_in_graph,
+                                'percent_positive_country':percent_positive_country,
+                                'percent_negative_country':percent_negative_country,
+                                'percent_rejected_country':percent_rejected_country,
+                                'percent_positive_provinces':percent_positive_provinces,
+                                'percent_negative_provinces':percent_negative_provinces,
+                                'percent_rejected_provinces':percent_rejected_provinces,
+                                'total_dbs':total_dbs,
+                                'months_reporting':months_reporting,
+                                'days_reporting':days_reporting,
+                                'year_reporting':year_reporting,
                                 })
