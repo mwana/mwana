@@ -305,7 +305,8 @@ class Reminders(TestScript):
     def testRemindersRegistered(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth")
         birth.appointments.create(name='1 day', num_days=2)
-        clinic = LocationType.objects.create(name='Clinic', slug='clinic')
+        clinic = LocationType.objects.create(singular='Clinic',
+                                             plural='Clinics', slug='clinic')
         central = Location.objects.create(name='Central Clinic', type=clinic)
         patient1 = Contact.objects.create(name='Henry', location=central)
         

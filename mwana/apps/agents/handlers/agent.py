@@ -1,7 +1,5 @@
 import re
 
-from django.contrib.contenttypes.models import ContentType
-
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
@@ -47,10 +45,8 @@ class AgentHelper(KeywordHandler):
         zone_type = const.get_zone_type()
         try:
             # get_or_create does not work with iexact
-            location_type = ContentType.objects.get_for_model(Location)
             zone = Location.objects.get(name__iexact=name,
-                                        parent_id=clinic.pk,
-                                        parent_type=location_type,
+                                        parent=clinic,
                                         type=zone_type)
         except Location.DoesNotExist:
             zone = Location.objects.create(name=name,
