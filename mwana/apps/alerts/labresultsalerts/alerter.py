@@ -116,7 +116,7 @@ class Alerter:
         Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                               Q(types=const.get_clinic_worker_type())).\
             order_by('pk')
-            days_late = self.days_ago(self.latest_pending_result_arrival_date(clinic))
+            days_late = self.days_ago(self.earliest_pending_result_arrival_date(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.retrieving_days) else Alert.LOW_LEVEL
             my_alerts.append(Alert(Alert.LONG_PENDING_RESULTS, "%s clinic have not"\
                              " retrieved their results. Please call and enquire "
@@ -137,9 +137,9 @@ class Alerter:
         self.set_not_sending_dbs_alerts()
         return self.district_transport_days, sorted(self.not_sending_dbs_alerts, key=itemgetter(5))
 
-    def latest_pending_result_arrival_date(self, location):
+    def earliest_pending_result_arrival_date(self, location):
         try:
-            return Result.objects.filter(clinic=location, notification_status='notified').order_by('-arrival_date')[0].arrival_date.date()
+            return Result.objects.filter(clinic=location, notification_status='notified').order_by('arrival_date')[0].arrival_date.date()
         except IndexError:
             return self.today-timedelta(days=999)
 
