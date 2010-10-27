@@ -12,6 +12,7 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from rapidsms.contrib.locations.models import Location
+from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
 class Alerter:    
@@ -148,10 +149,35 @@ class Alerter:
         except IndexError:
             notification = date(1900, 1, 1)
         try:
-            actual = Result.objects.filter(clinic=location).order_by('-entered_on')[0].entered_on
+            actual = Result.objects.filter(clinic=location).exclude(entered_on=None).order_by('-entered_on')[0].entered_on
         except IndexError:
             actual = date(1900, 1, 1)
         return max(notification, actual)
+
+    def last_retrieved_or_checked(self, location):
+        try:
+            notification = SampleNotification.objects.filter(location=location).order_by('-date')[0].date.date()
+        except IndexError:
+            notification = date(1900, 1, 1)
+        try:
+            last_retreived = Result.objects.filter(clinic=location, notification_status='sent').order_by('-result_sent_date')[0].result_sent_date.date()
+        except IndexError:
+            last_retreived = date(1900, 1, 1)
+        try:
+            last_checked = Message.objects.filter(Q(contact__location=location) |
+                                                  Q(contact__location__parent=location),
+                                                  Q(text__iregex='\s*check\s*')
+                                                  ).order_by('-date')[0].date.date()
+        except IndexError:
+            last_checked = date(1900, 1, 1)
+        try:
+            last_tried_result = Message.objects.filter(Q(contact__location=location) |
+                                                       Q(contact__location__parent=location),
+                                                       Q(text__istartswith='The results for sample') |
+                                                       Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
+        except IndexError:
+            last_tried_result = date(1900, 1, 1)
+        return max(notification, last_retreived, last_checked, last_tried_result)
 
     def days_ago(self, date):
         return (self.today - date).days
@@ -171,14 +197,24 @@ class Alerter:
                            Q(lab_results__notification_status='sent',
                            lab_results__result_sent_date__gte
                            =self.clinic_sent_dbs_referal_date.date()),
-                           Q(contact__message__text__iregex='\s*check\s*') |
-                           Q(parent__contact__message__text__iregex='\s*check\s*')
+                           Q(
+                           contact__message__text__iregex='\s*check\s*') |
+                           Q(parent__contact__message__text__iregex='\s*check\s*'
+                           ) |
+                           Q(
+                           contact__message__text__istartswith='The results for sample') |
+                           Q(parent__contact__message__text__istartswith='The results for sample'
+                           ) |
+                           Q(
+                           contact__message__text__istartswith='There are currently no results') |
+                           Q(parent__contact__message__text__istartswith='There are currently no results'
+                           )
                            ).distinct()
         for clinic in clinics:
             additional_text = ""
             if clinic not in active_clinics:
-                additional_text = "Clinic has not been using Results160 "\
-                    + "during this period"
+                additional_text = "The last time this clinic used Results160 was "\
+                    + "%s days ago." % self.days_ago(self.last_retrieved_or_checked(clinic))
             contacts = \
     Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                           Q(types=const.get_clinic_worker_type())).\
@@ -187,10 +223,10 @@ class Alerter:
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
                              "Clinic "
-                             "has no record of sending DBS samples. "
-                             "Please check "
-                             "that they have supplies by caling (%s)."
-                             "" % (
+                             "has no record of sending DBS samples in  the last"
+                             " %s days. Please check "
+                             "that they have supplies by calling (%s)."
+                             "" % (days_late,
                              ", ".join(contact.name + ":"
                              + contact.default_connection.identity
                              for contact in contacts)),
