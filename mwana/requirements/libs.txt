@@ -1,1 +1,12 @@
-django==1.1.2
+# django>=1.2.3
+Django-1.2.3.tar.gz
+# nose>=0.11.2
+nose-0.11.2.tar.gz
+# django-nose>=0.1.2
+django-nose-0.1.2.tar.gz
+# djtables>=0.1.1
+djtables-0.1.1.tar.gz
+# djappsettings>=0.1.0
+djappsettings-0.1.0.tar.gz
+# RapidSMS:
+rapidsms-a7a0fcc.tar.gz

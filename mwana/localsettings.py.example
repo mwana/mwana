@@ -13,3 +13,5 @@ DATABASE_PASSWORD = ''
 DATABASE_HOST = ''
 DATABASE_PORT = ''
 TEST_DATABASE_NAME = 'test_mwana_devel'
+
+PROJECT_LOGO_URL = '/opt/mwana/mwana/data/mylogo.jpg'

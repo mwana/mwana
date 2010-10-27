@@ -1,4 +1,4 @@
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
 from mwana.apps.help.models import HelpRequest
 from rapidsms.messages.outgoing import OutgoingMessage

@@ -14,7 +14,7 @@ from mwana import const
 # finds our text.
 _ = lambda s: s
 
-class App(rapidsms.App):
+class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
     
     DATE_RE = re.compile(r"[\d/.-]+")

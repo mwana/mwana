@@ -25,7 +25,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class App (rapidsms.App):
+class App (rapidsms.apps.base.AppBase):
     
     # we store everyone who we think could be sending us a PIN for results 
     # here, so we can intercept the message.

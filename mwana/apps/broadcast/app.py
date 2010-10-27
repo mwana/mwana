@@ -4,7 +4,7 @@ from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 from rapidsms.messages.outgoing import OutgoingMessage
 
 NO_CONTACT = "Sorry %(sender)s, but we don't have any information about %(recipient)s anymore so we were unable to send your response"
-class App (rapidsms.App):
+class App (rapidsms.apps.base.AppBase):
     
     BLAST_RESPONSE_WINDOW_HOURS = 4
     

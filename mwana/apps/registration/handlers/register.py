@@ -1,5 +1,5 @@
 
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 
 class RegisterHandler(KeywordHandler):

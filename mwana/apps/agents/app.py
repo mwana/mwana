@@ -1,4 +1,4 @@
 import rapidsms
 
-class App (rapidsms.App):
+class App (rapidsms.apps.base.AppBase):
     pass

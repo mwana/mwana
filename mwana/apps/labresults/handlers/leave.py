@@ -1,4 +1,4 @@
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds

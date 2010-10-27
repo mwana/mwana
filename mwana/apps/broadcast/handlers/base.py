@@ -1,4 +1,4 @@
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.broadcast.models import BroadcastMessage
 

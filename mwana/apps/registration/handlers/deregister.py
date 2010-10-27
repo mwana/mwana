@@ -3,7 +3,7 @@ import logging
 from mwana import const
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
-from rapidsms.contrib.handlers import KeywordHandler
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
