@@ -18,7 +18,7 @@ start() {
         # unfortunately we don't know of a way to tell if the route process
         # started successfully
         echo -n Starting mwana route process...
-        sudo -u $USER $PROJECT_DIR/env/bin/python $PROJECT_DIR/mwana/manage.py route > $PROJECT_DIR/route.log 2>&1 &
+        sudo -u $USER $PROJECT_DIR/mwana/manage.py route > $PROJECT_DIR/route.log 2>&1 &
         echo done.
 }
 
