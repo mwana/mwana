@@ -5,7 +5,7 @@ from django.test.testcases import TestCase
 class TestContactsPlus(TestCase):
     
     def testParentChildLocations(self):
-        type = LocationType.objects.create(name="test", slug="tests")
+        type = LocationType.objects.create(singular="test", plural="tests", slug="tests")
         parent = Location.objects.create(type=type, name="parent", slug="parent") 
         child1 = Location.objects.create(type=type, name="child1", slug="child1", parent=parent) 
         child2 = Location.objects.create(type=type, name="child2", slug="child2", parent=parent) 

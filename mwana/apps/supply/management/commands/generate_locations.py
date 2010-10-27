@@ -27,7 +27,7 @@ def create_locations(count):
         health_center_type = LocationType.objects.get(slug="health_facilities")
     except LocationType.DoesNotExist:
         health_center_type = LocationType.objects.create\
-            (slug="health_facilities", name="health facility")
+            (slug="health_facilities",singular="health facility", plural="health facilities")
     
     for i in range(count):
         lat, lon = _zambian_coordinate()

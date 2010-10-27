@@ -1,9 +1,16 @@
 import os
-import os.path
+from os.path import dirname
 import sys
+import site
 
 #Calculate the project path based on the location of the WSGI script.
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+APACHE_DIR = dirname(__file__)
+# mwana/zambia/apache/../../..
+PROJECT_ROOT = dirname(dirname(dirname(APACHE_DIR)))
+VIRTUALENV_ROOT = os.path.join(PROJECT_ROOT, 'env')
+
+site_dir = os.path.join(VIRTUALENV_ROOT, 'lib', 'python2.6', 'site-packages')
+site.addsitedir(site_dir)
 
 SHOW_UPGRADE_MESSAGE = False
 ADMIN_IPS = ('127.0.0.1',)
@@ -14,13 +21,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'mwana.localsettings'
 os.environ['PYTHON_EGG_CACHE'] = '/var/data/.python_eggs'
 
 try:
-    rapidsms_root = os.path.join(PROJECT_ROOT, "mwana", "submodules", "rapidsms")
-    rapidsms_lib = os.path.join(rapidsms_root, "lib")
-    django_settings_root = os.path.join(rapidsms_root, "submodules", "django-app-settings")
-    django_tables_root = os.path.join(rapidsms_root, "submodules", "django-tables")
-    
-    for dir in [django_settings_root, django_tables_root, rapidsms_lib, PROJECT_ROOT]:
-        sys.path.insert(0, dir)
+    sys.path.insert(0, PROJECT_ROOT)
     
     from mwana import localsettings as settings
     from mwana.logconfig import init_file_logging

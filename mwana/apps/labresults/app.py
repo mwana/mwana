@@ -8,7 +8,6 @@ from datetime import date, datetime
 
 from django.conf import settings
 from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
 
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
@@ -17,7 +16,6 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
-from rapidsms.contrib.locations.models import Location
 import mwana.apps.labresults.config as config
 import mwana.const as const
 import rapidsms
@@ -228,13 +226,10 @@ class App (rapidsms.apps.base.AppBase):
 
         if not changed_results:
             return
-        location_type = ContentType.objects.get_for_model(Location)
         contacts = \
-        Contact.active.filter(Q(location=clinic)|
-                              (Q(location__parent_id=clinic.pk) &
-                               Q(location__parent_type=location_type)),
-                              Q(types=const.get_clinic_worker_type())).\
-                              order_by('pk')
+        Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
+                                         Q(types=const.get_clinic_worker_type())).\
+                                         order_by('pk')
         if not contacts:
             self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
@@ -289,10 +284,8 @@ class App (rapidsms.apps.base.AppBase):
     def results_avail_messages(self, clinic):
         results = self._pending_results(clinic)
         contacts = \
-        Contact.active.filter(Q(location=clinic)|
-                              (Q(location__parent_id=clinic.pk) &
-                               Q(location__parent_type=location_type)),
-                              Q(types=const.get_clinic_worker_type()))
+        Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
+                                         Q(types=const.get_clinic_worker_type()))
         if not contacts:
             self.warning("No contacts registered to receiver results at %s! "
                          "These will go unreported until clinic staff "
