@@ -10,17 +10,7 @@
 # then add your django settings:
 SEND_LIVE_LABRESULTS = True
 
-# you should configure your database here before doing any real work.
-# see: http://docs.djangoproject.com/en/dev/ref/settings/#databases
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "mwanadb3", #"mohdb", #"mwanadb",
-        "USER": "rapidsms",
-        "PASSWORD": "rapid",
-        "HOST": "localhost",
-    }
-}
+# configure DATABASES in your localsettings.py
 
 #MIDDLEWARE_CLASSES = (
 #    'django.middleware.common.CommonMiddleware',
@@ -94,7 +84,7 @@ INSTALLED_APPS = [
     "mwana.apps.labresults",
     "mwana.apps.reminders",
     "mwana.apps.location_importer",
-    "mwana.apps.supply",
+#    "mwana.apps.supply",
     "mwana.apps.broadcast",
     "mwana.apps.reports",
     "mwana.apps.training",
@@ -112,7 +102,7 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.locations.views.locations",          "Map"),
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
-    ('mwana.apps.supply.views.dashboard', 'Supplies'),
+#    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
 
@@ -197,7 +187,7 @@ TEST_EXCLUDED_APPS = [
 # maps the urls.py module of each app into a single project urlconf.
 # this is handy, but too magical for the taste of some. (remove it?)
 #ROOT_URLCONF = "rapidsms.djangoproject.urls"
-ROOT_URLCONF = "urls"
+ROOT_URLCONF = "mwana.urls"
 
 
 
@@ -207,18 +197,4 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 
-
-# since we might hit the database from any thread during testing, the
-# in-memory sqlite database isn't sufficient. it spawns a separate
-# virtual database for each thread, and syncdb is only called for the
-# first. this leads to confusing "no such table" errors. We create
-# a named temporary instance instead.
-import os
-import tempfile
-import sys
-
-if 'test' in sys.argv:
-    for db_name in DATABASES:
-        DATABASES[db_name]['TEST_NAME'] = os.path.join(
-            tempfile.gettempdir(),
-			"%s.rapidsms.test.sqlite3" % db_name)
+# configure DATABASES in your localsettings.py
