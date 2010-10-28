@@ -63,7 +63,7 @@ def staging():
     env.dbname = 'mwana_staging_newcore'
     env.repos = {
 #        'mwana': '/home/projects/mwana',
-        'mwana': 'git://github.com/mwana/mwana.git',
+        'mwana': 'https://adewinter@github.com/mwana/mwana.git',
     }
     setup_path()
 
@@ -116,13 +116,13 @@ def deploy_from_local():
     # -r recurse into directories
     # -v increase verbosity
     # -z compress file data during the transfer
-    extra_opts = '--omit-dir-times -e "ssh -p 80"'
+    extra_optss = '--omit-dir-times -e "ssh"' # -p 80"'
     project.rsync_project(
         env.code_root,
-        local_path=env.local_dir,
+        local_dir=env.local_dir,
         exclude=RSYNC_EXCLUDE,
         delete=True,
-        extra_opts=extra_opts,
+        extra_opts=extra_optss,
     )
     touch()
     restart_route()
@@ -165,7 +165,7 @@ def touch():
     Forces a reload of the WSGI Django application in Apache by modifying
     the last-modified time on the wsgi file.
     """
-    run('touch %s' % PATH_SEP.join((env.code_root, 'zambia', 'apache',
+    run('touch %s' % PATH_SEP.join((env.code_root,'mwana', 'zambia', 'apache',
                                     'project.wsgi')))
 
 
