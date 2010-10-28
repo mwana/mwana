@@ -1,7 +1,7 @@
-
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from django.views.decorators.http import require_GET
 from mwana.apps.alerts.labresultsalerts.alerter import Alerter
-from rapidsms.utils import render_to_response
 
 def get_int(val):
     return int(val) if str(val).isdigit() else None
@@ -36,7 +36,7 @@ def mwana_alerts (request):
     lab_sending_days, not_sending_dbs = \
         alerter.get_labs_not_sending_payloads_alerts(lab_sending_days)
 
-    return render_to_response(request, 'alerts/alerts.html',
+    return render_to_response('alerts/alerts.html',
                               {
                               'not_sending_dbs_alerts':not_sending_dbs_alerts,
                               'transport_time':transport_time,
@@ -54,5 +54,5 @@ def mwana_alerts (request):
                               'lab_sending_days':lab_sending_days,
 
                               'days':range(1, 60),
-                              }
+                              }, context_instance=RequestContext(request)
                               )

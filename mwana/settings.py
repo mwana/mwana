@@ -30,10 +30,10 @@ SEND_LIVE_LABRESULTS = True
 # to configure it. see the documentation in those modules for a list of
 # the valid options for each.
 INSTALLED_BACKENDS = {
-    #"att": {
-    #    "ENGINE": "rapidsms.backends.gsm",
-    #    "PORT": "/dev/ttyUSB0"
-    #},
+    "att": {
+        "ENGINE": "rapidsms.backends.gsm",
+        "PORT": "/dev/ttyUSB0"
+    },
     #"verizon": {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
@@ -106,6 +106,7 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
+    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 
 ]
 

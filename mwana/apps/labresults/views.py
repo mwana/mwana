@@ -6,12 +6,8 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_GET
 from django.forms import ModelForm
 from django.db import transaction
-from django.db.models import Sum, Count
 
 from mwana.apps.labresults import models as labresults
-from mwana.apps.labresults.models import Result
-from mwana.apps.labresults.models import SampleNotification
-from mwana.apps.labresults.models import Payload
 from mwana.decorators import has_perm_or_basicauth
 from mwana.apps.locations.models import Location
 from django.template import RequestContext

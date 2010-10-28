@@ -20,6 +20,7 @@ urlpatterns = patterns('',
 
     # Mwana app URLs
     (r'^labresults/', include('mwana.apps.labresults.urls')),
+    (r'^alerts/', include('mwana.apps.alerts.urls')),
     #(r'^supplies/', include('mwana.apps.supply.urls')),
     url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     # RapidSMS contrib app URLs
