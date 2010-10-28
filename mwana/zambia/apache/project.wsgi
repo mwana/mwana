@@ -3,14 +3,14 @@ from os.path import dirname
 import sys
 import site
 
-site_dir = os.path.join(VIRTUALENV_ROOT, 'lib', 'python2.6', 'site-packages')
-site.addsitedir(site_dir)
-
 #Calculate the project path based on the location of the WSGI script.
 APACHE_DIR = dirname(__file__)
 # mwana/zambia/apache/../../..
 PROJECT_ROOT = dirname(dirname(dirname(APACHE_DIR)))
 VIRTUALENV_ROOT = os.path.join(PROJECT_ROOT, 'env')
+
+site_dir = os.path.join(VIRTUALENV_ROOT, 'lib', 'python2.6', 'site-packages')
+site.addsitedir(site_dir)
 
 SHOW_UPGRADE_MESSAGE = False
 ADMIN_IPS = ('127.0.0.1',)
