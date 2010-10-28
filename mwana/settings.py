@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.default",
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
-    "rapidsms.contrib.locations",
+#    "mwana.apps.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
     "rapidsms.contrib.registration",
@@ -89,7 +89,8 @@ INSTALLED_APPS = [
     "mwana.apps.reports",
     "mwana.apps.training",
     "mwana.apps.help",
-	"mwana.apps.alerts",
+    "mwana.apps.alerts",
+    "mwana.apps.locations",
 ]
 
 # this rapidsms-specific setting defines which views are linked by the
@@ -99,7 +100,7 @@ RAPIDSMS_TABS = [
     ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
     ("rapidsms.contrib.registration.views.registration",    "Registration"),
     ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-    ("rapidsms.contrib.locations.views.locations",          "Map"),
+    ("mwana.apps.locations.views.dashboard",          "Map"),
 #    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
     ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),

@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.db.models import Sum
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 
 class Results160Reports:
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')

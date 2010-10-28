@@ -102,6 +102,9 @@ def update_requirements():
 
 
 def deploy_from_local():
+    """
+    Deploys to hosts using local files and rsync (instead of checking out from a remote repo). Touches wsgi script to force apache reload.
+    """
     # don't die if tests fail
     # with settings(warn_only=True):
     #     run_tests()
@@ -126,25 +129,25 @@ def deploy_from_local():
 
 
 def iter_commits():
-    for name, commit in COMMITS:
+    for name, branch in COMMITS:
         repo = env.repos.get(name, '')
         # don't use os.path on the off chance that we're deploying
         # from windows to linux
         dest = PATH_SEP.join([env.root, DEST_DIRS.get(name, '')])
-        yield name, commit, repo, dest
+        yield name, branch, repo, dest
 
 
 def clone_all():
-    for name, commit, repo, dest in iter_commits():
+    for name, branch, repo, dest in iter_commits():
         if repo:
             run('git clone %s %s' % (repo, dest))
 
 
 def pull_and_checkout_all():
-    for name, commit, repo, dest in iter_commits():
+    for name, branch, repo, dest in iter_commits():
         if repo:
             run('cd %s && git pull origin master && git checkout %s' %
-                (dest, commit))
+                (dest, branch))
 
 
 def deploy():

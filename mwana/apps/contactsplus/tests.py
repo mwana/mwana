@@ -1,4 +1,4 @@
-from rapidsms.contrib.locations.models import LocationType, Location
+from mwana.apps.locations.models import LocationType, Location
 from rapidsms.models import Contact
 from django.test.testcases import TestCase
 

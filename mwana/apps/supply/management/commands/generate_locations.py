@@ -22,7 +22,7 @@ class Command(LabelCommand):
     
 def create_locations(count):
     # give django some time to bootstrap itself
-    from rapidsms.contrib.locations.models import LocationType, Location, Point
+    from mwana.apps.locations.models import LocationType, Location, Point
     try:
         health_center_type = LocationType.objects.get(slug="health_facilities")
     except LocationType.DoesNotExist:
@@ -39,7 +39,7 @@ def create_locations(count):
     print "Successfully created %s new locations" % count
 
 def _new_facility_name():
-    from rapidsms.contrib.locations.models import Location
+    from mwana.apps.locations.models import Location
     name = "%s %s" % (random.choice(PLACES_IN_ZAMBIA), 
                       random.choice(HEALTH_CENTER_TYPES))
     try:

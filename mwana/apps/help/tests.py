@@ -6,8 +6,8 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from mwana import const
-from rapidsms.contrib.locations.models import Location
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD, INITIAL_PAYLOAD

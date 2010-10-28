@@ -26,11 +26,12 @@ urlpatterns = patterns('',
     (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
     (r'^export/', include('rapidsms.contrib.export.urls')),
     (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
-    (r'^locations/', include('rapidsms.contrib.locations.urls')),
+    (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
     (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
     (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
+    (r'^locations/', include('mwana.apps.locations.urls')),
     
 )
 

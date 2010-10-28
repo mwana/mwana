@@ -4,7 +4,7 @@ import time
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
-from rapidsms.contrib.locations.models import Location, LocationType
+from mwana.apps.locations.models import Location, LocationType
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders.app import App

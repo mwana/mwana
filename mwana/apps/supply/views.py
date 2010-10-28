@@ -6,7 +6,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods, require_GET
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.utils import web_message
 from rapidsms.contrib.messaging.utils import send_message
 from django.template import RequestContext

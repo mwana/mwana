@@ -1,6 +1,6 @@
 from django.db import models
 from django.db.models import Q
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 import datetime
 

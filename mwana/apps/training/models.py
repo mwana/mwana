@@ -1,6 +1,6 @@
 from django.db import models
 from rapidsms.models import Contact
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 import datetime
 # Create your models here.
 

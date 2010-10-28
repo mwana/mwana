@@ -1,7 +1,7 @@
 import re
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 
 from mwana.apps.reminders import models as reminders

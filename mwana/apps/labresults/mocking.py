@@ -3,7 +3,7 @@ from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS,
     SELF_COLLECTED
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.util import is_eligible_for_results
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact

@@ -1,5 +1,5 @@
 from django.db import models
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 #from rapidsms.models import Connection
 #from rapidsms.models import Contact
 

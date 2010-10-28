@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from datetime import datetime
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.models import Connection, Contact
 
 

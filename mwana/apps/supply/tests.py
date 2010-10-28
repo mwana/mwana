@@ -1,7 +1,7 @@
 from mwana.apps.supply.app import App
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 

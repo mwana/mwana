@@ -7,7 +7,7 @@ from mwana import const
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.views import process_payload
 
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 
 logger = logging.getLogger(__name__)
 

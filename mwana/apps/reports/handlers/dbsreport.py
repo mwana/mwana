@@ -8,7 +8,7 @@ from mwana import const
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
