@@ -9,8 +9,8 @@ from django.core.urlresolvers import reverse
 from mwana.apps.labresults import models as labresults
 from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
-from rapidsms.contrib.locations.models import Location
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import LocationType
 from rapidsms.models import Connection
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript

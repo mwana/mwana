@@ -11,7 +11,7 @@ from mwana.apps.alerts.models import Lab
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 

@@ -1,5 +1,5 @@
 from mwana.apps.contactsplus.models import ContactType
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import LocationType
 
 # contact types:
 CBA_SLUG = 'cba'

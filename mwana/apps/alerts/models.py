@@ -1,5 +1,6 @@
 from django.db import models
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
+
 
 class Hub(models.Model):
     name = models.CharField(max_length=50)

@@ -7,8 +7,8 @@ Replace these with more appropriate tests for your application.
 
 from mwana import const
 from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.contrib.locations.models import Location
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.stringcleaning.app import App as cleaner_App

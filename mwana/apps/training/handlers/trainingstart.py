@@ -1,7 +1,7 @@
 from django.db import models
 from mwana.apps.training.models import TrainingSession
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 

@@ -50,7 +50,7 @@ LOG_BACKUPS = 256     # number of logs to keep around
 TABS = [
     ('rapidsms.views.dashboard', 'Dashboard'),
 #    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
-    ('rapidsms.contrib.locations.views.dashboard', 'Map'),
+    ('mwana.apps.locations.views.dashboard', 'Map'),
 #    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.registration.views.registration', 'Registration'),

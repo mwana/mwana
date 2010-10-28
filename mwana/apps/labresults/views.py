@@ -13,7 +13,7 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.labresults.models import Payload
 from mwana.decorators import has_perm_or_basicauth
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 

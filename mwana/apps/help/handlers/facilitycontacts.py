@@ -2,7 +2,7 @@ import mwana.const as const
 from django.db.models import Q
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 
 

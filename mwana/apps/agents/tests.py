@@ -1,7 +1,7 @@
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
-from rapidsms.contrib.locations.models import Location, LocationType
+from mwana.apps.locations.models import Location, LocationType
 
 from mwana.apps.reminders.app import App
 from mwana.apps.reminders import models as reminders

@@ -1,4 +1,4 @@
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import LocationType
 from mwana.const import get_zone_type
 import datetime
 

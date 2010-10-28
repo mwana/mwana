@@ -6,8 +6,8 @@ Replace these with more appropriate tests for your application.
 """
 
 from mwana import const
-from rapidsms.contrib.locations.models import Location
-from rapidsms.contrib.locations.models import LocationType
+from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from rapidsms.models import Connection

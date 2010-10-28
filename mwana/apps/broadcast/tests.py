@@ -1,6 +1,6 @@
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.messagelog.app import App as logger_app
-from rapidsms.contrib.locations.models import LocationType, Location
+from mwana.apps.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type
