@@ -152,7 +152,7 @@ class App(rapidsms.App):
                             name=patient.name, date=date.strftime('%d/%m/%Y'))
                 return
             patient.patient_events.create(event=event, date=date,
-                                          cba_conn=msg.connection)
+                                          cba_conn=msg.connection, notification_status="new")
             gender = event.possessive_pronoun
             msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
