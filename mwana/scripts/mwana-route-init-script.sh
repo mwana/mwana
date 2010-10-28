@@ -19,7 +19,7 @@ USER=
 
 stop() {
         echo -n Stopping mwana route process...
-        PID=`ps aux|grep "manage.py route"|grep -v grep|awk '{print $2}'`
+        PID=`ps aux| grep "manage.py runrouter"| grep -v grep|awk '{print $2}'`
         if [ -n $PID ]; then
                 kill $PID
         fi
