@@ -33,7 +33,7 @@ def create_locations(count):
         lat, lon = _zambian_coordinate()
         point = Point.objects.create(latitude=str(lat), longitude=str(lon))
         name = _new_facility_name()
-        Location.objects.create(name=name,point=point,
+        Location.objects.create(singular=name,plural = name+"s",point=point,
                                 type=health_center_type,
                                 slug=name.replace(" ", "_")[:30])
     print "Successfully created %s new locations" % count
