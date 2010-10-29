@@ -4,24 +4,33 @@ import sys
 import site
 
 #Calculate the project path based on the location of the WSGI script.
+
 APACHE_DIR = dirname(__file__)
+
 # mwana/zambia/apache/../../..
-PROJECT_ROOT = dirname(dirname(dirname(APACHE_DIR)))
+# mwana/mwana/zambia/apache/../../../../
+#PROJECT_ROOT = dirname(dirname(dirname(dirname(APACHE_DIR))))
+
+PROJECT_ROOT = '/home/deployer/staging-newcore/'
 VIRTUALENV_ROOT = os.path.join(PROJECT_ROOT, 'env')
+MWANA_ROOT = os.path.join(PROJECT_ROOT,'mwana','mwana')
 
 site_dir = os.path.join(VIRTUALENV_ROOT, 'lib', 'python2.6', 'site-packages')
 site.addsitedir(site_dir)
 
 SHOW_UPGRADE_MESSAGE = False
 ADMIN_IPS = ('127.0.0.1',)
-UPGRADE_FILE = os.path.join(PROJECT_ROOT, 'media', 'html', 'upgrade.html')
-ERROR_FILE = os.path.join(PROJECT_ROOT, 'media', 'html', 'server_error.html')
+UPGRADE_FILE = os.path.join(MWANA_ROOT, 'media', 'html', 'upgrade.html')
+ERROR_FILE = os.path.join(MWANA_ROOT, 'media', 'html', 'server_error.html')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mwana.localsettings'
-os.environ['PYTHON_EGG_CACHE'] = '/var/data/.python_eggs'
+os.environ['PYTHON_EGG_CACHE'] = '/var/tmp/.python_eggs'
 
 try:
-    sys.path.insert(0, PROJECT_ROOT)
+#    sys.path.insert(0, MWANA_ROOT)
+    sys.path.insert(0, '/home/deployer/staging-newcore/mwana/')
+    sys.path.insert(1, site_dir)
+
     
     from mwana import localsettings as settings
     from mwana.logconfig import init_file_logging
