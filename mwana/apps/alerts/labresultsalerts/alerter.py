@@ -59,6 +59,9 @@ class Alerter:
     last_sent_payloads = {}
     not_sending_dbs_alerts = []
 
+    def __init__(self):
+        self.today = date.today()
+
     def get_labs_not_sending_payloads_alerts(self, days=None):
         my_alerts = []
         self.set_lab_last_sent_payload()
