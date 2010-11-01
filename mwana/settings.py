@@ -30,10 +30,10 @@ SEND_LIVE_LABRESULTS = True
 # to configure it. see the documentation in those modules for a list of
 # the valid options for each.
 INSTALLED_BACKENDS = {
-    "att": {
-        "ENGINE": "rapidsms.backends.gsm",
-        "PORT": "/dev/ttyUSB0"
-    },
+    #"att": {
+    #    "ENGINE": "rapidsms.backends.gsm",
+    #    "PORT": "/dev/ttyUSB0"
+    #},
     #"verizon": {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
@@ -79,7 +79,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.echo",
     "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
-    "mwana.apps.registration",
+#    "mwana.apps.registration",
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",

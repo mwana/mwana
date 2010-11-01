@@ -282,6 +282,9 @@ class App (rapidsms.apps.base.AppBase):
             r.save()
 
     def results_avail_messages(self, clinic):
+        '''
+        Returns clinic workers registered to receive results notification at this clinic. 
+        '''
         results = self._pending_results(clinic)
         contacts = \
         Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),

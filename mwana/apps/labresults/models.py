@@ -165,3 +165,11 @@ class LabLog(models.Model):
         return ('%s: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                                 self.message if len(self.message) < 20 else (self.message[:17] + '...'))) \
             if not self.raw else 'parse error'
+
+
+class PrintedResult(models.Model):
+    ''' A result that has been printed out on an sms printer at a specific location '''
+    result = models.ForeignKey(Result)
+    contact = models.ForeignKey(Contact)
+    times_printed = models.IntegerField(null=True, blank=True)
+    
