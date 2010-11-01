@@ -5,6 +5,7 @@ from rapidsms.djangoproject.settings import *
 
 # then add your django settings:
 SEND_LIVE_LABRESULTS = True
+SEND_LIVE_BIRTH_REMINDERS = True
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
+    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     
