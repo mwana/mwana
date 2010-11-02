@@ -15,7 +15,7 @@ from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 
-class Alerter:    
+class Alerter:
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
     district_transport_days = DEFAULT_DISTICT_TRANSPORT_DAYS
 
@@ -35,7 +35,7 @@ class Alerter:
     lab_sending_days = DEFAULT_LAB_SENDING_DAYS
 
     today = date.today()
-    
+
     district_trans_referal_date = \
     datetime(today.year, today.month, today.day)-timedelta(days=district_transport_days)
 
@@ -53,11 +53,14 @@ class Alerter:
 
     lab_send_referal_date = \
     datetime(today.year, today.month, today.day)-timedelta(days=lab_sending_days)
-    
+
     last_received_dbs = {}
     last_processed_dbs = {}
     last_sent_payloads = {}
     not_sending_dbs_alerts = []
+
+    def __init__(self):
+        self.today = date.today()
 
     def get_labs_not_sending_payloads_alerts(self, days=None):
         my_alerts = []
@@ -236,7 +239,7 @@ class Alerter:
                              level,
                              additional_text
                              ))
-                             
+
         return self.clinic_notification_days, sorted(my_alerts, key=itemgetter(5))
 
     def set_district_last_received_dbs(self):
@@ -269,10 +272,10 @@ class Alerter:
             else:
                 self.last_sent_payloads[lab] = payload.incoming_date
 
-                
+
     def set_not_sending_dbs_alerts(self):
         self.set_district_last_received_dbs()
-        
+
         all_districts = \
         self.get_distinct_parents(self.get_facilities_for_reporting())
         for dist in all_districts:
@@ -326,13 +329,13 @@ class Alerter:
     def add_to_district_dbs_elerts(self, type, message, culprit=None, days_late=None, sort_field=None, level=None, extra=None):
         self.not_sending_dbs_alerts.append(Alert(type, message, culprit,
                                            days_late, sort_field, level, extra))
-        
+
     def get_hub_name(self, location):
         try:
             return Hub.objects.get(district=location).name
         except Hub.DoesNotExist:
             return "(Unkown hub)"
-        
+
     def get_hub_number(self, location):
         try:
             return Hub.objects.exclude(Q(phone=None) | Q(phone='')).\
