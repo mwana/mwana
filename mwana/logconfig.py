@@ -68,8 +68,9 @@ def init_email_handler(email_host, default_from_email, admins,
                                    default_from_email,
                                    [email for name, email in admins],
                                    email_subject_prefix + 'log message')
-    smtp.getSubject = lambda record: ''.join(email_subject_prefix,
-                                            record.levelname, ': ', record.msg)
+    smtp.getSubject = lambda record: ''.join([email_subject_prefix,
+                                              record.levelname,
+                                              ': ', record.msg])
     smtp.setLevel(logging.ERROR)
     smtp.setFormatter(EmailMsgFormatter(log_format))
     root_logger.addHandler(smtp)
