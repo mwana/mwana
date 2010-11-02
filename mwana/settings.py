@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.default",
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
 #    "mwana.apps.locations",
@@ -91,6 +90,10 @@ INSTALLED_APPS = [
     "mwana.apps.help",
     "mwana.apps.alerts",
     "mwana.apps.locations",
+
+
+# This app should always come last to prevent it from hijacking other apps that handle default messages
+    "rapidsms.contrib.default",
 ]
 
 # this rapidsms-specific setting defines which views are linked by the

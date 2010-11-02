@@ -1,7 +1,18 @@
 This is the Mwana MNCH RapidSMS project for deployment in Zambia and Malawi.
 When development settles down a bit, the rapidsms package can be bundled into
-a deb, rpm, .tar.gz (or whatever), and installed into site-packages. For now,
-it is a submodule.
+a deb, rpm, .tar.gz (or whatever), and installed into site-packages.
+
+
+
+
+
+~~~~~~~~~~
+NOTE: BELOW NOTES ARE OUT OF DATE. SUBMODULES ARE NOT IN USE ANYMORE.  See github.com/mwana/mwana new-core branch for changes.
+
+
+
+
+
 
 Setup
 =====
