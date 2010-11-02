@@ -74,12 +74,12 @@ INSTALLED_APPS = [
 #    "mwana.apps.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-    "rapidsms.contrib.registration",
+#    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
     "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
-#    "mwana.apps.registration",
+    "mwana.apps.registration",
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
@@ -154,7 +154,7 @@ LOG_FILE    = "logs/rapidsms.log"
 LOG_FORMAT  = "[%(name)s]: %(message)s"
 LOG_SIZE    = 8192 # 8192 bytes = 64 kb
 LOG_BACKUPS = 256 # number of logs to keep
-
+DJANGO_LOG_FILE  = '/var/log/rapidsms/django.log'
 
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
