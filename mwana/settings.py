@@ -100,18 +100,19 @@ INSTALLED_APPS = [
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
-    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
-    ("rapidsms.contrib.registration.views.registration",    "Registration"),
-    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-    ("mwana.apps.locations.views.dashboard",          "Map"),
-#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
-    ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
+    ('rapidsms.views.dashboard', 'Dashboard'),
+    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ('mwana.apps.locations.views.dashboard', 'Map'),
+    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.registration.views.registration', 'Registration'),
+    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-
 ]
+
 
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
