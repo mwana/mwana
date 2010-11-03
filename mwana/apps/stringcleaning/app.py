@@ -5,6 +5,7 @@ from mwana.apps.broadcast.handlers.all import AllHandler
 from mwana.apps.broadcast.handlers.clinic import ClinicHandler
 from mwana.apps.broadcast.handlers.cba import ClinicHandler as CbaHandler
 from mwana.apps.broadcast.handlers.blaster import BlastHandler
+from mwana.apps.broadcast.handlers.district import DistrictHandler
 
 class App (rapidsms.apps.base.AppBase):
 
@@ -26,6 +27,7 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(CbaHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(ClinicHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(BlastHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(DistrictHandler.keyword.split('|')))
         
         # remove leading/trailing whitespace
         # get out your featherduster
