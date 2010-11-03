@@ -59,6 +59,18 @@ class PatientEvent(models.Model):
     """
     Event that happened to a patient at a given time
     """
+    STATUS_CHOICES = (
+        ('new', 'New birth registered'),
+        ('notified', 'Clinic notified of new birth'),
+        ('sent', 'Birth details sent to clinic')    #set when server receives updates to a sample record
+                                                #AFTER this result has already been sent to the clinic.
+                                                #if result has not yet been sent, it keeps status 'new'.
+                                                #the updated data may or may not merit sending the
+                                                #update to the clinic (i.e., changed result, yes, changed
+                                                #child age, no)
+    )
+
+    
     patient = models.ForeignKey(Contact, related_name='patient_events',
                                 limit_choices_to={'types__slug': 'patient'})
     event = models.ForeignKey(Event, related_name='patient_events')
@@ -67,6 +79,9 @@ class PatientEvent(models.Model):
                                           'cba'},verbose_name='CBA Connection')
     date = models.DateField()
     date_logged = models.DateTimeField()
+    notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)   #New field added to accomodate birth notification status
+    notification_sent_date = models.DateTimeField(null=True, blank=True)    #New field added to accomodate birth notification sent date
+    
     
     def save(self, *args, **kwargs):
         if not self.pk:

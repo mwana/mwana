@@ -7,3 +7,4 @@ mwana/db.sqlite3
 .project
 .pydevproject
 .settings/
+mwana/*.bak
