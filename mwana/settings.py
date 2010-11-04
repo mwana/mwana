@@ -83,7 +83,8 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
-    "mwana.apps.birth_reminders",
+# disabled 4/11/10 because the code doesn't appear to be checked in.  -TM
+#    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.broadcast",
