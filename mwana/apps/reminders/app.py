@@ -41,8 +41,8 @@ class App(rapidsms.apps.base.AppBase):
         
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-#        EventSchedule.objects.create(callback=callback, hours=[12],
-#                                     minutes=[0])
+        EventSchedule.objects.create(callback=callback, hours=[12],
+                                     minutes=[0])
 
     def _parse_date(self, date_str):
         """
@@ -152,7 +152,7 @@ class App(rapidsms.apps.base.AppBase):
                             name=patient.name, date=date.strftime('%d/%m/%Y'))
                 return
             patient.patient_events.create(event=event, date=date,
-                                          cba_conn=msg.connection)
+                                          cba_conn=msg.connection, notification_status="new")
             gender = event.possessive_pronoun
             msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
