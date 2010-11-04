@@ -9,6 +9,7 @@
 
 # then add your django settings:
 SEND_LIVE_LABRESULTS = True
+SEND_LIVE_BIRTH_REMINDERS = True
 
 # configure DATABASES in your localsettings.py
 
@@ -82,6 +83,7 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
+    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.broadcast",
