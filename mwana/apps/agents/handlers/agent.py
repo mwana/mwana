@@ -60,7 +60,7 @@ class AgentHelper(KeywordHandler):
         Determines the contact's current clinic and zone, if any.
         """
         if contact and contact.location and\
-           contact.location.type.slug == const.ZONE_SLUG:
+           contact.location.type.slug in const.ZONE_SLUGS:
             contact_clinic = contact.location.parent
             contact_zone = contact.location
         elif contact and contact.location and\

@@ -6,6 +6,7 @@ from datetime import timedelta
 from django.db import connection
 from django.db.models import Q
 from django.db.models import Sum
+from mwana import const
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
@@ -229,9 +230,9 @@ class Results160Reports:
             unprocessed = self.get_results_by_status_and_location(['unprocessed'], location).count()
             total = self.get_results_by_status_and_location(['updated', 'new',
                                                             'notified', 'unprocessed'], location).count()
-
-            table.append([' ' + location.parent.name, ' ' + location.name, \
-                         new, notified, updated, unprocessed, total])
+            district_name = location.parent and location.parent.name or ' '
+            table.append([' ' + district_name, ' ' + location.name,\
+                          new, notified, updated, unprocessed, total])
             tt_new = tt_new + new
             tt_notified = tt_notified + notified
             tt_updated = tt_updated + updated
@@ -522,10 +523,12 @@ class Results160Reports:
         """
         start = self.dbsr_startdate.date()
         end = self.dbsr_enddate.date()
-        earliest_start = Result.objects.order_by('result_sent_date').\
-        filter(notification_status='sent')[0].result_sent_date.date()
-
-        start = max(start, earliest_start)
+        try:
+            earliest_start = Result.objects.order_by('result_sent_date').\
+            filter(notification_status='sent')[0].result_sent_date.date()
+        except IndexError:
+            earliest_start = None
+        start = earliest_start and max(start, earliest_start) or start
         end = min(end, date.today())
         diff = (end - start).days
         if diff > self.MAX_REPORTING_PERIOD:
@@ -557,12 +560,14 @@ class Results160Reports:
             table.append([key, value])
 
         return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
-    def get_distinct_parents(self, locations):
+
+    def get_distinct_parents(self, locations, type_slugs=None):
         if not locations:
             return None
         parents = []
         for location in locations:
-            parents.append(location.parent)
+            if not type_slug or (location.parent and location.parent.type.slug in type_slugs):
+                parents.append(location.parent)
         return list(set(parents))
 
     def get_total_results_in_province(self, province):
@@ -590,12 +595,14 @@ class Results160Reports:
         percent_positive_provinces = []
         percent_negative_provinces = []
         percent_rejected_provinces = []
-        provinces = self.get_distinct_parents(self.get_distinct_parents(self.get_active_facilities()))
-
-        for province in provinces:
-            percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
-            percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
-            percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+        facilities = self.get_active_facilities()
+        districts = self.get_distinct_parents(facilities, type_slugs=const.DISTRICT_SLUGS)
+        provinces = self.get_distinct_parents(districts, type_slugs=const.PROVINCE_SLUGS)
+        if provinces:
+            for province in provinces:
+                percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+                percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+                percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
             
                     
         
