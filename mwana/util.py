@@ -1,6 +1,12 @@
 from mwana.apps.locations.models import LocationType
-from mwana.const import get_zone_type
+from mwana import const
 import datetime
+from django.conf import settings
+from mwana.importlib import get_class
+
+
+LocationCode = get_class(settings.LOCATION_CODE_CLASS)
+
 
 def get_clinic_or_default(contact):
     """Gets a clinic associated with the contact"""
@@ -14,16 +20,18 @@ def get_clinic_or_default(contact):
     # parents are found 
     location = contact.location
     while location:
-        if location.type != get_zone_type():
+        if location.type.slug not in const.ZONE_SLUGS:
             return location
         location = location.parent
     return contact.location
+
 
 def is_today_a_weekend():
     """
     Returns true if current date is a weekend. Monday => 0
     """
     return datetime.date.today().weekday() in [5, 6]
+
 
 def is_weekend(input_date):
     """

@@ -3,22 +3,14 @@
 # encoding=utf-8
 
 # -------------------------------------------------------------------- #
-#                          MAIN CONFIGURATION                          #
+#                        PROJECT CONFIGURATION                         #
 # -------------------------------------------------------------------- #
+# Note that this file should only contain settings that can be shared
+# across the entire project (i.e., in both Malawi and Zambia).
+#
+# Customization for a country or specific server environment should be done
+# in the mwana/malawi/ or mwana/zambia/ directories, respectively.
 
-
-# then add your django settings:
-SEND_LIVE_LABRESULTS = True
-SEND_LIVE_BIRTH_REMINDERS = True
-
-# configure DATABASES in your localsettings.py
-
-#MIDDLEWARE_CLASSES = (
-#    'django.middleware.common.CommonMiddleware',
-#    'django.contrib.sessions.middleware.SessionMiddleware',
-#    'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'mwana.middleware.LoginRequired',
-#)
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
@@ -83,7 +75,6 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
-# disabled 4/11/10 because the code doesn't appear to be checked in.  -TM
 #    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
@@ -93,7 +84,6 @@ INSTALLED_APPS = [
     "mwana.apps.help",
     "mwana.apps.alerts",
     "mwana.apps.locations",
-
 
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
@@ -161,7 +151,7 @@ LOG_FILE    = "logs/rapidsms.log"
 LOG_FORMAT  = "[%(name)s]: %(message)s"
 LOG_SIZE    = 8192 # 8192 bytes = 64 kb
 LOG_BACKUPS = 256 # number of logs to keep
-DJANGO_LOG_FILE  = '/var/log/rapidsms/django.log'
+DJANGO_LOG_FILE  = 'logs/django.log'
 
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
@@ -172,12 +162,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.media",
     "django.core.context_processors.request",
 ]
-
-
-# -------------------------------------------------------------------- #
-#                           HERE BE DRAGONS!                           #
-#        these settings are pure hackery, and will go away soon        #
-# -------------------------------------------------------------------- #
 
 
 # these apps should not be started by rapidsms in your tests, however,
@@ -199,11 +183,38 @@ TEST_EXCLUDED_APPS = [
 ROOT_URLCONF = "mwana.urls"
 
 
-
 # For Schema Migration
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'testextensions_main.migrations',
 }
 
 
-# configure DATABASES in your localsettings.py
+# -------------------------------------------------------------------- #
+#                       RESULTS160 CONFIGURATION                       #
+# -------------------------------------------------------------------- #
+
+# Results160 setting to configure whether or not real results from the lab
+# should be delivered to health clinics
+SEND_LIVE_LABRESULTS = True
+
+# Miscellaneous slugs needed by Results160 and dependent on the data schema/
+# local environment.  You will almost certainly want to customize these in
+# your country-level settings file.
+RESULTS160_SLUGS = {
+# contact types:
+    'CBA_SLUG': 'cba',
+    'PATIENT_SLUG': 'patient',
+    'CLINIC_WORKER_SLUG': 'clinic-worker',
+    'DISTRICT_WORKER_SLUG': 'district-worker',
+# location types:
+    'CLINIC_SLUGS': ('clinic',),
+    'ZONE_SLUGS': ('zone',),
+    'DISTRICT_SLUGS': ('district',),
+}
+
+# -------------------------------------------------------------------- #
+#                        REMINDMI CONFIGURATION                        #
+# -------------------------------------------------------------------- #
+
+# RemindMi setting to configure ...
+SEND_LIVE_BIRTH_REMINDERS = True

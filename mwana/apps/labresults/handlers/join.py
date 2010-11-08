@@ -5,7 +5,8 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
-from mwana.util import get_clinic_or_default
+from mwana.util import get_clinic_or_default, LocationCode
+
 
 class JoinHandler(KeywordHandler):
     """
@@ -97,7 +98,7 @@ class JoinHandler(KeywordHandler):
 
         tokens = group.groups()
         tokens = list(tokens)
-        tokens[0] = tokens[0].strip()[0:6] #location code
+        tokens[0] = tokens[0].strip() #location code
         tokens[2] = tokens[2].title().strip() #name
         tokens[4] = tokens[4].strip() #pin
         
@@ -113,58 +114,19 @@ class JoinHandler(KeywordHandler):
             self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
             return False
         
-        if len(tokens[0]) == 4:
-            tokens[0] = tokens[0] + '00' #pad with 00 for district code
-        
         return tuple(tokens)
 
-
-    def get_worker_type(self, code):
-        '''
-        Returns the worker_type based on the location_code
-        Expects code of format PPDDFF exactly.
-        '''
-        PP = code[0:2]
-        DD = code[2:4]
-        FF = code[4:6]
-        
-        if FF == '00':
-            if DD == '00':
-                return const.get_province_worker_type()
-            else:
-                return const.get_district_worker_type()
-        else:
-            return const.get_clinic_worker_type()
-        
-    def get_location_type(self, code):
-        '''
-        Returns the location_type_slug (Province, district or clinic) based on the location_code
-        Expects code of format PPDDFF exactly.
-        '''
-        PP = code[0:2]
-        DD = code[2:4]
-        FF = code[4:6]
-        print 'WOOP WOOP!'
-        if FF == '00':
-            if DD == '00':
-                return const.PROVINCE_SLUGS
-            else:
-                return const.DISTRICT_SLUGS
-        else:
-            return const.CLINIC_SLUGS  
-        
     def handle(self, text):
 
         tokens = self.check_message_valid_and_clean(text)
         
         if not tokens:
             return
-
-        clinic_code = tokens[0]
+        clinic_code = LocationCode(tokens[0])
         name = tokens[2]
         pin = tokens[4]
-        worker_type = self.get_worker_type(clinic_code)
-        location_type = self.get_location_type(clinic_code)
+        worker_type = clinic_code.get_worker_type()
+        location_type = clinic_code.get_location_type()
         
         if is_already_valid_connection_type(self.msg.connection, worker_type):
             # refuse re-registration if they're still active and eligible
@@ -174,7 +136,7 @@ class JoinHandler(KeywordHandler):
             return False
         
         try:
-            location = Location.objects.get(slug__iexact=clinic_code,
+            location = Location.objects.get(slug__iexact=clinic_code.slug,
                                             type__slug__in=location_type)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
