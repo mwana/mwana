@@ -31,3 +31,5 @@ RESULTS160_SLUGS = {
 TIME_ZONE = 'Africa/Blantyre'
 
 LANGUAGE_CODE = 'eng-us'
+
+LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
