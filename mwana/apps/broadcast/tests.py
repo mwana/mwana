@@ -3,7 +3,8 @@ from rapidsms.contrib.messagelog.app import App as logger_app
 from mwana.apps.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
-from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type
+from mwana import const
+from mwana.const import get_clinic_worker_type, get_cba_type
 from mwana.apps.broadcast.app import App as broadcast_app
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
@@ -12,12 +13,16 @@ class TestApp(TestScript):
     
     def setUp(self):
         super(TestApp, self).setUp()
-        type, _ = LocationType.objects.get_or_create(singular="clinic", 
+        clinic_type, _ = LocationType.objects.get_or_create(singular="clinic", 
                                                      plural="clinics", 
-                                                     slug="clinics")
-        clinic = Location.objects.create(type=type, name="demo", slug="demo") 
-        self.clinic_zone= Location.objects.create(type=get_zone_type(), name="child", 
-                                             slug="child", parent=clinic) 
+                                                     slug=const.CLINIC_SLUGS[0])
+        zone_type, _ = LocationType.objects.get_or_create(singular="clinic", 
+                                                     plural="clinics", 
+                                                     slug=const.CLINIC_SLUGS[0])
+        clinic = Location.objects.create(type=clinic_type, name="demo",
+                                         slug="demo")
+        self.clinic_zone = Location.objects.create(type=zone_type, name="child", 
+                                                   slug="child", parent=clinic) 
         clinic_worker = self.create_contact(name="clinic_worker", location=clinic, 
                                             types=[get_clinic_worker_type()])
         clinic_worker2 = self.create_contact(name="clinic_worker2", location=self.clinic_zone,

@@ -49,7 +49,7 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
         else:
             cba_name = ''
         if patient.location:
-            if patient.location.type == const.get_zone_type() and\
+            if patient.location.type.slug in const.ZONE_SLUGS and\
                patient.location.parent:
                 clinic_name = patient.location.parent.name
             else:

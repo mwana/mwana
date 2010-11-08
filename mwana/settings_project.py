@@ -3,21 +3,14 @@
 # encoding=utf-8
 
 # -------------------------------------------------------------------- #
-#                          MAIN CONFIGURATION                          #
+#                        PROJECT CONFIGURATION                         #
 # -------------------------------------------------------------------- #
+# Note that this file should only contain settings that can be shared
+# across the entire project (i.e., in both Malawi and Zambia).
+#
+# Customization for a country or specific server environment should be done
+# in the mwana/malawi/ or mwana/zambia/ directories, respectively.
 
-
-# then add your django settings:
-SEND_LIVE_LABRESULTS = True
-
-# configure DATABASES in your localsettings.py
-
-#MIDDLEWARE_CLASSES = (
-#    'django.middleware.common.CommonMiddleware',
-#    'django.contrib.sessions.middleware.SessionMiddleware',
-#    'django.contrib.auth.middleware.AuthenticationMiddleware',
-#    'mwana.middleware.LoginRequired',
-#)
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
@@ -30,10 +23,10 @@ SEND_LIVE_LABRESULTS = True
 # to configure it. see the documentation in those modules for a list of
 # the valid options for each.
 INSTALLED_BACKENDS = {
-    "att": {
-        "ENGINE": "rapidsms.backends.gsm",
-        "PORT": "/dev/ttyUSB0"
-    },
+    #"att": {
+    #    "ENGINE": "rapidsms.backends.gsm",
+    #    "PORT": "/dev/ttyUSB0"
+    #},
     #"verizon": {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
@@ -68,13 +61,12 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
 
     # the rapidsms contrib apps.
-    "rapidsms.contrib.default",
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
 #    "mwana.apps.locations",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-    "rapidsms.contrib.registration",
+#    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "rapidsms.contrib.echo",
     "mwana.apps.stringcleaning",
@@ -83,6 +75,7 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
+#    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.broadcast",
@@ -92,24 +85,27 @@ INSTALLED_APPS = [
     "mwana.apps.alerts",
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
+# This app should always come last to prevent it from hijacking other apps that handle default messages
+    "rapidsms.contrib.default",
 ]
 
 # this rapidsms-specific setting defines which views are linked by the
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
-    ("rapidsms.contrib.messagelog.views.message_log",       "Message Log"),
-    ("rapidsms.contrib.registration.views.registration",    "Registration"),
-    ("rapidsms.contrib.messaging.views.messaging",          "Messaging"),
-    ("mwana.apps.locations.views.dashboard",          "Map"),
-#    ("rapidsms.contrib.scheduler.views.index",              "Event Scheduler"),
-    ("rapidsms.contrib.httptester.views.generate_identity", "Message Tester"),
+    ('rapidsms.views.dashboard', 'Dashboard'),
+    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ('mwana.apps.locations.views.dashboard', 'Map'),
+    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.registration.views.registration', 'Registration'),
+    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-
 ]
+
 
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
@@ -135,7 +131,7 @@ LOGIN_REDIRECT_URL = "/"
 # use django-nose to run tests. rapidsms contains lots of packages and
 # modules which django does not find automatically, and importing them
 # all manually is tiresome and error-prone.
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+#TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 
 # for some reason this setting is blank in django's global_settings.py,
@@ -155,7 +151,7 @@ LOG_FILE    = "logs/rapidsms.log"
 LOG_FORMAT  = "[%(name)s]: %(message)s"
 LOG_SIZE    = 8192 # 8192 bytes = 64 kb
 LOG_BACKUPS = 256 # number of logs to keep
-
+DJANGO_LOG_FILE  = 'logs/django.log'
 
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
@@ -166,12 +162,6 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.media",
     "django.core.context_processors.request",
 ]
-
-
-# -------------------------------------------------------------------- #
-#                           HERE BE DRAGONS!                           #
-#        these settings are pure hackery, and will go away soon        #
-# -------------------------------------------------------------------- #
 
 
 # these apps should not be started by rapidsms in your tests, however,
@@ -193,11 +183,38 @@ TEST_EXCLUDED_APPS = [
 ROOT_URLCONF = "mwana.urls"
 
 
-
 # For Schema Migration
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'testextensions_main.migrations',
 }
 
 
-# configure DATABASES in your localsettings.py
+# -------------------------------------------------------------------- #
+#                       RESULTS160 CONFIGURATION                       #
+# -------------------------------------------------------------------- #
+
+# Results160 setting to configure whether or not real results from the lab
+# should be delivered to health clinics
+SEND_LIVE_LABRESULTS = True
+
+# Miscellaneous slugs needed by Results160 and dependent on the data schema/
+# local environment.  You will almost certainly want to customize these in
+# your country-level settings file.
+RESULTS160_SLUGS = {
+# contact types:
+    'CBA_SLUG': 'cba',
+    'PATIENT_SLUG': 'patient',
+    'CLINIC_WORKER_SLUG': 'clinic-worker',
+    'DISTRICT_WORKER_SLUG': 'district-worker',
+# location types:
+    'CLINIC_SLUGS': ('clinic',),
+    'ZONE_SLUGS': ('zone',),
+    'DISTRICT_SLUGS': ('district',),
+}
+
+# -------------------------------------------------------------------- #
+#                        REMINDMI CONFIGURATION                        #
+# -------------------------------------------------------------------- #
+
+# RemindMi setting to configure ...
+SEND_LIVE_BIRTH_REMINDERS = True

@@ -40,7 +40,7 @@ class DeregisterHandler(KeywordHandler):
         text = b.remove_double_spaces(text)
         worker = self.msg.contact
         location = worker.location
-        if location.type == const.get_zone_type():
+        if location.type.slug in const.ZONE_SLUGS:
             location = location.parent
         cba = None
 

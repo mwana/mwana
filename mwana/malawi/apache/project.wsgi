@@ -3,35 +3,28 @@ from os.path import dirname
 import sys
 import site
 
-#Calculate the project path based on the location of the WSGI script.
-
+# Calculate various paths based on the location of the WSGI script, assuming
+# __file__ lives at <root>/mwana/<country/apache/project.wsgi
 APACHE_DIR = dirname(__file__)
-
-# mwana/zambia/apache/../../..
-# mwana/mwana/zambia/apache/../../../../
-#PROJECT_ROOT = dirname(dirname(dirname(dirname(APACHE_DIR))))
-
-PROJECT_ROOT = '/home/deployer/staging-newcore/'
-VIRTUALENV_ROOT = os.path.join(PROJECT_ROOT, 'env')
-MWANA_ROOT = os.path.join(PROJECT_ROOT,'mwana','mwana')
+COUNTRY_DIR = dirname(APACHE_DIR)
+MWANA_DIR = dirname(COUNTRY_DIR)
+CODE_ROOT = dirname(MWANA_DIR)
+DEPLOY_ROOT = dirname(CODE_ROOT)
+VIRTUALENV_ROOT = os.path.join(DEPLOY_ROOT, 'python_env')
 
 site_dir = os.path.join(VIRTUALENV_ROOT, 'lib', 'python2.6', 'site-packages')
 site.addsitedir(site_dir)
+sys.path.insert(0, CODE_ROOT)
 
 SHOW_UPGRADE_MESSAGE = False
 ADMIN_IPS = ('127.0.0.1',)
-UPGRADE_FILE = os.path.join(MWANA_ROOT, 'media', 'html', 'upgrade.html')
-ERROR_FILE = os.path.join(MWANA_ROOT, 'media', 'html', 'server_error.html')
+UPGRADE_FILE = os.path.join(MWANA_DIR, 'media', 'html', 'upgrade.html')
+ERROR_FILE = os.path.join(MWANA_DIR, 'media', 'html', 'server_error.html')
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'mwana.localsettings'
 os.environ['PYTHON_EGG_CACHE'] = '/var/tmp/.python_eggs'
 
 try:
-#    sys.path.insert(0, MWANA_ROOT)
-    sys.path.insert(0, '/home/deployer/staging-newcore/mwana/')
-    sys.path.insert(1, site_dir)
-
-    
     from mwana import localsettings as settings
     from mwana.logconfig import init_file_logging
     init_file_logging(settings.DJANGO_LOG_FILE, settings.LOG_SIZE,

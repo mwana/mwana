@@ -3,7 +3,6 @@
 
 import sys, os
 from django.core.management import execute_manager
-import settings
 
 # use a default settings module if none was specified on the command line
 DEFAULT_SETTINGS = 'mwana.localsettings'
@@ -20,4 +19,5 @@ if __name__ == "__main__":
         sys.path.remove(project_root)
     sys.path.insert(0, os.path.dirname(project_root))
 
-    execute_manager(settings)
+    from mwana import settings_project
+    execute_manager(settings_project)
