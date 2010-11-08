@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "mwana.apps.help",
     "mwana.apps.alerts",
     "mwana.apps.locations",
+    "mwana.apps.patienttracing",
 ]
 
 # this rapidsms-specific setting defines which views are linked by the
