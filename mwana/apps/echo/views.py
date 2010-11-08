@@ -49,6 +49,6 @@ def index(request):
         out += '<td>'+str(i).strip("'")+'</td><td>'+str(dd[i]).strip("'")+"</td>" 
         out += "</tr>"
     
-#    return HttpResponse(out)
-    return render_to_response("echo/sometemplate.html",{'key':'value'},context_instance=RequestContext(request))
+    return HttpResponse(out)
+#    return render_to_response("echo/sometemplate.html",{'key':'value'},context_instance=RequestContext(request))
 
