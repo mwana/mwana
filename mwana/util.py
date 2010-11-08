@@ -1,5 +1,5 @@
 from mwana.apps.locations.models import LocationType
-from mwana.const import get_zone_type
+from mwana import const
 import datetime
 
 def get_clinic_or_default(contact):
@@ -14,7 +14,7 @@ def get_clinic_or_default(contact):
     # parents are found 
     location = contact.location
     while location:
-        if location.type != get_zone_type():
+        if location.type.slug not in const.ZONE_SLUGS:
             return location
         location = location.parent
     return contact.location

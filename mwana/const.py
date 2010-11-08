@@ -6,23 +6,22 @@ from mwana.apps.locations.models import LocationType
 # contact types:
 CBA_SLUG = settings.RESULTS160_SLUGS.get('CBA_SLUG', 'cba')
 PATIENT_SLUG = settings.RESULTS160_SLUGS.get('PATIENT_SLUG', 'patient')
-CLINIC_WORKER_SLUG = settings.RESULTS160_SLUGS.get('CLINIC_WORKER_SLUG'
-                                                      'clinic-worker')
+CLINIC_WORKER_SLUG = settings.RESULTS160_SLUGS.get('CLINIC_WORKER_SLUG',
+                                                   'clinic-worker')
 DISTRICT_WORKER_SLUG = settings.RESULTS160_SLUGS.get('DISTRICT_WORKER_SLUG',
-                                                        'district-worker')
+                                                     'district-worker')
 PROVINCE_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PROVINCE_WORKER_SLUG',
-                                                        'province-worker')
+                                                     'province-worker')
 
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))
 ZONE_SLUGS = settings.RESULTS160_SLUGS.get('ZONE_SLUGS', ('zone',))
-DISTRICT_SLUGS = settings.RESULTS160_SLUGS.get('DISTRICT_SLUGS',
-                                                  ('district',))
+DISTRICT_SLUGS = settings.RESULTS160_SLUGS.get('DISTRICT_SLUGS', ('district',))
+
 # PROVINCE_SLUGS is optional (not all countries have provinces)
 # it should NOT be set to None, as that would cause filters by the 'province'
 # type to effectively return any type of location
-PROVINCE_SLUGS = settings.RESULTS160_SLUGS.get('PROVINCE_SLUGS',
-                                                  ('province',))
+PROVINCE_SLUGS = settings.RESULTS160_SLUGS.get('PROVINCE_SLUGS', ('province',))
 
 # apps
 LAB_RESULTS_APP = "mwana.apps.labresults"
@@ -57,11 +56,10 @@ def get_patient_type():
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
 
+
 def get_district_worker_type():
     return _get_contacttype(DISTRICT_WORKER_SLUG, 'District Worker')
 
+
 def get_province_worker_type():
     return _get_contacttype(PROVINCE_WORKER_SLUG, 'Province Worker')
-
-def get_zone_type():
-    return _get_locationtype(ZONE_SLUG, 'Zone')

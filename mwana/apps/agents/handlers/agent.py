@@ -1,7 +1,7 @@
 import re
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 
 from mwana.apps.reminders import models as reminders
@@ -42,7 +42,7 @@ class AgentHelper(KeywordHandler):
 
     def _get_or_create_zone(self, clinic, name):
         # create the zone if it doesn't already exist
-        zone_type = const.get_zone_type()
+        zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
         try:
             # get_or_create does not work with iexact
             zone = Location.objects.get(name__iexact=name,
