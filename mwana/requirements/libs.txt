@@ -14,3 +14,9 @@ rapidsms-a7a0fcc.tar.gz
 pytz-2010l.tar.gz
 # pygsm must be installed separately because it requires that pytz be
 # installed first
+# django-uni-form (for xforms support)
+django-uni-form-0.7.0.tar.gz
+# django-eav (for xforms support)
+django-eav-b608a0a.tar.gz
+# rapidsms-xforms
+rapidsms-xforms.tar.gz
