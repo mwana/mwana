@@ -33,7 +33,7 @@ urlpatterns = patterns('',
     (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
-    
+    (r'^xforms/', include('rapidsms_xforms.urls')),
 )
 
 if settings.DEBUG:
