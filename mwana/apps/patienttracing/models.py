@@ -22,8 +22,7 @@ class PatientTrace(models.Model):
     type = models.CharField(max_length=15)
     name = models.CharField(max_length=50) # name of patient to trace
     patient_event = models.ForeignKey(PatientEvent, related_name='patient_traces',
-                                limit_choices_to={'types__slug': 'patient'},
-                                null=True, blank=True) 
+                                      null=True, blank=True) 
     messenger = models.ForeignKey(Contact,  related_name='patients_reminded',
                             limit_choices_to={'types__slug': 'cba'}, null=True,
                             blank=True)# cba who informs patient

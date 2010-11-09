@@ -94,7 +94,7 @@ def send_notifications(router):
                                            date_logged=datetime.datetime.now())
             patient_trace = PatientTrace()
             patient_trace.type=appointment.name
-            patient_trace.name = patient_event.patient.name
+            patient_trace.name = patient_event.patient.name[:50]
             patient_trace.patient_event = patient_event
             patient_trace.status = 'new'
             patient_trace.save()
