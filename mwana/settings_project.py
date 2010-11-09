@@ -97,7 +97,7 @@ RAPIDSMS_TABS = [
     ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
     ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.registration.views.registration', 'Registration'),
     ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),

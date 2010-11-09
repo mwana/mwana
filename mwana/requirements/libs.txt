@@ -14,3 +14,5 @@ rapidsms-a7a0fcc.tar.gz
 pytz-2010l.tar.gz
 # pygsm must be installed separately because it requires that pytz be
 # installed first
+# pygrowup (from https://github.com/ewheeler/pygrowup)
+pygrowup-b10ba44.tar.gz
