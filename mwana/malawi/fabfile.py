@@ -36,7 +36,7 @@ env.local_dir = os.path.dirname(os.path.dirname(__file__))
 # if you get errors checking out "master", you probably need to run
 # "git branch master" in the offending repository on the server
 env.repos = {
-    'mwana': {'branch': 'new-core',
+    'mwana': {'branch': 'feature-xforms',
               'url': 'git://github.com/mwana/mwana.git'},
 }
 
