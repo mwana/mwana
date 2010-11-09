@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     "mwana.apps.agents",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
-    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     
