@@ -166,7 +166,7 @@ def process_payload(payload, data=None):
 
 def normalize_clinic_id (zpct_id):
     """turn the ZPCT clinic id format into the MoH clinic id format"""
-    return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) > 3 else zpct_id
+    return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
 
 def map_result (verbose_result):
     """map the result type from extract.py codes to Result model codes"""
