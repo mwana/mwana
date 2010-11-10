@@ -76,8 +76,8 @@ class DeregisterHandler(KeywordHandler):
         if not cba:
             cbas = \
             Contact.active.filter(name__icontains=text,
-                                  location__parent=location,
-                                  types=const.get_cba_type())
+                                   location__parent=location,
+                                  types=const.get_cba_type()).order_by('connection')
             if not cbas:
                 self.respond('The name %(name)s does not belong to any'
                              ' CBA at %(clinic)s. Make sure you typed it '

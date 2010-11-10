@@ -5,7 +5,6 @@ import re
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
-from rapidsms.contrib.locations.models import Location
 
 import logging
 
