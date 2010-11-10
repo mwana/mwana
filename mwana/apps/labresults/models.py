@@ -19,8 +19,8 @@ class SampleNotification(models.Model):
     date     = models.DateTimeField(default=datetime.utcnow)
     
     def __unicode__(self):
-        "%s DBS Samples from %s on %s" % \
-            (self.count, self.location, self.date.date())
+        return "%s DBS Samples from %s on %s" % \
+            (self.count, self.location.name, self.date.date())
 
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status
