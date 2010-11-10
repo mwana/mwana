@@ -4,6 +4,7 @@ import logging
 
 from django.http import HttpResponse
 from django.views.decorators.http import require_http_methods, require_GET
+from django.views.decorators.csrf import csrf_exempt
 from django.forms import ModelForm
 from django.db import transaction
 
@@ -72,8 +73,9 @@ def dashboard(request):
     locations = Location.objects.all()
     return render_to_response("labresults/dashboard.html",
                               {"locations": locations },context_instance=RequestContext(request))
-                             
 
+
+@csrf_exempt
 @require_http_methods(['POST'])
 @has_perm_or_basicauth('labresults.add_payload', 'Lab Results')
 @transaction.commit_on_success
