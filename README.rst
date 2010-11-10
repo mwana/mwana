@@ -25,6 +25,11 @@ Developer Setup
 
 **Prerequisites:**
 
+* PostgreSQL and the appropriate Python bindings (``psycopg2``).  On Linux, you
+  can  usually install these via your Linux distribution's package manager, e.g.::
+
+    sudo apt-get install postgresql python-psycopg2
+
 * Install pip and virtualenv, and make sure virtualenv is up to date, e.g.::
 
     easy_install pip
