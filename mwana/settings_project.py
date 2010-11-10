@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messaging",
 #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
-    "rapidsms.contrib.echo",
+    "mwana.apps.echo",
     "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",

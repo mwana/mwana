@@ -1,4 +1,4 @@
-from mwana.malawi.settings_malawi import *
+from mwana.malawi.settings_country import *
 
 DEBUG = False
 

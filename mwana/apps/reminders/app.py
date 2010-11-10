@@ -146,10 +146,14 @@ class App(rapidsms.apps.base.AppBase):
             else:
                 cba_name = ''
             if patient.patient_events.filter(event=event, date=date).count():
-                msg.respond(_("Hello%(cba)s! I am sorry, but someone has already"
-                            " registered a %(event)s for %(name)s on %(date)s."),
-                            cba=cba_name, event=event.name.lower(),
-                            name=patient.name, date=date.strftime('%d/%m/%Y'))
+                #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
+                #you and get on with it.
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                        "%(name)s on %(date)s. You will be notified when "
+                        "it is time for %(gender)s next appointment at the "
+                        "clinic."), cba=cba_name, gender=event.possessive_pronoun,
+                        event=event.name.lower(),
+                        date=date.strftime('%d/%m/%Y'), name=patient.name)
                 return
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="new")
