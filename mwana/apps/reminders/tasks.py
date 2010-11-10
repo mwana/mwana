@@ -17,7 +17,7 @@ NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 logger = logging.getLogger('mwana.apps.reminders.tasks')
 
 
-def send_appointment_reminder(patient, default_conn=None, pronouns=None):
+def send_appointment_reminder(patient, type, default_conn=None, pronouns=None):
     if pronouns is None:
         pronouns = {}
     logger.info('Sending appointment reminder for %s' % patient)
@@ -57,11 +57,11 @@ def send_appointment_reminder(patient, default_conn=None, pronouns=None):
         else:
             clinic_name = 'the clinic'
         msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
-                              "for their next clinic appointment. Please "
-                              "deliver a reminder to this person and ensure "
+                              "for their %(type)s clinic appointment. Please "
+                              "remind this person and ensure "
                               "they visit %(clinic)s within 3 days."),
                               cba=cba_name, patient=patient.name,
-                              clinic=clinic_name)
+                              clinic=clinic_name, type=type)
         msg.send()
     return connections
 
@@ -82,6 +82,7 @@ def send_notifications(router):
         )
         for patient_event in patient_events:
             connections = send_appointment_reminder(patient_event.patient,
+                                                    appointment.name,
                                                     patient_event.cba_conn)
             for connection in connections:
                 reminders.SentNotification.objects.create(
