@@ -12,5 +12,7 @@ djappsettings-0.1.0.tar.gz
 rapidsms-a7a0fcc.tar.gz
 # pytz:
 pytz-2010l.tar.gz
-# pygsm must be installed separately because it requires that pytz be
-# installed first
+# pyserial
+pyserial-2.5.tar.gz
+# pygsm must be installed separately because it requires that pytz and pyserial
+# be installed first
