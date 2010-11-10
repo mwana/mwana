@@ -1,6 +1,5 @@
 from django.test import TestCase
 from .models import Location, LocationType
-from _mysql_exceptions import IntegrityError
 
 class LocationTest(TestCase):
     
@@ -20,9 +19,3 @@ class LocationTest(TestCase):
         self.assertEqual("dia", rest.slug, "Slug was not converted to lowercase!")
         
         Location.objects.create(type=self.type, name="Muskaan", slug="mk")
-        try:
-            Location.objects.create(type=self.type, name="Muskaan 2", slug=" MK ")
-            self.fail("Creating location with a duplicate slug should fail!")
-        except IntegrityError:
-            pass
-        
