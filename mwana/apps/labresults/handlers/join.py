@@ -42,22 +42,11 @@ class JoinHandler(KeywordHandler):
         '''
         Checks the message for general validity (correct pin length, number of keywords, etc) and
         returns False if message is somehow invalid (after firing off a useful response message)
-        
+
         Returns cleaned message in tokenized format (tuple)
         '''
-        
+        original_text = text
         cleaner = InputCleaner()
-        
-        group = self.PATTERN.search(text)
-        if group is None:
-            self.mulformed_msg_help()
-            return False
-
-        tokens = group.groups()
-        if not tokens:
-            self.mulformed_msg_help()
-            return False
-
 
         text = text.strip()
         text = cleaner.remove_double_spaces(text)
@@ -91,9 +80,18 @@ class JoinHandler(KeywordHandler):
         elif not user_pin.isdigit():
             self.invalid_pin(user_pin)
             return False
-        
+
+        group = self.PATTERN.search(original_text)
+        if group is None:
+            self.mulformed_msg_help()
+            return False
+
+        tokens = group.groups()
+        if not tokens:
+            self.mulformed_msg_help()
+            return False
         #sanitize!
-            
+
         group = self.PATTERN.search(text)
 
         tokens = group.groups()
@@ -101,8 +99,8 @@ class JoinHandler(KeywordHandler):
         tokens[0] = tokens[0].strip() #location code
         tokens[2] = tokens[2].title().strip() #name
         tokens[4] = tokens[4].strip() #pin
-        
-        
+
+
         #more error checking
         if len(tokens[4]) != self.PIN_LENGTH:
             self.respond(self.INVALID_PIN)
@@ -113,7 +111,7 @@ class JoinHandler(KeywordHandler):
         elif len(tokens[2]) < self.MIN_NAME_LENGTH:
             self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
             return False
-        
+
         return tuple(tokens)
 
     def handle(self, text):

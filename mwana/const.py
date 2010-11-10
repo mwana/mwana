@@ -60,7 +60,7 @@ def get_clinic_worker_type():
 def get_district_worker_type():
     return _get_contacttype(DISTRICT_WORKER_SLUG, 'District Worker')
 def get_zone_type():
-    return _get_locationtype(ZONE_SLUG, 'Zone')
+    return _get_locationtype(ZONE_SLUGS, 'Zone')
 
 def get_province_worker_type():
     return _get_contacttype(PROVINCE_WORKER_SLUG, 'Province Worker')
