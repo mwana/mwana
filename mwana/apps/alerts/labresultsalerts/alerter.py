@@ -289,7 +289,7 @@ class Alerter:
                                    self.district_trans_referal_date.date()),
                                    Q(parent=dist) |
                                    Q(parent__parent=dist)
-                                   )
+                                   ).distinct()
                     if clinics:
                         additional = "These clinics have sent results to the "\
                         "hub: %s" % ",".join(clinic.name for clinic in clinics)

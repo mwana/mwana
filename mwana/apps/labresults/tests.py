@@ -139,7 +139,7 @@ class TestApp(LabresultsSetUp):
         
     testUnregisteredCheck = """
             unknown_user > CHECK RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>
         """
         
     testCheckResultsNone = """

@@ -153,7 +153,7 @@ class EventRegistration(TestScript):
             kk     > birth 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > birth 4/3/2010 maria
-            kk     < Hello Rupiah Banda! I am sorry, but someone has already registered a birth for maria on 04/03/2010.
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
