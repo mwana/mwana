@@ -37,10 +37,10 @@ class App(AppBase):
 
     @property
     def backend(self):
+        bb = None
         b = self.router.backends
         for i in b:
-            bb = b[i]
-         
+            bb = b[i]         
         return bb
 
     def ajax_GET_status(self,get):
