@@ -4,8 +4,9 @@ from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.contrib.locations.models import Location
 from rapidsms.models import Contact
-from mwana.apps.labresults.util import is_eligible_for_results
-from mwana.util import get_clinic_or_default
+from mwana.apps.labresults.util import is_already_valid_connection_type
+from mwana.util import get_clinic_or_default, LocationCode
+
 
 class JoinHandler(KeywordHandler):
     """
@@ -19,8 +20,8 @@ class JoinHandler(KeywordHandler):
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 2
 
-    HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
-    ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
+    HELP_TEXT = "To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>"
+    ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or location first reply with keyword 'LEAVE' and try again."
         
     def help(self):
         self.respond(self.HELP_TEXT)
@@ -28,86 +29,115 @@ class JoinHandler(KeywordHandler):
     def mulformed_msg_help(self):
         self.respond("Sorry, I didn't understand that. "
                      "Make sure you send your location, name and pin "
-                     "like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.")
+                     "like: JOIN <LOCATION CODE> <NAME> <SECURITY CODE>.")
 
     def invalid_pin(self, pin):
         self.respond("Sorry, %s wasn't a valid security code. "
                      "Please make sure your code is a %s-digit number like %s. "
-                     "Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>." % (pin,
+                     "Send JOIN <LOCATION CODE> <YOUR NAME> <SECURITY CODE>." % (pin,
                      self.PIN_LENGTH, ''.join(str(i) for i in range(1, int(self.PIN_LENGTH) + 1))))
 
-    def handle(self, text):
-        b = InputCleaner()
-        if is_eligible_for_results(self.msg.connection):
-            # refuse re-registration if they're still active and eligible
-            self.respond(self.ALREADY_REGISTERED, 
-                         name=self.msg.connection.contact.name,
-                         location=self.msg.connection.contact.location)
-            return
+
+    def check_message_valid_and_clean(self, text):
+        '''
+        Checks the message for general validity (correct pin length, number of keywords, etc) and
+        returns False if message is somehow invalid (after firing off a useful response message)
         
-        text = text.strip()
-        text = b.remove_double_spaces(text)
-        if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 1):
-            self.mulformed_msg_help()
-            return
-
-        #signed pin
-        if text[-5:-4] == '-' or text[-5:-4] == '+':
-            self.invalid_pin(text[-5:])
-            return
-        #too long pin
-        if ' ' in text and text[1 + text.rindex(' '):].isdigit() and len(text[1 + text.rindex(' '):]) > self.PIN_LENGTH:
-            self.invalid_pin(text[1 + text.rindex(' '):])
-            return
-        #non-white space before pin
-        if text[-5:-4] != ' ' and text[-4:-3] != ' ':
-            self.respond("Sorry, you should put a space before your pin. "
-                         "Please make sure your code is a %s-digit number like %s. "
-                         "Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>." % (
-                         self.PIN_LENGTH, ''.join(str(i) for i in range(1, int(self.PIN_LENGTH) + 1))))
-            return
-        #reject invalid pin
-        user_pin = text[-4:]
-        if not user_pin:
-            self.help()
-            return
-        elif len(user_pin) < 4:
-            self.invalid_pin(user_pin)
-            return
-        elif not user_pin.isdigit():
-            self.invalid_pin(user_pin)
-            return
-
+        Returns cleaned message in tokenized format (tuple)
+        '''
+        
+        cleaner = InputCleaner()
         
         group = self.PATTERN.search(text)
         if group is None:
             self.mulformed_msg_help()
-            return
+            return False
 
         tokens = group.groups()
         if not tokens:
             self.mulformed_msg_help()
-            return
+            return False
 
-        clinic_code = tokens[0].strip()
-        clinic_code = b.try_replace_oil_with_011(clinic_code)
-        #we expect all codes have format PPDDFF or PPDDFFS
-        clinic_code = clinic_code[0:6]
-        name = tokens[2]
-        name = name.title().strip()
-        pin = tokens[4].strip()
-        if len(pin) != self.PIN_LENGTH:
+
+        text = text.strip()
+        text = cleaner.remove_double_spaces(text)
+        if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 1):
+            self.mulformed_msg_help()
+            return False
+
+        #signed pin
+        if text[-5:-4] == '-' or text[-5:-4] == '+':
+            self.invalid_pin(text[-5:])
+            return False
+        #too long pin
+        if ' ' in text and text[1 + text.rindex(' '):].isdigit() and len(text[1 + text.rindex(' '):]) > self.PIN_LENGTH:
+            self.invalid_pin(text[1 + text.rindex(' '):])
+            return False
+        #non-white space before pin
+        if text[-5:-4] != ' ' and text[-4:-3] != ' ':
+            self.respond("Sorry, you should put a space before your pin. "
+                         "Please make sure your code is a %s-digit number like %s. "
+                         "Send JOIN <LOCATION CODE> <YOUR NAME> <SECURITY CODE>." % (
+                         self.PIN_LENGTH, ''.join(str(i) for i in range(1, int(self.PIN_LENGTH) + 1))))
+            return False
+        #reject invalid pin
+        user_pin = text[-4:]
+        if not user_pin:
+            self.help()
+            return False
+        elif len(user_pin) < 4:
+            self.invalid_pin(user_pin)
+            return False
+        elif not user_pin.isdigit():
+            self.invalid_pin(user_pin)
+            return False
+        
+        #sanitize!
+            
+        group = self.PATTERN.search(text)
+
+        tokens = group.groups()
+        tokens = list(tokens)
+        tokens[0] = tokens[0].strip() #location code
+        tokens[2] = tokens[2].title().strip() #name
+        tokens[4] = tokens[4].strip() #pin
+        
+        
+        #more error checking
+        if len(tokens[4]) != self.PIN_LENGTH:
             self.respond(self.INVALID_PIN)
-            return
-        if not name:
+            return False
+        if not tokens[2]:
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
-            return
-        elif len(name) < self.MIN_NAME_LENGTH:
+            return False
+        elif len(tokens[2]) < self.MIN_NAME_LENGTH:
             self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
+            return False
+        
+        return tuple(tokens)
+
+    def handle(self, text):
+
+        tokens = self.check_message_valid_and_clean(text)
+        
+        if not tokens:
             return
+        clinic_code = LocationCode(tokens[0])
+        name = tokens[2]
+        pin = tokens[4]
+        worker_type = clinic_code.get_worker_type()
+        location_type = clinic_code.get_location_type()
+        
+        if is_already_valid_connection_type(self.msg.connection, worker_type):
+            # refuse re-registration if they're still active and eligible
+            self.respond(self.ALREADY_REGISTERED, 
+                         name=self.msg.connection.contact.name,
+                         location=self.msg.connection.contact.location)
+            return False
+        
         try:
-            location = Location.objects.get(slug__iexact=clinic_code,
-                                            type__slug__in=const.CLINIC_SLUGS)
+            location = Location.objects.get(slug__iexact=clinic_code.slug,
+                                            type__slug__in=location_type)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
                 # this means they were already registered and active, but not yet 
@@ -126,7 +156,7 @@ class JoinHandler(KeywordHandler):
             contact.name = name
             contact.pin = pin
             contact.save()
-            contact.types.add(const.get_clinic_worker_type())
+            contact.types.add(worker_type)
             
             self.msg.connection.contact = contact
             self.msg.connection.save()

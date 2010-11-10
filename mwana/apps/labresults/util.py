@@ -11,4 +11,16 @@ def is_eligible_for_results(connection):
         and connection.contact.pin is not None \
         and connection.contact.location is not None
            
-        
+def is_already_valid_connection_type(connection, connection_type):
+    """
+    Checks to see whether this person is already registered at the connection_type level
+    
+    ALWAYS RETURNS TRUE AT PRESENT
+    """
+    return connection.contact is not None \
+        and connection.contact.is_active \
+        and connection_type in connection.contact.types.all() \
+        and connection.contact.pin is not None \
+        and connection.contact.location is not None
+    
+    return True        

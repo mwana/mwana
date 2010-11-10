@@ -15,3 +15,5 @@ DATABASE_PORT = ''
 TEST_DATABASE_NAME = 'test_mwana_devel'
 
 PROJECT_LOGO_URL = '/opt/mwana/mwana/data/mylogo.jpg'
+
+TIME_ZONE='Europe/London'
