@@ -1,6 +1,7 @@
 *.pyc
 *.db
 mwana/localsettings.py
+mwana/test_localsettings.py
 *~
 mwana/logs/*
 mwana/db.sqlite3
