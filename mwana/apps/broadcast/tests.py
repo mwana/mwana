@@ -13,14 +13,15 @@ class TestApp(TestScript):
     
     def setUp(self):
         super(TestApp, self).setUp()
-        type, _ = LocationType.objects.get_or_create(singular="clinic", 
+        clinic_type, _ = LocationType.objects.get_or_create(singular="clinic", 
                                                      plural="clinics", 
-                                                     slug="clinics")
-        clinic = Location.objects.create(type=type, name="demo",
-                                         const.CLINIC_SLUGS[0]) 
-        zone = Location.objects.create(type=type, name="demo",
-                                       const.ZONE_SLUGS[0])
-        self.clinic_zone = Location.objects.create(type=zone, name="child", 
+                                                     slug=const.CLINIC_SLUGS[0])
+        zone_type, _ = LocationType.objects.get_or_create(singular="clinic", 
+                                                     plural="clinics", 
+                                                     slug=const.CLINIC_SLUGS[0])
+        clinic = Location.objects.create(type=clinic_type, name="demo",
+                                         slug="demo")
+        self.clinic_zone = Location.objects.create(type=zone_type, name="child", 
                                                    slug="child", parent=clinic) 
         clinic_worker = self.create_contact(name="clinic_worker", location=clinic, 
                                             types=[get_clinic_worker_type()])
