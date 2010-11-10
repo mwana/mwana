@@ -139,6 +139,10 @@ TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 MEDIA_URL = "/static/"
 
 
+# URL for admin media (also defined in apache configuration)
+ADMIN_MEDIA_PREFIX = '/admin-media/'
+
+
 # this is required for the django.contrib.sites tests to run, but also
 # not included in global_settings.py, and is almost always ``1``.
 # see: http://docs.djangoproject.com/en/dev/ref/contrib/sites/
