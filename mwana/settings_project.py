@@ -84,7 +84,9 @@ INSTALLED_APPS = [
     "mwana.apps.help",
     "mwana.apps.alerts",
     "mwana.apps.locations",
+    "mwana.apps.patienttracing",
 
+    # xforms + dependencies
     "eav",
     "uni_form",
     "rapidsms_xforms",
@@ -136,12 +138,16 @@ LOGIN_REDIRECT_URL = "/"
 # use django-nose to run tests. rapidsms contains lots of packages and
 # modules which django does not find automatically, and importing them
 # all manually is tiresome and error-prone.
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+#TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 
 # for some reason this setting is blank in django's global_settings.py,
 # but it is needed for static assets to be linkable.
 MEDIA_URL = "/static/"
+
+
+# URL for admin media (also defined in apache configuration)
+ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 
 # this is required for the django.contrib.sites tests to run, but also

@@ -45,20 +45,9 @@ class JoinHandler(KeywordHandler):
         
         Returns cleaned message in tokenized format (tuple)
         '''
-        
+        original_text = text
         cleaner = InputCleaner()
-        
-        group = self.PATTERN.search(text)
-        if group is None:
-            self.mulformed_msg_help()
-            return False
-
-        tokens = group.groups()
-        if not tokens:
-            self.mulformed_msg_help()
-            return False
-
-
+   
         text = text.strip()
         text = cleaner.remove_double_spaces(text)
         if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 1):
@@ -92,6 +81,15 @@ class JoinHandler(KeywordHandler):
             self.invalid_pin(user_pin)
             return False
         
+        group = self.PATTERN.search(original_text)
+        if group is None:
+            self.mulformed_msg_help()
+            return False
+
+        tokens = group.groups()
+        if not tokens:
+            self.mulformed_msg_help()
+            return False
         #sanitize!
             
         group = self.PATTERN.search(text)
