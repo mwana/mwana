@@ -1,4 +1,4 @@
-from mwana.zabia.settings_zambia import *
+from mwana.zambia.settings_country import *
 
 DEBUG = False
 
