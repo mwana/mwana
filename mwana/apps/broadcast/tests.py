@@ -70,10 +70,18 @@ class TestApp(TestScript):
                                              types=[get_clinic_worker_type()])
 
         script="""
+        dho > msg my own way
+        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        dho > msg
+        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        """      
+        self.runScript(script)
+
+        script="""
         dho > msg all testing dho blasting
         """
-      
-        self.runScript(script)  
+        self.runScript(script)
+
         msgs=self.receiveAllMessages()
         
         self.assertEqual(3,len(msgs))

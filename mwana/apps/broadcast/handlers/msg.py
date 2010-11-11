@@ -12,7 +12,12 @@ class DistrictHandler(BroadcastHandler):
     MALFORMED_MESSAGE = "Sorry, we didn't recognise any keywords. Available keywords are: ALL or <CLINIC_NUMBER>. Send: MSG EXAMPLE for an example"
     EXAMPLE_MESSAGE_ONE = "To send to all clinics in your district use: MSG ALL (your message). ** For example: MSG ALL remember to fill out the DBS logbook!"
     EXAMPLE_MESSAGE_TWO = "To send to other DHOs in your district, use: MSG DHO (your message). ** For example: MSG DHO I will be going to all clinics in Mansa this week"
+    HELP_TEXT = "To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)"
     PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})$")
+
+    def help(self):
+        self.respond(self.HELP_TEXT)
+
     def handle(self, text):
         '''
         Sends to all other contacts in the same district
@@ -36,6 +41,7 @@ class DistrictHandler(BroadcastHandler):
             return True
         
         tokens = group.groups()
+        
         msg_part=text[len(tokens[0]):].strip()
         if tokens[0].lower() == 'dho':
             contacts = Contact.active.location(location)\
@@ -47,6 +53,8 @@ class DistrictHandler(BroadcastHandler):
             Contact.active.filter(location__slug__startswith=location.slug[:4]).\
             exclude(id=self.msg.contact.id)
             return self.broadcast(msg_part, contacts)
+        else:
+            self.help()
             
             
             
