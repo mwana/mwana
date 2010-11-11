@@ -9,7 +9,7 @@ from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
 
-class TraceHandler(KeywordHandler):
+class ToldHandler(KeywordHandler):
     '''
     User sends: 
     TRACE MARY <REASON>
@@ -28,7 +28,7 @@ class TraceHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "trace|trase|trac"
+    keyword = "told|toll|teld"
     PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
@@ -50,7 +50,7 @@ class TraceHandler(KeywordHandler):
         
         
         
-        self.man_trace(text)
+        self.told(text)
         return True
         
     
@@ -60,7 +60,7 @@ class TraceHandler(KeywordHandler):
         '''
 
         #Check to see if there are any patients being traced by the given name        
-        patients = PatientTrace.objects.filter(name=pat_name)
+        patients = PatientTrace.objects.filter(name=pat_name).filter(status=patienttracing.get_status_new())
         if len(patients) == 0:
             self.respond_patient_not_found(pat_name)
 
@@ -75,16 +75,14 @@ class TraceHandler(KeywordHandler):
         patient = patients[0]
         
         #update patienttrace entry data
-        patient.reminded_on = datetime.now()
+        patient.reminded_date = datetime.now()
         patient.status = patienttracing.get_status_told()
         patient.messenger = self.msg.connection.contact
         
         patient.save()
         
-        
-        self.respond_trace_initiated(name)        
-        self.send_trace_to_cbas(name)
-     
+        self.respond_thanks_and_confirm_reminder(pat_name)
+        self.update_initiator_on_status(pat_name)
     
     
     def respond_trace_expired(self,pat_name):
@@ -113,12 +111,12 @@ class TraceHandler(KeywordHandler):
         traces
         '''
         self.respond(self.unrecognized_txt)
-        pass
-    
     
     def respond_thanks_and_confirm_reminder(self,pat_name):
         self.respond(self.response_told_thanks_txt)
 
+    def update_initiator_on_status(self,pat_name):
+        pass
 
 # ====================================================================     
 #    DELETE ME!

@@ -7,6 +7,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.reminders import models as reminders
 from mwana import const
 from mwana.apps.patienttracing.models import PatientTrace
+from mwana.apps.patienttracing import models as patienttracing
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -60,7 +61,7 @@ def send_appointment_reminder(patient, type, default_conn=None, pronouns=None):
         msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
                               "for their %(type)s clinic appointment. Please "
                               "remind this person and ensure "
-                              "they visit %(clinic)s within 3 days."),
+                              "they visit %(clinic)s within 3 days and reply with TOLD %(patient)s"),
                               cba=cba_name, patient=patient.name,
                               clinic=clinic_name, type=type)
         msg.send()
@@ -94,7 +95,9 @@ def send_notifications(router):
                                            date_logged=datetime.datetime.now())
             patient_trace = PatientTrace()
             patient_trace.type=appointment.name
+            patient_trace.start_date=datetime.datetime.now()
             patient_trace.name = patient_event.patient.name[:50]
             patient_trace.patient_event = patient_event
             patient_trace.status = 'new'
+            patient_trace.initator = patienttracing.get_automated_initiator()
             patient_trace.save()
