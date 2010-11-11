@@ -24,12 +24,32 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 RAPIDSMS_TABS.remove(('rapidsms.views.dashboard', 'Dashboard'))
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
+#INSTALLED_BACKENDS.update({
+#    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
+#               "port": "/dev/ttyUSB0",
+#               'baudrate': '115200',
+#               'rtscts': '1',
+#               'timeout': 10}
+#})
+
+# Add the kannel backends for Zain and TNM
 INSTALLED_BACKENDS.update({
-    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
-               "port": "/dev/ttyUSB0",
-               'baudrate': '115200',
-               'rtscts': '1',
-               'timeout': 10}
+    "zain" : {
+        "ENGINE":  "mwana.backends.kannel",
+        "host": "127.0.0.1",
+        "port": 8081,
+        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+        "sendsms_params": {"smsc": "zain-modem", "username": "rapidsms",
+                            "password": ""}, # set in localsettings.py
+    },
+    "tnm" : {
+        "ENGINE":  "mwana.backends.kannel",
+        "host": "127.0.0.1",
+        "port": 8082,
+        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+        "sendsms_params": {"smsc": "tnm-smpp", "username": "rapidsms",
+                            "password": ""}, # set in localsettings.py
+    }
 })
 
 DATABASES = {
