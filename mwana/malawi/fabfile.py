@@ -36,7 +36,7 @@ env.local_dir = os.path.dirname(os.path.dirname(__file__))
 # if you get errors checking out "master", you probably need to run
 # "git branch master" in the offending repository on the server
 env.repos = {
-    'mwana': {'branch': 'new-core',
+    'mwana': {'branch': 'develop',
               'url': 'git://github.com/mwana/mwana.git'},
 }
 
@@ -129,8 +129,9 @@ def clone_all():
 def pull_and_checkout_all():
     for name, branch, repo, dest in iter_commits():
         if repo:
-            run('cd %s && git pull origin %s && git checkout %s' %
-                (dest, branch, branch))
+            with cd(dest):
+                run('git pull')
+                run('git checkout %s' % branch)
 
 
 def deploy():
