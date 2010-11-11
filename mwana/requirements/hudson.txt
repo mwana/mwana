@@ -1,4 +1,8 @@
-coverage
-unittest-xml-reporting
-pylint
--e git://git.chris-lamb.co.uk/django-lint#egg=django-lint
+# coverage
+hudson/coverage-3.4.tar.gz
+# -e git://git.chris-lamb.co.uk/django-lint#egg=django-lint
+hudson/django-lint-0.13.tar.gz
+# pylint
+hudson/pylint-0.21.3.tar.gz
+# unittest-xml-reporting
+hudson/unittest-xml-reporting-1.0.3.tar.gz
