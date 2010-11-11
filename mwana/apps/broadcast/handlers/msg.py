@@ -36,14 +36,17 @@ class DistrictHandler(BroadcastHandler):
             return True
         
         tokens = group.groups()
+        msg_part=text[len(tokens[0]):].strip()
         if tokens[0].lower() == 'dho':
             contacts = Contact.active.location(location)\
                             .exclude(id=self.msg.contact.id)\
                             .filter(types=get_district_worker_type())
-            return self.broadcast(text, contacts)
+            return self.broadcast(msg_part, contacts)
         elif tokens[0].lower() == 'all':
-            contacts = Contact.objects.filter(location__parent__slug__startswith=location.slug)
-            return self.broadcast(text, contacts)
+            contacts = \
+            Contact.active.filter(location__slug__startswith=location.slug[:4]).\
+            exclude(id=self.msg.contact.id)
+            return self.broadcast(msg_part, contacts)
             
             
             
