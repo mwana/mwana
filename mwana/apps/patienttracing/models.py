@@ -4,7 +4,8 @@ from django.db import models
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
 
-STATUS_CHOICES = (
+class PatientTrace(models.Model):
+    STATUS_CHOICES = (
                   ("new", "new"),
                   ("told", "told"),
                   ("confirmed", "confirmed"),
@@ -13,14 +14,21 @@ STATUS_CHOICES = (
                   ("dead", "patient died"),# when mother can't be traced
                   )
 
+    TYPE_CHOICES = (
+                ("manual", "manual"),
+                ("6day", "6day"),
+                ("6week", "6week"),
+                ("6month","6month")
+                )
 
-class PatientTrace(models.Model):
+
     # person who initiates the tracing
     initiator = models.ForeignKey(Contact, related_name='patients_traced',
                                      limit_choices_to={'types__slug': 'clinic_worker'},
                                      null=True, blank=True)
-    type = models.CharField(max_length=15)
+    type = models.CharField(choices=TYPE_CHOICES, max_length=15)
     name = models.CharField(max_length=50) # name of patient to trace
+#    reason = models.CharField(max_length=90) #optional reason for why the trace was initiated
     patient_event = models.ForeignKey(PatientEvent, related_name='patient_traces',
                                       null=True, blank=True) 
     messenger = models.ForeignKey(Contact,  related_name='patients_reminded',
@@ -43,3 +51,5 @@ class PatientTrace(models.Model):
             self.start_date = datetime.datetime.now()
         super(PatientTrace, self).save(*args, ** kwargs)
 
+def get_status_told():
+    return PatientTrace.STATUS_CHOICES[1][1]
