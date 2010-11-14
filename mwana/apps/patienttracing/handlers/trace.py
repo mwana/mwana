@@ -8,6 +8,10 @@ from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
 from mwana.apps.patienttracing import models as patienttracing
+from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
+from mwana import const
+
+
 class TraceHandler(KeywordHandler):
     '''
     User sends: 
@@ -29,20 +33,28 @@ class TraceHandler(KeywordHandler):
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
     response_to_trace_txt = "Thank You %s! Your patient trace has been initiated."
-    cba_initiate_trace_msg = "Hello %s, please find %s and tell them to come to the clinic. When you've told them, please reply to this msg with: TOLD %s"
+    cba_initiate_trace_msg = "Hi %s, please find %s and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD %s"
     
+    cba_not_allowed_txt = "Sorry %s, CBAs are not allowed to start Traces.  Please ask a clinic worker to start a trace."
     
     def handle(self,text):
-        #check message is valid
-        #check for:
-        # CONTACT is valid
-        # FORMAT is valid
-        # 
+        if not self.contact_valid():
+            return
         #pass it off to trace() for processing.
         self.man_trace(text)
         return True
         
-    
+    def contact_valid(self):
+        connection = self.msg.connection
+        if not is_valid_connection(connection, const.get_clinic_worker_type()): #Only clinic workers should be able to trace
+            if is_valid_connection(connection, const.get_cba_type()):
+                self.respond(self.cba_not_allowed_txt % (self.msg.connection.contact.name))
+            else:
+                self.respond(self.unrecognized_sender())
+            return False
+        else:
+            return True
+        
     def man_trace(self, name):
         '''
         Initiate a "manual" trace

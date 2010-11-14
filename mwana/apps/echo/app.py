@@ -26,22 +26,7 @@ class App(AppBase):
 
 
     def start(self):
-        try:
-            self.backend
-
-        except KeyError:
-            self.info(
-                "To use the mwana echo app, you must add a  " +\
-                "backend named 'zain' to your INSTALLED_BACKENDS")
-
-
-    @property
-    def backend(self):
-        bb = None
-        b = self.router.backends
-        for i in b:
-            bb = b[i]         
-        return bb
+        pass
 
     def ajax_GET_status(self,get):
         backends = self.router.backends

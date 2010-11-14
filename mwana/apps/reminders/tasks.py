@@ -58,12 +58,10 @@ def send_appointment_reminder(patient, type, default_conn=None, pronouns=None):
                 clinic_name = patient.location.name
         else:
             clinic_name = 'the clinic'
-        msg = OutgoingMessage(connection, _("Hello%(cba)s. %(patient)s is due "
-                              "for their %(type)s clinic appointment. Please "
-                              "remind this person and ensure "
-                              "they visit %(clinic)s within 3 days and reply with TOLD %(patient)s"),
+        msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for %(type)s clinic visit.Please remind them to visit %(clinic)s within 3 days then reply with TOLD %(patient)s"),
                               cba=cba_name, patient=patient.name,
                               clinic=clinic_name, type=type)
+        
         msg.send()
     return connections
 

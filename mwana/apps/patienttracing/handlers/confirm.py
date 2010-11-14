@@ -8,6 +8,8 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
+from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
+from mwana import const
 
 class ConfirmHandler(KeywordHandler):
     '''
@@ -36,21 +38,35 @@ class ConfirmHandler(KeywordHandler):
     response_confirmed_thanks_txt = "Thank you %s! You have confirmed that %s has been to the clinic!"
                                
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
+    
+    clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
 #    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
 #                        "in the last %s days and try again"
     
     def handle(self,text):
         #check message is valid
         #check for:
-        # CONTACT is valid
-        # FORMAT is valid
-        # 
-        
-        
+        # CONTACT is valid        
+        if not self.contact_valid():
+            return
         
         self.confirm(text)
         return True
+
+    def contact_valid(self):
+        if not is_valid_connection(self.msg.connection, const.get_cba_type()): #Only clinic workers should be able to trace
+            if is_valid_connection(self.msg.connection, const.get_clinic_worker_type()):
+                self.respond(self.clinic_worker_not_allowed % (self.msg.connection.contact.name))
+            else:
+                self.respond(self.unrecognized_txt)
+            return False
+        else:
+            return True
         
+        return True
+    
+    
+                
     def create_new_patient_trace(self, pat_name):
         p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location.parent)
         p.initiator_contact = self.msg.connection.contact

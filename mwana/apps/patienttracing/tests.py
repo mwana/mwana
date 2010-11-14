@@ -103,7 +103,7 @@ class TestApp(TestScript):
             lost   > trace
             lost   < Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>
             clinic_worker     > trace mary
-            cba_contact       < Hello Cba One, please find mary and tell them to come to the clinic. When you've told them, please reply to this msg with: TOLD mary
+            cba_contact       < Hi Cba One, please find mary and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD mary
             clinic_worker     < Thank You John Banda! Your patient trace has been initiated.
             """
         self.runScript(script)

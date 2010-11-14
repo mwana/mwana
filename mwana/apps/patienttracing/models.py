@@ -47,7 +47,7 @@ class PatientTrace(models.Model):
     initiator_contact = models.ForeignKey(Contact, related_name='patients_traced',
                                      limit_choices_to={'types__slug': 'clinic_worker'},
                                      null=True, blank=True)
-    clinic = models.ForeignKey(Location, related_name='patient_location', null=False, blank=False)
+    clinic = models.ForeignKey(Location, related_name='patient_location', null=True, blank=True)
     type = models.CharField(choices=TYPE_CHOICES, max_length=30)
     name = models.CharField(max_length=50) # name of patient to trace
 #    reason = models.CharField(max_length=90) #optional reason for why the trace was initiated
@@ -61,7 +61,7 @@ class PatientTrace(models.Model):
                             limit_choices_to={'types__slug': 'cba'}, null=True,
                             blank=True)# cba who confirms that patient visited clinic
 
-    status = models.CharField(choices=STATUS_CHOICES, max_length=15) # status of tracing activity
+    status = models.CharField(choices=STATUS_CHOICES, max_length=25) # status of tracing activity
 
     start_date = models.DateTimeField() # date when tracing starts
     reminded_date = models.DateTimeField(null=True, blank=True) # date when cba tells mother

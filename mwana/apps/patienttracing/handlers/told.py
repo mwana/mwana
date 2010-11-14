@@ -8,6 +8,8 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
+from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
+from mwana import const
 
 class ToldHandler(KeywordHandler):
     '''
@@ -34,6 +36,8 @@ class ToldHandler(KeywordHandler):
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
     response_told_thanks_txt = "Thank you %s! After %s has visited the clinic, please send us a confirmation message by sending: CONFIRM %s." \
                                "You will receive a reminder to confirm in a few days"
+    
+    clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
                                
 #    patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
 #    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
@@ -43,12 +47,6 @@ class ToldHandler(KeywordHandler):
     
     
     def handle(self,text):
-        #check message is valid
-        #check for:
-        # CONTACT is valid
-        # FORMAT is valid
-        # 
-        #pass it off to trace() for processing.
         words = self.sanitize_and_validate(text)
         if words:
             return self.told(words)
@@ -57,10 +55,14 @@ class ToldHandler(KeywordHandler):
         
     def sanitize_and_validate(self, text):
         #check if contact is valid
-        if self.msg.connection.contact is None \
-               or not self.msg.connection.contact.is_active:
-            self.unrecognized_sender()
-            return None
+        if not is_valid_connection(self.msg.connection, const.get_cba_type()): #Only clinic workers should be able to trace
+            if is_valid_connection(self.msg.connection, const.get_clinic_worker_type()):
+                self.respond(self.clinic_worker_not_allowed % (self.msg.connection.contact.name))
+            else:
+                self.respond(self.unrecognized_txt)
+            return False
+        else:
+            return text
         
         return text
     
