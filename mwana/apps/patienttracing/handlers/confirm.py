@@ -28,7 +28,7 @@ class ConfirmHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "confirm|conferm|confhrm|cnfrm"
+    keyword = "confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm"
 #    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "Sorry, the system could not understand your message. To confirm a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>"
@@ -36,8 +36,8 @@ class ConfirmHandler(KeywordHandler):
     response_confirmed_thanks_txt = "Thank you %s! You have confirmed that %s has been to the clinic!"
                                
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
-    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
-                        "in the last %s days and try again"
+#    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
+#                        "in the last %s days and try again"
     
     def handle(self,text):
         #check message is valid
@@ -51,22 +51,31 @@ class ConfirmHandler(KeywordHandler):
         self.confirm(text)
         return True
         
-    
-    def told(self, pat_name):
+    def create_new_patient_trace(self, pat_name):
+        p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location.parent)
+        p.initiator_contact = self.msg.connection.contact
+        p.type="unrecognized_patient"
+        p.name = pat_name
+        p.status = patienttracing.get_status_confirmed()
+        p.confirmed_date = datetime.now() 
+        p.save()
+        
+    def confirm(self, pat_name):
         '''
         Respond to CONFIRM message, update PatientTrace db entry status to 'CONFIRM'
         '''
 
         #Check to see if there are any patients being traced by the given name        
-        patients = PatientTrace.objects.filter(name=pat_name).filter(status=patienttracing.get_status_told())
-        if len(patients) == 0:
-            self.respond_patient_not_found(pat_name)
-
-        #Check to see if there is a PatientTrace initiated within the last TRACE_WINDOW days            
-        patients.filter(reminded_date__gt=(datetime.now()-timedelta(days=self.TRACE_WINDOW)))
+        patients = PatientTrace.objects.filter(name__iexact=pat_name)\
+                                        .filter(status=patienttracing.get_status_told())\
+                                        .filter(clinic=self.msg.connection.contact.location.parent)
         
+        #If patient not found (a name mismatch?) then just deal with it by creating a new 'confirmed' trace entry and thanking the user.
         if len(patients) == 0:
-            self.respond_trace_expired(pat_name)
+            self.create_new_patient_trace(pat_name)
+            self.respond_confirmed_thankyou(pat_name)
+            return True
+
             
         #If there are more than one patients in the resulting list, pick the first one.  We have no way
         #of knowing which one is the correct patient in this case.
@@ -80,18 +89,18 @@ class ConfirmHandler(KeywordHandler):
         patient.save()
         self.respond_confirmed_thankyou(pat_name)
     
-    def respond_trace_expired(self,pat_name):
-        self.respond(self.trace_expired_txt)
+#    def respond_trace_expired(self,pat_name):
+#        self.respond(self.trace_expired_txt)
          
     def respond_patient_not_found(self,pat_name):
-        self.respond(self.patient_not_found_txt)
+        self.respond(self.patient_not_found_txt % (self.msg.connection.contact.name))
          
     def respond_confirmed_thankyou(self, pat_name):
         '''
         Responds with a thank you message for telling the patient to come into the clinic,
         Informs the user about confirming the visit
         '''
-        self.respond(self.response_confirmed_thanks_txt)
+        self.respond(self.response_confirmed_thanks_txt % (self.msg.connection.contact.name, pat_name))
         
  
     def help(self):

@@ -47,7 +47,10 @@ class App(AppBase):
         backends = self.router.backends
         status = {}
         for b in backends:
-            status[backends[b].name] = backends[b].status()
+            try:
+                status[backends[b].name] = backends[b].status()
+            except:
+                status[backends[b].name] = 'No Status'
         return str(status)
     
     def ajax_POST_send_test_message(self, get, post):

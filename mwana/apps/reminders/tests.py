@@ -225,13 +225,13 @@ class Reminders(TestScript):
         expected_messages = \
             ['Hello cba1. patient 1 is due for their 2 day clinic appointment. '
                 'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.',
+                'visit Central Clinic within 3 days and reply with TOLD patient 1',
                 'Hello cba1. patient 2 is due for their 2 day clinic appointment. '
                 'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.',
+                'visit Central Clinic within 3 days and reply with TOLD patient 2',
                 'Hello cba2. patient 3 is due for their 2 day clinic appointment. '
                 'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.']
+                'visit Central Clinic within 3 days and reply with TOLD patient 3']
         self.assertEqual(len(messages), len(expected_messages))
         for msg in messages:
             self.assertTrue(msg.text in expected_messages, msg)
@@ -298,7 +298,7 @@ class Reminders(TestScript):
         self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due "
                          "for their 1 day clinic appointment. Please "
                          "remind this person and ensure they visit "
-                         "the clinic within 3 days.")
+                         "the clinic within 3 days and reply with TOLD Henry")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
         
@@ -332,7 +332,7 @@ class Reminders(TestScript):
         self.assertEqual(messages[0].text, "Hello cba. Henry is due for "
                          "their 1 day clinic appointment. Please "
                          "remind this person and ensure they visit "
-                         "Central Clinic within 3 days.")
+                         "Central Clinic within 3 days and reply with TOLD Henry")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)        
         

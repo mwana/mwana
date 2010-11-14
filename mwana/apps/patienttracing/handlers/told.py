@@ -29,16 +29,18 @@ class ToldHandler(KeywordHandler):
     TRACE_WINDOW = 5 #days
     
     keyword = "told|toll|teld"
-    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
     response_told_thanks_txt = "Thank you %s! After %s has visited the clinic, please send us a confirmation message by sending: CONFIRM %s." \
                                "You will receive a reminder to confirm in a few days"
                                
-    patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
-    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
-                        "in the last %s days"
+#    patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
+#    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
+#                        "in the last %s days"
+                        
+#    initiator_status_update_txt = "Hi %s, CBA %s has just told %s to come to the clinic."
+    
     
     def handle(self,text):
         #check message is valid
@@ -47,28 +49,47 @@ class ToldHandler(KeywordHandler):
         # FORMAT is valid
         # 
         #pass it off to trace() for processing.
+        words = self.sanitize_and_validate(text)
+        if words:
+            return self.told(words)
+        else:
+            return
         
+    def sanitize_and_validate(self, text):
+        #check if contact is valid
+        if self.msg.connection.contact is None \
+               or not self.msg.connection.contact.is_active:
+            self.unrecognized_sender()
+            return None
         
-        
-        self.told(text)
-        return True
-        
+        return text
     
+    
+    def create_new_patient_trace(self, pat_name):
+        p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location.parent)
+        p.initiator_contact = self.msg.connection.contact
+        p.type="unrecognized_patient"
+        p.name = pat_name
+        p.status = patienttracing.get_status_new()
+        p.start_date = datetime.now() 
+        p.save()
+        
     def told(self, pat_name):
         '''
         Respond to TOLD message, update PatientTrace db entry status to 'told'
         '''
 
         #Check to see if there are any patients being traced by the given name        
-        patients = PatientTrace.objects.filter(name=pat_name).filter(status=patienttracing.get_status_new())
-        if len(patients) == 0:
-            self.respond_patient_not_found(pat_name)
-
-        #Check to see if there is a PatientTrace initiated within the last TRACE_WINDOW days            
-        patients.filter(start_date__gt=(datetime.now()-timedelta(days=self.TRACE_WINDOW)))
+        patients = PatientTrace.objects.filter(name__iexact=pat_name) \
+                                        .filter(status=patienttracing.get_status_new()) \
+                                        .filter(clinic = self.msg.connection.contact.location.parent)
         
         if len(patients) == 0:
-            self.respond_trace_expired(pat_name)
+#            self.respond("patient "+pat_name+" not found! Making a new one!")
+            #if no matching trace is found
+            self.create_new_patient_trace(pat_name)
+            self.told(pat_name) #redo the loop
+            return True
             
         #If there are more than one patients in the resulting list, pick the first one.  We have no way
         #of knowing which one is the correct patient in this case.
@@ -81,22 +102,21 @@ class ToldHandler(KeywordHandler):
         
         patient.save()
         
-        self.respond_thanks_and_confirm_reminder(pat_name)
-        self.update_initiator_on_status(pat_name)
+        self.respond_told_thankyou(pat_name)
     
     
-    def respond_trace_expired(self,pat_name):
-        self.respond(self.trace_expired_txt)
+#    def respond_trace_expired(self,pat_name):
+#        self.respond(self.trace_expired_txt % (self.msg.connection.contact.name, pat_name, self.TRACE_WINDOW))
          
-    def respond_patient_not_found(self,pat_name):
-        self.respond(self.patient_not_found_txt)
+#    def respond_patient_not_found(self,pat_name):
+#        self.respond(self.patient_not_found_txt % (self.msg.connection.contact.name))
          
-    def respond_told_thankyou(self):
+    def respond_told_thankyou(self, pat_name):
         '''
         Responds with a thank you message for telling the patient to come into the clinic,
         Informs the user about confirming the visit
         '''
-        self.respond(self.response_told_thanks_txt)
+        self.respond(self.response_told_thanks_txt % (self.msg.connection.contact.name, pat_name, pat_name))
         
  
     def help(self):
@@ -112,36 +132,12 @@ class ToldHandler(KeywordHandler):
         '''
         self.respond(self.unrecognized_txt)
     
-    def respond_thanks_and_confirm_reminder(self,pat_name):
-        self.respond(self.response_told_thanks_txt)
 
-    def update_initiator_on_status(self,pat_name):
-        pass
-
-# ====================================================================     
-#    DELETE ME!
-#
-#    initiator = models.ForeignKey(Contact, related_name='patients_traced',
-#                                     limit_choices_to={'types__slug': 'clinic_worker'},
-#                                     null=True, blank=True)
-#    type = models.CharField(max_length=15)
-#    name = models.CharField(max_length=50) # name of patient to trace
-#    patient_event = models.ForeignKey(PatientEvent, related_name='patient_traces',
-#                                      null=True, blank=True) 
-#    messenger = models.ForeignKey(Contact,  related_name='patients_reminded',
-#                            limit_choices_to={'types__slug': 'cba'}, null=True,
-#                            blank=True)# cba who informs patient
-#
-#    confirmed_by = models.ForeignKey(Contact, related_name='patient_traces_confirmed',
-#                            limit_choices_to={'types__slug': 'cba'}, null=True,
-#                            blank=True)# cba who confirms that patient visited clinic
-#
-#    status = models.CharField(choices=STATUS_CHOICES, max_length=15) # status of tracing activity
-#
-#    start_date = models.DateTimeField() # date when tracing starts
-#    reminded_on = models.DateTimeField(null=True, blank=True) # date when cba tells mother
-#    confirmed_date = models.DateTimeField(null=True, blank=True)# date of confirmation that patient visited clinic   
-#    
-# =======================================================================    
     
+#    def update_initiator_on_status(self,pat_name, initiator_contact):
+#        self.respond(self.initiator_status_update_txt % (initiator_contact.name, self.msg.connection.contact.name, pat_name))
+        
+
+
+
     

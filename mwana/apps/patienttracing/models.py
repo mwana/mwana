@@ -3,12 +3,26 @@ import datetime
 from django.db import models
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
+from rapidsms.contrib.locations.models import Location
 
+
+class SentConfirmationMessage(models.Model):
+    patient_name = models.CharField(max_length=50)
+    initiator_contact = models.ForeignKey(Contact, limit_choices_to={'types__slug': 'worker'},
+                                     related_name='trace_confirmation_initiator',
+                                     null=True, blank=True)
+    cba_contact = models.ForeignKey(Contact, limit_choices_to={'types__slug': 'cba'},
+                                    related_name='trace_confirmation_cba')
+    message = models.CharField(max_length=160)
+    sent_date = models.DateTimeField()
+    
+    
 class PatientTrace(models.Model):
     STATUS_CHOICES = (
                   ("new", "new"),
                   ("told", "told"),
                   ("confirmed", "confirmed"),
+                  ("awaiting_confirm", "awaiting_confirm"), #waiting for CBA to send in confirm message (after system sent confirm reminder msg)
                   ("refused", "patient refused"),# when mother can't be traced
                   ("lost", "lost to followup"),# when mother can't be traced
                   ("dead", "patient died"),# when mother can't be traced
@@ -18,7 +32,8 @@ class PatientTrace(models.Model):
                 ("manual", "manual"),
                 ("6 day", "6 day"),
                 ("6 week", "6 week"),
-                ("6 month","6 month")
+                ("6 month","6 month"),
+                ("unrecognized_patient", "unrecognized_patient")  #this is when we get a told message and are unable to link it to a previously initiated trace.
                 )
 
     INITIATOR_CHOICES = (
@@ -32,7 +47,8 @@ class PatientTrace(models.Model):
     initiator_contact = models.ForeignKey(Contact, related_name='patients_traced',
                                      limit_choices_to={'types__slug': 'clinic_worker'},
                                      null=True, blank=True)
-    type = models.CharField(choices=TYPE_CHOICES, max_length=15)
+    clinic = models.ForeignKey(Location, related_name='patient_location', null=False, blank=False)
+    type = models.CharField(choices=TYPE_CHOICES, max_length=30)
     name = models.CharField(max_length=50) # name of patient to trace
 #    reason = models.CharField(max_length=90) #optional reason for why the trace was initiated
     patient_event = models.ForeignKey(PatientEvent, related_name='patient_traces',
@@ -62,6 +78,9 @@ def get_status_new():
 
 def get_status_told():
     return PatientTrace.STATUS_CHOICES[1][1]
+
+def get_status_await_confirm():
+    return PatientTrace.STATUS_CHOICES[3][1]
 
 def get_status_confirmed():
     return PatientTrace.STATUS_CHOICES[2][1]

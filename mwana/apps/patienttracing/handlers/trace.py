@@ -7,7 +7,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
-
+from mwana.apps.patienttracing import models as patienttracing
 class TraceHandler(KeywordHandler):
     '''
     User sends: 
@@ -25,11 +25,10 @@ class TraceHandler(KeywordHandler):
     '''
     
     keyword = "trace|trase|trac"
-    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_to_trace_txt = "Thank You %s! Your patient trace has been initiated.  You will be notified when the patient is found."
+    response_to_trace_txt = "Thank You %s! Your patient trace has been initiated."
     cba_initiate_trace_msg = "Hello %s, please find %s and tell them to come to the clinic. When you've told them, please reply to this msg with: TOLD %s"
     
     
@@ -50,12 +49,13 @@ class TraceHandler(KeywordHandler):
         '''
     #    create entry in the model (PatientTrace)
     #    send out response message(s)
-        p = PatientTrace.objects.create()
-        p.initiator = self.msg.connection.contact
+        p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location)
+        p.initiator_contact = self.msg.connection.contact
         p.type="manual"
         p.name = name
-        p.status = "new"
+        p.status = patienttracing.get_status_new()
         p.start_date = datetime.now() 
+        
         p.save()
         
         
@@ -96,7 +96,6 @@ class TraceHandler(KeywordHandler):
         traces
         '''
         self.respond(self.unrecognized_txt)
-        pass
     
     def broadcast(self, text, contacts, group_name, patient_name):
 #        message_body = "%(text)s [from %(user)s to %(group)s]"
