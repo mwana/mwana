@@ -34,8 +34,7 @@ class ToldHandler(KeywordHandler):
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_told_thanks_txt = "Thank you %s! After %s has visited the clinic, please send us a confirmation message by sending: CONFIRM %s." \
-                               "You will receive a reminder to confirm in a few days"
+    response_told_thanks_txt = "Thank you %s! After you confirm %s has visited the clinic, please send: CONFIRM %s."
     
     clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
                                
@@ -105,6 +104,7 @@ class ToldHandler(KeywordHandler):
         patient.save()
         
         self.respond_told_thankyou(pat_name)
+        return True
     
     
 #    def respond_trace_expired(self,pat_name):

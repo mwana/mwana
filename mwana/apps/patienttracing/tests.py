@@ -104,14 +104,14 @@ class TestApp(TestScript):
             lost   < Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>
             clinic_worker     > trace mary
             cba_contact       < Hi Cba One, please find mary and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD mary
-            clinic_worker     < Thank You John Banda! Your patient trace has been initiated.
+            clinic_worker     < Thank you John Banda. RemindMi Agents have been asked to find mary.
             """
         self.runScript(script)
         self.assertEqual(PatientTrace.objects.get(name='mary').status.lower(),"new")
             
         script = """
             cba_contact       > TOLD MARY
-            cba_contact       < Thank you Cba One! After MARY has visited the clinic, please send us a confirmation message by sending: CONFIRM MARY.You will receive a reminder to confirm in a few days
+            cba_contact       < Thank you Cba One! After you confirm MARY has visited the clinic, please send: CONFIRM MARY.
            """
         self.runScript(script)
         self.assertEqual(PatientTrace.objects.get(name__iexact='Mary').status.lower(),"told")

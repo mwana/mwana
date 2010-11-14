@@ -32,7 +32,7 @@ class TraceHandler(KeywordHandler):
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_to_trace_txt = "Thank You %s! Your patient trace has been initiated."
+    response_to_trace_txt = "Thank you %s. RemindMi Agents have been asked to find %s."
     cba_initiate_trace_msg = "Hi %s, please find %s and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD %s"
     
     cba_not_allowed_txt = "Sorry %s, CBAs are not allowed to start Traces.  Please ask a clinic worker to start a trace."
@@ -79,7 +79,7 @@ class TraceHandler(KeywordHandler):
         Respond with an outgoing message back to the sender that a trace has been initiated
         '''
         
-        self.respond(self.response_to_trace_txt % (self.msg.contact.name))
+        self.respond(self.response_to_trace_txt % (self.msg.contact.name, patient_name))
         pass
  
     def send_trace_to_cbas(self, patient_name):
