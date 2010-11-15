@@ -20,6 +20,8 @@ RESULTS160_SLUGS = {
 #    'send_results_notification': {'minutes': '*'},
 #}
 
+RESULTS160_FAKE_ID_FORMAT = "{clinic}-{id:04d}-1"
+
 TIME_ZONE = 'Africa/Blantyre'
 
 LANGUAGE_CODE = 'eng-us'
