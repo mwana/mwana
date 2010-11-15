@@ -174,7 +174,7 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule('send_results_notification',
+        schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [11], 'minutes': [30],
                                        'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
@@ -183,7 +183,7 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule('send_changed_records_notification',
+        schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [11], 'minutes': [0],
                                        'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
@@ -192,7 +192,7 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule('process_outstanding_payloads',
+        schedule = self._get_schedule(callback.split('.')[-1],
                                       {'minutes': [0], 'hours': '*'})
         EventSchedule.objects.create(callback=callback, **schedule)
 
