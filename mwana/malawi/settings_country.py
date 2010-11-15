@@ -15,10 +15,10 @@ RESULTS160_SLUGS = {
     'DISTRICT_SLUGS': ('district',),
 }
 
-RESULTS160_SCHEDULES = {
-    # send out results almost immediately (for demo purposes only)
-    'send_results_notification': {'minutes': '*'},
-}
+#RESULTS160_SCHEDULES = {
+#    # send out results almost immediately (for demo purposes only)
+#    'send_results_notification': {'minutes': '*'},
+#}
 
 TIME_ZONE = 'Africa/Blantyre'
 
