@@ -115,49 +115,67 @@ class LabresultsSetUp(TestScript):
 
 class TestApp(LabresultsSetUp):
 
-    testReportResults = """
+    def testReportResults(self):
+        script = """
             clinic_worker > SENT 33
             clinic_worker < Hello John Banda! We received your notification that 33 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportResultsCorrection = """
+    def testReportResultsCorrection(self):
+        script = """
             clinic_worker > snt hundred twenti 5 samples
             clinic_worker < Hello John Banda! We received your notification that 125 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportRemovalOfExtraWords = """
+    def testReportRemovalOfExtraWords(self):
+        script = """
             clinic_worker > SENT 40 samples anythin
             clinic_worker < Hello John Banda! We received your notification that 40 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
         
-    testZeroSampleNumber = """
+    def testZeroSampleNumber(self):
+        script = """
             clinic_worker > SENT 0
             clinic_worker < Sorry, the number of DBS samples sent must be greater than 0 (zero).
         """
-    testNegativeSampleNumber = """
+        self.runScript(script)
+
+    def testNegativeSampleNumber(self):
+        script = """
             clinic_worker > SENT -1
             clinic_worker < Hello John Banda! We received your notification that 1 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testBadReportFormat = """
+    def testBadReportFormat(self):
+        script = """
             clinic_worker > SENT some samples yo!
             clinic_worker < Sorry, we didn't understand that message. To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
         """
+        self.runScript(script)
         
-    testUnregisteredResults = """
+    def testUnregisteredResults(self):
+        script = """
             unknown_user > SENT 3
             unknown_user < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
         """
         
-    testUnregisteredCheck = """
+    def testUnregisteredCheck(self):
+        script = """
             unknown_user > CHECK RESULTS
             unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>
         """
+        self.runScript(script)
         
-    testCheckResultsNone = """
+    def testCheckResultsNone(self):
+        script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
     """
+        self.runScript(script)
     
     # TODO: flesh out this test
     """
