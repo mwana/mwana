@@ -14,13 +14,12 @@ RESULTS160_SLUGS = {
     'ZONE_SLUGS': ('zone',),
     'DISTRICT_SLUGS': ('district',),
 }
-
 #RESULTS160_SCHEDULES = {
 #    # send out results almost immediately (for demo purposes only)
 #    'send_results_notification': {'minutes': '*'},
 #}
-
-RESULTS160_FAKE_ID_FORMAT = "{clinic}-{id:04d}-1"
+RESULTS160_FAKE_ID_FORMAT = '{clinic}-{id:04d}-1'
+RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 
 TIME_ZONE = 'Africa/Blantyre'
 
