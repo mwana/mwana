@@ -51,7 +51,7 @@ def setup_path():
 
 def staging():
     env.environment = 'staging-environment'
-    env.hosts = ['192.168.1.10']
+    env.hosts = ['malawi-qa.projectmwana.org']
     env.user = 'mwana'
     env.home = '/home/mwana'
     setup_path()

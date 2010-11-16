@@ -6,3 +6,7 @@ hudson/django-lint-0.13.tar.gz
 hudson/pylint-0.21.3.tar.gz
 # unittest-xml-reporting
 hudson/unittest-xml-reporting-1.0.3.tar.gz
+# BeautifulSoup
+hudson/BeautifulSoup-3.1.0.1.tar.gz
+# django-test-extensions
+hudson/django-test-extensions-35a1c15.tar.gz
