@@ -63,7 +63,8 @@ class TraceHandler(KeywordHandler):
     #    send out response message(s)
         p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location)
         p.initiator_contact = self.msg.connection.contact
-        p.type="manual"
+        p.type=patienttracing.get_type_manual()
+        p.initiator = patienttracing.get_initiator_clinic_worker()
         p.name = name
         p.status = patienttracing.get_status_new()
         p.start_date = datetime.now() 

@@ -39,10 +39,12 @@ class PatientTrace(models.Model):
     INITIATOR_CHOICES = (
                          ("admin", "admin"),
                          ("clinic_worker", "clinic_worker"),
-                         ("automated_task", "automated_task")
+                         ("automated_task", "automated_task"),
+                         ("cba", "cba"),
                          )
 
     initiator = models.CharField(choices=INITIATOR_CHOICES, max_length=20)
+    
     # person who initiates the tracing (used when initiator=clinic_worker)
     initiator_contact = models.ForeignKey(Contact, related_name='patients_traced',
                                      limit_choices_to={'types__slug': 'clinic_worker'},
@@ -85,11 +87,26 @@ def get_status_await_confirm():
 def get_status_confirmed():
     return PatientTrace.STATUS_CHOICES[2][1]
 
-def get_clinic_worker_initiator():
+def get_initiator_cba():
+    return PatientTrace.INITIATOR_CHOICES[3][0]
+
+def get_initiator_clinic_worker():
     return PatientTrace.INITIATOR_CHOICES[1][0]
 
-def get_automated_initiator():
+def get_initiator_automated():
     return PatientTrace.INITIATOR_CHOICES[2][0]
 
-def get_admin_initiator():
+def get_initiator_admin():
     return PatientTrace.INITIATOR_CHOICES[0][0]
+
+def get_type_manual():
+    return PatientTrace.TYPE_CHOICES[0][0]
+
+def get_type_6day():
+    return PatientTrace.TYPE_CHOICES[1][0]
+def get_type_6week():
+    return PatientTrace.TYPE_CHOICES[2][0]
+def get_type_6month():
+    return PatientTrace.TYPE_CHOICES[3][0]
+def get_type_unrecognized():
+    return PatientTrace.TYPE_CHOICES[4][0]

@@ -111,7 +111,9 @@ class TestApp(TestScript):
             
         script = """
             cba_contact       > TOLD MARY
+            clinic_worker     < Hi John Banda, CBA Cba One has just told MARY to come to the clinic.
             cba_contact       < Thank you Cba One! After you confirm MARY has visited the clinic, please send: CONFIRM MARY.
+            
            """
         self.runScript(script)
         self.assertEqual(PatientTrace.objects.get(name__iexact='Mary').status.lower(),"told")
@@ -120,6 +122,7 @@ class TestApp(TestScript):
             cba_contact       > Confirm Sarah
             cba_contact       < Thank you Cba One! You have confirmed that Sarah has been to the clinic!
             cba_contact       > Confirm Mary
+            clinic_worker     < Hi John Banda, CBA Cba One has CONFIRMED that Mary has been to the clinic.
             cba_contact       < Thank you Cba One! You have confirmed that Mary has been to the clinic!
         """
         self.runScript(script)

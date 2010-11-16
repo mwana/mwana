@@ -40,6 +40,9 @@ class ConfirmHandler(KeywordHandler):
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
     
     clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
+    initiator_status_update_txt = "Hi %s, CBA %s has CONFIRMED that %s has been to the clinic."
+
+
 #    trace_expired_txt = "Sorry %s, the trace for %s has expired.  Please check the spelling of the patient's name if you are sure a trace has been initiated"\
 #                        "in the last %s days and try again"
     
@@ -70,7 +73,8 @@ class ConfirmHandler(KeywordHandler):
     def create_new_patient_trace(self, pat_name):
         p = PatientTrace.objects.create(clinic = self.msg.connection.contact.location.parent)
         p.initiator_contact = self.msg.connection.contact
-        p.type="unrecognized_patient"
+        p.initiator = patienttracing.get_initiator_cba()
+        p.type = patienttracing.get_type_unrecognized()
         p.name = pat_name
         p.status = patienttracing.get_status_confirmed()
         p.confirmed_date = datetime.now() 
@@ -96,6 +100,10 @@ class ConfirmHandler(KeywordHandler):
         #If there are more than one patients in the resulting list, pick the first one.  We have no way
         #of knowing which one is the correct patient in this case.
         patient = patients[0]
+        
+        if patient.initiator == patienttracing.get_initiator_clinic_worker() and \
+                                            patient.initiator_contact is not None:
+            self.update_initiator_on_status(pat_name, patient.initiator_contact)
         
         #update patienttrace entry data
         patient.confirmed_date = datetime.now()
@@ -131,6 +139,13 @@ class ConfirmHandler(KeywordHandler):
         traces
         '''
         self.respond(self.unrecognized_txt)
+        
+        
+    def update_initiator_on_status(self,pat_name, initiator_contact):
+        if initiator_contact.default_connection is not None:
+            msg = OutgoingMessage(initiator_contact.default_connection, self.initiator_status_update_txt % (initiator_contact.name, self.msg.connection.contact.name, pat_name))
+            msg.send()
+
     
 
 # ====================================================================     
