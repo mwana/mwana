@@ -1,9 +1,16 @@
 from mwana.zambia.settings_country import *
 
-TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.run_tests'
-TEST_OUTPUT_VERBOSE = True
-TEST_OUTPUT_DESCRIPTIONS = True
-TEST_OUTPUT_DIR = 'zambia/xmlrunner'
+# old xmlrunner settings:
+#TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.run_tests'
+#TEST_OUTPUT_VERBOSE = True
+#TEST_OUTPUT_DESCRIPTIONS = True
+#TEST_OUTPUT_DIR = 'zambia/xmlrunner'
+
+# django-test-extensions:
+#TEST_RUNNER = 'test_extensions.testrunners.xmloutput.XMLTestSuiteRunner'
+
+# mwana runner to skip the DB teardown (usually hangs, so we skip it):
+TEST_RUNNER = 'mwana.tests.runners.NoTeardownXMLTestRunner'
 
 # for sqlite3:
 DATABASES = {

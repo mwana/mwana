@@ -165,27 +165,36 @@ class App (rapidsms.apps.base.AppBase):
             
         if len(message) > 0:
             yield message
-        
+
+    def _get_schedule(self, key, default=None):
+        schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
+        return schedules.get(key, default)
+
     def schedule_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[30],
-                                     days_of_week=[0, 1, 2, 3, 4 ])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [30],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[0],
-                                     days_of_week=[0, 1, 2, 3, 4])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [0],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'minutes': [0], 'hours': '*'})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""     

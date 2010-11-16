@@ -6,6 +6,7 @@ import mwana.const as const
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from mwana.apps.labresults import models as labresults
 from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
@@ -21,7 +22,17 @@ from mwana.apps.labresults.testdata.reports import *
 
 
 class LabresultsSetUp(TestScript):
-    
+
+    def _result_text(self):
+        """
+        Returns the appropriate display value for DBS results as it would
+        appear in an SMS.
+        """
+        results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
+        results = {'detected': results_text.get('P', 'Detected'),
+                   'not_detected': results_text.get('N', 'NotDetected')}
+        return results
+
     def setUp(self):
         # this call is required if you want to override setUp
         super(LabresultsSetUp, self).setUp()
@@ -103,49 +114,68 @@ class LabresultsSetUp(TestScript):
         self.assertTrue(const.get_clinic_worker_type() in contact.types.all())
 
 class TestApp(LabresultsSetUp):
-    testReportResults = """
+
+    def testReportResults(self):
+        script = """
             clinic_worker > SENT 33
             clinic_worker < Hello John Banda! We received your notification that 33 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportResultsCorrection = """
+    def testReportResultsCorrection(self):
+        script = """
             clinic_worker > snt hundred twenti 5 samples
             clinic_worker < Hello John Banda! We received your notification that 125 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportRemovalOfExtraWords = """
+    def testReportRemovalOfExtraWords(self):
+        script = """
             clinic_worker > SENT 40 samples anythin
             clinic_worker < Hello John Banda! We received your notification that 40 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
         
-    testZeroSampleNumber = """
+    def testZeroSampleNumber(self):
+        script = """
             clinic_worker > SENT 0
             clinic_worker < Sorry, the number of DBS samples sent must be greater than 0 (zero).
         """
-    testNegativeSampleNumber = """
+        self.runScript(script)
+
+    def testNegativeSampleNumber(self):
+        script = """
             clinic_worker > SENT -1
             clinic_worker < Hello John Banda! We received your notification that 1 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testBadReportFormat = """
+    def testBadReportFormat(self):
+        script = """
             clinic_worker > SENT some samples yo!
             clinic_worker < Sorry, we didn't understand that message. To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
         """
+        self.runScript(script)
         
-    testUnregisteredResults = """
+    def testUnregisteredResults(self):
+        script = """
             unknown_user > SENT 3
             unknown_user < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
         """
         
-    testUnregisteredCheck = """
+    def testUnregisteredCheck(self):
+        script = """
             unknown_user > CHECK RESULTS
             unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>
         """
+        self.runScript(script)
         
-    testCheckResultsNone = """
+    def testCheckResultsNone(self):
+        script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
     """
+        self.runScript(script)
     
     # TODO: flesh out this test
     """
@@ -195,9 +225,9 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "count": 3, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_display(),
-            "id2": res2.requisition_id, "res2": res2.get_result_display(),
-            "id3": res3.requisition_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text(),
+            "id3": res3.requisition_id, "res3": res3.get_result_text()}
         
         self.runScript(script)
         
@@ -225,9 +255,9 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_display(),
-            "id2": res2.requisition_id, "res2": res2.get_result_display(),
-            "id3": res3.requisition_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text(),
+            "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
         
@@ -347,7 +377,7 @@ class TestApp(LabresultsSetUp):
         
         script = """
             clinic_worker > RESULT 9999
-            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < Sample 9999: {detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
             clinic_worker < There are currently no results available for 1, 000. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
@@ -359,18 +389,18 @@ class TestApp(LabresultsSetUp):
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0001
-            clinic_worker < **** 0001;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0001;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0003
-            clinic_worker < **** 0003;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0003;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
-            clinic_worker < **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
-            clinic_worker < **** 0000;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0000;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0001 0002
-            clinic_worker < **** 0001;NotDetected. **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0001;{not_detected}. **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to receive DBS results. If you think this message is a mistake, respond with keyword 'HELP'
-           """
+           """.format(**self._result_text())
 
         self.runScript(script)
 
@@ -434,12 +464,12 @@ class TestApp(LabresultsSetUp):
             central_clinic_worker > CHECK
             central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             central_clinic_worker > 1111
-            central_clinic_worker < Thank you! Here are your results: **** 0000;Detected. **** 0004b;NotDetected
+            central_clinic_worker < Thank you! Here are your results: **** 0000;{detected}. **** 0004b;{not_detected}
             central_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again James Phiri!
             clinic_worker > CHECK
             clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 0001;NotDetected. **** 0002;Detected. **** 0003;NotDetected. **** 0004;NotDetected. **** 0004a;Rejected
+            clinic_worker < Thank you! Here are your results: **** 0001;{not_detected}. **** 0002;{detected}. **** 0003;{not_detected}. **** 0004;{not_detected}. **** 0004a;Rejected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             clinic_worker > Reports
             clinic_worker < To view a report, send REPORT <CLINIC_CODE> [MONTH]
@@ -456,7 +486,7 @@ class TestApp(LabresultsSetUp):
             clinic_worker > Reports 400000
             clinic_worker > Reports 40 Nov
             clinic_worker > Reports Luapula
-        """
+        """.format(**self._result_text())
         self.runScript(script)        
         msgs=self.receiveAllMessages()
         
@@ -709,9 +739,9 @@ class TestResultsAcceptor(LabresultsSetUp):
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 1029023412;NotDetected. **** 78;NotDetected. **** 21234987;NotDetected
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 21234987;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """        
+            """.format(**self._result_text())
         self.runScript(script)
 
         # testing if the payload is processed fine is done in other test methods
@@ -749,10 +779,10 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;NotDetected changed to 87;Detected
-            clinic_worker < **** 21234987;NotDetected changed to 21234987b;NotDetected
+            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}
+            clinic_worker < **** 21234987;{not_detected} changed to 21234987b;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """
+            """.format(**self._result_text())
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
