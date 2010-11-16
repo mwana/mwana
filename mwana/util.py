@@ -1,4 +1,4 @@
-from mwana.apps.locations.models import LocationType
+from mwana.apps.locations.models import Location, LocationType
 from mwana import const
 import datetime
 from django.conf import settings

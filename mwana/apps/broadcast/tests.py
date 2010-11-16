@@ -29,9 +29,7 @@ class TestApp(TestScript):
         self.clinic2 = Location.objects.create(type=clinic_type, name="Other Clinic", slug="402020")
         self.clinic2.parent = self.district2
         self.clinic2.save()
-        zone_type, _ = LocationType.objects.get_or_create(singular="clinic",
-                                                     plural="clinics",
-                                                     slug=const.CLINIC_SLUGS[0])
+        zone_type = LocationType.objects.create(slug=const.ZONE_SLUGS[0])
 
         self.clinic_zone= Location.objects.create(type=zone_type, name="child",
                                                    slug="child", parent=self.clinic)

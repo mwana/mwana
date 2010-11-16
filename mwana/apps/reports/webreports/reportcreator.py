@@ -566,7 +566,7 @@ class Results160Reports:
             return None
         parents = []
         for location in locations:
-            if not type_slug or (location.parent and location.parent.type.slug in type_slugs):
+            if not type_slugs or (location.parent and location.parent.type.slug in type_slugs):
                 parents.append(location.parent)
         return list(set(parents))
 
