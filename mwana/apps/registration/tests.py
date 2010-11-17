@@ -12,6 +12,7 @@ from mwana.apps.locations.models import LocationType
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.stringcleaning.app import App as cleaner_App
+import time
 
 
 class TestApp(TestScript):
@@ -27,9 +28,9 @@ class TestApp(TestScript):
         central_clinic = Location.objects.create(name="Central Clinic",
                                                  slug="403012", type=ctr)
         mansa = Location.objects.create(name="Mansa",
-                                                 slug="4030", type=dst)
+                                                 slug="403000", type=dst)
         luapula = Location.objects.create(name="Luapula",
-                                                 slug="40", type=prv)
+                                                 slug="400000", type=prv)
         script = """
             lost   > join
             lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
@@ -57,11 +58,13 @@ class TestApp(TestScript):
             tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
         """
         self.runScript(script)
+        time.sleep(1)
         self.assertEqual(4, Contact.objects.count(), "Registration didn't create a new contact!")
         rb = Contact.objects.get(name = "Rupiah Banda")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
+        
 
 
         script = """
@@ -71,6 +74,7 @@ class TestApp(TestScript):
             kk     < Sorry, I don't know about a location with code 4f3012. Please check your code and try again.
         """
         self.runScript(script)
+        time.sleep(1)
         self.assertEqual(5, Contact.objects.count())
         jb = Contact.objects.get(name='Jacob Banda')
         self.assertEqual(central_clinic, jb.location)
@@ -82,15 +86,18 @@ class TestApp(TestScript):
             hubman     < Hi Hubman Banda, thanks for registering for Results160 from hub at Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
+        time.sleep(.5)
         self.assertEqual(6, Contact.objects.count())
         hubman = Contact.objects.get(name='Hubman Banda')
         self.assertEqual(hubman.types.all()[0].slug, const.HUB_WORKER_SLUG)
+        
 
         script = """
             dho     > join dho 4030 Dho banda 1234
             dho     < Hi Dho Banda, thanks for registering for Results160 from Mansa DHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
+        time.sleep(.5)
         self.assertEqual(7, Contact.objects.count())
         dho = Contact.objects.get(name='Dho Banda')
         self.assertEqual(dho.types.all()[0].slug, const.DISTRICT_WORKER_SLUG)
@@ -100,6 +107,7 @@ class TestApp(TestScript):
             pho     < Hi Pho Banda, thanks for registering for Results160 from Luapula PHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
+        time.sleep(.5)
         self.assertEqual(8, Contact.objects.count())
         pho = Contact.objects.get(name='Pho Banda')
         self.assertEqual(pho.types.all()[0].slug, const.PROVINCE_WORKER_SLUG)

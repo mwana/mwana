@@ -152,7 +152,7 @@ class JoinHandler(KeywordHandler):
         if not tokens:
             return
         if self.include_type:
-            slug = tokens[2]
+            slug = LocationCode(tokens[2]).slug
             name = tokens[4].title().strip()
             pin = tokens[6]
             worker_type = get_worker_type(tokens[0])
