@@ -61,16 +61,11 @@ def cba_usage(clinic):
     
     ctype = ContactType.objects.all()[1]
     
-    june = PatientEvent.objects.filter(date__month=6).filter(cba_conn__contact__type=ctype)\
-                                                        .filter(cba_conn__contact__location__name=clinic)
-    july = PatientEvent.objects.filter(date__month=7).filter(cba_conn__contact__type=ctype)\
-                                                        .filter(cba_conn__contact__location__name=clinic)
-    aug = PatientEvent.objects.filter(date__month=8).filter(cba_conn__contact__type=ctype)\
-                                                        .filter(cba_conn__contact__location__name=clinic)
-    sep = PatientEvent.objects.filter(date__month=9).filter(cba_conn__contact__type=ctype)\
-                                                        .filter(cba_conn__contact__location__name=clinic)
-    oct = PatientEvent.objects.filter(date__month=10).filter(cba_conn__contact__type=ctype)\
-                                                        .filter(cba_conn__contact__location__name=clinic)
+    june = PatientEvent.objects.filter(date__month=6).filter(cba_conn__contact__types=ctype).filter(cba_conn__contact__location__parent__name=clinic)
+    july = PatientEvent.objects.filter(date__month=7).filter(cba_conn__contact__types=ctype).filter(cba_conn__contact__location__parent__name=clinic)
+    aug = PatientEvent.objects.filter(date__month=8).filter(cba_conn__contact__types=ctype).filter(cba_conn__contact__location__parent__name=clinic)
+    sep = PatientEvent.objects.filter(date__month=9).filter(cba_conn__contact__types=ctype).filter(cba_conn__contact__location__parent__name=clinic)
+    oct = PatientEvent.objects.filter(date__month=10).filter(cba_conn__contact__types=ctype).filter(cba_conn__contact__location__parent__name=clinic)
     
 #    months = [june,july,aug,sep,oct]
 #    

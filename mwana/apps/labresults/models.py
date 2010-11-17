@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
+
 from datetime import datetime
 from mwana.apps.locations.models import Location
 from rapidsms.models import Connection, Contact
@@ -19,8 +21,8 @@ class SampleNotification(models.Model):
     date     = models.DateTimeField(default=datetime.utcnow)
     
     def __unicode__(self):
-        "%s DBS Samples from %s on %s" % \
-            (self.count, self.location, self.date.date())
+        return "%s DBS Samples from %s on %s" % \
+            (self.count, self.location.name, self.date.date())
 
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status
@@ -46,12 +48,31 @@ class Result(models.Model):
                                     #  sense; sit on it indefinitely, hoping it will resolve to a
                                     #  different status
     )
-    
-    def get_result(self):
-        if self.result in ('X', 'I'):
+
+    def _get_result_text(self, result_str):
+        """
+        Helper method to get the correspong result from a given character. These are
+        not as exactly as specified in Result.RESULT_CHOICES
+        """
+        char_string = result_str.upper()
+        result_settings = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
+        if char_string in result_settings:
+            return result_settings[char_string]
+        elif char_string == 'N':
+            return 'NotDetected'
+        elif char_string == 'P':
+            return 'Detected'
+        elif char_string in ['R','I','X']:
             return 'Rejected'
+
+    def get_result_text(self):
+        return self._get_result_text(self.result)
+
+    def get_old_result_text(self):
+        if ':' in self.old_value:
+            return self._get_result_text(self.old_value.split(':')[1])
         else:
-            return super(Result, self).get_result_display()
+            return ''
 
     STATUS_CHOICES = (
         ('in-transit', 'En route to lab'),      #not supported currently

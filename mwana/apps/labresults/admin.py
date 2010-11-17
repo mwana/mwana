@@ -26,3 +26,9 @@ class PayloadAdmin(admin.ModelAdmin):
     list_filter = ('incoming_date', 'auth_user', 'version', 'source',
                    'parsed_json', 'validated_schema')
 admin.site.register(Payload, PayloadAdmin)
+
+class SampleNotificationAdmin(admin.ModelAdmin):
+    list_display =('contact', 'location', 'count', 'count_in_text', 'date')
+    list_filter =('contact', 'location', 'count', 'count_in_text', 'date')
+    date_hierarchy = 'date'
+admin.site.register(SampleNotification, SampleNotificationAdmin)

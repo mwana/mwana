@@ -4,6 +4,8 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import LocationType
 
 # contact types:
+LAB_WORKER_SLUG = settings.RESULTS160_SLUGS.get('LAB_WORKER_SLUG', 'hub')
+HUB_WORKER_SLUG = settings.RESULTS160_SLUGS.get('HUB_WORKER_SLUG', 'hub')
 CBA_SLUG = settings.RESULTS160_SLUGS.get('CBA_SLUG', 'cba')
 PATIENT_SLUG = settings.RESULTS160_SLUGS.get('PATIENT_SLUG', 'patient')
 CLINIC_WORKER_SLUG = settings.RESULTS160_SLUGS.get('CLINIC_WORKER_SLUG',
@@ -45,6 +47,12 @@ def _get_locationtype(slug, singular, plural=None):
     return type
 
 
+def get_lab_worker_type():
+    return _get_contacttype(LAB_WORKER_SLUG, 'LAB Worker')
+
+def get_hub_worker_type():
+    return _get_contacttype(HUB_WORKER_SLUG, 'Hub Worker')
+
 def get_cba_type():
     return _get_contacttype(CBA_SLUG, 'Community Based Agent')
 
@@ -52,6 +60,8 @@ def get_cba_type():
 def get_patient_type():
     return _get_contacttype(PATIENT_SLUG, 'Patient')
 
+def get_zone_type():
+    return _get_locationtype(ZONE_SLUGS, 'Zone')
 
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
