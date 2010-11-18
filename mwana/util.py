@@ -1,4 +1,4 @@
-from mwana.apps.locations.models import LocationType
+from mwana.apps.locations.models import Location, LocationType
 from mwana import const
 import datetime
 from django.conf import settings
@@ -38,3 +38,39 @@ def is_weekend(input_date):
     Returns true if passed date is a weekend. Monday => 0
     """
     return input_date.weekday() in [5, 6]
+
+def get_worker_type(category):
+    '''
+    Returns the worker_type based on the category
+    '''
+    type = category.lower()
+    if type == 'district' or type == 'dho':
+        return const.get_district_worker_type()
+    elif type == 'clinic':
+        return const.get_clinic_worker_type()
+    if type == 'cba':
+        return const.get_cba_type()
+    elif type == 'province' or type == 'pho':
+        return const.get_province_worker_type()
+    elif type == 'hub':
+        return const.get_hub_worker_type()
+    elif type == 'lab':
+        return const.get_lab_worker_type()
+
+def get_location_type(category):
+    '''
+    Returns the location_type based on the category
+    '''
+    type = category.lower()
+    if type == 'district' or type == 'dho':
+        return const.DISTRICT_SLUGS
+    elif type == 'clinic':
+        return const.CLINIC_SLUGS
+    if type == 'cba':
+        return const.ZONE_SLUGS
+    elif type == 'province' or type == 'pho':
+        return const.PROVINCE_SLUGS
+    elif type == 'hub':
+        return const.CLINIC_SLUGS
+    elif type == 'lab':
+        return const.CLINIC_SLUGS
