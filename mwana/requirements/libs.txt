@@ -20,3 +20,7 @@ django-uni-form-0.7.0.tar.gz
 django-eav-b608a0a.tar.gz
 # rapidsms-xforms
 rapidsms-xforms.tar.gz
+# pyserial
+pyserial-2.5.tar.gz
+# pygsm must be installed separately because it requires that pytz and pyserial
+# be installed first

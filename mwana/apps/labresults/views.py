@@ -258,14 +258,13 @@ def accept_record (record, payload):
     if rec_status not in ('new', 'update'):
         cant_save('sync_status not an allowed value')
         return False
-
+    if new_record.result:
+            new_record.arrival_date = new_record.payload.incoming_date
     if not old_record:
         if rec_status == 'update':
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
-        new_record.notification_status = 'new' if new_record.result else 'unprocessed'
-        if new_record.result:
-            new_record.arrival_date = new_record.payload.incoming_date
+        new_record.notification_status = 'new' if new_record.result else 'unprocessed'        
     else:
         #keep track of original date for payload with result
         if old_record.arrival_date and old_record.result:

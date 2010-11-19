@@ -2,7 +2,8 @@ from rapidsms.tests.scripted import TestScript
 
 class SimpleTest(TestScript):
 
-    test_trial_period = """
+    def test_trial_period(self):
+        script = """
         kb > join
         kb < I'm sorry, Results160 and RemindMi are still in testing phase. We will notify you when the system is live.
         kb > tryout
@@ -10,3 +11,4 @@ class SimpleTest(TestScript):
         kb > join
         kb < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
     """
+        self.runScript(script)

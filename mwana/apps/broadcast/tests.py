@@ -9,36 +9,38 @@ from mwana.apps.broadcast.app import App as broadcast_app
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
 
+from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type
+
 class TestApp(TestScript):
     
     def setUp(self):
         super(TestApp, self).setUp()
         clinic_type, _ = LocationType.objects.get_or_create(singular="clinic", 
                                                      plural="clinics", 
-                                                     slug=const.CLINIC_SLUGS[0])
-        zone_type, _ = LocationType.objects.get_or_create(singular="clinic", 
-                                                     plural="clinics", 
-                                                     slug=const.CLINIC_SLUGS[0])
-        clinic = Location.objects.create(type=clinic_type, name="demo",
-                                         slug="demo")
-        self.clinic_zone = Location.objects.create(type=zone_type, name="child", 
-                                                   slug="child", parent=clinic) 
-        clinic_worker = self.create_contact(name="clinic_worker", location=clinic, 
+                                                     slug="clinics")
+        district_type, _ = LocationType.objects.get_or_create(singular="district",
+                                                     plural="districts",
+                                                     slug="districts")
+        self.district = Location.objects.create(type=district_type, name="Mansa", slug="403000")
+        self.district2 = Location.objects.create(type=district_type, name="Lusaka", slug="402000")
+        self.clinic = Location.objects.create(type=clinic_type, name="Central Clinic", slug="403020")
+        self.clinic.parent = self.district
+        self.clinic.save()
+        self.clinic2 = Location.objects.create(type=clinic_type, name="Other Clinic", slug="402020")
+        self.clinic2.parent = self.district2
+        self.clinic2.save()
+        zone_type = LocationType.objects.create(slug=const.ZONE_SLUGS[0])
+
+        self.clinic_zone= Location.objects.create(type=zone_type, name="child",
+                                                   slug="child", parent=self.clinic)
+        clinic_worker = self.create_contact(name="clinic_worker", location=self.clinic,
                                             types=[get_clinic_worker_type()])
-        clinic_worker2 = self.create_contact(name="clinic_worker2", location=self.clinic_zone,
+        clinic_worker2 = self.create_contact(name="clinic_worker2", location=self.clinic,
                                              types=[get_clinic_worker_type()])
         
-#        script = "help_admin > hello world"
-#        self.runScript(script)
-#        connection = Connection.objects.get(identity="help_admin")
-#        help_admin = Contact.objects.create(alias='help_admin', is_active = True, name="help_admin",
-#                                         location=clinic_zone,is_help_admin = True)
-#        help_admin.types.add(const.get_clinic_worker_type())
-#                                
-#        connection.contact = help_admin
-#        connection.save()
         
-        cba = self.create_contact(name="cba", location=clinic,
+
+        cba = self.create_contact(name="cba", location=self.clinic_zone,
                                   types=[get_cba_type()])
         cba2 = self.create_contact(name="cba2", location=self.clinic_zone,
                                    types=[get_cba_type()])
@@ -53,6 +55,63 @@ class TestApp(TestScript):
         
    
         
+    def testMsg(self):
+        """
+        msg dho blah blah : goes to fellow dho's at district
+        msg all blah blah : goes to both dho's and clinic workers in district
+        """
+
+        dho = self.create_contact(name="dho", location=self.district,
+                                            types=[get_district_worker_type()])
+        dho2 = self.create_contact(name="dho2", location=self.district,
+                                            types=[get_district_worker_type()])
+
+        # control contacts
+        dho3 = self.create_contact(name="dho3", location=self.district2,
+                                            types=[get_district_worker_type()])
+        clinic_worker3 = self.create_contact(name="clinic_worker3", location=self.clinic2,
+                                             types=[get_clinic_worker_type()])
+        hub_worker = self.create_contact(name="hub_worker", location=self.clinic,
+                                             types=[get_hub_worker_type()])
+
+        script="""
+        dho > msg my own way
+        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        dho > msg
+        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        """
+        self.runScript(script)
+
+        script="""
+        dho > msg all testing dho blasting
+        """
+        self.runScript(script)
+
+        msgs=self.receiveAllMessages()
+       
+        self.assertEqual(3,len(msgs))
+        expected_recipients = ["dho2","clinic_worker","clinic_worker2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing dho blasting [from dho to MSG]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+        script="""
+        dho > msg dho testing dho blasting
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        # no extra msgs sent
+        self.assertEqual(1, len(msgs))
+        self.assertEqual('dho2', msgs[0].contact.name)
+        self.assertEqual(msgs[0].text, 'testing dho blasting [from dho to MSG]')
+
+
     def testGroupMessaging(self):
         self.assertEqual(0, BroadcastMessage.objects.count())
         self.assertEqual(0, BroadcastResponse.objects.count())
@@ -71,7 +130,7 @@ class TestApp(TestScript):
                     messages = self.receiveAllMessages()
                     recipients_minus_self = [c for c in recipients if c != contact]
                     self.assertEqual(len(recipients_minus_self), len(messages), 
-                                     ("message from %s went to correct amount of "
+                                     ("message from %s went to incorrect amount of "
                                       "people for keyword %s. Expected %s but was "
                                       "%s") % (contact, keyword, len(recipients) - 1,
                                                len(messages)))
