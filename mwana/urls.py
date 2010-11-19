@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
+    
 )
 
 if settings.DEBUG:
