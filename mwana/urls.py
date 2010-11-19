@@ -34,8 +34,6 @@ urlpatterns = patterns('',
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
-
-    (r'^', include('rapidsms_xforms.urls')), # needs top level formList url
 )
 
 if settings.DEBUG:

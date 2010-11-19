@@ -86,11 +86,6 @@ INSTALLED_APPS = [
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
 
-    # xforms + dependencies
-    "eav",
-    "uni_form",
-    "rapidsms_xforms",
-
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
@@ -110,7 +105,6 @@ RAPIDSMS_TABS = [
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('xforms', 'XForms'),
 ]
 
 
