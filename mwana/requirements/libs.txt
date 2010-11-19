@@ -12,6 +12,14 @@ djappsettings-0.1.0.tar.gz
 rapidsms-a7a0fcc.tar.gz
 # pytz:
 pytz-2010l.tar.gz
+# pygsm must be installed separately because it requires that pytz be
+# installed first
+# django-uni-form (for xforms support)
+django-uni-form-0.7.0.tar.gz
+# django-eav (for xforms support)
+django-eav-e8b5849.tar.gz
+# rapidsms-xforms
+rapidsms-xforms.tar.gz
 # pyserial
 pyserial-2.5.tar.gz
 # pygsm must be installed separately because it requires that pytz and pyserial

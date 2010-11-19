@@ -41,7 +41,7 @@ class App (rapidsms.apps.base.AppBase):
                 return
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '+', '-']
+        separators = [',', '/', ';', '*', '-'] # allow '+' because it's needed by xforms
         for mark in separators:            
             if (keyword in results_keywords and mark =='/'):
                 continue
