@@ -62,17 +62,17 @@ class ResultsHandler(KeywordHandler):
                not results:
                 # demo functionality - if '9999' was specified and no results
                 # were found with that requisition ID, return a sample result
-                self.respond("Sample 9999: Detected. Please record these "
+                results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY',
+                                       {})
+                self.respond("Sample 9999: %s. Please record these "
                              "results in your clinic records and promptly "
-                             "delete them from your phone. Thanks again")
+                             "delete them from your phone. Thanks again" %
+                             results_text.get('P', 'Detected'))
                 return
             elif results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
-                        if result.result in ('X', 'I'):
-                            reply = 'Rejected'
-                        else:
-                            reply = result.get_result_display()
+                        reply = result.get_result_text()
                         ready_sample_results.append(
                                 "%(req_id)s;%(res)s" %
                                 {'req_id':result.requisition_id,

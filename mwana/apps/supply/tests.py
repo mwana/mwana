@@ -104,10 +104,12 @@ class TestApp (TestScript):
 
        
 
-    testRequestRequiresRegistration = """
+    def testRequestRequiresRegistration(self):
+        script = """
         noname > request sb
         noname < Sorry you have to register to request supplies. To register, send JOIN <LOCATION CODE> <NAME>
     """
+        self.runScript(script)
 
     def _create_contact(self, identity, name, location):
         # this has a janky dependency on the reg format, but is nice and convenient

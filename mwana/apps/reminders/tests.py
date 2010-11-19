@@ -15,6 +15,8 @@ from mwana import const
 
 class EventRegistration(TestScript):
     
+#    "Hi %(cba)s.%(patient)s is due for %(type)s clinic visit.Please remind them to visit %(clinic)s within 3 days then reply with TOLD %(patient)s"
+    
     def _register(self):
         clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital", slug="kdh",
@@ -223,15 +225,15 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         expected_messages = \
-            ['Hello cba1. patient 1 is due for their 2 day clinic appointment. '
-                'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.',
-                'Hello cba1. patient 2 is due for their 2 day clinic appointment. '
-                'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.',
-                'Hello cba2. patient 3 is due for their 2 day clinic appointment. '
-                'Please remind this person and ensure they '
-                'visit Central Clinic within 3 days.']
+            ['Hi cba1.patient 1 is due for 2 day clinic visit.'
+             'Please remind them to visit Central Clinic within 3 days then '
+             'reply with TOLD patient 1',
+             'Hi cba1.patient 2 is due for 2 day clinic visit.'
+             'Please remind them to visit Central Clinic within 3 days then '
+             'reply with TOLD patient 2',
+             'Hi cba2.patient 3 is due for 2 day clinic visit.'
+             'Please remind them to visit Central Clinic within 3 days then '
+             'reply with TOLD patient 3',]
         self.assertEqual(len(messages), len(expected_messages))
         for msg in messages:
             self.assertTrue(msg.text in expected_messages, msg)
@@ -295,10 +297,9 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello Rupiah Banda. Henry is due "
-                         "for their 1 day clinic appointment. Please "
-                         "remind this person and ensure they visit "
-                         "the clinic within 3 days.")
+        self.assertEqual(messages[0].text, "Hi Rupiah Banda.Henry is due "
+                         "for 1 day clinic visit.Please remind them to visit "
+                         "the clinic within 3 days then reply with TOLD Henry")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
         
@@ -329,10 +330,9 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hello cba. Henry is due for "
-                         "their 1 day clinic appointment. Please "
-                         "remind this person and ensure they visit "
-                         "Central Clinic within 3 days.")
+        self.assertEqual(messages[0].text, "Hi cba.Henry is due for 1 day clinic visit."
+                                            "Please remind them to visit Central Clinic within"
+                                            " 3 days then reply with TOLD Henry")
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)        
         

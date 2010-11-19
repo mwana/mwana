@@ -166,27 +166,36 @@ class App (rapidsms.apps.base.AppBase):
             
         if len(message) > 0:
             yield message
-        
+
+    def _get_schedule(self, key, default=None):
+        schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
+        return schedules.get(key, default)
+
     def schedule_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[30],
-                                     days_of_week=[0, 1, 2, 3, 4 ])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [30],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[0],
-                                     days_of_week=[0, 1, 2, 3, 4])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [0],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'minutes': [0], 'hours': '*'})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""     
@@ -196,6 +205,13 @@ class App (rapidsms.apps.base.AppBase):
             self._mark_results_pending(results,
                                        (msg.connection for msg in messages))
 
+    def _result_verified(self):
+        """
+        Only return verified results or results which can't be verified
+        due to constraints at the lab.
+        """
+        return Q(verified__isnull=True) | Q(verified=True)
+
     def _pending_results(self, clinic):
         """
         Returns the pending results for a clinic. This is limited to 9 results
@@ -203,17 +219,31 @@ class App (rapidsms.apps.base.AppBase):
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
+<<<<<<< HEAD
             return Result.objects.filter(clinic=clinic,
                                location__active=True,
                                notification_status__in=['new', 'notified'])[:9]
+=======
+            results = Result.objects.filter(clinic=clinic,
+                                   location__active=True,
+                                   notification_status__in=['new', 'notified'])
+            return results.filter(self._result_verified())[:9]
+>>>>>>> develop
         else:
             return Result.objects.none()
 
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
+<<<<<<< HEAD
             return Result.objects.filter(clinic=clinic,
                                    location__active=True,
                                    notification_status='updated')
+=======
+            results = Result.objects.filter(clinic=clinic,
+                                   location__active=True,
+                                   notification_status='updated')
+            return results.filter(self._result_verified())
+>>>>>>> develop
         else:
             return Result.objects.none()
 

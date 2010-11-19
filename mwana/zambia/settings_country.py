@@ -7,6 +7,8 @@ RESULTS160_SLUGS = {
     'CLINIC_WORKER_SLUG': 'worker',
     'DISTRICT_WORKER_SLUG': 'district',
     'PROVINCE_WORKER_SLUG': 'province',
+    'HUB_WORKER_SLUG': 'hub',
+    'LAB_WORKER_SLUG': 'lab',
     # location types:
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
                     'rural_health_centre', 'health_post'),
