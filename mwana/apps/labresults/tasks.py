@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 verified = Q(lab_results__verified__isnull=True) |\
            Q(lab_results__verified=True)
 
-active = Q(lab_results__clinic__active=True)
+active = Q(lab_results__clinic__send_live_results=True)
 
 def send_results_notification(router):
     logger.debug('in send_results_notification')
