@@ -17,7 +17,7 @@ pytz-2010l.tar.gz
 # django-uni-form (for xforms support)
 django-uni-form-0.7.0.tar.gz
 # django-eav (for xforms support)
-django-eav-b608a0a.tar.gz
+django-eav-e8b5849.tar.gz
 # rapidsms-xforms
 rapidsms-xforms.tar.gz
 # pyserial
