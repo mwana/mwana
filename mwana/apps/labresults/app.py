@@ -220,7 +220,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         if settings.SEND_LIVE_LABRESULTS:
             results = Result.objects.filter(clinic=clinic,
-                                   location__active=True,
+                                   clinic__active=True,
                                    notification_status__in=['new', 'notified'])
             return results.filter(self._result_verified())[:9]
         else:
@@ -229,7 +229,7 @@ class App (rapidsms.apps.base.AppBase):
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
             results = Result.objects.filter(clinic=clinic,
-                                   location__active=True,
+                                   clinic__active=True,
                                    notification_status='updated')
             return results.filter(self._result_verified())
         else:

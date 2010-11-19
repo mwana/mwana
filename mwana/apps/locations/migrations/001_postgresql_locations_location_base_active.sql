@@ -1,3 +1,3 @@
 BEGIN;
-ALTER TABLE locations_location_base ADD COLUMN active boolean;
+ALTER TABLE locations_location ADD COLUMN active boolean;
 COMMIT;
