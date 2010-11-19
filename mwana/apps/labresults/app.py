@@ -219,31 +219,19 @@ class App (rapidsms.apps.base.AppBase):
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
-<<<<<<< HEAD
-            return Result.objects.filter(clinic=clinic,
-                               location__active=True,
-                               notification_status__in=['new', 'notified'])[:9]
-=======
             results = Result.objects.filter(clinic=clinic,
                                    location__active=True,
                                    notification_status__in=['new', 'notified'])
             return results.filter(self._result_verified())[:9]
->>>>>>> develop
         else:
             return Result.objects.none()
 
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
-<<<<<<< HEAD
-            return Result.objects.filter(clinic=clinic,
-                                   location__active=True,
-                                   notification_status='updated')
-=======
             results = Result.objects.filter(clinic=clinic,
                                    location__active=True,
                                    notification_status='updated')
             return results.filter(self._result_verified())
->>>>>>> develop
         else:
             return Result.objects.none()
 
