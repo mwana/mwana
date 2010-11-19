@@ -4,7 +4,7 @@ from mwana.util import get_clinic_or_default
 from mwana.const import get_cba_type
 
 
-class ClinicHandler(BroadcastHandler):
+class CBAHandler(BroadcastHandler):
     
     group_name = "CBA"
     keyword = "CBA|aaa|cab"
