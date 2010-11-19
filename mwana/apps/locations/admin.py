@@ -7,7 +7,8 @@ from .models import *
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name", "type", "full_name")
+    list_display = ("name", "type", "full_name", "active")
+    list_filter = ("type", "active")
 
 
 admin.site.register(Point)
