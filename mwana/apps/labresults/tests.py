@@ -44,7 +44,10 @@ class LabresultsSetUp(TestScript):
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya", parent = self.luapula)
         self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya)
         self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa)
-
+        # clinic for send_live_results = True
+        self.clinic_live_results_true = Location.objects.create(type=self.type, name="LiveResultsTrue Clinic", slug="403010", parent = self.mansa, send_live_results=True)
+        # clinic for send_live_results = False
+        self.clinic_live_results_false = Location.objects.create(type=self.type, name="LiveResultsFalse Clinic", slug="403011", parent = self.mansa, send_live_results=False)
         
         self.support_clinic = Location.objects.create(type=self.type, name="Support Clinic", slug="spt")
         # this gets the backend and connection in the db
@@ -76,6 +79,22 @@ class LabresultsSetUp(TestScript):
         Connection.objects.create(identity="central_clinic_worker", backend=connection.backend,
                                   contact=self.central_clinic_worker)
         connection.save()
+        
+        # create a worker for the live_results_true clinic
+        self.true_clinic_worker = Contact.objects.create(alias="jbt", name="John Banda",
+                                        location=self.clinic_live_results_true, pin="1001")
+        self.true_clinic_worker.types.add(const.get_clinic_worker_type())
+        
+        Connection.objects.create(identity="true_clinic_worker", backend=connection.backend,
+                                    contact=self.true_clinic_worker)
+        
+        # create a worker for the live_results_false clinic
+        self.false_clinic_worker = Contact.objects.create(alias="jbf", name="John Banda",
+                                        location=self.clinic_live_results_false, pin="0110")
+        self.false_clinic_worker.types.add(const.get_clinic_worker_type())
+        
+        Connection.objects.create(identity="false_clinic_worker", backend=connection.backend,
+                                    contact=self.false_clinic_worker)
 
         # create support staff
         self.support_contact = Contact.objects.create(alias="ha1", name="Help Admin",
@@ -166,7 +185,7 @@ class TestApp(LabresultsSetUp):
     def testUnregisteredCheck(self):
         script = """
             unknown_user > CHECK RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
         """
         self.runScript(script)
         
@@ -185,6 +204,35 @@ class TestApp(LabresultsSetUp):
         524754 < Hi Cory, thanks for registering for DBS results from Results160 as staff of Chipungu. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
     """
     
+    def testSendLiveResultsTrue(self):
+        results = get_fake_results(2, self.clinic_live_results_true, notification_status_choices=("new", ))
+        for res in results:  res.save()
+        res1, res2 = results
+
+        script = """
+            true_clinic_worker > CHECK
+            true_clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            true_clinic_worker > %(code)s
+            true_clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s
+            true_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s! 
+            """ % {"name": self.contact.name, "count": 2, "code":"1001",
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text()}
+
+        self.runScript(script)
+    
+    def testSendLiveResultsFalse(self):
+        results = get_fake_results(2, self.clinic_live_results_false, notification_status_choices=("new", ))
+        for res in results:  res.save()
+        res1, res2 = results
+        
+        script = """
+            false_clinic_worker > CHECK
+            false_clinic_worker < Hello %(name)s. There are no new DBS test results for LiveResultsFalse Clinic right now. We'll let you know as soon as more results are available.
+    """ % {"name": self.contact.name}
+        self.runScript(script)
+    
+        
     def testSentCreatesDbObjects(self):
         self.assertEqual(0, SampleNotification.objects.count())
         script = """
