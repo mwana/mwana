@@ -12,6 +12,7 @@ from django.db.models import Q
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.locations.models import Location
 from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
@@ -219,6 +220,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         if settings.SEND_LIVE_LABRESULTS:
             results = Result.objects.filter(clinic=clinic,
+                                   clinic__send_live_results=True,
                                    notification_status__in=['new', 'notified'])
             return results.filter(self._result_verified())[:9]
         else:
@@ -227,7 +229,8 @@ class App (rapidsms.apps.base.AppBase):
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
             results = Result.objects.filter(clinic=clinic,
-                                            notification_status='updated')
+                                   clinic__send_live_results=True,
+                                   notification_status='updated')
             return results.filter(self._result_verified())
         else:
             return Result.objects.none()
