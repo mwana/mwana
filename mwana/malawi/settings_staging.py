@@ -4,6 +4,7 @@ DEBUG = False
 
 ADMINS = (
     ('Tobias McNulty', 'mwana@caktusgroup.com'),
+    ('Lengani Kaunda', 'lengani@p4studio.com'),
 )
 
 MANAGERS = ADMINS
