@@ -42,8 +42,8 @@ class LabresultsSetUp(TestScript):
         self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="luapula")
         self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="mansa", parent = self.luapula)
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya", parent = self.luapula)
-        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya)
-        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa)
+        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya, send_live_results=True)
+        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa, send_live_results=True)
         # clinic for send_live_results = True
         self.clinic_live_results_true = Location.objects.create(type=self.type, name="LiveResultsTrue Clinic", slug="403010", parent = self.mansa, send_live_results=True)
         # clinic for send_live_results = False
