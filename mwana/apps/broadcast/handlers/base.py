@@ -3,14 +3,15 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_hub_worker_type
 
-HELP_TEXT = "To send a message to %(group)s send keyword %(group)s followed by the contents of your message."
+HELP_TEXT = "To send a message to %(group)s send keyword %(keyword)s followed by the contents of your message."
 UNREGISTERED = "You must be registered with a clinic to use the broadcast feature. Please ask your clinic team how to register, or respond with keyword 'HELP'" 
 
 class BroadcastHandler(KeywordHandler):
     """Broadcast handler"""
     
     def help(self):
-        self.respond(HELP_TEXT, group=self.group_name)
+        self.respond(HELP_TEXT, group=self.group_name,
+                     keyword=self.keyword.split('|')[0].upper())
     
     @property
     def group_name(self):

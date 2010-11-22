@@ -88,12 +88,15 @@ class TestApp(TestScript):
             """
         self.runScript(script)
 
+        self.startRouter()
         self.assertEqual(1, TrainingSession.objects.filter(is_on=True).count())
 #        self.startRouter()
         #manually call scheduled task
         tasks.send_endof_training_notification(self.router)
 
         msgs = self.receiveAllMessages()
+        self.stopRouter()
+        
         trainer_msg = "Hi Trainer Zulu, please send TRAINING STOP if you have stopped training for today at Central Clinic"
         admin_msg ="A reminder was sent to Trainer Zulu, tz to state if training has ended for Central Clinic, 403012"
 

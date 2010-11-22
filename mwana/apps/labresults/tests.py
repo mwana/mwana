@@ -827,8 +827,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}
-            clinic_worker < **** 21234987;{not_detected} changed to 21234987b;{not_detected}
+            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 21234987;{not_detected} changed to 21234987b;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """.format(**self._result_text())
         self.runScript(script)

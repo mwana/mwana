@@ -5,7 +5,7 @@ from mwana.const import get_district_worker_type
 import re
 from django.db.models import Q
 
-class DistrictHandler(BroadcastHandler):
+class MessageHandler(BroadcastHandler):
 
     group_name = "MSG"
     keyword = "msg"

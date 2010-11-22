@@ -16,10 +16,10 @@ RESULTS160_SLUGS = {
 }
 RESULTS160_SCHEDULES = {
     # send new results at 8:00am M-F
-    'send_results_notification': {'hours': [7], 'minutes': [38],
+    'send_results_notification': {'hours': [8], 'minutes': [0],
                                   'days_of_week': [0, 1, 2, 3, 4]},
     # send changed results at 7:30am M-F
-    'send_changed_records_notification': {'hours': [7], 'minutes': [32],
+    'send_changed_records_notification': {'hours': [7], 'minutes': [30],
                                           'days_of_week': [0, 1, 2, 3, 4]},
 }
 RESULTS160_FAKE_ID_FORMAT = '{clinic}-{id:04d}-1'
@@ -30,3 +30,11 @@ TIME_ZONE = 'Africa/Blantyre'
 LANGUAGE_CODE = 'eng-us'
 
 LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
+
+ROOT_URLCONF = 'mwana.malawi.urls'
+
+# Add XForms app + navigation:
+INSTALLED_APPS.insert(-1, 'eav')
+INSTALLED_APPS.insert(-1, 'uni_form')
+INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
+RAPIDSMS_TABS.append(('xforms', 'XForms'))
