@@ -141,9 +141,9 @@ class JoinHandler(KeywordHandler):
 
     def handle(self, text):
         text = text.strip()
-        cba_pattern = re.compile(r"^(cba|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
+        cba_pattern = re.compile(r"^(cba|hsa|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
         if cba_pattern.findall(text) or text.strip().split()[0].lower() in \
-        ('agent','cba'):
+        ('agent', 'cba', 'hsa'):
             self.handle_zone(text[text.index(' '):])
             return       
 
