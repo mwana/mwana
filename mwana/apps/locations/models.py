@@ -90,7 +90,6 @@ class LocationBase(models.Model):
     type = models.ForeignKey(LocationType)
     point = models.ForeignKey(Point, null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True)
-    active = models.NullBooleanField(null=True, blank=True)
 
     class Meta:
         abstract = True
