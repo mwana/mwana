@@ -45,11 +45,13 @@ class DistrictHandler(BroadcastHandler):
 
         msg_part=text[len(tokens[0]):].strip()
         if tokens[0].lower() == 'dho':
+            self.group_name = 'DHO'
             contacts = Contact.active.location(location)\
                             .exclude(id=self.msg.contact.id)\
                             .filter(types=get_district_worker_type())
             return self.broadcast(msg_part, contacts)
         elif tokens[0].lower() == 'all':
+            self.group_name = 'ALL'
             contacts = \
             Contact.active.filter(Q(location=location)|Q(location__parent=location)).\
             exclude(id=self.msg.contact.id)
