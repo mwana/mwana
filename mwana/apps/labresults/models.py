@@ -72,7 +72,8 @@ class Result(models.Model):
         if ':' in self.old_value:
             return self._get_result_text(self.old_value.split(':')[1])
         else:
-            return ''
+            # the result hasn't changed, so return the current result
+            return self.get_result_text()
 
     STATUS_CHOICES = (
         ('in-transit', 'En route to lab'),      #not supported currently

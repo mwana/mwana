@@ -19,9 +19,9 @@ class JoinHandler(KeywordHandler):
     MIN_NAME_LENGTH = 2
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")
-    HELP_TEXT = "To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>"
-    MALFORMED_MSG_TXT = "Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>."
-    INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <LOCATION CODE> <YOUR NAME> <SECURITY CODE>."
+    HELP_TEXT = "To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>"
+    MALFORMED_MSG_TXT = "Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>."
+    INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <LOCATION CODE> <YOUR NAME> <PIN CODE>."
 
     ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or location first reply with keyword 'LEAVE' and try again."
         
@@ -32,7 +32,7 @@ class JoinHandler(KeywordHandler):
         self.respond(self.MALFORMED_MSG_TXT)
 
     def invalid_pin(self, pin):
-        self.respond("Sorry, %s wasn't a valid security code. %s" % (pin, self.INVALID_PIN))
+        self.respond("Sorry, %s wasn't a valid pin code. %s" % (pin, self.INVALID_PIN))
 
     def check_message_valid_and_clean(self, text):
         '''
@@ -123,7 +123,7 @@ class JoinHandler(KeywordHandler):
         ('clinic','dho','hub','pho'):
             self.include_type = True
             self.PATTERN = new_pattern            
-            self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>."
+            self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>."
 
 
     def get_response_message(self, worker_type, name, location, pin):
@@ -141,9 +141,9 @@ class JoinHandler(KeywordHandler):
 
     def handle(self, text):
         text = text.strip()
-        cba_pattern = re.compile(r"^(cba|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
+        cba_pattern = re.compile(r"^(cba|hsa|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
         if cba_pattern.findall(text) or text.strip().split()[0].lower() in \
-        ('agent','cba'):
+        ('agent', 'cba', 'hsa'):
             self.handle_zone(text[text.index(' '):])
             return       
 

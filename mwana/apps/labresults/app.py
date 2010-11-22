@@ -12,6 +12,7 @@ from django.db.models import Q
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.locations.models import Location
 from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
@@ -204,6 +205,13 @@ class App (rapidsms.apps.base.AppBase):
             self._mark_results_pending(results,
                                        (msg.connection for msg in messages))
 
+    def _result_verified(self):
+        """
+        Only return verified results or results which can't be verified
+        due to constraints at the lab.
+        """
+        return Q(verified__isnull=True) | Q(verified=True)
+
     def _pending_results(self, clinic):
         """
         Returns the pending results for a clinic. This is limited to 9 results
@@ -211,15 +219,19 @@ class App (rapidsms.apps.base.AppBase):
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
-            return Result.objects.filter(clinic=clinic,
-                               notification_status__in=['new', 'notified'])[:9]
+            results = Result.objects.filter(clinic=clinic,
+                                   clinic__send_live_results=True,
+                                   notification_status__in=['new', 'notified'])
+            return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
 
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
-            return Result.objects.filter(clinic=clinic,
+            results = Result.objects.filter(clinic=clinic,
+                                   clinic__send_live_results=True,
                                    notification_status='updated')
+            return results.filter(self._result_verified())
         else:
             return Result.objects.none()
 

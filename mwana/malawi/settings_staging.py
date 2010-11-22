@@ -12,6 +12,8 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
+XFORMS_HOST = 'malawi-qa.projectmwana.org'
+
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
 # only on the staging or production server, so that development can continue
 # locally:
@@ -63,7 +65,7 @@ DATABASES = {
     }
 }
 
-SEND_LIVE_LABRESULTS = False
+SEND_LIVE_LABRESULTS = True
 SEND_LIVE_BIRTH_REMINDERS = False
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
