@@ -660,7 +660,7 @@ class TestResultsAcceptor(LabresultsSetUp):
                     "fac": 2020200, 
                     "id": "10-09997", 
                     "hw_tit": "ZAN", 
-                    "pat_id": "21234987", 
+                    "pat_id": "212987", 
                     "dob": "2010-01-12", 
                     "proc_on": "2010-04-17", 
                     "child_age": 4,
@@ -787,7 +787,7 @@ class TestResultsAcceptor(LabresultsSetUp):
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 21234987;{not_detected}
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """.format(**self._result_text())
         self.runScript(script)
@@ -814,7 +814,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=21234987b, Result=N, old value=21234987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=212987b, Result=N, old value=212987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
@@ -827,7 +827,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 21234987;{not_detected} changed to 21234987b;{not_detected}
+            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 212987;{not_detected} changed to 212987b;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             """.format(**self._result_text())
         self.runScript(script)
@@ -858,7 +858,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Get all the messages sent
         msgs = self.receiveAllMessages()
         self.stopRouter()
-
+        
         msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
         msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
 
@@ -870,13 +870,14 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # let clinic worker also become a cba, let other worker leave
         script = """
-            clinic_worker > agent 402029 3 John Banda
+            clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
             other_worker > leave
             other_worker  < You have successfully unregistered, Mary Phiri. We're sorry to see you go.
             """
+        time.sleep(1)
         self.runScript(script)
-
+        
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
