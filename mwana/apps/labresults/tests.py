@@ -166,7 +166,7 @@ class TestApp(LabresultsSetUp):
     def testUnregisteredCheck(self):
         script = """
             unknown_user > CHECK RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <LOCATION CODE> <NAME> <SECURITY CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
         """
         self.runScript(script)
         
@@ -811,7 +811,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Get all the messages sent
         msgs = self.receiveAllMessages()
         self.stopRouter()
-
+        
         msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
         msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
 
@@ -823,13 +823,14 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # let clinic worker also become a cba, let other worker leave
         script = """
-            clinic_worker > agent 402029 3 John Banda
+            clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
             other_worker > leave
             other_worker  < You have successfully unregistered, Mary Phiri. We're sorry to see you go.
             """
+        time.sleep(1)
         self.runScript(script)
-
+        
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
