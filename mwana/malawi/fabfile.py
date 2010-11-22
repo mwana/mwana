@@ -136,6 +136,7 @@ def pull_and_checkout_all():
 
 def deploy():
     pull_and_checkout_all()
+    update_requirements()
     touch()
     restart_route()
 

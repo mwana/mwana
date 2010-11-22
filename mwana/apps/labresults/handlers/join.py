@@ -32,7 +32,7 @@ class JoinHandler(KeywordHandler):
         self.respond(self.MALFORMED_MSG_TXT)
 
     def invalid_pin(self, pin):
-        self.respond("Sorry, %s wasn't a valid security code. %s" % (pin, self.INVALID_PIN))
+        self.respond("Sorry, %s wasn't a valid pin code. %s" % (pin, self.INVALID_PIN))
 
     def check_message_valid_and_clean(self, text):
         '''

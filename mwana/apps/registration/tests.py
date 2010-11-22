@@ -35,7 +35,7 @@ class TestApp(TestScript):
             lost   > join
             lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
             rb     > join clinic kdh rupiah banda 123q
-            rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, 123q wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
             tk     > join clinic kdh tizie kays -1000
             tk     < Hi Tizie Kays, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             jk     > join clinic kdh jordan katembula -1000
@@ -43,7 +43,7 @@ class TestApp(TestScript):
             rb     > join clinic kdh rupiah banda1000
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join clinic kdh rupiah banda 2001234
-            rb     < Sorry, 2001234 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, 2001234 wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join clinic kdh rupiah banda4004444
             rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
             rb     > join clinic kdh rupiah banda 1234

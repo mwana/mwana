@@ -211,7 +211,7 @@ class TestApp(LabresultsSetUp):
 
         script = """
             true_clinic_worker > CHECK
-            true_clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            true_clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             true_clinic_worker > %(code)s
             true_clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s
             true_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s! 
@@ -256,9 +256,9 @@ class TestApp(LabresultsSetUp):
         # some messages should trigger a PIN wrong answer, others shouldn't
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 55555
-            clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
+            clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > Help
             support_contact < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
             support_contact2 < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
@@ -266,9 +266,9 @@ class TestApp(LabresultsSetUp):
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > here's some stuff that you won't understand
-            clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
+            clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > %(code)s
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
@@ -290,7 +290,7 @@ class TestApp(LabresultsSetUp):
         # also support querying them via these magic keywords
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
         """ % {"name": self.contact.name, "count": 3}
         self.runScript(script)
         
@@ -337,7 +337,7 @@ class TestApp(LabresultsSetUp):
                 for msg in messages:
                     self.assertTrue(msg.connection.identity in ["clinic_worker", "other_worker"])
                     self.assertEqual("Hello %(name)s. We have 3 DBS test results ready for you. "
-                                     "Please reply to this SMS with your security code to retrieve "
+                                     "Please reply to this SMS with your pin code to retrieve "
                                      "these results." % {"name": msg.contact.name}, msg.text)
                                      
                 
@@ -510,12 +510,12 @@ class TestApp(LabresultsSetUp):
         #collect the results. get some reports
         script = """
             central_clinic_worker > CHECK
-            central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             central_clinic_worker > 1111
             central_clinic_worker < Thank you! Here are your results: **** 0000;{detected}. **** 0004b;{not_detected}
             central_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again James Phiri!
             clinic_worker > CHECK
-            clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 4567
             clinic_worker < Thank you! Here are your results: **** 0001;{not_detected}. **** 0002;{detected}. **** 0003;{not_detected}. **** 0004;{not_detected}. **** 0004a;Rejected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
@@ -785,7 +785,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # let the clinic worker get the results
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 4567
             clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 21234987;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
@@ -859,8 +859,8 @@ class TestResultsAcceptor(LabresultsSetUp):
         msgs = self.receiveAllMessages()
         self.stopRouter()
 
-        msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
-        msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+        msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+        msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
 
         self.assertTrue(msg1 in (msgs[0].text, msgs[1].text ),
         "Following message was not sent:\n%s" % msg1)
