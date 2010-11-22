@@ -1,0 +1,236 @@
+# Translation for Mwana.
+# Copyright (C) 2010
+# This file is distributed under the same license as the Mwana package.
+# Tobias McNulty <tobisa@caktusgroup.com>, 2010.  Thanks to Boniface at Henry Courtyard Lodge for help with the translation
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-05-12 17:20+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: apps/agents/handlers/agent.py:23
+msgid ""
+"To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR "
+"NAME>"
+msgstr ""
+"Kuti mulembetse ngati ogwiritsa ntchito RemindMi, tumizani mawu oti AGENT <NAMBALA YA  "
+"CHIPATALA> <NAMBALA YA DELA> <DZINA LANU>"
+
+#: apps/agents/handlers/agent.py:33 apps/agents/handlers/agent.py:36
+msgid "or"
+msgstr "kapena"
+
+#: apps/agents/handlers/agent.py:39
+#, python-format
+msgid "Please notify us next time there is a %(event)s in your zone."
+msgstr "Chonde tidziwitseni pakachitika  %(event)s m'mdera lanu."
+
+#: apps/agents/handlers/agent.py:88
+#, python-format
+msgid ""
+"Sorry, I don't know about a clinic with code %(code)s. Please check your "
+"code and try again."
+msgstr ""
+"Pepani sindikudziwa chipatala chodziwika ndi ndinambala %(code)"
+"ss, Chonde yeselaninso kulowetsa nambala yachipatala."
+
+#: apps/agents/handlers/agent.py:98
+#, python-format
+msgid ""
+"Hello %(name)s! You are already registered as a RemindMi Agent for zone %"
+"(zone)s of %(clinic)s."
+msgstr ""
+"Moni a  %(name)s! Mumalembetsa kale  ngati ogwiritsa ntchito  RemindMi mudela la %(zone)s "
+"ku  %(clinic)s."
+
+#: apps/agents/handlers/agent.py:105
+#, python-format
+msgid ""
+"Hello %(name)s! You are already registered as a RemindMi Agent for %"
+"(old_clinic)s. To leave your current clinic and join %(new_clinic)s, reply "
+"with LEAVE and then re-send your message."
+msgstr ""
+"Moni a  %(name)s! Mumalembetsa kale  ngati ogwiritsa ntchito  RemindMi wa %(old_clinic)"
+"s. Ngati mukuchoka ku chipatalachi  ndikukalowa ku  %(new_clinic)s tumizani mawu woti  "
+" LEAVE kenako tumizaninso uthengayo."
+
+#: apps/agents/handlers/agent.py:129
+#, python-format
+msgid ""
+"Thank you %(name)s! You have successfully registered as a RemindMi Agent for "
+"zone %(zone)s of %(clinic)s.%(notify_text)s"
+msgstr ""
+"Zikomo Kwambiri a %(name)s! Mwalembetsa ngati ogwiritsa ntchito RemindMi m'mdera la  %"
+"(zone)s ku %(clinic)s.%(notify_text)s"
+
+#: apps/agents/handlers/agent.py:135
+#, fuzzy
+msgid "Sorry, I didn't understand that. "
+msgstr "Pepani, sindanamvetse zomwe mwatuniza."
+
+#: apps/labresults/handlers/leave.py:12
+#, python-format
+msgid ""
+"You have successfully unregistered, %(name)s. We're sorry to see you go."
+msgstr ""
+"Zikomo a %(name)s, Mwasankha kusiya kugwiritsa ntchito RemindMi. Ndife odandaula kuti mukutisiya."
+
+#: apps/labresults/handlers/leave.py:13
+msgid ""
+"Ogo - Mwasankha kusiya kugwiritsa ntchito RemindMi koma sitikukuzindikirani ! "
+"Komabe musadandaule - simudzalandiranso uthenga uliwonse kuchochera kwa ife."
+msgstr ""
+
+#: apps/reminders/app.py:22
+#, python-format
+msgid ""
+"To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
+"optional and is logged as TODAY if left out."
+msgstr ""
+"Mukafuna  kupereka  uthenga wina %(event_lower)s, tumezani %(event_upper)s <TSIKU> <DZINA "
+"Tsiku mukhoza kuika kapena osaika >. Ngati simuika tsiku  likaonetsa tsiku lalero."
+
+#: apps/reminders/app.py:118
+msgid ""
+"Sorry, I couldn't understand that date. Please enter the date like so: DAY "
+"MONTH YEAR, for example: 23 04 2010"
+msgstr ""
+"Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - ubushiku umwenshi "
+"umwaka - 23 04 2010."
+
+#: apps/reminders/app.py:127
+#, python-format
+msgid "Sorry, you can not register a %s with a date after today's."
+msgstr ""
+
+#: apps/reminders/app.py:150
+#, python-format
+msgid ""
+"Hello%(cba)s! I am sorry, but someone has already registered a %(event)s for "
+"%(name)s on %(date)s."
+msgstr ""
+
+#: apps/reminders/app.py:158
+#, fuzzy, python-format
+msgid ""
+"Thank you%(cba)s! You have successfully registered a %(event)s for %(name)s "
+"on %(date)s. You will be notified when it is time for %(gender)s next "
+"appointment at the clinic."
+msgstr ""
+"Twamitotela ba%(cba)s, namulembesha ukufyalwa kwa %(event)s %(name)s pa "
+"bushibuku bwapa %(date)s."
+
+#: apps/reminders/app.py:165
+msgid "Sorry, I didn't understand that."
+msgstr "Munjeleleko, nshumfwile amashiwi mutumine."
+
+#: apps/reminders/tasks.py:57
+#, fuzzy, python-format
+msgid ""
+"Hello%(cba)s. %(patient)s is due for their next clinic appointment. Please "
+"deliver a reminder to this person and ensure they visit %(clinic)s within 3 "
+"days."
+msgstr ""
+"Ba%(cbs)s, inshita ya %(patient)s uku tandalila ichipatala naifika. "
+"Beshibisheni kaili mu shininkishe ukuti batandala ku %(clinic)s mushinku "
+"shitatu."
+
+#: submodules/rapidsms/lib/rapidsms/contrib/locations/forms.py:36
+msgid "Enter a valid latitude."
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/locations/forms.py:37
+msgid "Enter a valid longitude."
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/views.py:27
+#, python-format
+msgid "Schedule '%(name)s' successfully updated"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/edit.html:35
+msgid "Submit"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/edit.html:38
+msgid "Return to the list of schedules"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:14
+msgid "Event"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:15
+msgid "Description"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:16
+msgid "Month"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:17
+msgid "Day of Month"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:18
+msgid "Day of Week"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:19
+msgid "Hour"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:20
+msgid "Minute"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:21
+msgid "Start Time"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:22
+msgid "End Time"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:23
+msgid "Count"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:24
+msgid "Active"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:45
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:56
+msgid "Add a Schedule"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/contrib/scheduler/templates/scheduler/index.html:53
+msgid "No schedules yet"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/templates/layout.html:34
+msgid "Return to the Dashboard"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/templates/layout.html:42
+msgid "Log out"
+msgstr ""
+
+#: submodules/rapidsms/lib/rapidsms/templates/layout.html:43
+msgid "Log in"
+msgstr ""
+
+#~ msgid ""
+#~ "To add a birth, send MWANA <DATE> <MOTHER's NAME>. The date is optional."
+#~ msgstr ""
+#~ "Nga kwafyalikako umwana, tumeni mwana <inshiku> <ishina lyabanyina>."
+#~ "Inshiku yena nangu tamubikilepo tebwafya sana."
