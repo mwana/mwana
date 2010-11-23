@@ -33,19 +33,19 @@ class TestApp(TestScript):
                                                  slug="400000", type=prv)
         script = """
             lost   > join
-            lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
+            lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
             rb     > join clinic kdh rupiah banda 123q
-            rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, 123q wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
             tk     > join clinic kdh tizie kays -1000
             tk     < Hi Tizie Kays, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             jk     > join clinic kdh jordan katembula -1000
             jk     < Hi Jordan Katembula, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > join clinic kdh rupiah banda1000
-            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
             rb     > join clinic kdh rupiah banda 2001234
-            rb     < Sorry, 2001234 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, 2001234 wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
             rb     > join clinic kdh rupiah banda4004444
-            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <SECURITY CODE>.
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
             rb     > join clinic kdh rupiah banda 1234
             rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             ts     > join clinic 403012 li  1234
@@ -53,9 +53,9 @@ class TestApp(TestScript):
             kk     > join clinic whoops kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > join abc
-            noname < Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>.
+            noname < Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>.
             tooshortname > join clinic kdh j 1234
-            tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <SECURITY CODE>
+            tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
         """
         self.runScript(script)
         time.sleep(1)

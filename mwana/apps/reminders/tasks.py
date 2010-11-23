@@ -97,5 +97,5 @@ def send_notifications(router):
             patient_trace.name = patient_event.patient.name[:50]
             patient_trace.patient_event = patient_event
             patient_trace.status = 'new'
-            patient_trace.initator = patienttracing.get_automated_initiator()
+            patient_trace.initator = patienttracing.get_initiator_automated()
             patient_trace.save()
