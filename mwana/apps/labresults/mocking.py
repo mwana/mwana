@@ -127,6 +127,10 @@ def get_fake_results(count, clinic, starting_requisition_id=9990,
     current_requisition_id = starting_requisition_id
     # strip off indeterminate/inconsistent, as those results won't be sent
     result_choices = [r[0] for r in Result.RESULT_CHOICES[:3]]
+    if clinic.type in const.ZONE_SLUGS:
+        clinic = clinic.parent
+    else:
+        clinic = clinic
     for i in range(count):
         requisition_id = requisition_id_format.format(id=(current_requisition_id + i),
                                                       clinic=clinic.slug)

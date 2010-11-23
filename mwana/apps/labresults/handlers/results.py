@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models import Q
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.labresults.models import Result
+from mwana import const
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to receive DBS \
 results. If you think this message is a mistake, respond with keyword 'HELP'"
@@ -65,7 +66,10 @@ class ResultsHandler(KeywordHandler):
                                         requisition_id)
             fake_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT',
                               '{id:04d}')
-            clinic_id = self.msg.contact.location.slug
+            if self.msg.contact.location.type in const.ZONE_SLUGS:
+                clinic_id = self.msg.contact.location.parent.slug
+            else:
+                clinic_id = self.msg.contact.location.slug
             fake_id = fake_id.format(clinic=clinic_id, id=9999)
             fake_ids = [fake_id]
             if fake_id.startswith(clinic_id):
