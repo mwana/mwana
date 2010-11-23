@@ -63,16 +63,22 @@ class ResultsHandler(KeywordHandler):
         for requisition_id in requisition_ids:
             results = self._get_results(self.msg.contact.location,
                                         requisition_id)
-            if len(requisition_ids) == 1 and requisition_id == '9999' and\
-               not results:
+            fake_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT',
+                              '{id:04d}')
+            fake_id = fake_id.format(clinic=self.msg.contact.location.slug,
+                                     id=9999)
+            fake_id_clean = fake_id.replace('-', '')
+            if len(requisition_ids) == 1 and not results and\
+              requisition_id in ('9999', fake_id, fake_id_clean):
                 # demo functionality - if '9999' was specified and no results
                 # were found with that requisition ID, return a sample result
                 results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY',
                                        {})
-                self.respond("Sample 9999: %s. Please record these "
+                self.respond("Sample {id}: {result}. Please record these "
                              "results in your clinic records and promptly "
-                             "delete them from your phone. Thanks again" %
-                             results_text.get('P', 'Detected'))
+                             "delete them from your phone. Thanks again".format(
+                             result=results_text.get('P', 'Detected'),
+                             id=fake_id))
                 return
             elif results:
                 for result in results:
