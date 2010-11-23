@@ -322,3 +322,7 @@ class InputCleaner:
 
         return matrix[n][m]
 
+    def remove_dash_plus(self, s):
+        for c in ['-', '+']:
+            s = s.replace(c, '')
+        return s

@@ -33,7 +33,8 @@ class SentHandler(KeywordHandler):
             return
         b = InputCleaner()
         try:
-            count = int(b.try_replace_oil_with_011(text.strip()))
+            text = b.remove_dash_plus(text)
+            count = int(b.try_replace_oil_with_011(text))
         except ValueError:
             text = b.words_to_digits(text)
             if not text:

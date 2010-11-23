@@ -31,7 +31,10 @@ class PingHandler(KeywordHandler):
         text += '|Backends:['
         b = router.backends
         for i in b:
-            text += str(i) +':'+str(b[i].status())+', '
+            if hasattr(b[i], 'status'):
+                text += str(i) +':'+str(b[i].status())+', '
+            else:
+                text += str(i)
         text +=']'
         self.respond(text)
         return True

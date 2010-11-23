@@ -33,9 +33,9 @@ class KannelBackend(RapidHttpBacked):
 
     def handle_request(self, request):
         self.debug('Received request: %s' % request.GET)
-        sms = request.GET.get('text', '')
-        sender = request.GET.get('id', '')
-        if not sms or not sender:
+        sms = request.GET.get('text', None)
+        sender = request.GET.get('id', None)
+        if sms is None or sender is None:
             error_msg = 'ERROR: Missing "text" or "id" params. '\
                         'parameters received are: %(params)s' % \
                          {'params': unicode(request.GET)}

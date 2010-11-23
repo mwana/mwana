@@ -76,7 +76,6 @@ def create_virtualenv():
 
 def update_requirements():
     with cd(PATH_SEP.join([env.code_root, env.project, 'requirements'])):
-        run('pwd')
         for file_name in ['libs.txt', 'pygsm.txt']:
             cmd = ['pip install']
             cmd += ['-q -E %(virtualenv_root)s' % env]

@@ -37,7 +37,8 @@ class ResultsHandler(KeywordHandler):
             if requisition_id.startswith(clinic.slug):
                 short_id = re.sub('^%s' % clinic.slug, '', requisition_id)
                 q |= Q(requisition_id__iexact=short_id)
-            q &= Q(clinic=clinic)
+            q &= Q(clinic=clinic) & Q(clinic__send_live_results=True)
+            q &= Q(verified__isnull=True) | Q(verified=True)
             return Result.objects.order_by('pk').filter(q)
         else:
             return Result.objects.none()
