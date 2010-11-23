@@ -872,8 +872,6 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
-            other_worker > leave
-            other_worker  < You have successfully unregistered, Mary Phiri. We're sorry to see you go.
             """
         time.sleep(1)
         self.runScript(script)
@@ -885,8 +883,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Get all the messages sent
         msgs = self.receiveAllMessages()
         
-        self.assertEqual(1,len(msgs))
+        self.assertEqual(2,len(msgs))
         self.assertEqual(msg2,msgs[0].text)
+        self.assertEqual(msg1,msgs[1].text)
 
         self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -894,3 +893,13 @@ class TestResultsAcceptor(LabresultsSetUp):
                             arrival_date=None).exclude(result=None).count())
         time.sleep(1)
         self.stopRouter()
+
+        # ensure that clinic workers registered as CBAs cannot retrieve results twice
+        script = """
+            other_worker > 6789
+            clinic_worker < Mary Phiri has collected these results
+            other_worker < Thank you! Here are your results: **** 1029023412;Negative. **** 78;Negative. **** 212987;Negative
+            other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
+"""
+        time.sleep(1)
+        self.runScript(script)
