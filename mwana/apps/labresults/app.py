@@ -142,7 +142,7 @@ class App (rapidsms.apps.base.AppBase):
             # was taken care of 
             clinic_connections = [contact.default_connection for contact in \
                                   Contact.active.filter\
-                                  (location=clinic)]
+                                  (Q(location=clinic) | Q(location__parent=clinic))]
             
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
