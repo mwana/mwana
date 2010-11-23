@@ -66,7 +66,7 @@ class ResultsHandler(KeywordHandler):
                                         requisition_id)
             fake_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT',
                               '{id:04d}')
-            if self.msg.contact.location.type in const.ZONE_SLUGS:
+            if self.msg.contact.location.type.slug in const.ZONE_SLUGS:
                 clinic_id = self.msg.contact.location.parent.slug
             else:
                 clinic_id = self.msg.contact.location.slug
