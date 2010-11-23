@@ -898,8 +898,8 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             other_worker > 6789
             clinic_worker < Mary Phiri has collected these results
-            other_worker < Thank you! Here are your results: **** 1029023412;Negative. **** 78;Negative. **** 212987;Negative
+            other_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
             other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
-"""
+""".format(**self._result_text())
         time.sleep(1)
         self.runScript(script)
