@@ -65,11 +65,14 @@ class ResultsHandler(KeywordHandler):
                                         requisition_id)
             fake_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT',
                               '{id:04d}')
-            fake_id = fake_id.format(clinic=self.msg.contact.location.slug,
-                                     id=9999)
-            fake_id_clean = fake_id.replace('-', '')
+            clinic_id = self.msg.contact.location.slug
+            fake_id = fake_id.format(clinic=clinic_id, id=9999)
+            fake_ids = [fake_id]
+            if fake_id.startswith(clinic_id):
+                fake_ids.append(fake_id[len(clinic_id):])
+            fake_ids = [Result.clean_req_id(id) for id in fake_ids]
             if len(requisition_ids) == 1 and not results and\
-              requisition_id in ('9999', fake_id, fake_id_clean):
+              Result.clean_req_id(requisition_id) in fake_ids:
                 # demo functionality - if '9999' was specified and no results
                 # were found with that requisition ID, return a sample result
                 results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY',
