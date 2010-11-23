@@ -45,7 +45,9 @@ class App (rapidsms.apps.base.AppBase):
                 return
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '-'] # allow '+' because it's needed by xforms
+        # allow '+' because it's needed by xforms
+        # allow '-' because it's used in requisition IDs in Malawi
+        separators = [',', '/', ';', '*']
         for mark in separators:            
             if (keyword in results_keywords and mark =='/'):
                 continue
