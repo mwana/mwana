@@ -378,8 +378,8 @@ class TestApp(LabresultsSetUp):
         Tests getting of results for given samples.
         """
         results = labresults.Result.objects.all()
-        res1 = results.create(requisition_id="0001", clinic=self.clinic,
-                              result="N",
+        res1 = results.create(requisition_id="%s-0001-1" % self.clinic.slug,
+                              clinic=self.clinic, result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
@@ -390,8 +390,8 @@ class TestApp(LabresultsSetUp):
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res3 = results.create(requisition_id="0003", clinic=self.clinic,
-                              result="N",
+        res3 = results.create(requisition_id="%s-0003-1" % self.clinic.slug,
+                              clinic=self.clinic, result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
@@ -436,19 +436,19 @@ class TestApp(LabresultsSetUp):
             clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
-            clinic_worker > RESULT 0001
-            clinic_worker < **** 0001;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
-            clinic_worker > RESULT 0003
-            clinic_worker < **** 0003;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT {clinic}-0001-1
+            clinic_worker < **** {clinic}-0001-1;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 00031
+            clinic_worker < **** {clinic}-0003-1;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
             clinic_worker < **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
             clinic_worker < **** 0000;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
-            clinic_worker > RESULT 0001 0002
-            clinic_worker < **** 0001;{not_detected}. **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 00011 0002
+            clinic_worker < **** {clinic}-0001-1;{not_detected}. **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to receive DBS results. If you think this message is a mistake, respond with keyword 'HELP'
-           """.format(**self._result_text())
+           """.format(clinic=self.clinic.slug, **self._result_text())
 
         self.runScript(script)
 

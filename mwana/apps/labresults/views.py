@@ -347,7 +347,8 @@ class LogForm(ModelForm):
 class ResultForm(ModelForm):
     class Meta:
         model = labresults.Result
-        exclude = ['notification_status','record_change','old_value']
+        exclude = ['notification_status','record_change','old_value',
+                   'requisition_id_search']
 
 log_rotation_threshold = 5000
 def log_viewer (request, daysback='7', source_filter=''):

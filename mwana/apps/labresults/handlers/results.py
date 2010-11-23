@@ -33,10 +33,14 @@ class ResultsHandler(KeywordHandler):
 
     def _get_results(self, clinic, requisition_id):
         if settings.SEND_LIVE_LABRESULTS:
-            q = Q(requisition_id__iexact=requisition_id) 
+            requisition_id = Result.clean_req_id(requisition_id)
+            q = Q(requisition_id_search__iexact=requisition_id) 
             if requisition_id.startswith(clinic.slug):
                 short_id = re.sub('^%s' % clinic.slug, '', requisition_id)
-                q |= Q(requisition_id__iexact=short_id)
+                q |= Q(requisition_id_search__iexact=short_id)
+            else:
+                long_id = clinic.slug + requisition_id
+                q |= Q(requisition_id_search__iexact=long_id)
             q &= Q(clinic=clinic) & Q(clinic__send_live_results=True)
             q &= Q(verified__isnull=True) | Q(verified=True)
             return Result.objects.order_by('pk').filter(q)

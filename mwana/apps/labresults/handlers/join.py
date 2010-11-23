@@ -5,6 +5,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
+from mwana.apps.labresults.models import Result
 from mwana.apps.reminders import models as reminders
 from mwana.util import get_clinic_or_default, get_worker_type, get_location_type, LocationCode
 _ = lambda s: s

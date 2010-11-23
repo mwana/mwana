@@ -97,6 +97,8 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
+    requisition_id_search = models.CharField(max_length=50, db_index=True) # requisition ID with punctuation removed, for search purposes
+
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
@@ -129,6 +131,15 @@ class Result(models.Model):
     result_sent_date = models.DateTimeField(null=True, blank=True)
     arrival_date = models.DateTimeField(null=True, blank=True)#date when 1st related payload with result came
 
+    @classmethod
+    def clean_req_id(cls, req_id):
+        return req_id.replace('-', '')
+
+    def save(self, *args, **kwargs):
+        if self.requisition_id:
+            self.requisition_id_search =\
+              Result.clean_req_id(self.requisition_id)
+        super(Result, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('collected_on', 'requisition_id')
