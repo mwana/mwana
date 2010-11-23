@@ -196,7 +196,9 @@ class JoinHandler(KeywordHandler):
             contact.pin = pin            
             contact.save()
             contact.types.add(worker_type)
-            
+            if not contact.types.filter(slug=const.get_cba_type()).exists():
+                contact.types.add(const.get_cba_type())
+
             self.msg.connection.contact = contact
             self.msg.connection.save()
             
