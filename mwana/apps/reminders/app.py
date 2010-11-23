@@ -58,6 +58,8 @@ class App(rapidsms.apps.base.AppBase):
                 date = datetime.datetime.strptime(date_str, format)
             except ValueError:
                 pass
+            if date:
+                break
         if date:
             # is there a better way to do this? if no year was specified in
             # the string, it defaults to 1900
