@@ -45,6 +45,7 @@ class JoinHandler(KeywordHandler):
         cleaner = InputCleaner()
    
         text = text.strip()
+        text = cleaner.remove_dash_plus(text)
         text = cleaner.remove_double_spaces(text)
         self.set_pattern_to_use(text)
         if len(text) < (self.PIN_LENGTH + self.MIN_CLINIC_CODE_LENGTH + self.MIN_NAME_LENGTH + 1):
