@@ -322,12 +322,15 @@ class Results160Reports:
         for location in locations:
             number_sent, days = self.get_avg_dbs_turnaround_time(location)
             tt_number_sent = tt_number_sent + number_sent
-            sum_days = sum_days + days
-            min_days = min(days, min_days)
-            max_days = max(days, max_days)
-
+            if days is not None:
+                sum_days = sum_days + days
+                min_days = min(days, min_days)
+                max_days = max(days, max_days)
+                days = self.safe_rounding(days)
+            else:
+                days = '-'
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, self.safe_rounding(days)])
+                         number_sent, days])
 
         avg = None
         if locations:
@@ -357,12 +360,15 @@ class Results160Reports:
         for location in locations:
             number_entered, days = self.get_avg_rsts_entering_time(location)
             tt_number_entered = tt_number_entered + number_entered
-            sum_days = sum_days + days
-            min_days = min(days, min_days)
-            max_days = max(days, max_days)
-
+            if days is not None:
+                sum_days = sum_days + days
+                min_days = min(days, min_days)
+                max_days = max(days, max_days)
+                days = self.safe_rounding(days)
+            else:
+                days = '-'
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_entered, self.safe_rounding(days)])
+                         number_entered, days])
 
         avg = None
         if locations:
@@ -392,12 +398,15 @@ class Results160Reports:
         for location in locations:
             number_sent, days = self.get_avg_dbs_retrieval_time(location)
             tt_number_sent = tt_number_sent + number_sent
-            sum_days = sum_days + days
-            min_days = min(days, min_days)
-            max_days = max(days, max_days)
-
+            if days is not None:
+                sum_days = sum_days + days
+                min_days = min(days, min_days)
+                max_days = max(days, max_days)
+                days = self.safe_rounding(days)
+            else:
+                days = '-'
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, self.safe_rounding(days)])
+                         number_sent, days])
 
         avg = None
         if locations:
@@ -427,12 +436,15 @@ class Results160Reports:
         for location in locations:
             number_processed, days = self.get_avg_dbs_processing_time(location)
             tt_number_processed = tt_number_processed + number_processed
-            sum_days = sum_days + days
-            min_days = min(days, min_days)
-            max_days = max(days, max_days)
-
+            if days is not None:
+                sum_days = sum_days + days
+                min_days = min(days, min_days)
+                max_days = max(days, max_days)
+                days = self.safe_rounding(days)
+            else:
+                days = '-'
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_processed, self.safe_rounding(days)])
+                         number_processed, days])
 
         avg = None
         if locations:
@@ -463,12 +475,15 @@ class Results160Reports:
         for location in locations:
             number_sent, days = self.get_avg_dbs_transport_time(location)
             tt_samples = tt_samples + number_sent
-            sum_days = sum_days + days
-            min_days = min(days, min_days)
-            max_days = max(days, max_days)
-
+            if days is not None:
+                sum_days = sum_days + days
+                min_days = min(days, min_days)
+                max_days = max(days, max_days)
+                days = self.safe_rounding(days)
+            else:
+                days = '-'
             table.append([' ' + location.parent.name, ' ' + location.name,
-                         number_sent, self.safe_rounding(days)])
+                         number_sent, days])
 
         avg = None
         if locations:
