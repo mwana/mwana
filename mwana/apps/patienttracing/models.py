@@ -3,7 +3,7 @@ import datetime
 from django.db import models
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
-from rapidsms.contrib.locations.models import Location
+from mwana.apps.locations.models import Location
 
 
 class SentConfirmationMessage(models.Model):
