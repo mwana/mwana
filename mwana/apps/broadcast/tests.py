@@ -5,18 +5,18 @@ from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana import const
 from mwana.const import get_clinic_worker_type, get_cba_type
-from mwana.apps.broadcast.app import App as broadcast_app
+from mwana.settings_project import DEFAULT_RESPONSE
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
 
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type
 
 class TestApp(TestScript):
-    
+
     def setUp(self):
         super(TestApp, self).setUp()
-        clinic_type, _ = LocationType.objects.get_or_create(singular="clinic", 
-                                                     plural="clinics", 
+        clinic_type, _ = LocationType.objects.get_or_create(singular="clinic",
+                                                     plural="clinics",
                                                      slug="clinics")
         district_type, _ = LocationType.objects.get_or_create(singular="district",
                                                      plural="districts",
@@ -37,24 +37,24 @@ class TestApp(TestScript):
                                             types=[get_clinic_worker_type()])
         clinic_worker2 = self.create_contact(name="clinic_worker2", location=self.clinic,
                                              types=[get_clinic_worker_type()])
-        
-        
+
+
 
         cba = self.create_contact(name="cba", location=self.clinic_zone,
                                   types=[get_cba_type()])
         cba2 = self.create_contact(name="cba2", location=self.clinic_zone,
                                    types=[get_cba_type()])
         active_contacts = Contact.active.all()
-        
+
         self.all = [clinic_worker, clinic_worker2, cba, cba2]
         self.expected_keyword_to_groups = \
             {"ALL":    [clinic_worker, clinic_worker2, cba, cba2],
              "CLINIC": [clinic_worker, clinic_worker2],
              "CBA":    [cba, cba2],
              }
-        
-   
-        
+
+
+
     def testMsg(self):
         """
         msg dho blah blah : goes to fellow dho's at district
@@ -88,13 +88,13 @@ class TestApp(TestScript):
         self.runScript(script)
 
         msgs=self.receiveAllMessages()
-       
+
         self.assertEqual(3,len(msgs))
         expected_recipients = ["dho2","clinic_worker","clinic_worker2"]
         actual_recipients = []
 
         for msg in msgs:
-            self.assertEqual(msg.text,"testing dho blasting [from dho to MSG]")
+            self.assertEqual(msg.text,"testing dho blasting [from dho to ALL]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
         self.assertEqual([], difference)
@@ -109,7 +109,7 @@ class TestApp(TestScript):
         # no extra msgs sent
         self.assertEqual(1, len(msgs))
         self.assertEqual('dho2', msgs[0].contact.name)
-        self.assertEqual(msgs[0].text, 'testing dho blasting [from dho to MSG]')
+        self.assertEqual(msgs[0].text, 'testing dho blasting [from dho to DHO]')
 
 
     def testGroupMessaging(self):
@@ -129,7 +129,7 @@ class TestApp(TestScript):
                                      (keyword, message_body))
                     messages = self.receiveAllMessages()
                     recipients_minus_self = [c for c in recipients if c != contact]
-                    self.assertEqual(len(recipients_minus_self), len(messages), 
+                    self.assertEqual(len(recipients_minus_self), len(messages),
                                      ("message from %s went to incorrect amount of "
                                       "people for keyword %s. Expected %s but was "
                                       "%s") % (contact, keyword, len(recipients) - 1,
@@ -137,9 +137,9 @@ class TestApp(TestScript):
                     for msg in messages:
                         self.assertEqual("%(text)s [from %(from)s to %(keyword)s]" % \
                                          {"text": message_body, "from": contact.name,
-                                          "keyword": keyword}, 
+                                          "keyword": keyword},
                                          msg.text)
-                    
+
                     # check DB objects
                     self.assertEqual(running_count, BroadcastMessage.objects.count())
                     last_msg = BroadcastMessage.objects.order_by("-date")[0]
@@ -149,27 +149,20 @@ class TestApp(TestScript):
                     for responder in recipients_minus_self:
                         self.assertTrue(responder in last_msg.recipients.all(),
                                         "Recipient %s was linked in the db" % responder)
-                        
+
                     msg_recipients = [msg.peer for msg in messages]
                     for responder in recipients_minus_self:
                         self.assertTrue(responder.default_connection.identity in msg_recipients)
-                        
+
                         # response workflow
                         self.sendMessage(responder.default_connection.identity, response)
                         responses = self.receiveAllMessages()
                         self.assertEqual(1, len(responses))
-                        self.assertEqual(contact.default_connection.identity, responses[0].peer)
-                        self.assertEqual("%(text)s [from %(from)s]" % \
-                                         {"text": response, "from": responder.name},
-                                         responses[0].text)
-                        
-                        # check models
-                        response_count += 1
-                        self.assertEqual(response_count, BroadcastResponse.objects.count())
-                        last_resp = BroadcastResponse.objects.order_by("-date")[0]
-                        self.assertEqual(last_msg, last_resp.broadcast)
-                        self.assertEqual(response, last_resp.text)
-                        self.assertEqual(responder, last_resp.contact)
+                        self.assertEqual(responder.default_connection.identity, responses[0].peer)
+                        self.assertEqual(DEFAULT_RESPONSE, responses[0].text)
+                        # As per http://groups.google.com/group/mwana/tree/browse_frm/thread/07f5d6599ac91832/695178783cf65e76
+                        # No longer supporting broadcast responses.
+                        self.assertEqual(0, BroadcastResponse.objects.count())
 
         finally:
             self.stopRouter()
