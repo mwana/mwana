@@ -8,6 +8,7 @@ from mwana.apps.labresults.util import is_already_valid_connection_type
 from mwana.apps.labresults.models import Result
 from mwana.apps.reminders import models as reminders
 from mwana.util import get_clinic_or_default, get_worker_type, get_location_type, LocationCode
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
 _ = lambda s: s
 
 class JoinHandler(KeywordHandler):
@@ -196,8 +197,9 @@ class JoinHandler(KeywordHandler):
             contact.pin = pin            
             contact.save()
             contact.types.add(worker_type)
-            if not contact.types.filter(slug=const.get_cba_type()).exists():
-                contact.types.add(const.get_cba_type())
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                if not contact.types.filter(slug=const.get_cba_type()).exists():
+                    contact.types.add(const.get_cba_type())
 
             self.msg.connection.contact = contact
             self.msg.connection.save()
