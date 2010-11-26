@@ -5,14 +5,14 @@ unittest). These will both pass when you run "manage.py test".
 Replace these with more appropriate tests for your application.
 """
 
+import time
+
 from mwana import const
-from rapidsms.contrib.handlers.app import App as handler_app
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
-from mwana.apps.stringcleaning.app import App as cleaner_App
-import time
+from rapidsms.contrib.messagelog.models import Message
 
 
 class TestApp(TestScript):
@@ -28,9 +28,9 @@ class TestApp(TestScript):
         central_clinic = Location.objects.create(name="Central Clinic",
                                                  slug="403012", type=ctr)
         mansa = Location.objects.create(name="Mansa",
-                                                 slug="403000", type=dst)
+                                        slug="403000", type=dst)
         luapula = Location.objects.create(name="Luapula",
-                                                 slug="400000", type=prv)
+                                          slug="400000", type=prv)
         script = """
             lost   > join
             lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
@@ -60,7 +60,7 @@ class TestApp(TestScript):
         self.runScript(script)
         time.sleep(1)
         self.assertEqual(4, Contact.objects.count(), "Registration didn't create a new contact!")
-        rb = Contact.objects.get(name = "Rupiah Banda")
+        rb = Contact.objects.get(name="Rupiah Banda")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
@@ -176,9 +176,9 @@ class TestApp(TestScript):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital",
-                                      slug="202020", type=ctr)
+                                slug="202020", type=ctr)
         Location.objects.create(name="Central Clinic",
-                                                 slug="101010", type=ctr)
+                                slug="101010", type=ctr)
         # create support contacts
         script = """
             +260979565991     > join clinic 202020 support 1 1000
@@ -193,7 +193,7 @@ class TestApp(TestScript):
         for admin in admins:
             admin.is_help_admin = True
             admin.save()
-
+        time.sleep(1)
         # create clinic workers
         script = """
             +260979565994     > join clinic 202020 James Phiri 1000
@@ -257,8 +257,9 @@ class TestApp(TestScript):
             +260979565994 < You have successfully deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777754")
+        cba = Contact.objects.get(connection=None, name="Kunda Banda")
         self.assertEqual(cba.is_active, False)
+        self.assertEqual(Connection.objects.filter(contact=cba).count(), 0)
 
         #test deregistering cba whose name is not unique in system but at clinic
         script = """
@@ -269,7 +270,7 @@ class TestApp(TestScript):
             +260979565996 < You have successfully deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777751")
+        cba = Contact.objects.get(connection=None, name="Rupiah Banda")
         self.assertEqual(cba.is_active, False)
 
         #test deregistering cba using phone number without country code
@@ -281,6 +282,16 @@ class TestApp(TestScript):
             +260979565996 < You have successfully deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777756")
+        cba = Contact.objects.get(connection=None, name="Trevor Sinkala")
         self.assertEqual(cba.is_active, False)
+
+        self.assertTrue(Message.objects.filter(contact=cba) > 0)
+        self.assertTrue(Message.objects.filter(connection__contact=None).count() > 3)
+        self.assertEqual(Message.objects.filter(connection=None).count(), 0)
+
+        script = """
+            +260977777756 > cba who deregistered me?
+            +260977777756 < You must be registered with a clinic to use the broadcast feature. Please ask your clinic team how to register, or respond with keyword 'HELP'
+            """
+        self.runScript(script)
        

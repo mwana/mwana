@@ -8,6 +8,7 @@ from mwana.const import get_clinic_worker_type, get_cba_type
 from mwana.settings_project import DEFAULT_RESPONSE
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
+import time
 
 from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type
 
@@ -188,7 +189,7 @@ class TestApp(TestScript):
                                 
         connection.contact = help_admin
         connection.save()
-        
+        time.sleep(1)
         script = """
             help_admin > blast hello
             clinic_worker < hello [from help_admin to Mwana Users]
