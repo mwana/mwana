@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # the argument '--mwana-apps' automatically tests all mwana apps specified
     # in the project-level settings file (settings_project.py) that include
     # a file named 'tests.py'
-    if sys.argv[1] == 'test' and '--mwana-apps' in sys.argv:
+    if len(sys.argv) > 1 and sys.argv[1] == 'test' and '--mwana-apps' in sys.argv:
         sys.argv.remove('--mwana-apps')
         apps = settings_project.INSTALLED_APPS
         apps = filter(lambda a: a.startswith('mwana.apps'), apps)
