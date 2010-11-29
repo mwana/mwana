@@ -61,11 +61,14 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                 clinic_name = patient.location.name
         else:
             clinic_name = 'the clinic'
+        appt_date = patient_event.date +\
+                    datetime.timedelta(days=appointment.num_days)
         msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for "
-                              "%(type)s clinic visit.Please remind them to "
-                              "visit %(clinic)s within 3 days then "
+                              "%(type)s clinic visit on %(date)s.Please "
+                              "remind them to visit %(clinic)s, then "
                               "reply with TOLD %(patient)s"),
                               cba=cba_name, patient=patient.name,
+                              date=appt_date.strftime('%d/%m/%Y'),
                               clinic=clinic_name, type=type)
         
         msg.send()
@@ -89,13 +92,23 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
 def send_notifications(router):
     logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
+        # the number of days after a patient event that we want to send a
+        # reminder for this appointment
         total_days = appointment.num_days - NOTIFICATION_NUM_DAYS
+        # the date before which a patient event must have occurred in order
+        # to trigger a reminder
         date = datetime.datetime.now() -\
                datetime.timedelta(days=total_days)
-        #start_date =
+        # the beginning of that day
+        start_date = date.replace(minute=0, second=0, hour=0)
+        # the end of that day
+        end_date = start_date + datetime.timedelta(days=1)
+        # only send appointment reminders that are due TODAY to avoid spamming
+        # the CBAs / HSAs with excessive, out-dated reminders
         patient_events = reminders.PatientEvent.objects.filter(
             event=appointment.event,
-            date__lte=date,
+            date__gte=start_date,
+            date__lt=end_date,
             patient__is_active=True
         ).exclude(
             sent_notifications__appointment=appointment
