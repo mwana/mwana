@@ -25,7 +25,7 @@ DATABASES = {
 # virtual database for each thread, and syncdb is only called for the
 # first. this leads to confusing "no such table" errors. We create
 # a named temporary instance instead.
-        "TEST_NAME": "/dev/shm/mwana_malawi_test_db.sqlite3",
+        "TEST_NAME": "/dev/shm/mwana_zambia_test_db.sqlite3",
     }
 }
 
