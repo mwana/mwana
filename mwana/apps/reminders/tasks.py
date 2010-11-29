@@ -19,9 +19,12 @@ NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 logger = logging.getLogger('mwana.apps.reminders.tasks')
 
 
-def send_appointment_reminder(patient, type, default_conn=None, pronouns=None):
+def send_appointment_reminder(patient_event, appointment, default_conn=None,
+                              pronouns=None):
     if pronouns is None:
         pronouns = {}
+    patient = patient_event.patient
+    type = appointment.name
     logger.info('Sending appointment reminder for %s' % patient)
     if patient.location:
         logger.debug('using patient location (%s) to find CBAs' %
@@ -58,21 +61,38 @@ def send_appointment_reminder(patient, type, default_conn=None, pronouns=None):
                 clinic_name = patient.location.name
         else:
             clinic_name = 'the clinic'
-        msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for %(type)s clinic visit.Please remind them to visit %(clinic)s within 3 days then reply with TOLD %(patient)s"),
+        msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for "
+                              "%(type)s clinic visit.Please remind them to "
+                              "visit %(clinic)s within 3 days then "
+                              "reply with TOLD %(patient)s"),
                               cba=cba_name, patient=patient.name,
                               clinic=clinic_name, type=type)
         
         msg.send()
-    return connections
+        
+        reminders.SentNotification.objects.create(
+                                   appointment=appointment,
+                                   patient_event=patient_event,
+                                   recipient=connection,
+                                   date_logged=datetime.datetime.now())
+
+    patient_trace = PatientTrace()
+    patient_trace.type = appointment.name
+    patient_trace.start_date=datetime.datetime.now()
+    patient_trace.name = patient_event.patient.name[:50]
+    patient_trace.patient_event = patient_event
+    patient_trace.status = 'new'
+    patient_trace.initator = patienttracing.get_initiator_automated()
+    patient_trace.save()
 
 
-def send_notifications(router):
+def send_notifications(router):name
     logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
         total_days = appointment.num_days - NOTIFICATION_NUM_DAYS
         date = datetime.datetime.now() -\
                datetime.timedelta(days=total_days)
-               
+        #start_date =
         patient_events = reminders.PatientEvent.objects.filter(
             event=appointment.event,
             date__lte=date,
@@ -81,21 +101,6 @@ def send_notifications(router):
             sent_notifications__appointment=appointment
         )
         for patient_event in patient_events:
-            connections = send_appointment_reminder(patient_event.patient,
-                                                    appointment.name,
-                                                    patient_event.cba_conn                                                    
-                                                    )
-            for connection in connections:
-                reminders.SentNotification.objects.create(
-                                           appointment=appointment,
-                                           patient_event=patient_event,
-                                           recipient=connection,
-                                           date_logged=datetime.datetime.now())
-            patient_trace = PatientTrace()
-            patient_trace.type=appointment.name
-            patient_trace.start_date=datetime.datetime.now()
-            patient_trace.name = patient_event.patient.name[:50]
-            patient_trace.patient_event = patient_event
-            patient_trace.status = 'new'
-            patient_trace.initator = patienttracing.get_initiator_automated()
-            patient_trace.save()
+            connections = send_appointment_reminder(patient_event,
+                                                    appointment,
+                                                    patient_event.cba_conn)
