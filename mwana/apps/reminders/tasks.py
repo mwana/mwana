@@ -86,7 +86,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     patient_trace.save()
 
 
-def send_notifications(router):name
+def send_notifications(router):
     logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
         total_days = appointment.num_days - NOTIFICATION_NUM_DAYS
