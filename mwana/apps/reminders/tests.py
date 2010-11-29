@@ -224,16 +224,17 @@ class Reminders(TestScript):
         # just the 1 and two day notifications should go out;
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
+        appt_date = datetime.datetime.today() + datetime.timedelta(days=2)
         expected_messages = \
-            ['Hi cba1.patient 1 is due for 2 day clinic visit.'
-             'Please remind them to visit Central Clinic within 3 days then '
-             'reply with TOLD patient 1',
-             'Hi cba1.patient 2 is due for 2 day clinic visit.'
-             'Please remind them to visit Central Clinic within 3 days then '
-             'reply with TOLD patient 2',
-             'Hi cba2.patient 3 is due for 2 day clinic visit.'
-             'Please remind them to visit Central Clinic within 3 days then '
-             'reply with TOLD patient 3',]
+            ['Hi cba1.patient 1 is due for 2 day clinic visit on %s.'
+             'Please remind them to visit Central Clinic, then '
+             'reply with TOLD patient 1' % appt_date.strftime("%d/%m/%Y"),
+             'Hi cba1.patient 2 is due for 2 day clinic visit on %s.'
+             'Please remind them to visit Central Clinic, then '
+             'reply with TOLD patient 2' % appt_date.strftime("%d/%m/%Y"),
+             'Hi cba2.patient 3 is due for 2 day clinic visit on %s.'
+             'Please remind them to visit Central Clinic, then '
+             'reply with TOLD patient 3' % appt_date.strftime("%d/%m/%Y"),]
         self.assertEqual(len(messages), len(expected_messages))
         for msg in messages:
             self.assertTrue(msg.text in expected_messages, msg)
@@ -297,9 +298,10 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
+        appt_date = datetime.datetime.today() + datetime.timedelta(days=2)
         self.assertEqual(messages[0].text, "Hi Rupiah Banda.Henry is due "
-                         "for 1 day clinic visit.Please remind them to visit "
-                         "the clinic within 3 days then reply with TOLD Henry")
+                         "for 1 day clinic visit on %s.Please remind them to visit "
+                         "the clinic, then reply with TOLD Henry" % appt_date.strftime("%d/%m/%Y"))
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
         
@@ -330,9 +332,10 @@ class Reminders(TestScript):
         # 3 patients x 2 notifications = 6 messages
         messages = self.receiveAllMessages()
         self.assertEqual(len(messages), 1)
-        self.assertEqual(messages[0].text, "Hi cba.Henry is due for 1 day clinic visit."
-                                            "Please remind them to visit Central Clinic within"
-                                            " 3 days then reply with TOLD Henry")
+        appt_date = datetime.datetime.today() + datetime.timedelta(days=2)
+        self.assertEqual(messages[0].text, "Hi cba.Henry is due for 1 day clinic visit on %s."
+                                            "Please remind them to visit Central Clinic, "
+                                            "then reply with TOLD Henry" % appt_date.strftime("%d/%m/%Y"))
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)        
         
