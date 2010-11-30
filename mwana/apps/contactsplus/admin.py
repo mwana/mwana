@@ -4,6 +4,7 @@ from rapidsms.models import Contact
 from rapidsms.admin import ContactAdmin
 
 from mwana.apps.contactsplus import models as contactsplus
+from views import export_to_csv
 
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
@@ -14,6 +15,7 @@ class ContactAdmin(ContactAdmin):
     list_filter = ('types', 'is_active', 'language',)
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
+    actions = [export_to_csv]
     
     def unicode(self, obj):
         return unicode(obj)
