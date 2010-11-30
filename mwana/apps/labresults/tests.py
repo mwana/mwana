@@ -422,10 +422,11 @@ class TestApp(LabresultsSetUp):
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
-        
+        fake_req_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT', '{id:04d}')
+        fake_req_id = fake_req_id.format(id=9999, clinic=self.clinic.slug)
         script = """
-            clinic_worker > RESULT 9999
-            clinic_worker < Sample 9999: {detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT {fake_req_id}
+            clinic_worker < Sample {fake_req_id}: {detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
             clinic_worker < There are currently no results available for 1, 000. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
@@ -448,7 +449,8 @@ class TestApp(LabresultsSetUp):
             clinic_worker < **** {clinic}-0001-1;{not_detected}. **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to receive DBS results. If you think this message is a mistake, respond with keyword 'HELP'
-           """.format(clinic=self.clinic.slug, **self._result_text())
+           """.format(clinic=self.clinic.slug, fake_req_id=fake_req_id,
+                      **self._result_text())
 
         self.runScript(script)
 
