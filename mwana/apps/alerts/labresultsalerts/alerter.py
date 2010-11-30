@@ -417,7 +417,7 @@ class Alerter:
 
     def get_distinct_parents(self, locations):
         if not locations:
-            return None
+            return []
         parents = []
         for location in locations:
             parents.append(location.parent)
