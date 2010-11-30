@@ -46,6 +46,7 @@ INSTALLED_BACKENDS.update({
                             "password": ""}, # set in localsettings.py
         "coding": 0,
         "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
     },
     "tnm" : {
         "ENGINE":  "mwana.backends.kannel",
@@ -56,6 +57,7 @@ INSTALLED_BACKENDS.update({
                             "password": ""}, # set in localsettings.py
         "coding": 0,
         "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
     }
 })
 
