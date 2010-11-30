@@ -3,14 +3,13 @@ from rapidsms.contrib.messagelog.app import App as logger_app
 from mwana.apps.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
-from mwana import const
-from mwana.const import get_clinic_worker_type, get_cba_type
+from mwana import const 
 from mwana.settings_project import DEFAULT_RESPONSE
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
 import time
-
-from mwana.const import get_clinic_worker_type, get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type
+from mwana.const import (get_province_worker_type, get_clinic_worker_type,
+get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type)
 
 class TestApp(TestScript):
 
@@ -22,8 +21,16 @@ class TestApp(TestScript):
         district_type, _ = LocationType.objects.get_or_create(singular="district",
                                                      plural="districts",
                                                      slug="districts")
+        province_type, _ = LocationType.objects.get_or_create(singular="province",
+                                                     plural="provinces",
+                                                     slug="provinces")
+        self.province = Location.objects.create(type=province_type, name="Luapula", slug="400000")
         self.district = Location.objects.create(type=district_type, name="Mansa", slug="403000")
-        self.district2 = Location.objects.create(type=district_type, name="Lusaka", slug="402000")
+        self.district.parent=self.province
+        self.district.save()
+        self.district2 = Location.objects.create(type=district_type, name="Kawambwa", slug="402000")
+        self.district2.parent=self.province
+        self.district2.save()
         self.clinic = Location.objects.create(type=clinic_type, name="Central Clinic", slug="403020")
         self.clinic.parent = self.district
         self.clinic.save()
@@ -55,31 +62,34 @@ class TestApp(TestScript):
              }
 
 
-
-    def testMsg(self):
-        """
-        msg dho blah blah : goes to fellow dho's at district
-        msg all blah blah : goes to both dho's and clinic workers in district
-        """
-
+    def create_msg_workers(self):
+        dho = self.create_contact(name="dho", location=self.district,
+                                            types=[get_district_worker_type()])
         dho = self.create_contact(name="dho", location=self.district,
                                             types=[get_district_worker_type()])
         dho2 = self.create_contact(name="dho2", location=self.district,
                                             types=[get_district_worker_type()])
 
         # control contacts
+        pho = self.create_contact(name="pho", location=self.province,
+                                            types=[get_province_worker_type()])
         dho3 = self.create_contact(name="dho3", location=self.district2,
                                             types=[get_district_worker_type()])
         clinic_worker3 = self.create_contact(name="clinic_worker3", location=self.clinic2,
                                              types=[get_clinic_worker_type()])
         hub_worker = self.create_contact(name="hub_worker", location=self.clinic,
                                              types=[get_hub_worker_type()])
+    def testMsgByDho(self):
+
+        self.create_msg_workers()        
 
         script="""
         dho > msg my own way
-        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        dho < Sorry, I din't understand that. To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: DHO, CLINIC, ALL
         dho > msg
-        dho < To send a message to DHOs in your district, SEND: MSG DHO (your message). To send to both DHOs and clinic worker SEND: MSG ALL (your message)
+        dho < To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: DHO, CLINIC, ALL
+        dho > msg cba come and get sweets
+        dho < 'CBA' is not a valid message group for you. To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: DHO, CLINIC, ALL
         """
         self.runScript(script)
 
@@ -111,6 +121,158 @@ class TestApp(TestScript):
         self.assertEqual(1, len(msgs))
         self.assertEqual('dho2', msgs[0].contact.name)
         self.assertEqual(msgs[0].text, 'testing dho blasting [from dho to DHO]')
+
+        script="""
+        dho > msg clinic testing dho blasting
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(2,len(msgs))
+        expected_recipients = ["clinic_worker","clinic_worker2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing dho blasting [from dho to CLINIC]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+    def testMsgByClinicWorker(self):
+
+        self.create_msg_workers()
+       
+        script="""
+        clinic_worker > msg my own way
+        clinic_worker < Sorry, I din't understand that. To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: CBA, CLINIC, ALL, DHO
+        clinic_worker > msg
+        clinic_worker < To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: CBA, CLINIC, ALL, DHO
+        """
+        self.runScript(script)
+
+        script="""
+        clinic_worker > msg all testing msg all
+        """
+        self.runScript(script)
+
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(3,len(msgs))
+        expected_recipients = ["cba","cba2","clinic_worker2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing msg all [from clinic_worker to ALL]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+        script="""
+        clinic_worker > msg clinic sending from clinic_worker to clinic
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        # no extra msgs sent
+        self.assertEqual(1, len(msgs))
+        self.assertEqual('clinic_worker2', msgs[0].contact.name)
+        self.assertEqual(msgs[0].text, 'sending from clinic_worker to clinic [from clinic_worker to CLINIC]')
+
+        script="""
+        clinic_worker > msg cba testing clinic to cba
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(2,len(msgs))
+        expected_recipients = ["cba","cba2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing clinic to cba [from clinic_worker to CBA]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+        script="""
+        clinic_worker > msg dho testing clinic to dho
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+        
+        self.assertEqual(2,len(msgs))
+        expected_recipients = ["dho","dho2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing clinic to dho [from clinic_worker to DHO]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+    def testMsgByCba(self):
+
+        self.create_msg_workers()
+
+        script="""
+        cba > msg my own way
+        cba < Sorry, I din't understand that. To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: CBA, CLINIC, ALL
+        cba > msg
+        cba < To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: CBA, CLINIC, ALL
+        cba > msg dho come and get sweets
+        cba < 'DHO' is not a valid message group for you. To send a message SEND: MSG <GROUP> <your message>. The groups you can send to are: CBA, CLINIC, ALL
+        """
+        self.runScript(script)
+
+        script="""
+        cba > msg all testing msg all
+        """
+        self.runScript(script)
+
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(3,len(msgs))
+        expected_recipients = ["cba2","clinic_worker","clinic_worker2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing msg all [from cba to ALL]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
+
+        script="""
+        cba > msg cba sending from cbc to cba
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        # no extra msgs sent
+        self.assertEqual(1, len(msgs))
+        self.assertEqual('cba2', msgs[0].contact.name)
+        self.assertEqual(msgs[0].text, 'sending from cbc to cba [from cba to CBA]')
+
+        script="""
+        cba > msg clinic testing cba to clinic
+        """
+
+        self.runScript(script)
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(2,len(msgs))
+        expected_recipients = ["clinic_worker","clinic_worker2"]
+        actual_recipients = []
+
+        for msg in msgs:
+            self.assertEqual(msg.text,"testing cba to clinic [from cba to CLINIC]")
+            actual_recipients.append(msg.contact.name)
+        difference = list(set(actual_recipients).difference(set(expected_recipients)))
+        self.assertEqual([], difference)
 
 
     def testGroupMessaging(self):
