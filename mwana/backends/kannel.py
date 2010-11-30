@@ -25,8 +25,8 @@ class KannelBackend(RapidHttpBacked):
     max-messages = 0
     get-url = http://127.0.0.1:8888/?id=%p&text=%a
     """
-    charset = 'UTF-16BE'
-    coding = 2
+    charset = 'UTF-8'
+    coding = 1
 
     def configure(self, sendsms_url='http://127.0.0.1:13013/cgi-bin/sendsms',
                   sendsms_params=None, **kwargs):
