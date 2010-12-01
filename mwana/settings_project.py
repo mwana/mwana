@@ -41,6 +41,9 @@ INSTALLED_BACKENDS = {
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
     "mwana.apps.broadcast",
+    # this has to come before the handlers app because of the CONFIRM handler
+    # in patienttracing
+    "mwana.apps.tlcprinters",
     #'south',
     # the essentials.
     "django_nose",
