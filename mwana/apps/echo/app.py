@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import time
 from rapidsms.conf import settings
 from rapidsms.apps.base import AppBase

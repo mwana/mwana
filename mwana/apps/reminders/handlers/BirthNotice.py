@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 This handler is suppose to be modified into a scheduled task.
 """

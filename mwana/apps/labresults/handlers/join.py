@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import re
 from mwana import const
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner

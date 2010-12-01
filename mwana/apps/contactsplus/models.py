@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.db import models
 from django.db.models.query import QuerySet
 from django.db.models.query_utils import Q
