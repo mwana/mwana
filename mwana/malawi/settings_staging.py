@@ -44,6 +44,9 @@ INSTALLED_BACKENDS.update({
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "zain-modem", "username": "rapidsms",
                             "password": ""}, # set in localsettings.py
+        "coding": 0,
+        "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
     },
     "tnm" : {
         "ENGINE":  "mwana.backends.kannel",
@@ -52,6 +55,9 @@ INSTALLED_BACKENDS.update({
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "tnm-smpp", "username": "rapidsms",
                             "password": ""}, # set in localsettings.py
+        "coding": 0,
+        "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
     }
 })
 
