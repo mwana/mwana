@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.db import models
 from mwana.apps.training.models import TrainingSession
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler

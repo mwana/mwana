@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import json
 from datetime import datetime, timedelta, date
 import logging

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 Sets labresults.Result.result_sent_date to the the value the result was sent for
 results that were sent before this field was added. The dates are extracted from

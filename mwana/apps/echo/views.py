@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.http import HttpResponse
 from rapidsms.errors import NoRouterError
 from . import utils

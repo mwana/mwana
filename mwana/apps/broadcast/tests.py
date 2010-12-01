@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.contrib.messagelog.app import App as logger_app
 from mwana.apps.locations.models import LocationType, Location
