@@ -857,10 +857,10 @@ class TestResultsAcceptor(LabresultsSetUp):
         # clinic_worker should be able to get the results by replying with PIN
         script = """
             clinic_worker > 4567
-            other_worker  < John Banda has collected these results
             clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 212987;{not_detected} changed to 212987b;{not_detected}
+            other_worker  < John Banda has collected these results
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """.format(**self._result_text())
+""".format(**self._result_text())
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -928,8 +928,8 @@ class TestResultsAcceptor(LabresultsSetUp):
         # ensure that clinic workers registered as CBAs cannot retrieve results twice
         script = """
             other_worker > 6789
-            clinic_worker < Mary Phiri has collected these results
             other_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
 """.format(**self._result_text())
         time.sleep(1)
