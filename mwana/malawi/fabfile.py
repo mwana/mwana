@@ -62,7 +62,7 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production-environment'
-    env.hosts = ['41.72.110.86:80']
+    env.hosts = ['10.3.1.120']
     env.user = 'mwana'
     env.home = '/home/mwana'
     setup_path()
