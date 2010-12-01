@@ -12,8 +12,7 @@ from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
-from rapidsms.models import Connection
-from rapidsms.models import Contact
+from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.util import is_today_a_weekend, is_weekend
@@ -553,6 +552,36 @@ class TestApp(LabresultsSetUp):
         self.assertEqual(msgs[len(msgs)-10].text,central_clinc_rpt)
         self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
         
+
+class TestPrinters(LabresultsSetUp):
+    """ Tests adding and removing of DBS printers """
+
+    def testAdd(self):
+        script = """
+            unknown_user > PRINTER ADD {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+    
+    def testRemove(self):
+        contact = Contact.objects.create(name='printer', is_active=True,
+                                         location=self.clinic)
+        contact.types.add(const.get_dbs_printer_type())
+        backend = Backend.objects.get(name='mockbackend')
+        conn = Connection.objects.create(identity='1234', contact=contact,
+                                         backend=backend)
+        script = """
+            unknown_user > PRINTER REMOVE {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1111
+            support_contact < No active printer found with that backend and phone number at that location.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1234
+            support_contact < Printer removed successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
 
 class TestResultsAcceptor(LabresultsSetUp):
     """
