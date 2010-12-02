@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: ai ts=4 sts=4 et sw=4
 # bootstrap.py
 # Bootstrap and setup a virtualenv with the specified requirements.txt
 import os
