@@ -11,6 +11,8 @@ from fabric import utils
 
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
+from mwana import localsettings
+
 # use this instead of os.path.join since remote OS might differ from local
 PATH_SEP = '/'
 RSYNC_EXCLUDE = (
@@ -220,19 +222,13 @@ def reset_local_db():
                'database with the %(environment)s database?' % env
     if not console.confirm(question, default=False):
         utils.abort('Local database reset aborted.')
-    sys.path.insert(0, '..')
-#    if env.environment == 'staging':
-#        from mwana.malawi.settings_qa import DATABASES as remote
-#    else:
-#        from mwana.malawi.settings_production import DATABASES as remote
-#    from mwana.localsettings import DATABASES as loc
-#    local_db = loc['default']['NAME']
-#    remote_db = remote['default']['NAME']
-    if env.environment == 'staging':
-        from settings_qa import DATABASE_NAME as remote_db
-    elif env.environment == 'production':
-        from mwana.malawi.settings_production import DATABASE_NAME as remote_db
-    from mwana.localsettings import DATABASE_NAME as local_db
+    if env.environment == 'staging-environment':
+        from mwana.malawi.settings_staging import DATABASES as remote_dbs
+    elif env.environment == 'production-environment':
+        from mwana.malawi.settings_production import DATABASES as remote_dbs
+    from mwana.localsettings import DATABASES as local_dbs
+    remote_db = remote_dbs['default']['NAME']
+    local_db = local_dbs['default']['NAME']
     with settings(warn_only=True):
         local('dropdb %s' % local_db)
     local('createdb %s' % local_db)
