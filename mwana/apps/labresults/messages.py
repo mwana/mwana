@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from django.conf import settings
+
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
 
@@ -31,6 +33,7 @@ def build_results_messages(results):
     their status
     """
     result_strings = []
+    max_len = settings.MAX_SMS_LENGTH
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
@@ -44,7 +47,7 @@ def build_results_messages(results):
                                                   res.get_result_text()))
             
     result_text, remainder = combine_to_length(result_strings,
-                                               length=160-len(RESULTS))
+                                               length=max_len-len(RESULTS))
     first_msg = RESULTS + result_text
     responses = [first_msg]
     while remainder:
@@ -53,12 +56,14 @@ def build_results_messages(results):
     return responses
 
 
-def combine_to_length(list, delimiter=". ", length=160):
+def combine_to_length(list, delimiter=". ", length=None):
     """
     Combine a list of strings to a maximum of a specified length, using the 
     delimiter to separate them.  Returns the combined strings and the 
     remainder as a tuple.
     """
+    if length is None:
+        length = settings.MAX_SMS_LENGTH
     if not list:  return ("", [])
     if len(list[0]) > length:
         raise Exception("None of the messages will fit in the specified length of %s" % length)

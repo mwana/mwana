@@ -13,8 +13,7 @@ from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
-from rapidsms.models import Connection
-from rapidsms.models import Contact
+from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.util import is_today_a_weekend, is_weekend
@@ -555,6 +554,38 @@ class TestApp(LabresultsSetUp):
         self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
         
 
+class TestPrinters(LabresultsSetUp):
+    """ Tests adding and removing of DBS printers """
+
+    def testAdd(self):
+        script = """
+            unknown_user > PRINTER ADD {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+    
+    def testRemove(self):
+        contact = Contact.objects.create(name='printer', is_active=True,
+                                         location=self.clinic)
+        contact.types.add(const.get_dbs_printer_type())
+        backend = Backend.objects.get(name='mockbackend')
+        conn = Connection.objects.create(identity='1234', contact=contact,
+                                         backend=backend)
+        script = """
+            unknown_user > PRINTER REMOVE {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1111
+            support_contact < No active printer found with that backend and phone number at that location.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1234
+            1234 < 00This printer has been deregistered from Mibenge Clinic. You will no longer receive results.
+            support_contact < Printer removed successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
+
 class TestResultsAcceptor(LabresultsSetUp):
     """
     Tests processing of payloads
@@ -829,10 +860,10 @@ class TestResultsAcceptor(LabresultsSetUp):
         # clinic_worker should be able to get the results by replying with PIN
         script = """
             clinic_worker > 4567
-            other_worker  < John Banda has collected these results
             clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 212987;{not_detected} changed to 212987b;{not_detected}
+            other_worker  < John Banda has collected these results
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """.format(**self._result_text())
+""".format(**self._result_text())
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -900,8 +931,8 @@ class TestResultsAcceptor(LabresultsSetUp):
         # ensure that clinic workers registered as CBAs cannot retrieve results twice
         script = """
             other_worker > 6789
-            clinic_worker < Mary Phiri has collected these results
             other_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
 """.format(**self._result_text())
         time.sleep(1)
