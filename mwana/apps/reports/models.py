@@ -2,7 +2,8 @@
 from django.db import models
 from mwana.apps.locations.models import Location
 #from rapidsms.models import Connection
-#from rapidsms.models import Contact
+from rapidsms.models import Contact
+from datetime import datetime
 
 class Turnaround(models.Model):
     """
@@ -41,3 +42,46 @@ class MessageGroup(models.Model):
     clinic = models.CharField(max_length=20)
     before_pilot = models.BooleanField()
 
+class DhoReportNotification(models.Model):
+    """
+    Records EID and Birth reports sent to dho
+    """
+    REPORT_TYPES = (
+    ('M','Monthly Report'),
+    )
+
+    contact  = models.ForeignKey(Contact, related_name='dho')
+    district = models.ForeignKey(Location)
+    type    = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    samples = models.PositiveIntegerField()
+    results = models.PositiveIntegerField()
+    births = models.PositiveIntegerField()
+    date     = models.DateField()
+    date_sent     = models.DateTimeField(default=datetime.now)
+
+
+    def __unicode__(self):
+        return "%s DHO EID & Births Summary for %s on %s" % \
+            (self.district.name, self.date, self.date_sent.date())
+
+class PhoReportNotification(models.Model):
+    """
+    Records EID and Birth reports sent to pho
+    """
+    REPORT_TYPES = (
+    ('M','Monthly Report'),
+    )
+
+    contact  = models.ForeignKey(Contact, related_name='pho')
+    province = models.ForeignKey(Location)
+    type    = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    samples = models.PositiveIntegerField()
+    results = models.PositiveIntegerField()
+    births = models.PositiveIntegerField()
+    date     = models.DateField()
+    date_sent     = models.DateTimeField(default=datetime.now)
+
+
+    def __unicode__(self):
+        return "%s DHO EID & Births Summary for %s on %s" % \
+            (self.province.name, self.date, self.date_sent.date())
