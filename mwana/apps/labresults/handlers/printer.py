@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact, Connection, Backend
 
