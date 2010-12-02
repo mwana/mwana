@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 class Alert:
 
     DISTRICT_NOT_SENDING_DBS = 1

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """ This script imports locations from a csv file into the database.
 The csv file should have columns in the order:
 Province, District, Facility_Name, Code, Facility Type, Latitude, Longitude

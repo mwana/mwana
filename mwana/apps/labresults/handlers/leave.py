@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
