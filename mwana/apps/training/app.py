@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import logging
 import rapidsms
 from mwana.apps.labresults.messages import *

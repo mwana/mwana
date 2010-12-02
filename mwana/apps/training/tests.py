@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 This file demonstrates two different styles of tests (one doctest and one
 unittest). These will both pass when you run "manage.py test".

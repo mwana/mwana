@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import re
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace

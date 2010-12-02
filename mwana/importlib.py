@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.importlib import import_module

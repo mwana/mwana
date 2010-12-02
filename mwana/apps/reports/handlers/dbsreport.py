@@ -2,15 +2,15 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-import datetime
-from django.db.models import Q
+from datetime import datetime
+from datetime import timedelta
 from mwana import const
+from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.util import is_eligible_for_results
+from mwana.apps.locations.models import Location
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from mwana.apps.locations.models import Location
-from rapidsms.contrib.messagelog.models import Message
-from rapidsms.models import Contact
+
 
 class ReportHandler(KeywordHandler):
     """
@@ -18,7 +18,6 @@ class ReportHandler(KeywordHandler):
 
     keyword = "report|reports|repot|repots"
 
-#    PATTERN = re.compile(r"^(\w+)(\s+)(.{4,})(\s+)(\d+)$")
     
     PIN_LENGTH = 4     
     MIN_CLINIC_CODE_LENGTH = 3
@@ -81,18 +80,18 @@ class ReportHandler(KeywordHandler):
                     return
         text = text.strip()
         text = b.remove_double_spaces(text)
-        today = datetime.datetime.today()
+        today = datetime.today()
         try:
             month = int(b.words_to_digits(text.split()[1][0:3]))
         except (IndexError, TypeError):
             month = today.month
         if month not in range(1, 13):
             month = today.month
-        startdate = datetime.datetime(today.year, month, 1)
+        startdate = datetime(today.year, month, 1)
         if month == 12:
-            enddate = datetime.datetime(today.year, 12, 31)
+            enddate = datetime(today.year, 12, 31) + timedelta(days=1) - timedelta(seconds=1)
         else:
-            enddate = datetime.datetime(today.year, month + 1, 1) - datetime.timedelta(seconds=1)
+            enddate = datetime(today.year, month + 1, 1) - timedelta(seconds=1)
         report_values = self.get_facility_report(location, startdate, enddate,
                                                  district_facilities,
                                                  province_facilities)
@@ -105,17 +104,7 @@ class ReportHandler(KeywordHandler):
         
         self.respond(msg)
 
-    def get_msgs_with_live_results(self, startdate, enddate, contacts):
-        return Message.objects.filter(Q(date__gt=startdate)
-                                          | Q(date=startdate),
-                                          Q(date__lt=enddate) | Q(date=enddate),
-                                          direction__iexact='O', 
-                                          contact__in=contacts,
-                                          text__icontains='ected').exclude(
-                                          Q(text__icontains='Sample 9999') |
-                                          (Q(text__icontains='**** 9990;') &
-                                          Q(text__icontains='**** 9991;') &
-                                          Q(text__icontains='**** 9992;')))
+    
                                           
     def get_facility_report(self, location, startdate,
                             enddate, district_facilities, province_facilities):
@@ -130,16 +119,21 @@ class ReportHandler(KeywordHandler):
         elif district_facilities:
             return self.get_facilities_summed_report(district_facilities,
                                                      startdate, enddate)
-
-        contacts = Contact.objects.filter(location=location)
-        msgs = self.get_msgs_with_live_results(startdate, enddate, contacts)
-
+      
         rejected_results = negative_results = positive_results = 0
-        for msg in msgs:
-            rejected_results  = rejected_results + msg.text.count(';Rejected')
-            negative_results = negative_results + msg.text.count(';NotDetected')
-            positive_results = positive_results + msg.text.count(';Detected')
-
+        rejected_results = Result.objects.filter(clinic=location,
+                                                 result_sent_date__gte=startdate,
+                                                 result_sent_date__lte=enddate,
+                                                 result__in='RIX').count()
+        negative_results = Result.objects.filter(clinic=location,
+                                                 result_sent_date__gte=startdate,
+                                                 result_sent_date__lte=enddate,
+                                                 result='N').count()
+        positive_results = Result.objects.filter(clinic=location,
+                                                 result_sent_date__gte=startdate,
+                                                 result_sent_date__lte=enddate,
+                                                 result='P').count()
+        
         total = rejected_results + negative_results + positive_results
         results = {'Rejected':rejected_results, 'NotDetected':negative_results,
             'Detected':positive_results, 'TT':total}
@@ -152,17 +146,25 @@ class ReportHandler(KeywordHandler):
         twice, ie via CHECK and RESULT
         """
         rejected_results = negative_results = positive_results = 0
-        for location in many_locations:
-            contacts = Contact.objects.filter(location=location)
-            msgs = self.get_msgs_with_live_results(startdate, enddate, contacts)
-            
-            for msg in msgs:
-                rejected_results  = rejected_results + msg.text.count(';Rejected')
-                negative_results = negative_results + msg.text.count(';NotDetected')
-                positive_results = positive_results + msg.text.count(';Detected')
+                   
+        rejected_results = rejected_results + \
+            Result.objects.filter(clinic__in=many_locations,
+                                  result_sent_date__gte=startdate,
+                                  result_sent_date__lte=enddate,
+                                  result__in='RIX').count()
+        negative_results = negative_results + \
+            Result.objects.filter(clinic__in=many_locations,
+                                  result_sent_date__gte=startdate,
+                                  result_sent_date__lte=enddate,
+                                  result='N').count()
+        positive_results = positive_results + \
+            Result.objects.filter(clinic__in=many_locations,
+                                  result_sent_date__gte=startdate,
+                                  result_sent_date__lte=enddate,
+                                  result='P').count()
 
-            total = rejected_results + negative_results + positive_results
-            results = {'Rejected':rejected_results, 'NotDetected':negative_results,
-                'Detected':positive_results, 'TT':total}
+        total = rejected_results + negative_results + positive_results
+        results = {'Rejected':rejected_results, 'NotDetected':negative_results,
+            'Detected':positive_results, 'TT':total}
         return results
 
