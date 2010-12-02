@@ -562,6 +562,7 @@ class TestPrinters(LabresultsSetUp):
             unknown_user > PRINTER ADD {clinic} mockbackend 1234
             unknown_user < You must be a registered help admin to add or remove printers.
             support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
             support_contact < Printer added successfully.
         """.format(clinic=self.clinic.slug)
         self.runScript(script)
@@ -579,6 +580,7 @@ class TestPrinters(LabresultsSetUp):
             support_contact > PRINTER REMOVE {clinic} mockbackend 1111
             support_contact < No active printer found with that backend and phone number at that location.
             support_contact > PRINTER REMOVE {clinic} mockbackend 1234
+            1234 < 00This printer has been deregistered from Mibenge Clinic. You will no longer receive results.
             support_contact < Printer removed successfully.
         """.format(clinic=self.clinic.slug)
         self.runScript(script)

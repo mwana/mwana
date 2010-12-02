@@ -2,6 +2,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact, Connection, Backend
 
 from mwana.apps.locations.models import Location
+from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 
 from mwana import const
 
@@ -48,12 +49,21 @@ class PrinterHandler(KeywordHandler):
         except Backend.DoesNotExist:
             self.respond('Backend name %s is not known.' % backend_name)
             return
+        # prepend the country code if the shorthand was given
+        if phone.startswith('0') and hasattr(settings, 'COUNTRY_CODE'):
+            phone = settings.COUNTRY_CODE + phone[1:]
         if action == 'add':
             contact = Contact.objects.create(name='Printer in %s' % location.name,
                                              location=location)
-            connection = Connection.objects.create(identity=phone, backend=backend,
-                                                   contact=contact)
+            conn = Connection.objects.create(identity=phone, backend=backend,
+                                             contact=contact)
             contact.types.add(const.get_dbs_printer_type())
+            conf_msg = TLCOutgoingMessage(conn, 'You have successfully '
+                                          'registered this printer at '
+                                          '%(location)s. You will receive '
+                                          'results as soon as they are '
+                                          'available.', location=location.name)
+            conf_msg.send()
             self.respond('Printer added successfully.')
         elif action == 'remove':
             try:
@@ -69,4 +79,9 @@ class PrinterHandler(KeywordHandler):
             contact.save()
             conn.contact = None
             conn.save()
+            conf_msg = TLCOutgoingMessage(conn, 'This printer has been '
+                                          'deregistered from %(location)s. You '
+                                          'will no longer receive results.',
+                                          location=location.name)
+            conf_msg.send()
             self.respond('Printer removed successfully.')
