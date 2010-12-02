@@ -53,7 +53,7 @@ class LabresultsSetUp(TestScript):
 class TestApp(LabresultsSetUp):  
 
     def testSentNotifications(self):
-        self.assertEqual(0, SampleNotification.objects.count())
+        self.assertEqual(0, HubSampleNotification.objects.count())
         script = """
             hub_worker > join hub 403012 hubman phiri 1111
             hub_worker < Hi Hubman Phiri, thanks for registering for Results160 from hub at Central Clinic. Your PIN is 1111. Reply with keyword 'HELP' if this is incorrect
