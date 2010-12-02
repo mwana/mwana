@@ -1,9 +1,11 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.contrib import admin
 
 from rapidsms.models import Contact
 from rapidsms.admin import ContactAdmin
 
 from mwana.apps.contactsplus import models as contactsplus
+
 
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
@@ -14,6 +16,7 @@ class ContactAdmin(ContactAdmin):
     list_filter = ('types', 'is_active', 'language',)
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
+
     
     def unicode(self, obj):
         return unicode(obj)

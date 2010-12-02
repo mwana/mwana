@@ -1,9 +1,11 @@
+# vim: ai ts=4 sts=4 et sw=4
 import re
 from datetime import datetime
 from django.conf import settings
 from django.db.models import Q
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.labresults.models import Result
+from mwana import const
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to receive DBS \
 results. If you think this message is a mistake, respond with keyword 'HELP'"
@@ -33,11 +35,16 @@ class ResultsHandler(KeywordHandler):
 
     def _get_results(self, clinic, requisition_id):
         if settings.SEND_LIVE_LABRESULTS:
-            q = Q(requisition_id__iexact=requisition_id) 
+            requisition_id = Result.clean_req_id(requisition_id)
+            q = Q(requisition_id_search__iexact=requisition_id) 
             if requisition_id.startswith(clinic.slug):
                 short_id = re.sub('^%s' % clinic.slug, '', requisition_id)
-                q |= Q(requisition_id__iexact=short_id)
-            q &= Q(clinic=clinic)
+                q |= Q(requisition_id_search__iexact=short_id)
+            else:
+                long_id = clinic.slug + requisition_id
+                q |= Q(requisition_id_search__iexact=long_id)
+            q &= Q(clinic=clinic) & Q(clinic__send_live_results=True)
+            q &= Q(verified__isnull=True) | Q(verified=True)
             return Result.objects.order_by('pk').filter(q)
         else:
             return Result.objects.none()
@@ -58,21 +65,33 @@ class ResultsHandler(KeywordHandler):
         for requisition_id in requisition_ids:
             results = self._get_results(self.msg.contact.location,
                                         requisition_id)
-            if len(requisition_ids) == 1 and requisition_id == '9999' and\
-               not results:
+            fake_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT',
+                              '{id:04d}')
+            if self.msg.contact.location.type.slug in const.ZONE_SLUGS:
+                clinic_id = self.msg.contact.location.parent.slug
+            else:
+                clinic_id = self.msg.contact.location.slug
+            fake_id = fake_id.format(clinic=clinic_id, id=9999)
+            fake_ids = [fake_id]
+            if fake_id.startswith(clinic_id):
+                fake_ids.append(fake_id[len(clinic_id):])
+            fake_ids = [Result.clean_req_id(id) for id in fake_ids]
+            if len(requisition_ids) == 1 and not results and\
+              Result.clean_req_id(requisition_id) in fake_ids:
                 # demo functionality - if '9999' was specified and no results
                 # were found with that requisition ID, return a sample result
-                self.respond("Sample 9999: Detected. Please record these "
+                results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY',
+                                       {})
+                self.respond("Sample {id}: {result}. Please record these "
                              "results in your clinic records and promptly "
-                             "delete them from your phone. Thanks again")
+                             "delete them from your phone. Thanks again".format(
+                             result=results_text.get('P', 'Detected'),
+                             id=fake_id))
                 return
             elif results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
-                        if result.result in ('X', 'I'):
-                            reply = 'Rejected'
-                        else:
-                            reply = result.get_result_display()
+                        reply = result.get_result_text()
                         ready_sample_results.append(
                                 "%(req_id)s;%(res)s" %
                                 {'req_id':result.requisition_id,

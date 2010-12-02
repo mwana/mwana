@@ -1,4 +1,5 @@
-from mwana.zabia.settings_zambia import *
+# vim: ai ts=4 sts=4 et sw=4
+from mwana.zambia.settings_country import *
 
 DEBUG = False
 

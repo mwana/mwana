@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 Provides utilities to cleanup text
 """
@@ -322,3 +323,7 @@ class InputCleaner:
 
         return matrix[n][m]
 
+    def remove_dash_plus(self, s):
+        for c in ['-', '+']:
+            s = s.replace(c, '')
+        return s

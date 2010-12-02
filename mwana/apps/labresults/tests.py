@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import time
 import json
 
@@ -6,6 +7,7 @@ import mwana.const as const
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.conf import settings
 from mwana.apps.labresults import models as labresults
 from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
@@ -21,7 +23,17 @@ from mwana.apps.labresults.testdata.reports import *
 
 
 class LabresultsSetUp(TestScript):
-    
+
+    def _result_text(self):
+        """
+        Returns the appropriate display value for DBS results as it would
+        appear in an SMS.
+        """
+        results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
+        results = {'detected': results_text.get('P', 'Detected'),
+                   'not_detected': results_text.get('N', 'NotDetected')}
+        return results
+
     def setUp(self):
         # this call is required if you want to override setUp
         super(LabresultsSetUp, self).setUp()
@@ -31,9 +43,12 @@ class LabresultsSetUp(TestScript):
         self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="luapula")
         self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="mansa", parent = self.luapula)
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya", parent = self.luapula)
-        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya)
-        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa)
-
+        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent = self.samfya, send_live_results=True)
+        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa, send_live_results=True)
+        # clinic for send_live_results = True
+        self.clinic_live_results_true = Location.objects.create(type=self.type, name="LiveResultsTrue Clinic", slug="403010", parent = self.mansa, send_live_results=True)
+        # clinic for send_live_results = False
+        self.clinic_live_results_false = Location.objects.create(type=self.type, name="LiveResultsFalse Clinic", slug="403011", parent = self.mansa, send_live_results=False)
         
         self.support_clinic = Location.objects.create(type=self.type, name="Support Clinic", slug="spt")
         # this gets the backend and connection in the db
@@ -65,6 +80,22 @@ class LabresultsSetUp(TestScript):
         Connection.objects.create(identity="central_clinic_worker", backend=connection.backend,
                                   contact=self.central_clinic_worker)
         connection.save()
+        
+        # create a worker for the live_results_true clinic
+        self.true_clinic_worker = Contact.objects.create(alias="jbt", name="John Banda",
+                                        location=self.clinic_live_results_true, pin="1001")
+        self.true_clinic_worker.types.add(const.get_clinic_worker_type())
+        
+        Connection.objects.create(identity="true_clinic_worker", backend=connection.backend,
+                                    contact=self.true_clinic_worker)
+        
+        # create a worker for the live_results_false clinic
+        self.false_clinic_worker = Contact.objects.create(alias="jbf", name="John Banda",
+                                        location=self.clinic_live_results_false, pin="0110")
+        self.false_clinic_worker.types.add(const.get_clinic_worker_type())
+        
+        Connection.objects.create(identity="false_clinic_worker", backend=connection.backend,
+                                    contact=self.false_clinic_worker)
 
         # create support staff
         self.support_contact = Contact.objects.create(alias="ha1", name="Help Admin",
@@ -103,49 +134,68 @@ class LabresultsSetUp(TestScript):
         self.assertTrue(const.get_clinic_worker_type() in contact.types.all())
 
 class TestApp(LabresultsSetUp):
-    testReportResults = """
+
+    def testReportResults(self):
+        script = """
             clinic_worker > SENT 33
             clinic_worker < Hello John Banda! We received your notification that 33 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportResultsCorrection = """
+    def testReportResultsCorrection(self):
+        script = """
             clinic_worker > snt hundred twenti 5 samples
             clinic_worker < Hello John Banda! We received your notification that 125 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testReportRemovalOfExtraWords = """
+    def testReportRemovalOfExtraWords(self):
+        script = """
             clinic_worker > SENT 40 samples anythin
             clinic_worker < Hello John Banda! We received your notification that 40 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
         
-    testZeroSampleNumber = """
+    def testZeroSampleNumber(self):
+        script = """
             clinic_worker > SENT 0
             clinic_worker < Sorry, the number of DBS samples sent must be greater than 0 (zero).
         """
-    testNegativeSampleNumber = """
+        self.runScript(script)
+
+    def testNegativeSampleNumber(self):
+        script = """
             clinic_worker > SENT -1
             clinic_worker < Hello John Banda! We received your notification that 1 DBS samples were sent to us today from Mibenge Clinic. We will notify you when the results are ready.
         """
+        self.runScript(script)
 
-    testBadReportFormat = """
+    def testBadReportFormat(self):
+        script = """
             clinic_worker > SENT some samples yo!
             clinic_worker < Sorry, we didn't understand that message. To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
         """
+        self.runScript(script)
         
-    testUnregisteredResults = """
+    def testUnregisteredResults(self):
+        script = """
             unknown_user > SENT 3
             unknown_user < Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'
         """
         
-    testUnregisteredCheck = """
+    def testUnregisteredCheck(self):
+        script = """
             unknown_user > CHECK RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
         """
+        self.runScript(script)
         
-    testCheckResultsNone = """
+    def testCheckResultsNone(self):
+        script = """
             clinic_worker > CHECK RESULTS
             clinic_worker < Hello John Banda. There are no new DBS test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
     """
+        self.runScript(script)
     
     # TODO: flesh out this test
     """
@@ -155,6 +205,35 @@ class TestApp(LabresultsSetUp):
         524754 < Hi Cory, thanks for registering for DBS results from Results160 as staff of Chipungu. Your PIN is 1234. Reply with keyword 'HELP' if your information is not correct.
     """
     
+    def testSendLiveResultsTrue(self):
+        results = get_fake_results(2, self.clinic_live_results_true, notification_status_choices=("new", ))
+        for res in results:  res.save()
+        res1, res2 = results
+
+        script = """
+            true_clinic_worker > CHECK
+            true_clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+            true_clinic_worker > %(code)s
+            true_clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s
+            true_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s! 
+            """ % {"name": self.contact.name, "count": 2, "code":"1001",
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text()}
+
+        self.runScript(script)
+    
+    def testSendLiveResultsFalse(self):
+        results = get_fake_results(2, self.clinic_live_results_false, notification_status_choices=("new", ))
+        for res in results:  res.save()
+        res1, res2 = results
+        
+        script = """
+            false_clinic_worker > CHECK
+            false_clinic_worker < Hello %(name)s. There are no new DBS test results for LiveResultsFalse Clinic right now. We'll let you know as soon as more results are available.
+    """ % {"name": self.contact.name}
+        self.runScript(script)
+    
+        
     def testSentCreatesDbObjects(self):
         self.assertEqual(0, SampleNotification.objects.count())
         script = """
@@ -178,9 +257,9 @@ class TestApp(LabresultsSetUp):
         # some messages should trigger a PIN wrong answer, others shouldn't
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 55555
-            clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
+            clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > Help
             support_contact < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
             support_contact2 < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
@@ -188,16 +267,16 @@ class TestApp(LabresultsSetUp):
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > here's some stuff that you won't understand
-            clinic_worker < Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'
+            clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > %(code)s
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "count": 3, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_display(),
-            "id2": res2.requisition_id, "res2": res2.get_result_display(),
-            "id3": res3.requisition_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text(),
+            "id3": res3.requisition_id, "res3": res3.get_result_text()}
         
         self.runScript(script)
         
@@ -212,7 +291,7 @@ class TestApp(LabresultsSetUp):
         # also support querying them via these magic keywords
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
         """ % {"name": self.contact.name, "count": 3}
         self.runScript(script)
         
@@ -225,9 +304,9 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
             """ % {"name": self.contact.name, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_display(),
-            "id2": res2.requisition_id, "res2": res2.get_result_display(),
-            "id3": res3.requisition_id, "res3": res3.get_result_display()}
+            "id1": res1.requisition_id, "res1": res1.get_result_text(),
+            "id2": res2.requisition_id, "res2": res2.get_result_text(),
+            "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
         
@@ -259,7 +338,7 @@ class TestApp(LabresultsSetUp):
                 for msg in messages:
                     self.assertTrue(msg.connection.identity in ["clinic_worker", "other_worker"])
                     self.assertEqual("Hello %(name)s. We have 3 DBS test results ready for you. "
-                                     "Please reply to this SMS with your security code to retrieve "
+                                     "Please reply to this SMS with your pin code to retrieve "
                                      "these results." % {"name": msg.contact.name}, msg.text)
                                      
                 
@@ -300,8 +379,8 @@ class TestApp(LabresultsSetUp):
         Tests getting of results for given samples.
         """
         results = labresults.Result.objects.all()
-        res1 = results.create(requisition_id="0001", clinic=self.clinic,
-                              result="N",
+        res1 = results.create(requisition_id="%s-0001-1" % self.clinic.slug,
+                              clinic=self.clinic, result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
@@ -312,8 +391,8 @@ class TestApp(LabresultsSetUp):
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
 
-        res3 = results.create(requisition_id="0003", clinic=self.clinic,
-                              result="N",
+        res3 = results.create(requisition_id="%s-0003-1" % self.clinic.slug,
+                              clinic=self.clinic, result="N",
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
@@ -344,10 +423,11 @@ class TestApp(LabresultsSetUp):
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
-        
+        fake_req_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT', '{id:04d}')
+        fake_req_id = fake_req_id.format(id=9999, clinic=self.clinic.slug)
         script = """
-            clinic_worker > RESULT 9999
-            clinic_worker < Sample 9999: Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT {fake_req_id}
+            clinic_worker < Sample {fake_req_id}: {detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 000 1
             clinic_worker < There are currently no results available for 1, 000. Please check if the SampleID's are correct or sms HELP if you have been waiting for 2 months or more
             clinic_worker > RESULT 0004
@@ -358,19 +438,20 @@ class TestApp(LabresultsSetUp):
             clinic_worker < The results for sample(s) 0004a, 0004b are not yet ready. You will be notified when they are ready.
             clinic_worker > RESULT 6006
             clinic_worker < There are currently no results available for 6006. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
-            clinic_worker > RESULT 0001
-            clinic_worker < **** 0001;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
-            clinic_worker > RESULT 0003
-            clinic_worker < **** 0003;NotDetected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT {clinic}-0001-1
+            clinic_worker < **** {clinic}-0001-1;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 00031
+            clinic_worker < **** {clinic}-0003-1;{not_detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0002
-            clinic_worker < **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             clinic_worker > RESULT 0000
-            clinic_worker < **** 0000;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
-            clinic_worker > RESULT 0001 0002
-            clinic_worker < **** 0001;NotDetected. **** 0002;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker < **** 0000;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 00011 0002
+            clinic_worker < **** {clinic}-0001-1;{not_detected}. **** 0002;{detected}. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
             unkown_worker > RESULT 0000
             unkown_worker < Sorry, you must be registered with Results160 to receive DBS results. If you think this message is a mistake, respond with keyword 'HELP'
-           """
+           """.format(clinic=self.clinic.slug, fake_req_id=fake_req_id,
+                      **self._result_text())
 
         self.runScript(script)
 
@@ -432,14 +513,14 @@ class TestApp(LabresultsSetUp):
         #collect the results. get some reports
         script = """
             central_clinic_worker > CHECK
-            central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            central_clinic_worker < Hello James Phiri. We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             central_clinic_worker > 1111
-            central_clinic_worker < Thank you! Here are your results: **** 0000;Detected. **** 0004b;NotDetected
+            central_clinic_worker < Thank you! Here are your results: **** 0000;{detected}. **** 0004b;{not_detected}
             central_clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again James Phiri!
             clinic_worker > CHECK
-            clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello John Banda. We have 5 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 0001;NotDetected. **** 0002;Detected. **** 0003;NotDetected. **** 0004;NotDetected. **** 0004a;Rejected
+            clinic_worker < Thank you! Here are your results: **** 0001;{not_detected}. **** 0002;{detected}. **** 0003;{not_detected}. **** 0004;{not_detected}. **** 0004a;Rejected
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
             clinic_worker > Reports
             clinic_worker < To view a report, send REPORT <CLINIC_CODE> [MONTH]
@@ -447,16 +528,16 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Oct
-            clinic_worker > Reports 403012 10
+            clinic_worker > Reports 403012 Dec
+            clinic_worker > Reports 403012 12
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Oct
+            clinic_worker > Reports 40 Dec
             clinic_worker > Reports Luapula
-        """
+        """.format(**self._result_text())
         self.runScript(script)        
         msgs=self.receiveAllMessages()
         
@@ -582,7 +663,7 @@ class TestResultsAcceptor(LabresultsSetUp):
                     "fac": 2020200, 
                     "id": "10-09997", 
                     "hw_tit": "ZAN", 
-                    "pat_id": "21234987", 
+                    "pat_id": "212987", 
                     "dob": "2010-01-12", 
                     "proc_on": "2010-04-17", 
                     "child_age": 4,
@@ -707,11 +788,11 @@ class TestResultsAcceptor(LabresultsSetUp):
         # let the clinic worker get the results
         script = """
             clinic_worker > CHECK RESULTS
-            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results.
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
             clinic_worker > 4567
-            clinic_worker < Thank you! Here are your results: **** 1029023412;NotDetected. **** 78;NotDetected. **** 21234987;NotDetected
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """        
+            """.format(**self._result_text())
         self.runScript(script)
 
         # testing if the payload is processed fine is done in other test methods
@@ -736,7 +817,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=21234987b, Result=N, old value=21234987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=212987b, Result=N, old value=212987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
@@ -749,10 +830,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         script = """
             clinic_worker > 4567
             other_worker  < John Banda has collected these results
-            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;NotDetected changed to 87;Detected
-            clinic_worker < **** 21234987;NotDetected changed to 21234987b;NotDetected
+            clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 212987;{not_detected} changed to 212987b;{not_detected}
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """
+            """.format(**self._result_text())
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -781,9 +861,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Get all the messages sent
         msgs = self.receiveAllMessages()
         self.stopRouter()
-
-        msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
-        msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+        
+        msg1 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+        msg2 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
 
         self.assertTrue(msg1 in (msgs[0].text, msgs[1].text ),
         "Following message was not sent:\n%s" % msg1)
@@ -793,13 +873,12 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # let clinic worker also become a cba, let other worker leave
         script = """
-            clinic_worker > agent 402029 3 John Banda
+            clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
-            other_worker > leave
-            other_worker  < You have successfully unregistered, Mary Phiri. We're sorry to see you go.
             """
+        time.sleep(1)
         self.runScript(script)
-
+        
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
@@ -807,8 +886,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Get all the messages sent
         msgs = self.receiveAllMessages()
         
-        self.assertEqual(1,len(msgs))
+        self.assertEqual(2,len(msgs))
         self.assertEqual(msg2,msgs[0].text)
+        self.assertEqual(msg1,msgs[1].text)
 
         self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -816,3 +896,13 @@ class TestResultsAcceptor(LabresultsSetUp):
                             arrival_date=None).exclude(result=None).count())
         time.sleep(1)
         self.stopRouter()
+
+        # ensure that clinic workers registered as CBAs cannot retrieve results twice
+        script = """
+            other_worker > 6789
+            clinic_worker < Mary Phiri has collected these results
+            other_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
+""".format(**self._result_text())
+        time.sleep(1)
+        self.runScript(script)

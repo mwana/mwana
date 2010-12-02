@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messaging",
 #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
-    "rapidsms.contrib.echo",
+    "mwana.apps.echo",
     "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
@@ -84,7 +84,7 @@ INSTALLED_APPS = [
     "mwana.apps.help",
     "mwana.apps.alerts",
     "mwana.apps.locations",
-
+    "mwana.apps.patienttracing",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
@@ -131,12 +131,16 @@ LOGIN_REDIRECT_URL = "/"
 # use django-nose to run tests. rapidsms contains lots of packages and
 # modules which django does not find automatically, and importing them
 # all manually is tiresome and error-prone.
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
+#TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
 
 # for some reason this setting is blank in django's global_settings.py,
 # but it is needed for static assets to be linkable.
 MEDIA_URL = "/static/"
+
+
+# URL for admin media (also defined in apache configuration)
+ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 
 # this is required for the django.contrib.sites tests to run, but also
@@ -153,6 +157,17 @@ LOG_SIZE    = 8192 # 8192 bytes = 64 kb
 LOG_BACKUPS = 256 # number of logs to keep
 DJANGO_LOG_FILE  = 'logs/django.log'
 
+
+MIDDLEWARE_CLASSES = [
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'mwana.middleware.LoginRequired',
+]
+
+
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
 TEMPLATE_CONTEXT_PROCESSORS = [
@@ -161,6 +176,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+    "django.core.context_processors.csrf",
 ]
 
 

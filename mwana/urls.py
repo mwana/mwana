@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
@@ -13,18 +14,17 @@ urlpatterns = patterns('',
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     (r'^admin/', include(admin.site.urls)),
-    
+
     # RapidSMS core URLs
-    (r'^account/', include('rapidsms.urls.login_logout')),
-    url(r'^$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
+    (r'^accounts/', include('rapidsms.urls.login_logout')),
+    url(r'^dashboard$', 'rapidsms.views.dashboard', name='rapidsms-dashboard'),
 
     # Mwana app URLs
     (r'^labresults/', include('mwana.apps.labresults.urls')),
     (r'^alerts/', include('mwana.apps.alerts.urls')),
     #(r'^supplies/', include('mwana.apps.supply.urls')),
-    url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
-    # RapidSMS contrib app URLs
-    (r'^ajax/', include('rapidsms.contrib.ajax.urls')),
+    #url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
+    url(r'^$', mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     (r'^export/', include('rapidsms.contrib.export.urls')),
     (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
@@ -33,7 +33,9 @@ urlpatterns = patterns('',
     (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
-    
+    (r'^contacts/', include('mwana.apps.contactsplus.urls')),
+    (r'^status/', include('mwana.apps.echo.urls')),
+
 )
 
 if settings.DEBUG:

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import datetime
 """
 Some data to represent formated sent results reports for the province,
@@ -5,8 +6,10 @@ it's district and facilities
 """
 today = datetime.datetime.today()
 month = today.month
+next_month = month < 12 and month + 1 or 1
+next_month_year = month < 12 and today.year or today.year + 1
 startdate = datetime.date(today.year, month, 1)
-enddate = datetime.date(today.year, month + 1, 1) - datetime.timedelta(days = 1)
+enddate = datetime.date(next_month_year, next_month, 1) - datetime.timedelta(days = 1)
 startdate = startdate.strftime("%d/%m/%Y")
 enddate = enddate.strftime("%d/%m/%Y")
 

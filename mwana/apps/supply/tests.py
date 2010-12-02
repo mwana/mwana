@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.supply.app import App
 from mwana.apps.supply.models import SupplyType, SupplyRequest
 from rapidsms.contrib.handlers.app import App as handler_app
@@ -104,10 +105,12 @@ class TestApp (TestScript):
 
        
 
-    testRequestRequiresRegistration = """
+    def testRequestRequiresRegistration(self):
+        script = """
         noname > request sb
         noname < Sorry you have to register to request supplies. To register, send JOIN <LOCATION CODE> <NAME>
     """
+        self.runScript(script)
 
     def _create_contact(self, identity, name, location):
         # this has a janky dependency on the reg format, but is nice and convenient

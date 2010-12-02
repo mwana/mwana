@@ -1,11 +1,14 @@
+# vim: ai ts=4 sts=4 et sw=4
 import rapidsms
 import re
 from mwana.apps.labresults.handlers.results import ResultsHandler
 from mwana.apps.broadcast.handlers.all import AllHandler
 from mwana.apps.broadcast.handlers.clinic import ClinicHandler
-from mwana.apps.broadcast.handlers.cba import ClinicHandler as CbaHandler
+from mwana.apps.broadcast.handlers.cba import CBAHandler
 from mwana.apps.broadcast.handlers.blaster import BlastHandler
 from mwana.apps.broadcast.handlers.district import DistrictHandler
+from mwana.apps.broadcast.handlers.hsa import HSAHandler
+from mwana.apps.broadcast.handlers.msg import MessageHandler
 
 class App (rapidsms.apps.base.AppBase):
 
@@ -24,10 +27,12 @@ class App (rapidsms.apps.base.AppBase):
         # assuming all keywords are declared in lower case
         results_keywords = ResultsHandler.keyword.split('|')
         broadcast_keywords = self.to_lower(AllHandler.keyword.split('|'))
-        broadcast_keywords.extend(self.to_lower(CbaHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(CBAHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(ClinicHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(BlastHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(DistrictHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(HSAHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(MessageHandler.keyword.split('|')))
         
         # remove leading/trailing whitespace
         # get out your featherduster
@@ -41,7 +46,9 @@ class App (rapidsms.apps.base.AppBase):
                 return
 
         # replace separation marks with a space
-        separators = [',', '/', ';', '*', '+', '-']
+        # allow '+' because it's needed by xforms
+        # allow '-' because it's used in requisition IDs in Malawi
+        separators = [',', '/', ';', '*']
         for mark in separators:            
             if (keyword in results_keywords and mark =='/'):
                 continue

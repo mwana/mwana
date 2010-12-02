@@ -1,9 +1,11 @@
-from mwana.malawi.settings_malawi import *
+# vim: ai ts=4 sts=4 et sw=4
+from mwana.malawi.settings_country import *
 
 DEBUG = False
 
 ADMINS = (
     ('Tobias McNulty', 'mwana@caktusgroup.com'),
+    ('Lengani Kaunda', 'lengani@p4studio.com'),
 )
 
 MANAGERS = ADMINS
@@ -11,6 +13,8 @@ MANAGERS = ADMINS
 EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
+
+XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
 # only on the staging or production server, so that development can continue
@@ -24,12 +28,38 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 RAPIDSMS_TABS.remove(('rapidsms.views.dashboard', 'Dashboard'))
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
+#INSTALLED_BACKENDS.update({
+#    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
+#               "port": "/dev/ttyUSB0",
+#               'baudrate': '115200',
+#               'rtscts': '1',
+#               'timeout': 10}
+#})
+
+# Add the kannel backends for Zain and TNM
 INSTALLED_BACKENDS.update({
-    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
-               "port": "/dev/ttyUSB0",
-               'baudrate': '115200',
-               'rtscts': '1',
-               'timeout': 10}
+    "zain" : {
+        "ENGINE":  "mwana.backends.kannel",
+        "host": "127.0.0.1",
+        "port": 8081,
+        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+        "sendsms_params": {"smsc": "zain-modem", "username": "rapidsms",
+                            "password": ""}, # set in localsettings.py
+        "coding": 0,
+        "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
+    },
+    "tnm" : {
+        "ENGINE":  "mwana.backends.kannel",
+        "host": "127.0.0.1",
+        "port": 8082,
+        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+        "sendsms_params": {"smsc": "tnm-smpp", "username": "rapidsms",
+                            "password": ""}, # set in localsettings.py
+        "coding": 0,
+        "charset": "ascii",
+        "encode_errors": "ignore", # strip out unknown (unicode) characters
+    }
 })
 
 DATABASES = {
@@ -43,7 +73,7 @@ DATABASES = {
     }
 }
 
-SEND_LIVE_LABRESULTS = False
+SEND_LIVE_LABRESULTS = True
 SEND_LIVE_BIRTH_REMINDERS = False
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from mwana import const
 
 
@@ -6,6 +7,8 @@ class LocationCode(object):
     def __init__(self, slug):
         if len(slug) == 4:
             slug += '00' #pad with 00 for district code
+        elif len(slug) == 2:
+            slug += '0000'
         self.slug = slug
 
     def __str__(self):

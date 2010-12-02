@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from mwana.util import get_clinic_or_default
@@ -33,7 +34,8 @@ class SentHandler(KeywordHandler):
             return
         b = InputCleaner()
         try:
-            count = int(b.try_replace_oil_with_011(text.strip()))
+            text = b.remove_dash_plus(text)
+            count = int(b.try_replace_oil_with_011(text))
         except ValueError:
             text = b.words_to_digits(text)
             if not text:

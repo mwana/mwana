@@ -1,9 +1,10 @@
+# vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
 
-RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your security code to retrieve these results."
+RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
 NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you know as soon as more results are available."
-BAD_PIN           = "Sorry, that was not the correct security code. Your security code is a 4-digit number like 1234. If you forgot your security code, reply with keyword 'HELP'"
+BAD_PIN           = "Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'"
 SELF_COLLECTED    = "Hi %(name)s. It looks like you already collected your DBS results. To check for new results reply with keyword 'CHECK'"
 ALREADY_COLLECTED = "Hi %(name)s. It looks like the results you are looking for were already collected by %(collector)s. To check for new results reply with keyword 'CHECK'"
 RESULTS           = "Thank you! Here are your results: "
@@ -24,42 +25,23 @@ def urgent_requisitionid_update(result):
             toreturn = True
     return toreturn
 
-def get_full_result_text(char_string):
-    """
-    Helper method to get the correspong result from a given character. These are
-    not as exactly as specified in Result.RESULT_CHOICES
-    """
-    if char_string.upper() == 'N':
-        return 'NotDetected'
-    elif char_string.upper() == 'P':
-        return 'Detected'
-    elif char_string.upper() in ['R','I','X']:
-        return 'Rejected'
-
 def build_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting 
     their status
     """
-#    result_strings = ["**** %s:%s" % (r.requisition_id, r.get_result_display()) \
-#                              for r in results]
     result_strings = []
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            try:
-                result_strings.append("**** %s;%s changed to %s;%s" % (
-                res.old_value.split(":")[0],
-                get_full_result_text(res.old_value.split(":")[1]),res.requisition_id,
-                res.get_result_display()))
-            except IndexError:
-                result_strings.append("**** %s;%s changed to %s;%s" % (
-                res.old_value, 
-                res.get_result_display(),res.requisition_id,
-                res.get_result_display()))            
+            result_strings.append("**** %s;%s changed to %s;%s" % (
+                                  res.old_value.split(":")[0],
+                                  res.get_old_result_text(),
+                                  res.requisition_id,
+                                  res.get_result_text()))
         else:
             result_strings.append("**** %s;%s" % (res.requisition_id,
-            res.get_result_display()))
+                                                  res.get_result_text()))
             
     result_text, remainder = combine_to_length(result_strings,
                                                length=160-len(RESULTS))

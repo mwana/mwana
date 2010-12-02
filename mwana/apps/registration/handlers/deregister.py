@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import logging
 
 from mwana import const
@@ -5,7 +6,7 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 logger = logging.getLogger(__name__)
 
 class DeregisterHandler(KeywordHandler):
@@ -76,8 +77,8 @@ class DeregisterHandler(KeywordHandler):
         if not cba:
             cbas = \
             Contact.active.filter(name__icontains=text,
-                                  location__parent=location,
-                                  types=const.get_cba_type())
+                                   location__parent=location,
+                                  types=const.get_cba_type()).order_by('connection')
             if not cbas:
                 self.respond('The name %(name)s does not belong to any'
                              ' CBA at %(clinic)s. Make sure you typed it '
@@ -99,17 +100,21 @@ class DeregisterHandler(KeywordHandler):
                              clinic=location.name)
                 return
         if cba:
+            cba_connection = cba.default_connection.identity
+            connection = Connection.objects.get(contact=cba)
+            connection.contact = None
+            connection.save()
             cba.is_active = False
             cba.save()
             self.respond("You have successfully deregistered %(name)s:"
                          + "%(phone)s of zone %(zone)s at %(clinic)s",
-                         name=cba.name, phone=cba.default_connection.identity,
+                         name=cba.name, phone= cba_connection,
                          zone=cba.location.name, clinic=location.name)
             msg = ("%s:%s has deregistered %s:%s of zone %s at %s" %
                    (worker.name,
                    worker.default_connection.identity,
                    cba.name,
-                   cba.default_connection.identity,
+                   cba_connection,
                    cba.location.name,
                    location.name))
             self.notify_help_admins(msg)

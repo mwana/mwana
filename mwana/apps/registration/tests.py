@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 This file demonstrates two different styles of tests (one doctest and one
 unittest). These will both pass when you run "manage.py test".
@@ -5,13 +6,14 @@ unittest). These will both pass when you run "manage.py test".
 Replace these with more appropriate tests for your application.
 """
 
+import time
+
 from mwana import const
-from rapidsms.contrib.handlers.app import App as handler_app
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
-from mwana.apps.stringcleaning.app import App as cleaner_App
+from rapidsms.contrib.messagelog.models import Message
 
 
 class TestApp(TestScript):
@@ -20,57 +22,97 @@ class TestApp(TestScript):
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        dst = LocationType.objects.create(slug=const.DISTRICT_SLUGS[0])
+        prv = LocationType.objects.create(slug=const.PROVINCE_SLUGS[0])
         kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=ctr)
         central_clinic = Location.objects.create(name="Central Clinic",
                                                  slug="403012", type=ctr)
+        mansa = Location.objects.create(name="Mansa",
+                                        slug="403000", type=dst)
+        luapula = Location.objects.create(name="Luapula",
+                                          slug="400000", type=prv)
         script = """
             lost   > join
-            lost   < To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
-            rb     > join kdh rupiah banda 123q
-            rb     < Sorry, 123q wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            tk     > join kdh tizie kays -1000
+            lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
+            rb     > join clinic kdh rupiah banda 123q
+            rb     < Sorry, 123q wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
+            tk     > join clinic kdh tizie kays -1000
             tk     < Hi Tizie Kays, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            jk     > join kdh jordan katembula -1000
+            jk     > join clinic kdh jordan katembula -1000
             jk     < Hi Jordan Katembula, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            rb     > join kdh rupiah banda1000
-            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            rb     > join kdh rupiah banda 2001234
-            rb     < Sorry, 2001234 wasn't a valid security code. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            rb     > join kdh rupiah banda4004444
-            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <CLINIC CODE> <YOUR NAME> <SECURITY CODE>.
-            rb     > join kdh rupiah banda 1234
+            rb     > join clinic kdh rupiah banda1000
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
+            rb     > join clinic kdh rupiah banda 2001234
+            rb     < Sorry, 2001234 wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
+            rb     > join clinic kdh rupiah banda4004444
+            rb     < Sorry, you should put a space before your pin. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
+            rb     > join clinic kdh rupiah banda 1234
             rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
-            ts     > join 4030120 li  1234
+            ts     > join clinic 403012 li  1234
             ts     < Hi Li, thanks for registering for Results160 from Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
-            kk     > join whoops kenneth kaunda 1234
+            kk     > join clinic whoops kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code whoops. Please check your code and try again.
             noname > join abc
-            noname < Sorry, I didn't understand that. Make sure you send your location, name and pin like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.
-            tooshortname > join kdh j 1234
-            tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>
+            noname < Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>.
+            tooshortname > join clinic kdh j 1234
+            tooshortname < Sorry, you must provide a valid name to register. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
         """
         self.runScript(script)
+        time.sleep(1)
         self.assertEqual(4, Contact.objects.count(), "Registration didn't create a new contact!")
-        rb = Contact.objects.get(name = "Rupiah Banda")
+        rb = Contact.objects.get(name="Rupiah Banda")
         self.assertEqual(kdh, rb.location, "Location was not set correctly after registration!")
         self.assertEqual(rb.types.count(), 1)
         self.assertEqual(rb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
+        
 
 
         script = """
-            jb     > join 4o30i2 jacob banda 1234
+            jb     > join clinic 4o30i2 jacob banda 1234
             jb     < Hi Jacob Banda, thanks for registering for Results160 from Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
-            kk     > join 4f30i2 kenneth kaunda 1234
+            kk     > join clinic 4f30i2 kenneth kaunda 1234
             kk     < Sorry, I don't know about a location with code 4f3012. Please check your code and try again.
         """
         self.runScript(script)
+        time.sleep(1)
         self.assertEqual(5, Contact.objects.count())
         jb = Contact.objects.get(name='Jacob Banda')
         self.assertEqual(central_clinic, jb.location)
         self.assertEqual(jb.types.count(), 1)
         self.assertEqual(jb.types.all()[0].slug, const.CLINIC_WORKER_SLUG)
+
+        script = """
+            hubman     > join hub 4o30i2 hubman banda 1234
+            hubman     < Hi Hubman Banda, thanks for registering for Results160 from hub at Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        time.sleep(.5)
+        self.assertEqual(6, Contact.objects.count())
+        hubman = Contact.objects.get(name='Hubman Banda')
+        self.assertEqual(hubman.types.all()[0].slug, const.HUB_WORKER_SLUG)
+        
+
+        script = """
+            dho     > join dho 4030 Dho banda 1234
+            dho     < Hi Dho Banda, thanks for registering for Results160 from Mansa DHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        time.sleep(.5)
+        self.assertEqual(7, Contact.objects.count())
+        dho = Contact.objects.get(name='Dho Banda')
+        self.assertEqual(dho.types.all()[0].slug, const.DISTRICT_WORKER_SLUG)
     
+        script = """
+            pho     > join pho 40 Pho banda 1234
+            pho     < Hi Pho Banda, thanks for registering for Results160 from Luapula PHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        time.sleep(.5)
+        self.assertEqual(8, Contact.objects.count())
+        pho = Contact.objects.get(name='Pho Banda')
+        self.assertEqual(pho.types.all()[0].slug, const.PROVINCE_WORKER_SLUG)
+
     def testAgentThenJoinRegistrationSameClinic(self):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
@@ -78,9 +120,9 @@ class TestApp(TestScript):
                                       slug="kdh", type=ctr)
         # the same clinic
         script = """
-            rb     > agent kdh 02 rupiah banda
+            rb     > join agent kdh 02 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
-            rb     > join kdh rupiah banda -1000
+            rb     > join clinic kdh rupiah banda -1000
             rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
         """
         self.runScript(script)
@@ -94,10 +136,10 @@ class TestApp(TestScript):
                                                  slug="404040", type=ctr)
         # different clinics
         script = """
-            rb     > agent 404040 02 rupiah banda
+            rb     > join agent 404040 02 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Central Clinic.
-            rb     > join kdh rupiah banda -1000
-            rb     < Your phone is already registered to Rupiah Banda at Central Clinic. To change name or clinic first reply with keyword 'LEAVE' and try again.
+            rb     > join clinic kdh rupiah banda -1000
+            rb     < Your phone is already registered to Rupiah Banda at Central Clinic. To change name or location first reply with keyword 'LEAVE' and try again.
         """
         self.runScript(script)
 
@@ -108,7 +150,7 @@ class TestApp(TestScript):
                                       slug="kdh", type=ctr)
         # the same clinic
         script = """
-            rb     > join kdh rupiah banda -1000
+            rb     > join clinic kdh rupiah banda -1000
             rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > agent kdh 02 rupiah banda
             rb     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
@@ -135,16 +177,16 @@ class TestApp(TestScript):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital",
-                                      slug="202020", type=ctr)
+                                slug="202020", type=ctr)
         Location.objects.create(name="Central Clinic",
-                                                 slug="101010", type=ctr)
+                                slug="101010", type=ctr)
         # create support contacts
         script = """
-            +260979565991     > join 202020 support 1 1000
+            +260979565991     > join clinic 202020 support 1 1000
             +260979565991     < Hi Support 1, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            +260979565992     > join 202020 support 2 1000
+            +260979565992     > join clinic 202020 support 2 1000
             +260979565992     < Hi Support 2, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            +260979565993     > join 202020 support 3 1000
+            +260979565993     > join clinic 202020 support 3 1000
             +260979565993     < Hi Support 3, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
@@ -152,21 +194,21 @@ class TestApp(TestScript):
         for admin in admins:
             admin.is_help_admin = True
             admin.save()
-
+        time.sleep(1)
         # create clinic workers
         script = """
-            +260979565994     > join 202020 James Phiri 1000
+            +260979565994     > join clinic 202020 James Phiri 1000
             +260979565994     < Hi James Phiri, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            +260979565995     > join 202020 James Banda 1000
+            +260979565995     > join clinic 202020 James Banda 1000
             +260979565995     < Hi James Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
-            +260979565996     > join 202020 Peter Kunda 1000
+            +260979565996     > join clinic 202020 Peter Kunda 1000
             +260979565996     < Hi Peter Kunda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
 
         # create CBA's
         script = """
-            +260977777751     > agent 202020 02 rupiah banda
+            +260977777751     > join agent 202020 02 rupiah banda
             +260977777751     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Kafue District Hospital.
             +260977777752     > agent 101010 02 rupiah banda
             +260977777752     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 02 of Central Clinic.
@@ -208,7 +250,7 @@ class TestApp(TestScript):
         #test deregistering cba whose name is not unique at same clinic
         script = """
             +260979565994 > deregister Kunda Banda
-            +260979565994 < Try sending REMOVE <CBA_PHONE_NUMBER>. Which CBA did you mean? Kunda Banda:+260977777754 or Kunda Banda:+260977777753
+            +260979565994 < Try sending REMOVE <CBA_PHONE_NUMBER>. Which CBA did you mean? Kunda Banda:+260977777753 or Kunda Banda:+260977777754
             +260979565994 > deregister +260977777754
             +260979565991 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
             +260979565992 < James Phiri:+260979565994 has deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
@@ -216,8 +258,9 @@ class TestApp(TestScript):
             +260979565994 < You have successfully deregistered Kunda Banda:+260977777754 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777754")
+        cba = Contact.objects.get(connection=None, name="Kunda Banda")
         self.assertEqual(cba.is_active, False)
+        self.assertEqual(Connection.objects.filter(contact=cba).count(), 0)
 
         #test deregistering cba whose name is not unique in system but at clinic
         script = """
@@ -228,7 +271,7 @@ class TestApp(TestScript):
             +260979565996 < You have successfully deregistered Rupiah Banda:+260977777751 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777751")
+        cba = Contact.objects.get(connection=None, name="Rupiah Banda")
         self.assertEqual(cba.is_active, False)
 
         #test deregistering cba using phone number without country code
@@ -240,6 +283,16 @@ class TestApp(TestScript):
             +260979565996 < You have successfully deregistered Trevor Sinkala:+260977777756 of zone 02 at Kafue District Hospital
         """
         self.runScript(script)
-        cba = Contact.objects.get(connection__identity="+260977777756")
+        cba = Contact.objects.get(connection=None, name="Trevor Sinkala")
         self.assertEqual(cba.is_active, False)
+
+        self.assertTrue(Message.objects.filter(contact=cba) > 0)
+        self.assertTrue(Message.objects.filter(connection__contact=None).count() > 3)
+        self.assertEqual(Message.objects.filter(connection=None).count(), 0)
+
+        script = """
+            +260977777756 > cba who deregistered me?
+            +260977777756 < You must be registered with a clinic to use the broadcast feature. Please ask your clinic team how to register, or respond with keyword 'HELP'
+            """
+        self.runScript(script)
        

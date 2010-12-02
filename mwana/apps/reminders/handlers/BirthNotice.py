@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 This handler is suppose to be modified into a scheduled task.
 """
@@ -5,7 +6,6 @@ import re
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
-from rapidsms.contrib.locations.models import Location
 
 import logging
 
@@ -27,7 +27,7 @@ class BirthRecordHandler(KeywordHandler):
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 2
 
-    HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <SECURITY CODE>"
+    HELP_TEXT = "To register, send JOIN <CLINIC CODE> <NAME> <PIN CODE>"
     ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or clinic first reply with keyword 'LEAVE' and try again."
 
     def help(self):
@@ -36,7 +36,7 @@ class BirthRecordHandler(KeywordHandler):
     def mulformed_msg_help(self):
         self.respond("Sorry, I didn't understand that. "
                      "Make sure you send your location, name and pin "
-                     "like: JOIN <CLINIC CODE> <NAME> <SECURITY CODE>.")
+                     "like: JOIN <CLINIC CODE> <NAME> <PIN CODE>.")
 
     def get_locations_with_births(self):
         locs=[]

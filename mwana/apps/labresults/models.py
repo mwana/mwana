@@ -1,5 +1,8 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
+
 from datetime import datetime
 from mwana.apps.locations.models import Location
 from rapidsms.models import Connection, Contact
@@ -19,8 +22,8 @@ class SampleNotification(models.Model):
     date     = models.DateTimeField(default=datetime.utcnow)
     
     def __unicode__(self):
-        "%s DBS Samples from %s on %s" % \
-            (self.count, self.location, self.date.date())
+        return "%s DBS Samples from %s on %s" % \
+            (self.count, self.location.name, self.date.date())
 
 class Result(models.Model):
     """a DBS result, including patient tracking info, actual result, and status
@@ -46,12 +49,32 @@ class Result(models.Model):
                                     #  sense; sit on it indefinitely, hoping it will resolve to a
                                     #  different status
     )
-    
-    def get_result(self):
-        if self.result in ('X', 'I'):
+
+    def _get_result_text(self, result_str):
+        """
+        Helper method to get the correspong result from a given character. These are
+        not as exactly as specified in Result.RESULT_CHOICES
+        """
+        char_string = result_str.upper()
+        result_settings = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
+        if char_string in result_settings:
+            return result_settings[char_string]
+        elif char_string == 'N':
+            return 'NotDetected'
+        elif char_string == 'P':
+            return 'Detected'
+        elif char_string in ['R','I','X']:
             return 'Rejected'
+
+    def get_result_text(self):
+        return self._get_result_text(self.result)
+
+    def get_old_result_text(self):
+        if ':' in self.old_value:
+            return self._get_result_text(self.old_value.split(':')[1])
         else:
-            return super(Result, self).get_result_display()
+            # the result hasn't changed, so return the current result
+            return self.get_result_text()
 
     STATUS_CHOICES = (
         ('in-transit', 'En route to lab'),      #not supported currently
@@ -75,6 +98,8 @@ class Result(models.Model):
     sample_id = models.CharField(max_length=10)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
+    requisition_id_search = models.CharField(max_length=50, db_index=True) # requisition ID with punctuation removed, for search purposes
+
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
@@ -107,6 +132,15 @@ class Result(models.Model):
     result_sent_date = models.DateTimeField(null=True, blank=True)
     arrival_date = models.DateTimeField(null=True, blank=True)#date when 1st related payload with result came
 
+    @classmethod
+    def clean_req_id(cls, req_id):
+        return req_id.replace('-', '')
+
+    def save(self, *args, **kwargs):
+        if self.requisition_id:
+            self.requisition_id_search =\
+              Result.clean_req_id(self.requisition_id)
+        super(Result, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ('collected_on', 'requisition_id')

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from operator import itemgetter
 
 import mwana.const as const
@@ -289,7 +290,7 @@ class Alerter:
                                    self.district_trans_referal_date.date()),
                                    Q(parent=dist) |
                                    Q(parent__parent=dist)
-                                   )
+                                   ).distinct()
                     if clinics:
                         additional = "These clinics have sent results to the "\
                         "hub: %s" % ",".join(clinic.name for clinic in clinics)
@@ -417,7 +418,7 @@ class Alerter:
 
     def get_distinct_parents(self, locations):
         if not locations:
-            return None
+            return []
         parents = []
         for location in locations:
             parents.append(location.parent)

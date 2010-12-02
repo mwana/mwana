@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from __future__ import with_statement
 
 import os
@@ -73,7 +74,7 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production'
-    env.hosts = ['41.72.110.86:80']
+    env.hosts = ['10.10.10.20:80']
     env.user = 'mwana'
     env.home = '/home/mwana'
     env.root = os.path.join(env.home, env.environment)

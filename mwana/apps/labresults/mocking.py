@@ -1,3 +1,6 @@
+# vim: ai ts=4 sts=4 et sw=4
+from django.conf import settings
+
 from mwana.apps.labresults.messages import build_results_messages, INSTRUCTIONS, \
     RESULTS_READY, BAD_PIN, RESULTS_PROCESSED, DEMO_FAIL, ALREADY_COLLECTED, \
     SELF_COLLECTED
@@ -111,23 +114,31 @@ class MockResultUtility(LoggerMixin):
         self.waiting_for_pin[connection] = results
         
     
-def get_fake_results(count, clinic, starting_requisition_id=9990, requisition_id_format="%04d",
+def get_fake_results(count, clinic, starting_requisition_id=9990,
+                     requisition_id_format=None,
                      notification_status_choices=("new",)):
     """
     Fake results for demos and trainings. Defaults to a high requisition_id
     that is not likely to be found at the clinic.
     """
     results = []
+    if requisition_id_format is None:
+        requisition_id_format = getattr(settings, "RESULTS160_FAKE_ID_FORMAT",
+                                        "{id:04d}")
     current_requisition_id = starting_requisition_id
     # strip off indeterminate/inconsistent, as those results won't be sent
     result_choices = [r[0] for r in Result.RESULT_CHOICES[:3]]
+    if clinic.type.slug in const.ZONE_SLUGS:
+        clinic = clinic.parent
     for i in range(count):
-        results.append(
-            Result(requisition_id=requisition_id_format % (current_requisition_id + i), 
-                   clinic=clinic,
-                   # make sure we get at least one of each possible result
-                   result=result_choices[i % len(result_choices)],
-                   collected_on=datetime.datetime.today(),
-                   entered_on=datetime.datetime.today(), 
-                   notification_status=random.choice(notification_status_choices)))
+        requisition_id = requisition_id_format.format(id=(current_requisition_id + i),
+                                                      clinic=clinic.slug)
+        status = random.choice(notification_status_choices)
+        result = Result(requisition_id=requisition_id, clinic=clinic,
+                        # make sure we get at least one of each possible result
+                        result=result_choices[i % len(result_choices)],
+                        collected_on=datetime.datetime.today(),
+                        entered_on=datetime.datetime.today(), 
+                        notification_status=status)
+        results.append(result)
     return results

@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """
 Defines some test data payloads
 """
@@ -66,7 +67,7 @@ INITIAL_PAYLOAD = {
             "fac": '402029',
             "id": "10-09997",
             "hw_tit": "ZAN",
-            "pat_id": "21234987",
+            "pat_id": "212987",
             "dob": "2010-01-12",
             "proc_on": "2010-04-17",
             "child_age": 4
@@ -140,7 +141,7 @@ CHANGED_PAYLOAD = {
             "fac": '402029',
             "id": "10-09997",
             "hw_tit": "ZAN",
-            "pat_id": "21234987b",
+            "pat_id": "212987b",
             "dob": "2010-01-12",
             "proc_on": "2010-04-17",
             "child_age": 4

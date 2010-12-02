@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 '''
 Created on Mar 31, 2010
 
@@ -12,6 +13,7 @@ from django.db.models import Q
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.locations.models import Location
 from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
@@ -141,7 +143,7 @@ class App (rapidsms.apps.base.AppBase):
             # was taken care of 
             clinic_connections = [contact.default_connection for contact in \
                                   Contact.active.filter\
-                                  (location=clinic)]
+                                  (Q(location=clinic) | Q(location__parent=clinic))]
             
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
@@ -165,27 +167,36 @@ class App (rapidsms.apps.base.AppBase):
             
         if len(message) > 0:
             yield message
-        
+
+    def _get_schedule(self, key, default=None):
+        schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
+        return schedules.get(key, default)
+
     def schedule_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[30],
-                                     days_of_week=[0, 1, 2, 3, 4 ])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [30],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        
-        EventSchedule.objects.create(callback=callback, hours=[11], minutes=[0],
-                                     days_of_week=[0, 1, 2, 3, 4])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [11], 'minutes': [0],
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours='*', minutes=[0])
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'minutes': [0], 'hours': '*'})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def notify_clinic_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms."""     
@@ -195,6 +206,13 @@ class App (rapidsms.apps.base.AppBase):
             self._mark_results_pending(results,
                                        (msg.connection for msg in messages))
 
+    def _result_verified(self):
+        """
+        Only return verified results or results which can't be verified
+        due to constraints at the lab.
+        """
+        return Q(verified__isnull=True) | Q(verified=True)
+
     def _pending_results(self, clinic):
         """
         Returns the pending results for a clinic. This is limited to 9 results
@@ -202,15 +220,19 @@ class App (rapidsms.apps.base.AppBase):
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
-            return Result.objects.filter(clinic=clinic,
-                               notification_status__in=['new', 'notified'])[:9]
+            results = Result.objects.filter(clinic=clinic,
+                                   clinic__send_live_results=True,
+                                   notification_status__in=['new', 'notified'])
+            return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
 
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:
-            return Result.objects.filter(clinic=clinic,
+            results = Result.objects.filter(clinic=clinic,
+                                   clinic__send_live_results=True,
                                    notification_status='updated')
+            return results.filter(self._result_verified())
         else:
             return Result.objects.none()
 
