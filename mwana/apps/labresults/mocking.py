@@ -252,7 +252,7 @@ class MockSMSReportsUtility(LoggerMixin):
             samples = random.randrange(16, 40, 1)
             results = random.randrange(16, 40, 1)
             district_name = clinic.name
-            msg = ("Demo report:\n%s, %s %s EID & Birth Totals\n DBS Totals sent: %s ***\nDBS "
+            msg = ("Demo report:\n%s, %s %s EID & Birth Totals\n DBS Samples sent: %s ***\nDBS "
                    "Results received; %s ***\nBirths registered; 34" % (name, month, district_name, samples, results))
             OutgoingMessage(hub_woker.default_connection, msg).send()
 
@@ -266,7 +266,7 @@ class MockSMSReportsUtility(LoggerMixin):
             samples = random.randrange(16,40,1)
             results = random.randrange(16,40,1)
             district_name = clinic.name
-            msg = ("Demo report:\n%s, %s %s EID & Birth Totals\n DBS Totals sent: %s ***\nDBS "
+            msg = ("Demo report:\n%s, %s %s EID & Birth Samples\n DBS Totals sent: %s ***\nDBS "
             "Results received; %s ***\nBirths registered; 34" %(name,month,district_name,samples,results))
             OutgoingMessage(hub_woker.default_connection, msg).send()
 

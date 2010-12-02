@@ -88,7 +88,7 @@ class TestApp(TestScript):
             tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP
             """
         self.runScript(script)
-
+        time.sleep(0.1)
         self.startRouter()
         self.assertEqual(1, TrainingSession.objects.filter(is_on=True).count())
 #        self.startRouter()
