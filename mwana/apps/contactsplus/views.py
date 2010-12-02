@@ -10,24 +10,27 @@ from rapidsms.contrib.messagelog.models import Message
 
 @login_required
 def export_contacts(request):
-    contacts = Contact.objects.all().order_by('name')
+    contacts = Contact.active.all()
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment;filename=contacts_export.csv'
     writer = csv.writer(response)
-    headings = ['Name', 'Phone', 'District', 'Facility', 'Facility Type',
+    headings = ['Name', 'Phone', 'District', 'Facility', 'Zone',
                 'Registered', 'Contact Type']
     writer.writerow(headings)
     for obj in contacts:
         row = []
         row.append(obj.name)
         if obj.default_connection is not None:
-            phone = obj.default_connection.identity
+            row.append(obj.default_connection.identity)
         else:
-            phone = 'Not available'
-        row.append(phone)
-        row.append(obj.location.parent)
-        row.append(obj.location)
-        row.append(obj.location.type)
+            row.append('No number')
+
+        zone = " "
+        facility = " "
+        district = " "
+
+        locations = [district, facility, zone]
+        row.extend(locations)
         earliest = Message.objects.filter(
             contact=obj.id,
             direction='I',
