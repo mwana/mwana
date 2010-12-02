@@ -26,6 +26,10 @@ RESULTS160_SCHEDULES = {
 RESULTS160_FAKE_ID_FORMAT = '{clinic}-{id:04d}-1'
 RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 
+# The TLC printers require 2 chars at the beginning of the message, so reduce
+# the size of all outgoing messages by 2 chars here
+MAX_SMS_LENGTH = 158
+
 TIME_ZONE = 'Africa/Blantyre'
 
 LANGUAGE_CODE = 'eng-us'

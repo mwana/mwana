@@ -15,6 +15,8 @@ DISTRICT_WORKER_SLUG = settings.RESULTS160_SLUGS.get('DISTRICT_WORKER_SLUG',
                                                      'district-worker')
 PROVINCE_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PROVINCE_WORKER_SLUG',
                                                      'province-worker')
+DBS_PRINTER_SLUG = settings.RESULTS160_SLUGS.get('DBS_PRINTER_SLUG',
+                                                 'dbs-printer')
 
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))
@@ -56,6 +58,9 @@ def get_hub_worker_type():
 
 def get_cba_type():
     return _get_contacttype(CBA_SLUG, 'Community Based Agent')
+
+def get_dbs_printer_type():
+    return _get_contacttype(DBS_PRINTER_SLUG, 'DBS Printer')
 
 
 def get_patient_type():
