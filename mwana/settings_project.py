@@ -208,6 +208,12 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 
+# The maximum length of an SMS to be sent through the system.  It is only
+# enforced manually; i.e., you need to use it to chunk your messages
+# appropriately.
+MAX_SMS_LENGTH = 160
+
+
 # -------------------------------------------------------------------- #
 #                       RESULTS160 CONFIGURATION                       #
 # -------------------------------------------------------------------- #
