@@ -33,5 +33,6 @@ def export_contacts(request):
         ).aggregate(registered=Min('date'))
         row.append(earliest['registered'])
         row.append(";".join(obj.types.values_list('name', flat=True)))
+        row = [unicode(v).encode("UTF-8") for v in row]
         writer.writerow(row)
     return response
