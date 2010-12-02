@@ -15,7 +15,7 @@ class ContactAdmin(ContactAdmin):
                    # 'location', 
 		    'default_connection', 'types_list', 'date_of_first_sms',
                     'date_of_most_recent_sms', 'is_active',)
-    list_filter = ('types', 'is_active', 'language',)
+    list_filter = ('types', 'is_active', 'language', 'location')
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
 
