@@ -45,7 +45,7 @@ class PrinterHandler(KeywordHandler):
             self.respond('Location ID %s is not known.' % location_slug)
             return
         try:
-            backend = Backend.objects.get(name=backend_name)
+            backend = Backend.objects.get(name__iexact=backend_name)
         except Backend.DoesNotExist:
             self.respond('Backend name %s is not known.' % backend_name)
             return
