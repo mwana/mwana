@@ -57,8 +57,10 @@ class PrinterHandler(KeywordHandler):
         if action == 'add':
             contact = Contact.objects.create(name='Printer in %s' % location.name,
                                              location=location)
-            conn = Connection.objects.create(identity=phone, backend=backend,
-                                             contact=contact)
+            conn, _ = Connection.objects.get_or_create(identity=phone,
+                                                       backend=backend)
+            conn.contact = contact
+            conn.save()
             contact.types.add(const.get_dbs_printer_type())
             conf_msg = TLCOutgoingMessage(conn, 'You have successfully '
                                           'registered this printer at '
