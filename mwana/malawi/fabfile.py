@@ -65,7 +65,7 @@ def production():
                            'production?', default=False):
         utils.abort('Production deployment aborted.')
     env.environment = 'production-environment'
-    env.hosts = ['10.3.1.120']
+    env.hosts = ['10.3.1.20']
     env.user = 'mwana'
     env.home = '/home/mwana'
     setup_path()
@@ -245,8 +245,8 @@ def bootstrap():
     create_virtualenv()
     install_init_script()
     if not files.exists(env.code_root):
-        #clone_all()
-        deploy_from_local()
+        clone_all()
+        #deploy_from_local()
     pull_and_checkout_all()
     update_requirements()
     print '\nNow add your database password to localsettings.py and run syncdb'
