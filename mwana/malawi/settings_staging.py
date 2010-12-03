@@ -54,8 +54,10 @@ INSTALLED_BACKENDS.update({
         "host": "127.0.0.1",
         "port": 8081,
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "zain-modem", "username": "rapidsms",
-                            "password": ""}, # set in localsettings.py
+        "sendsms_params": {"smsc": "zain-modem",
+                           "from": "+265999279085", # will be overridden; set for consistency
+                           "username": "rapidsms",
+                           "password": ""}, # set password in localsettings.py
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore", # strip out unknown (unicode) characters
@@ -65,8 +67,10 @@ INSTALLED_BACKENDS.update({
         "host": "127.0.0.1",
         "port": 8082,
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "tnm-smpp", "username": "rapidsms",
-                            "password": ""}, # set in localsettings.py
+        "sendsms_params": {"smsc": "tnm-smpp",
+                           "from": "88160", # not set automatically by SMSC
+                           "username": "rapidsms",
+                           "password": ""}, # set password in localsettings.py
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore", # strip out unknown (unicode) characters
