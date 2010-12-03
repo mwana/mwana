@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from mwana.malawi.settings_country import *
 
 DEBUG = False
@@ -24,7 +25,18 @@ XFORMS_HOST = 'malawi-qa.projectmwana.org'
 #                     "phase. We will notify you when the system is live."
 
 # You can also customize RAPIDSMS_TABS like so:
-RAPIDSMS_TABS.remove(('rapidsms.views.dashboard', 'Dashboard'))
+RAPIDSMS_TABS = [
+#    ('rapidsms.views.dashboard', 'Dashboard'),
+#    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+#    ('mwana.apps.locations.views.dashboard', 'Map'),
+    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+#    ('mwana.apps.labresults.views.dashboard', 'Results160'),
+    ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
+    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
+    ('xforms', 'XForms'),
+]
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
 #INSTALLED_BACKENDS.update({

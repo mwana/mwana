@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.utils.functional import curry
 from rapidsms.contrib.ajax.utils import call_router
 

@@ -1,3 +1,5 @@
+# python-memcache
+python-memcached-1.45.tar.gz
 # django>=1.2.3
 Django-1.2.3.tar.gz
 # nose>=0.11.2
@@ -9,7 +11,7 @@ djtables-0.1.1.tar.gz
 # djappsettings>=0.1.0
 djappsettings-0.1.0.tar.gz
 # RapidSMS:
-rapidsms-gefd0256.tar.gz
+rapidsms-rapidsms-v0.9.6a-5-g43f12d6.tar.gz
 # pytz:
 pytz-2010l.tar.gz
 # pygsm must be installed separately because it requires that pytz be

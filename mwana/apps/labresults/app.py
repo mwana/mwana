@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 '''
 Created on Mar 31, 2010
 
@@ -16,8 +17,9 @@ from mwana.apps.locations.models import Location
 from mwana.apps.labresults.util import is_eligible_for_results
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 import mwana.apps.labresults.config as config
+from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 import mwana.const as const
 import rapidsms
 import re
@@ -73,7 +75,7 @@ class App (rapidsms.apps.base.AppBase):
            and message.connection.contact:
             pin = message.text.strip()
             if pin.upper() == message.connection.contact.pin.upper():
-                self.send_results(message)
+                self.send_results_after_pin(message)
                 return True
             else:
                 # lets hide a magic field in the message so we can respond 
@@ -109,8 +111,8 @@ class App (rapidsms.apps.base.AppBase):
                          collector=self.last_collectors[clinic])
             return True
         return self.mocker.default(message)
-        
-    def send_results (self, message):
+
+    def send_results_after_pin (self, message):
         """
         Sends the actual results in response to the message
         (comes after PIN workflow).
@@ -123,19 +125,10 @@ class App (rapidsms.apps.base.AppBase):
                        (clinic, message.connection.contact))
             message.respond("Sorry, there are no new EID results for %s." % clinic)
             self.waiting_for_pin.pop(message.connection)
-        else: 
-            responses = build_results_messages(results)
-            
-            for resp in responses: 
-                message.respond(resp)
-
+        else:
+            self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
-            
-            for r in results:
-                r.notification_status = 'sent'
-                r.result_sent_date = datetime.now()
-                r.save()
-                
+
             self.waiting_for_pin.pop(message.connection)
             
             # remove pending contacts for this clinic and notify them it 
@@ -149,10 +142,24 @@ class App (rapidsms.apps.base.AppBase):
                     self.waiting_for_pin.pop(conn)
                     OutgoingMessage(conn, RESULTS_PROCESSED, 
                                     name=message.connection.contact.name).send()
-            
+
             self.last_collectors[clinic] = \
                         message.connection.contact
-        
+
+    def send_results(self, connections, results, msgcls=OutgoingMessage):
+        """Sends the specified results to the given contacts."""
+        responses = build_results_messages(results)
+
+        for connection in connections:
+            for resp in responses: 
+                msg = msgcls(connection, resp)
+                msg.send()
+
+        for r in results:
+            r.notification_status = 'sent'
+            r.result_sent_date = datetime.now()
+            r.save()
+
     def chunk_messages(self, content):
         message = ''
         for piece in content:
@@ -198,12 +205,21 @@ class App (rapidsms.apps.base.AppBase):
         EventSchedule.objects.create(callback=callback, **schedule)
 
     def notify_clinic_pending_results(self, clinic):
-        """Notifies clinic staff that results are ready via sms."""     
-        messages, results  = self.results_avail_messages(clinic)
-        if messages:
-            self.send_messages(messages)
-            self._mark_results_pending(results,
-                                       (msg.connection for msg in messages))
+        """
+        If one or more printers is available at the clinic, sends the results
+        directly there.  Otherwise, notifies clinic staff that results are
+        ready via sms.
+        """
+        printers = self.printers_for_clinic(clinic)
+        results = self._pending_results(clinic)
+        if printers.exists():
+            self.send_results(printers, results, msgcls=TLCOutgoingMessage)
+        else:
+            messages  = self.results_avail_messages(clinic, results)
+            if messages:
+                self.send_messages(messages)
+                self._mark_results_pending(results, (msg.connection
+                                                     for msg in messages))
 
     def _result_verified(self):
         """
@@ -235,6 +251,12 @@ class App (rapidsms.apps.base.AppBase):
         else:
             return Result.objects.none()
 
+    def printers_for_clinic(self, clinic):
+        """ Returns the active printer connections, if any, for a clinic. """
+        return Connection.objects.filter(contact__location=clinic,
+                                         contact__types=const.get_dbs_printer_type(),
+                                         contact__is_active=True)
+
     def notify_clinic_of_changed_records(self, clinic):
         """Notifies clinic of the new status for changed results."""
         changed_results = []
@@ -247,6 +269,14 @@ class App (rapidsms.apps.base.AppBase):
 
         if not changed_results:
             return
+
+        # if a printer exists for this clinic, send the results straight there
+        printers = self.printers_for_clinic(clinic)
+        if printers.exists():
+            self.send_results(printers, changed_results,
+                              msgcls=TLCOutgoingMessage)
+            return
+
         contacts = \
         Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
                                          Q(types=const.get_clinic_worker_type())).\
@@ -302,11 +332,10 @@ class App (rapidsms.apps.base.AppBase):
             r.notification_status = 'notified'
             r.save()
 
-    def results_avail_messages(self, clinic):
+    def results_avail_messages(self, clinic, results):
         '''
         Returns clinic workers registered to receive results notification at this clinic. 
         '''
-        results = self._pending_results(clinic)
         contacts = \
         Contact.active.filter(Q(location=clinic)|Q(location__parent=clinic),
                                          Q(types=const.get_clinic_worker_type()))
@@ -322,7 +351,7 @@ class App (rapidsms.apps.base.AppBase):
                                   name=contact.name, count=results.count())
             all_msgs.append(msg)
         
-        return all_msgs, results
+        return all_msgs
     
     def no_results_message (self, clinic):
         if clinic.last_fetch == None or days_ago(clinic.last_fetch) >= config.ping_frequency:

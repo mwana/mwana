@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 """ This script downloads synchronization data from a remote server,
 deletes local xforms and submissions, and loads the data
 

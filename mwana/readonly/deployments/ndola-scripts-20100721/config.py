@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 version = '1.0.3'
 
 sched = ['0930', '1310', '1645']  #scheduling parameters for sync task

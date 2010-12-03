@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 # File that specifies project-wide settings
 
 # TODO Make these two values read only
