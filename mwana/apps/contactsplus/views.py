@@ -14,7 +14,7 @@ def export_contacts(request):
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment;filename=contacts_export.csv'
     writer = csv.writer(response)
-    headings = ['Name', 'Phone', 'District', 'Facility', 'Zone',
+    headings = ['Name', 'Phone', 'District', 'Facility',  
                 'Registered', 'Contact Type']
     writer.writerow(headings)
     for obj in contacts:
@@ -24,13 +24,8 @@ def export_contacts(request):
             row.append(obj.default_connection.identity)
         else:
             row.append('No number')
-
-        zone = " "
-        facility = " "
-        district = " "
-
-        locations = [district, facility, zone]
-        row.extend(locations)
+        row.append(obj.district)
+        row.append(obj.clinic)
         earliest = Message.objects.filter(
             contact=obj.id,
             direction='I',
