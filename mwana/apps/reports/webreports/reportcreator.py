@@ -258,7 +258,8 @@ class Results160Reports:
             aggregate(sum=Sum("count"))['sum']
                 
             tt_reported = tt_reported + reported
-            table.append([' ' + location.parent.name, ' ' + location.name, reported])
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name, reported])
         table.append(['All listed districts', 'All listed  clinics', tt_reported])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -276,7 +277,8 @@ class Results160Reports:
                                              entered_on__lt=self.dbsr_enddate).count()
             tt_received = tt_received + received
 
-            table.append([' ' + location.parent.name, ' ' + location.name, received, ])
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name, received, ])
         table.append(['All listed districts', 'All listed  clinics', tt_received])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -293,8 +295,8 @@ class Results160Reports:
             negative = self.get_sent_results(location).filter(result='N').count()
             rejected = self.get_sent_results(location).filter(result__in=['R', 'X', 'I']).count()
             total = self.get_sent_results(location).count()
-
-            table.append([' ' + location.parent.name, ' ' + location.name, positive,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name, positive,
                          negative, rejected, total,])
 
             tt_positive = tt_positive + positive
@@ -330,7 +332,8 @@ class Results160Reports:
                 days = self.safe_rounding(days)
             else:
                 days = '-'
-            table.append([' ' + location.parent.name, ' ' + location.name,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name,
                          number_sent, days])
 
         avg = None
@@ -368,7 +371,8 @@ class Results160Reports:
                 days = self.safe_rounding(days)
             else:
                 days = '-'
-            table.append([' ' + location.parent.name, ' ' + location.name,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name,
                          number_entered, days])
 
         avg = None
@@ -406,7 +410,8 @@ class Results160Reports:
                 days = self.safe_rounding(days)
             else:
                 days = '-'
-            table.append([' ' + location.parent.name, ' ' + location.name,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name,
                          number_sent, days])
 
         avg = None
@@ -444,7 +449,8 @@ class Results160Reports:
                 days = self.safe_rounding(days)
             else:
                 days = '-'
-            table.append([' ' + location.parent.name, ' ' + location.name,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name,
                          number_processed, days])
 
         avg = None
@@ -483,7 +489,8 @@ class Results160Reports:
                 days = self.safe_rounding(days)
             else:
                 days = '-'
-            table.append([' ' + location.parent.name, ' ' + location.name,
+            parent_name = location.parent and location.parent.name or ' '
+            table.append([' ' + parent_name, ' ' + location.name,
                          number_sent, days])
 
         avg = None
