@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     "mwana.apps.alerts",
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
+    "mwana.apps.hub_workflow",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
