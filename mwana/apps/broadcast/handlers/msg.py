@@ -107,7 +107,6 @@ class MessageHandler(BroadcastHandler):
         if contacts:
             return self.broadcast(msg_part, contacts)
         else:
-            print 'ooops!'
             self.help()
         
 
