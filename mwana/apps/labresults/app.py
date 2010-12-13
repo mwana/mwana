@@ -128,6 +128,11 @@ class App (rapidsms.apps.base.AppBase):
         else:
             self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
+            # send the results to registered printer as well if available.
+            printers = self.printers_for_clinic(clinic)
+            if printers.exists():
+                self.send_results(printers, results, msgcls=TLCOutgoingMessage)
+
 
             self.waiting_for_pin.pop(message.connection)
             
@@ -206,20 +211,14 @@ class App (rapidsms.apps.base.AppBase):
 
     def notify_clinic_pending_results(self, clinic):
         """
-        If one or more printers is available at the clinic, sends the results
-        directly there.  Otherwise, notifies clinic staff that results are
-        ready via sms.
+        Notifies clinic staff that results are ready via sms.
         """
-        printers = self.printers_for_clinic(clinic)
         results = self._pending_results(clinic)
-        if printers.exists():
-            self.send_results(printers, results, msgcls=TLCOutgoingMessage)
-        else:
-            messages  = self.results_avail_messages(clinic, results)
-            if messages:
-                self.send_messages(messages)
-                self._mark_results_pending(results, (msg.connection
-                                                     for msg in messages))
+        messages  = self.results_avail_messages(clinic, results)
+        if messages:
+            self.send_messages(messages)
+            self._mark_results_pending(results, (msg.connection
+                                                 for msg in messages))
 
     def _result_verified(self):
         """
@@ -258,7 +257,10 @@ class App (rapidsms.apps.base.AppBase):
                                          contact__is_active=True)
 
     def notify_clinic_of_changed_records(self, clinic):
-        """Notifies clinic of the new status for changed results."""
+        """
+        Notifies clinic of the new status for changed results. Results now
+        only sent to clinics when a pin for results is entered.
+        """
         changed_results = []
         updated_results = self._updated_results(clinic)
         if not updated_results:
@@ -268,13 +270,6 @@ class App (rapidsms.apps.base.AppBase):
                 changed_results.append(updated_result)
 
         if not changed_results:
-            return
-
-        # if a printer exists for this clinic, send the results straight there
-        printers = self.printers_for_clinic(clinic)
-        if printers.exists():
-            self.send_results(printers, changed_results,
-                              msgcls=TLCOutgoingMessage)
             return
 
         contacts = \
