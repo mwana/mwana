@@ -2,6 +2,7 @@
 import logging
 import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
+from mwana.apps.labresults.mocking import MockSMSReportsUtility
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,11 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_new_dbs_at_lab_notification_task()
         self.schedule_dbs_summary_to_hub_report_task()
 
+    def handle(self, message):
+        mocker = MockSMSReportsUtility()
+
+        if mocker.handle(message):
+            return True
 
     def schedule_new_dbs_at_lab_notification_task(self):
         callback = 'mwana.apps.hub_workflow.tasks.send_new_dbs_at_lab_notification'
