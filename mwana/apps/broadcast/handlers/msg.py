@@ -21,7 +21,7 @@ class MessageHandler(BroadcastHandler):
     HELP_TEXT = ("To send a message SEND: MSG <GROUP> <your message>. The groups"
                  " you can send to are: %s")
 
-    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\s+)(.{1,})$")
+    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\s+)(.{1,})$", re.IGNORECASE)
 
     workertype_group_mapping = {
     'cba':('cba', 'clinic', 'all'),
