@@ -48,7 +48,8 @@ class MessageHandler(BroadcastHandler):
         try:
             for type in self.msg.contact.types.all():                
                 for val in self.workertype_group_mapping[type.slug]:
-                    groups.append(val)
+                    if val not in groups:
+                        groups.append(val)
         except (KeyError):
             pass
         if not groups:
