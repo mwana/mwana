@@ -5,7 +5,7 @@ import random
 from datetime import date
 from datetime import timedelta
 from django.conf import settings
-from mwana.apps.hub_workflow.tasks import DBS_SUMMARY
+from mwana.apps.hub_workflow.tasks import get_lab_name, DBS_SUMMARY
 from mwana.apps.hub_workflow.tasks import SAMPLES_RECEIVED_TODAY
 from mwana.apps.labresults.messages import ALREADY_COLLECTED
 from mwana.apps.labresults.messages import BAD_PIN
@@ -220,7 +220,7 @@ class MockSMSReportsUtility(LoggerMixin):
         hub_workers = Contact.active.filter(types=get_hub_worker_type(), location=clinic)
         for hub_woker in hub_workers:
             samples = random.randrange(4, 16, 1)
-            my_lab = clinic.name
+            my_lab = get_lab_name(hub_woker.location.parent)
             msg = ("Demo report:\n"+SAMPLES_RECEIVED_TODAY % {'name':hub_woker.name, 'lab_name':my_lab,
                    'count':samples, 'hub_name':hub_woker.location.name})
             OutgoingMessage(hub_woker.default_connection, msg).send()
