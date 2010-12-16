@@ -101,7 +101,7 @@ class MessageHandler(BroadcastHandler):
                                              Q(location__location=location) | \
                                              Q(location__parent=location))\
                                             .exclude(id=self.msg.contact.id)\
-                                            .filter(types = get_district_worker_type)
+                                            .filter(types = get_district_worker_type).distinct()            
         elif group_name == "ALL":
             contacts = Contact.active.location(location)\
                 .exclude(id=self.msg.contact.id)
