@@ -45,7 +45,7 @@ def send_dho_eid_and_birth_report(router):
                                              Q(cba_conn__contact__location__parent__parent=district)
                                              |Q(cba_conn__contact__location__parent=district),# cba/clinic worker
                                              Q(date__year=last_year),
-                                             Q(date__month=last_month)).count()
+                                             Q(date__month=last_month)).distinct().count()
 
         district_name = district.name
 
@@ -91,7 +91,7 @@ def send_pho_eid_and_birth_report(router):
                                              Q(cba_conn__contact__location__parent__parent__parent=province)
                                              |Q(cba_conn__contact__location__parent__parent=province),# cba/clinic worker
                                              Q(date__year=last_year),
-                                             Q(date__month=last_month)).count()
+                                             Q(date__month=last_month)).distinct().count()
 
         province_name = province.name
 
