@@ -122,7 +122,7 @@ class App (rapidsms.apps.base.AppBase):
 
     def letters_for_numbers(self, str):
         # dict of letters and the numerals they are intended to be
-        gaffes = {'i': '1', 'l': '1', 'o': '0'}
+        gaffes = {'!': '1', 'i': '1', 'l': '1', 'o': '0'}
 
         # don't worry about case
         numeralized = str.lower()
