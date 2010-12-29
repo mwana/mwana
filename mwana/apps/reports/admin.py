@@ -26,3 +26,15 @@ admin.site.register(MessageGroup, MessageGroupAdmin)
 class SupportedLocationAdmin(admin.ModelAdmin):
     list_display = ('location', 'supported')
 admin.site.register(SupportedLocation, SupportedLocationAdmin)
+
+class PhoReportNotificationAdmin(admin.ModelAdmin):
+    list_display = ('contact', 'province', 'type', 'samples', 'results', 'births', 'date', 'date_sent')
+    list_filter = ('province', 'date', 'date_sent')
+    date_hierarchy = 'date_sent'
+admin.site.register(PhoReportNotification, PhoReportNotificationAdmin)
+
+class DhoReportNotificationAdmin(admin.ModelAdmin):
+    list_display = ('contact', 'district', 'type', 'samples', 'results', 'births', 'date', 'date_sent')
+    list_filter = ('district', 'date', 'date_sent')
+    date_hierarchy = 'date_sent'
+admin.site.register(DhoReportNotification, DhoReportNotificationAdmin)
