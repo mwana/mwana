@@ -11,7 +11,7 @@ class App (rapidsms.apps.base.AppBase):
 
     def start (self):
         self.schedule_eid_and_birth_dho_report_task()
-        self.schedule_eid_and_birth_dho_report_task()
+        self.schedule_eid_and_birth_pho_report_task()
 
     def handle(self, message):
         mocker = MockSMSReportsUtility()
@@ -23,13 +23,13 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.reports.tasks.send_dho_eid_and_birth_report'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[10, 14], minutes=[20],
+        EventSchedule.objects.create(callback=callback, hours=[10, 15], minutes=[20],
                                      days_of_week=[0, 1, 2, 3, 4])
-    def schedule_eid_and_birth_dho_report_task(self):
+    def schedule_eid_and_birth_pho_report_task(self):
         callback = 'mwana.apps.reports.tasks.send_pho_eid_and_birth_report'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[10, 14], minutes=[15],
+        EventSchedule.objects.create(callback=callback, hours=[10, 15], minutes=[15],
                                      days_of_week=[0, 1, 2, 3, 4])
 
     
