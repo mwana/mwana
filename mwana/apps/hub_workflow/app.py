@@ -24,7 +24,7 @@ class App (rapidsms.apps.base.AppBase):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[16], minutes=[40],
-                                     days_of_week=[0, 1, 2, 3, 4])
+                                     days_of_week=[3, 4])
 
     def schedule_dbs_summary_to_hub_report_task(self):
         callback = 'mwana.apps.hub_workflow.tasks.send_dbs_summary_to_hub_report'

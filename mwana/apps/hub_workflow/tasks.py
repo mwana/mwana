@@ -10,7 +10,7 @@ from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
 
-SAMPLES_RECEIVED_TODAY = "Hello %(name)s. %(lab_name)s lab has received %(count)s samples from %(hub_name)s hub today."
+SAMPLES_RECEIVED_TODAY = "Hello %(name)s. %(lab_name)s lab has received %(count)s samples from %(hub_name)s hub this week."
 DBS_SUMMARY = "Hello %(name)s. In %(month)s, %(hub_name)s hub sent %(samples)s DBS samples to the lab and %(results)s DBS results were delivered to %(district_name)s District"
 
 def get_lab_name(district):
@@ -23,9 +23,11 @@ def get_lab_name(district):
 def send_new_dbs_at_lab_notification(router):
     logger.info('notifying hub workers of new DBS entered today at lab')
     hub_workers = Contact.active.filter(types=get_hub_worker_type())
+    today = date.today()
+    weekstart = today -timedelta(days =(today.weekday()+1))
     for hub_woker in hub_workers:
         district = hub_woker.location.parent
-        samples = Result.objects.filter(entered_on=date.today(), clinic__parent=district).count()
+        samples = Result.objects.filter(entered_on__gte=weekstart, clinic__parent=district).count()
         if not samples:
             continue
         my_lab = get_lab_name(district)
