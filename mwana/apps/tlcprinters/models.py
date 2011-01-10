@@ -6,7 +6,7 @@ from rapidsms import models as rapidsms
 class MessageConfirmation(models.Model):
     connection = models.ForeignKey(rapidsms.Connection)
     sent_at = models.DateTimeField()
-    text = models.CharField(max_length=160)
+    text = models.CharField(max_length=165)# plus space for the hexadecimal or anything you may want to prepend
     seq_num = models.SmallIntegerField()
     confirmed = models.BooleanField(default=False)
 

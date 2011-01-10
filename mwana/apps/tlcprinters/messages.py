@@ -9,7 +9,8 @@ class TLCOutgoingMessage(OutgoingMessage):
             last_msg = MessageConfirmation.objects.latest('sent_at')
         except MessageConfirmation.DoesNotExist:
             last_msg = None
-        seq_num = last_msg and last_msg.seq_num or -1
+#        seq_num = last_msg and last_msg.seq_num or -1 # this is a bug when last_msg.seq_num = 0. you will always get -1
+        seq_num = last_msg.seq_num if (last_msg and (last_msg.seq_num!=None)) else -1
         if seq_num > 255:
             seq_num = 0
         else:
