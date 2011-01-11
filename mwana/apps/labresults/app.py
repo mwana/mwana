@@ -190,7 +190,7 @@ class App (rapidsms.apps.base.AppBase):
         NUIDs = ", ".join(str(res.id) for res in results)
         for contact in contacts:
             msg_text = ("Hello {name}, {count} results were sent to printer "
-                        "at {clinic}. NUIDs are : {nuids}"
+                        "at {clinic}. NUIDs are: {nuids}"
                         "".format(name=contact.name, count=len(results),
                         clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()
