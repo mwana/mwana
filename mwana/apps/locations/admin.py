@@ -7,8 +7,9 @@ from .models import *
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name", "type", "full_name", "send_live_results")
-    list_filter = ("type", "send_live_results")
+    list_display = ("name", "type", "full_name", "send_live_results",
+                    "has_independent_printer")
+    list_filter = ("type", "send_live_results", "has_independent_printer")
     search_fields = ("name", "slug")
 
 

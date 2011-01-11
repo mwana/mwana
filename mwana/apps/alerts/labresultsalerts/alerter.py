@@ -119,7 +119,7 @@ class Alerter:
             contacts = \
         Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                               Q(types=const.get_clinic_worker_type())).\
-            order_by('pk')
+            distinct().order_by('pk')
             days_late = self.days_ago(self.earliest_pending_result_arrival_date(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.retrieving_days) else Alert.LOW_LEVEL
             my_alerts.append(Alert(Alert.LONG_PENDING_RESULTS, "%s clinic have not"\
@@ -222,7 +222,7 @@ class Alerter:
             contacts = \
     Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                           Q(types=const.get_clinic_worker_type())).\
-        order_by('pk')
+        distinct().order_by('pk')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,

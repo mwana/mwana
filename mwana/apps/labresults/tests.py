@@ -16,6 +16,7 @@ from mwana.apps.locations.models import LocationType
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
+from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend, is_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
@@ -373,6 +374,61 @@ class TestApp(LabresultsSetUp):
         for res in results:  res.save()
         return results
     
+    def testSend_results_to_printer_task(self):
+        results = labresults.Result.objects.all()
+        results.create(requisition_id="%s-0001-1" % self.clinic.slug,
+                          clinic=self.clinic, result="N",
+                          collected_on=datetime.datetime.today(),
+                          entered_on=datetime.datetime.today(),
+                          notification_status="new")
+
+        results.create(requisition_id="0002", clinic=self.clinic,
+                          result="P",
+                          collected_on=datetime.datetime.today(),
+                          entered_on=datetime.datetime.today(),
+                          notification_status="new")
+        self.clinic.has_independent_printer = True
+        self.clinic.save()
+        script = """
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
+        time.sleep(.2)
+
+        self.startRouter()
+        tlcprinter_tasks.send_results_to_printer(self.router)
+        msgs=self.receiveAllMessages()
+
+        expected_msgs = []
+        msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. NUIDs are : 2, 1"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. NUIDs are : 2, 1"
+        msg3 = """Printer in Mibenge Clinic:01Muswishi RHC.
+Patient ID: 0002.
+HIV-DNAPCR Result:
+Detected.
+Approved by ADH DNA-PCR LAB.
+(NUID: 2)"""
+
+        msg4="""Printer in Mibenge Clinic:02Muswishi RHC.
+Patient ID: 402029-0001-1.
+HIV-DNAPCR Result:
+NotDetected.
+Approved by ADH DNA-PCR LAB.
+(NUID: 1)"""
+
+        expected_msgs.append(msg1)
+        expected_msgs.append(msg2)
+        expected_msgs.append(msg3)
+        expected_msgs.append(msg4)
+
+        self.assertEqual(4, len(msgs))
+        for msg in msgs:
+            my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
+            self.assertTrue(my_msg in expected_msgs)
+
     def testResultsSample(self):
         """
         Tests getting of results for given samples.
@@ -527,14 +583,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Dec
-            clinic_worker > Reports 403012 12
+            clinic_worker > Reports 403012 Jan
+            clinic_worker > Reports 403012 1
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Dec
+            clinic_worker > Reports 40 Jan
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        
@@ -885,6 +941,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # The number of results records should be 3
         self.assertEqual(labresults.Result.objects.count(), 3)
 
+        time.sleep(.2)
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
@@ -907,9 +964,9 @@ class TestResultsAcceptor(LabresultsSetUp):
             clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
             """
-        time.sleep(1)
-        self.runScript(script)
         
+        self.runScript(script)
+        time.sleep(.1)
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
