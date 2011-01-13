@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.tlcprinters.models import MessageConfirmation
 import time
 import json
 
@@ -375,6 +376,8 @@ class TestApp(LabresultsSetUp):
         return results
     
     def testSend_results_to_printer_task(self):
+        self.assertEqual(0, MessageConfirmation.objects.count())
+
         results = labresults.Result.objects.all()
         results.create(requisition_id="%s-0001-1" % self.clinic.slug,
                           clinic=self.clinic, result="N",
@@ -403,21 +406,21 @@ class TestApp(LabresultsSetUp):
         msgs=self.receiveAllMessages()
 
         expected_msgs = []
-        msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. NUIDs are : 2, 1"
-        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. NUIDs are : 2, 1"
-        msg3 = """Printer in Mibenge Clinic:01Muswishi RHC.
+        msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
+        msg3 = """Printer in Mibenge Clinic:01Mibenge Clinic.
 Patient ID: 0002.
 HIV-DNAPCR Result:
 Detected.
 Approved by ADH DNA-PCR LAB.
-(NUID: 2)"""
+(Serial ID: 2)"""
 
-        msg4="""Printer in Mibenge Clinic:02Muswishi RHC.
+        msg4="""Printer in Mibenge Clinic:02Mibenge Clinic.
 Patient ID: 402029-0001-1.
 HIV-DNAPCR Result:
 NotDetected.
 Approved by ADH DNA-PCR LAB.
-(NUID: 1)"""
+(Serial ID: 1)"""
 
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -427,8 +430,8 @@ Approved by ADH DNA-PCR LAB.
         self.assertEqual(4, len(msgs))
         for msg in msgs:
             my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
-            self.assertTrue(my_msg in expected_msgs)
-
+            self.assertTrue(my_msg in expected_msgs,"'{msg}' not in expected messages".format(msg=my_msg))
+        self.assertEqual(3, MessageConfirmation.objects.count())
     def testResultsSample(self):
         """
         Tests getting of results for given samples.

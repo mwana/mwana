@@ -14,8 +14,8 @@ INSTRUCTIONS      = "Please record these results in your clinic records and prom
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
-PRINTER_RESULTS   = "Muswishi RHC.\nPatient ID: %(req_id)s.\n%(test_type)s:\n%(result)s.\nApproved by %(lab_name)s.\n(NUID: %(serial)s)"
-CHANGED_PRINTER_RESULTS   = "Muswishi RHC.\nPatient ID: %(req_id)s.\n%(test_type)s:\n%(result)s.\nApproved by %(lab_name)s.\n(NUID: %(serial)s)"
+PRINTER_RESULTS   = "%(clinic)s.\nPatient ID: %(req_id)s.\n%(test_type)s:\n%(result)s.\nApproved by %(lab_name)s.\n(Serial ID: %(serial)s)"
+CHANGED_PRINTER_RESULTS   = "%(clinic)s.\nPatient ID: %(req_id)s.\n%(test_type)s:\n%(result)s.\nApproved by %(lab_name)s.\n(Serial ID: %(serial)s)"
 
 TEST_TYPE = "HIV-DNAPCR Result"
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
@@ -39,7 +39,8 @@ def build_printer_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (CHANGED_PRINTER_RESULTS % {"serial":res.id,
+            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
+                   "serial":res.id,
                    "old_req_id":res.old_value.split(":")[0],
                    "old_result":res.get_old_result_text(),
                    "new_req_id":res.requisition_id,
@@ -47,7 +48,8 @@ def build_printer_results_messages(results):
                    "test_type":TEST_TYPE,
                    "lab_name":ADH_LAB_NAME})
         else:
-            msg = (PRINTER_RESULTS % {"serial":res.id,
+            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
+                   "serial":res.id,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,
