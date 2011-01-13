@@ -408,19 +408,9 @@ class TestApp(LabresultsSetUp):
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
         msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
-        msg3 = """Printer in Mibenge Clinic:01Mibenge Clinic.
-Patient ID: 0002.
-HIV-DNAPCR Result:
-Detected.
-Approved by ADH DNA-PCR LAB.
-(Serial ID: 2)"""
+        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 2)"
 
-        msg4="""Printer in Mibenge Clinic:02Mibenge Clinic.
-Patient ID: 402029-0001-1.
-HIV-DNAPCR Result:
-NotDetected.
-Approved by ADH DNA-PCR LAB.
-(Serial ID: 1)"""
+        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 1)"
 
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -430,7 +420,7 @@ Approved by ADH DNA-PCR LAB.
         self.assertEqual(4, len(msgs))
         for msg in msgs:
             my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
-            self.assertTrue(my_msg in expected_msgs,"'{msg}' not in expected messages".format(msg=my_msg))
+            self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
         self.assertEqual(3, MessageConfirmation.objects.count())
     def testResultsSample(self):
         """
