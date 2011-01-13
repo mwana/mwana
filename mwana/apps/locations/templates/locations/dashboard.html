@@ -12,8 +12,15 @@
 {{ block.super }}
 <link type="text/css" rel="stylesheet" href="/static/locations/stylesheets/label-overlay.css" />
 {% endblock %}
-
+            
 {% block left %}{% if location %}
+<div class="module">
+    <h2>Actions</h2>
+    <ul>
+        <li><a href='{% url location_messages location.pk %}'>View messages sent from this location ({{ location_message_count }})</a></li>
+    </ul>
+</div>
+
 <div class="module">
 	<h2>Edit this Location</h2>
 

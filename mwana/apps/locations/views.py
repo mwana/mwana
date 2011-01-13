@@ -8,10 +8,15 @@ from django.core.urlresolvers import reverse
 
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_GET, require_http_methods
-from rapidsms.utils import web_message
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from django.db.models import Q
 
+from rapidsms.utils import web_message
+from rapidsms.contrib.messagelog import models as messagelog
+from rapidsms.contrib.messagelog.tables import MessageTable
+
+from mwana import const
 
 @require_GET
 def dashboard(req, location_pk=None):
@@ -25,7 +30,7 @@ def dashboard(req, location_pk=None):
     if location_pk is not None:
         location = get_object_or_404(Location, pk=location_pk)
         location_form = LocationForm(instance=location)
-
+        location_message_count = location_messages(location).count()
         # add each ancestor to the breadcrumbs.
         for loc in location.path:
             url = reverse(dashboard, args=(loc.pk,))
@@ -36,6 +41,7 @@ def dashboard(req, location_pk=None):
     else:
         location = None
         location_form = None
+        location_message_count = None
 
     # build a list of [sub-]locationtypes with their locations, to avoid
     # having to invoke the ORM from the template (which is foul).
@@ -49,7 +55,8 @@ def dashboard(req, location_pk=None):
             "breadcrumbs": breadcrumbs,
             "locations_data": locations_data,
             "location_form": location_form,
-            "location": location
+            "location": location,
+            "location_message_count": location_message_count,
          },context_instance=RequestContext(req)
      )
 
@@ -59,10 +66,10 @@ def view_location(req, location_code, location_type_slug):
     location = get_object_or_404(Location, slug=location_code)
     loc_type = get_object_or_404(LocationType, exists_in=location)
     locations = loc_type.location_set.all().order_by("slug")
-
+    
     return render_to_response(
         "locations/dashboard.html", {
-            "locations": locations },
+            "locations": locations},
             context_instance=RequestContext(req))
 
 
@@ -159,3 +166,24 @@ def add_location(req, location_type_slug):
         return web_message(req,
             "Location %d saved" % (location.pk),
             link=reverse("locations_dashboard"))
+
+
+def location_messages(location):
+    from_location = Q(connection__contact__location=location)
+    from_parent1 = Q(connection__contact__location__parent=location)
+    from_parent2 = Q(connection__contact__location__parent__parent=location)
+    from_parent3 = Q(connection__contact__location__parent__parent__parent=location)
+    messages = messagelog.Message.objects.filter(from_location | from_parent1 |
+                                                 from_parent2 | from_parent3)
+    return messages
+
+
+def list_location_messages(request, location_pk):
+    location = get_object_or_404(Location, pk=location_pk)
+    messages = location_messages(location)
+    return render_to_response(
+        "locations/list_location_messages.html", {
+            "location": location,
+            "messages_table": MessageTable(messages, request=request),
+        }, context_instance=RequestContext(request)
+    )
