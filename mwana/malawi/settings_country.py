@@ -28,6 +28,12 @@ RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 
 GROWTHMONITORING_SETTINGS = {'DEFAULT_LANG': 'en'}
 
+# The TLC printers require 2 chars at the beginning of the message, so reduce
+# the size of all outgoing messages by 2 chars here
+MAX_SMS_LENGTH = 158
+
+COUNTRY_CODE = '+265'
+
 TIME_ZONE = 'Africa/Blantyre'
 
 LANGUAGE_CODE = 'eng-us'

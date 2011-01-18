@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.tlcprinters.models import MessageConfirmation
 import time
 import json
 
@@ -13,10 +14,10 @@ from mwana.apps.labresults.mocking import get_fake_results
 from mwana.apps.labresults.models import Result, SampleNotification
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
-from rapidsms.models import Connection
-from rapidsms.models import Contact
+from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
+from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend, is_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
@@ -374,6 +375,53 @@ class TestApp(LabresultsSetUp):
         for res in results:  res.save()
         return results
     
+    def testSend_results_to_printer_task(self):
+        self.assertEqual(0, MessageConfirmation.objects.count())
+
+        results = labresults.Result.objects.all()
+        results.create(requisition_id="%s-0001-1" % self.clinic.slug,
+                          clinic=self.clinic, result="N",
+                          collected_on=datetime.datetime.today(),
+                          entered_on=datetime.datetime.today(),
+                          notification_status="new")
+
+        results.create(requisition_id="0002", clinic=self.clinic,
+                          result="P",
+                          collected_on=datetime.datetime.today(),
+                          entered_on=datetime.datetime.today(),
+                          notification_status="new")
+        self.clinic.has_independent_printer = True
+        self.clinic.save()
+        script = """
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
+        time.sleep(.2)
+
+        self.startRouter()
+        tlcprinter_tasks.send_results_to_printer(self.router)
+        msgs=self.receiveAllMessages()
+
+        expected_msgs = []
+        msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
+        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 2)"
+
+        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 1)"
+
+        expected_msgs.append(msg1)
+        expected_msgs.append(msg2)
+        expected_msgs.append(msg3)
+        expected_msgs.append(msg4)
+
+        self.assertEqual(4, len(msgs))
+        for msg in msgs:
+            my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
+            self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
+        self.assertEqual(3, MessageConfirmation.objects.count())
     def testResultsSample(self):
         """
         Tests getting of results for given samples.
@@ -528,14 +576,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Dec
-            clinic_worker > Reports 403012 12
+            clinic_worker > Reports 403012 Jan
+            clinic_worker > Reports 403012 1
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Dec
+            clinic_worker > Reports 40 Jan
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        
@@ -554,6 +602,38 @@ class TestApp(LabresultsSetUp):
         self.assertEqual(msgs[len(msgs)-10].text,central_clinc_rpt)
         self.assertEqual(msgs[len(msgs)-11].text,mibenge_report1)
         
+
+class TestPrinters(LabresultsSetUp):
+    """ Tests adding and removing of DBS printers """
+
+    def testAdd(self):
+        script = """
+            unknown_user > PRINTER ADD {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+    
+    def testRemove(self):
+        contact = Contact.objects.create(name='printer', is_active=True,
+                                         location=self.clinic)
+        contact.types.add(const.get_dbs_printer_type())
+        backend = Backend.objects.get(name='mockbackend')
+        conn = Connection.objects.create(identity='1234', contact=contact,
+                                         backend=backend)
+        script = """
+            unknown_user > PRINTER REMOVE {clinic} mockbackend 1234
+            unknown_user < You must be a registered help admin to add or remove printers.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1111
+            support_contact < No active printer found with that backend and phone number at that location.
+            support_contact > PRINTER REMOVE {clinic} mockbackend 1234
+            1234 < 00This printer has been deregistered from Mibenge Clinic. You will no longer receive results.
+            support_contact < Printer removed successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
 
 class TestResultsAcceptor(LabresultsSetUp):
     """
@@ -829,10 +909,10 @@ class TestResultsAcceptor(LabresultsSetUp):
         # clinic_worker should be able to get the results by replying with PIN
         script = """
             clinic_worker > 4567
-            other_worker  < John Banda has collected these results
             clinic_worker < Thank you! Here are your results: **** 1029023412;Rejected. **** 78;{not_detected} changed to 87;{detected}. **** 212987;{not_detected} changed to 212987b;{not_detected}
+            other_worker  < John Banda has collected these results
             clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
-            """.format(**self._result_text())
+""".format(**self._result_text())
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
@@ -854,6 +934,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # The number of results records should be 3
         self.assertEqual(labresults.Result.objects.count(), 3)
 
+        time.sleep(.2)
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
@@ -876,9 +957,9 @@ class TestResultsAcceptor(LabresultsSetUp):
             clinic_worker > join agent 402029 3 John Banda
             clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
             """
-        time.sleep(1)
-        self.runScript(script)
         
+        self.runScript(script)
+        time.sleep(.1)
         # start router and send a notification
         self.startRouter()
         tasks.send_results_notification(self.router)
@@ -900,8 +981,8 @@ class TestResultsAcceptor(LabresultsSetUp):
         # ensure that clinic workers registered as CBAs cannot retrieve results twice
         script = """
             other_worker > 6789
-            clinic_worker < Mary Phiri has collected these results
             other_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Mary Phiri!
 """.format(**self._result_text())
         time.sleep(1)

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
 
@@ -12,8 +13,12 @@ RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
+HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
+PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s.\r\n(Serial ID: %(serial)s)"
+CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s.\r\n(Serial ID: %(serial)s)"
 
-
+TEST_TYPE = "HIV-DNAPCR Result"
+ADH_LAB_NAME = "ADH DNA-PCR LAB"
 def urgent_requisitionid_update(result):
     """
     Returns True if there has been a critical update in requisition id. That is
@@ -21,16 +26,45 @@ def urgent_requisitionid_update(result):
     """
     toreturn = False
     if result.record_change:
-        if result.record_change in ['req_id','both']:
+        if result.record_change in ['req_id', 'both']:
             toreturn = True
     return toreturn
 
-def build_results_messages(results):
+def build_printer_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting 
     their status
     """
     result_strings = []
+    # if messages are updates to requisition ids
+    for res in results:
+        if urgent_requisitionid_update(res):
+            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
+                   "serial":res.id,
+                   "old_req_id":res.old_value.split(":")[0],
+                   "old_result":res.get_old_result_text(),
+                   "new_req_id":res.requisition_id,
+                   "new_result":res.get_result_text(),
+                   "test_type":TEST_TYPE,
+                   "lab_name":ADH_LAB_NAME})
+        else:
+            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
+                   "serial":res.id,
+                   "req_id":res.requisition_id,
+                   "result":res.get_result_text(),
+                   "test_type":TEST_TYPE,
+                   "lab_name":ADH_LAB_NAME})
+        result_strings.append(msg)
+               
+    return result_strings
+
+def build_results_messages(results):
+    """
+    From a list of lab results, build a list of messages reporting
+    their status
+    """
+    result_strings = []
+    max_len = settings.MAX_SMS_LENGTH
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
@@ -41,10 +75,10 @@ def build_results_messages(results):
                                   res.get_result_text()))
         else:
             result_strings.append("**** %s;%s" % (res.requisition_id,
-                                                  res.get_result_text()))
-            
+                                  res.get_result_text()))
+
     result_text, remainder = combine_to_length(result_strings,
-                                               length=160-len(RESULTS))
+                                               length=max_len-len(RESULTS))
     first_msg = RESULTS + result_text
     responses = [first_msg]
     while remainder:
@@ -53,12 +87,14 @@ def build_results_messages(results):
     return responses
 
 
-def combine_to_length(list, delimiter=". ", length=160):
+def combine_to_length(list, delimiter=". ", length=None):
     """
     Combine a list of strings to a maximum of a specified length, using the 
     delimiter to separate them.  Returns the combined strings and the 
     remainder as a tuple.
     """
+    if length is None:
+        length = settings.MAX_SMS_LENGTH
     if not list:  return ("", [])
     if len(list[0]) > length:
         raise Exception("None of the messages will fit in the specified length of %s" % length)

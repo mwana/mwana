@@ -41,6 +41,9 @@ INSTALLED_BACKENDS = {
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
     "mwana.apps.broadcast",
+    # this has to come before the handlers app because of the CONFIRM handler
+    # in patienttracing
+    "mwana.apps.tlcprinters",
     #'south',
     # the essentials.
     "django_nose",
@@ -85,6 +88,7 @@ INSTALLED_APPS = [
     "mwana.apps.alerts",
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
+    "mwana.apps.hub_workflow",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
@@ -203,6 +207,12 @@ ROOT_URLCONF = "mwana.urls"
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'testextensions_main.migrations',
 }
+
+
+# The maximum length of an SMS to be sent through the system.  It is only
+# enforced manually; i.e., you need to use it to chunk your messages
+# appropriately.
+MAX_SMS_LENGTH = 160
 
 
 # -------------------------------------------------------------------- #

@@ -21,7 +21,7 @@ class MessageHandler(BroadcastHandler):
     HELP_TEXT = ("To send a message SEND: MSG <GROUP> <your message>. The groups"
                  " you can send to are: %s")
 
-    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\s+)(.{1,})$")
+    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\s+)(.{1,})$", re.IGNORECASE)
 
     workertype_group_mapping = {
     'cba':('cba', 'clinic', 'all'),
@@ -48,7 +48,8 @@ class MessageHandler(BroadcastHandler):
         try:
             for type in self.msg.contact.types.all():                
                 for val in self.workertype_group_mapping[type.slug]:
-                    groups.append(val)
+                    if val not in groups:
+                        groups.append(val)
         except (KeyError):
             pass
         if not groups:
@@ -100,14 +101,13 @@ class MessageHandler(BroadcastHandler):
                                              Q(location__location=location) | \
                                              Q(location__parent=location))\
                                             .exclude(id=self.msg.contact.id)\
-                                            .filter(types = get_district_worker_type)
+                                            .filter(types = get_district_worker_type).distinct()            
         elif group_name == "ALL":
             contacts = Contact.active.location(location)\
                 .exclude(id=self.msg.contact.id)
         if contacts:
             return self.broadcast(msg_part, contacts)
         else:
-            print 'ooops!'
             self.help()
         
 

@@ -153,7 +153,7 @@ class TestApp(TestScript):
         self.runScript(script)
 
         script="""
-        clinic_worker > msg all testing msg all
+        clinic_worker > msg ALL testing msg all
         """
         self.runScript(script)
 

@@ -10,14 +10,14 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
+EMAIL_SUBJECT_PREFIX = '[mwana-malawi-production] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
 XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
-# only on the staging or production server, so that development can continue
+# only on the production or production server, so that development can continue
 # locally:
 #INSTALLED_APPS.insert(INSTALLED_APPS.index("rapidsms"),
 #                      "mwana.apps.whitelist")
@@ -80,11 +80,11 @@ INSTALLED_BACKENDS.update({
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "mwana_legacy_staging",
+        "NAME": "mwana_production",
         "USER": "mwana",
         "PASSWORD": "", # configure in localsettings.py
         "HOST": "localhost",
-        "TEST_DATABASE_NAME": "test_mwana_legacy_staging",
+        "TEST_DATABASE_NAME": "test_mwana_production",
     }
 }
 

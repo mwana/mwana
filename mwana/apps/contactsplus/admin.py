@@ -1,8 +1,10 @@
 # vim: ai ts=4 sts=4 et sw=4
 from django.contrib import admin
+from django.db.models import Min, Max
 
 from rapidsms.models import Contact
 from rapidsms.admin import ContactAdmin
+from rapidsms.contrib.messagelog.models import Message
 
 from mwana.apps.contactsplus import models as contactsplus
 
@@ -11,9 +13,9 @@ admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
                    # 'location', 
-		    'default_connection', 'types_list',
-                    'is_active',)
-    list_filter = ('types', 'is_active', 'language',)
+		    'default_connection', 'types_list', 'date_of_first_sms',
+                    'date_of_most_recent_sms', 'is_active',)
+    list_filter = ('types', 'is_active', 'language', 'location')
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
 
@@ -27,6 +29,26 @@ class ContactAdmin(ContactAdmin):
 
     def types_list(self, obj):
         return ', '.join(obj.types.values_list('name', flat=True))
+    
+    def date_of_first_sms(self, obj):
+        earliest = Message.objects.filter(
+            contact=obj.id,
+            direction='I',
+        ).aggregate(date=Min('date'))
+        if earliest['date']:
+            return earliest['date'].strftime('%d/%m/%Y %H:%M:%S')
+        else:
+            return 'None'
+
+    def date_of_most_recent_sms(self, obj):
+        latest = Message.objects.filter(
+            contact=obj.id,
+            direction='I',
+        ).aggregate(date=Max('date'))
+        if latest['date']:
+            return latest['date'].strftime('%d/%m/%Y %H:%M:%S')
+        else:
+            return 'None'
 admin.site.register(Contact, ContactAdmin)
 
 

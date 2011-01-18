@@ -90,7 +90,7 @@ class PatientEvent(models.Model):
         super(PatientEvent, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return '%s %s on %s' % (self.patient, self.event, self.date)
+        return '%s %s on %s' % (self.patient.name, self.event, self.date)
     
     class Meta:
         unique_together = (('patient', 'event', 'date'),)

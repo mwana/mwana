@@ -1,0 +1,8 @@
+{% extends "messagelog/index.html" %}
+
+{% block content %}
+<div class="messages module">
+    <h2>Message Log for {{ location }} {{ location.type }}</h2>
+    {{ messages_table.as_html }}
+</div>
+{% endblock %}
