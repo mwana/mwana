@@ -28,3 +28,4 @@ pyserial-2.5.tar.gz
 # be installed first
 # pygrowup (from https://github.com/ewheeler/pygrowup)
 pygrowup-b10ba44.tar.gz
+south-0.7.3.tar.gz

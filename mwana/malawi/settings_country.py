@@ -53,3 +53,8 @@ RAPIDSMS_TABS.append(('xforms', 'XForms'))
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'growthmonitoring')
 RAPIDSMS_TABS.append(('growth_index', 'Growth Monitoring'))
+
+INSTALLED_APPS.insert(0, 'south')
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'mwana.malawi.migrations.rapidsms',
+}
