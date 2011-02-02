@@ -25,8 +25,12 @@ Developer Setup
 
 **Prerequisites:**
 
-* PostgreSQL and the appropriate Python bindings (``psycopg2``).  On Linux, you
-  can  usually install these via your Linux distribution's package manager, e.g.::
+* A Linux-based development environment including Python 2.6.  Ubuntu 10.04 or
+  later is recommended.  At present, Windows-based environments are not
+  actively supported.
+
+* PostgreSQL and the appropriate Python bindings (``psycopg2``).  In
+  Debian-based distributions, you can install these using ``apt-get``, e.g.::
 
     sudo apt-get install postgresql python-psycopg2
 
