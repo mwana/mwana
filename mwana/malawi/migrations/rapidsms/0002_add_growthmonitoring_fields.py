@@ -29,6 +29,25 @@ class Migration(SchemaMigration):
         # Changing field 'Contact.alias'
         db.alter_column('rapidsms_contact', 'alias', self.gf('django.db.models.fields.CharField')(unique=True, max_length=20))
 
+        # Import the Contact model directly so we can access parse_name
+        # (RapidSMS model extensions don't get added to South's copy of the
+        # class).  Note that we still have to use orm.Contact to access the
+        # actual objects in the database.
+        from rapidsms.models import Contact
+        for contact in orm.Contact.objects.all():
+            contact.alias, contact.first_name, contact.last_name =\
+               Contact.parse_name(contact.name)
+            if len(contact.alias) > 20:
+                print contact.alias
+            contact.save()
+
+        # We have to commit before we can alter the table again (otherwise we
+        # see the "pending trigger events" Postgres error).  The whole
+        # migration was wrapped in a transaction to begin with, so start one
+        # again afterwards.
+        db.commit_transaction()
+        db.start_transaction()
+
         # Adding unique constraint on 'Contact', fields ['alias']
         db.create_unique('rapidsms_contact', ['alias'])
 
