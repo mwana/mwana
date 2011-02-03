@@ -37,8 +37,6 @@ class Migration(SchemaMigration):
         for contact in orm.Contact.objects.all():
             contact.alias, contact.first_name, contact.last_name =\
                Contact.parse_name(contact.name)
-            if len(contact.alias) > 20:
-                print contact.alias
             contact.save()
 
         # We have to commit before we can alter the table again (otherwise we
