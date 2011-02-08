@@ -28,4 +28,9 @@ pyserial-2.5.tar.gz
 # be installed first
 # pygrowup (from https://github.com/ewheeler/pygrowup)
 pygrowup-b10ba44.tar.gz
+# growthmonitoring (checkout from git because it may change frequently)
+-e git+http://github.com/mwana/rapidsms-growthmonitoring-app.git#egg=rapidsms-growthmonitoring-app
+# people (required by growthmonitoring; checkout from git because it may change frequently)
+-e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
+# south (from http://south.aeracode.org/)
 south-0.7.3.tar.gz
