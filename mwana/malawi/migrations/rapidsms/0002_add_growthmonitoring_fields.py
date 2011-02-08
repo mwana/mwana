@@ -27,7 +27,7 @@ class Migration(SchemaMigration):
         db.add_column('rapidsms_contact', 'last_name', self.gf('django.db.models.fields.CharField')(default='', max_length=30, blank=True), keep_default=False)
 
         # Changing field 'Contact.alias'
-        db.alter_column('rapidsms_contact', 'alias', self.gf('django.db.models.fields.CharField')(unique=True))
+        db.alter_column('rapidsms_contact', 'alias', self.gf('django.db.models.fields.CharField')(unique=True, max_length=100))
 
         # Import the Contact model directly so we can access parse_name
         # (RapidSMS model extensions don't get added to South's copy of the
