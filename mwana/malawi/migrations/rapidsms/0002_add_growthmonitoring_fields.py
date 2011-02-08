@@ -73,10 +73,6 @@ class Migration(SchemaMigration):
         # Deleting field 'Contact.last_name'
         db.delete_column('rapidsms_contact', 'last_name')
 
-        # Changing field 'Contact.alias'
-        db.alter_column('rapidsms_contact', 'alias', self.gf('django.db.models.fields.CharField')(max_length=100))
-
-
     models = {
         'contactsplus.contacttype': {
             'Meta': {'object_name': 'ContactType'},
