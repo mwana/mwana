@@ -103,7 +103,7 @@ RAPIDSMS_TABS = [
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.registration.views.registration', 'Registration'),
-    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
