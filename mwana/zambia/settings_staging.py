@@ -4,9 +4,9 @@ from mwana.zambia.settings_country import *
 DEBUG = False
 
 ADMINS = (
-    ('Anton de Winter', 'adewinter@dimagi.com'),
-    ('Trevor Sinkala', 'sinkalation@gmail.com'),
-    ('Nchimunya Hamakando', 'nchimunya@gmail.com'),
+#    ('Anton de Winter', 'adewinter@dimagi.com'),
+#    ('Trevor Sinkala', 'sinkalation@gmail.com'),
+#    ('Nchimunya Hamakando', 'nchimunya@gmail.com'),
 )
 
 MANAGERS = ADMINS
