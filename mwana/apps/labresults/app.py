@@ -187,10 +187,10 @@ class App (rapidsms.apps.base.AppBase):
         Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                               Q(types=const.get_clinic_worker_type())).distinct().\
             order_by('pk')
-        NUIDs = ", ".join(str(res.id) for res in results)
+        NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
-            msg_text = ("Hello {name}, {count} results were sent to printer "
-                        "at {clinic}. Serials are : {nuids}"
+            msg_text = ("Hello {name}, {count} results sent to printer "
+                        "at {clinic}. IDs : {nuids}"
                         "".format(name=contact.name, count=len(results),
                         clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()

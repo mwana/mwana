@@ -406,11 +406,11 @@ class TestApp(LabresultsSetUp):
         msgs=self.receiveAllMessages()
 
         expected_msgs = []
-        msg1 = "John Banda:Hello John Banda, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
-        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results were sent to printer at Mibenge Clinic. Serials are : 2, 1"
-        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 2)"
+        msg1 = "John Banda:Hello John Banda, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
+        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
 
-        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB.\r\n(Serial ID: 1)"
+        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
 
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -576,14 +576,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Jan
-            clinic_worker > Reports 403012 1
+            clinic_worker > Reports 403012 Feb
+            clinic_worker > Reports 403012 2
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Jan
+            clinic_worker > Reports 40 Feb
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        
