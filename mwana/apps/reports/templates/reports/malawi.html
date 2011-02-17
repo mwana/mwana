@@ -1,0 +1,322 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+{% load labresults_tags %}
+
+{% block title %}Mwana Reports - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+
+<div>
+    <div class="left">
+        <div class="module">
+            <div class="module">
+                <h2>Percentage (%) Positivity</h2>                
+                <table width="100%" class="th" bgcolor="#EEEEEE">
+
+                    <tr class="th" >
+                        <td align="center" width="295">
+                            <p align="center"><font size="6">{{percent_positive_country }}%</font></p>
+                            <p align="center"><font size="3" ><b>Positivity</b></font></p>
+                        </td>
+                        <td width="407" colspan="2">
+                            Average Positivity for
+                            {{total_dbs}} samples in {{ days_reporting}} days {# in {{ year_reporting}} #}
+                            <p>{{percent_negative_country}} % Negative,
+                            <p>{{ percent_rejected_country}}% Rejected
+                        </td>
+                    </tr>                    
+                    <tr>                        
+                        <td>
+                            {% for record in percent_positive_provinces %}
+                            {% for column in record %}
+                            {% ifequal forloop.counter0 0%}
+                            <b>{{ column }}%</b>
+                            {% else %}
+                            Positive <b>{{ column }}</b><br>
+                            {% endifequal %}
+                            {% endfor %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for record in percent_negative_provinces %}
+                            {% for column in record %}
+                            {% ifequal forloop.counter0 0%}
+                            <b>{{ column }}%</b>
+                            {% else %}
+                            Negative <b>{{ column }}</b><br>
+                            {% endifequal %}
+                            {% endfor %}
+                            {% endfor %}
+                        </td>
+                        <td>
+                            {% for record in percent_rejected_provinces %}
+                            {% for column in record %}
+                            {% ifequal forloop.counter0 0%}
+                            <b>{{ column }}%</b>
+                            {% else %}
+                            Rejected <b>{{ column }}</b><br>
+                            {% endifequal %}
+                            {% endfor %}
+                            {% endfor %}
+                        </td>   
+                    </tr>
+                </table>               
+
+            </div>
+            
+            
+            <h1>Date range reports:</h1>
+            
+                
+            <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+            <br>
+            <form name="getValues" action="" method="GET">
+                <p>Select Period
+                    <input type="text" name="startdate" size="9" value={{ startdate }} />
+                           to
+                           <input type="text" name="enddate" size="9" value={{ enddate }} />
+                <input type="submit" value="Ok" name="SubmitValues" /></form>
+            Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
+            <div>
+                <p align="center"><h3>Results160 Report 1 - Results
+                Tested By Lab and Retrieved By Facilities between 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+		  <p><b>DEFINITION  - Tested - means processed by lab
+		  and result recorded,  Verified – means lab have
+		  approved its release,  Retrieved - means facilities
+		  have successfully retrieved the results via
+		  SMS</b></p>
+		  <p></p>
+                <table width="100%">
+                    {% for record in sent_results_rpt %}
+                    <tr>
+                        <td width="20">
+                            {% if forloop.counter0 %}
+                            {% if not forloop.last %}
+                            {{ forloop.counter0 }}
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        {% for column in record %}
+                        {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                        <td width="20"><u>{{ column }}</u></td>
+                        {% else %}
+                        {% if forloop.parentloop.last %}
+                        <td width="20"><b>{{ column }}</b></td>
+                        {% else %}
+                        <td width="20">{{ column }}</td>
+                        {% endif %}
+                        {% endif %}
+                        {% else %}
+                        {% if forloop.parentloop.last %}
+                        <td><b> 0 </b></td>
+                        {% else %}
+                        <td> 0 </td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+                <p><p>
+
+            <h3>Results160 Report 2 - Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                &nbsp;&nbsp;StartDate: {{startdate}} Enddate:
+                {{enddate}}</h3>
+<p></p>
+<p><b>DEFINITION  -  Shows the number of samples recorded as received
+    at laboratory,  but not yet retrieved by facility</b></p>
+
+<p></p>
+            <table width="100%">
+                {% for record in pending_results %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td width="20"><b>{{ column }}</b></td>
+                    {% else %}
+                    <td width="20">{{ column }}</td>
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+            <p>
+                <h3>Results160 Report 3 – Trends of Result Retrieval in period &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+                <p></p>
+		<p><b>DEFINITION  -  Shows the frequency of result retrieval over the selected period</b></p>
+		
+
+                <p>
+                    Showing a total of {{ tt_in_graph }} results received in the
+                    period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+                </p>
+
+                {% for record in graph %}
+
+                {% for column in record %}
+                {% if not forloop.counter0 %}
+                {{column}}&nbsp;
+                {% else %}
+                {% if column %}
+                <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" alt="missing bar" height="10"
+                     width="{% widthratio column single_bar_length 100 %}" /> {{column}}
+
+                {% else %}
+                Nil
+                {% endif %}
+                <br>
+                {% endif %}
+                {% endfor %}
+                {% endfor %}
+            </div>
+            <p>
+
+<h3>Results160 Report 4 – Average Turnaround Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+                <p></p>
+		<p><b>DEFINITION  -  Showing the average time between the date results are recorded as received at laboratory and actually being received by the facility staff via SMS.</b></p>
+
+            <p>
+                Showing average time between the Date DBS
+                samples are collected at the facilities and the Date the results
+                for these samples are received at the facility.
+                <br>
+                Minimum Average Days = {{min_turnaround_time}}; &nbsp;
+                Maximum Average Days = {{max_turnaround_time}}; &nbsp;
+                Out of {{num_of_results}} results in {{num_of_facilities}} 
+                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+            <p>
+            <table width="100%">
+                {% for record in turnaround_time_rpt %}
+                <tr>
+                    <td width="20">
+                        {% if forloop.counter0 %}
+                        {% if not forloop.last %}
+                        {{ forloop.counter0 }}
+                        {% endif %}
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td width="20"><u>{{ column }}</u></td>
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td width="20"><b>{{ column }}</b></td>
+                    {% else %}
+                    {%ifequal column min_turnaround_time%}
+                    {%if forloop.last %}
+                    <td width="20" bgcolor="#66CC00">{{ column }}</td>
+                    {%else%}
+                    <td width="20">{{ column }}</td>
+                    {%endif%}
+                    {% else %}
+                    {%ifequal column max_turnaround_time%}
+                    {%if forloop.last %}
+                    <td width="20" bgcolor="#FFFF33">{{ column }}</td>
+                    {%else%}
+                    <td width="20">{{ column }}</td>
+                    {%endif%}
+                    {% else %}
+                    <td width="20">{{ column }}</td>
+                    {% endifequal %}
+                    {% endifequal %}
+                    {% endif %}
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+                <div class="module">
+                    <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
+                    <p>
+                    <h3>RemindMe Report 1 - Births from Clinics
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate:
+                    {{startdate}} Enddate: {{enddate}}</h3>
+		    <p></p>
+		    <p><b>DEFINITION  -  Showing the number of births registered by facility in the given period.</b></p>
+
+
+                    <table width="100%">
+                        {% for record in births_rpt %}
+                        <tr>
+                            <td width="20">
+                                {% if forloop.counter0 %}
+                                {% if not forloop.last %}
+                                {{ forloop.counter0 }}
+                                {% endif %}
+                                {% endif %}
+                            </td>
+                            {% for column in record %}
+                            {% if column %}
+                            {% if not forloop.parentloop.counter0 %}
+                            <td width="20"><u>{{ column }}</u></td>
+                            {% else %}
+                            {% if forloop.parentloop.last %}
+                            <td width="20"><b>{{ column }}</b></td>
+                            {% else %}
+                            <td width="20">{{ column }}</td>
+                            {% endif %}
+                            {% endif %}
+                            {% else %}
+                            {% if forloop.parentloop.last %}
+                            <td><b> 0 </b></td>
+                            {% else %}
+                            <td> 0 </td>
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+
+</div>
+{% endblock %}
