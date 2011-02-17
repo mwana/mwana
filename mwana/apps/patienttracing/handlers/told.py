@@ -31,7 +31,7 @@ class ToldHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "told|toll|teld|tod|telld"
+    keyword = "told|toll|teld|tod|telld|t0ld"
     
     help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
