@@ -18,7 +18,7 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
-from mwana.util import is_today_a_weekend, is_weekend
+from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
 
@@ -601,14 +601,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Feb
-            clinic_worker > Reports 403012 2
+            clinic_worker > Reports 403012 Mar
+            clinic_worker > Reports 403012 3
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Feb
+            clinic_worker > Reports 40 Mar
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        
