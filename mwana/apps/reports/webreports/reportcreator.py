@@ -669,25 +669,15 @@ class MalawiReports(Results160Reports):
     
     def get_live_facilities(self):
         return Location.objects.filter(send_live_results=True).distinct()
-        
-    def get_results_by_location(self, location):
-        """Returns results query set by location in reporting period"""
 
-        return Result.objects.filter(Q(processed_on__gt=self.dbsr_startdate)
-                                     | Q(processed_on=self.dbsr_startdate),
-                                     Q(processed_on__lt=self.dbsr_enddate) |
-                                     Q(processed_on=self.dbsr_enddate))\
-                                     .filter(clinic=location)
-
-    def get_sent_results(self, location):
-        """Returns sent results query set in reporting period"""
-        return Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
-                                     | Q(result_sent_date=self.dbsr_startdate),
-                                     Q(result_sent_date__lt=self.dbsr_enddate) |
-                                     Q(result_sent_date=self.dbsr_enddate))\
-                                     .filter(clinic=location,
-                                             notification_status='sent')
-    
+    def get_live_districts(self):
+        """Returns a sorted list of districts with live facilities"""
+        parents = []
+        for site in self.get_live_facilities():
+            parents.append(site.parent and site.parent.name or ' ')
+            
+        return sorted(list(set(parents))) 
+            
     def get_new_results(self, location):
         """Returns new results query set for location in reporting period"""
 
@@ -695,7 +685,7 @@ class MalawiReports(Results160Reports):
                                      Q(processed_on__lte=self.dbsr_enddate))\
                                      .filter(clinic=location)
         
-    def dbsr_tested_retrieved_report(self, startdate=None, enddate=None):
+    def dbsr_tested_retrieved_report(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)
         table = []
 
@@ -707,27 +697,31 @@ class MalawiReports(Results160Reports):
         positive = negative = rejected = total_tested = 0
         tested = ['Detected', 'NotDetected', 'R', 'X', 'I']
         for location in self.get_live_facilities():
-            positive = self.get_new_results(location).filter(result='P').count()
-            negative = self.get_new_results(location).filter(result='N').count()
-            rejected = self.get_new_results(location).filter(result__in='XIR').count()
-            total_retrieved = self.get_new_results(location).filter(notification_status='sent').count()
-            total_verified = self.get_new_results(location).filter(verified=True).count()
-            total_tested = positive + negative
             parent_name = location.parent and location.parent.name or ' '
-            table.append([' ' + parent_name, ' ' + location.name, positive,
+            if (district == "All Districts" or district == parent_name):
+                positive = self.get_new_results(location).filter(result='P').count()
+                negative = self.get_new_results(location).filter(result='N').count()
+                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                total_retrieved = self.get_new_results(location).filter(notification_status='sent').count()
+                total_verified = self.get_new_results(location).filter(verified=True).count()
+                total_tested = positive + negative
+
+                table.append([' ' + parent_name, ' ' + location.name, positive,
                          negative, rejected, total_tested, total_verified, total_retrieved])
 
-            tt_positive = tt_positive + positive
-            tt_negative = tt_negative + negative
-            tt_rejected = tt_rejected + rejected
-            tt_tested = tt_tested + positive + negative
-            tt_verified = tt_verified + total_verified
-            tt_retrieved = tt_retrieved + total_retrieved
+                tt_positive = tt_positive + positive
+                tt_negative = tt_negative + negative
+                tt_rejected = tt_rejected + rejected
+                tt_tested = tt_tested + positive + negative
+                tt_verified = tt_verified + total_verified
+                tt_retrieved = tt_retrieved + total_retrieved
+            else:
+                pass
         table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected,
                       tt_tested, tt_verified, tt_retrieved])
         return sorted(table, key=itemgetter(0, 1))
 
-    def dbsr_pending_results_report(self, startdate=None, enddate=None):
+    def dbsr_pending_results_report(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)
         table = []
 
@@ -736,23 +730,25 @@ class MalawiReports(Results160Reports):
                       'Unprocessed', 'Total Pending'])
         tt_new = tt_notified = tt_updated = tt_unprocessed = tt_pending = 0
         new = notified = updated = unprocessed = total_pending = 0
-        # TODO: change to also handle case for a specific location request.
         for location in self.get_live_facilities():
-            new = self.get_new_results(location).filter(notification_status='new').count()
-            notified = self.get_new_results(location).filter(notification_status='notified').count()
-            updated = self.get_new_results(location).filter(notification_status='updated').count()
-            unprocessed = self.get_new_results(location).filter(notification_status='unprocessed').count()
-            total_pending = new + notified + updated + unprocessed
             parent_name = location.parent and location.parent.name or ' '
-            table.append([' ' + parent_name, ' ' + location.name, new,
+            if (district == "All Districts" or district == parent_name):
+                new = self.get_new_results(location).filter(notification_status='new').count()
+                notified = self.get_new_results(location).filter(notification_status='notified').count()
+                updated = self.get_new_results(location).filter(notification_status='updated').count()
+                unprocessed = self.get_new_results(location).filter(notification_status='unprocessed').count()
+                total_pending = new + notified + updated + unprocessed
+
+                table.append([' ' + parent_name, ' ' + location.name, new,
                           notified, updated, unprocessed, total_pending])
 
-            tt_new = tt_new + new
-            tt_notified = tt_notified + notified
-            tt_updated = tt_updated + updated
-            tt_unprocessed = tt_unprocessed + unprocessed
-            tt_pending = tt_pending + total_pending
-
+                tt_new = tt_new + new
+                tt_notified = tt_notified + notified
+                tt_updated = tt_updated + updated
+                tt_unprocessed = tt_unprocessed + unprocessed
+                tt_pending = tt_pending + total_pending
+            else:
+                pass
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, 
                       tt_unprocessed, tt_pending])
         return sorted(table, key=itemgetter(0, 1))
