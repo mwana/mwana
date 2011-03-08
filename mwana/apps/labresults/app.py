@@ -189,9 +189,9 @@ class App (rapidsms.apps.base.AppBase):
             order_by('pk')
         NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
-            msg_text = ("Hello {name}, {count} results sent to printer "
-                        "at {clinic}. IDs : {nuids}"
-                        "".format(name=contact.name, count=len(results),
+            msg_text = (u"Hello {name}, {count} results sent to printer "
+                        u"at {clinic}. IDs : {nuids}"
+                        u"".format(name=contact.name, count=len(results),
                         clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()
         
