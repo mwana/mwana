@@ -19,9 +19,10 @@ class Results160Reports:
     MAX_REPORTING_PERIOD = 100 # days
     BAR_LENGTH = 5.0
     today = date.today()
-    dbsr_enddate = datetime(today.year, today.month, today.day) + timedelta(days=1)
-    -timedelta(seconds=0.01)
-    dbsr_startdate = datetime(today.year, today.month, today.day)-timedelta(days=30)
+    dbsr_enddate = datetime(today.year, today.month, today.day) + \
+                   timedelta(days=1) - timedelta(seconds=0.01)
+    dbsr_startdate = datetime(today.year, today.month, today.day) - \
+                     timedelta(days=30)
 
     def safe_rounding(self, float):
         try:
@@ -721,6 +722,7 @@ class MalawiReports(Results160Reports):
                       tt_tested, tt_verified, tt_retrieved])
         return sorted(table, key=itemgetter(0, 1))
 
+
     def dbsr_pending_results_report(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)
         table = []
@@ -752,4 +754,101 @@ class MalawiReports(Results160Reports):
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, 
                       tt_unprocessed, tt_pending])
         return sorted(table, key=itemgetter(0, 1))
+
+
+    def dbsr_positivity_data(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+
+        def percent(num, den):
+            if not num:
+                return 0
+            elif not den:
+                return 0
+            else:
+                return "%4.1f" % (100.0 * num / den)
+                
+
+        tt_positive = tt_negative = tt_rejected = 0
+        tt_tested = tt_verified = tt_retrieved = total_dbs = 0
+        positive = negative = rejected = total_tested = 0
+        percent_positive_district =  percent_negative_district = \
+                                     percent_rejected_district = 0
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                positive = self.get_new_results(location).filter(result='P').count()
+                negative = self.get_new_results(location).filter(result='N').count()
+                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                total_tested = positive + negative
+
+                tt_positive = tt_positive + positive
+                tt_negative = tt_negative + negative
+                tt_rejected = tt_rejected + rejected
+                tt_tested = tt_tested + total_tested
+                total_dbs = tt_positive + tt_negative + tt_rejected
+            else:
+                pass
+
+        # calculate district level stats.
+        percent_positive_district = percent(tt_positive, total_dbs)
+        percent_negative_district = percent(tt_negative, total_dbs)
+        percent_rejected_district = percent(tt_rejected, total_dbs)
+                
+        return total_dbs, percent_positive_district, percent_negative_district, percent_rejected_district
+
+
+    def dbsr_graph_data(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+
+        days = self.get_all_dates_dictionary()
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                sent_results = self.get_sent_results(location)
+                for result in sent_results:
+                    try:
+                        days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
+                    except KeyError:
+                        if len(days) == 1:break
+
+        # assign some variable with a value, not so friendly to calculate in templates
+        single_bar_length = max(days.values()) / self.BAR_LENGTH
+
+        # for easy sorting, create a list of lists from the dictionary
+        table = []
+        for key, value in days.items():
+            table.append([key, value])
+
+        return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
+        
+        
+#Reminders
+    def reminders_patient_events_report(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+        
+        table = []
+
+        table.append(['  Facility', 'Count of Births'])
+
+        cursor = connection.cursor()
+
+        cursor.execute('SELECT locations_location.name AS Facility, count(reminders_patientevent.id) as Count ' +
+                       'FROM reminders_patientevent \
+                          LEFT JOIN reminders_event ON reminders_patientevent.event_id = reminders_event.id\
+                          LEFT JOIN rapidsms_connection ON rapidsms_connection.id = reminders_patientevent.cba_conn_id\
+                          LEFT JOIN rapidsms_contact ON rapidsms_connection.contact_id = rapidsms_contact.id\
+                          LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
+                          LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
+                          WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
+                          AND locations_location.send_live_results = %s\
+                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate, 'True'])
+        total = 0
+        for row in cursor.fetchall():
+            total = total + row[1]
+            if row[0]:
+                table.append([' ' + row[0], row[1]])
+            else:
+                table.append([' Unknown', row[1]])
+        table.append(['All listed clinics', total])
+        return sorted(table, key=itemgetter(0))
         

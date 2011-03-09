@@ -59,15 +59,13 @@ def malawi_reports(request, location=None):
 
     districts = r.get_live_districts()
 
-    births = r.reminders_patient_events_report(startdate, enddate)
+    births = r.reminders_patient_events_report(startdate, enddate, district)
 
-    single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate,
-                                                             enddate)
+    single_bar_length, tt_in_graph, \
+    graph = r.dbsr_graph_data(startdate, enddate, district)
 
-    percent_positive_country, percent_negative_country, \
-    percent_rejected_country, percent_positive_provinces, \
-    percent_negative_provinces, percent_rejected_provinces, total_dbs, \
-    months_reporting, days_reporting, year_reporting = r.dbs_positivity_data()
+    total_dbs, percent_positive_district, percent_negative_district, \
+    percent_rejected_district= r.dbsr_positivity_data(startdate, enddate, district)
 
     return render_to_response('reports/malawi.html',
         {'startdate': startdate,
@@ -88,16 +86,10 @@ def malawi_reports(request, location=None):
          'single_bar_length': single_bar_length,
          'tt_in_graph': tt_in_graph,
          'pending_results': pending,
-         'percent_positive_country': percent_positive_country,
-         'percent_negative_country': percent_negative_country,
-         'percent_rejected_country': percent_rejected_country,
-         'percent_positive_provinces': percent_positive_provinces,
-         'percent_negative_provinces': percent_negative_provinces,
-         'percent_rejected_provinces': percent_rejected_provinces,
+         'percent_positive_district': percent_positive_district,
+         'percent_negative_district': percent_negative_district,
+         'percent_rejected_district': percent_rejected_district,
          'total_dbs': total_dbs,
-         'months_reporting': months_reporting,
-         'days_reporting': days_reporting,
-         'year_reporting': year_reporting,
      }, context_instance=RequestContext(request))
 
 
