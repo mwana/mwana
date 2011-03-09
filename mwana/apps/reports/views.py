@@ -59,7 +59,7 @@ def malawi_reports(request, location=None):
 
     districts = r.get_live_districts()
 
-    births = r.reminders_patient_events_report(startdate, enddate, district)
+    births = r.reminders_patient_events_report(startdate, enddate)
 
     single_bar_length, tt_in_graph, \
     graph = r.dbsr_graph_data(startdate, enddate, district)

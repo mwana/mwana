@@ -820,35 +820,3 @@ class MalawiReports(Results160Reports):
             table.append([key, value])
 
         return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
-        
-        
-#Reminders
-    def reminders_patient_events_report(self, startdate=None, enddate=None, district=None):
-        self.set_reporting_period(startdate, enddate)
-        
-        table = []
-
-        table.append(['  Facility', 'Count of Births'])
-
-        cursor = connection.cursor()
-
-        cursor.execute('SELECT locations_location.name AS Facility, count(reminders_patientevent.id) as Count ' +
-                       'FROM reminders_patientevent \
-                          LEFT JOIN reminders_event ON reminders_patientevent.event_id = reminders_event.id\
-                          LEFT JOIN rapidsms_connection ON rapidsms_connection.id = reminders_patientevent.cba_conn_id\
-                          LEFT JOIN rapidsms_contact ON rapidsms_connection.contact_id = rapidsms_contact.id\
-                          LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
-                          LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
-                          WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
-                          AND locations_location.send_live_results = %s\
-                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate, 'True'])
-        total = 0
-        for row in cursor.fetchall():
-            total = total + row[1]
-            if row[0]:
-                table.append([' ' + row[0], row[1]])
-            else:
-                table.append([' Unknown', row[1]])
-        table.append(['All listed clinics', total])
-        return sorted(table, key=itemgetter(0))
-        
