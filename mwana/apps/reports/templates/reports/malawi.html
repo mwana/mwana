@@ -1,0 +1,242 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+{% load labresults_tags %}
+
+{% block title %}Mwana Reports - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+
+<div>
+  <div class="left">
+    <div class="module">
+       <h1>Date range and location reports:</h1>
+       <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+      <br>
+      <form name="getValues" action="" method="GET">
+        <p>Select Period
+          <input type="text" name="startdate" size="9" value={{ startdate }} />
+          to
+          <input type="text" name="enddate" size="9" value={{ enddate }} />
+	  Location:
+	  <select name="location" value="{{ location }}">
+	    <option value="All Districts"
+		    {% ifequal selected_location "All districts" %}
+		    selected="selected"
+		    {% endifequal %}>
+	      All Districts</option>
+	    {% for location in districts %}
+	    <option value="{{ location }}"
+		    {% ifequal selected_location location %} 
+		    selected="selected" 
+		    {% endifequal %}>
+	      {{ location }}</option>
+	    {% endfor %}
+	  </select>
+          <input type="submit" value="Ok" name="SubmitValues" /></form>
+
+      <p>Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b>
+	by <b>{{ user.username|title }}</b></p>
+      
+      <div>
+
+	<div class="module">
+          <h2>Percentage (%) Positivity</h2>                
+          <table width="100%" class="th" bgcolor="#EEEEEE">
+            <tr class="th" >
+              <td align="center" width="295">
+                <p align="center"><font size="6">
+		    {{percent_positive_district }}%
+		</font></p>
+                <p align="center"><font size="3" ><b>Positivity</b></font></p>
+              </td>
+              <td width="407" colspan="2">
+                Average Positivity for {{total_dbs}} samples processed from 
+		{{startdate}} to {{enddate}}
+                <p>{{percent_negative_district}}% Negative,
+                <p>{{percent_rejected_district}}% Rejected
+              </td>
+            </tr>                    
+          </table>               
+        </div>
+        <p align="center"><h3>Results160 Report 1 - Results
+            Tested By Lab and Received By Facilities between 
+	    StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+	<p><b>DEFINITION  - Tested - means processed by lab
+	    and result recorded,  Verified – means lab have
+	    approved its release,  Received - means facilities
+	    have successfully received the results via
+	    SMS</b></p>
+	<p></p>
+        <table width="100%">
+          {% for record in sent_results_rpt %}
+          <tr>
+            <td width="20">
+              {% if forloop.counter0 %}
+              {% if not forloop.last %}
+              {{ forloop.counter0 }}
+              {% endif %}
+              {% endif %}
+            </td>
+            {% for column in record %}
+            {% if column %}
+            {% if not forloop.parentloop.counter0 %}
+            <td width="20"><u>{{ column }}</u></td>
+            {% else %}
+            {% if forloop.parentloop.last %}
+            <td width="20"><b>{{ column }}</b></td>
+            {% else %}
+            <td width="20">{{ column }}</td>
+            {% endif %}
+            {% endif %}
+            {% else %}
+            {% if forloop.parentloop.last %}
+            <td><b> 0 </b></td>
+            {% else %}
+            <td> 0 </td>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+	<br>
+          <h3>Results160 Report 2 - Pending Results for Clinics between 
+	    StartDate: {{startdate}} Enddate: {{enddate}}
+	  </h3>
+	<p></p>
+	<p><b>DEFINITION  -  Shows the number of samples recorded as received
+	    at laboratory,  but not yet received by facility via SMS. New - 
+	    A fresh result from the lab, Notified - Clinic has been notified of
+	    new result, Updated - record has been updated from the lab, 
+	    Unprocessed - At lab, not processed yet.</b></p>
+	<br>
+        <table width="100%">
+          {% for record in pending_results %}
+          <tr>
+            <td width="20">
+              {% if forloop.counter0 %}
+              {% if not forloop.last %}
+              {{ forloop.counter0 }}
+              {% endif %}
+              {% endif %}
+            </td>
+            {% for column in record %}
+            {% if column %}
+            {% if not forloop.parentloop.counter0 %}
+            <td width="20"><u>{{ column }}</u></td>
+            {% else %}
+            {% if forloop.parentloop.last %}
+            <td width="20"><b>{{ column }}</b></td>
+            {% else %}
+            <td width="20">{{ column }}</td>
+            {% endif %}
+            {% endif %}
+            {% else %}
+            {% if forloop.parentloop.last %}
+            <td><b> 0 </b></td>
+            {% else %}
+            <td> 0 </td>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </table>
+	<br>
+        <h3>Results160 Report 3 - Trends of Result Retrieval in period between 
+	  StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+	<br>
+	<p><b>DEFINITION  -  Shows the frequency of result retrieval over the 
+	    selected period</b></p>
+	<p>
+          Showing a total of {{ tt_in_graph }} results received in the
+          period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+        </p>
+
+        {% for record in graph %}
+
+        {% for column in record %}
+        {% if not forloop.counter0 %}
+        {{column}}&nbsp;
+        {% else %}
+        {% if column %}
+        <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" 
+	     alt="missing bar" height="10"
+             width="{% widthratio column single_bar_length 100 %}" /> 
+	{{column}}
+
+        {% else %}
+        Nil
+        {% endif %}
+        <br>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
+      </div>
+        <div class="module">
+          <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
+          <p>
+            <h3>RemindMe Report 1 - Births from Clinics between StartDate: 
+	      {{startdate}} and Enddate: {{enddate}}
+	    </h3>
+	    <br>
+	  <p><b>DEFINITION - Showing the number of births registered by 
+	      facility in the given period (in all districts).</b></p>
+          <table width="100%">
+            {% for record in births_rpt %}
+            <tr>
+              <td width="20">
+                {% if forloop.counter0 %}
+                {% if not forloop.last %}
+                {{ forloop.counter0 }}
+                {% endif %}
+                {% endif %}
+              </td>
+              {% for column in record %}
+              {% if column %}
+              {% if not forloop.parentloop.counter0 %}
+              <td width="20"><u>{{ column }}</u></td>
+              {% else %}
+              {% if forloop.parentloop.last %}
+              <td width="20"><b>{{ column }}</b></td>
+              {% else %}
+              <td width="20">{{ column }}</td>
+              {% endif %}
+              {% endif %}
+              {% else %}
+              {% if forloop.parentloop.last %}
+              <td><b> 0 </b></td>
+              {% else %}
+              <td> 0 </td>
+              {% endif %}
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </table>
+        </div>
+    </div>
+  </div>
+  <div class="clear-hack"></div>
+</div>
+
+</div>
+{% endblock %}

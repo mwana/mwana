@@ -24,6 +24,8 @@ LANGUAGE_CODE = 'bem-zm'
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
+ROOT_URLCONF = 'mwana.zambia.urls'
+
 # LOG_FORMAT override to include time
 LOG_FORMAT  = "[%(asctime)s] [%(name)s]: %(message)s"
 
@@ -41,6 +43,6 @@ RAPIDSMS_TABS = [
 #    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.labresults.views.mwana_reports', 'Reports'),
+    ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
