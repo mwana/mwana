@@ -1,4 +1,5 @@
 from rapidsms.messages.outgoing import OutgoingMessage
+from datetime import datetime
 
 from mwana.apps.tlcprinters.models import MessageConfirmation
 
