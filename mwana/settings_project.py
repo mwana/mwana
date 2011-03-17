@@ -222,6 +222,7 @@ MAX_SMS_LENGTH = 160
 # Results160 setting to configure whether or not real results from the lab
 # should be delivered to health clinics
 SEND_LIVE_LABRESULTS = True
+ON_LIVE_SERVER = True
 
 # Miscellaneous slugs needed by Results160 and dependent on the data schema/
 # local environment.  You will almost certainly want to customize these in

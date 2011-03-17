@@ -103,6 +103,13 @@ class App (rapidsms.apps.base.AppBase):
         """
         quick and dirty way of ignoring messages from mobile service providers
         """
+        from django.conf import settings
+        if settings.ON_LIVE_SERVER:
+            for c in message.connection.identity:
+                if c in 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ':
+                    logger.info("Ignoring message %s from %s"% (message.text, message.connection.identity) )
+                    return True
+
         if message.connection.identity[1:-1].isdigit() and\
         len(message.connection.identity) <7:
             logger.info("Ignoring message %s from %s"% (message.text, message.connection.identity) )

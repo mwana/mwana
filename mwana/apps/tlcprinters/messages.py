@@ -1,4 +1,5 @@
 from rapidsms.messages.outgoing import OutgoingMessage
+from datetime import datetime
 
 from mwana.apps.tlcprinters.models import MessageConfirmation
 
@@ -27,3 +28,9 @@ class TLCOutgoingMessage(OutgoingMessage):
                                                text=self.text,
                                                sent_at=self.sent_at,
                                                seq_num=seq_num)
+        else:
+            MessageConfirmation.objects.create(connection=self._connection,
+                                               text=self.text,
+                                               sent_at=datetime.today(),
+                                               seq_num=seq_num)
+                                               

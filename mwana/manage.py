@@ -39,4 +39,9 @@ if __name__ == "__main__":
         print 'NOTICE: running tests for the following mwana apps: %s' %\
               ', '.join(apps)
         sys.argv.extend(apps)
+    elif len(sys.argv) > 1 and sys.argv[1] == 'test' and settings_project.ON_LIVE_SERVER:
+        print "___"*20
+        print '\nPlease set "ON_LIVE_SERVER" to False in settings_project\n'
+        print "___"*20
+        sys.exit()
     execute_manager(settings_project)

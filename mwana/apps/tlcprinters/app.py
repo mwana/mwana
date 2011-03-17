@@ -42,7 +42,7 @@ class App (rapidsms.apps.base.AppBase):
                                                               connection=message.connection,
                                                               confirmed=False,
                                                               ).order_by('-sent_at')[0]
-            except MessageConfirmation.DoesNotExist:
+            except IndexError: #DoesNotExist never happens with filter()
                 msg_conf = None
                 logger.warning('No message confirmation found for '
                                'connection=%s and seq_num=%s' %
