@@ -37,6 +37,9 @@ class Migration(SchemaMigration):
         for contact in orm.Contact.objects.all():
             contact.alias, contact.first_name, contact.last_name =\
                Contact.parse_name(contact.name)
+            contact.alias = contact.alias[:100]
+            contact.first_name = contact.first_name[:30]
+            contact.last_name = contact.last_name[:30]
             contact.save()
 
         # We have to commit before we can alter the table again (otherwise we
