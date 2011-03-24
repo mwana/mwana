@@ -46,6 +46,7 @@ ROOT_URLCONF = 'mwana.malawi.urls'
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
 INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
+RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 RAPIDSMS_TABS.append(('xforms', 'XForms'))
 
 # Add the people and growth monitoring apps for Malawi:

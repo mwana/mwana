@@ -18,7 +18,7 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
-from mwana.util import is_today_a_weekend, is_weekend
+from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
 
@@ -422,6 +422,31 @@ class TestApp(LabresultsSetUp):
             my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
             self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
         self.assertEqual(3, MessageConfirmation.objects.count())
+
+        # lets fake that one message was confirmed by printer
+        # call task again. only unconfirmed result is resent
+        confirmed = MessageConfirmation.objects.get(text__contains=\
+                                                        "Patient ID: 0002")
+        confirmed.confirmed = True
+        confirmed.save()
+
+        tlcprinter_tasks.send_results_to_printer(self.router)
+        msgs=self.receiveAllMessages()
+
+        self.assertEqual(3, len(msgs))
+        expected_msgs = []
+        msg1 = "John Banda:Hello John Banda, 1 results sent to printer at Mibenge Clinic. IDs : 402029-0001-1"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 1 results sent to printer at Mibenge Clinic. IDs : 402029-0001-1"
+        msg3 = "Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
+
+        expected_msgs.append(msg1)
+        expected_msgs.append(msg2)
+        expected_msgs.append(msg3)
+        for msg in msgs:
+            my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
+            self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
+
+            
     def testResultsSample(self):
         """
         Tests getting of results for given samples.
@@ -576,14 +601,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Feb
-            clinic_worker > Reports 403012 2
+            clinic_worker > Reports 403012 Mar
+            clinic_worker > Reports 403012 3
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 Feb
+            clinic_worker > Reports 40 Mar
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        

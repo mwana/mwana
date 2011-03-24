@@ -9,6 +9,10 @@ from mwana.apps.broadcast.handlers.blaster import BlastHandler
 from mwana.apps.broadcast.handlers.district import DistrictHandler
 from mwana.apps.broadcast.handlers.hsa import HSAHandler
 from mwana.apps.broadcast.handlers.msg import MessageHandler
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 class App (rapidsms.apps.base.AppBase):
 
@@ -95,7 +99,15 @@ class App (rapidsms.apps.base.AppBase):
         # give the message clean text
         message.text = msgtxt
 
-
+    def handle(self, message):
+        """
+        quick and dirty way of ignoring messages from mobile service providers
+        """
+        if message.connection.identity[1:-1].isdigit() and\
+        len(message.connection.identity) <7:
+            logger.info("Ignoring message %s from %s"% (message.text, message.connection.identity) )
+            return True
+        
     def period_vs_decimal(self, str):
         '''Removes .'s unless they are between two digits'''
         txt = str

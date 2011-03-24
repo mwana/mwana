@@ -126,6 +126,14 @@ class LocationBase(models.Model):
         return "/".join(map(_code, self.path))
 
 
+    @property
+    def district(self):
+        """
+        Return the name of the parent location type for this location
+        """
+        return self.parent and self.parent.name or ' '
+
+
     def save(self, *args, **kwargs):
 
         # remove any superfluous spaces from the _name_. it would be a

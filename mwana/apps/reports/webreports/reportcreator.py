@@ -19,9 +19,10 @@ class Results160Reports:
     MAX_REPORTING_PERIOD = 100 # days
     BAR_LENGTH = 5.0
     today = date.today()
-    dbsr_enddate = datetime(today.year, today.month, today.day) + timedelta(days=1)
-    -timedelta(seconds=0.01)
-    dbsr_startdate = datetime(today.year, today.month, today.day)-timedelta(days=30)
+    dbsr_enddate = datetime(today.year, today.month, today.day) + \
+                   timedelta(days=1) - timedelta(seconds=0.01)
+    dbsr_startdate = datetime(today.year, today.month, today.day) - \
+                     timedelta(days=30)
 
     def safe_rounding(self, float):
         try:
@@ -527,7 +528,8 @@ class Results160Reports:
                           LEFT JOIN locations_location  as cba_location ON rapidsms_contact.location_id = cba_location.id\
                           LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
                           WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
-                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate])
+                          AND locations_location.send_live_results = %s\
+                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate, 'True'])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
@@ -663,3 +665,158 @@ class Results160Reports:
 
         return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
 
+
+class MalawiReports(Results160Reports):
+    
+    def get_live_facilities(self):
+        return Location.objects.filter(send_live_results=True).distinct()
+
+    def get_live_districts(self):
+        """Returns a sorted list of districts with live facilities"""
+        parents = []
+        for site in self.get_live_facilities():
+            parents.append(site.parent and site.parent.name or ' ')
+            
+        return sorted(list(set(parents))) 
+            
+    def get_new_results(self, location):
+        """Returns new results query set for location in reporting period"""
+
+        return Result.objects.filter(Q(processed_on__gte=self.dbsr_startdate),
+                                     Q(processed_on__lte=self.dbsr_enddate))\
+                                     .filter(clinic=location)
+        
+    def dbsr_tested_retrieved_report(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility',
+                     'Positive', 'Negative', 'Rejected',
+                     'Tested', 'Verified', 'Received'])
+        tt_positive = tt_negative = tt_rejected = 0
+        tt_tested = tt_verified = tt_retrieved = 0
+        positive = negative = rejected = total_tested = 0
+        tested = ['Detected', 'NotDetected', 'R', 'X', 'I']
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                positive = self.get_new_results(location).filter(result='P').count()
+                negative = self.get_new_results(location).filter(result='N').count()
+                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                total_retrieved = self.get_new_results(location).filter(notification_status='sent').count()
+                total_verified = self.get_new_results(location).filter(verified=True).count()
+                total_tested = positive + negative
+
+                table.append([' ' + parent_name, ' ' + location.name, positive,
+                         negative, rejected, total_tested, total_verified, total_retrieved])
+
+                tt_positive = tt_positive + positive
+                tt_negative = tt_negative + negative
+                tt_rejected = tt_rejected + rejected
+                tt_tested = tt_tested + positive + negative
+                tt_verified = tt_verified + total_verified
+                tt_retrieved = tt_retrieved + total_retrieved
+            else:
+                pass
+        table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected,
+                      tt_tested, tt_verified, tt_retrieved])
+        return sorted(table, key=itemgetter(0, 1))
+
+
+    def dbsr_pending_results_report(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        table.append(['  District', '  Facility',
+                      'New', 'Notified', 'Updated',
+                      'Unprocessed', 'Total Pending'])
+        tt_new = tt_notified = tt_updated = tt_unprocessed = tt_pending = 0
+        new = notified = updated = unprocessed = total_pending = 0
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                new = self.get_new_results(location).filter(notification_status='new').count()
+                notified = self.get_new_results(location).filter(notification_status='notified').count()
+                updated = self.get_new_results(location).filter(notification_status='updated').count()
+                unprocessed = self.get_new_results(location).filter(notification_status='unprocessed').count()
+                total_pending = new + notified + updated + unprocessed
+
+                table.append([' ' + parent_name, ' ' + location.name, new,
+                          notified, updated, unprocessed, total_pending])
+
+                tt_new = tt_new + new
+                tt_notified = tt_notified + notified
+                tt_updated = tt_updated + updated
+                tt_unprocessed = tt_unprocessed + unprocessed
+                tt_pending = tt_pending + total_pending
+            else:
+                pass
+        table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, 
+                      tt_unprocessed, tt_pending])
+        return sorted(table, key=itemgetter(0, 1))
+
+
+    def dbsr_positivity_data(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+
+        def percent(num, den):
+            if not num:
+                return 0
+            elif not den:
+                return 0
+            else:
+                return "%4.1f" % (100.0 * num / den)
+                
+
+        tt_positive = tt_negative = tt_rejected = 0
+        tt_tested = tt_verified = tt_retrieved = total_dbs = 0
+        positive = negative = rejected = total_tested = 0
+        percent_positive_district =  percent_negative_district = \
+                                     percent_rejected_district = 0
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                positive = self.get_new_results(location).filter(result='P').count()
+                negative = self.get_new_results(location).filter(result='N').count()
+                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                total_tested = positive + negative
+
+                tt_positive = tt_positive + positive
+                tt_negative = tt_negative + negative
+                tt_rejected = tt_rejected + rejected
+                tt_tested = tt_tested + total_tested
+                total_dbs = tt_positive + tt_negative + tt_rejected
+            else:
+                pass
+
+        # calculate district level stats.
+        percent_positive_district = percent(tt_positive, total_dbs)
+        percent_negative_district = percent(tt_negative, total_dbs)
+        percent_rejected_district = percent(tt_rejected, total_dbs)
+                
+        return total_dbs, percent_positive_district, percent_negative_district, percent_rejected_district
+
+
+    def dbsr_graph_data(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+
+        days = self.get_all_dates_dictionary()
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                sent_results = self.get_sent_results(location)
+                for result in sent_results:
+                    try:
+                        days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
+                    except KeyError:
+                        if len(days) == 1:break
+
+        # assign some variable with a value, not so friendly to calculate in templates
+        single_bar_length = max(days.values()) / self.BAR_LENGTH
+
+        # for easy sorting, create a list of lists from the dictionary
+        table = []
+        for key, value in days.items():
+            table.append([key, value])
+
+        return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
