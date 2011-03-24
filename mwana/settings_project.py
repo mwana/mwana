@@ -72,7 +72,6 @@ INSTALLED_APPS = [
 #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "mwana.apps.echo",
-    "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.agents",
@@ -89,6 +88,7 @@ INSTALLED_APPS = [
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
     "mwana.apps.hub_workflow",
+    "mwana.apps.stringcleaning",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
