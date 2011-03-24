@@ -46,3 +46,9 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
+
+# we need separate migration modules for the rapidsms app in Malawi and
+# Zambia, because different 3rd party apps add different model extensions
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'mwana.zambia.migrations.rapidsms',
+}
