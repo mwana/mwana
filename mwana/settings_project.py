@@ -221,6 +221,9 @@ MAX_SMS_LENGTH = 160
 # Results160 setting to configure whether or not real results from the lab
 # should be delivered to health clinics
 SEND_LIVE_LABRESULTS = True
+
+# When set to True, incoming messages from non-standard phone numbers will be
+# ignored. E.g. +551, MTN, 440. See handle()in stringcleaning app.py
 ON_LIVE_SERVER = True
 
 # Miscellaneous slugs needed by Results160 and dependent on the data schema/
