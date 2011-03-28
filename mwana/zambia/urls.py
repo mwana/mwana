@@ -5,7 +5,6 @@ from mwana.apps.reports import views
 urlpatterns = patterns('',
     # global project URLs:
     (r'^', include('mwana.urls')),
-    # custom URL additions for Malawi:
-    url(r'^$', views.malawi_reports, name='mwana_reports'),
-    (r'^', include('rapidsms_xforms.urls')), # needs top level formList url
+    # custom URL additions for Zambia:
+    url(r'^$', views.zambia_reports, name='mwana_reports'),
 )
