@@ -17,7 +17,7 @@ RESULTS160_SLUGS = {
     'DISTRICT_SLUGS': ('districts',), # XXX verify me
     'PROVINCE_SLUGS': ('provinces',), # XXX verify me
 }
-
+INSTALLED_APPS.append("mwana.apps.reports.webreports")
 TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'bem-zm'
