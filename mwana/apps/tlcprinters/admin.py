@@ -6,6 +6,6 @@ from mwana.apps.tlcprinters import models as tlcprinters
 class MessageConfirmationAdmin(admin.ModelAdmin):
     list_display = ('sent_at', 'connection', 'text', 'seq_num', 'confirmed',)
     list_filter = ('sent_at', 'confirmed',)
-    search_fields = ('text',)
+    search_fields = ('text','connection__identity','connection__contact__name',)
     date_hierarchy = 'sent_at'
 admin.site.register(tlcprinters.MessageConfirmation, MessageConfirmationAdmin)
