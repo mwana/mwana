@@ -11,8 +11,12 @@ from mwana import const
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
+from mwana.apps.reports.webreports.models import GroupFacilityMapping
 
 class Results160Reports:
+    def __init__(self, current_user=None):
+        self.user = current_user
+
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
     # Arbitrary values
     SOME_INVALID_DAYS = 3650
@@ -39,30 +43,37 @@ class Results160Reports:
             datetime(enddate.year, enddate.month, enddate.day)\
             + timedelta(days=1) - timedelta(seconds=0.01)
 
+    def user_facilities(self):
+        from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+            return  Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+        else:
+            return Location.objects.all()
+
     def get_active_facilities(self):
-        return Location.objects.filter(lab_results__notification_status__in=
+        return self.user_facilities().filter(lab_results__notification_status__in=
                                        ['sent']).distinct()
 
     def get_facilities_for_dbs_notifications(self):
-        return Location.objects.filter(supportedlocation__supported=True,
+        return self.user_facilities().filter(supportedlocation__supported=True,
                                        samplenotification__date__gte=self.dbsr_startdate,
                                        samplenotification__date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_rsts_reporting(self):
-        return Location.objects.filter(lab_results__notification_status__in=['sent'],
+        return self.user_facilities().filter(lab_results__notification_status__in=['sent'],
                                        lab_results__result_sent_date__gte=self.dbsr_startdate,
                                        lab_results__result_sent_date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_transport_reporting(self):
-        return Location.objects.filter(lab_results__collected_on__lte=self.dbsr_enddate,
+        return self.user_facilities().filter(lab_results__collected_on__lte=self.dbsr_enddate,
                                        lab_results__entered_on__gte=self.dbsr_startdate,
                                        lab_results__entered_on__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_processing_reporting(self):
-        return Location.objects.filter(Q(lab_results__entered_on__lt=self.dbsr_enddate) |
+        return self.user_facilities().filter(Q(lab_results__entered_on__lt=self.dbsr_enddate) |
                                        Q(lab_results__entered_on=self.dbsr_enddate),
                                        Q(lab_results__processed_on__gt=self.dbsr_startdate)
                                        | Q(lab_results__processed_on=self.dbsr_startdate),
@@ -71,7 +82,7 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_turnarround_reporting(self):
-        return Location.objects.filter(Q(lab_results__collected_on__lt=self.dbsr_enddate) |
+        return self.user_facilities().filter(Q(lab_results__collected_on__lt=self.dbsr_enddate) |
                                        Q(lab_results__collected_on=self.dbsr_enddate),
                                        Q(lab_results__result_sent_date__gt=self.dbsr_startdate)
                                        | Q(lab_results__result_sent_date=self.dbsr_startdate),
@@ -80,19 +91,19 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_entering_reporting(self):
-        return Location.objects.filter(lab_results__entered_on__lte=self.dbsr_enddate,
+        return self.user_facilities().filter(lab_results__entered_on__lte=self.dbsr_enddate,
                                        lab_results__result_sent_date__gte=self.dbsr_startdate,
                                        lab_results__result_sent_date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_retrieval_reporting(self):
-        return Location.objects.filter(lab_results__arrival_date__lte=self.dbsr_enddate,
+        return self.user_facilities().filter(lab_results__arrival_date__lte=self.dbsr_enddate,
                                        lab_results__result_sent_date__gte=self.dbsr_startdate,
                                        lab_results__result_sent_date__lte=self.dbsr_enddate
                                        ).distinct()
 
     def get_facilities_for_samples_at_lab(self):
-        return Location.objects.filter(Q(lab_results__notification_status__in=self.STATUS_CHOICES),
+        return self.user_facilities().filter(Q(lab_results__notification_status__in=self.STATUS_CHOICES),
                                        Q(lab_results__entered_on__gt=self.dbsr_startdate)
                                        | Q(lab_results__entered_on=self.dbsr_startdate),
                                        Q(lab_results__entered_on__lt=self.dbsr_enddate) |
@@ -100,7 +111,7 @@ class Results160Reports:
                                        ).distinct()
 
     def get_facilities_for_pending_rsts(self):
-        return Location.objects.filter(Q(lab_results__notification_status__in=[
+        return self.user_facilities().filter(Q(lab_results__notification_status__in=[
                                        'unprocessed', 'new', 'notified', 'updated'])
                                        ).distinct()
 
@@ -520,6 +531,9 @@ class Results160Reports:
 
         cursor = connection.cursor()
 
+        ids=[-1]
+        for loc in self.user_facilities():
+            ids.append(loc.id)
         cursor.execute('SELECT locations_location.name AS Facility, count(reminders_patientevent.id) as Count ' +
                        'FROM reminders_patientevent \
                           LEFT JOIN reminders_event ON reminders_patientevent.event_id = reminders_event.id\
@@ -529,7 +543,10 @@ class Results160Reports:
                           LEFT JOIN locations_location ON cba_location.parent_id = locations_location.id\
                           WHERE reminders_event.name = %s AND date_logged BETWEEN %s AND %s\
                           AND locations_location.send_live_results = %s\
-                          GROUP BY locations_location.name', ['Birth', self.dbsr_startdate, self.dbsr_enddate, 'True'])
+                          AND locations_location.id in %s\
+                          GROUP BY locations_location.name', ['Birth',
+                          self.dbsr_startdate, self.dbsr_enddate, 'True',\
+                          tuple(ids)])
         total = 0
         for row in cursor.fetchall():
             total = total + row[1]
@@ -569,7 +586,8 @@ class Results160Reports:
         self.set_reporting_period(startdate, enddate)
 
         days = self.get_all_dates_dictionary()
-        sent_results = self.get_results_by_status(['sent'])
+        sent_results = self.get_results_by_status(['sent']).\
+        filter(clinic__in=self.user_facilities())
 
         for result in sent_results:
             try:
@@ -596,7 +614,8 @@ class Results160Reports:
         return list(set(parents))
 
     def get_total_results_in_province(self, province):
-        return Result.objects.filter(clinic__parent__parent=province).exclude(result=None).count()
+        return Result.objects.filter(clinic__parent__parent=province).\
+    filter(clinic__in=self.user_facilities()).exclude(result=None).count()
 
     def dbs_positivity_data(self, year=None):
 
@@ -610,12 +629,12 @@ class Results160Reports:
 
         if not year:
             year = date.today().year
-        results = Result.objects.exclude(result=None)
+        results = Result.objects.exclude(result=None).filter(clinic__in=self.user_facilities())
         total_dbs = results.count()
 
-        percent_positive_country = percent(results.filter(result__iexact='P').count(), total_dbs)
-        percent_negative_country = percent(results.filter(result__iexact='N').count(), total_dbs)
-        percent_rejected_country = percent(results.filter(result__in='XIR').count(), total_dbs)
+        percent_positive_country = percent(results.filter(result__iexact='P',clinic__in=self.user_facilities()).count(), total_dbs)
+        percent_negative_country = percent(results.filter(result__iexact='N',clinic__in=self.user_facilities()).count(), total_dbs)
+        percent_rejected_country = percent(results.filter(result__in='XIR',clinic__in=self.user_facilities()).count(), total_dbs)
 
         percent_positive_provinces = []
         percent_negative_provinces = []
@@ -625,9 +644,9 @@ class Results160Reports:
         provinces = self.get_distinct_parents(districts, type_slugs=const.PROVINCE_SLUGS)
         if provinces:
             for province in provinces:
-                percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
-                percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
-                percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province).count(), self.get_total_results_in_province(province)), province.name))
+                percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
+                percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
+                percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
             
                     
         
@@ -669,7 +688,7 @@ class Results160Reports:
 class MalawiReports(Results160Reports):
     
     def get_live_facilities(self):
-        return Location.objects.filter(send_live_results=True).distinct()
+        return self.user_facilities().filter(send_live_results=True).distinct()
 
     def get_live_districts(self):
         """Returns a sorted list of districts with live facilities"""

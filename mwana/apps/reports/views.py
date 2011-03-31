@@ -112,7 +112,7 @@ def zambia_reports(request):
     startdate = min(startdate1, enddate1, datetime.today().date())
     enddate = min(max(enddate1, startdate1), datetime.today().date())
 
-    r = Results160Reports()
+    r = Results160Reports(request.user)
     res = r.dbs_sent_results_report(startdate, enddate)
 
     min_processing_time, max_processing_time, num_of_dbs_processed, \
