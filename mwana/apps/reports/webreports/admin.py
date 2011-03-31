@@ -7,8 +7,15 @@ from mwana.apps.reports.webreports.models import ReportingGroup
 class GroupFacilityMappingAdmin(admin.ModelAdmin):
     list_display = ('group', 'facility',)
     list_filter = ('group', 'facility',)
+    search_fields = ('group__name','facility__name')
 
 admin.site.register(GroupFacilityMapping, GroupFacilityMappingAdmin)
-admin.site.register(GroupUserMapping)
+
+class GroupUserMappingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'group',)
+    list_filter = ('user', 'group',)
+    search_fields = ('group__name','user__username')
+
+admin.site.register(GroupUserMapping, GroupUserMappingAdmin)
 admin.site.register(ReportingGroup)
 
