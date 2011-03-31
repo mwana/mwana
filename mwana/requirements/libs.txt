@@ -11,7 +11,7 @@ djtables-0.1.1.tar.gz
 # djappsettings>=0.1.0
 djappsettings-0.1.0.tar.gz
 # RapidSMS:
-rapidsms-rapidsms-v0.9.6a-5-g43f12d6.tar.gz
+rapidsms-rapidsms-v0.9.6a-17-gd80f038.tar.gz
 # pytz:
 pytz-2010l.tar.gz
 # pygsm must be installed separately because it requires that pytz be
