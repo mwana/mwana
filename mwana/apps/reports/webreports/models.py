@@ -21,11 +21,11 @@ class GroupUserMapping(models.Model):
 
 class GroupFacilityMapping(models.Model):
     group = models.ForeignKey(ReportingGroup)
-    facilty = models.ForeignKey(Location, limit_choices_to={
+    facility = models.ForeignKey(Location, limit_choices_to={
                                 "send_live_results":True})
 
     def __unicode__(self):
-        return "%s: %s" % (self.group, self.facilty)
+        return "%s: %s" % (self.group, self.facility)
 
     class Meta:
-        unique_together = (('group', 'facilty'),)
+        unique_together = (('group', 'facility'),)
