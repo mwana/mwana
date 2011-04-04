@@ -14,8 +14,11 @@ from mwana.apps.locations.models import Location
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 
 class Results160Reports:
-    def __init__(self, current_user=None):
+    def __init__(self, current_user=None, group=None, province=None, district=None):
         self.user = current_user
+        self.reporting_group = group
+        self.reporting_province = province
+        self.reporting_district = district
 
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
     # Arbitrary values
@@ -46,9 +49,27 @@ class Results160Reports:
     def user_facilities(self):
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
         if SYSTEM_LOCALE==LOCALE_ZAMBIA:
-            return  Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+            facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+            if self.reporting_group:
+                facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)|Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
+            
+            
+            if self.reporting_district:
+                facs = facs.filter(slug__startswith=self.reporting_district[:4])
+            elif self.reporting_province:
+                facs = facs.filter(slug__startswith=self.reporting_province[:2])
+            return facs
         else:
             return Location.objects.all()
+        
+    def get_rpt_provinces(self, user):
+        self.user = user         
+        return self.get_distinct_parents(self.get_rpt_districts(user))
+
+    def get_rpt_districts(self, user):
+        self.user = user
+        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
+
 
     def get_active_facilities(self):
         return self.user_facilities().filter(lab_results__notification_status__in=
