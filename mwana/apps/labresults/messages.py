@@ -39,19 +39,19 @@ def build_printer_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
+            msg = (settings.CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "old_req_id":res.old_value.split(":")[0],
                    "old_result":res.get_old_result_text(),
                    "new_req_id":res.requisition_id,
                    "new_result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME})
         else:
-            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
+            msg = (settings.PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME})
         result_strings.append(msg)
                
     return result_strings

@@ -128,11 +128,6 @@ class App (rapidsms.apps.base.AppBase):
         else:
             self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
-            # send the results to registered printer as well if available.
-            printers = self.printers_for_clinic(clinic)
-            if printers.exists():
-                self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
-
 
             self.waiting_for_pin.pop(message.connection)
             
@@ -167,10 +162,7 @@ class App (rapidsms.apps.base.AppBase):
 
     def send_printer_results(self, connections, results, msgcls=OutgoingMessage):
         """Sends the specified results to the given contacts."""
-        if results[0].clinic.has_independent_printer:
-            responses = build_printer_results_messages(results)
-        else:
-            responses = build_results_messages(results)
+        responses = build_printer_results_messages(results)
 
         for connection in connections:
             for resp in responses:
@@ -189,9 +181,9 @@ class App (rapidsms.apps.base.AppBase):
             order_by('pk')
         NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
-            msg_text = (u"Hello {name}, {count} results sent to printer "
-                        u"at {clinic}. IDs : {nuids}"
-                        u"".format(name=contact.name, count=len(results),
+            msg_text = ("Hello {name}, {count} results sent to printer "
+                        "at {clinic}. IDs : {nuids}"
+                        "".format(name=contact.name, count=len(results),
                         clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()
         
@@ -242,13 +234,19 @@ class App (rapidsms.apps.base.AppBase):
 
     def notify_clinic_pending_results(self, clinic):
         """
-        Notifies clinic staff that results are ready via sms.
+        If one or more printers are available at the clinic, sends the results
+        directly there. Otherwise, notifies clinic staff that results are
+        ready via sms.
         """
+        printers = self.printers_for_clinic(clinic)
         results = self._pending_results(clinic)
-        messages  = self.results_avail_messages(clinic, results)
-        if messages:
-            self.send_messages(messages)
-            self._mark_results_pending(results, (msg.connection
+        if printers.exists():
+            self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
+        else:
+            messages  = self.results_avail_messages(clinic, results)
+            if messages:
+                self.send_messages(messages)
+                self._mark_results_pending(results, (msg.connection
                                        for msg in messages))
 
     def send_printers_pending_results(self, clinic):
@@ -298,8 +296,7 @@ class App (rapidsms.apps.base.AppBase):
 
     def notify_clinic_of_changed_records(self, clinic):
         """
-        Notifies clinic of the new status for changed results. Results now
-        only sent to clinics when a pin for results is entered.
+        Notifies clinic of the new status for changed results. 
         """
         changed_results = []
         updated_results = self._updated_results(clinic)
@@ -312,6 +309,14 @@ class App (rapidsms.apps.base.AppBase):
         if not changed_results:
             return
 
+        # if a printer exists for this clinic, send the results
+        # straight there.
+        printers = self.printers_for_clinic(clinic)
+        if printers.exists():
+            self.send_printer_results(printers, changed_results,
+                          msgcls=TLCOutgoingMessage)
+            return
+                        
         contacts = \
         Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                               Q(types=const.get_clinic_worker_type())).\
