@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
 from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
@@ -45,13 +46,15 @@ def build_printer_results_messages(results):
                    "new_req_id":res.requisition_id,
                    "new_result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         else:
             msg = (settings.PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         result_strings.append(msg)
                
     return result_strings
