@@ -51,7 +51,7 @@ RAPIDSMS_TABS = [
 # Add the kannel backends for Zain and TNM
 INSTALLED_BACKENDS.update({
     "zain" : {
-        "ENGINE":  "mwana.backends.kannel",
+        "ENGINE":  "rapidsms.backends.kannel",
         "host": "127.0.0.1",
         "port": 8081,
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
@@ -64,7 +64,7 @@ INSTALLED_BACKENDS.update({
         "encode_errors": "ignore", # strip out unknown (unicode) characters
     },
     "tnm" : {
-        "ENGINE":  "mwana.backends.kannel",
+        "ENGINE":  "rapidsms.backends.kannel",
         "host": "127.0.0.1",
         "port": 8082,
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
