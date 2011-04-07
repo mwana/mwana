@@ -99,7 +99,7 @@ class App (rapidsms.apps.base.AppBase):
         # give the message clean text
         message.text = msgtxt
 
-    def handle(self, message):
+    def default(self, message):
         """
         quick and dirty way of ignoring messages from mobile service providers
         """
