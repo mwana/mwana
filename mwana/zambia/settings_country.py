@@ -50,5 +50,4 @@ RAPIDSMS_TABS = [
 PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 
-TEST_TYPE = "HIV-DNAPCR Result"
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

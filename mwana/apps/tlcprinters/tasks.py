@@ -48,21 +48,4 @@ def clean_up_unconfirmed_results():
                         " : %s, %s, %s" % (msg.id, req_id, clinic.name))
             continue
 
-def send_results_to_printer(router):
-    logger.debug('in tasks.send_results_to_printer')
-    if settings.SEND_LIVE_LABRESULTS:
-        clean_up_unconfirmed_results()
-        new_notified = Q(lab_results__notification_status__in=
-                         ['new', 'notified'])
 
-        clinics_with_results = \
-            Location.objects.filter(Q(has_independent_printer=True)
-                                    & new_notified
-                                    & verified & send_live_results).distinct()
-        labresults_app = router.get_app(const.LAB_RESULTS_APP)
-        for clinic in clinics_with_results:
-            logger.info('sending new results to printer at %s' % clinic)
-            labresults_app.send_printers_pending_results(clinic)
-    else:
-        logger.info('not sending new results because '
-                    'settings.SEND_LIVE_LABRESULTS is False')
