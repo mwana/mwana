@@ -15,6 +15,7 @@ from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
+from mwana.const import get_hub_worker_type
 
 class Alerter:
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
@@ -217,8 +218,12 @@ class Alerter:
         for clinic in clinics:
             additional_text = ""
             if clinic not in active_clinics:
-                additional_text = "The last time this clinic used Results160 was "\
-                    + "%s days ago." % self.days_ago(self.last_retrieved_or_checked(clinic))
+                days_ago = self.days_ago(self.last_retrieved_or_checked(clinic))
+                if days_ago < 40000:
+                    additional_text = "The last time this clinic used Results160 was "\
+                    + "%s days ago." % days_ago
+                else:
+                    additional_text = "This clinic has never used Results160"
             contacts = \
     Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                           Q(types=const.get_clinic_worker_type())).\
@@ -316,11 +321,11 @@ class Alerter:
                 else:
                     pass
             else:
-                self.add_to_district_dbs_elerts(Alert(Alert.DISTRICT_NOT_SENDING_DBS,
+                self.add_to_district_dbs_elerts(Alert.DISTRICT_NOT_SENDING_DBS,
                                                 "The %s district has never sent samples to"
                                                 " %s. Please call the hub and enquire %s" %
                                                 (dist.name, self.get_hub_name(dist),
-                                                self.get_hub_number(dist))),
+                                                self.get_hub_number(dist)),
                                                 dist.name,
                                                 999,
                                                 -999,
@@ -333,11 +338,17 @@ class Alerter:
 
     def get_hub_name(self, location):
         try:
-            return Hub.objects.get(district=location).name
-        except Hub.DoesNotExist:
-            return "(Unkown hub)"
+            return Location.objects.filter(contact__types=get_hub_worker_type()).distinct().get(parent=location).name
+        except:
+            try:
+                return Hub.objects.get(district=location).name
+            except Hub.DoesNotExist:
+                return "(Unkown hub)"
 
     def get_hub_number(self, location):
+        pipo=Contact.objects.filter(types=get_hub_worker_type(),location__parent=location)
+        if pipo:
+            return ", ".join(c.name+": "+c.default_connection.identity for c in pipo)
         try:
             return Hub.objects.exclude(Q(phone=None) | Q(phone='')).\
         get(district=location).phone
