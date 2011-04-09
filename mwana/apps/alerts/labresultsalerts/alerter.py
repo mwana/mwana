@@ -322,9 +322,10 @@ class Alerter:
                     pass
             else:
                 self.add_to_district_dbs_elerts(Alert.DISTRICT_NOT_SENDING_DBS,
-                                                "The %s district has never sent samples to"
-                                                " %s. Please call the hub and enquire %s" %
+                                                "The %s district hub (%s) has never sent samples to"
+                                                " %s. Please call the hub and enquire (%s)" %
                                                 (dist.name, self.get_hub_name(dist),
+                                                self.get_lab_name(dist),
                                                 self.get_hub_number(dist)),
                                                 dist.name,
                                                 999,
@@ -366,7 +367,7 @@ class Alerter:
         try:
             return Payload.objects.filter(lab_results__clinic__parent\
                                           =district)[0].source
-        except Payload.DoesNotExist:
+        except:
             return "(Unkown lab)"
 
     def set_clinic_sent_dbs_start_dates(self, days):
