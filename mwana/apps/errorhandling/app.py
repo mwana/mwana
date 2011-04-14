@@ -14,16 +14,17 @@ from mwana.const import get_clinic_worker_type
 from mwana.const import get_district_worker_type
 from mwana.const import get_hub_worker_type
 from mwana.const import get_province_worker_type
+from mwana.apps.labresults.messages import BAD_PIN
+from mwana.apps.labresults.messages import CLINIC_DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import HUB_DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import CBA_DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import DHO_DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import PHO_DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import UNREGISTERED_DEFAULT_RESPONSE
 import rapidsms
 
 logger = logging.getLogger(__name__)
 
-CLINIC_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are CHECK, RESULT, SENT, TRACE, MSG CBA, MSG CLINIC, MSG ALL and MSG DHO. Respond with any keyword or HELP for more information"
-HUB_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are RECEIVED and SENT. Respond with any keyword or HELP for more information"
-CBA_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
-DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
-PHO_DEFAULT_RESPONSE = "Sorry %s. Respond with keyword HELP for assistance."
-UNREGISTERED_DEFAULT_RESPONSE = "Invalid Keyword. Please send the keyword HELP if you need to be assisted."
 
 class App (rapidsms.apps.base.AppBase):
     """
@@ -37,7 +38,9 @@ class App (rapidsms.apps.base.AppBase):
         if not contact:
             message.respond(UNREGISTERED_DEFAULT_RESPONSE)
             return True
-        
+        if hasattr(message, "possible_bad_pin"):
+            message.respond(BAD_PIN)
+            return True
         # Clinic worker: pin issues
         if is_pin(text) and ready_results(contact).count() == 0:
             message.respond("Hello %s. Are you trying to retrieve new "
