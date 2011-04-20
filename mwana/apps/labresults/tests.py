@@ -912,6 +912,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         # The number of results records should remain to be 3
         self.assertEqual(labresults.Result.objects.count(), 3)
 
+        time.sleep(.1)
         # Start router and manually call send_changed_records_notification()
         self.startRouter()
         tasks.send_changed_records_notification(self.router)
