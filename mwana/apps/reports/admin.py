@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import CbaEncouragement
+from mwana.apps.reports.models import CbaThanksNotification
 from django.contrib import admin
 from mwana.apps.reports.models import *
 from mwana.apps.reports.models import SupportedLocation
@@ -38,3 +40,18 @@ class DhoReportNotificationAdmin(admin.ModelAdmin):
     list_filter = ('district', 'date', 'date_sent')
     date_hierarchy = 'date_sent'
 admin.site.register(DhoReportNotification, DhoReportNotificationAdmin)
+
+class CbaThanksNotificationAdmin(admin.ModelAdmin):
+    list_display = ('contact', 'facility', 'births', 'date', 'date_sent')
+    list_filter = ('facility', 'date', 'date_sent')
+    date_hierarchy = 'date_sent'
+    search_fields = ('contact__name', )
+admin.site.register(CbaThanksNotification, CbaThanksNotificationAdmin)
+
+class CbaEncouragementAdmin(admin.ModelAdmin):
+    list_display = ('contact', 'facility', 'date_sent')
+    list_filter = ('facility', 'date_sent')
+    date_hierarchy = 'date_sent'
+    search_fields = ('contact__name', )
+admin.site.register(CbaEncouragement, CbaEncouragementAdmin)
+
