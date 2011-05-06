@@ -86,9 +86,9 @@
             <br>
             <form name="getValues" action="" method="GET">
                 <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="startdate" size="9" value={{ startdate }} />
+                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
                            to
-                           <input type="text" name="enddate" size="9" value={{ enddate }} />
+                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
                            {% if region_selectable %}
                 <p>Select Region: &nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
@@ -162,7 +162,7 @@
 
                 {% for column in record %}
                 {% if not forloop.counter0 %}
-                {{column}}&nbsp;
+                {{column|date:"Y-m-d"}}&nbsp;
                 {% else %}
                 {% if column %}
                 <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" alt="missing bar" height="10"
