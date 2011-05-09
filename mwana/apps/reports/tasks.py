@@ -127,6 +127,9 @@ def send_cba_birth_report(router):
     month_ago = date(today.year, today.month, 1)-timedelta(days=1)
     last_year = month_ago.year
     last_month = month_ago.month
+
+    counter = 0
+    msg_limit = 9
     for worker in workers:
         location = get_clinic_or_default(worker)
         reports = CbaThanksNotification.objects.filter(facility=location,
@@ -157,6 +160,9 @@ def send_cba_birth_report(router):
                                              date=month_ago)
 
         OutgoingMessage(worker.default_connection, msg).send()
+        counter = counter + 1
+        if counter >= msg_limit:
+            break
 
 def send_cba_encouragement(router):
     logger.info('encouraging CBAs to continue doing BIRTH, TRACE & TOLD')
@@ -165,7 +171,9 @@ def send_cba_encouragement(router):
         logger.warning('No CBAs found in the system')
         return
     today = date.today()
-    
+
+    counter = 0
+    msg_limit = 9
     for worker in workers:
         location = get_clinic_or_default(worker)
         sent = CbaEncouragement.objects.filter(facility=location,
@@ -182,3 +190,6 @@ def send_cba_encouragement(router):
                                         type='M')
 
         OutgoingMessage(worker.default_connection, msg).send()
+        counter = counter + 1
+        if counter >= msg_limit:
+            break

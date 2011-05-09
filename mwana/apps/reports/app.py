@@ -40,12 +40,12 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.reports.tasks.send_cba_birth_report'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[14], minutes=[30],
+        EventSchedule.objects.create(callback=callback, hours=[8, 14], minutes=range(0, 50, 5),
                                      days_of_week=[0, 1, 2, 3, 4])
 
     def schedule_send_cba_encouragement_task(self):
         callback = 'mwana.apps.reports.tasks.send_cba_encouragement'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[15], minutes=[30],
+        EventSchedule.objects.create(callback=callback, hours=[9,15], minutes=range(0, 50, 5),
                                      days_of_week=[0, 1, 2, 3, 4])
