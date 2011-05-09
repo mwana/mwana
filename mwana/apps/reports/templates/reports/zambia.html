@@ -1,7 +1,6 @@
 {# TODO: Find a better way of displaying the reports to avoid repeating code #}
 {% extends "layout.html" %}
 {% load forms_tags %}
-{% load labresults_tags %}
 
 {% block title %}Mwana Reports - {{ block.super }}{% endblock %}
 
@@ -82,7 +81,7 @@
             <h1>Date range reports:</h1>
 
 
-            <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+            <h2>Results160 Reports in period {{fstartdate}} to {{fenddate}}</h2>
             <br>
             <form name="getValues" action="" method="GET">
                 <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
