@@ -15,6 +15,9 @@ INSTRUCTIONS      = "Please record these results in your clinic records and prom
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
+PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
+CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
+
 TEST_TYPE = "HIV-DNAPCR Result"
 
 def urgent_requisitionid_update(result):
@@ -37,7 +40,7 @@ def build_printer_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (settings.CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
+            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "old_req_id":res.old_value.split(":")[0],
                    "old_result":res.get_old_result_text(),
                    "new_req_id":res.requisition_id,
@@ -46,7 +49,7 @@ def build_printer_results_messages(results):
                    "lab_name":settings.ADH_LAB_NAME,
                    "sms_date":date.isoformat(date.today())})
         else:
-            msg = (settings.PRINTER_RESULTS % {"clinic":res.clinic.name,
+            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,

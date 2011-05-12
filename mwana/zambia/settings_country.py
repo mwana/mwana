@@ -47,7 +47,4 @@ RAPIDSMS_TABS = [
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
 
-PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
-CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
-
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

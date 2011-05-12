@@ -30,9 +30,6 @@ RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
 
-PRINTER_RESULTS   = "Site #: %(clinic)s.\r\nPatient ID:%(req_id)s.\r\nLab ID:%(lab_name)s.\r\nTest:%(test_type)s\r\nResult:%(result)s\r\nSMS Date: %(sms_date)s\r\nApproved By: %(lab_name)s."
-CHANGED_PRINTER_RESULTS   = "Site #: %(clinic)s.\r\nPatient ID:%(req_id)s.\r\nLab ID:%(lab_name)s.\r\nTest:%(test_type)s\r\nResult:%(result)s\r\nSMS Date: %(sms_date)s\r\nApproved By: %(lab_name)s."
-
 ADH_LAB_NAME = "QECH DNA-PCR LAB"
 
 COUNTRY_CODE = '+265'
