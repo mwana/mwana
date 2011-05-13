@@ -49,7 +49,8 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_change_notification_task()
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
-        
+        self.schedule_send_results_to_printer_task()
+
     def handle (self, message):
         key = message.text.strip().upper()
         key = key[:4]
@@ -231,6 +232,13 @@ class App (rapidsms.apps.base.AppBase):
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'minutes': [0], 'hours': '*'})
         EventSchedule.objects.create(callback=callback, ** schedule)
+
+    def schedule_send_results_to_printer_task(self):
+        callback = 'mwana.apps.labresults.tasks.send_results_to_printer'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours=[7, 8, 9, 10, 13, 14, 16], minutes=[50],
+                                     days_of_week=[0, 1, 2, 3, 4])
 
     def notify_clinic_pending_results(self, clinic):
         """
