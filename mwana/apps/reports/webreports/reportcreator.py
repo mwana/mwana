@@ -686,26 +686,6 @@ class Results160Reports:
             total_dbs, months_reporting, days_reporting, year_reporting
 
 
-
-        days = self.get_all_dates_dictionary()
-        sent_results = self.get_results_by_status(['sent'])
-
-        for result in sent_results:
-            try:
-                days[result.result_sent_date.date()] = days[result.result_sent_date.date()] + 1
-            except KeyError:
-                if len(days) == 1:break
-        # assign some variable with a value, not so friendly to calculate in templates
-        single_bar_length = max(days.values()) / self.BAR_LENGTH
-
-        # for easy sorting, create a list of lists from the dictionary
-        table = []
-        for key, value in days.items():
-            table.append([key, value])
-
-        return single_bar_length, sum(days.values()), sorted(table, key=itemgetter(0, 1))
-
-
 class MalawiReports(Results160Reports):
     
     def get_live_facilities(self):

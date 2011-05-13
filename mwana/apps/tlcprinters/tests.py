@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from django.test import TestCase
 
@@ -22,6 +23,7 @@ class TLCTest(TestScript):
                                                sent_at=datetime.datetime.now(),
                                                text='abc', seq_num=255,
                                                confirmed=False)
+        time.sleep(0.1)
         self.startRouter()
         self.sendMessage('tester', 'Confirm SMS: FF')
         responses = self.receiveAllMessages()
@@ -32,6 +34,7 @@ class TLCTest(TestScript):
         self.assertTrue(mc.confirmed)
 
     def test_tlc_outgoing_msg(self):
+        time.sleep(0.1)
         self.startRouter()
         msg = TLCOutgoingMessage(self.tester, 'hello printer')
         msg.send()

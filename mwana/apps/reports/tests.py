@@ -1,18 +1,18 @@
+from mwana.apps.reports.models import CbaEncouragement
+from mwana.apps.patienttracing.models import PatientTrace
+from mwana.apps.reports.models import CbaThanksNotification
 import time
 
 import mwana.const as const
 from datetime import date
 from datetime import timedelta
-from django.conf import settings
-from mwana.apps.hub_workflow.models import HubSampleNotification
 from mwana.apps.labresults.models import Result
-from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.labresults.testdata.reports import *
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
 from mwana.apps.reminders.models import Event
 from mwana.apps.reports import tasks
-from mwana.apps.reports.models import DhoReportNotification
+from mwana.apps.reports.models import DhoReportNotification, CbaThanksNotification
 from rapidsms.tests.scripted import TestScript
 
 
@@ -33,6 +33,7 @@ class SmsReportsSetUp(TestScript):
         
         script = """
             cba > join cba 403012 1 cba phiri
+            cba2 > join cba 403012 1 cba2 Mwanza
             clinic_worker > join clinic 403012 james banda 1111
             hub_worker > join hub 403012 hubman phiri 1111
             district_worker > join dho 403000 dho m. banda 1111            
@@ -96,6 +97,71 @@ Births registered: 0""" % month_ago.strftime("%B")]
         self.assertEqual(len(msgs), 2)
         for msg in msgs:
             self.assertTrue(msg.text in expected_msgs,"%s not in %s"%(msg.text,"\n".join(msg for msg in expected_msgs)))
+    def testCbaThanksReport(self):
+        self.assertEqual(0, CbaThanksNotification.objects.count())
+        Event.objects.create(name="Birth", slug="birth")
+
+        today = date.today()
+        month_ago = date(today.year, today.month, 1)-timedelta(days=1)
+
+        script = """
+            cba > birth 2 %(last_month)s %(last_month_year)s unicef innovation
+            cba > birth 4 %(last_month)s %(last_month_year)s unicef innovation
+            cba > told unicef mwana
+            cba2 > birth 6 %(last_month)s %(last_month_year)s unicef baby
+        """ % {"last_month":month_ago.month, "last_month_year":month_ago.year}
+        self.runScript(script)
+
+        time.sleep(0.1)
+
+        self.startRouter()
+        # even if task is called twice a day only send once
+        tasks.send_cba_birth_report(self.router)
+        time.sleep(0.1)
+        tasks.send_cba_birth_report(self.router)
+        time.sleep(0.1)
+
+
+        self.stopRouter()
+        msgs = self.receiveAllMessages()
+        
+        expected_msgs =["Thank you, Cba Phiri. You have helped about 3 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
+        % (month_ago.strftime("%B"), month_ago.year),
+        "Thank you, Cba2 Mwanza. You have helped about 1 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
+        % (month_ago.strftime("%B"), month_ago.year)]
+
+        self.assertEqual(len(msgs), 2)
+        for msg in msgs:
+            self.assertTrue(msg.text in expected_msgs,"%s not in %s"%(msg.text,"\n".join(msg for msg in expected_msgs)))
+
+        self.assertTrue(CbaThanksNotification.objects.count()==2)
+        self.assertTrue(PatientTrace.objects.count()==1)
+
+    def testCbaReminderReport(self):
+        self.assertEqual(0, CbaEncouragement.objects.count())
+       
+        time.sleep(0.1)
+
+        self.startRouter()
+        # even if task is called twice a day only send once
+        tasks.send_cba_encouragement(self.router)
+        time.sleep(0.1)
+        tasks.send_cba_encouragement(self.router)
+        time.sleep(0.1)
+
+
+        self.stopRouter()
+        msgs = self.receiveAllMessages()
+
+        expected_msgs =["Hello Cba Phiri. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives."
+        ,
+        "Hello Cba2 Mwanza. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives."]
+
+        self.assertEqual(len(msgs), 2)
+        for msg in msgs:
+            self.assertTrue(msg.text in expected_msgs,"%s not in %s"%(msg.text,"\n".join(msg for msg in expected_msgs)))
+
+        self.assertTrue(CbaEncouragement.objects.count()==2)
 
     def testPhoEidAndBirthReports(self):
         self.assertEqual(0, DhoReportNotification.objects.count())

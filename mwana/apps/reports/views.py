@@ -198,8 +198,10 @@ def zambia_reports(request):
     months_reporting, days_reporting, year_reporting = r.dbs_positivity_data()
 
     return render_to_response('reports/zambia.html',
-        {'startdate': try_format(startdate),
-         'enddate': try_format(enddate),
+        {'startdate': startdate,
+         'enddate': enddate,
+         'fstartdate': try_format(startdate),
+         'fenddate': try_format(enddate),
          'today': today,
          'sent_results_rpt': res,
          'turnaround_time_rpt': turnaround_time,
