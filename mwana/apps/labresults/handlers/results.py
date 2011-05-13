@@ -49,10 +49,23 @@ class ResultsHandler(KeywordHandler):
         else:
             return Result.objects.none()
 
+    def is_sentence(self, text):
+        alphabet = 'aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ'
+        found = 0
+        for char in text:
+            if char in alphabet:
+                found += 1
+        if found > 5:
+            return True
+        return False
+    
     def handle(self, text):
         text = text.strip()
         if not self.msg.contact:
             self.respond(UNGREGISTERED)
+            return
+        if self.is_sentence(text):
+            self.respond("%s Send the keyword HELP if you need to be helped." % (SORRY))
             return
         requisition_ids = self.PATTERN.findall(text)
         #we do not expect this
