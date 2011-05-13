@@ -270,8 +270,7 @@ class Alerter:
                 self.last_processed_dbs[lab] = result.processed_on
 
     def set_lab_last_sent_payload(self):
-        payloads = Payload.objects.exclude(incoming_date=None).\
-            filter(lab_results__clinic__in=self.get_facilities_for_reporting())
+        payloads = Payload.objects.exclude(incoming_date=None)
         self.last_sent_payloads.clear()
         for payload in payloads:
             lab = payload.source
