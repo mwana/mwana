@@ -18,6 +18,13 @@ from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
 
 class Alerter:
+    def __init__(self, current_user=None, group=None, province=None, district=None):
+        self.today = date.today()
+        self.user = current_user
+        self.reporting_group = group
+        self.reporting_province = province
+        self.reporting_district = district
+
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
     district_transport_days = DEFAULT_DISTICT_TRANSPORT_DAYS
 
@@ -61,8 +68,7 @@ class Alerter:
     last_sent_payloads = {}
     not_sending_dbs_alerts = []
 
-    def __init__(self):
-        self.today = date.today()
+    
 
     def get_labs_not_sending_payloads_alerts(self, days=None):
         my_alerts = []
@@ -110,9 +116,9 @@ class Alerter:
     def get_clinics_not_retriving_results_alerts(self, days=None):
         self.set_retrieving_start(days)
         my_alerts = []
-        clinics = Location.\
-            objects.filter(
-                           supportedlocation__supported=True,
+        
+        facs = self.get_facilities_for_reporting()
+        clinics = facs.filter(
                            lab_results__notification_status='notified',
                            lab_results__arrival_date__lt=self.retrieving_ref_date
                            ).distinct()
@@ -190,8 +196,8 @@ class Alerter:
     def get_clinics_not_sending_dbs_alerts(self, day=None):
         my_alerts = []
         self.set_clinic_sent_dbs_start_dates(day)
-        clinics = Location.objects.filter(supportedlocation__supported=True
-                                          ).\
+        facs = self.get_facilities_for_reporting()
+        clinics = facs.\
             exclude(lab_results__entered_on__gte=
                     self.clinic_sent_dbs_referal_date.date()).\
                 exclude(samplenotification__date__gte=
@@ -252,7 +258,9 @@ class Alerter:
                 self.last_received_dbs[district] = result.entered_on
 
     def set_lab_last_processed_dbs(self):
-        results = Result.objects.exclude(processed_on=None)
+        results = Result.objects.exclude(processed_on=None).\
+        filter(clinic__in=self.get_facilities_for_reporting())
+        self.last_processed_dbs.clear()
         for result in results:
             lab = result.payload.source
             if lab in  self.last_processed_dbs.keys():
@@ -262,7 +270,9 @@ class Alerter:
                 self.last_processed_dbs[lab] = result.processed_on
 
     def set_lab_last_sent_payload(self):
-        payloads = Payload.objects.exclude(incoming_date=None)
+        payloads = Payload.objects.exclude(incoming_date=None).\
+        filter(source__in=self.my_payload_sources())
+        self.last_sent_payloads.clear()
         for payload in payloads:
             lab = payload.source
             if lab in  self.last_sent_payloads.keys():
@@ -418,8 +428,23 @@ class Alerter:
                  self.today.day)-timedelta(days=self.retrieving_days-1)
 
     def get_facilities_for_reporting(self):
-        return Location.objects.filter(supportedlocation__supported=True
+        facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+        if self.reporting_group:
+            facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
+            |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
+        if self.reporting_district:
+            facs = facs.filter(slug__startswith=self.reporting_district[:4])
+        elif self.reporting_province:
+            facs = facs.filter(slug__startswith=self.reporting_province[:2])
+        return facs.filter(supportedlocation__supported=True
                                        ).distinct()
+
+    def my_payload_sources(self):
+        facs = self.get_facilities_for_reporting()
+        payloads = Payload.objects.filter(lab_results__clinic__in=facs)
+        if payloads:
+            return [payloads[0].source]
+        return []
 
     def get_distinct_parents(self, locations):
         if not locations:
@@ -428,3 +453,11 @@ class Alerter:
         for location in locations:
             parents.append(location.parent)
         return list(set(parents))
+    
+    def get_rpt_districts(self, user):
+        self.user = user
+        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
+
+    def get_rpt_provinces(self, user):
+        self.user = user
+        return self.get_distinct_parents(self.get_rpt_districts(user))

@@ -85,3 +85,41 @@ class PhoReportNotification(models.Model):
     def __unicode__(self):
         return "%s DHO EID & Births Summary for %s on %s" % \
             (self.province.name, self.date, self.date_sent.date())
+
+class CbaThanksNotification(models.Model):
+    """
+    Send thank you messages to CBA's who registered births during a given month
+    """
+    REPORT_TYPES = (
+    ('M','Monthly Report'),
+    )
+
+    contact  = models.ForeignKey(Contact, related_name='cba')
+    facility = models.ForeignKey(Location)
+    type  = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    births = models.PositiveIntegerField()
+    date  = models.DateField()
+    date_sent = models.DateTimeField(default=datetime.now)
+
+
+    def __unicode__(self):
+        return "Congratulatory message for %s of %s for registering %s births in %s" % \
+            (self.contact.name, self.facility.name, self.births, self.date)
+
+class CbaEncouragement(models.Model):
+    """
+    Send encouragement/reminder messages to CBA's to register births
+    """
+    REPORT_TYPES = (
+    ('M','Monthly Encouragement'),
+    )
+
+    contact  = models.ForeignKey(Contact)
+    facility = models.ForeignKey(Location)
+    type  = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    date_sent = models.DateTimeField(default=datetime.now)
+
+
+    def __unicode__(self):
+        return "Encouragement message to %s to register births" % \
+            (self.contact.name)

@@ -40,6 +40,7 @@ def send_dbs_summary_to_hub_report(router):
     hub_workers = Contact.active.filter(types=get_hub_worker_type())
     if not hub_workers:
         logger.warning('No hub workers found in the system')
+        return
     today = date.today()
     month_ago = date(today.year, today.month, 1)-timedelta(days=1)
     last_year = month_ago.year
