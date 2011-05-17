@@ -271,7 +271,7 @@ class Alerter:
 
     def set_lab_last_sent_payload(self):
         payloads = Payload.objects.exclude(incoming_date=None).\
-            filter(lab_results__clinic__in=self.get_facilities_for_reporting())
+        filter(source__in=self.my_payload_sources())
         self.last_sent_payloads.clear()
         for payload in payloads:
             lab = payload.source
@@ -438,6 +438,13 @@ class Alerter:
             facs = facs.filter(slug__startswith=self.reporting_province[:2])
         return facs.filter(supportedlocation__supported=True
                                        ).distinct()
+
+    def my_payload_sources(self):
+        facs = self.get_facilities_for_reporting()
+        payloads = Payload.objects.filter(lab_results__clinic__in=facs)
+        if payloads:
+            return [payloads[0].source]
+        return []
 
     def get_distinct_parents(self, locations):
         if not locations:
