@@ -30,6 +30,8 @@ RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
 
+ADH_LAB_NAME = "QECH DNA-PCR LAB"
+
 COUNTRY_CODE = '+265'
 
 TIME_ZONE = 'Africa/Blantyre'

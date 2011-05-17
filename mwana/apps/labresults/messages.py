@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
 from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
@@ -24,7 +25,7 @@ PHO_DEFAULT_RESPONSE = "Sorry %s. Respond with keyword HELP for assistance."
 UNREGISTERED_DEFAULT_RESPONSE = "Invalid Keyword. Please send the keyword HELP if you need to be assisted."
 
 TEST_TYPE = "HIV-DNAPCR Result"
-ADH_LAB_NAME = "ADH DNA-PCR LAB"
+
 def urgent_requisitionid_update(result):
     """
     Returns True if there has been a critical update in requisition id. That is
@@ -51,13 +52,15 @@ def build_printer_results_messages(results):
                    "new_req_id":res.requisition_id,
                    "new_result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         else:
             msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         result_strings.append(msg)
                
     return result_strings

@@ -47,3 +47,5 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
+
+ADH_LAB_NAME = "ADH DNA-PCR LAB"
