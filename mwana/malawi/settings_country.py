@@ -42,7 +42,8 @@ LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
 
 ROOT_URLCONF = 'mwana.malawi.urls'
 
-# Add XForms app + navigation:
+# Add XForms app + navigation and webreports:
+INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
 INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
