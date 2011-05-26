@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     (r'^', include('mwana.urls')),
     # custom URL additions for Zambia:
     url(r'^$', views.zambia_reports, name='mwana_reports'),
+    (r'^logs/', include('mwana.apps.filteredlogs.urls')),
 )
