@@ -2,6 +2,7 @@
 from datetime import date
 from datetime import timedelta
 import logging
+from django.conf import settings
 
 from django.db.models import Q
 from mwana.apps.labresults.models import Result
@@ -171,6 +172,10 @@ def send_cba_encouragement(router):
         logger.warning('No CBAs found in the system')
         return
     today = date.today()
+    todaysday = today.day
+
+    if todaysday <= 14 and settings.ON_LIVE_SERVER:
+        return
 
     counter = 0
     msg_limit = 9
