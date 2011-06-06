@@ -34,6 +34,9 @@ class Alerter:
     DEFAULT_RETRIEVING_DAYS = 5 # days
     retrieving_days = DEFAULT_RETRIEVING_DAYS
 
+    DEFAULT_TRACING_DAYS = 14 # days
+    tracing_days = DEFAULT_TRACING_DAYS
+
     DEFAULT_CLINIC_NOTIFICATION_DAYS = 14 # days
     clinic_notification_days = DEFAULT_CLINIC_NOTIFICATION_DAYS
 
@@ -113,10 +116,57 @@ class Alerter:
 
         return self.lab_processing_days, sorted(my_alerts, key=itemgetter(5))
 
+    def get_last_retrieved_results(self, location):
+        try:
+            return Result.objects.filter(clinic=location, result_sent_date__gt=self.tracing_ref_date).exclude(result_sent_date=None).order_by("-result_sent_date")[0].result_sent_date.date()
+        except IndexError:
+            return None
+
+    def get_last_used_trace(self, location):
+        try:
+            return Message.objects.filter(contact__location=location, text__istartswith="trace", date__gt=self.tracing_ref_date).order_by("-date")[0].date.date()
+        except:
+            return date(1900, 1, 1)
+
+    def get_clinics_not_using_trace_alerts(self, days=None):
+        my_alerts = []
+        self.set_tracing_start(days)
+
+        facs = self.get_facilities_for_reporting()
+        
+        for clinic in facs:
+            last_retrieved_results = self.get_last_retrieved_results(clinic)
+            last_used_trace = self.get_last_used_trace(clinic)
+
+            if last_retrieved_results is None:
+                continue
+
+            if last_retrieved_results <= last_used_trace:
+                continue
+            count = Result.objects.filter(clinic=clinic, result_sent_date__gte=self.tracing_ref_date).count()
+            days_late = self.days_ago(last_retrieved_results)
+            level = Alert.LOW_LEVEL
+            contacts = \
+        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                              Q(types=const.get_clinic_worker_type())).\
+            distinct().order_by('pk')
+            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_TRACE, "%s clinic have "\
+                             " retrieved %s results but have NOT used TRACE command. Please call and enquire "
+                             "(%s)" % (clinic.name, count, ", ".join(contact.name + ":"
+                             + contact.default_connection.identity
+                             for contact in contacts)),
+                             clinic.name,
+                             days_late,
+                             -days_late,
+                             level,
+                             ""
+                             )) 
+        return self.tracing_days, sorted(my_alerts, key=itemgetter(5))
+
     def get_clinics_not_retriving_results_alerts(self, days=None):
         self.set_retrieving_start(days)
         my_alerts = []
-        
+
         facs = self.get_facilities_for_reporting()
         clinics = facs.filter(
                            lab_results__notification_status='notified',
@@ -300,7 +350,7 @@ class Alerter:
                                    Q(parent__parent=dist)
                                    ).distinct()
                     if clinics:
-                        additional = "These clinics have sent results to the "\
+                        additional = "These clinics have sent samples to the "\
                         "hub: %s" % ",".join(clinic.name for clinic in clinics)
                     days_late = (self.today - self.last_received_dbs[dist]).days
                     level = Alert.HIGH_LEVEL if days_late >= (2 * self.district_transport_days) else Alert.LOW_LEVEL
@@ -426,6 +476,15 @@ class Alerter:
         self.retrieving_ref_date = \
         datetime(self.today.year, self.today.month,
                  self.today.day)-timedelta(days=self.retrieving_days-1)
+
+    def set_tracing_start(self, days):
+        if days:
+            self.tracing_days = days
+        else:
+            self.tracing_days = self.DEFAULT_TRACING_DAYS
+        self.tracing_ref_date = \
+        datetime(self.today.year, self.today.month,
+                 self.today.day)-timedelta(days=self.tracing_days-1)
 
     def get_facilities_for_reporting(self):
         facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
