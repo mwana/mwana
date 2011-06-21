@@ -6,6 +6,7 @@ class Alert:
     CLINIC_NOT_USING_SYSTEM = 3
     LAB_NOT_PROCESSING_DBS = 4
     LAB_NOT_SENDING_PAYLOD = 5
+    CLINIC_NOT_USING_TRACE = 6
     HIGH_LEVEL = 2
     LOW_LEVEL = 1
 
@@ -18,6 +19,10 @@ class Alert:
         self.days_late = days_late
         self.level = level
         self.extra = extra
+
+    def __unicode__(self):
+        "Alert [type:%s, message:%s, sort_field:%s, culprit:%s, days_late:%s, level:%s,  extra:%s]" % \
+        (self.type, self.message, self.sort_field, self.culprit, self.days_late, self.level, self.extra)
 
     def __getitem__(self, position):
         return (self.type,

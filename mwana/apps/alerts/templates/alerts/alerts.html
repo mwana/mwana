@@ -226,6 +226,41 @@
                         </table>
                         {% endfor %}
                     <p><p>
+                        <hr>
+                <h1>Tracing Issues:</h1>
+                        <!-- Alert Report 6-->
+                    <p align="center">
+                    <h3>Alerts for clinics not using the trace command in the last {{ tracing_days }} days.</h3>
+                    <br>Select date range (days)
+                    <select name="input_tracing_days" size="1">
+                        {% for a in days%}
+                        {% ifequal a tracing_days %}
+                        <option selected value="{{a}}">{{a}}</option>
+                        {% else%}
+                        <option value="{{a}}">{{a}}</option>
+                        {% endifequal %}
+                        {%endfor%}
+
+                    </select>
+
+                    <input type="submit" value="Update" name="SubmitValues2" />
+
+                     <p>
+                        {% for record in not_using_trace %}
+                        <table border="1"  width="100%">
+                            <tr>
+                                {% ifequal record.level record.HIGH_LEVEL %}
+                                <td width="50" bgcolor="#FF0000"></td>
+                                {% else%}
+                                <td width="50" bgcolor="#FFFF00"></td>
+                                {% endifequal%}
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
+                                <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
+                                <td bgcolor="#FFFFFF">{{ record.message }} <b>{{ record.extra }}</b></td>
+                            </tr>
+                        </table>
+                        {% endfor %}
+                    <p><p>
                 </div>
                 <p>
             </div>

@@ -24,6 +24,7 @@ def mwana_alerts (request):
     notifying_time = get_from_request(request, 'input_notifying_time')
     lab_processing_days = get_from_request(request, 'input_lab_processing_days')
     lab_sending_days = get_from_request(request, 'input_lab_sending_days')
+    tracing_days = get_from_request(request, 'input_tracing_days')
 
     is_report_admin = False
     try:
@@ -54,6 +55,8 @@ def mwana_alerts (request):
     lab_sending_days, not_sending_dbs = \
         alerter.get_labs_not_sending_payloads_alerts(lab_sending_days)
 
+    tracing_days, not_using_trace = alerter.get_clinics_not_using_trace_alerts(tracing_days)
+    
     return render_to_response('alerts/alerts.html',
                               {
                               'not_sending_dbs_alerts':not_sending_dbs_alerts,
@@ -70,6 +73,9 @@ def mwana_alerts (request):
 
                               'not_sending_dbs':not_sending_dbs,
                               'lab_sending_days':lab_sending_days,
+
+                              'not_using_trace':not_using_trace,
+                              'tracing_days':tracing_days,
 
                               'days':range(1, 60),
                               'is_report_admin': is_report_admin,

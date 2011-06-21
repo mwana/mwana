@@ -1,0 +1,112 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Message Logs - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+
+
+    <div class="left">
+        <div class="module">
+            
+
+            <!--h1>Filtered Message Logs:</h1-->
+
+
+            <h2>Filtered Message Logs</h2>
+            <br>
+            <form name="getValues" action="" method="GET">
+                <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
+                           to
+                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
+                           {% if region_selectable %}
+                <p>Select Region: &nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}&nbsp;
+                    or District:{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}&nbsp;
+                    or Facility:{% autoescape off %}
+                    {{rpt_facilities}}
+                    {% endautoescape %}&nbsp;
+
+                    {% if is_report_admin %}
+                <p>Select Implementer:
+                    {% autoescape off %}
+                    {{rpt_group}}
+                    {% endautoescape %}
+                    &nbsp;
+                    {%endif%}
+                    {%endif%}
+
+                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+
+            </form>
+            <hr>
+           <div>
+              
+
+            <h3>
+                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                </h3>
+<!--            <p>
+                Showing average time between the Date DBS
+                samples are collected at the facilities and the Date the results
+                for these samples are received at the facility.
+                <br>
+                Minimum Average Days = {{min_turnaround_time}}; &nbsp;
+                Maximum Average Days = {{max_turnaround_time}}; &nbsp;
+                Out of {{num_of_results}} results in {{num_of_facilities}}
+                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+            <p>-->
+            <table width="100%">
+                {% for record in messages %}
+                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                    <td >
+                        {% if forloop.counter0 %}
+                        
+                        {{ forloop.counter0 }}
+                        
+                        {% endif %}
+                    </td>
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td ><u>{{ column }}</u></td>
+                    {% else %}
+                    <td >{{ column }}</td>
+                    
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+
+</div>
+{% endblock %}
