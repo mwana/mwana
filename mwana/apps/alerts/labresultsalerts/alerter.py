@@ -239,10 +239,41 @@ class Alerter:
         except IndexError:
             last_tried_result = date(1900, 1, 1)
         return max(notification, last_retreived, last_checked, last_tried_result)
+    
+    def last_used_sent(self, location):
+        try:
+            return SampleNotification.objects.filter(location=location).order_by('-date')[0].date.date()
+        except IndexError:
+            return date(1900, 1, 1)
+        
+    def last_retreived_results(self, location):
+        try:
+            return Result.objects.filter(clinic=location, notification_status='sent').order_by('-result_sent_date')[0].result_sent_date.date()
+        except IndexError:
+            return date(1900, 1, 1)
+        
+    
+    def last_used_check(self, location):
+        try:
+            return Message.objects.filter(contact__location=location ,
+                                                  text__iregex='\s*check\s*'
+                                                  ).order_by('-date')[0].date.date()
+        except IndexError:
+            return date(1900, 1, 1)
+        
+    def last_used_result(self, location):        
+        try:
+            return Message.objects.filter(Q(contact__location=location) ,
+                                           Q(text__istartswith='The results for sample') |
+                                           Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
+        except IndexError:
+            return date(1900, 1, 1)
 
     def days_ago(self, date):
         return (self.today - date).days
-
+    
+    
+        
     def get_clinics_not_sending_dbs_alerts(self, day=None):
         my_alerts = []
         self.set_clinic_sent_dbs_start_dates(day)
@@ -253,26 +284,48 @@ class Alerter:
                 exclude(samplenotification__date__gte=
                         self.clinic_sent_dbs_referal_date.date()).distinct()
 
-        active_clinics = Location.\
-            objects.filter(
-                           Q(lab_results__notification_status='sent',
-                           lab_results__result_sent_date__gte
-                           =self.clinic_sent_dbs_referal_date.date()),
-                           Q(contact__message__text__iregex='\s*check\s*') |                           
-                           Q(contact__message__text__istartswith='The results for sample') |                           
-                           Q(
-                           contact__message__text__istartswith='There are currently no results') 
-                           ).distinct()
+#        active_clinics = Location.\
+#            objects.filter(
+#                           Q(lab_results__notification_status='sent',
+#                           lab_results__result_sent_date__gte
+#                           =self.clinic_sent_dbs_referal_date.date()),
+#                           Q(contact__message__text__iregex='\s*check\s*') |                           
+#                           Q(contact__message__text__istartswith='The results for sample') |                           
+#                           Q(
+#                           contact__message__text__istartswith='There are currently no results') 
+#                           ).distinct()
         
         for clinic in clinics:
             additional_text = ""
-            if clinic not in active_clinics:
-                days_ago = self.days_ago(self.last_retrieved_or_checked(clinic))
-                if days_ago < 40000:
-                    additional_text = "The last time this clinic used Results160 was "\
-                    + "%s days ago." % days_ago
-                else:
-                    additional_text = "This clinic has never used Results160"
+            days_ago = self.days_ago(self.last_retreived_results(clinic))
+            if days_ago < 40000:
+                additional_text += "This clinic last retrieved results "\
+                + "%s days ago" % days_ago
+            else:
+                additional_text += "This clinic has never retrieved results"
+                
+            days_ago = self.days_ago(self.last_used_sent(clinic))
+            if days_ago < 40000:
+                additional_text += ", last used SENT keyword "\
+                + "%s days ago" % days_ago
+            else:
+                additional_text += ", has never used SENT keyword"
+                
+            days_ago = self.days_ago(self.last_used_check(clinic))
+            if days_ago < 40000:
+                additional_text += ", last used CHECK keyword "\
+                + "%s days ago" % days_ago
+            else:
+                additional_text += ", has never CHECKed for results"
+                         
+            days_ago = self.days_ago(self.last_used_result(clinic))
+            if days_ago < 40000:
+                additional_text += ", last used RESULT keyword "\
+                + "%s days ago." % days_ago
+            else:
+                additional_text += ", has never used RESULT keyword."
+                
+                
             contacts = \
     Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                           Q(types=const.get_clinic_worker_type())).\
