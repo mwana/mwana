@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
 from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
 from mwana.apps.labresults.models import Result
@@ -16,9 +17,15 @@ DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in yo
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
 PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
+CLINIC_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are CHECK, RESULT, SENT, TRACE, MSG CBA, MSG CLINIC, MSG ALL and MSG DHO. Respond with any keyword or HELP for more information"
+HUB_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are RECEIVED and SENT. Respond with any keyword or HELP for more information"
+CBA_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
+DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
+PHO_DEFAULT_RESPONSE = "Sorry %s. Respond with keyword HELP for assistance."
+UNREGISTERED_DEFAULT_RESPONSE = "Invalid Keyword. Please send the keyword HELP if you need to be assisted."
 
 TEST_TYPE = "HIV-DNAPCR Result"
-ADH_LAB_NAME = "ADH DNA-PCR LAB"
+
 def urgent_requisitionid_update(result):
     """
     Returns True if there has been a critical update in requisition id. That is
@@ -45,13 +52,15 @@ def build_printer_results_messages(results):
                    "new_req_id":res.requisition_id,
                    "new_result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         else:
             msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
                    "req_id":res.requisition_id,
                    "result":res.get_result_text(),
                    "test_type":TEST_TYPE,
-                   "lab_name":ADH_LAB_NAME})
+                   "lab_name":settings.ADH_LAB_NAME,
+                   "sms_date":date.isoformat(date.today())})
         result_strings.append(msg)
                
     return result_strings

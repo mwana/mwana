@@ -1,19 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
-import json
 from datetime import datetime, timedelta, date
-import logging
 
-from django.http import HttpResponse
-from django.views.decorators.http import require_http_methods, require_GET
-from django.views.decorators.csrf import csrf_exempt
-from django.forms import ModelForm
-from django.db import transaction
+from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from mwana.apps.reports.webreports.models import ReportingGroup
 
-from mwana.apps.labresults import models as labresults
-from mwana.decorators import has_perm_or_basicauth
-from mwana.apps.locations.models import Location
 
 
 def text_date(text):
@@ -93,6 +85,47 @@ def malawi_reports(request, location=None):
      }, context_instance=RequestContext(request))
 
 
+def get_facilities_dropdown_html(id, facilities, selected_facility):
+    #TODO: move this implemention to templates
+    code ='<select name="%s" size="1">\n'%id
+    code +='<option value="All">All</option>\n'
+    for fac in facilities:
+        if fac.slug == selected_facility:
+            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+        else:
+            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
+
+    code = code +'</select>'
+    return code
+
+def get_groups_dropdown_html(id, selected_group):
+    #TODO: move this implemention to templates
+    code ='<select name="%s" size="1">\n'%id
+    code +='<option value="All">All</option>\n'
+    for group in ReportingGroup.objects.all():
+        if str(group.id) == selected_group:
+            code = code + '<option selected value="%s">%s</option>\n'%(group.id,group.name)
+        else:
+            code = code + '<option value="%s">%s</option>\n'%(group.id,group.name)
+
+    code = code +'</select>'
+    return code
+
+def read_request(request,param):
+    try:
+        value = request.REQUEST[param]
+        if value =='All':
+            value = None
+    except:
+        value = None
+    return value
+
+def try_format(date):
+    try:
+        return date.strftime("%Y-%m-%d")
+    except:
+        return date
+
 @require_GET
 def zambia_reports(request):
 #    , startdate=datetime.today().date()-timedelta(days=30),
@@ -112,7 +145,20 @@ def zambia_reports(request):
     startdate = min(startdate1, enddate1, datetime.today().date())
     enddate = min(max(enddate1, startdate1), datetime.today().date())
 
-    r = Results160Reports()
+    is_report_admin = False
+    try:
+        user_group_name = request.user.groupusermapping_set.all()[0].group.name
+        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
+        and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
+            is_report_admin = True
+    except:
+        pass
+    
+    rpt_group = read_request(request, "rpt_group")
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+      
+    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts)
     res = r.dbs_sent_results_report(startdate, enddate)
 
     min_processing_time, max_processing_time, num_of_dbs_processed, \
@@ -154,6 +200,8 @@ def zambia_reports(request):
     return render_to_response('reports/zambia.html',
         {'startdate': startdate,
          'enddate': enddate,
+         'fstartdate': try_format(startdate),
+         'fenddate': try_format(enddate),
          'today': today,
          'sent_results_rpt': res,
          'turnaround_time_rpt': turnaround_time,
@@ -201,4 +249,9 @@ def zambia_reports(request):
          'months_reporting': months_reporting,
          'days_reporting': days_reporting,
          'year_reporting': year_reporting,
+         'is_report_admin': is_report_admin,
+         'region_selectable': True,
+         'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
+         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
+         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
      }, context_instance=RequestContext(request))

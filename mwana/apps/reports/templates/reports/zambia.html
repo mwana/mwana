@@ -1,7 +1,6 @@
 {# TODO: Find a better way of displaying the reports to avoid repeating code #}
 {% extends "layout.html" %}
 {% load forms_tags %}
-{% load labresults_tags %}
 
 {% block title %}Mwana Reports - {{ block.super }}{% endblock %}
 
@@ -77,20 +76,43 @@
                 </table>               
 
             </div>
-            
-            
+
+
             <h1>Date range reports:</h1>
-            
-                
-            <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+
+
+            <h2>Results160 Reports in period {{fstartdate}} to {{fenddate}}</h2>
             <br>
             <form name="getValues" action="" method="GET">
-                <p>Select Period
-                    <input type="text" name="startdate" size="9" value={{ startdate }} />
+                <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
                            to
-                           <input type="text" name="enddate" size="9" value={{ enddate }} />
-                <input type="submit" value="Ok" name="SubmitValues" /></form>
-            Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
+                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
+                           {% if region_selectable %}
+                <p>Select Region: &nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}&nbsp;
+                    or District:{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}&nbsp;(Note: District overrides Province)
+
+                    {% if is_report_admin %}
+                <p>Select Implementer:
+                    {% autoescape off %}
+                    {{rpt_group}}
+                    {% endautoescape %}
+                    &nbsp;
+                    {%endif%}
+                    {%endif%}
+
+                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+
+
+
+            </form><hr>
+            <p>
+                Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
             <div>
                 <p align="center"><h3>Results Received By Facilities</h3>
 
@@ -139,7 +161,7 @@
 
                 {% for column in record %}
                 {% if not forloop.counter0 %}
-                {{column}}&nbsp;
+                {{column|date:"Y-m-d"}}&nbsp;
                 {% else %}
                 {% if column %}
                 <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" alt="missing bar" height="10"
@@ -165,7 +187,7 @@
                 <br>
                 Minimum Average Days = {{min_turnaround_time}}; &nbsp;
                 Maximum Average Days = {{max_turnaround_time}}; &nbsp;
-                Out of {{num_of_results}} results in {{num_of_facilities}} 
+                Out of {{num_of_results}} results in {{num_of_facilities}}
                 facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
             <p>
             <table width="100%">

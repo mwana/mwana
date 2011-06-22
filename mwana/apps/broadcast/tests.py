@@ -6,6 +6,7 @@ from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
 from mwana import const 
 from mwana.settings_project import DEFAULT_RESPONSE
+from mwana.apps.labresults.messages import CLINIC_DEFAULT_RESPONSE, CBA_DEFAULT_RESPONSE
 from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
 import time
@@ -323,7 +324,8 @@ class TestApp(TestScript):
                         responses = self.receiveAllMessages()
                         self.assertEqual(1, len(responses))
                         self.assertEqual(responder.default_connection.identity, responses[0].peer)
-                        self.assertEqual(DEFAULT_RESPONSE, responses[0].text)
+                        default_responces = [DEFAULT_RESPONSE, CLINIC_DEFAULT_RESPONSE, CBA_DEFAULT_RESPONSE]
+                        self.assertTrue(responses[0].text in default_responces)
                         # As per http://groups.google.com/group/mwana/tree/browse_frm/thread/07f5d6599ac91832/695178783cf65e76
                         # No longer supporting broadcast responses.
                         self.assertEqual(0, BroadcastResponse.objects.count())

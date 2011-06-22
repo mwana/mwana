@@ -17,7 +17,9 @@ RESULTS160_SLUGS = {
     'DISTRICT_SLUGS': ('districts',), # XXX verify me
     'PROVINCE_SLUGS': ('provinces',), # XXX verify me
 }
-
+INSTALLED_APPS.append("mwana.apps.reports.webreports")
+INSTALLED_APPS.append("mwana.apps.errorhandling")
+INSTALLED_APPS.append("mwana.apps.filteredlogs")
 TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'bem-zm'
@@ -45,6 +47,7 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
+    ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
 ]
 
 # we need separate migration modules for the rapidsms app in Malawi and
@@ -52,3 +55,5 @@ RAPIDSMS_TABS = [
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'mwana.zambia.migrations.rapidsms',
 }
+
+ADH_LAB_NAME = "ADH DNA-PCR LAB"

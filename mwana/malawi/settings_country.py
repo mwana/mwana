@@ -32,6 +32,8 @@ GROWTHMONITORING_SETTINGS = {'DEFAULT_LANG': 'en'}
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
 
+ADH_LAB_NAME = "QECH DNA-PCR LAB"
+
 COUNTRY_CODE = '+265'
 
 TIME_ZONE = 'Africa/Blantyre'
@@ -42,7 +44,8 @@ LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
 
 ROOT_URLCONF = 'mwana.malawi.urls'
 
-# Add XForms app + navigation:
+# Add XForms app + navigation and webreports:
+INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
 INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
