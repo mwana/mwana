@@ -11,6 +11,7 @@ from mwana.apps.labresults.messages import ALREADY_COLLECTED
 from mwana.apps.labresults.messages import BAD_PIN
 from mwana.apps.labresults.messages import DEMO_FAIL
 from mwana.apps.labresults.messages import HUB_DEMO_FAIL
+from mwana.apps.labresults.messages import RIMINDMI_DEMO_FAIL
 from mwana.apps.labresults.messages import INSTRUCTIONS
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import RESULTS_READY
@@ -21,10 +22,12 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.const import get_district_worker_type
 from mwana.const import get_hub_worker_type
+from mwana.const import get_cba_type
 from mwana.const import get_province_worker_type
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
+from mwana.apps.reminders.models import PatientEvent
 
 
 class MockResultUtility(LoggerMixin):
@@ -169,8 +172,6 @@ class MockSMSReportsUtility(LoggerMixin):
             if not clinic:
                 message.respond(HUB_DEMO_FAIL)
             else:
-                # Fake like we need to prompt their clinic for results, as a means
-                # to conduct user testing.  The mocker does not touch the database
                 self.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_send_dbs_recvd_at_lab_notification(clinic)
                 self.fake_sending_hub_reports(clinic)
@@ -182,8 +183,6 @@ class MockSMSReportsUtility(LoggerMixin):
             if not clinic:
                 message.respond(HUB_DEMO_FAIL)
             else:
-                # Fake like we need to prompt their clinic for results, as a means
-                # to conduct user testing.  The mocker does not touch the database
                 self.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_sending_dho_reports(clinic)
             return True
@@ -194,12 +193,47 @@ class MockSMSReportsUtility(LoggerMixin):
             if not clinic:
                 message.respond(HUB_DEMO_FAIL)
             else:
-                # Fake like we need to prompt their clinic for results, as a means
-                # to conduct user testing.  The mocker does not touch the database
                 self.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_sending_pho_reports(clinic)
             return True
 
+class MockRemindMiUtility(LoggerMixin):
+    """
+    A mock reports utility.  This allows you to do some demo/training scripts
+    while not writing any results data to the database.
+    """
+
+    def handle(self, message):
+        if message.text.strip().upper().startswith("RMDEMO"):
+            rest = message.text.strip()[6:].strip()
+            clinic = self.get_clinic(message, rest)
+
+            if not clinic:
+                message.respond(RIMINDMI_DEMO_FAIL)
+            else:
+                self.info("Initiating demo remindmi to clinic: %s" % clinic)
+                self.fake_sending_six_day_notification(clinic)
+            return True
+
+    def fake_sending_six_day_notification(self, clinic):
+        cbas = Contact.active.filter(types=get_cba_type(), location__parent=clinic)
+        patients = PatientEvent.objects.filter(cba_conn__in=(cba.default_connection for cba in cbas)).distinct()
+        
+        if patients:
+            patient_name = patients[0].patient.name
+        else:
+            patient_name = "Maria Malambo"
+        
+        appt_date = date.today() + timedelta(days=3)
+        for cba in cbas:
+            OutgoingMessage(cba.default_connection, ("Hi %(cba)s.%(patient)s is due for "
+                                  "%(type)s clinic visit on %(date)s.Please "
+                                  "remind them to visit %(clinic)s, then "
+                                  "reply with TOLD %(patient)s"),
+                                  cba=cba.name, patient=patient_name,
+                                  date=appt_date.strftime('%d/%m/%Y'),
+                                  clinic=clinic.name, type="6 day").send()
+                                  
     def get_clinic(self, message, code):
         clinic = None
         if code:
