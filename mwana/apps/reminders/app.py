@@ -8,7 +8,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
-from mwana.apps.labresults.mocking import MockRemindMiUtility
+from mwana.apps.reminders.mocking import MockRemindMiUtility
 from mwana import const
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
