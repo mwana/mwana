@@ -49,3 +49,10 @@ RAPIDSMS_TABS = [
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
+
+# we need separate migration modules for the rapidsms app in Malawi and
+# Zambia, because different 3rd party apps add different model extensions
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'mwana.zambia.migrations.rapidsms',
+}
+

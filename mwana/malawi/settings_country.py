@@ -26,6 +26,8 @@ RESULTS160_SCHEDULES = {
 RESULTS160_FAKE_ID_FORMAT = '{clinic}-{id:04d}-1'
 RESULTS160_RESULT_DISPLAY = {'N': 'Negative', 'P': 'Positive'}
 
+GROWTHMONITORING_SETTINGS = {'DEFAULT_LANG': 'en'}
+
 # The TLC printers require 2 chars at the beginning of the message, so reduce
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
@@ -50,3 +52,14 @@ INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 RAPIDSMS_TABS.append(('xforms', 'XForms'))
 
+# Add the people and growth monitoring apps for Malawi:
+# don't append, 'default' app should come last:
+INSTALLED_APPS.insert(-1, 'people')
+INSTALLED_APPS.insert(-1, 'growthmonitoring')
+RAPIDSMS_TABS.append(('growth_index', 'Growth Monitoring'))
+
+# we need separate migration modules for the rapidsms app in Malawi and
+# Zambia, because different 3rd party apps add different model extensions
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'mwana.malawi.migrations.rapidsms',
+}
