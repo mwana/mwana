@@ -241,11 +241,6 @@ RESULTS160_SLUGS = {
     'DISTRICT_SLUGS': ('district',),
 }
 
-NUTRITION_SLUGS = {
-    'NUTRITION_WORKER_SLUG': 'nutrition-interviewer',
-    'NUTRITION_PATIENT_SLUG': 'nutrition-patient',
-}
-
 # -------------------------------------------------------------------- #
 #                        REMINDMI CONFIGURATION                        #
 # -------------------------------------------------------------------- #
