@@ -26,7 +26,10 @@ def init_varibles():
     global dhos
     global today
     global yesterday
-    dhos = Contact.active.filter(types=get_district_worker_type())
+   
+    dhos = Contact.active.filter(types=get_district_worker_type(), location__smsalertlocation__enabled=True)
+    logger.info('%s DHOs eligible for SMS alerts' % dhos.count())
+
     today = date.today()
     yesterday = datetime(today.year, today.month, today.day)-timedelta(days=1)
 
@@ -114,6 +117,7 @@ def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
                                                      district=contact.location,
                                                      date_sent__gte=date_back)
     if old_msg:
+        logger.info('%s already notiffied of alert (%s)' % (contact.name, alert_type))
         return
 
     OutgoingMessage(contact.default_connection, msg).send()

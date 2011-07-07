@@ -6,6 +6,16 @@ from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 
 
+class SMSAlertLocation(models.Model):
+    """
+    Manages facilities that can receive SMS alerts
+    """
+    district = models.ForeignKey(Location, limit_choices_to={"type__slug":"districts"})
+    enabled = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return "%s: %s" % (self.district.name, "Enabled" if self.enabled else "Not Enabled")
+    
 class Hub(models.Model):
     name = models.CharField(max_length=50)
     district = models.ForeignKey(Location, unique=True)

@@ -2,6 +2,8 @@
 from django.contrib import admin
 from mwana.apps.alerts.models import Hub
 from mwana.apps.alerts.models import Lab
+from mwana.apps.alerts.models import SMSAlertLocation
 
 admin.site.register(Hub)
 admin.site.register(Lab)
+admin.site.register(SMSAlertLocation)
