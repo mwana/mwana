@@ -1,32 +1,19 @@
-# vim: ai ts=4 sts=4 et sw=4
-from rapidsms.contrib.handlers import KeywordHandler
+# vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 from mwana.apps.nutrition.messages import *
 
 
-class RemoveHandler(KeywordHandler):
+class DismissHandler(KeywordHandler):
     """
-    Remove a specified Health Interviewer.
+    Discharge a child from a nutrition programme.
     """
 
-    keyword = "remove|rem"
-
+    keyword = "dismiss|dis"
 
     def help(self):
-        self.respond(REMOVE_HELP)
+        self.respond(DISMISS_HELP)
 
 
     def handle(self, text):
-# fix this
-        try:
-            healthworker = Contact.objects.get(interviewer_id=code)
-            healthworker.status = 'I'
-            healthworker.save()
-            self.respond(REMOVE_CONFIRM %
-                         (healthworker.name, healthworker.interviewer_id))
-            healthworker.interviewer_id = None 
-            healthworker.save()
-        except Exception, e:
-            self.respond(INVALID_MESSAGE)
-            self.exception()
-
+        pass

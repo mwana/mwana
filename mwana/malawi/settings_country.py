@@ -55,8 +55,8 @@ RAPIDSMS_TABS.append(('xforms', 'XForms'))
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
 INSTALLED_APPS.insert(-1, 'people')
-INSTALLED_APPS.insert(-1, 'growthmonitoring')
-RAPIDSMS_TABS.append(('growth_index', 'Growth Monitoring'))
+INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
+RAPIDSMS_TABS.append(('growth_index', 'Nutrition'))
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions

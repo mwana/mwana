@@ -17,9 +17,6 @@ PROVINCE_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PROVINCE_WORKER_SLUG',
                                                      'province-worker')
 DBS_PRINTER_SLUG = settings.RESULTS160_SLUGS.get('DBS_PRINTER_SLUG',
                                                  'dbs-printer')
-# contact types for nutrition app
-NUTRITION_WORKER_SLUG = settings.NUTRITION_SLUGS.get('NUTRITION_WORKER_SLUG', 'nutrition-interviewer')
-NUTRITION_PATIENT_SLUG = settings.NUTRITION_SLUGS.get('NUTRITION_PATIENT_SLUG', 'nutrition-patient')
 
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))

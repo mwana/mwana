@@ -1,7 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
-from rapidsms.contrib.handlers import KeywordHandler
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 from mwana.apps.nutrition.messages import *
+from mwana.apps.nutrition.models import *
+
+from people.models import PersonType
+
 
 class CancelHandler(KeywordHandler):
     """
@@ -16,7 +22,9 @@ class CancelHandler(KeywordHandler):
 
 
     def handle(self, text):
-        #fix this 
+        PATTERN = re.compile(r'(?P<child_id>\d+)\s+', re.IGNORECASE)
+        m = p.match(text)
+        child = m.group('child_id').strip
         try:
             patient = Person.objects.get(code=child)
             ass = patient.latest_assessment()

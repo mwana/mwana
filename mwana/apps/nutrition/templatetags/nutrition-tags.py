@@ -8,11 +8,11 @@ from django.db.models import Avg
 
 from rapidsms.webui.utils import * 
 
-from growthmonitoring.models import *
+from nutrition.models import *
 
-@register.inclusion_tag("growthmonitoring/partials/stats.html")
-@dashboard("top_right", "growthmonitoring/partials/stats.html", "growthmonitoring.can_view")
-def growthmonitoring_stats():
+@register.inclusion_tag("nutrition/partials/stats.html")
+@dashboard("top_right", "nutrition/partials/stats.html", "nutrition.can_view")
+def nutrition_stats():
     return { "stats": [
         {
             "caption": "Teams",
@@ -36,9 +36,9 @@ def growthmonitoring_stats():
         }
     ]}
 
-@register.inclusion_tag("growthmonitoring/partials/progress.html")
-@dashboard("top_middle", "growthmonitoring/partials/progress.html", "growthmonitoring.can_view")
-def growthmonitoring_progress():
+@register.inclusion_tag("nutrition/partials/progress.html")
+@dashboard("top_middle", "nutrition/partials/progress.html", "nutrition.can_view")
+def nutrition_progress():
     def unique_list(seq):
         set = {}
         map(set.__setitem__, seq, [])
@@ -106,9 +106,9 @@ def growthmonitoring_progress():
         "total_suspects": Assessment.objects.all().filter(status='S').count()
     }
 
-@register.inclusion_tag("growthmonitoring/partials/healthworkers.html")
-@dashboard("bottom_left", "growthmonitoring/partials/healthworkers.html", "growthmonitoring.can_view")
-def growthmonitoring_healthworkers():
+@register.inclusion_tag("nutrition/partials/healthworkers.html")
+@dashboard("bottom_left", "nutrition/partials/healthworkers.html", "nutrition.can_view")
+def nutrition_healthworkers():
     healthworkers_infos = []
     hws = HealthWorker.objects.filter(status="A")
     for hw in hws:

@@ -14,7 +14,7 @@ from .models import *
 
 
 def index(req):
-    template_name="growthmonitoring/index.html"
+    template_name="nutrition/index.html"
     surveyentries = SurveyEntry.objects.order_by('-survey_date')
     assessments = ass_dicts_for_display()
     # sort by date, descending
@@ -52,8 +52,8 @@ def ass_dicts_for_display():
         # TODO is there a better way to do this? adding fields to the queryset???
         ass_dict.update({'interviewer_id'   : ass.healthworker.interviewer_id})
         ass_dict.update({'child_id'         : ass.patient.code})
-        ass_dict.update({'household_id'     : ass.patient.household_id})
-        ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
+        #ass_dict.update({'household_id'     : ass.patient.household_id})
+        #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
         ass_dict.update({'sex'              : ass.patient.gender})
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
@@ -76,8 +76,8 @@ def ass_dicts_for_export():
         # TODO is there a better way to do this? adding fields to the queryset???
         ass_dict.update({'interviewer_id'   : ass.healthworker.interviewer_id})
         ass_dict.update({'child_id'         : ass.patient.code})
-        ass_dict.update({'household_id'     : ass.patient.household_id})
-        ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
+        #ass_dict.update({'household_id'     : ass.patient.household_id})
+        #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
         ass_dict.update({'sex'              : ass.patient.gender})
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
@@ -110,12 +110,12 @@ def export(headers, keys, objects, file_name):
 
 
 def csv_assessments(req):
-    headers = ['date', 'interviewer ID', 'cluster ID', 'child ID',
-        'household ID', 'sex', 'date of birth', 'age in months', 'height',
+    headers = ['date', 'interviewer ID', 'child ID',
+        'sex', 'date of birth', 'age in months', 'height',
         'weight', 'oedema', 'muac', 'height for age', 'weight for age',
         'weight for height', 'survey status']
-    keys = ['date', 'interviewer_id', 'cluster_id', 'child_id',
-            'household_id', 'sex', 'date_of_birth', 'age_in_months',
+    keys = ['date', 'interviewer_id', 'child_id',
+            'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',
             'weight4height', 'human_status']
     
@@ -126,10 +126,10 @@ def csv_assessments(req):
 
 
 def csv_entries(req):
-    headers = ['Survey Date', 'Interviewer ID', 'Cluster ID', 'Child ID',
-               'Household ID', 'Sex', 'Date of Birth', 'Age', 'Height',
+    headers = ['Survey Date', 'Interviewer ID', 'Child ID',
+               'Sex', 'Date of Birth', 'Age', 'Height',
                'Weight', 'Oedema', 'MUAC']
-    keys = ['survey_date', 'healthworker_id', 'cluster_id', 'child_id',
-            'household_id', 'gender', 'date_of_birth', 'age_in_months',
+    keys = ['survey_date', 'healthworker_id', 'child_id',
+            'gender', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac']
     return export(headers, keys, SurveyEntry.objects.all(), 'entries.csv')
