@@ -997,6 +997,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertEqual(msg2,msgs[0].text)
         self.assertEqual(msg1,msgs[1].text)
 
+        self.assertEqual(3, Result.objects.filter(notification_status='notified',
+                            ).count())
+
         self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
         self.assertEqual(0, Result.objects.filter(
@@ -1013,3 +1016,31 @@ class TestResultsAcceptor(LabresultsSetUp):
 """.format(**self._result_text())
         time.sleep(1)
         self.runScript(script)
+
+        # test filtering out old messages
+        for res in Result.objects.all():
+            res.notification_status = "notified"
+            res.save()
+
+        old_res = Result.objects.all()[0]
+
+        
+        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=12)
+        old_res.save()
+
+        time.sleep(.1)
+        # start router and send a notification
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+            if today.weekday() != 0:
+                self.assertTrue(msgs[0].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+                self.assertTrue(msgs[1].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+            else:
+                self.assertTrue(msgs[0].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+                self.assertTrue(msgs[1].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+            self.assertEqual(2,len(msgs))
