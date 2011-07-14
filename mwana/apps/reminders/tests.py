@@ -166,7 +166,7 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/6/2011 maria
+            kk     > birth 4/6/2041 maria
             kk     < Sorry, you can not register a birth with a date after today's.
         """
         self.runScript(script)
