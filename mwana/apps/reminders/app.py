@@ -128,7 +128,7 @@ class App(rapidsms.apps.base.AppBase):
                     msg.respond(_("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
                                 "DAY MONTH YEAR, for example: 23 04 2010"))
-                    return
+                    return True
             else:
                 date = datetime.datetime.today()
 
@@ -136,7 +136,7 @@ class App(rapidsms.apps.base.AppBase):
             if date > datetime.datetime.today():
                 msg.respond(_("Sorry, you can not register a %s with a date "
                 "after today's." % event.name.lower()))
-                return
+                return True
 
             # fetch or create the patient
             if msg.contact and msg.contact.location:
@@ -165,7 +165,7 @@ class App(rapidsms.apps.base.AppBase):
                         "clinic."), cba=cba_name, gender=event.possessive_pronoun,
                         event=event.name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
-                return
+                return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="new")
             gender = event.possessive_pronoun
