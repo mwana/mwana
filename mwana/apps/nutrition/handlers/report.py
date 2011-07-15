@@ -19,15 +19,16 @@ from mwana.apps.nutrition.models import *
 class ReportHandler(KeywordHandler):
 
     keyword = "report|rep|enq"
+    cg = childgrowth(False, False)
 
     def help(self):
-        self.respond("To report measurements send: ENQ <CHILD ID> <WEIGHT> <MUAC>")
+        self.respond("To report measurements send: ENQ <CHILD ID> <GENDER> <WEIGHT> <HEIGHT> <OEDEMA> <MUAC>")
 
     def start(self):
         # initialize childgrowth, which loads WHO tables
         # TODO is this the best place for this??
         # TODO make childgrowth options configurable via config.py
-        self.cg = childgrowth(False, False)
+        #self.cg = childgrowth(False, False)
 
     def __get_or_create_patient(self, **kwargs):
         self.debug("finding patient...")
@@ -384,4 +385,3 @@ class ReportHandler(KeywordHandler):
         # send confirmation AFTER any error messages
         self.respond(confirmation)
         self.debug('sent confirmation')
-        return self.handled
