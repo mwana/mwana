@@ -22,7 +22,7 @@ class ReportHandler(KeywordHandler):
 
     
     def help(self):
-        self.respond("To report measurements send: ENQ <CHILD ID> <GENDER> <WEIGHT> <HEIGHT> <OEDEMA> <MUAC>")
+        self.respond(REPORT_HELP)
 
     def start(self):
         # initialize childgrowth, which loads WHO tables
@@ -179,6 +179,9 @@ class ReportHandler(KeywordHandler):
 
         except ObjectDoesNotExist, MultipleObjectsReturned:
             return self.respond("No active survey at this date")
+
+        self.debug("initialising separate childgrowth instance..")
+        cg = childgrowth(False, False)
 
         # find out who is submitting this report
         healthworker = self.__identify_healthworker()
@@ -344,7 +347,7 @@ class ReportHandler(KeywordHandler):
         try:
             # perform analysis based on cg instance from start()
             # TODO add to Assessment save method?
-            results = ass.analyze(self.cg)
+            results = ass.analyze(cg)
             self.debug('analyzed!')
             self.debug(results)
             #response_map = {
