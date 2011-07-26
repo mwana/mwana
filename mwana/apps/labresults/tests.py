@@ -17,7 +17,7 @@ from mwana.apps.locations.models import LocationType
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
-from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
+from mwana.apps.labresults import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
