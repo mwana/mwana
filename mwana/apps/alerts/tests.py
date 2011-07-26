@@ -16,16 +16,6 @@ from rapidsms.tests.scripted import TestScript
 
 class SMSAlertsSetUp(TestScript):
 
-    def _result_text(self):
-        """
-        Returns the appropriate display value for DBS results as it would
-        appear in an SMS.
-        """
-        results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
-        results = {'detected': results_text.get('P', 'Detected'),
-            'not_detected': results_text.get('N', 'NotDetected')}
-        return results
-
     def setUp(self):
         # this call is required if you want to override setUp
         super(SMSAlertsSetUp, self).setUp()
