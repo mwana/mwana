@@ -59,8 +59,8 @@ class SMSAlertsSetUp(TestScript):
         luapula_pho > join pho 400000 Luapula PHO 1111
         mansa_dho > join dho 403000 Mansa DHO 1111
         samfya_dho > join dho 402000 Samfya DHO 1111
-        kawambwa_dho > join dho 401000 Samfya DHO 1111
-        salanga_worker > join clinic 401012 Mibenge Man 1111
+        kawambwa_dho > join dho 401000 Kawambwa DHO 1111
+        salanga_worker > join clinic 401012 Salanga Man 1111
         mibenge_worker > join clinic 403029 Mibenge Man 1111
         kashitu_worker > join clinic 402026 kashitu Man 1111
         cental_worker > join clinic 403012 Central Man 1111
