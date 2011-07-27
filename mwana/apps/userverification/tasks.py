@@ -27,6 +27,9 @@ def send_verification_request(router):
     
     counter = 0
     msg_limit = 9
+    
+    logger.info('%s clinic workers have not sent messages in the last %s days' % (len(contacts), days_back))
+
     for contact in contacts:
         if UserVerification.objects.filter(contact=contact,
                                            facility=contact.location, request='1',
