@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.reports.models import SupportedLocation
 from mwana.apps.userverification.models import UserVerification
 from datetime import timedelta
 import time
@@ -33,12 +34,12 @@ class UserVerificationSetUp(TestScript):
         self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent=self.mansa, send_live_results=True)
         self.salanga = Location.objects.create(type=self.type, name="Salanga Clinic", slug="401012", parent=self.kawambwa, send_live_results=True)
 
-        
+        for loc in Location.objects.filter(type__singular="clinic"):
+            SupportedLocation.objects.create(location =loc, supported =True)
 
+        self.unsupported = Location.objects.create(type=self.type, name="Unsupported Clinic", slug="401013", parent=self.kawambwa, send_live_results=True)
+             
 
-#        from datetime import datetime
-#        today = datetime.today()
-#        late = today - timedelta(days=60)
 
 
         # register staff for the clinics and also their districts and provinces
@@ -54,6 +55,7 @@ class UserVerificationSetUp(TestScript):
         mibenge_worker > join clinic 403029 Mibenge Man 1111
         kashitu_worker > join clinic 402026 kashitu Man 1111
         central_worker > join clinic 403012 Central Man 1111
+        unsupported_worker > join clinic 403013 I Man 1111
         mibenge_cba > join cba 403029 1 Mibenge CBA
         kashitu_cba > join cba 402026  2 kashitu cba
         central_cba1 > join cba 403012 3 Central cba1
@@ -65,7 +67,7 @@ class UserVerificationSetUp(TestScript):
 
         msgs = self.receiveAllMessages()
 
-        self.assertEqual(12, len(msgs))
+        self.assertEqual(13, len(msgs))
 
 
 

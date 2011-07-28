@@ -20,17 +20,22 @@ def send_verification_request(router):
     today = datetime.today()
     date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
 
-    # TODO: leave out new clinic workers
-    contacts = Contact.active.exclude(message__direction="I",
-                                      message__date__gte=date_back).\
-                                      filter(types=get_clinic_worker_type())
-    
+
+    supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
+    location__supportedlocation__supported=True).distinct()
+
+    complying_contacts = supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
+
+
+
+    defaulting_contacts = set(supported_contacts) - set(complying_contacts)
     counter = 0
     msg_limit = 9
-    
-    logger.info('%s clinic workers have not sent messages in the last %s days' % (len(contacts), days_back))
 
-    for contact in contacts:
+    logger.info('%s clinic workers have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
+    
+    
+    for contact in defaulting_contacts:
         if UserVerification.objects.filter(contact=contact,
                                            facility=contact.location, request='1',
                                            verification_freq="A",
@@ -43,7 +48,7 @@ def send_verification_request(router):
 
         UserVerification.objects.create(contact=contact,
                                         facility=contact.location, request='1', verification_freq="A")
-        
+
         counter = counter + 1
         if counter >= msg_limit:
             break
