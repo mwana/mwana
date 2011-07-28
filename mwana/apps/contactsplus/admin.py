@@ -3,6 +3,8 @@ from django.contrib import admin
 from django.db.models import Min, Max
 
 from rapidsms.models import Contact
+from rapidsms.models import Connection
+from rapidsms.models import Backend
 from rapidsms.admin import ContactAdmin
 from rapidsms.contrib.messagelog.models import Message
 
@@ -63,3 +65,19 @@ class MessageAdmin(admin.ModelAdmin):
     list_filter = ("direction", "date", "contact",)
     search_fields = ("text",)
 admin.site.register(Message, MessageAdmin)
+
+
+def create_action(backend):
+    fun = lambda modeladmin, request, queryset: queryset.update(backend=backend)
+    name = "mark_%s" % (backend,)
+    return (name, (fun, name, "Set selected connections to %s backend" % (backend,)))
+
+
+admin.site.unregister(Connection)
+class ConnectionAdmin(admin.ModelAdmin):
+    list_display = ("identity", "backend", "contact",)
+    list_filter = ("backend",)
+
+    def get_actions(self, request):
+        return dict(create_action(b) for b in Backend.objects.all())
+admin.site.register(Connection, ConnectionAdmin)
