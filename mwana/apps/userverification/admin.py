@@ -16,7 +16,7 @@ class UserVerificationAdmin(admin.ModelAdmin):
 
     def date_of_most_recent_sms(self, obj):
         latest = Message.objects.filter(
-            contact=obj.id,
+            contact=obj.contact.id,
             direction='I',
         ).aggregate(date=Max('date'))
         if latest['date']:
