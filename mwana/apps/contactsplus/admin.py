@@ -55,3 +55,11 @@ admin.site.register(Contact, ContactAdmin)
 class ContactTypeAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
 admin.site.register(contactsplus.ContactType, ContactTypeAdmin)
+
+
+admin.site.unregister(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("text", "direction", "who", "date",)
+    list_filter = ("direction", "date", "contact",)
+    search_fields = ("text",)
+admin.site.register(Message, MessageAdmin)
