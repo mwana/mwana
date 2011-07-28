@@ -249,6 +249,10 @@ class App (rapidsms.apps.base.AppBase):
         """
         printers = self.printers_for_clinic(clinic)
         results = self._pending_results(clinic)
+        if not results:
+            logger.info("0 results to send for %s" % clinic.name)
+            return
+
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
         else:
