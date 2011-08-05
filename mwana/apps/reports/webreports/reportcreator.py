@@ -796,9 +796,14 @@ class MalawiReports(Results160Reports):
         for location in self.get_live_facilities():
             parent_name = location.parent and location.parent.name or ' '
             if (district == "All Districts" or district == parent_name):
-                positive = self.get_new_results(location).filter(result='P').count()
-                negative = self.get_new_results(location).filter(result='N').count()
-                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                positive = self.get_new_results(location)\
+                        .filter(result='P')\
+                        .filter(Q(verified=True) | Q(verified__isnull=True))\
+                        .count()
+                negative = self.get_new_results(location).filter(result='N')\
+                           .filter(verified=True).count()
+                rejected = self.get_new_results(location)\
+                           .filter(result__in='XIR').count()
                 total_tested = positive + negative
 
                 tt_positive = tt_positive + positive
