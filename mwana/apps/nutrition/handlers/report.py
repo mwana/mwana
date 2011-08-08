@@ -18,7 +18,7 @@ from mwana.apps.nutrition.models import *
 
 class ReportHandler(KeywordHandler):
 
-    keyword = "report|rep|enq"
+    keyword = "gm"
 
     
     def help(self):
