@@ -283,17 +283,6 @@ class Alerter:
                     self.clinic_sent_dbs_referal_date.date()).\
                 exclude(samplenotification__date__gte=
                         self.clinic_sent_dbs_referal_date.date()).distinct()
-
-#        active_clinics = Location.\
-#            objects.filter(
-#                           Q(lab_results__notification_status='sent',
-#                           lab_results__result_sent_date__gte
-#                           =self.clinic_sent_dbs_referal_date.date()),
-#                           Q(contact__message__text__iregex='\s*check\s*') |                           
-#                           Q(contact__message__text__istartswith='The results for sample') |                           
-#                           Q(
-#                           contact__message__text__istartswith='There are currently no results') 
-#                           ).distinct()
         
         for clinic in clinics:
             additional_text = ""

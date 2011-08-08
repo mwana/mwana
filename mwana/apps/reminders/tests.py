@@ -340,3 +340,97 @@ class Reminders(TestScript):
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)        
         
+class MockReminders(TestScript):
+
+    apps = (handler_app, App, )
+    def setUp(self):
+        # this call is required if you want to override setUp
+        super(MockReminders, self).setUp()
+        self.type = LocationType.objects.get_or_create(singular="clinic", plural="clinics", slug=const.CLINIC_SLUGS[2])[0]
+        self.type1 = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]
+        self.type2 = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]
+        self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="400000")
+        self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="403000", parent = self.luapula)
+        self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="402000", parent = self.luapula)
+        self.mibenge = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="403029", parent = self.mansa, send_live_results=True)
+        self.kashitu = Location.objects.create(type=self.type, name="Kashitu Clinic", slug="402026", parent = self.samfya, send_live_results=True)
+        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012", parent = self.mansa, send_live_results=True)
+        birth = reminders.Event.objects.create(name="Birth", slug="birth")
+
+    def testSendMockReminders(self):
+        """
+        Tests mocking 6 day RemindMi messages to CBAs
+        Reminders should only go to CBAs at specified facility
+        """
+        self.assertEqual(Contact.objects.count(), 0, "Contact list is not empty")
+
+        #create different users - control and non control
+        script = """
+        luapula_pho > join pho 400000 Luapula PHO 1111
+        mansa_dho > join dho 403000 Mansa DHO 1111
+        samfya_dho > join dho 402000 Samfya DHO 1111
+        mibenge_worker > join clinic 403029 Mibenge Man 1111
+        kashitu_worker > join clinic 402026 kashitu Man 1111
+        cental_worker > join clinic 403012 Central Man 1111
+        mibenge_cba > join cba 403029 1 Mibenge CBA
+        kashitu_cba > join cba 402026  2 kashitu cba
+        central_cba1 > join cba 403012 3 Central cba1
+        central_cba2 > join cba 403012 4 Central cba2
+        demo_initiator > join pho 400000 Trainer Man 1111
+        """
+
+        self.runScript(script)
+        self.assertEqual(Contact.objects.count(), 11)
+
+        msgs=self.receiveAllMessages()
+        
+        self.assertEqual(11,len(msgs))
+
+        from datetime import date, timedelta
+        date = date.today() + timedelta(3)
+        fdate = date.strftime('%d/%m/%Y')
+
+        #only cba at given faclity should receive reminder. Default demo patient
+        #is Maria Malambo
+        script = """
+        demo_initiator > rmdemo 402026
+        kashitu_cba < Hi Kashitu Cba.Maria Malambo is due for 6 day clinic visit on %s.Please remind them to visit Kashitu Clinic, then reply with TOLD Maria Malambo
+        """ % fdate
+        self.runScript(script)
+
+        # No extra messages
+        msgs=self.receiveAllMessages()
+        self.assertEqual(0,len(msgs))
+
+        #only cba at given faclity should receive reminder. If baby is registered pick one
+        script = """
+        kashitu_cba > birth 29 06 2011 Groovy Phiri
+        kashitu_cba < Thank you Kashitu Cba! You have successfully registered a birth for Groovy Phiri on 29/06/2011. You will be notified when it is time for his or her next appointment at the clinic.
+        demo_initiator > rmdemo 402026
+        kashitu_cba < Hi Kashitu Cba.Groovy Phiri is due for 6 day clinic visit on %s.Please remind them to visit Kashitu Clinic, then reply with TOLD Groovy Phiri
+        """ % (fdate)
+        self.runScript(script)
+
+        # No extra messages
+        msgs=self.receiveAllMessages()
+        self.assertEqual(0,len(msgs))
+
+
+        #Central clinic has two CBAs
+        script = """
+        demo_initiator > rmdemo 403012
+        """
+        self.runScript(script)
+
+        # No extra messages
+        msgs=self.receiveAllMessages()
+        self.assertEqual(2,len(msgs))
+
+        expected_msgs = [ "Hi Central Cba1.Maria Malambo is due for 6 day clinic visit on %s.Please remind them to visit Central Clinic, then reply with TOLD Maria Malambo" % fdate
+        , "Hi Central Cba2.Maria Malambo is due for 6 day clinic visit on %s.Please remind them to visit Central Clinic, then reply with TOLD Maria Malambo" % fdate]
+
+        for msg in msgs:
+            self.assertTrue(msg.text in expected_msgs)
+            self.assertTrue(msg.connection.identity in ["central_cba1", "central_cba2"],
+            msg.connection.identity + " not in connection list" )
+        

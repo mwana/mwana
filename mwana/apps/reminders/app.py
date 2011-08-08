@@ -8,6 +8,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
+from mwana.apps.reminders.mocking import MockRemindMiUtility
 from mwana import const
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -107,6 +108,12 @@ class App(rapidsms.apps.base.AppBase):
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
+        
+        mocker = MockRemindMiUtility()
+
+        if mocker.handle(msg):
+            return True
+
         if not msg.text:
             return False
         event_slug = msg.text.split()[0].lower()
@@ -121,7 +128,7 @@ class App(rapidsms.apps.base.AppBase):
                     msg.respond(_("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
                                 "DAY MONTH YEAR, for example: 23 04 2010"))
-                    return
+                    return True
             else:
                 date = datetime.datetime.today()
 
@@ -129,7 +136,7 @@ class App(rapidsms.apps.base.AppBase):
             if date > datetime.datetime.today():
                 msg.respond(_("Sorry, you can not register a %s with a date "
                 "after today's." % event.name.lower()))
-                return
+                return True
 
             # fetch or create the patient
             if msg.contact and msg.contact.location:
@@ -158,7 +165,7 @@ class App(rapidsms.apps.base.AppBase):
                         "clinic."), cba=cba_name, gender=event.possessive_pronoun,
                         event=event.name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
-                return
+                return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="new")
             gender = event.possessive_pronoun

@@ -17,7 +17,7 @@ from mwana.apps.locations.models import LocationType
 from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
-from mwana.apps.tlcprinters import tasks as tlcprinter_tasks
+from mwana.apps.labresults import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
 from mwana.apps.labresults.testdata.reports import *
@@ -601,14 +601,14 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Jun
-            clinic_worker > Reports 403012 6
+            clinic_worker > Reports 403012 Jul
+            clinic_worker > Reports 403012 7
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 June
+            clinic_worker > Reports 40 July
             clinic_worker > Reports Luapula
         """.format(**self._result_text())
         self.runScript(script)        
@@ -997,6 +997,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertEqual(msg2,msgs[0].text)
         self.assertEqual(msg1,msgs[1].text)
 
+        self.assertEqual(3, Result.objects.filter(notification_status='notified',
+                            ).count())
+
         self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
         self.assertEqual(0, Result.objects.filter(
@@ -1013,3 +1016,31 @@ class TestResultsAcceptor(LabresultsSetUp):
 """.format(**self._result_text())
         time.sleep(1)
         self.runScript(script)
+
+        # test filtering out old messages
+        for res in Result.objects.all():
+            res.notification_status = "notified"
+            res.save()
+
+        old_res = Result.objects.all()[0]
+
+        
+        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=12)
+        old_res.save()
+
+        time.sleep(.1)
+        # start router and send a notification
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+            if today.weekday() != 0:
+                self.assertTrue(msgs[0].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+                self.assertTrue(msgs[1].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+            else:
+                self.assertTrue(msgs[0].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+                self.assertTrue(msgs[1].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
+            self.assertEqual(2,len(msgs))

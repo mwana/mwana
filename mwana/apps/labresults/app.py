@@ -12,6 +12,7 @@ import rapidsms
 import re
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 from django.conf import settings
 from django.db.models import Q
 from mwana.apps.labresults.messages import *
@@ -248,6 +249,10 @@ class App (rapidsms.apps.base.AppBase):
         """
         printers = self.printers_for_clinic(clinic)
         results = self._pending_results(clinic)
+        if not results:
+            logger.info("0 results to send for %s" % clinic.name)
+            return
+
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
         else:
@@ -283,9 +288,25 @@ class App (rapidsms.apps.base.AppBase):
             results = Result.objects.filter(clinic=clinic,
                                             clinic__send_live_results=True,
                                             notification_status__in=['new', 'notified'])
+            results = self.filterout(results)
             return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
+
+
+    def filterout(self, results):
+        """
+        If clinic has not been retrieving results despite being notified, then
+        send them only once a week
+        """
+        from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
+        today = datetime.today()
+        ago = today - timedelta(days=7)
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+            if today.weekday() != 0:
+                results = results.exclude(notification_status='notified',
+                arrival_date__lte=ago)
+        return results
 
     def _updated_results(self, clinic):
         if settings.SEND_LIVE_LABRESULTS:

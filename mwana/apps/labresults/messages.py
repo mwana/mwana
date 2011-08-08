@@ -15,6 +15,7 @@ INSTRUCTIONS      = "Please record these results in your clinic records and prom
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
+RIMINDMI_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a RemindMi demo. To specify a location send: RMDEMO <LOCATION_CODE>"
 PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CLINIC_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are CHECK, RESULT, SENT, TRACE, MSG CBA, MSG CLINIC, MSG ALL and MSG DHO. Respond with any keyword or HELP for more information"

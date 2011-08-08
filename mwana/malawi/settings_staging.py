@@ -14,7 +14,7 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
-XFORMS_HOST = 'malawi-qa.projectmwana.org'
+#XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
 # only on the staging or production server, so that development can continue
@@ -36,7 +36,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.malawi_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('growth_index', 'Growth Monitoring'),
-    ('xforms', 'XForms'),
+#    ('xforms', 'XForms'),
 ]
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS

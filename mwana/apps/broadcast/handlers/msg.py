@@ -41,6 +41,10 @@ class MessageHandler(BroadcastHandler):
 
 
     def help(self):
+        if self.msg.contact is None or \
+            self.msg.contact.location is None:
+                self.respond(UNREGISTERED)
+                return
         self.respond(self.get_help_text())
         
     def get_help_text(self):
