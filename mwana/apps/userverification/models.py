@@ -16,7 +16,7 @@ class UserVerification(models.Model):
                          )
 
     REQUEST_TYPES = (
-                     ('1', 'Stopped using Results160/Changed Clinic'),
+                     ('1', 'Still using Results160/At same clinic?'),
                      ('2', 'Other'),
                      )
 

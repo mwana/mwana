@@ -11,6 +11,8 @@ from mwana.apps.labresults.messages import ALREADY_COLLECTED
 from mwana.apps.labresults.messages import BAD_PIN
 from mwana.apps.labresults.messages import DEMO_FAIL
 from mwana.apps.labresults.messages import HUB_DEMO_FAIL
+from mwana.apps.labresults.messages import PHO_DEMO_FAIL
+from mwana.apps.labresults.messages import DHO_DEMO_FAIL
 from mwana.apps.labresults.messages import INSTRUCTIONS
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import RESULTS_READY
@@ -180,7 +182,7 @@ class MockSMSReportsUtility(LoggerMixin):
             clinic = self.get_clinic(message, rest)
 
             if not clinic:
-                message.respond(HUB_DEMO_FAIL)
+                message.respond(DHO_DEMO_FAIL)
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
@@ -192,7 +194,7 @@ class MockSMSReportsUtility(LoggerMixin):
 
             clinic = self.get_clinic(message, rest)
             if not clinic:
-                message.respond(HUB_DEMO_FAIL)
+                message.respond(PHO_DEMO_FAIL)
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database

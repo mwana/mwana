@@ -84,7 +84,7 @@ def clean_up_unconfirmed_results():
                                                   sent_at__gte=date_back,
                                                   text__icontains=TEST_TYPE)
     for msg in messages:
-        req_id = msg.text.split(".")[1].split()[-1]
+        req_id = msg.text.split(".")[1].split(":")[-1].strip()
         
         clinic = msg.connection.contact.location
 

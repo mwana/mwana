@@ -64,7 +64,7 @@ class App (rapidsms.apps.base.AppBase):
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = self._pending_results(clinic)
+            results = self._pending_results(clinic, True)
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
                                 count=results.count())
@@ -278,7 +278,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         return Q(verified__isnull=True) | Q(verified=True)
 
-    def _pending_results(self, clinic):
+    def _pending_results(self, clinic, check=False):
         """
         Returns the pending results for a clinic. This is limited to 9 results
         (about 3 SMSes) at a time, so clinics aren't overwhelmed with new
@@ -288,13 +288,13 @@ class App (rapidsms.apps.base.AppBase):
             results = Result.objects.filter(clinic=clinic,
                                             clinic__send_live_results=True,
                                             notification_status__in=['new', 'notified'])
-            results = self.filterout(results)
+            results = self.filterout(results, check)
             return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
 
 
-    def filterout(self, results):
+    def filterout(self, results, check):
         """
         If clinic has not been retrieving results despite being notified, then
         send them only once a week
@@ -302,7 +302,7 @@ class App (rapidsms.apps.base.AppBase):
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
         today = datetime.today()
         ago = today - timedelta(days=7)
-        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
                 arrival_date__lte=ago)

@@ -204,10 +204,9 @@ class Results160Reports:
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_processing_time(self, location):
-        results = Result.objects.filter(Q(processed_on__gt=self.dbsr_startdate)
-                                        | Q(processed_on=self.dbsr_startdate),
-                                        Q(processed_on__lt=self.dbsr_enddate) |
-                                        Q(processed_on=self.dbsr_enddate))\
+        results = Result.objects.exclude(entered_on=None).\
+                                filter(processed_on__gte=self.dbsr_startdate,
+                                        processed_on__lte=self.dbsr_enddate) \
         .filter(clinic=location)
         if not results:
             return (0, None)
