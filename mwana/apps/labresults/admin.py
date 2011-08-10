@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from django.contrib import admin
 from mwana.apps.labresults.models import *
+from mwana.apps.labresults.actions import export_as_csv_action
 
 
 class ResultAdmin(admin.ModelAdmin):
@@ -13,6 +14,7 @@ class ResultAdmin(admin.ModelAdmin):
                    'processed_on', 'clinic',)
     search_fields = ('sample_id','requisition_id')
     date_hierarchy = 'result_sent_date'
+    actions = [export_as_csv_action("Export selected results as CSV")]
 admin.site.register(Result, ResultAdmin)
 
 
