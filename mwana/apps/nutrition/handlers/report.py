@@ -219,9 +219,10 @@ class ReportHandler(KeywordHandler):
             self.respond(INVALID_MEASUREMENT %\
                 (survey_entry.child_id))
 
-        # check that all three id codes are numbers
-        valid_ids, invalid_ids = self._validate_ids({'interviewer' : str(healthworker.interviewer_id),\
-            'child' : survey_entry.child_id})
+        # check that id codes are numbers
+        valid_ids, invalid_ids = self._validate_ids(
+            {'interviewer' : str(healthworker.interviewer_id),\
+             'child' : survey_entry.child_id})
         # send responses for each invalid id, if any
         if len(invalid_ids) > 0:
             for k,v in invalid_ids.iteritems():
