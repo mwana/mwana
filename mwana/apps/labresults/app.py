@@ -18,6 +18,7 @@ from django.db.models import Q
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
@@ -38,7 +39,12 @@ class App (rapidsms.apps.base.AppBase):
     # we keep a mapping of locations to who collected last, so we can respond
     # when we receive stale pins
     last_collectors = {}
-    
+    for record in PendingPinConnections.objects.filter():
+            if record.connection in waiting_for_pin.keys():
+                waiting_for_pin[record.connection].append(record.result)
+            else:
+                waiting_for_pin[record.connection] = [record.result]
+
     mocker = MockResultUtility()
     
     # regex format stolen from KeywordHandler
@@ -51,6 +57,10 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
         self.schedule_send_results_to_printer_task()
+
+    def pop_pending_connection(self,connection):
+        self.waiting_for_pin.pop(connection)
+        PendingPinConnections.objects.filter(connection=connection).delete()
 
     def handle (self, message):
         key = message.text.strip().upper()
@@ -397,6 +407,8 @@ class App (rapidsms.apps.base.AppBase):
     def _mark_results_pending(self, results, connections):
         for connection in connections:
             self.waiting_for_pin[connection] = results
+            for res in results:
+                PendingPinConnections.objects.create(connection=connection, result=res)
         for r in results:
             r.notification_status = 'notified'
             r.save()
