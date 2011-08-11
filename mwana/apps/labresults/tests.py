@@ -1045,3 +1045,11 @@ class TestResultsAcceptor(LabresultsSetUp):
                 self.assertTrue(msgs[0].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
                 self.assertTrue(msgs[1].text.endswith("We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
             self.assertEqual(2,len(msgs))
+
+
+        script = """
+            clinic_worker > CHECK
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+        """
+
+        self.runScript(script)
