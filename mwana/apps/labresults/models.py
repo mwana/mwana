@@ -206,4 +206,10 @@ class PrintedResult(models.Model):
     result = models.ForeignKey(Result)
     contact = models.ForeignKey(Contact)
     times_printed = models.IntegerField(null=True, blank=True)
-    
+
+
+class PendingPinConnections(models.Model):
+    """for storage of connections that have pending PIN requests"""
+    connection = models.ForeignKey(Connection)
+    result = models.ForeignKey(Result)
+    timestamp = models.DateTimeField(null=True,blank=True, auto_now=True)
