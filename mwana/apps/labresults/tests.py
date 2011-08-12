@@ -582,7 +582,8 @@ class TestApp(LabresultsSetUp):
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
                               notification_status="new")
-        
+
+        today = datetime.datetime.today()
         #collect the results. get some reports
         script = """
             central_clinic_worker > CHECK
@@ -601,16 +602,16 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Sorry, I don't know about a location with code 403029. Please check your code and try again.
             clinic_worker > Reports 402029
             clinic_worker > Reports 403012
-            clinic_worker > Reports 403012 Jul
-            clinic_worker > Reports 403012 7
+            clinic_worker > Reports 403012 %s
+            clinic_worker > Reports 403012 %s
             clinic_worker > Reports 402000
             clinic_worker > Reports 403000
             clinic_worker > Reports 4030
             clinic_worker > Reports mansa
             clinic_worker > Reports 400000
-            clinic_worker > Reports 40 July
+            clinic_worker > Reports 40 %s
             clinic_worker > Reports Luapula
-        """.format(**self._result_text())
+        """.format(**self._result_text())% (today.strftime("%b"), today.month, today.strftime("%b"))
         self.runScript(script)        
         msgs=self.receiveAllMessages()
         

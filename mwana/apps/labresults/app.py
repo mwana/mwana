@@ -18,6 +18,7 @@ from django.db.models import Q
 from mwana.apps.labresults.messages import *
 from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
@@ -38,7 +39,12 @@ class App (rapidsms.apps.base.AppBase):
     # we keep a mapping of locations to who collected last, so we can respond
     # when we receive stale pins
     last_collectors = {}
-    
+    for record in PendingPinConnections.objects.filter():
+            if record.connection in waiting_for_pin.keys():
+                waiting_for_pin[record.connection].append(record.result)
+            else:
+                waiting_for_pin[record.connection] = [record.result]
+
     mocker = MockResultUtility()
     
     # regex format stolen from KeywordHandler
@@ -52,6 +58,10 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_process_payloads_tasks()
         self.schedule_send_results_to_printer_task()
 
+    def pop_pending_connection(self,connection):
+        self.waiting_for_pin.pop(connection)
+        PendingPinConnections.objects.filter(connection=connection).delete()
+
     def handle (self, message):
         key = message.text.strip().upper()
         key = key[:4]
@@ -64,7 +74,7 @@ class App (rapidsms.apps.base.AppBase):
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = self._pending_results(clinic)
+            results = self._pending_results(clinic, True)
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
                                 count=results.count())
@@ -278,7 +288,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         return Q(verified__isnull=True) | Q(verified=True)
 
-    def _pending_results(self, clinic):
+    def _pending_results(self, clinic, check=False):
         """
         Returns the pending results for a clinic. This is limited to 9 results
         (about 3 SMSes) at a time, so clinics aren't overwhelmed with new
@@ -288,13 +298,13 @@ class App (rapidsms.apps.base.AppBase):
             results = Result.objects.filter(clinic=clinic,
                                             clinic__send_live_results=True,
                                             notification_status__in=['new', 'notified'])
-            results = self.filterout(results)
+            results = self.filterout(results, check)
             return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
 
 
-    def filterout(self, results):
+    def filterout(self, results, check):
         """
         If clinic has not been retrieving results despite being notified, then
         send them only once a week
@@ -302,7 +312,7 @@ class App (rapidsms.apps.base.AppBase):
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
         today = datetime.today()
         ago = today - timedelta(days=7)
-        if SYSTEM_LOCALE==LOCALE_ZAMBIA:
+        if SYSTEM_LOCALE==LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
                 arrival_date__lte=ago)
@@ -397,6 +407,8 @@ class App (rapidsms.apps.base.AppBase):
     def _mark_results_pending(self, results, connections):
         for connection in connections:
             self.waiting_for_pin[connection] = results
+            for res in results:
+                PendingPinConnections.objects.create(connection=connection, result=res)
         for r in results:
             r.notification_status = 'notified'
             r.save()
