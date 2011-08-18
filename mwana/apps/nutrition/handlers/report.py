@@ -315,7 +315,7 @@ class ReportHandler(KeywordHandler):
             self.debug(valid_weight)
             self.debug(valid_muac)
 
-            if valid_height and valid_weight and valid_muac:
+            if valid_height or valid_weight or valid_muac:
                 ass = Assessment(healthworker=healthworker, patient=patient,\
                         height=measurements['height'], weight=measurements['weight'],\
                         muac=measurements['muac'], oedema=bool_oedema, survey=survey)
@@ -323,7 +323,7 @@ class ReportHandler(KeywordHandler):
                 ass.save()
                 self.debug("saved assessment")
             else:
-                return self.respond(NULL_ASSESSMENT % (survey_entry.child_id))
+                #return self.respond(NULL_ASSESSMENT % (survey_entry.child_id))
                 self.debug("oops! assesment not saved as required value is none.")
         except Exception, e:
             self.exception("problem making assessment")
