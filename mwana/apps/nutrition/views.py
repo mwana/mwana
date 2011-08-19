@@ -110,10 +110,10 @@ def export(headers, keys, objects, file_name):
 
 
 def csv_assessments(req):
-    headers = ['date', 'interviewer ID', 'child ID',
-        'sex', 'date of birth', 'age in months', 'height',
-        'weight', 'oedema', 'muac', 'height for age', 'weight for age',
-        'weight for height', 'survey status']
+    headers = ['Survey Date', 'Interviewer ID', 'Child ID',
+        'Sex', 'Date of Birth', 'Age in months', 'Height',
+        'Weight', 'Oedema', 'MUAC', 'Height for age', 'Weight for age',
+        'Weight for height', 'Survey status']
     keys = ['date', 'interviewer_id', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',

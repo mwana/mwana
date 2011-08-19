@@ -213,6 +213,10 @@ class ReportHandler(KeywordHandler):
             survey_entry = SurveyEntry(**tokens)
             if healthworker.interviewer_id is not None:
                 survey_entry.healthworker_id = healthworker.interviewer_id
+            # save age in months for raw data as well
+            raw_dob_str, raw_dob_obj = self._validate_date(survey_entry.date_of_birth)
+            if raw_dob_obj is not None:
+                survey_entry.age_in_months = helpers.date_to_age_in_months(raw_dob_obj)
             survey_entry.save()
         except Exception, e:
             self.exception()
