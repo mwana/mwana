@@ -211,8 +211,7 @@ class ReportHandler(KeywordHandler):
             # save record of survey submission before doing any processing
             # so we have all of the entries as they were submitted
             survey_entry = SurveyEntry(**tokens)
-            if healthworker.interviewer_id is not None:
-                survey_entry.healthworker_id = healthworker.interviewer_id
+            survey_entry.healthworker = healthworker
             # save age in months for raw data as well
             raw_dob_str, raw_dob_obj = self._validate_date(survey_entry.date_of_birth)
             if raw_dob_obj is not None:
@@ -225,8 +224,7 @@ class ReportHandler(KeywordHandler):
 
         # check that id codes are numbers
         valid_ids, invalid_ids = self._validate_ids(
-            {'interviewer' : str(healthworker.interviewer_id),\
-             'child' : survey_entry.child_id})
+            {'child' : survey_entry.child_id})
         # send responses for each invalid id, if any
         if len(invalid_ids) > 0:
             for k,v in invalid_ids.iteritems():

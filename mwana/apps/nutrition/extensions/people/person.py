@@ -34,7 +34,7 @@ class Patient(models.Model):
             return helpers.date_to_age_in_months(self.date_of_birth)
 
     def __unicode__(self):
-        return "Child %s, Household %s, Cluster %s" % (self.code, self.household_id, self.cluster_id)
+        return "Child %s" % (self.code)
 
     def status_from_bools(self, mam, sam, stunting):
         if not mam and not sam and not stunting:

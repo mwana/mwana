@@ -2,7 +2,7 @@
 
 GENDER_MISMATCH = "Reported gender '%s' for Child ID %s does not match previously reported gender=%s."
 DOB_MISMATCH = "Reported date of birth '%s' for Child ID %s does not match previosly reported DOB=%s."
-REGISTER_BEFORE_REPORTING = "Please register before submitting survey: Send the word REGISTER followed by your Interviewer ID and your full name."
+REGISTER_BEFORE_REPORTING = "Please register before submitting survey: Send JOIN HSA <LOCATIONCODE> <ZONE> <FIRSTNAME> <LASTNAME>."
 TOO_MANY_TOKENS = "Too much data!."
 INVALID_ID = "Sorry, ID code '%s' is not valid for a %s."
 INVALID_DOB = "Sorry I don't understand '%s' as a child's date of birth. Please use DDMMYY."

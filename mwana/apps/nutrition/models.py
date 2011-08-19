@@ -157,10 +157,11 @@ class SurveyEntry(models.Model):
 
     # who what where when why
     survey_date         = models.DateTimeField(auto_now_add=True)
-    healthworker_id     = models.CharField(max_length=25,blank=True,null=True)
-    cluster_id          = models.CharField(max_length=25,blank=True,null=True)
+    #healthworker_id     = models.CharField(max_length=25,blank=True,null=True)
+    healthworker        = models.ForeignKey(Contact,null=True)
+    #cluster_id          = models.CharField(max_length=25,blank=True,null=True)
     child_id            = models.CharField(max_length=25,blank=True,null=True)
-    household_id        = models.CharField(max_length=25,blank=True,null=True)
+    #household_id        = models.CharField(max_length=25,blank=True,null=True)
     gender              = models.CharField(max_length=25,blank=True,null=True)
     date_of_birth       = models.CharField(max_length=25,blank=True,null=True)
     age_in_months       = models.CharField(max_length=25,blank=True,null=True)

@@ -13,7 +13,7 @@ class AssessmentAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
 
 class SurveyEntryAdmin(admin.ModelAdmin):
-    list_display = ('healthworker_id', 'household_id', 'child_id', 'cluster_id', 'survey_date')
+    list_display = ('child_id', 'survey_date')
 
 
 class SurveyAdmin(admin.ModelAdmin):
