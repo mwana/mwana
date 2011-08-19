@@ -50,7 +50,8 @@ def ass_dicts_for_display():
         # IDs, ect from foreign fields rather than just the unicode() names
         # or all of the fields from related models)
         # TODO is there a better way to do this? adding fields to the queryset???
-        ass_dict.update({'interviewer_id'   : ass.healthworker.interviewer_id})
+        ass_dict.update({'interviewer_name'   : ass.healthworker.name})
+        ass_dict.update({'location'          : ass.healthworker.clinic})
         ass_dict.update({'child_id'         : ass.patient.code})
         #ass_dict.update({'household_id'     : ass.patient.household_id})
         #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
@@ -74,7 +75,8 @@ def ass_dicts_for_export():
         # IDs, ect from foreign fields rather than just the unicode() names
         # or all of the fields from related models)
         # TODO is there a better way to do this? adding fields to the queryset???
-        ass_dict.update({'interviewer_id'   : ass.healthworker.interviewer_id})
+        ass_dict.update({'interviewer_name'   : ass.healthworker.name})
+        ass_dict.update({'location'          : ass.healthworker.clinic})
         ass_dict.update({'child_id'         : ass.patient.code})
         #ass_dict.update({'household_id'     : ass.patient.household_id})
         #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
@@ -97,11 +99,17 @@ def export(headers, keys, objects, file_name):
     writer.writerow(headers)
     for obj in objects:
         row = []
+        sep = "."
         for key in keys:
             if isinstance(obj, dict) and key in obj:
                 row.append(obj[key])
             elif hasattr(obj, key):
                 row.append(getattr(obj, key))
+            elif sep in key:
+                # assuming healthworker, clean this up later.
+                list = key.split(sep)
+                if hasattr(obj.healthworker, list[1]):
+                    row.append(getattr(obj.healthworker, list[1]))
             else:
                 row.append("None")
         writer.writerow(row)
@@ -110,11 +118,11 @@ def export(headers, keys, objects, file_name):
 
 
 def csv_assessments(req):
-    headers = ['Survey Date', 'Interviewer ID', 'Child ID',
+    headers = ['Survey Date', 'Location', 'Interviewer Name', 'Child ID',
         'Sex', 'Date of Birth', 'Age in months', 'Height',
         'Weight', 'Oedema', 'MUAC', 'Height for age', 'Weight for age',
         'Weight for height', 'Survey status']
-    keys = ['date', 'interviewer_id', 'child_id',
+    keys = ['date', 'location', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',
             'weight4height', 'human_status']
@@ -126,10 +134,10 @@ def csv_assessments(req):
 
 
 def csv_entries(req):
-    headers = ['Survey Date', 'Interviewer ID', 'Child ID',
-               'Sex', 'Date of Birth', 'Age', 'Height',
+    headers = ['Survey Date', 'Location', 'Interviewer Name', 'Child ID',
+               'Sex', 'Date of Birth', 'Age in months', 'Height',
                'Weight', 'Oedema', 'MUAC']
-    keys = ['survey_date', 'healthworker_id', 'child_id',
+    keys = ['survey_date', 'healthworker.clinic', 'healthworker.name', 'child_id',
             'gender', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac']
     return export(headers, keys, SurveyEntry.objects.all(), 'entries.csv')

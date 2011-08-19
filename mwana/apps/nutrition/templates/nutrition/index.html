@@ -10,7 +10,8 @@
     <thead>
         <tr>
             <th>Date Submitted</th>
-            <th>Interviewer ID</th>
+	    <th>Facility</th>
+            <th>Interviewer Name</th>
             <th>Child ID</th>
             <th>Sex</th>
             <th>Date of Birth</th>
@@ -29,7 +30,8 @@
         {% for assessment in assessments %}
             <tr>
                 <td>{{assessment.date|date:"d-m-y H:m:s"}}</td>
-                <td>{{assessment.interviewer_id}}</td>
+		<td>{{assessment.location}}</td>
+                <td>{{assessment.interviewer_name}}</td>
                 <td>{{assessment.child_id}}</td>
                 <td>{{assessment.sex}}</td>
                 <td>{{assessment.date_of_birth|date:"d-m-y"}}</td>
@@ -60,7 +62,8 @@
     <thead>
         <tr>
             <th>Date Submitted</th>
-            <th>Interviewer ID</th>
+	    <th>Facility</th>
+            <th>Interviewer Name</th>
             <th>Child ID</th>
             <th>Sex</th>
             <th>Date of Birth</th>
@@ -75,7 +78,8 @@
         {% for entry in entries %}
             <tr>
                 <td>{{entry.survey_date|date:"d-m-y H:m:s"}}</td>
-                <td>{{entry.healthworker_id}}</td>
+		<td>{{entry.healthworker.clinic}}</td>
+                <td>{{entry.healthworker.name}}</td>
                 <td>{{entry.child_id}}</td>
                 <td>{{entry.gender}}</td>
                 <td>{{entry.date_of_birth}}</td>
