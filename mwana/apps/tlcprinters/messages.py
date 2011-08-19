@@ -1,11 +1,15 @@
 from rapidsms.messages.outgoing import OutgoingMessage
 from datetime import datetime
+import time
 
 from mwana.apps.tlcprinters.models import MessageConfirmation
 
 class TLCOutgoingMessage(OutgoingMessage):
     
     def send(self):
+        # Pause a little. unit tests can run so fast such that 'sent_at' can be
+        # equal for two different messages. Therefore, last_msg may not be as expected
+        time.sleep(.1)
         try:
             last_msg = MessageConfirmation.objects.latest('sent_at')
         except MessageConfirmation.DoesNotExist:
