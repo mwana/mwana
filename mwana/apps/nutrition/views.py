@@ -74,7 +74,8 @@ def ass_dicts_for_export():
         # add desired fields from related models (we want to display the
         # IDs, ect from foreign fields rather than just the unicode() names
         # or all of the fields from related models)
-        # TODO is there a better way to do this? adding fields to the queryset???
+        # TODO is there a better way to do this? adding fields to the
+        # queryset???
         ass_dict.update({'interviewer_name'   : ass.healthworker.name})
         ass_dict.update({'location'          : ass.healthworker.clinic})
         ass_dict.update({'child_id'         : ass.patient.code})
@@ -118,10 +119,10 @@ def export(headers, keys, objects, file_name):
 
 
 def csv_assessments(req):
-    headers = ['Survey Date', 'Location', 'Interviewer Name', 'Child ID',
+    headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',    
         'Sex', 'Date of Birth', 'Age in months', 'Height',
         'Weight', 'Oedema', 'MUAC', 'Height for age', 'Weight for age',
-        'Weight for height', 'Survey status']
+        'Weight for height', 'Data Quality']
     keys = ['date', 'location', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',
@@ -134,7 +135,7 @@ def csv_assessments(req):
 
 
 def csv_entries(req):
-    headers = ['Survey Date', 'Location', 'Interviewer Name', 'Child ID',
+    headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',
                'Sex', 'Date of Birth', 'Age in months', 'Height',
                'Weight', 'Oedema', 'MUAC']
     keys = ['survey_date', 'healthworker.clinic', 'healthworker.name', 'child_id',
