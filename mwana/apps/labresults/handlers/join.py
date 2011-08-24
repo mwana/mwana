@@ -283,7 +283,7 @@ class JoinHandler(KeywordHandler):
             #prepare identity id for interviewer_id
             identity_id = str(self.msg.connection.identity)
             if len(identity_id) > MAX_IDENTITY_ID:
-                identity_id = int(identity[-9:])
+                identity_id = int(identity_id[-9:])
             else:
                 identity_id = int(identity_id)
 
