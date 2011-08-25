@@ -258,7 +258,7 @@ class JoinHandler(KeywordHandler):
 
     def handle_zone(self, text):
         PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
-        HELP_TEXT = _("To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> "\
+        HELP_TEXT = _("To register as a Mobile agent, send JOIN <CBA> <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
         MAX_IDENTITY_ID = 10
         
@@ -290,14 +290,14 @@ class JoinHandler(KeywordHandler):
             if contact_zone == zone:
                 # don't let agents register twice for the same zone
                 self.respond(_("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for zone %(zone)s of %(clinic)s."),
+                             "a Mobile Agent for zone %(zone)s of %(clinic)s."),
                              name=self.msg.contact.name, zone=zone.name,
                              clinic=clinic.name)
                 return
             elif contact_clinic and contact_clinic != clinic:
                 # force agents to leave if they appear to be switching clinics
                 self.respond(_("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for %(old_clinic)s. To leave "
+                             "a Mobile Agent for %(old_clinic)s. To leave "
                              "your current clinic and join %(new_clinic)s, "
                              "reply with LEAVE and then re-send your message."),
                              name=self.msg.contact.name,
@@ -323,7 +323,7 @@ class JoinHandler(KeywordHandler):
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
             msg = self.respond(_("Thank you %(name)s! You have successfully "
-                                 "registered as a RemindMi Agent for zone "
+                                 "registered as a Mobile Agent for zone "
                                  "%(zone)s of %(clinic)s."), name=cba.name,
                                  zone=zone.name, clinic=clinic.name)
             notify_text, kwargs = self._get_notify_text()
