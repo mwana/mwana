@@ -148,17 +148,17 @@ class ReportHandler(KeywordHandler):
                 if 40.0 < float(height) < 125.0:
                     valid_height = True
             else:
-                valid_height = False # do not analyze using height.
+                valid_height = True
             if weight is not None:
                 if 1.5 < float(weight) < 35.0:
                     valid_weight = True
             else:
-                valid_weight = False # do not using weight
+                valid_weight = True 
             if muac is not None:
                 if 10.0 < float(muac) < 22.0:
                     valid_muac = True
             else:
-                valid_muac = False  # do not analyze on muac
+                valid_muac = True
             return valid_height, valid_weight, valid_muac
         except Exception, e:
             self.exception('problem validating measurements')
@@ -303,11 +303,6 @@ class ReportHandler(KeywordHandler):
 
             measurements = {"height" : survey_entry.height,\
                 "weight" : survey_entry.weight, "muac" : survey_entry.muac}
-#            for k,v in measurements.iteritems():
-#                # replace 'no data' shorthands with None
-#                if v.upper().startswith('X'):
-#                    tokens.update({k : None})
-# disabling as no data shorthands already updated.
             
             human_oedema, bool_oedema = self._validate_bool(survey_entry.oedema)
             valid_height, valid_weight, valid_muac = self._validate_measurements(\
@@ -321,12 +316,13 @@ class ReportHandler(KeywordHandler):
                 ass = Assessment(healthworker=healthworker, patient=patient,\
                         height=measurements['height'], weight=measurements['weight'],\
                         muac=measurements['muac'], oedema=bool_oedema, survey=survey)
-
-                ass.save()
-                self.debug("saved assessment")
             else:
-                #return self.respond(NULL_ASSESSMENT % (survey_entry.child_id))
-                self.debug("oops! assesment not saved as required value is none.")
+                self.debug("have null values for height, weight and muac.")
+                ass = Assessment(healthworker=healthworker, patient=patient,\
+                             oedema=bool_oedema, survey=survey)
+
+            ass.save()
+            self.debug("saved assessment")
         except Exception, e:
             self.exception("problem making assessment")
             self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))

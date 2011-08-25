@@ -21,6 +21,5 @@ REMOVE_HELP = "To remove an Interviewer send: REMOVE <Inteviewer ID>."
 REMOVE_CONFIRM = "%s has been removed from Interviewer ID %s."
 ADMIT_HELP = "To admit a child send: ADMIT <CHILD ID> <NAME>"
 DISMISS_HELP = "To discharge a child send: DISMISS <CHILD_ID>"
-NULL_ASSESSMENT = "An assessment will not be saved for this report for child: %s, as a required measurement is missing."
 # only for testing
 ADMIT_HANDLE = "Admit is being handled. You sent the following text: %s."
