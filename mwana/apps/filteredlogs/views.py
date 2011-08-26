@@ -62,9 +62,10 @@ def filtered_logs(request):
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
+    search_key = read_request(request, "search_key")
 
     log = MessageFilter(request.user, rpt_group, rpt_provinces, rpt_districts, rpt_facilities)
-    table = log.get_filtered_message_logs(startdate, enddate)
+    table = log.get_filtered_message_logs(startdate, enddate, search_key)
     
 
     return render_to_response('messagelogs/messages.html',
@@ -88,5 +89,6 @@ def filtered_logs(request):
                               'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", log.get_rpt_provinces(request.user), rpt_provinces),
                               'rpt_districts': get_facilities_dropdown_html("rpt_districts", log.get_rpt_districts(request.user), rpt_districts),
                               'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", log.get_rpt_facilities(request.user), rpt_facilities),
+                              'search_key': search_key if search_key else ""
                               }, context_instance=RequestContext(request)
                               )

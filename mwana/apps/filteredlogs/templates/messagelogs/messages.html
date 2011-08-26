@@ -43,6 +43,11 @@
                     {{rpt_facilities}}
                     {% endautoescape %}&nbsp;
 
+                <p>Search: &nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="search_key" size="17" value={{ search_key }}>
+                    &nbsp;
                     {% if is_report_admin %}
                 <p>Select Implementer:
                     {% autoescape off %}

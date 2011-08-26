@@ -106,13 +106,22 @@ class MessageFilter:
                 break
         return text_copy
 
-    def get_filtered_message_logs(self, startdate=None, enddate=None):
+    def get_filtered_message_logs(self, startdate=None, enddate=None, search_key=None):
         self.set_reporting_period(startdate, enddate)
-        msgs = Message.objects.filter(Q(contact__location__in=self.get_facilities_for_reporting()) |
-                               Q(contact__location__parent__in=self.get_facilities_for_reporting()))\
-            .filter(date__gte=self.dbsr_startdate,
-                    date__lte=self.dbsr_enddate
-                    ).order_by('-date')[:200]
+
+        locations = Q(contact__location__in=self.get_facilities_for_reporting()) |\
+                               Q(contact__location__parent__in=self.get_facilities_for_reporting())
+        daterange = Q(date__gte=self.dbsr_startdate) & Q(date__lte=self.dbsr_enddate)
+
+        msgs = Message.objects.filter(locations).filter(daterange).order_by('-date')[:200]
+
+        
+
+        if search_key and search_key.strip():
+            search = Q(text__icontains=search_key) |\
+            Q(connection__identity__icontains=search_key.strip()) |\
+            Q(contact__name__icontains=search_key.strip())
+            msgs = Message.objects.filter(locations).filter(daterange).filter(search).order_by('-date')[:200]
 
         table = []
 
