@@ -54,18 +54,18 @@
 
       <p>Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b>
 	by <b>{{ user.username|title }}</b></p>
-          
+      
       <div>
 
 	<div class="module">
-          <h2>Percentage (%) Positivity of sampled data</h2>                
+          <h2>Percentage (%) Positivity</h2>                
           <table width="100%" class="th" bgcolor="#EEEEEE">
             <tr class="th" >
               <td align="center" width="295">
                 <p align="center"><font size="6">
 		    {{percent_positive_district }}%
 		</font></p>
-                <p align="center"><font size="3" ><b>Positivity for sampled data</b></font></p>
+                <p align="center"><font size="3" ><b>Positivity</b></font></p>
               </td>
               <td width="407" colspan="2">
                 Average Positivity for {{total_dbs}} samples processed from 
@@ -78,7 +78,7 @@
         </div>
         <p align="center"><h3>Results160 Report 1 - Results
             Tested By Lab and Received By Facilities between 
-	    StartDate: {{startdate}} Enddate: {{enddate}} | Export:<a href="{% url csv_received %}/?location={{selected_location}}"> CSV</a> | <a href="{% url csv_results %}/?location={{selected_location}}">Data</a>  </h3>
+	    StartDate: {{startdate}} Enddate: {{enddate}}</h3>
 	<p><b>DEFINITION  - Tested - means processed by lab
 	    and result recorded,  Verified – means lab have
 	    approved its release,  Received - means facilities
@@ -119,7 +119,7 @@
         </table>
 	<br>
           <h3>Results160 Report 2 - Pending Results for Clinics between 
-	    StartDate: {{startdate}} Enddate: {{enddate}} | Export:<a href="{% url csv_pending %}/?location={{selected_location}}"> CSV</a>
+	    StartDate: {{startdate}} Enddate: {{enddate}}
 	  </h3>
 	<p></p>
 	<p><b>DEFINITION  -  Shows the number of samples recorded as received

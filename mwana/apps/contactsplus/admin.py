@@ -81,4 +81,3 @@ class ConnectionAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         return dict(create_action(b) for b in Backend.objects.all())
 admin.site.register(Connection, ConnectionAdmin)
-
