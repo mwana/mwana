@@ -1,0 +1,46 @@
+<div class="module progress">
+	<h2>Daily Survey Progress</h2>
+	<div class="toolbar"></div>
+        <div class="help">Review daily progress throughout the survey period.</div>
+	<table class="export">
+		<thead><tr>
+				<th>Date</th>
+				<th>Day</th>
+				<th colspan="2">Children</th>
+				<th colspan="2">Active Teams</th>
+				<th colspan="2">Total Survey Entries</th>
+				<th colspan="2">Valid Surveys</th>
+				<th colspan="2">Good Surveys</th>
+				<th colspan="2">Suspect Surveys</th>
+			</tr>
+		</thead>
+		<tbody>
+                        {% for day in days %}
+			<tr{% if day.in_future %} class="future"{% endif %}>
+				<td class="min shrink"><span title="{{ day.date|date }}">{{ day.date|date:"d/m" }}</span></td>
+				<td title="{{ day.date|date }}" class="day min num">{{ day.number }}</td>
+				
+				<td colspan="2">{{ day.children }}</td>
+				<td colspan="2">{{ day.healthworkers }}</td>
+				<td colspan="2">{{ day.surveys }}</td>
+				<td colspan="1">{{ day.valids }}</td>
+				<td class="perc">{% ifnotequal day.valids None %}{{ day.valid_perc }}%{% endifnotequal %}</td>
+				
+				<td colspan="1">{{ day.goods }}</td>
+				<td class="perc">{% ifnotequal day.goods None %}{{ day.good_perc }}%{% endifnotequal %}</td>
+				
+				<td colspan="1">{{ day.suspects }}</td>
+				<td class="perc">{% ifnotequal day.suspects None %}{{ day.suspect_perc }}%{% endifnotequal %}</td>
+			</tr>{% endfor %}
+			<tr class="totals">
+                                <td colspan="2">Total</td>
+                                <td colspan="2">{{ total_children }}</td>
+                                <td colspan="2">{{ active_healthworkers }}</td>
+                                <td colspan="2">{{ total_surveys }}</td>
+                                <td colspan="2">{{ total_valids }}</td>
+                                <td colspan="2">{{ total_goods }}</td>
+                                <td colspan="2">{{ total_suspects }}</td>
+                        </tr> 
+		</tbody>
+	</table>
+</div>

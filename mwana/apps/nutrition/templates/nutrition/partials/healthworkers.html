@@ -1,0 +1,37 @@
+{% load reporters-tags %}
+<div class="module progress">
+        <h2>Interviewers</h2>
+	<div class="toolbar"></div>
+        <div class="help">Learn about our interviewers!</div>
+	<table class="export">
+		<thead><tr>
+				<th>First</th>
+				<th>ID</th>
+				<th colspan="2">Last message</th>
+				<th>Total messages</th>
+				<th>Messages this month</th>
+				<th>Messages this week</th>
+				<th>Messages today</th>
+                                <th>Surveys today</th>
+				<th>Total good surveys</th>
+				<th>Total suspect surveys</th>
+			</tr>
+		</thead>
+		<tbody>
+	            {% for hw in healthworkers %}
+                    <tr>
+                            <td>{{ hw.first_name }}</td>
+                            <td>{{ hw.interviewer_id }}</td>
+                            <td colspan="2">{{ hw.last_seen|last_seen }}</td>
+                            <td>{{ hw.num_message_count }}</td>
+                            <td>{{ hw.num_message_month }}</td>
+                            <td>{{ hw.num_message_week }}</td>
+                            <td>{{ hw.num_message_today }}</td>
+                            <td>{{ hw.surveys_today }}</td>
+                            <td>{{ hw.goods }}</td>
+                            <td>{{ hw.suspects }}</td>
+                    </tr>
+                    {% endfor %}
+	        </tbody>
+        </table>
+</div>

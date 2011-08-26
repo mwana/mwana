@@ -27,7 +27,7 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
 #    ('rapidsms.views.dashboard', 'Dashboard'),
-#    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
 #    ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
@@ -35,6 +35,7 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
+    ('growth_index', 'Growth Monitoring'),
 #    ('xforms', 'XForms'),
 ]
 
