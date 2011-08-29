@@ -20,6 +20,9 @@ from mwana.apps.locations.models import Location
 def get_int(val):
     return int(val) if str(val).isdigit() else None
 
+def get_default_int(val):
+    return int(val) if str(val).isdigit() else 0
+
 def get_groups_name(id):
     try:
         return ReportingGroup.objects.get(pk=id)
@@ -32,6 +35,11 @@ def get_facility_name(slug):
     except:
         return "All"
 
+def get_next_navigation(text):
+    try:
+        return {"Next":1,"Previous":-1}[text]
+    except:
+        return 0
 
 @require_GET
 def filtered_logs(request):    
@@ -63,9 +71,18 @@ def filtered_logs(request):
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
     search_key = read_request(request, "search_key")
+    search_key = read_request(request, "search_key")
+    navigation = read_request(request, "navigate")
+    page = read_request(request, "page")
+
+    page = get_default_int(page)
+    page = page + get_next_navigation(navigation)
+    
+
 
     log = MessageFilter(request.user, rpt_group, rpt_provinces, rpt_districts, rpt_facilities)
-    table = log.get_filtered_message_logs(startdate, enddate, search_key)
+
+    (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = log.get_filtered_message_logs(startdate, enddate, search_key, page)
     
 
     return render_to_response('messagelogs/messages.html',
@@ -80,6 +97,10 @@ def filtered_logs(request):
 
                               
                               'messages':table,
+                              "messages_paginator_num_pages":  messages_paginator_num_pages,
+                              "messages_number":  messages_number,
+                              "messages_has_next":  messages_has_next,
+                              "messages_has_previous":  messages_has_previous,
                               'is_report_admin': is_report_admin,
                               'region_selectable': True,
                               'implementer': get_groups_name(rpt_group),

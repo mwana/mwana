@@ -18,6 +18,7 @@
 
 
     <div class="left">
+        <form name="getValues" action="" method="GET">
         <div class="module">
             
 
@@ -26,7 +27,7 @@
 
             <h2>Filtered Message Logs</h2>
             <br>
-            <form name="getValues" action="" method="GET">
+            
                 <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="text" name="startdate" size="9" value={{ fstartdate }} />
                            to
@@ -59,7 +60,7 @@
 
                     &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
 
-            </form>
+            
             <hr>
            <div>
               
@@ -68,26 +69,12 @@
                 Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
                 </h3>
-<!--            <p>
-                Showing average time between the Date DBS
-                samples are collected at the facilities and the Date the results
-                for these samples are received at the facility.
-                <br>
-                Minimum Average Days = {{min_turnaround_time}}; &nbsp;
-                Maximum Average Days = {{max_turnaround_time}}; &nbsp;
-                Out of {{num_of_results}} results in {{num_of_facilities}}
-                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
-            <p>-->
-            <table width="100%">
+              
+
+       <table width="100%">
                 {% for record in messages %}
                 <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                    <td >
-                        {% if forloop.counter0 %}
-                        
-                        {{ forloop.counter0 }}
-                        
-                        {% endif %}
-                    </td>
+                    
                     {% for column in record %}
                     {% if column %}
                     {% if not forloop.parentloop.counter0 %}
@@ -112,6 +99,25 @@
         </div>
         <div class="clear-hack"></div>
     </div>
+        
+        <div class="pagination">
+    <span class="step-links">
+        {% if messages_has_previous %}
+            <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
+
+        <span class="current">
+            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+        </span>
+
+        {% if messages_has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ messages_number }}>
+    </span>
+
+</div>
+        </form>
 
 </div>
 {% endblock %}
