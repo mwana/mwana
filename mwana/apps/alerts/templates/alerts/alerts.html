@@ -116,6 +116,24 @@
                             </tr>
                         </table>
                         {% endfor %}
+                        <p><p><hr><p>
+           <h3>Alerts for Clinic staff not using Results160</h3>
+                        <p>
+                        {% for record in inactive_workers_alerts %}
+
+                        <table border="1"  width="100%">
+                            <tr>
+                                {% ifequal record.level record.HIGH_LEVEL %}
+                                <td width="50" bgcolor="#FF0000"></td>
+                                {% else%}
+                                <td width="50" bgcolor="#FFFF00"></td>
+                                {% endifequal%}
+                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
+                                <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
+                                <td bgcolor="#FFFFFF">{{ record.message }} <p><b>{{ record.extra }}</b></td>
+                            </tr>
+                        </table>
+                        {% endfor %}
 
                     <p><p>
                     <hr>
