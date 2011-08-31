@@ -57,7 +57,7 @@ def staging():
     env.hosts = ['10.3.1.10']
     env.user = 'mwana'
     env.home = '/home/mwana'
-    env.repos['mwana']['branch'] = 'feature/nutrition'
+    env.repos['mwana']['branch'] = 'release/Malawi_1.2'
     setup_path()
 
 
