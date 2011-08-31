@@ -192,7 +192,7 @@ class ReportHandler(KeywordHandler):
 
         PATTERN = re.compile(r'(?P<child_id>\d+)\s+(?P<gender>[M|F])\s+(?P<date_of_birth>\d{6})\D*(?P<weight>\d{2}\.\d{1})\D*(?P<height>\d{2}\.\d{1})\D*(?P<oedema>[Y|N])\D*(?P<muac>\d{2}\.\d{1})', re.IGNORECASE)
 
-        token_labels = ['child_id', 'gender', 'date_of_birth', 'weight', 'height', 'oedema', 'muac']
+        token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac']
 
         token_data = text.split()
         
