@@ -40,6 +40,24 @@ def is_weekend(input_date):
     """
     return input_date.weekday() in [5, 6]
 
+def get_contact_type_name(contact):
+    '''
+    Returns the worker_type (name) based on the contact
+    '''
+    try:
+        return contact.types.all()[0].name
+    except (AttributeError, IndexError):
+        return ""
+
+def get_contact_type_slug(contact):
+    '''
+    Returns the worker_type (slug) based on the contact
+    '''
+    try:
+        return contact.types.all()[0].slug
+    except (AttributeError, IndexError):
+        return ""
+
 def get_worker_type(category):
     '''
     Returns the worker_type based on the category

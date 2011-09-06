@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.userverification.models import UserVerification
+from django.db.models import Max
+
 from operator import itemgetter
 
 import mwana.const as const
@@ -427,6 +430,55 @@ class Alerter:
                                                 -999,
                                                 Alert.HIGH_LEVEL,
                                                 "")
+    def last_used_system(self, contact):
+        latest = Message.objects.filter(
+            contact=contact.id,
+            direction='I',
+        ).aggregate(date=Max('date'))
+        if latest['date']:
+            return (datetime.today() - latest['date']).days
+        else:
+            return None
+
+
+    def get_inactive_workers_alerts(self):
+
+        facilities = (self.get_facilities_for_reporting())
+
+        defaulters = UserVerification.objects.exclude(responded="True").\
+        filter(facility__in=facilities)
+
+
+        inactive_alerts = []
+        
+        for facility in facilities:
+            days_late = 75
+            defaulters = UserVerification.objects.exclude(responded="True").\
+            filter(facility=facility, contact__is_active=True).distinct()
+
+            if not defaulters:
+                continue
+
+            msg = ("The following staff registered at %s have not been using "
+             "Results160 for too long and have been unresponsive. "
+             "The last time they used the system is "
+            "as shown. Please call and enquire. " % (facility.name))
+
+            temp = []
+            for defaulter in defaulters:
+                last_used = self.last_used_system(defaulter.contact)
+                last_used_msg = "%s days ago" % last_used if last_used else "Never"
+                temp.append("%s (%s) %s" % (defaulter.contact.name,
+                defaulter.contact.default_connection.identity, last_used_msg
+                ))
+                if last_used: days_late = max(days_late, last_used)
+
+            msg = msg + "; ".join(msg for msg in temp) + "."
+
+            inactive_alerts.append(Alert(Alert.WORKER_NOT_USING_SYSTEM, msg, defaulter.facility.name,
+            days_late, -days_late, Alert.HIGH_LEVEL, ""))
+        return sorted(inactive_alerts, key=itemgetter(5))
+
 
     def add_to_district_dbs_elerts(self, type, message, culprit=None, days_late=None, sort_field=None, level=None, extra=None):
         self.not_sending_dbs_alerts.append(Alert(type, message, culprit,

@@ -56,6 +56,8 @@ def mwana_alerts (request):
         alerter.get_labs_not_sending_payloads_alerts(lab_sending_days)
 
     tracing_days, not_using_trace = alerter.get_clinics_not_using_trace_alerts(tracing_days)
+    inactive_workers_alerts = alerter.get_inactive_workers_alerts()
+
     
     return render_to_response('alerts/alerts.html',
                               {
@@ -76,6 +78,8 @@ def mwana_alerts (request):
 
                               'not_using_trace':not_using_trace,
                               'tracing_days':tracing_days,
+
+                              'inactive_workers_alerts':inactive_workers_alerts,
 
                               'days':range(1, 60),
                               'is_report_admin': is_report_admin,
