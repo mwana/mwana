@@ -276,7 +276,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         Sends new results to printers at clinics.
         """
-        results = self._pending_results(clinic)
+        results = self._pending_results(clinic, True)
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
