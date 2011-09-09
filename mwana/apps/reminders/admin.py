@@ -1,7 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from rapidsms.models import Contact
 from django.contrib import admin
-from django import forms
-from django.db import models
 
 from mwana.apps.reminders import models as reminders
 
@@ -28,7 +27,8 @@ admin.site.register(reminders.Appointment, AppointmentAdmin)
 
 
 class PatientEventAdmin(admin.ModelAdmin):
-    list_display = ('clinic','patient', 'event', 'date','date_logged','cba_conn','notification_status','notification_sent_date',)
+    list_display = ('clinic','patient', 'event', 'date','date_logged','cba',
+    'cba_conn','notification_status','notification_sent_date',)
     list_filter = ('event','date_logged','notification_status',)
     date_hierarchy = 'date_logged'
     search_fields = ('patient__name', 'patient__location__parent__name',)
@@ -38,6 +38,12 @@ class PatientEventAdmin(admin.ModelAdmin):
             return obj.patient.location.parent.name
         except:
             return ""
+        
+    def cba(self, obj):        
+        try:
+            return Contact.active.filter(connection__identity__icontains=obj.cba_conn.identity)[0].name
+        except:
+            return "Unknown"
         
 admin.site.register(reminders.PatientEvent, PatientEventAdmin)
 
