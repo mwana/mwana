@@ -219,28 +219,14 @@ class Alerter:
         return max(notification, actual)
 
     def last_retrieved_or_checked(self, location):
-        try:
-            notification = SampleNotification.objects.filter(location=location).order_by('-date')[0].date.date()
-        except IndexError:
-            notification = date(1900, 1, 1)
-        try:
-            last_retreived = Result.objects.filter(clinic=location, notification_status='sent').order_by('-result_sent_date')[0].result_sent_date.date()
-        except IndexError:
-            last_retreived = date(1900, 1, 1)
-        try:
-            last_checked = Message.objects.filter(Q(contact__location=location) |
-                                                  Q(contact__location__parent=location),
-                                                  Q(text__iregex='\s*check\s*')
-                                                  ).order_by('-date')[0].date.date()
-        except IndexError:
-            last_checked = date(1900, 1, 1)
-        try:
-            last_tried_result = Message.objects.filter(Q(contact__location=location) |
-                                                       Q(contact__location__parent=location),
-                                                       Q(text__istartswith='The results for sample') |
-                                                       Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
-        except IndexError:
-            last_tried_result = date(1900, 1, 1)
+        notification = self.last_used_sent(location)
+        notification = date(1900, 1, 1)
+        last_retreived = self.last_retreived_results(location)
+        last_retreived = date(1900, 1, 1)
+        last_checked = self.last_used_check(location)
+        last_checked = date(1900, 1, 1)
+        last_tried_result = self.last_used_result(location)
+        
         return max(notification, last_retreived, last_checked, last_tried_result)
     
     def last_used_sent(self, location):
