@@ -11,7 +11,7 @@ from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 
 from .models import *
-
+from .table import AssessmentTable
 
 def index(req):
     template_name="nutrition/index.html"
@@ -23,7 +23,17 @@ def index(req):
     return render_to_response(template_name, context,
                               context_instance=RequestContext(req))
 
+    
+def reports(request):
+    template_name="nutrition/reports.html"
+    assessments = ass_dicts_for_display()
+    table = AssessmentTable(assessments)
+    table.paginate(page=request.GET.get('page', 1))
+    context = {'table': table}
+    return render_to_response(template_name, context,
+                              context_instance=RequestContext(request))
 
+    
 def instance_to_dict(instance):
     dict = {}
     for field in instance._meta.fields:

@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load django_tables2 %}
+
+{% block title %}Nutrition Assessments{% endblock %}
+{% block content %}
+
+<div class="module">
+
+<h2>Analyzed Growth Monitor Surveys</h2>
+
+{% render_table table %}
+
+</div>  
+
+<style type="text/css" media="screen">
+<!--
+  <ul class="pagination">
+    <li class="previous"><a href="?page=1">Previous</a></li>
+    <li class="current">Page 2 of 29</li>
+    <li class="next"><a href="?page=3">Next</a></li>
+  </ul>
+-->
+ul.pagination {border:0; margin:0; padding:0; list-style-type:none; text-align:center; width:700px;}
+ul.pagination li {font-size:larger; font-weight:bold; display:inline;}
+li.previous {margin-left:-35px; margin-right:350px;}
+li.current {}
+li.next {float:right; margin-right:20px;} 
+</style>
+
+<div class="module">
+<h3>Exports</h3>
+<br>
+<div class="">
+  &nbsp;
+    <a href="{% url growth_assessments %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+</div>
+<br>
+<div class="">
+ &nbsp;
+   	<a href="{% url growth_surveyentries %}" class="export">{% trans "Export Survey Entries" %}</a>
+</div>
+
+</div>  
+{% endblock %}
