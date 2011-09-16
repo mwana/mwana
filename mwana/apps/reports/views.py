@@ -1,10 +1,15 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import datetime, timedelta, date
+import csv
 
+from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from django.db.models import Q
 from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.apps.labresults.models import Result
+from mwana.apps.reports.webreports.reportcreator import MalawiReports
 
 
 
@@ -21,7 +26,6 @@ def text_date(text):
 
 @require_GET
 def malawi_reports(request, location=None):
-    from webreports.reportcreator import MalawiReports
 
     today = datetime.today().date()
     try:
@@ -255,3 +259,68 @@ def zambia_reports(request):
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
      }, context_instance=RequestContext(request))
+
+
+# csv and date exports
+
+def get_report_criteria(request):
+    today = datetime.today().date()
+    try:
+        startdate = text_date(request.REQUEST['start_date'])
+    except (KeyError, ValueError, IndexError):
+        startdate = today - timedelta(days=30)
+
+    try:
+        enddate = text_date(request.REQUEST['end_date'])
+    except (KeyError, ValueError, IndexError):
+        enddate = datetime.today().date()
+
+    #startdate = min(startdate1, enddate1, datetime.today().date())
+    #enddate = min(max(enddate1, startdate1), datetime.today().date())
+
+    try:
+        district = request.REQUEST['location']
+    except (KeyError, ValueError, IndexError):
+        district = "All Districts"
+
+    return district, startdate, enddate
+
+@require_GET
+def csv_report_one(request):
+    district, startdate, enddate = get_report_criteria(request)
+    file_name = district.replace(' ', '_') + "_" + str(startdate)\
+                + "_" + str(enddate) + ".csv"
+    headers = ["Sample ID", "Req ID", "Clinic", "Result", "Processed on",
+               "Arrived at server", "Notification status", "Verified",
+           "Result sent date"]
+    keys = ['sample_id', 'requisition_id', 'clinic', 'result', 'processed_on',
+        'arrival_date', 'notification_status', 'verified', 'result_sent_date']
+    response = HttpResponse(mimetype='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_name
+
+    
+    r = MalawiReports()
+    writer = csv.writer(response)
+    writer.writerow(headers)
+    for location in r.get_live_facilities():
+        parent_name = location.parent and location.parent.name or ' '
+        if (district == "All Districts" or district == parent_name):
+            results = Result.objects.filter(Q(processed_on__gte=startdate),
+                                            Q(processed_on__lte=enddate))\
+                      .filter(clinic=location)
+            for obj in results:
+                row = []
+                for key in keys:
+                    if isinstance(obj, dict) and key in obj:
+                        row.append(obj[key])
+                    elif hasattr(obj, key):
+                        row.append(getattr(obj, key))
+                    else:
+                        row.append("None")
+                writer.writerow(row)
+
+    return response
+
+@require_GET
+def csv_report_two(request):
+    return "This should be an export of csv results that form the basis of report two."
