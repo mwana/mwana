@@ -11,34 +11,26 @@
 
 {% render_table table %}
 
+<div class="toolbar">
+    <a href="{% url growth_assessments %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+</div>
 </div>  
 
 <style type="text/css" media="screen">
-<!--
-  <ul class="pagination">
-    <li class="previous"><a href="?page=1">Previous</a></li>
-    <li class="current">Page 2 of 29</li>
-    <li class="next"><a href="?page=3">Next</a></li>
-  </ul>
--->
-ul.pagination {border:0; margin:0; padding:0; list-style-type:none; text-align:center; width:700px;}
-ul.pagination li {font-size:larger; font-weight:bold; display:inline;}
+ul.pagination {
+border:0; margin:0; padding:5px; list-style-type:none; 
+text-align:center; width:940px; margin-top:8px;}
+ul.pagination li {font-size:12px; font-weight:bold; display:inline;}
 li.previous {margin-left:-35px; margin-right:350px;}
 li.current {}
-li.next {float:right; margin-right:20px;} 
+li.next {float:right; margin-left:350px; margin-right:20px;} 
 </style>
 
 <div class="module">
-<h3>Exports</h3>
-<br>
-<div class="">
-  &nbsp;
-    <a href="{% url growth_assessments %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
-</div>
-<br>
-<div class="">
- &nbsp;
-   	<a href="{% url growth_surveyentries %}" class="export">{% trans "Export Survey Entries" %}</a>
+<h2>Raw Survey Entries</h2>
+
+<div class="toolbar">
+   	<a href="{% url growth_surveyentries %}" class="export">{% trans "Export Raw Survey Entries" %}</a>
 </div>
 
 </div>  
