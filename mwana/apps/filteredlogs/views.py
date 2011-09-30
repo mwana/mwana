@@ -71,7 +71,6 @@ def filtered_logs(request):
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
     search_key = read_request(request, "search_key")
-    search_key = read_request(request, "search_key")
     navigation = read_request(request, "navigate")
     page = read_request(request, "page")
 
