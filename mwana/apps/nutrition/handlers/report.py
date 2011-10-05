@@ -155,7 +155,9 @@ class ReportHandler(KeywordHandler):
             else:
                 valid_weight = True 
             if muac is not None:
-                if 10.0 < float(muac) < 22.0:
+                if muac in ['n','N']:
+                    valid_muac = True
+                elif 10.0 < float(muac) < 22.0:
                     valid_muac = True
             else:
                 valid_muac = True
@@ -272,18 +274,20 @@ class ReportHandler(KeywordHandler):
         except Exception, e:
             self.exception('problem saving patient')
 
-        try:
-            # update age separately (should be the only volitile piece of info)
-            self.debug(survey_entry.age_in_months)
-            if survey_entry.age_in_months is not None:
-                patient.age_in_months = int(survey_entry.age_in_months)
-            else:
-                patient.age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
-            self.debug(patient.age_in_months)
-            patient.save()
-        except Exception, e:
-            self.exception('problem saving age')
-            return self.respond("There was a problem saving the age.")
+        # we must have a patient to update
+        if patient is not None:
+            try:
+                # update age separately (should be the only volitile piece of info)
+                self.debug(survey_entry.age_in_months)
+                if survey_entry.age_in_months is not None:
+                    patient.age_in_months = int(survey_entry.age_in_months)
+                else:
+                    patient.age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
+                self.debug(patient.age_in_months)
+                patient.save()
+            except Exception, e:
+                self.exception('problem saving age')
+                return self.respond("There was a problem saving the age.")
 
         # calculate age based on reported date of birth
         # respond if calcualted age differs from reported age
@@ -335,10 +339,10 @@ class ReportHandler(KeywordHandler):
                     "Gender=%s"      % (patient.gender or "??"),
                     "DOB=%s"        % (patient.date_of_birth or "??"),
                     "Age=%sm"      % (patient.age_in_months or "??"),
-                    "Weight=%skg"   % (ass.weight or "??"),
-                    "Height=%scm"  % (ass.height or "??"),
-                    "Oedema=%s"   % (ass.human_oedema or "??"),
-                    "MUAC=%scm"      % (ass.muac or "??")]
+                    "Weight=%skg"   % (measurements['weight'] or "??"),
+                    "Height=%scm"  % (measurements['height'] or "??"),
+                    "Oedema=%s"   % (human_oedema or "??"),
+                    "MUAC=%scm"      % (measurements['muac'] or "??")]
 
             self.debug('constructing confirmation')
             confirmation = REPORT_CONFIRM %\
@@ -350,9 +354,12 @@ class ReportHandler(KeywordHandler):
         try:
             # perform analysis based on cg instance from start()
             # TODO add to Assessment save method?
-            results = ass.analyze(cg)
-            self.debug('analyzed!')
-            self.debug(results)
+            if ass is not None:
+                results = ass.analyze(cg)
+                self.debug('assessment analyzed!')
+                self.debug(results)
+            else:
+                self.debug('there is no assessment saved to analyse')
             #response_map = {
             #    'weight4age'    : 'Oops. I think weight or age is incorrect',
             #    'height4age'    : 'Oops. I think height or age is incorrect',
@@ -389,5 +396,8 @@ class ReportHandler(KeywordHandler):
             self.exception('problem with analysis')
 
         # send confirmation AFTER any error messages
-        self.respond(confirmation)
-        self.debug('sent confirmation')
+        if confirmation is not None:
+            self.respond(confirmation)
+            self.debug('sent confirmation')
+        else:
+            self.debug('there was a problem building the confirmation message')
