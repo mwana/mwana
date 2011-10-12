@@ -16,7 +16,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
 
-class ReportHandler(KeywordHandler):
+class ReportGMHandler(KeywordHandler):
 
     keyword = "gm"
 
