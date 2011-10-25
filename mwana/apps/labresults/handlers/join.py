@@ -326,9 +326,10 @@ class JoinHandler(KeywordHandler):
                                  "registered as a Mobile Agent for zone "
                                  "%(zone)s of %(clinic)s."), name=cba.name,
                                  zone=zone.name, clinic=clinic.name)
-            notify_text, kwargs = self._get_notify_text()
-            if notify_text:
-                msg.append(notify_text, **kwargs)
+            if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+                notify_text, kwargs = self._get_notify_text()
+                if notify_text:
+                    msg.append(notify_text, **kwargs)
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
             msg.append(HELP_TEXT)
