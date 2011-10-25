@@ -7,12 +7,37 @@
 
 <div class="module">
 
-<h2>Analyzed Growth Monitor Surveys</h2>
+<h2>Analyzed Growth Monitor Surveys by period and location</h2>
+<br />
+<form name="getValues" method="GET" action="">
+    <p>Select Period: 
+    <input type="text" name="startdate" value="{{ startdate }}" size="12"/>
+    To
+    <input type="text" name="enddate" value="{{ enddate }}" size="12"/>
+    Location:
+    <select name="location" value="{{ location }}">
+        <option value="All Facilities"
+                {% ifequal selected_location "All Facilities" %}
+                selected="selected"
+                {% endifequal %} >
+        </option>
+        {% for facility in locations %}
+        <option value="{{ facility }}"
+                {% ifequal facility selected_location %}
+                selected="selected"
+                {% endifequal %} >
+                {{ facility }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="submit" name="SubmitValues" value="Ok" />
+    </p>
+</form>
 
 {% render_table table %}
 
 <div class="toolbar">
-    <a href="{% url growth_assessments %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+    <a href="{% url growth_assessments %}?location={{selected_location}}&startdate={{startdate}}&enddate{{enddate}}" class="export">{% trans "Export Analyzed Surveys" %}</a>
 </div>
 </div>  
 

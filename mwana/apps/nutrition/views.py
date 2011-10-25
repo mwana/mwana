@@ -6,6 +6,7 @@ import os,sys,string
 import csv
 
 from django.http import HttpResponse
+from django.db.models import Q
 
 from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -26,10 +27,18 @@ def index(req):
     
 def reports(request):
     template_name="nutrition/reports.html"
-    assessments = ass_dicts_for_display()
+    location, startdate, enddate = get_report_criteria(request)
+    assessments = ass_dicts_for_display(location, startdate, enddate)
+    selected_location = str(location)
+    locations = survey_locations()
+    locations.append("All Facilities")
+    #locations = sorted(list(set(locations)))
+    # sort by date, newest at top
+    assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     table = AssessmentTable(assessments)
     table.paginate(page=request.GET.get('page', 1))
-    context = {'table': table}
+    context = {'table': table, 'selected_location': selected_location, 
+    'startdate': startdate, 'enddate': enddate, 'locations': locations}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
@@ -51,9 +60,12 @@ def instance_to_dict(instance):
     return dict
 
 
-def ass_dicts_for_display():
+def ass_dicts_for_display(location, startdate, enddate):
     dicts_for_display = []
     asses = Assessment.objects.all().select_related()
+    if location != "All Facilities":
+        asses = asses.filter(healthworker__location__parent__name=location)
+    asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     for ass in asses:
         ass_dict = {}
         # add desired fields from related models (we want to display the
@@ -75,9 +87,12 @@ def ass_dicts_for_display():
 
 
 # TODO DRY
-def ass_dicts_for_export():
+def ass_dicts_for_export(location, startdate, enddate):
     dicts_for_export = []
     asses = Assessment.objects.all().select_related()
+    if location != "All Facilities":
+        asses = asses.filter(healthworker__location__parent__name=location)
+        asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
 
     for ass in asses:
         ass_dict = {}
@@ -138,7 +153,8 @@ def csv_assessments(req):
             'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',
             'weight4height', 'human_status']
     
-    assessments = ass_dicts_for_export()
+    location, startdate, enddate = get_report_criteria(req)
+    assessments = ass_dicts_for_export(location, startdate, enddate)
     # sort by date, descending
     assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     return export(headers, keys, assessments, 'assessments.csv')
@@ -152,3 +168,25 @@ def csv_entries(req):
             'gender', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac']
     return export(headers, keys, SurveyEntry.objects.all(), 'entries.csv')
+
+
+def survey_locations():
+    facilities = []
+    def uniq(seq):
+        seen = set()
+        seen_add = seen.add
+        return [ x for x in seq if x not in seen and not seen_add(x)]        
+
+    for assesment in Assessment.objects.all().select_related():
+        facilities.append(str(assesment.healthworker.clinic))
+        
+    return uniq(facilities)
+
+def get_report_criteria(request):
+    location = request.GET.get('location', 'All Facilities')
+    default_end_date = datetime.today().date()
+    default_start_date = default_end_date - timedelta(days=30)
+    startdate = request.GET.get('startdate', default_start_date)
+    enddate = request.GET.get('enddate', default_end_date)
+
+    return location, startdate, enddate
