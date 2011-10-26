@@ -57,7 +57,7 @@ RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 # don't append, 'default' app should come last:
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
-RAPIDSMS_TABS.append(('growth_index', 'Nutrition'))
+RAPIDSMS_TABS.append(('growth_index', 'Growth Monitor'))
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions

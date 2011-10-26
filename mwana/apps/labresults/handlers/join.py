@@ -148,8 +148,14 @@ class JoinHandler(KeywordHandler):
         cba_pattern = re.compile(r"^(cba|hsa|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
         if cba_pattern.findall(text) or text.strip().split()[0].lower() in \
         ('agent', 'cba', 'hsa'):
-            self.handle_zone(text[text.index(' '):])
-            return       
+            try:
+                words = text.split()
+                self.handle_zone(text[text.index(' '):])
+                return  
+            except (ValueError):
+                self.respond("To register as a Mobile agent, send JOIN <HSA> <CLINIC CODE> "\
+                             "<ZONE #> <YOUR NAME>")
+                return
 
         tokens = self.check_message_valid_and_clean(text)
         
