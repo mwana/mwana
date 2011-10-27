@@ -127,7 +127,7 @@ class App(rapidsms.apps.base.AppBase):
                 if not date:
                     msg.respond(_("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
-                                "DAY MONTH YEAR, for example: 23 04 2010"))
+                                "DDMMYY, for example: 271011"))
                     return True
             else:
                 date = datetime.datetime.today()
