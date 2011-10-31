@@ -480,7 +480,7 @@ class Alerter:
                 return "(Unkown hub)"
 
     def get_hub_number(self, location):
-        pipo=Contact.objects.filter(types=get_hub_worker_type(),location__parent=location)
+        pipo=Contact.active.filter(types=get_hub_worker_type(),location__parent=location)
         if pipo:
             return ", ".join(c.name+": "+c.default_connection.identity for c in pipo)
         try:
