@@ -24,6 +24,8 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 #WHITELIST_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
 #                     "phase. We will notify you when the system is live."
 
+DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
+
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
 #    ('rapidsms.views.dashboard', 'Dashboard'),
