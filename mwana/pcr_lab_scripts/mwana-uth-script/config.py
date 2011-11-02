@@ -1,9 +1,9 @@
-version = '1.1.0'
+version = '1.1.1'
 
-sched = ['0930', '1310', '1530']  #scheduling parameters for sync task
+sched = ['0930', '1045', '1310', '1530']  #scheduling parameters for sync task
 
-# List of clinic ids to send data for; if present, ONLY data for these clinics 
-# will accumulate in the staging db and, subsequently, be sent to the MOH 
+# List of clinic ids to send data for; if present, ONLY data for these clinics
+# will accumulate in the staging db and, subsequently, be sent to the MOH
 # server.  If empty or None, data for all clinics will be sent.
 clinics = [
   '8080140',
@@ -16,9 +16,42 @@ clinics = [
   '8070260',
   '8070350',
   '8070370',
+  '8040360',
+  '8040230',
+  '8040240',
+  '8040210',
+'8040190',
+'8040320',
+'8040300',
+'8040270',
+'8040140',
+'8040290',
+'8040380',
+'8040160',
+'8040340',
+'8040250',
+'8040200',
+'8040370',
+'8040400',
+'8040350',
+'8040220',
+'8040330',
+'8040280',
+'8040390',
+'8040260',
+'8040130',
+'8040150',
+'8040120',
+'8040110',
+'8040310',
+'8040410',
+'8040420',
+'8040430',
+'8040180',
+
 ]
 
-#path to the Lab database                                        
+#path to the Lab database
 import os.path
 base_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -65,7 +98,7 @@ result_map = {
 }
 
 #production rapidsms server at MoH
-submit_url = 'https://mwana-zambia.unicefinnovation.org/labresults/incoming/'
+submit_url = 'https://mwana.moh.gov.zm/labresults/incoming/'
 
 auth_params = dict(realm='Lab Results', user='uth', passwd='Eedoos9seh')
 
@@ -79,9 +112,10 @@ testing_window = 90    #number of days after a requisition forms has been entere
 
 init_lookback = 14     #when initializing the system, how many days back from the date of initialization to report
                        #results for (everything before that is 'archived')
-                      
-                      
-transport_chunk = 5000  #maximum size per POST to rapidsms server (bytes) (approximate)
+
+new_facility_lookback = 30 #when initializing a newly added facility to clinic above, how many days back from the date of initialization to report
+                           #results for (everything before that is 'archived')                           
+transport_chunk = 700  #maximum size per POST to rapidsms server (bytes) (approximate)
 send_compressed = False  #if True, payloads will be sent bz2-compressed
 compression_factor = .2 #estimated compression factor
 

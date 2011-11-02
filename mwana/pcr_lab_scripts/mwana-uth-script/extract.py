@@ -61,7 +61,24 @@ def init_staging_db (lookback):
   create_staging_db()
   archive_old_samples(lookback)
   log.info('staging db initialized')
-    
+
+def init_any_new_clinics ():
+  """'initialize' the staging database for newly added facilities"""
+  log.info('checking if new clinics have been added to config.clinics')
+  conn = dbconn('staging')
+  curs = conn.cursor()
+  curs.execute("SELECT distinct facility_code FROM samples")
+  in_staging = []
+  for rec in curs.fetchall():
+      in_staging.append(str(rec[0]))
+
+  new_clinics = list(set(config.clinics) - set(in_staging))
+
+  conn.commit()
+  curs.close()
+  conn.close()
+  archive_old_facility_samples(config.new_facility_lookback, new_clinics)
+
 def create_staging_db ():
   """create the tables in the sqlite db"""
   conn = dbconn('staging')
@@ -123,6 +140,46 @@ def archive_old_samples (lookback):
   curs.close()
   conn.close()
   
+def archive_old_facility_samples (lookback, facility_list):
+  """For the given facility, pre-populate very old samples in the prod db into
+  staging, so they don't show up in 'new record' queries"""
+  if not facility_list:
+      return
+  conn = dbconn('prod')
+  curs = conn.cursor()
+  sql = "select distinct %s, Facility from tbl_Patient where DateReceived < ?" % (config.prod_db_id_column)
+  sql += ' AND Facility in (%s)' % ', '.join(facility_list)
+
+  curs.execute(sql, [days_ago(lookback).strftime('%Y-%m-%d')])
+  records = curs.fetchall()
+  if not records:
+      log.info('No old records found for newly added facilities: %s' %\
+      ", ".join(facility_list))
+      return
+  log.info('archiving %s records for %s newly added clinics: %s' %\
+  (len(records), len(facility_list), ', '.join(facility_list)))
+  curs.close()
+  conn.close()
+
+  conn = dbconn('staging')
+  curs = conn.cursor()
+  arcvd = []
+  for rec in records:
+    try:
+        curs.execute("insert into samples (sample_id, facility_code, sync_status) values (?, ?, 'historical')", [rec[0], rec[1]])
+        arcvd.append(rec[1])
+    except sqlite3.IntegrityError, e:
+        pass # sample_id already added
+    except Exception, e:
+        log.info(e)
+        pass
+  conn.commit()
+  curs.close()
+  conn.close()
+  arcvd = (set(arcvd))
+  log.info('Finished archiving %s records for %s of %s newly added clinics: %s' %\
+  (len(records), len(arcvd), len(facility_list), ', '.join(str(i) for i in arcvd)))
+
 def get_ids (db, col, table, normfunc=identity):
   """return a set of all primary key IDs in the given database"""
   conn = dbconn(db)
@@ -1075,5 +1132,6 @@ def daemon ():
     log.exception('top-level exception when booting daemon!')
   
 if __name__ == "__main__":
+  init_any_new_clinics()
   daemon()
 
