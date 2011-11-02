@@ -213,3 +213,7 @@ class PendingPinConnections(models.Model):
     connection = models.ForeignKey(Connection)
     result = models.ForeignKey(Result)
     timestamp = models.DateTimeField(null=True,blank=True, auto_now=True)
+
+    def __unicode__(self):
+        return "%s, %s, %s" % (self.connection, self.result, self.timestamp)
+
