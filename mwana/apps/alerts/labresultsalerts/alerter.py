@@ -310,15 +310,23 @@ class Alerter:
         distinct().order_by('pk')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
-            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
-                             "Clinic "
+            alert_msg = ("Clinic "
                              "has no record of sending DBS samples in  the last"
                              " %s days. Please check "
                              "that they have supplies by calling (%s)."
                              "" % (days_late,
                              ", ".join(contact.name + ":"
                              + contact.default_connection.identity
-                             for contact in contacts)),
+                             for contact in contacts)))
+            if days_late > 40000:
+                alert_msg = ("Clinic has no record of sending DBS samples "
+                             "since it was added to the SMS system. "
+                             "Please check that they have supplies by calling (%s)."
+                             "" % ( ", ".join(contact.name + ":"
+                             + contact.default_connection.identity
+                             for contact in contacts)))
+            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
+                             alert_msg,
                              clinic.name,
                              days_late,
                              -days_late,
@@ -450,12 +458,15 @@ class Alerter:
              "The last time they used the system is "
             "as shown. Please call and enquire. " % (facility.name))
 
+            contacts  = []
             temp = []
             for defaulter in defaulters:
-                last_used = self.last_used_system(defaulter.contact)
+                contacts.append(defaulter.contact)
+            for contact in set(contacts):
+                last_used = self.last_used_system(contact)
                 last_used_msg = "%s days ago" % last_used if last_used else "Never"
-                temp.append("%s (%s) %s" % (defaulter.contact.name,
-                defaulter.contact.default_connection.identity, last_used_msg
+                temp.append("%s (%s) %s" % (contact.name,
+                contact.default_connection.identity, last_used_msg
                 ))
                 if last_used: days_late = max(days_late, last_used)
 
