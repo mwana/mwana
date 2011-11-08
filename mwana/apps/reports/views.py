@@ -89,6 +89,14 @@ def malawi_reports(request, location=None):
      }, context_instance=RequestContext(request))
 
 
+@require_GET
+def malawi_home(request):
+    apps = ['results160', 'remindme', 'growth monitor']
+    return render_to_response('reports/malawi_home.html', {'apps':apps,},
+                              context_instance=RequestContext(request))
+                              
+
+
 def get_facilities_dropdown_html(id, facilities, selected_facility):
     #TODO: move this implemention to templates
     code ='<select name="%s" size="1">\n'%id
