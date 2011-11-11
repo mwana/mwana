@@ -358,6 +358,59 @@ class ReportGMHandler(KeywordHandler):
                 results = ass.analyze(cg)
                 self.debug('assessment analyzed!')
                 self.debug(results)
+                # categorise child status based on results of zscores.
+                if ass.weight4age is not None:
+                    if (ass.weight4age >= D(str(3.00))):
+                        ass.w4astatus = 'V'
+                    elif (D(str(2.00)) <= ass.weight4age < D(str(3.00))):
+                        ass.w4astatus = 'T'
+                    elif (D(str(0.00)) <= ass.weight4age < D(str(2.00))):
+                        ass.w4astatus = 'G'
+                    elif (D(str(-1.00)) <= ass.weight4age < D(str(0.00))):
+                        ass.w4astatus = 'L'
+                    elif (D(str(-2.00)) <= ass.weight4age < D(str(-1.00))):
+                        ass.w4astatus = 'M'
+                    elif (D(str(-3.00)) <= ass.weight4age < D(str(-2.00))):
+                        ass.w4astatus = 'U'
+                    elif (ass.weight4age < D(str(-3.00))):
+                        ass.w4astatus = 'S'
+
+                if ass.height4age is not None:
+                    if (ass.height4age >= D(str(3.0))):
+                        ass.h4astatus = 'V'
+                    elif (D(str(2.00)) <= ass.height4age < D(str(3.00))):
+                        ass.h4astatus = 'T'
+                    elif (D(str(0.00)) <= ass.height4age < D(str(2.00))):
+                        ass.h4astatus = 'G'
+                    elif (D(str(-1.0)) <= ass.height4age < D(str(0.00))):
+                        ass.h4astatus = 'L'
+                    elif (D(str(-2.00)) <= ass.height4age < D(str(-1.00))):
+                        ass.h4astatus = 'M'
+                    elif (D(str(-3.00)) <= ass.height4age < D(str(-2.00))):
+                        ass.h4astatus = 'U'
+                    elif (ass.height4age < D(str(-3.00))):
+                        ass.h4astatus = 'S'
+
+                if ass.muac is not None:
+                    if (ass.muac <= D(str(11.50))):
+                        ass.muac_status = 'S'
+                    elif (D(str(11.50)) <= ass.muac < D(str(12.50))):
+                        ass.muac_status = 'M'
+                    elif (D(str(12.50)) <= ass.muac < D(str(13.50))):
+                        ass.muac_status = 'P'
+                    elif (ass.muac >= D(str(13.50))):
+                        ass.muac_status = 'G'
+
+                if ass.weight4height is not None:
+                    if (D(str(-2.00)) < ass.weight4height <= D(str(-1.00))):
+                        ass.w4hstatus = 'P'
+                    if (D(str(-3.00)) < ass.weight4height <= D(str(-2.00))):
+                        ass.w4hstatus = 'M'
+                    if (ass.weight4height < D(str(-3.00))):
+                        ass.w4hstatus = 'S'
+                        
+                ass.save()
+
             else:
                 self.debug('there is no assessment saved to analyse')
             #response_map = {

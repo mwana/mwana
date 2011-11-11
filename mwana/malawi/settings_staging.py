@@ -14,6 +14,8 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
+TEMPLATE_DIRS = ("/home/mwana/staging-environment/code_root/mwana/malawi/templates",)
+
 #XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project

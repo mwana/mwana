@@ -1,0 +1,30 @@
+
+#wrapper {
+    width: 94%;
+    background: #fff;
+    margin: 0.5em auto 0 auto;
+
+    /* a little pretty for the 10/dec demo */
+    -moz-box-shadow: 4px 4px 8px #aaa;
+    box-shadow: 4px 4px 8px #aaa;
+    -moz-border-radius-bottomright: 1em;
+    -moz-border-radius-bottomleft: 1em;
+}
+
+    /* no scaling for ie6 */
+    * html #wrapper {
+        width: 94%; }
+
+    #branding h1 {
+        background: url("../images/malawi-moh-logo.png") no-repeat 100% 50%;
+        height: 65px;
+        color: #fff;
+        margin: 0;
+    }
+
+.over_cutoff {background:#0077bb;} /* blue */
+.normal_cutoff {background:#00cd00;} /* green */
+.low_cutoff {background:#fee01e;} /* yellow */
+.mild_cutoff {background:#dd7500;} /* orange */
+.severe_cutoff {background:#cd0000;} /* red */
+

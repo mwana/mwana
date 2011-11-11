@@ -81,6 +81,10 @@ def ass_dicts_for_display(location, startdate, enddate):
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
         ass_dict.update({'human_status'     : ass.get_status_display()})
+        ass_dict.update({'w4astatus'     : ass.get_w4astatus_display()})
+        ass_dict.update({'h4astatus'     : ass.get_h4astatus_display()})
+        ass_dict.update({'w4hstatus'     : ass.get_w4hstatus_display()})
+        ass_dict.update({'muac_status'     : ass.get_muac_status_display()})
         ass_dict.update(**instance_to_dict(ass))
         dicts_for_display.append(ass_dict)
     return dicts_for_display
@@ -110,6 +114,10 @@ def ass_dicts_for_export(location, startdate, enddate):
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
         ass_dict.update({'human_status'     : ass.get_status_display()})
+        ass_dict.update({'w4astatus'     : ass.get_w4astatus_display()})
+        ass_dict.update({'h4astatus'     : ass.get_h4astatus_display()})
+        ass_dict.update({'w4hstatus'     : ass.get_w4hstatus_display()})
+        ass_dict.update({'muac_status'     : ass.get_muac_status_display()})
         ass_dict.update(**instance_to_dict(ass))
         dicts_for_export.append(ass_dict)
     return dicts_for_export

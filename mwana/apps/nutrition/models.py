@@ -22,6 +22,44 @@ class Assessment(models.Model):
         ('S', 'Suspect'),
     )
 
+    HEIGHT_FOR_AGE_CHOICES = (
+        ('N', 'Not Measured'),
+        ('V', 'Very Tall'),
+        ('T', 'Normal - Tall'),
+        ('G', 'Normal'),
+        ('L', 'Normal - Short'),
+        ('M', 'Mild Stunting'),
+        ('U', 'Moderate Stunting'),
+        ('S', 'Severe Stunting'),
+    )
+
+    WEIGHT_FOR_AGE_CHOICES = (
+        ('N', 'Not Measured'),
+        ('V', 'Overweight'),
+        ('T', 'High Normal Weight'),
+        ('G', 'Normal Weight'),
+        ('L', 'Low Normal Weight'),
+        ('M', 'Mild Underweight'),
+        ('U', 'Moderate Underweight'),
+        ('S', 'Severe Underweight'),
+    )
+
+    WEIGHT_FOR_HEIGHT_CHOICES = (
+        ('N', 'Not Measured'),
+        ('P', 'Mild Wasting'),
+        ('M', 'Moderate Wasting'),
+        ('S', 'Severe Wasting'),
+        ('G', 'Normal'),
+    )
+
+    MUAC_CHOICES = (
+        ('N', 'Not Measured'),
+        ('P', 'Mild Wasting'),
+        ('M', 'Moderate Wasting'),
+        ('S', 'Severe Wasting'),
+        ('G', 'Normal Range'),
+    )
+
     # who what where when why
     healthworker        = models.ForeignKey(Contact,null=True)
     patient             = models.ForeignKey(Person)
@@ -45,6 +83,11 @@ class Assessment(models.Model):
     weight4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     height4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     weight4height       = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
+
+    w4astatus = models.CharField(max_length=1,choices=WEIGHT_FOR_AGE_CHOICES, default='N')
+    h4astatus = models.CharField(max_length=1,choices=HEIGHT_FOR_AGE_CHOICES, default='N')
+    w4hstatus = models.CharField(max_length=1,choices=WEIGHT_FOR_HEIGHT_CHOICES, default='N')
+    muac_status = models.CharField(max_length=1,choices=MUAC_CHOICES, default='N')
 
     class Meta:
         # define a permission for this app to use the @permission_required

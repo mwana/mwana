@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+import os.path
 from mwana.settings_project import *
 
 # Malawi:
@@ -41,6 +42,9 @@ TIME_ZONE = 'Africa/Blantyre'
 LANGUAGE_CODE = 'eng-us'
 
 LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
+
+MALAWI_ROOT = os.path.abspath(os.path.dirname(__file__))
+TEMPLATE_DIRS = (os.path.join(MALAWI_ROOT, "templates"),)
 
 ROOT_URLCONF = 'mwana.malawi.urls'
 
