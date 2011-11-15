@@ -96,8 +96,7 @@ def ass_dicts_for_export(location, startdate, enddate):
     asses = Assessment.objects.all().select_related()
     if location != "All Facilities":
         asses = asses.filter(healthworker__location__parent__name=location)
-        asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
-
+    asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     for ass in asses:
         ass_dict = {}
         # add desired fields from related models (we want to display the
@@ -114,10 +113,10 @@ def ass_dicts_for_export(location, startdate, enddate):
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
         ass_dict.update({'human_status'     : ass.get_status_display()})
-        ass_dict.update({'w4astatus'     : ass.get_w4astatus_display()})
-        ass_dict.update({'h4astatus'     : ass.get_h4astatus_display()})
-        ass_dict.update({'w4hstatus'     : ass.get_w4hstatus_display()})
-        ass_dict.update({'muac_status'     : ass.get_muac_status_display()})
+        ass_dict.update({'w4a_status'     : ass.get_w4astatus_display()})
+        ass_dict.update({'h4a_status'     : ass.get_h4astatus_display()})
+        ass_dict.update({'w4h_status'     : ass.get_w4hstatus_display()})
+        ass_dict.update({'mstatus'     : ass.get_muac_status_display()})
         ass_dict.update(**instance_to_dict(ass))
         dicts_for_export.append(ass_dict)
     return dicts_for_export
@@ -154,12 +153,14 @@ def export(headers, keys, objects, file_name):
 def csv_assessments(req):
     headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',    
         'Sex', 'Date of Birth', 'Age in months', 'Height',
-        'Weight', 'Oedema', 'MUAC', 'Height for age', 'Weight for age',
-        'Weight for height', 'Data Quality']
+        'Weight', 'Oedema', 'MUAC', 'MUAC Status','Height for age',
+        'Height for Age Status', 'Weight for age', 'Weight for Age Status',
+        'Weight for height', 'Weight for Height Status', 'Data Quality']
     keys = ['date', 'location', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
-            'height', 'weight', 'oedema', 'muac', 'height4age', 'weight4age',
-            'weight4height', 'human_status']
+            'height', 'weight', 'oedema', 'muac', 'mstatus',
+            'height4age', 'h4a_status', 'weight4age', 'w4a_status',
+            'weight4height', 'w4h_status', 'human_status']
     
     location, startdate, enddate = get_report_criteria(req)
     assessments = ass_dicts_for_export(location, startdate, enddate)
@@ -198,3 +199,4 @@ def get_report_criteria(request):
     enddate = request.GET.get('enddate', default_end_date)
 
     return location, startdate, enddate
+
