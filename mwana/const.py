@@ -79,3 +79,9 @@ def get_district_worker_type():
 
 def get_province_worker_type():
     return _get_contacttype(PROVINCE_WORKER_SLUG, 'Province Worker')
+
+def get_nutrition_worker_type():
+    return _get_contacttype(NUTRITION_WORKER_SLUG, 'Nutrition Interviewer')
+
+def get_nutrition_patient_type():
+    return _get_contacttype(NUTRITION_PATIENT_SLUG, 'Nutrition Patient')

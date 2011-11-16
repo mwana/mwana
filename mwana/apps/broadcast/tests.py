@@ -334,7 +334,7 @@ class TestApp(TestScript):
             self.stopRouter()
     
     def create_contact(self, name, location, types):
-        contact = Contact.objects.create(alias=name, name=name,
+        contact = Contact.objects.create(name=name,
                                          location=location)
         contact.types = types
         script = "%(name)s > hello world" % {"name": name}
@@ -348,7 +348,7 @@ class TestApp(TestScript):
         script = "help_admin > hello world"
         self.runScript(script)
         connection = Connection.objects.get(identity="help_admin")
-        help_admin = Contact.objects.create(alias='help_admin', is_active = True, name="help_admin",
+        help_admin = Contact.objects.create(is_active = True, name="help_admin",
                                          location=self.clinic_zone,is_help_admin = True)
         help_admin.types.add(const.get_clinic_worker_type())
                                 

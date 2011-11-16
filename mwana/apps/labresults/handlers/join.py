@@ -255,12 +255,13 @@ class JoinHandler(KeywordHandler):
                                                slug=get_unique_value(Location.objects, "slug", name),
                                                type=zone_type)
             return zone
-        
+
     def handle_zone(self, text):
         PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
-        HELP_TEXT = _("To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> "\
+        HELP_TEXT = _("To register as a Mobile agent, send JOIN <CBA> <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
-
+        MAX_IDENTITY_ID = 10
+        
         m = PATTERN.search(text)
         if m is not None:
             clinic_slug = m.group('clinic').strip()
@@ -279,17 +280,24 @@ class JoinHandler(KeywordHandler):
             contact_clinic, contact_zone =\
               self._get_clinic_and_zone(self.msg.contact)
 
+            #prepare identity id for interviewer_id
+            identity_id = str(self.msg.connection.identity)
+            if len(identity_id) > MAX_IDENTITY_ID:
+                identity_id = int(identity_id[-9:])
+            else:
+                identity_id = int(identity_id)
+
             if contact_zone == zone:
                 # don't let agents register twice for the same zone
                 self.respond(_("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for zone %(zone)s of %(clinic)s."),
+                             "a Mobile Agent for zone %(zone)s of %(clinic)s."),
                              name=self.msg.contact.name, zone=zone.name,
                              clinic=clinic.name)
                 return
             elif contact_clinic and contact_clinic != clinic:
                 # force agents to leave if they appear to be switching clinics
                 self.respond(_("Hello %(name)s! You are already registered as "
-                             "a RemindMi Agent for %(old_clinic)s. To leave "
+                             "a Mobile Agent for %(old_clinic)s. To leave "
                              "your current clinic and join %(new_clinic)s, "
                              "reply with LEAVE and then re-send your message."),
                              name=self.msg.contact.name,
@@ -302,18 +310,20 @@ class JoinHandler(KeywordHandler):
                 # level, update the record and save it
                 cba = self.msg.contact
                 cba.name = name
+                cba.interviewer_id = identity_id 
                 cba.location = zone
                 cba.save()
             else:
                 # lastly, if no contact exists, create one and save it in the
                 # connection
-                cba = Contact.objects.create(name=name, location=zone)
+                cba = Contact.objects.create(name=name, location=zone,
+                                          interviewer_id=identity_id)
                 self.msg.connection.contact = cba
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
             msg = self.respond(_("Thank you %(name)s! You have successfully "
-                                 "registered as a RemindMi Agent for zone "
+                                 "registered as a Mobile Agent for zone "
                                  "%(zone)s of %(clinic)s."), name=cba.name,
                                  zone=zone.name, clinic=clinic.name)
             notify_text, kwargs = self._get_notify_text()

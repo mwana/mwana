@@ -8,4 +8,5 @@ urlpatterns = patterns('',
     # custom URL additions for Malawi:
     url(r'^$', views.malawi_reports, name='mwana_reports'),
     (r'^', include('rapidsms_xforms.urls')), # needs top level formList url
+    (r'^growth/', include('mwana.apps.nutrition.urls')),
 )

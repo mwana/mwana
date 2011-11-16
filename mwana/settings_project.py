@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
     "mwana.apps.tlcprinters",
-    #'south',
+    'south',
     # the essentials.
     "django_nose",
     "djtables",
@@ -72,7 +72,6 @@ INSTALLED_APPS = [
 #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "mwana.apps.echo",
-    "mwana.apps.stringcleaning",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.agents",
@@ -89,6 +88,7 @@ INSTALLED_APPS = [
     "mwana.apps.locations",
     "mwana.apps.patienttracing",
     "mwana.apps.hub_workflow",
+    "mwana.apps.stringcleaning",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
@@ -101,9 +101,9 @@ RAPIDSMS_TABS = [
     ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
     ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.registration.views.registration', 'Registration'),
-    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),

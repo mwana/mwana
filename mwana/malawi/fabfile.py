@@ -54,9 +54,10 @@ def setup_path():
 
 def staging():
     env.environment = 'staging-environment'
-    env.hosts = ['malawi-qa.projectmwana.org']
+    env.hosts = ['10.3.1.10']
     env.user = 'mwana'
     env.home = '/home/mwana'
+    env.repos['mwana']['branch'] = 'feature/nutrition'
     setup_path()
 
 
@@ -213,7 +214,8 @@ def syncdb():
     """
     Runs ./manage.py syncdb on the remote server.
     """
-    run('%s/mwana/manage.py syncdb' % env.root)
+    run('source %s/bin/activate' % env.virtualenv_root)
+    run('%s/mwana/manage.py syncdb' % env.code_root)
 
 
 def reset_local_db():
