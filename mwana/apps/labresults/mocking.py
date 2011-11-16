@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 import datetime
 import mwana.const as const
 import random
@@ -18,12 +19,15 @@ from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import RESULTS_READY
 from mwana.apps.labresults.messages import SELF_COLLECTED
 from mwana.apps.labresults.messages import build_results_messages
+from mwana.apps.labresults.messages import build_printer_results_messages
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.const import get_district_worker_type
 from mwana.const import get_hub_worker_type
 from mwana.const import get_province_worker_type
+from mwana.const import get_dbs_printer_type
+from mwana.const import get_clinic_worker_type
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
@@ -37,6 +41,25 @@ class MockResultUtility(LoggerMixin):
 
     waiting_for_pin = {}
     last_collectors = {}
+
+    def fake_sending_results_to_printer(self, clinic):
+        printers = Contact.active.filter(types=get_dbs_printer_type(), location=clinic).distinct()
+        workers = Contact.active.filter(types=get_clinic_worker_type(), location=clinic).distinct()
+        results = get_fake_results(3, clinic)
+
+        responses = build_printer_results_messages(results)
+
+        for printer in printers:
+            for resp in responses:
+                TLCOutgoingMessage(printer.default_connection, resp).send()
+
+        NUIDs = ", ".join(str(res.requisition_id) for res in results)
+        for contact in workers:
+            msg_text = (u"Hello {name}, {count} results sent to printer "
+                        u"at {clinic}. IDs : {nuids}"
+                        u"".format(name=contact.name, count=len(results),
+                        clinic=clinic.name, nuids=NUIDs))
+            OutgoingMessage(contact.default_connection, msg_text).send()
 
     def handle(self, message):
         if message.text.strip().upper().startswith("DEMO"):
@@ -95,6 +118,31 @@ class MockResultUtility(LoggerMixin):
                     self.debug("caught a potential bad pin: %s for %s" % \
                                (message.text, message.connection))
                     message.possible_bad_mock_pin = True
+
+        elif message.text.strip().upper().startswith("PRINTERDEMO"):
+            rest = message.text.strip()[11:].strip()
+            clinic = None
+            if rest:
+                # optionally allow the tester to pass in a clinic code
+                try:
+                    clinic = Location.objects.get(slug__iexact=rest)
+                except Location.DoesNotExist:
+                    # maybe they just passed along some extra text
+                    pass
+            if not clinic and message.connection.contact \
+                and message.connection.contact.location:
+                    # They were already registered for a particular clinic
+                    # so assume they want to use that one.
+                    clinic = message.connection.contact.location
+            if not clinic:
+                message.respond(PRINTER_DEMO_FAIL)
+            else:
+                # Fake like we need to prompt their clinic for results, as a means
+                # to conduct user testing.  The mocker does not touch the database
+                self.info("Initiating a printer demo to clinic: %s" % clinic)
+                self.fake_sending_results_to_printer(clinic)
+            return True
+
 
 
     def default(self, message):
