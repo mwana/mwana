@@ -219,28 +219,14 @@ class Alerter:
         return max(notification, actual)
 
     def last_retrieved_or_checked(self, location):
-        try:
-            notification = SampleNotification.objects.filter(location=location).order_by('-date')[0].date.date()
-        except IndexError:
-            notification = date(1900, 1, 1)
-        try:
-            last_retreived = Result.objects.filter(clinic=location, notification_status='sent').order_by('-result_sent_date')[0].result_sent_date.date()
-        except IndexError:
-            last_retreived = date(1900, 1, 1)
-        try:
-            last_checked = Message.objects.filter(Q(contact__location=location) |
-                                                  Q(contact__location__parent=location),
-                                                  Q(text__iregex='\s*check\s*')
-                                                  ).order_by('-date')[0].date.date()
-        except IndexError:
-            last_checked = date(1900, 1, 1)
-        try:
-            last_tried_result = Message.objects.filter(Q(contact__location=location) |
-                                                       Q(contact__location__parent=location),
-                                                       Q(text__istartswith='The results for sample') |
-                                                       Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
-        except IndexError:
-            last_tried_result = date(1900, 1, 1)
+        notification = self.last_used_sent(location)
+        notification = date(1900, 1, 1)
+        last_retreived = self.last_retreived_results(location)
+        last_retreived = date(1900, 1, 1)
+        last_checked = self.last_used_check(location)
+        last_checked = date(1900, 1, 1)
+        last_tried_result = self.last_used_result(location)
+        
         return max(notification, last_retreived, last_checked, last_tried_result)
     
     def last_used_sent(self, location):
@@ -324,15 +310,23 @@ class Alerter:
         distinct().order_by('pk')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
-            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
-                             "Clinic "
+            alert_msg = ("Clinic "
                              "has no record of sending DBS samples in  the last"
                              " %s days. Please check "
                              "that they have supplies by calling (%s)."
                              "" % (days_late,
                              ", ".join(contact.name + ":"
                              + contact.default_connection.identity
-                             for contact in contacts)),
+                             for contact in contacts)))
+            if days_late > 40000:
+                alert_msg = ("Clinic has no record of sending DBS samples "
+                             "since it was added to the SMS system. "
+                             "Please check that they have supplies by calling (%s)."
+                             "" % ( ", ".join(contact.name + ":"
+                             + contact.default_connection.identity
+                             for contact in contacts)))
+            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
+                             alert_msg,
                              clinic.name,
                              days_late,
                              -days_late,
@@ -464,12 +458,15 @@ class Alerter:
              "The last time they used the system is "
             "as shown. Please call and enquire. " % (facility.name))
 
+            contacts  = []
             temp = []
             for defaulter in defaulters:
-                last_used = self.last_used_system(defaulter.contact)
+                contacts.append(defaulter.contact)
+            for contact in set(contacts):
+                last_used = self.last_used_system(contact)
                 last_used_msg = "%s days ago" % last_used if last_used else "Never"
-                temp.append("%s (%s) %s" % (defaulter.contact.name,
-                defaulter.contact.default_connection.identity, last_used_msg
+                temp.append("%s (%s) %s" % (contact.name,
+                contact.default_connection.identity, last_used_msg
                 ))
                 if last_used: days_late = max(days_late, last_used)
 
@@ -494,7 +491,7 @@ class Alerter:
                 return "(Unkown hub)"
 
     def get_hub_number(self, location):
-        pipo=Contact.objects.filter(types=get_hub_worker_type(),location__parent=location)
+        pipo=Contact.active.filter(types=get_hub_worker_type(),location__parent=location)
         if pipo:
             return ", ".join(c.name+": "+c.default_connection.identity for c in pipo)
         try:

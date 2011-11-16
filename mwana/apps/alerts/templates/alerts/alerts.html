@@ -86,7 +86,7 @@
                     <hr>
                         <!-- Report 2-->
                     <p align="center">
-                    <h3>Alerts for Clinics Not Sending DBS Samples or using Results160 in the last {{ notifying_time }} days</h3>
+                    <h3>Alerts for Clinics Not Sending DBS Samples in the last {{ notifying_time }} days</h3>
                     <br>Select date range (days)
                     <select name="input_notifying_time" size="1">
                         {% for a in days%}
@@ -110,7 +110,17 @@
                                 {% else%}
                                 <td width="50" bgcolor="#FFFF00"></td>
                                 {% endifequal%}
-                                <td width="50" bgcolor="#FFFFFF" align="center"><font size="6">{{ record.days_late }}</font><br>&nbsp;&nbsp;days</td>
+                                <td width="50" bgcolor="#FFFFFF" align="center">
+                                    <font size="6">
+                                        {% if record.days_late > 40000 %}
+                                          Never
+                                          </font><br>&nbsp;&nbsp;sent</td>
+                                          {% else %}
+                                          {{ record.days_late }}
+                                          </font><br>&nbsp;&nbsp;days</td>
+                                        {% endif %}
+                                        
+                                    
                                 <td width="80" bgcolor="#EBEBEB">{{ record.culprit }}</td>
                                 <td bgcolor="#FFFFFF">{{ record.message }} <p><b>{{ record.extra }}</b></td>
                             </tr>

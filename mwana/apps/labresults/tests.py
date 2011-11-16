@@ -374,7 +374,56 @@ class TestApp(LabresultsSetUp):
         results = get_fake_results(3, self.clinic, notification_status_choices=("new", ))
         for res in results:  res.save()
         return results
-    
+
+
+    def testSend_demo_results_to_printer(self):
+        self.assertEqual(0, MessageConfirmation.objects.count())
+
+        # register printer
+        self.clinic.has_independent_printer = True
+        self.clinic.save()
+        script = """
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
+        time.sleep(.2)
+
+        self.startRouter()
+
+        script = """
+            clinic_worker > printerdemo {clinic}            
+        """.format(clinic=self.clinic.slug)
+
+        self.runScript(script)
+        msgs = self.receiveAllMessages()
+       
+        expected_msgs = []
+        msg1 = "John Banda:Hello John Banda, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
+        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg5 = "Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992.\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by ADH DNA-PCR LAB."
+       
+        expected_msgs.append(msg1)
+        expected_msgs.append(msg2)
+        expected_msgs.append(msg3)
+        expected_msgs.append(msg4)
+        expected_msgs.append(msg5)
+        
+
+        self.assertEqual(5, len(msgs))
+        for msg in msgs:
+            my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
+            self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
+        
+
+        self.assertEqual(0, Result.objects.count())
+
+
+
     def testSend_results_to_printer_task(self):
         self.assertEqual(0, MessageConfirmation.objects.count())
 

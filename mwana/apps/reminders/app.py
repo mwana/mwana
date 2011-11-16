@@ -121,7 +121,8 @@ class App(rapidsms.apps.base.AppBase):
         if not event:
             return False
         date_str, patient_name = self._parse_message(msg)
-        if patient_name: # the date is optional
+        # if patient name is too long it's most likely the message sent was wrong
+        if patient_name and len(patient_name) < 50: # the date is optional
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:

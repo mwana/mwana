@@ -20,18 +20,18 @@
     <div class="left">
         <form name="getValues" action="" method="GET">
         <div class="module">
-            
+
 
             <!--h1>Filtered Message Logs:</h1-->
 
 
-            <h2>Filtered Message Logs</h2>
+            <h2>Send SMS Messages</h2>
             <br>
-            
-                <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
-                           to
-                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
+
+                <p>Select worker type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {% autoescape off %}
+                    {{worker_types}}
+                    {% endautoescape %}
                            {% if region_selectable %}
                 <p>Select Region: &nbsp;&nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
@@ -60,28 +60,28 @@
 
                     &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
 
-            
+
             <hr>
            <div>
-              
+
 
             <h3>
                 Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
                 </h3>
-              
+
 
        <table width="100%">
                 {% for record in messages %}
                 <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                    
+
                     {% for column in record %}
                     {% if column %}
                     {% if not forloop.parentloop.counter0 %}
                     <td ><u>{{ column }}</u></td>
                     {% else %}
                     <td >{{ column }}</td>
-                    
+
                     {% endif %}
                     {% else %}
                     {% if forloop.parentloop.last %}
@@ -99,7 +99,7 @@
         </div>
         <div class="clear-hack"></div>
     </div>
-        
+
         <div class="pagination">
     <span class="step-links">
         {% if messages_has_previous %}
