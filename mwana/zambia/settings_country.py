@@ -21,6 +21,7 @@ INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.filteredlogs")
+INSTALLED_APPS.append("mwana.apps.websmssender")
 
 TIME_ZONE = 'Africa/Lusaka'
 

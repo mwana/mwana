@@ -1,0 +1,123 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Message Logs - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+
+
+    <div class="left">
+        <form name="getValues" action="" method="GET">
+        <div class="module">
+
+
+            <!--h1>Filtered Message Logs:</h1-->
+
+
+            <h2>Send SMS Messages</h2>
+            <br>
+
+                <p>Select worker type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    {% autoescape off %}
+                    {{worker_types}}
+                    {% endautoescape %}
+                           {% if region_selectable %}
+                <p>Select Region: &nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}&nbsp;
+                    or District:{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}&nbsp;
+                    or Facility:{% autoescape off %}
+                    {{rpt_facilities}}
+                    {% endautoescape %}&nbsp;
+
+                <p>Search: &nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="search_key" size="17" value="{{ search_key }}">
+                    &nbsp;
+                    {% if is_report_admin %}
+                <p>Select Implementer:
+                    {% autoescape off %}
+                    {{rpt_group}}
+                    {% endautoescape %}
+                    &nbsp;
+                    {%endif%}
+                    {%endif%}
+
+                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+
+
+            <hr>
+           <div>
+
+
+            <h3>
+                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                </h3>
+
+
+       <table width="100%">
+                {% for record in messages %}
+                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td ><u>{{ column }}</u></td>
+                    {% else %}
+                    <td >{{ column }}</td>
+
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+
+        <div class="pagination">
+    <span class="step-links">
+        {% if messages_has_previous %}
+            <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
+
+        <span class="current">
+            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+        </span>
+
+        {% if messages_has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ messages_number }}>
+    </span>
+
+</div>
+        </form>
+
+</div>
+{% endblock %}
