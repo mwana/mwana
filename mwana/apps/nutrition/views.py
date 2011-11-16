@@ -31,7 +31,7 @@ def reports(request):
     assessments = ass_dicts_for_display(location, startdate, enddate)
     selected_location = str(location)
     locations = survey_locations()
-    locations.append("All Facilities")
+    locations.append("All Districts")
     #locations = sorted(list(set(locations)))
     # sort by date, newest at top
     assessments.sort(lambda x, y: cmp(y['date'], x['date']))
@@ -64,7 +64,7 @@ def ass_dicts_for_display(location, startdate, enddate):
     dicts_for_display = []
     asses = Assessment.objects.all().select_related()
     if location != "All Facilities":
-        asses = asses.filter(healthworker__location__parent__name=location)
+        asses = asses.filter(healthworker__location__parent__parent__name=location)
     asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     for ass in asses:
         ass_dict = {}
@@ -180,16 +180,16 @@ def csv_entries(req):
 
 
 def survey_locations():
-    facilities = []
+    districts = []
     def uniq(seq):
         seen = set()
         seen_add = seen.add
         return [ x for x in seq if x not in seen and not seen_add(x)]        
 
     for assesment in Assessment.objects.all().select_related():
-        facilities.append(str(assesment.healthworker.clinic))
+        districts.append(str(assesment.healthworker.clinic.parent))
         
-    return uniq(facilities)
+    return uniq(districts)
 
 def get_report_criteria(request):
     location = request.GET.get('location', 'All Facilities')
