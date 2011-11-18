@@ -22,42 +22,37 @@ class Assessment(models.Model):
         ('S', 'Suspect'),
     )
 
-    HEIGHT_FOR_AGE_CHOICES = (
-        ('N', 'Not Measured'),
+    STUNTING_CHOICES = (
+        ('N', ' '),
         ('V', 'Very Tall'),
-        ('T', 'Normal - Tall'),
+        ('T', 'Normal'),
         ('G', 'Normal'),
-        ('L', 'Normal - Short'),
-        ('M', 'Mild Stunting'),
-        ('U', 'Moderate Stunting'),
-        ('S', 'Severe Stunting'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
     )
 
-    WEIGHT_FOR_AGE_CHOICES = (
-        ('N', 'Not Measured'),
-        ('V', 'Overweight'),
-        ('T', 'High Normal Weight'),
-        ('G', 'Normal Weight'),
-        ('L', 'Low Normal Weight'),
-        ('M', 'Mild Underweight'),
-        ('U', 'Moderate Underweight'),
-        ('S', 'Severe Underweight'),
-    )
-
-    WEIGHT_FOR_HEIGHT_CHOICES = (
-        ('N', 'Not Measured'),
-        ('P', 'Mild Wasting'),
-        ('M', 'Moderate Wasting'),
-        ('S', 'Severe Wasting'),
+    UNDERWEIGHT_CHOICES = (
+        ('N', ' '),
+        ('V', 'Obese'),
+        ('T', 'Overweight'),
         ('G', 'Normal'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
     )
 
-    MUAC_CHOICES = (
-        ('N', 'Not Measured'),
-        ('P', 'Mild Wasting'),
-        ('M', 'Moderate Wasting'),
-        ('S', 'Severe Wasting'),
-        ('G', 'Normal Range'),
+    WASTING_CHOICES = (
+        ('N', ' '),
+        ('V', 'Unusual'),
+        ('T', 'Normal'),
+        ('G', 'Normal'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
     )
 
     # who what where when why
@@ -72,22 +67,16 @@ class Assessment(models.Model):
     weight              = models.DecimalField(max_digits=4,decimal_places=1,blank=True,null=True)
     muac                = models.DecimalField(max_digits=6,decimal_places=2,blank=True,null=True)
     oedema              = models.NullBooleanField(default=False)
-    #diarrea             = models.BooleanField(default=False)
-
-    # expensive calculations 
-    #mam                 = models.BooleanField(default=False)
-    #sam                 = models.BooleanField(default=False)
-    #stunting            = models.BooleanField(default=False)
 
     # z-scores
     weight4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     height4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     weight4height       = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
 
-    w4astatus = models.CharField(max_length=1,choices=WEIGHT_FOR_AGE_CHOICES, default='N')
-    h4astatus = models.CharField(max_length=1,choices=HEIGHT_FOR_AGE_CHOICES, default='N')
-    w4hstatus = models.CharField(max_length=1,choices=WEIGHT_FOR_HEIGHT_CHOICES, default='N')
-    muac_status = models.CharField(max_length=1,choices=MUAC_CHOICES, default='N')
+    underweight = models.CharField(max_length=1,choices=UNDERWEIGHT_CHOICES, default='N')
+    stunting = models.CharField(max_length=1,choices=STUNTING_CHOICES, default='N')
+    wasting = models.CharField(max_length=1,choices=WASTING_CHOICES, default='N')
+
 
     class Meta:
         # define a permission for this app to use the @permission_required

@@ -361,54 +361,74 @@ class ReportGMHandler(KeywordHandler):
                 # categorise child status based on results of zscores.
                 if ass.weight4age is not None:
                     if (ass.weight4age >= D(str(3.00))):
-                        ass.w4astatus = 'V'
+                        ass.underweight = 'V'
                     elif (D(str(2.00)) <= ass.weight4age < D(str(3.00))):
-                        ass.w4astatus = 'T'
+                        ass.underweight = 'T'
                     elif (D(str(0.00)) <= ass.weight4age < D(str(2.00))):
-                        ass.w4astatus = 'G'
+                        ass.underweight = 'G'
                     elif (D(str(-1.00)) <= ass.weight4age < D(str(0.00))):
-                        ass.w4astatus = 'L'
+                        ass.underweight = 'L'
                     elif (D(str(-2.00)) <= ass.weight4age < D(str(-1.00))):
-                        ass.w4astatus = 'M'
+                        ass.underweight = 'M'
                     elif (D(str(-3.00)) <= ass.weight4age < D(str(-2.00))):
-                        ass.w4astatus = 'U'
+                        ass.underweight = 'U'
                     elif (ass.weight4age < D(str(-3.00))):
-                        ass.w4astatus = 'S'
+                        ass.underweight = 'S'
 
                 if ass.height4age is not None:
                     if (ass.height4age >= D(str(3.0))):
-                        ass.h4astatus = 'V'
+                        ass.stunting = 'V'
                     elif (D(str(2.00)) <= ass.height4age < D(str(3.00))):
-                        ass.h4astatus = 'T'
+                        ass.stunting = 'T'
                     elif (D(str(0.00)) <= ass.height4age < D(str(2.00))):
-                        ass.h4astatus = 'G'
+                        ass.stunting = 'G'
                     elif (D(str(-1.0)) <= ass.height4age < D(str(0.00))):
-                        ass.h4astatus = 'L'
+                        ass.stunting = 'L'
                     elif (D(str(-2.00)) <= ass.height4age < D(str(-1.00))):
-                        ass.h4astatus = 'M'
+                        ass.stunting = 'M'
                     elif (D(str(-3.00)) <= ass.height4age < D(str(-2.00))):
-                        ass.h4astatus = 'U'
+                        ass.stunting = 'U'
                     elif (ass.height4age < D(str(-3.00))):
-                        ass.h4astatus = 'S'
+                        ass.stunting = 'S'
 
-                if ass.muac is not None:
-                    if (ass.muac <= D(str(11.50))):
-                        ass.muac_status = 'S'
-                    elif (D(str(11.50)) <= ass.muac < D(str(12.50))):
-                        ass.muac_status = 'M'
-                    elif (D(str(12.50)) <= ass.muac < D(str(13.50))):
-                        ass.muac_status = 'P'
-                    elif (ass.muac >= D(str(13.50))):
-                        ass.muac_status = 'G'
+                if (ass.weight4height is not None and ass.muac is not None):
+                    if (ass.weight4height >= D(str(3.0))):
+                        ass.wasting = 'V'
+                    if (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
+                        ass.wasting = 'T'
+                    if (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                        ass.wasting = 'G'
+                    if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
+                        ass.wasting = 'L'
+                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (12.51 <= ass.muac <= 13.50) ):
+                        ass.wasting = 'M'
+                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (11.60 <= ass.muac <= 12.50 )):
+                        ass.wasting = 'U'
+                    if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= 11.59)):
+                        ass.wasting = 'S'
+                elif ass.weight4height is not None:
+                    if (ass.weight4height >= D(str(3.0))):
+                        ass.wasting = 'V'
+                    elif (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
+                        ass.wasting = 'T'
+                    elif (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                        ass.wasting = 'G'
+                    elif (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
+                        ass.wasting = 'L'
+                    elif (D(str(-2.00)) <= ass.weight4height < D(str(-1.00))):
+                        ass.wasting = 'M'
+                    elif (D(str(-3.00)) < ass.weight4height < D(str(-2.00))):
+                        ass.wasting = 'U'
+                    elif (ass.weight4height <= D(str(-3.00))):
+                        ass.wasting = 'S'
+                elif ass.muac is not None:
+                    if (12.51 <= ass.muac <= 13.50):
+                        ass.wasting = 'M'
+                    elif (11.60 <= ass.muac <= 12.50 ):
+                        ass.wasting = 'U'
+                    elif (ass.muac <= 11.59):
+                        ass.wasting = 'S'
 
-                if ass.weight4height is not None:
-                    if (D(str(-2.00)) < ass.weight4height <= D(str(-1.00))):
-                        ass.w4hstatus = 'P'
-                    if (D(str(-3.00)) < ass.weight4height <= D(str(-2.00))):
-                        ass.w4hstatus = 'M'
-                    if (ass.weight4height < D(str(-3.00))):
-                        ass.w4hstatus = 'S'
-                        
                 ass.save()
 
             else:

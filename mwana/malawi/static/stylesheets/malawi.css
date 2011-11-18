@@ -22,9 +22,10 @@
         margin: 0;
     }
 
+.extreme_cutoff {background:#9c8aa5;} /* purple */
 .over_cutoff {background:#0077bb;} /* blue */
 .normal_cutoff {background:#00cd00;} /* green */
-.low_cutoff {background:#fee01e;} /* yellow */
-.mild_cutoff {background:#dd7500;} /* orange */
+.mild_cutoff {background:#fee01e;} /* yellow */
+.moderate_cutoff {background:#dd7500;} /* orange */
 .severe_cutoff {background:#cd0000;} /* red */
-
+.cleanup {display:none;}

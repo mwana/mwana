@@ -81,10 +81,9 @@ def ass_dicts_for_display(location, startdate, enddate):
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
         ass_dict.update({'human_status'     : ass.get_status_display()})
-        ass_dict.update({'w4astatus'     : ass.get_w4astatus_display()})
-        ass_dict.update({'h4astatus'     : ass.get_h4astatus_display()})
-        ass_dict.update({'w4hstatus'     : ass.get_w4hstatus_display()})
-        ass_dict.update({'muac_status'     : ass.get_muac_status_display()})
+        ass_dict.update({'underweight'     : ass.get_underweight_display()})
+        ass_dict.update({'stunting'     : ass.get_stunting_display()})
+        ass_dict.update({'wasting'     : ass.get_wasting_display()})
         ass_dict.update(**instance_to_dict(ass))
         dicts_for_display.append(ass_dict)
     return dicts_for_display
@@ -113,10 +112,9 @@ def ass_dicts_for_export(location, startdate, enddate):
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
         ass_dict.update({'human_status'     : ass.get_status_display()})
-        ass_dict.update({'w4a_status'     : ass.get_w4astatus_display()})
-        ass_dict.update({'h4a_status'     : ass.get_h4astatus_display()})
-        ass_dict.update({'w4h_status'     : ass.get_w4hstatus_display()})
-        ass_dict.update({'mstatus'     : ass.get_muac_status_display()})
+        ass_dict.update({'underweight_status'     : ass.get_underweight_display()})
+        ass_dict.update({'stunting_status'     : ass.get_stunting_display()})
+        ass_dict.update({'wasting_status'     : ass.get_wasting_display()})
         ass_dict.update(**instance_to_dict(ass))
         dicts_for_export.append(ass_dict)
     return dicts_for_export
@@ -152,15 +150,14 @@ def export(headers, keys, objects, file_name):
 
 def csv_assessments(req):
     headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',    
-        'Sex', 'Date of Birth', 'Age in months', 'Height',
-        'Weight', 'Oedema', 'MUAC', 'MUAC Status','Height for age',
-        'Height for Age Status', 'Weight for age', 'Weight for Age Status',
-        'Weight for height', 'Weight for Height Status', 'Data Quality']
+        'Sex', 'Date of Birth', 'Age in months', 'Height', 'Weight',
+        'Oedema', 'MUAC', 'Weight for height Z', 'Wasting','Weight for age Z',
+        'Underweight', 'Height for age Z', 'Stunting', 'Data Quality']
     keys = ['date', 'location', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
-            'height', 'weight', 'oedema', 'muac', 'mstatus',
-            'height4age', 'h4a_status', 'weight4age', 'w4a_status',
-            'weight4height', 'w4h_status', 'human_status']
+            'height', 'weight', 'oedema', 'muac', 'weight4height',
+            'wasting_status', 'weight4age', 'underweight_status', 'height4age',
+            'stunting_status', 'human_status']
     
     location, startdate, enddate = get_report_criteria(req)
     assessments = ass_dicts_for_export(location, startdate, enddate)
