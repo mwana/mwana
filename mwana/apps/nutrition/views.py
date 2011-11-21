@@ -94,7 +94,7 @@ def ass_dicts_for_export(location, startdate, enddate):
     dicts_for_export = []
     asses = Assessment.objects.all().select_related()
     if location != "All Facilities":
-        asses = asses.filter(healthworker__location__parent__name=location)
+        asses = asses.filter(healthworker__location__parent__parent__name=location)
     asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     for ass in asses:
         ass_dict = {}
