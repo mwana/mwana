@@ -56,6 +56,8 @@ def instance_to_dict(instance):
         # will leave a blank space rather than listing 'None'
         if value is not None:
             dict.update({ field.name : value })
+        if value is None:
+            dict.update({ field.name : " " })
     return dict
 
 
