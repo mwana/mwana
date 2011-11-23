@@ -107,7 +107,7 @@ jQuery(function() {
 
     jQuery('table tbody tr td:nth-child(10)').each(
         function() {
-            var s = "TRUE",
+            var s = "True",
              score = jQuery(this).text();
 
             if (score == s) {

@@ -41,3 +41,21 @@ class AssessmentTable(tables.Table):
 
     def render_stunting(self, value):
         return STUNTING[value]
+
+    def render_height(self, value):
+        if value == "None":
+            return " "
+        else:
+            return value
+
+    def render_weight(self, value):
+        if value == "None":
+            return " "
+        else:
+            return value
+
+    def render_oedema(self, value):
+        if value == "None":
+            return " "
+        else:
+            return value
