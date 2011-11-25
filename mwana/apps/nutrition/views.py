@@ -190,7 +190,7 @@ def survey_locations():
     return uniq(districts)
 
 def get_report_criteria(request):
-    location = request.GET.get('location', 'All Facilities')
+    location = request.GET.get('location', 'All Districts')
     default_end_date = datetime.today().date()
     default_start_date = default_end_date - timedelta(days=30)
     startdate = request.GET.get('startdate', default_start_date)
