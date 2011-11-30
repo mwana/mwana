@@ -14,6 +14,13 @@ from django.shortcuts import redirect, get_object_or_404, render_to_response
 from .models import *
 from .table import AssessmentTable
 
+
+DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
+             "Ntcheu", "Ntchisi", "Salima", "Chitipa", "Karonga", "Likoma", 
+             "Mzimba", "Nkhata Bay", "Rumphi", "Balaka", "Blantyre", "Chikwawa",
+             "Chiradzulu", "Machinga", "Mangochi", "Mulanje", "Mwanza", "Nsanje",
+             "Thyolo", "Phalombe", "Zomba", "Neno"]
+
 def index(req):
     template_name="nutrition/index.html"
     surveyentries = SurveyEntry.objects.order_by('-survey_date')
@@ -30,11 +37,12 @@ def reports(request):
     location, startdate, enddate = get_report_criteria(request)
     assessments = ass_dicts_for_display(location, startdate, enddate)
     selected_location = str(location)
-    locations = survey_locations()
+    locations = DISTRICTS 
     #locations = sorted(list(set(locations)))
     # sort by date, newest at top
     assessments.sort(lambda x, y: cmp(y['date'], x['date']))
-    table = AssessmentTable(assessments)
+    limited_assessments = assessments[:501]
+    table = AssessmentTable(limited_assessments)
     table.paginate(page=request.GET.get('page', 1))
     context = {'table': table, 'selected_location': selected_location, 
     'startdate': startdate, 'enddate': enddate, 'locations': locations}
@@ -63,10 +71,9 @@ def instance_to_dict(instance):
 
 def ass_dicts_for_display(location, startdate, enddate):
     dicts_for_display = []
-    asses = Assessment.objects.all().select_related()
+    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate)).select_related()
     if location != "All Districts":
         asses = asses.filter(healthworker__location__parent__parent__name=location)
-    asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     for ass in asses:
         ass_dict = {}
         # add desired fields from related models (we want to display the
@@ -76,8 +83,6 @@ def ass_dicts_for_display(location, startdate, enddate):
         ass_dict.update({'interviewer_name'   : ass.healthworker.name})
         ass_dict.update({'location'          : ass.healthworker.clinic})
         ass_dict.update({'child_id'         : ass.patient.code})
-        #ass_dict.update({'household_id'     : ass.patient.household_id})
-        #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
         ass_dict.update({'sex'              : ass.patient.gender})
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
@@ -107,8 +112,6 @@ def ass_dicts_for_export(location, startdate, enddate):
         ass_dict.update({'interviewer_name'   : ass.healthworker.name})
         ass_dict.update({'location'          : ass.healthworker.clinic})
         ass_dict.update({'child_id'         : ass.patient.code})
-        #ass_dict.update({'household_id'     : ass.patient.household_id})
-        #ass_dict.update({'cluster_id'       : ass.patient.cluster_id})
         ass_dict.update({'sex'              : ass.patient.gender})
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
         ass_dict.update({'age_in_months'    : ass.patient.age_in_months})
