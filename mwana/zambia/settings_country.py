@@ -21,7 +21,21 @@ INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.filteredlogs")
+INSTALLED_APPS.append("mwana.apps.monitor")
 INSTALLED_APPS.append("mwana.apps.websmssender")
+
+
+ADMINS = (
+    ('Trevor Sinkala', 'sinkalation@gmail.com'),
+)
+
+MANAGERS = ADMINS
+
+EMAIL_SUBJECT_PREFIX = '[Mwana] '
+EMAIL_HOST = 'localhost'
+DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
+
+
 
 TIME_ZONE = 'Africa/Lusaka'
 
@@ -54,3 +68,7 @@ RAPIDSMS_TABS = [
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
+
+from mwana.logconfig import init_email_handler
+init_email_handler(EMAIL_HOST, DEFAULT_FROM_EMAIL, ADMINS,
+                   EMAIL_SUBJECT_PREFIX, LOG_FORMAT)
