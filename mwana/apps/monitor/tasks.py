@@ -36,7 +36,7 @@ def get_results_data():
                                        result_sent_date__day=day()
                                        ).count()
     new = Result.objects.filter(notification_status='new').count()
-    notified = Result.objects.filter(notification_status='new').count()
+    notified = Result.objects.filter(notification_status='notified').count()
 
     return "New: %s\nNotified: %s\nSent: %s" % (new, notified, sent_today,)
 
