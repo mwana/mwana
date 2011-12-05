@@ -38,9 +38,6 @@ def reports(request):
     assessments = ass_dicts_for_display(location, startdate, enddate)
     selected_location = str(location)
     locations = DISTRICTS 
-    #locations = sorted(list(set(locations)))
-    # sort by date, newest at top
-    assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     limited_assessments = assessments[:501]
     table = AssessmentTable(limited_assessments)
     table.paginate(page=request.GET.get('page', 1))
@@ -71,7 +68,7 @@ def instance_to_dict(instance):
 
 def ass_dicts_for_display(location, startdate, enddate):
     dicts_for_display = []
-    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate)).select_related()
+    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate)).order_by('-date').select_related()
     if location != "All Districts":
         asses = asses.filter(healthworker__location__parent__parent__name=location)
     for ass in asses:
@@ -98,7 +95,7 @@ def ass_dicts_for_display(location, startdate, enddate):
 # TODO DRY
 def ass_dicts_for_export(location, startdate, enddate):
     dicts_for_export = []
-    asses = Assessment.objects.all().select_related()
+    asses = Assessment.objects.all().order_by('-date').select_related()
     if location != "All Districts":
         asses = asses.filter(healthworker__location__parent__parent__name=location)
     asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate))
