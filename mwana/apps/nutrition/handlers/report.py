@@ -408,13 +408,13 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'S'
  
                 if ass.muac is not None:
-                    if (12.51 <= ass.muac <= 13.50):
+                    if (D(str(12.51)) <= ass.muac <= D(str(13.50))):
                         ass.wasting = 'M'
-                    elif (11.60 <= ass.muac <= 12.50 ):
+                    elif (D(str(11.60)) <= ass.muac <= D(str(12.50))):
                         ass.wasting = 'U'
-                    elif (ass.muac <= 11.59):
+                    elif (ass.muac <= D(str(11.59))):
                         ass.wasting = 'S'
-                    elif (ass.muac >= 13.51):
+                    elif (ass.muac >= D(str(13.51))):
                         ass.wasting = 'G'
 
                 if (ass.weight4height is not None and ass.muac is not None):
