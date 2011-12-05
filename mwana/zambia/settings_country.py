@@ -69,6 +69,4 @@ RAPIDSMS_TABS = [
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
 
-from mwana.logconfig import init_email_handler
-init_email_handler(EMAIL_HOST, DEFAULT_FROM_EMAIL, ADMINS,
-                   EMAIL_SUBJECT_PREFIX, LOG_FORMAT)
+
