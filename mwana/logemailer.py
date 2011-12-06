@@ -2,6 +2,8 @@
 import logging
 import logging.handlers
 
+IGNORE_LIST = ["Problem in scheduler for: mwana.apps.labresults.tasks.process_outstanding_payloads: Months:(All), Days of Month:(All), Days of Week:(All), Hours:(*), Minutes:(0). Transaction managed block ended with pending COMMIT/ROLLBACK"]
+
 class TlsSMTPHandler(logging.handlers.SMTPHandler):
     """
     Code borrowed from:
@@ -30,6 +32,12 @@ class TlsSMTPHandler(logging.handlers.SMTPHandler):
                 port = smtplib.SMTP_PORT
             smtp = smtplib.SMTP(self.mailhost, port)
             msg = self.format(record)
+
+            if msg in IGNORE_LIST:
+                logger = logging.getLogger(__name__)
+                logger.info('ignoring emailing exception')
+                return
+            
             msg = "From: %s\r\nTo: %s\r\nSubject: %s\r\nDate: %s\r\n\r\n%s" % (
                             self.fromaddr,
                             string.join(self.toaddrs, ","),
