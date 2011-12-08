@@ -22,10 +22,32 @@
         margin: 0;
     }
 
-.extreme_cutoff {background:#9c8aa5;} /* purple */
-.over_cutoff {background:#0077bb;} /* blue */
-.normal_cutoff {background:#00cd00;} /* green */
-.mild_cutoff {background:#fee01e;} /* yellow */
-.moderate_cutoff {background:#dd7500;} /* orange */
-.severe_cutoff {background:#cd0000;} /* red */
-.cleanup {display:none;}
+/* nutrition cutoffs */
+.unusual, .very-tall, .obese {
+    background:#9c8aa5;
+}
+
+.overweight {
+    background:#0077bb;
+}
+
+.normal, .low-normal {
+    background:#00cd00;
+}
+
+.mild {
+    background:#fee01e;
+}
+
+.moderate {
+    background:#dd7500;
+}
+
+.severe, .oedema  {
+    background:#cd0000;
+}
+
+.pagination {
+    padding:16px 0 16px 8px;
+    font-size:13px;
+}

@@ -45,14 +45,14 @@ LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
 
 MALAWI_ROOT = os.path.abspath(os.path.dirname(__file__))
 TEMPLATE_DIRS = (os.path.join(MALAWI_ROOT, "templates"),)
-
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ['pagination.middleware.PaginationMiddleware',]
 ROOT_URLCONF = 'mwana.malawi.urls'
 
 # Add XForms app + navigation and webreports:
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
-INSTALLED_APPS.insert(-1, 'django_tables2')
+INSTALLED_APPS.insert(-1, 'pagination')
 #INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 #RAPIDSMS_TABS.append(('xforms', 'XForms'))

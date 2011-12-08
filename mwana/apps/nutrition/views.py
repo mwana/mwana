@@ -10,13 +10,14 @@ from django.db.models import Q
 
 from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
+from django.views.generic import list_detail
 
 from .models import *
 from .table import AssessmentTable
 
 
 DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
-             "Ntcheu", "Ntchisi", "Salima", "Chitipa", "Karonga", "Likoma", 
+             "Ntcheu", "Ntchisi", "Salima", "Chitipa", "Karonga", "Likoma",
              "Mzimba", "Nkhata Bay", "Rumphi", "Balaka", "Blantyre", "Chikwawa",
              "Chiradzulu", "Machinga", "Mangochi", "Mulanje", "Mwanza", "Nsanje",
              "Thyolo", "Phalombe", "Zomba", "Neno"]
@@ -31,22 +32,36 @@ def index(req):
     return render_to_response(template_name, context,
                               context_instance=RequestContext(req))
 
-    
+
 def reports(request):
     template_name="nutrition/reports.html"
     location, startdate, enddate = get_report_criteria(request)
     assessments = ass_dicts_for_display(location, startdate, enddate)
     selected_location = str(location)
-    locations = DISTRICTS 
+    locations = DISTRICTS
     limited_assessments = assessments[:501]
     table = AssessmentTable(limited_assessments)
     table.paginate(page=request.GET.get('page', 1))
-    context = {'table': table, 'selected_location': selected_location, 
-    'startdate': startdate, 'enddate': enddate, 'locations': locations}
+    context = {'table': table, 'selected_location': selected_location,
+               'startdate': startdate, 'enddate': enddate, 'locations': locations}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
-    
+def assessments(request):
+    location, startdate, enddate = get_report_criteria(request)
+    selected_location = str(location)
+    locations = DISTRICTS
+    context = {'selected_location': selected_location,
+               'startdate': startdate, 'enddate': enddate, 'locations': locations}
+    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate)).order_by('-date')
+    if location != "All Districts":
+        asses = asses.filter(healthworker__location__parent__parent__name=location)
+    return list_detail.object_list(
+        request,
+        queryset = asses,
+        template_name = "nutrition/assessment_list.html",
+        extra_context = context )
+
 def instance_to_dict(instance):
     dict = {}
     for field in instance._meta.fields:
@@ -150,7 +165,7 @@ def export(headers, keys, objects, file_name):
 
 
 def csv_assessments(req):
-    headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',    
+    headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',
         'Sex', 'Date of Birth', 'Age in months', 'Height', 'Weight',
         'Oedema', 'MUAC', 'Weight for height Z', 'Wasting','Weight for age Z',
         'Underweight', 'Height for age Z', 'Stunting', 'Data Quality']
@@ -159,7 +174,7 @@ def csv_assessments(req):
             'height', 'weight', 'oedema', 'muac', 'weight4height',
             'wasting_status', 'weight4age', 'underweight_status', 'height4age',
             'stunting_status', 'human_status']
-    
+
     location, startdate, enddate = get_report_criteria(req)
     assessments = ass_dicts_for_export(location, startdate, enddate)
     # sort by date, descending
@@ -182,11 +197,11 @@ def survey_locations():
     def uniq(seq):
         seen = set()
         seen_add = seen.add
-        return [ x for x in seq if x not in seen and not seen_add(x)]        
+        return [ x for x in seq if x not in seen and not seen_add(x)]
 
     for assesment in Assessment.objects.all().select_related():
         districts.append(str(assesment.healthworker.clinic.parent))
-        
+
     return uniq(districts)
 
 def get_report_criteria(request):
@@ -197,4 +212,3 @@ def get_report_criteria(request):
     enddate = request.GET.get('enddate', default_end_date)
 
     return location, startdate, enddate
-

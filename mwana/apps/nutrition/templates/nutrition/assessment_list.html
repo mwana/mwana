@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% load paginating_tags %}
+{% block title %}Nutrition Assessments{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet"
+      href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+
+{% block content %}
+
+<div class="module">
+
+<h2>Analyzed Growth Monitor Surveys by period and location</h2>
+<br />
+<form name="getValues" method="GET" action="">
+    <p>Select Period:
+    <input type="text" name="startdate" value="{{ startdate }}" size="12" />
+    To
+    <input type="text" name="enddate" value="{{ enddate }}" size="12" />
+    Location:
+    <select name="location" value="{{ location }}">
+        <option value="All Districts"
+                {% ifequal selected_location "All Districts" %}
+                selected="selected"
+                {% endifequal %} >All Districts
+        </option>
+        {% for facility in locations %}
+        <option value="{{ facility }}"
+                {% ifequal facility selected_location %}
+                selected="selected"
+                {% endifequal %} >
+                {{ facility }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="submit" name="SubmitValues" value="Ok" />
+    </p>
+</form>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date Submitted</th><th>Facility</th><th>Interviewer Name</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th>
+            </tr>
+        </thead>
+        <tbody>
+	    {% autopaginate object_list %}
+            {% for ass in object_list %}
+            <tr>
+                <td>{{ ass.date|date:"Y-m-d" }}</td>
+                <td>{{ ass.healthworker.clinic }}</td>
+                <td>{{ ass.healthworker.name }}</td>
+                <td>{{ ass.patient.code }}</td>
+                <td>{{ ass.patient.gender }}</td>
+                <td>{{ ass.patient.date_of_birth }}</td>
+                <td>{{ ass.patient.age_in_months }}</td>
+                <td>{% if ass.height %}{{ ass.height }}{% endif %}</td>
+                <td>{% if ass.weight %}{{ ass.weight }}{% endif %}</td>
+                <td class="{% if ass.oedema %}oedema{% endif %}">{% if ass.oedema %}{{ ass.oedema }}{% endif %}</td>
+                <td class="{{ ass.get_wasting_display|slugify }}">{% if ass.muac %}{{ ass.muac }}{% endif %}</td>
+                <td class="{{ ass.get_wasting_display|slugify }}">{% if ass.weight4height %}{{ ass.weight4height }}{% endif %}</td>
+                <td class="{{ ass.get_wasting_display|slugify }}">{{ ass.get_wasting_display }}</td>
+                <td class="{{ ass.get_underweight_display|slugify }}">{% if ass.weight4age %}{{ ass.weight4age }}{% endif %}</td>
+                <td class="{{ ass.get_underweight_display|slugify }}">{{ ass.get_underweight_display }}</td>
+                <td class="{{ ass.get_stunting_display|slugify }}">{% if ass.height4age %}{{ ass.height4age }}{% endif %}</td>
+                <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display }}</td>
+                <td>{{ ass.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="18">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <div id="paginator">{% paginate %}</div>
+</div>
+<div class="toolbar">
+    <a href="/growth/csv/assessments/?location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}" class="export">Export Analyzed Surveys</a>
+</div>
+
+</div>
+
+
+<div class="module">
+<h2>Raw Survey Entries</h2>
+
+<div class="toolbar">
+   	<a href="/growth/csv/surveyentries/" class="export">Export Raw Survey Entries</a>
+
+</div>
+
+</div>
+{% endblock %}

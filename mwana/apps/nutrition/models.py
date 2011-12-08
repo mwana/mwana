@@ -23,7 +23,7 @@ class Assessment(models.Model):
     )
 
     STUNTING_CHOICES = (
-        ('N', ' '),
+        ('N', ''),
         ('V', 'Very Tall'),
         ('T', 'Normal'),
         ('G', 'Normal'),
@@ -34,7 +34,7 @@ class Assessment(models.Model):
     )
 
     UNDERWEIGHT_CHOICES = (
-        ('N', ' '),
+        ('N', ''),
         ('V', 'Obese'),
         ('T', 'Overweight'),
         ('G', 'Normal'),
@@ -45,7 +45,7 @@ class Assessment(models.Model):
     )
 
     WASTING_CHOICES = (
-        ('N', ' '),
+        ('N', ''),
         ('V', 'Unusual'),
         ('T', 'Normal'),
         ('G', 'Normal'),
