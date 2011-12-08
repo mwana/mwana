@@ -33,7 +33,7 @@ class ToldHandler(KeywordHandler):
     
     keyword = "told|toll|teld|tod|telld|t0ld|TOLD"
     
-    help_txt = "Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>"
+    help_txt = "To tell that someone has been to the clinic send: TOLD <PATIENT_NAME>, e.g TOLD Bana Malama"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
     response_told_thanks_txt = "Thank you %s! After you confirm %s has visited the clinic, please send: CONFIRM %s."
     
@@ -54,6 +54,10 @@ class ToldHandler(KeywordHandler):
             return
         
     def sanitize_and_validate(self, text):
+        if len(text.split()) > 4:
+            self.help()
+            return False
+
         #check if contact is valid
         if not is_valid_connection(self.msg.connection, const.get_cba_type()): #Only clinic workers should be able to trace
             if is_valid_connection(self.msg.connection, const.get_clinic_worker_type()):

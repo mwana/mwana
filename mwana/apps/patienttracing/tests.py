@@ -104,11 +104,11 @@ class TestApp(TestScript):
             lost   > trace
             lost   < Sorry, the system could not understand your message. To trace a patient please send: TRACE <PATIENT_NAME>
             clinic_worker     > trace mary
-            cba_contact       < Hi Cba One, please find mary and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD mary
-            clinic_worker     < Thank you John Banda. RemindMi Agents have been asked to find mary.
+            cba_contact       < Hi Cba One, please find Mary and tell them to come to the clinic within 3 days. After telling them, reply with: TOLD Mary
+            clinic_worker     < Thank you John Banda. RemindMi Agents have been asked to find Mary.
             """
         self.runScript(script)
-        self.assertEqual(PatientTrace.objects.get(name='mary').status.lower(),"new")
+        self.assertEqual(PatientTrace.objects.get(name__iexact='mary').status.lower(),"new")
             
         script = """
             cba_contact       > TOLD MARY
@@ -134,6 +134,22 @@ class TestApp(TestScript):
 
     apps = (handler_app, App, )
     
+    def testTold(self):
+        script ="""
+            cba_contact > told trevor sinkala to go to the clinic luyaba kalomo
+            cba_contact < To tell that someone has been to the clinic send: TOLD <PATIENT_NAME>, e.g TOLD Bana Malama
+        """
+        self.runScript(script)
+        #TODO finish up rest of test
+        
+    def testConfirm(self):
+        script ="""
+            cba_contact > confirm trevor sinkala has been to the clinic luyaba kalomo
+            cba_contact < To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri
+        """
+        self.runScript(script)
+        #TODO finish up rest of test
+
     def testSendConfirmReminders(self):
         #set up
         trace1 = self.create_new_patient_trace("bob", 
