@@ -64,7 +64,7 @@
                 <td>{{ ass.patient.age_in_months }}</td>
                 <td>{% if ass.height %}{{ ass.height }}{% endif %}</td>
                 <td>{% if ass.weight %}{{ ass.weight }}{% endif %}</td>
-                <td class="{% if ass.oedema %}oedema{% endif %}">{% if ass.oedema %}{{ ass.oedema|yesno:"Yes,No," }}{% endif %}</td>
+                <td class="{% if ass.oedema %}oedema{% endif %}">{{ ass.oedema|yesno:"Yes,No, " }}</td>
                 <td class="{% if ass.muac %}{{ ass.get_wasting_display|slugify }}{% endif %}">{% if ass.muac %}{{ ass.muac }}{% endif %}</td>
                 <td class="{% if ass.weight4height %}{{ ass.get_wasting_display|slugify }}{% endif %}">{% if ass.weight4height %}{{ ass.weight4height }}{% endif %}</td>
                 <td class="{{ ass.get_wasting_display|slugify }}">{{ ass.get_wasting_display }}</td>

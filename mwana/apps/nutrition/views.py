@@ -22,6 +22,8 @@ DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
              "Chiradzulu", "Machinga", "Mangochi", "Mulanje", "Mwanza", "Nsanje",
              "Thyolo", "Phalombe", "Zomba", "Neno"]
 
+OEDEMA_VALUES = {1: "Yes", 0: "No",}
+
 def index(req):
     template_name="nutrition/index.html"
     surveyentries = SurveyEntry.objects.order_by('-survey_date')
@@ -77,7 +79,7 @@ def instance_to_dict(instance):
         if value is not None:
             dict.update({ field.name : value })
         if value is None:
-            dict.update({ field.name : " " })
+            dict.update({ field.name : "" })
     return dict
 
 
@@ -106,6 +108,11 @@ def ass_dicts_for_display(location, startdate, enddate):
         dicts_for_display.append(ass_dict)
     return dicts_for_display
 
+def get_human_oedema(value):
+    if value == 1:
+        return "Yes"
+    if value == 0:
+        return "No"
 
 # TODO DRY
 def ass_dicts_for_export(location, startdate, enddate):
@@ -132,6 +139,7 @@ def ass_dicts_for_export(location, startdate, enddate):
         ass_dict.update({'stunting_status'     : ass.get_stunting_display()})
         ass_dict.update({'wasting_status'     : ass.get_wasting_display()})
         ass_dict.update(**instance_to_dict(ass))
+        ass_dict.update({'oedema'           : get_human_oedema(ass.oedema)})
         dicts_for_export.append(ass_dict)
     return dicts_for_export
 
@@ -178,7 +186,7 @@ def csv_assessments(req):
     location, startdate, enddate = get_report_criteria(req)
     assessments = ass_dicts_for_export(location, startdate, enddate)
     # sort by date, descending
-    assessments.sort(lambda x, y: cmp(y['date'], x['date']))
+    #assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     return export(headers, keys, assessments, 'assessments.csv')
 
 
