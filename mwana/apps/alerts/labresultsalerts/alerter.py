@@ -454,12 +454,7 @@ class Alerter:
 
     def get_inactive_workers_alerts(self):
 
-        facilities = (self.get_facilities_for_reporting())
-
-        defaulters = UserVerification.objects.exclude(responded="True").\
-        filter(facility__in=facilities)
-        defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
-
+        facilities = (self.get_facilities_for_reporting())      
 
         inactive_alerts = []
         
@@ -467,6 +462,8 @@ class Alerter:
             days_late = 75
             defaulters = UserVerification.objects.exclude(responded="True").\
             filter(facility=facility, contact__is_active=True).distinct()
+
+            defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
 
             if not defaulters:
                 continue
