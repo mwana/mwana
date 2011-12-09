@@ -19,6 +19,7 @@ from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
+from mwana.const import get_clinic_worker_type
 
 class Alerter:
     def __init__(self, current_user=None, group=None, province=None, district=None):
@@ -435,12 +436,29 @@ class Alerter:
             return None
 
 
+    def get_complying_contacts(self):
+        """
+        quick and dirty fix.
+        """
+        #TODO: to better implementation of fix
+        days_back = 75
+        today = datetime.today()
+        date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
+
+
+        supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
+        location__supportedlocation__supported=True).distinct()
+
+        return supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
+
+
     def get_inactive_workers_alerts(self):
 
         facilities = (self.get_facilities_for_reporting())
 
         defaulters = UserVerification.objects.exclude(responded="True").\
         filter(facility__in=facilities)
+        defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
 
 
         inactive_alerts = []
