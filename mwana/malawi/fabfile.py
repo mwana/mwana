@@ -204,7 +204,7 @@ def restart_route():
     deployer ALL=NOPASSWD: ALL
     """
     # using run instead of sudo because sudo prompts for a password
-    run('sudo supervisorctl restart mwana-router')
+    run('sudo /etc/init.d/mwana-route restart')
     # print out the top of the log file in case there are errors
     import time
     time.sleep(2)
