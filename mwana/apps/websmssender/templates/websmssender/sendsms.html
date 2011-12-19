@@ -2,9 +2,31 @@
 {% extends "layout.html" %}
 {% load forms_tags %}
 
-{% block title %}Message Logs - {{ block.super }}{% endblock %}
+{% block title %}Send SMS Messages - {{ block.super }}{% endblock %}
 
 {% block javascripts %}
+<script type="text/javascript">
+    function inform(){
+        return confirm('Are you sure you want to');
+    }
+
+    function checkform(form){
+        if(form.message.value.trim() == ""){            
+            alert("Please enter a message to send");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length > 160){
+            alert("The message should not exceed 160 characters");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length < 15){
+            return confirm('Your massage is too short. Are you sure?')
+        }
+        return confirm('Are you sure?');
+    }
+</script>
 {{ block.super }}
 {% endblock %}
 
@@ -18,23 +40,20 @@
 
 
     <div class="left">
-        <form name="getValues" action="" method="GET">
+        <form name="getValues" action="" method="GET" onsubmit="return checkform(this);">
         <div class="module">
-
-
-            <!--h1>Filtered Message Logs:</h1-->
-
 
             <h2>Send SMS Messages</h2>
             <br>
 
-                <p>Select worker type&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <p>Select worker type:&nbsp;
                     {% autoescape off %}
                     {{worker_types}}
                     {% endautoescape %}
                            {% if region_selectable %}
-                <p>Select Region: &nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+                <p>
+                    Province:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% autoescape off %}
                     {{rpt_provinces}}
                     {% endautoescape %}&nbsp;
                     or District:{% autoescape off %}
@@ -44,11 +63,11 @@
                     {{rpt_facilities}}
                     {% endautoescape %}&nbsp;
 
-                <p>Search: &nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="search_key" size="17" value="{{ search_key }}">
-                    &nbsp;
+                <p>Phone # Like: &nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    
+                    <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
+                    &nbsp;E.g. +26097, +26096, +260966700345
                     {% if is_report_admin %}
                 <p>Select Implementer:
                     {% autoescape off %}
@@ -57,65 +76,17 @@
                     &nbsp;
                     {%endif%}
                     {%endif%}
+                
+                <p><textarea id="message" name="message" rows="4" cols="36">{{message}}</textarea> {{ meta_infor}} </p>
 
-                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+                    <input type="submit" value="Ok" name="SubmitValues"/>
 
-
-            <hr>
-           <div>
-
-
-            <h3>
-                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
-                </h3>
-
-
-       <table width="100%">
-                {% for record in messages %}
-                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
-
-                    {% for column in record %}
-                    {% if column %}
-                    {% if not forloop.parentloop.counter0 %}
-                    <td ><u>{{ column }}</u></td>
-                    {% else %}
-                    <td >{{ column }}</td>
-
-                    {% endif %}
-                    {% else %}
-                    {% if forloop.parentloop.last %}
-                    <td><b> 0 </b></td>
-                    {% else %}
-                    <td> 0 </td>
-                    {% endif %}
-                    {% endif %}
-                    {% endfor %}
-                </tr>
-                {% endfor %}
-            </table>
-
-
-        </div>
+           
         <div class="clear-hack"></div>
     </div>
 
         <div class="pagination">
-    <span class="step-links">
-        {% if messages_has_previous %}
-            <input type="submit" value="Previous" name="navigate" />
-        {% endif %}
-
-        <span class="current">
-            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
-        </span>
-
-        {% if messages_has_next %}
-        <input type="submit" value="Next" name="navigate" size="8" />
-        {% endif %}
-        <input type="hidden" name="page" value={{ messages_number }}>
-    </span>
-
+    
 </div>
         </form>
 
