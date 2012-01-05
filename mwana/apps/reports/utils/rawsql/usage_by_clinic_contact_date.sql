@@ -1,4 +1,4 @@
-SELECT distinct clinic, contactsplus_contacttype."slug",  phone, rapidsms_contact."name", messagelog_message.text, messagelog_message.date from reports_messagegroup
+SELECT distinct parent."name",clinic, contactsplus_contacttype."slug",  phone, rapidsms_contact."name", messagelog_message.text, messagelog_message.date from reports_messagegroup
 join messagelog_message on messagelog_message.id=reports_messagegroup.id
 --select messagelog_message.text,rapidsms_contact. * from messagelog_message
 join rapidsms_contact on rapidsms_contact.id=messagelog_message.contact_id
@@ -9,8 +9,7 @@ join contactsplus_contacttype on contactsplus_contacttype.id = rapidsms_contact_
 
 where messagelog_message.direction = 'I'
 and messagelog_message.date > '2010-06-13'
-and parent.slug like '8080%'
 AND backEND <> 'message tester'
 and is_active = true
 
-order by clinic, phone, text, contactsplus_contacttype.slug
+order by parent.name, clinic, phone, text, contactsplus_contacttype.slug
