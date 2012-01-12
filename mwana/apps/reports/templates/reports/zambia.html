@@ -18,6 +18,10 @@
 
 {% block content %}
 {# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{%if userHasNoAssingedFacilities%}
+You currently don't belong to any group for viewing reports. Contact the system administrator at <a href="mailto:{{adminEmail}}">{{adminEmail}}</a>  for help.
+{%else%}
+
 
 <div>
     <div class="left">
@@ -684,4 +688,5 @@
     </div>
 
 </div>
+{%endif%}
 {% endblock %}

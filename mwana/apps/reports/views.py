@@ -89,6 +89,9 @@ def get_facilities_dropdown_html(id, facilities, selected_facility):
     #TODO: move this implemention to templates
     code ='<select name="%s" size="1">\n'%id
     code +='<option value="All">All</option>\n'
+    if not facilities:
+        return '<select name="%s" size="1"></select>\n'%id
+
     for fac in facilities:
         if fac.slug == selected_facility:
             code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
@@ -125,6 +128,13 @@ def try_format(date):
         return date.strftime("%Y-%m-%d")
     except:
         return date
+
+def get_admin_email_address():
+    from djappsettings import settings
+    try:
+        return settings.ADMINS[0][1]
+    except:
+        return "Admin's email address"
 
 @require_GET
 def zambia_reports(request):
@@ -203,6 +213,8 @@ def zambia_reports(request):
          'fstartdate': try_format(startdate),
          'fenddate': try_format(enddate),
          'today': today,
+         'adminEmail': get_admin_email_address(),
+         'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
          'sent_results_rpt': res,
          'turnaround_time_rpt': turnaround_time,
          'min_turnaround_time': min_turnaround_time,
