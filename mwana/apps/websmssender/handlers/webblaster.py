@@ -6,14 +6,16 @@ from mwana.apps.websmssender.models import StagedMessage
 
 class Handler(KeywordHandler):
 
-    keyword = "blast2"
+    keyword = "webblast"
 
     def help(self):
         self.respond("Error")
 
     def handle(self, text):
-        for sm in StagedMessage.objects.all():
+        if self.msg.connection.identity != "99999999":
+            return
+        for sm in StagedMessage.objects.filter(user=text.strip()):
             OutgoingMessage(sm.connection,sm.text).send()
-            sm.delete()
-            sm.save()
+        s = StagedMessage.objects.filter(user=text.strip())
+        s.delete()
         return True

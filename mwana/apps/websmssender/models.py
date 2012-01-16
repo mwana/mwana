@@ -21,6 +21,7 @@ class StagedMessage(models.Model):
     date = models.DateTimeField(default=datetime.datetime.utcnow)
     connection = models.ForeignKey(Connection)
     text = models.CharField(max_length=160)
+    user = models.CharField(max_length=160)
 
     def __unicode__(self):
         return "Message created on '%s'"  % (self.date)

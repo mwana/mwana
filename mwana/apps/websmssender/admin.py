@@ -11,7 +11,7 @@ class WebSMSLogAdmin(admin.ModelAdmin):
 admin.site.register(WebSMSLog, WebSMSLogAdmin)
 
 class StagedMessageAdmin(admin.ModelAdmin):
-    list_display = ("date", "text", "connection")
+    list_display = ("date", "user", "text", "connection")
     date_hierarchy = 'date'
     search_fields = ('text',)
 admin.site.register(StagedMessage, StagedMessageAdmin)

@@ -1,4 +1,3 @@
-{# TODO: Find a better way of displaying the reports to avoid repeating code #}
 {% extends "layout.html" %}
 {% load forms_tags %}
 
@@ -36,7 +35,7 @@
 {% endblock %}
 
 {% block content %}
-{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+
 
 
     <div class="left">
@@ -45,14 +44,15 @@
 
             <h2>Send SMS Messages</h2>
             <br>
+            
 
-                <p>Select worker type:&nbsp;
+                <p >Select worker type:&nbsp;
                     {% autoescape off %}
                     {{worker_types}}
                     {% endautoescape %}
-                           {% if region_selectable %}
+                           
                 <p>
-                    Province:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Province:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% autoescape off %}
                     {{rpt_provinces}}
                     {% endautoescape %}&nbsp;
@@ -64,7 +64,7 @@
                     {% endautoescape %}&nbsp;
 
                 <p>Phone # Like: &nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     
                     <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
                     &nbsp;E.g. +26097, +26096, +260966700345
@@ -75,11 +75,19 @@
                     {% endautoescape %}
                     &nbsp;
                     {%endif%}
-                    {%endif%}
-                
-                <p><textarea id="message" name="message" rows="4" cols="36">{{message}}</textarea> {{ meta_infor}} </p>
+                {%if confirm_message or meta_infor%}
+                <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
+                    {{confirm_message}}
+                    {{ meta_infor}} 
+                    <input type="hidden" name="confirmed" value="{{ confirmed}}" />
+                </div>
+                {% endif %}
 
-                    <input type="submit" value="Ok" name="SubmitValues"/>
+                <p><textarea id="message" name="message" rows="4" cols="36">{{message}}</textarea> </p>
+
+                    <input type="submit" value="     Ok     " name="SubmitValues"/>
+                    <input type="submit" value="Cancel" name="cancel"/>
+                   
 
            
         <div class="clear-hack"></div>

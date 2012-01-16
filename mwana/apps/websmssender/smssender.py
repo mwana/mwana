@@ -21,11 +21,24 @@ class SMSSender:
         self.message = message
                
 
+    def count_of_recipients(self):
+        facs = user_facilities(current_user=self.user, group=self.reporting_group,
+                               province=self.reporting_province,
+                               district=self.reporting_district,
+                               facility=self.reporting_facility).distinct()
+        contacts = Contact.active.filter(types__in=self.worker_types,
+                                         connection__identity__icontains=self.phone_pattern)
+        list = []
+        for contact in contacts:
+            if get_clinic_or_default(contact) in facs:
+                list.append(contact)
+        return len(list), len(facs)
+
     def send_sms(self):
         facs = user_facilities(current_user=self.user, group=self.reporting_group,
                                province=self.reporting_province,
                                district=self.reporting_district,
-                               facility=self.reporting_facility)
+                               facility=self.reporting_facility).distinct()
         contacts = Contact.active.filter(types__in=self.worker_types,
                                          connection__identity__icontains=self.phone_pattern)
         list = []
@@ -52,10 +65,10 @@ class SMSSender:
         log.save()
 
         for con in Connection.objects.filter(contact__in=list):
-            StagedMessage.objects.create(connection=con, text=self.message.strip())
+            StagedMessage.objects.create(connection=con, text=self.message.strip(), user=self.user.username)
 
         from rapidsms.contrib.httptester.utils import send_test_message
-        send_test_message(identity="99999999", text="blast2 hello")
+        send_test_message(identity="99999999", text="webblast %s" % self.user.username)
         return len(list)
 
 
