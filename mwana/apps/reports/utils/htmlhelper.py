@@ -42,7 +42,7 @@ def get_contacttypes(slug):
         return ContactType.objects.filter(slug=slug).exclude(name__in=["Patient", "DBS Printer"])
 
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
-    code ='<select name="%s" size="1">\n'%id
+    code ='<select name="%s"" onchange="fire%sChange()" id="%s" size="1">\n' % (id, id, id)
     if selected_facility and get_only_select:
         pass
     else:
