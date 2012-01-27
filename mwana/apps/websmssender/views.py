@@ -50,9 +50,9 @@ def send_sms(request):
         confirmed = "no"
         message = ""
     elif not (message and message.strip()):
-        meta_infor = "Please supply a meesage to send"
+        meta_infor = "Please supply a message to send"
     elif len(message) > 160:
-        meta_infor = "Please enter a meesage not exceeding 160 characters long"
+        meta_infor = "Please enter a message not exceeding 160 characters long"
     else:
         contact_types = get_contacttypes(worker_types)
         sender = SMSSender(current_user=request.user, group=rpt_group, province=rpt_provinces,
