@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django.views.decorators.http import require_GET
 from mwana.apps.alerts.views import get_int
 from mwana.apps.filteredlogs.messagefilter import MessageFilter
-from mwana.apps.reports.views import get_facilities_dropdown_html
+from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
 from mwana.apps.reports.views import read_request
 from mwana.apps.reports.views import text_date
