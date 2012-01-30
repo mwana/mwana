@@ -22,12 +22,14 @@ from mwana.const import get_hub_worker_type
 from mwana.const import get_clinic_worker_type
 
 class Alerter:
-    def __init__(self, current_user=None, group=None, province=None, district=None):
+    def __init__(self, current_user=None, group=None, province=None,
+                    district=None, facility=None):
         self.today = date.today()
         self.user = current_user
         self.reporting_group = group
         self.reporting_province = province
         self.reporting_district = district
+        self.reporting_facility = facility
 
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
     district_transport_days = DEFAULT_DISTICT_TRANSPORT_DAYS
@@ -597,7 +599,9 @@ class Alerter:
         if self.reporting_group:
             facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
-        if self.reporting_district:
+        if self.reporting_facility:
+            facs = facs.filter(slug=self.reporting_facility)
+        elif self.reporting_district:
             facs = facs.filter(slug__startswith=self.reporting_district[:4])
         elif self.reporting_province:
             facs = facs.filter(slug__startswith=self.reporting_province[:2])
@@ -619,6 +623,10 @@ class Alerter:
             parents.append(location.parent)
         return list(set(parents))
     
+    def get_rpt_facilities(self, user):
+        self.user = user
+        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+
     def get_rpt_districts(self, user):
         self.user = user
         return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))

@@ -5,6 +5,7 @@ from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 
 
 
@@ -85,21 +86,21 @@ def malawi_reports(request, location=None):
      }, context_instance=RequestContext(request))
 
 
-def get_facilities_dropdown_html(id, facilities, selected_facility):
-    #TODO: move this implemention to templates
-    code ='<select name="%s" size="1">\n'%id
-    code +='<option value="All">All</option>\n'
-    if not facilities:
-        return '<select name="%s" size="1"></select>\n'%id
-
-    for fac in facilities:
-        if fac.slug == selected_facility:
-            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
-        else:
-            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
-
-    code = code +'</select>'
-    return code
+#def get_facilities_dropdown_html(id, facilities, selected_facility):
+#    #TODO: move this implemention to templates
+#    code ='<select name="%s" size="1">\n'%id
+#    code +='<option value="All">All</option>\n'
+#    if not facilities:
+#        return '<select name="%s" size="1"></select>\n'%id
+#
+#    for fac in facilities:
+#        if fac.slug == selected_facility:
+#            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+#        else:
+#            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
+#
+#    code = code +'</select>'
+#    return code
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
@@ -167,8 +168,9 @@ def zambia_reports(request):
     rpt_group = read_request(request, "rpt_group")
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
       
-    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts)
+    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
     res = r.dbs_sent_results_report(startdate, enddate)
 
     min_processing_time, max_processing_time, num_of_dbs_processed, \
@@ -266,4 +268,5 @@ def zambia_reports(request):
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
+         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
      }, context_instance=RequestContext(request))
