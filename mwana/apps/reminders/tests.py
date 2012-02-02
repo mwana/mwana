@@ -89,7 +89,7 @@ class EventRegistration(TestScript):
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
-            self.assertEqual(patient_event.date, datetime.date(2011, 1, 1))
+            self.assertEqual(patient_event.date, datetime.date(2012, 1, 1))
             self.assertEqual(patient_event.event.slug, "birth")
 
     def testCorrectMessageWithGender(self):

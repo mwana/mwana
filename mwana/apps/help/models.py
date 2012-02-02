@@ -2,6 +2,8 @@
 from django.db import models
 from rapidsms.models import Connection
 import datetime
+from mwana.util import get_clinic_or_default
+
 
 STATUS_CHOICES = (
     ("P", "pending"),
@@ -21,6 +23,13 @@ class HelpRequest(models.Model):
     def __unicode__(self):
         contact = self.requested_by.contact.name if self.requested_by.contact \
                     else self.requested_by.identity
+
+        location = "Unknown location"
+        try:
+            location = get_clinic_or_default(contact)
+        except:
+            pass
+
         problem = self.additional_text if self.additional_text else '<NO MORE INFO>'
-        return "%s asks for help with '%s' on %s"  % (contact, problem, self.requested_on)
+        return "%s from %s asks for help with '%s' on %s"  % (contact, location, problem, self.requested_on)
         
