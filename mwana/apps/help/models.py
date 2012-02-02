@@ -4,7 +4,6 @@ from rapidsms.models import Connection
 import datetime
 from mwana.util import get_clinic_or_default
 
-
 STATUS_CHOICES = (
     ("P", "pending"),
     ("A", "active"),
@@ -26,7 +25,7 @@ class HelpRequest(models.Model):
 
         location = "Unknown location"
         try:
-            location = get_clinic_or_default(contact)
+            location = get_clinic_or_default(self.requested_by.contact)
         except:
             pass
 
