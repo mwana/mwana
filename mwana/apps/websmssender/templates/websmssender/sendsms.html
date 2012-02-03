@@ -173,37 +173,47 @@
 
             <h2>Send SMS Messages</h2>
             <br>
+            <table border="0"  bgcolor="#F8F8F8"  width="100%">
+                
+                <tbody>
+                    <tr style="border: 0px;">
+                        <td style="border: 0px">Select worker type:</td>
+                        <td style="border: 0px">
+                            {% autoescape off %}
+                            {{worker_types}}
+                            {% endautoescape %}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 0px">Province:</td>
+                        <td style="border: 0px">{% autoescape off %}
+                            {{rpt_provinces}}
+                            {% endautoescape %}&nbsp;
+                            or District:{% autoescape off %}
+                            {{rpt_districts}}
+                            {% endautoescape %}&nbsp;
+                            or Facility:{% autoescape off %}
+                            {{rpt_facilities}}
+                            {% endautoescape %}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 0px">[Optional] Phone Pattern:</td>
+                        <td style="border: 0px">
+                            <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
+                            &nbsp;E.g. +26097, +26096, +260966700345</td>
+                    </tr>
+                    <tr>
+                        {% if is_report_admin %}
+                        <td style="border: 0px">Select Implementer:</td>
+                        <td style="border: 0px">{% autoescape off %}
+                            {{rpt_group}}
+                            {% endautoescape %}
+                        </td>
+                        {%endif%}
+                    </tr>
+                </tbody>
+            </table>
+<p>
 
-
-            <p >Select worker type:&nbsp;
-                {% autoescape off %}
-                {{worker_types}}
-                {% endautoescape %}
-
-            <p>
-                Province:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% autoescape off %}
-                {{rpt_provinces}}
-                {% endautoescape %}&nbsp;
-                or District:{% autoescape off %}
-                {{rpt_districts}}
-                {% endautoescape %}&nbsp;
-                or Facility:{% autoescape off %}
-                {{rpt_facilities}}
-                {% endautoescape %}&nbsp;
-
-            <p>Phone # Like: &nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-
-                <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
-                &nbsp;E.g. +26097, +26096, +260966700345
-                {% if is_report_admin %}
-            <p>Select Implementer:
-                {% autoescape off %}
-                {{rpt_group}}
-                {% endautoescape %}
-                &nbsp;
-                {%endif%}
                 {%if confirm_message or meta_infor%}
             <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
                 {{confirm_message}}
