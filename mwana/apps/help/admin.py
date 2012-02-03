@@ -26,13 +26,13 @@ class HelpRequestAdmin(admin.ModelAdmin):
         try:
             return obj.requested_by.contact.location.parent.name
         except:
-            return ""
+            return "Unknown"
 
     def location(self, obj):
         try:
             return obj.requested_by.contact.location.name
         except:
-            return ""
+            return "Unknown"
 
     def name(self, obj):
         try:

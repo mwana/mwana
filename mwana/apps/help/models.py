@@ -16,8 +16,11 @@ class HelpRequest(models.Model):
     
     requested_by = models.ForeignKey(Connection)
     requested_on = models.DateTimeField(default=datetime.datetime.utcnow)
-    additional_text = models.CharField(max_length=160)
+    additional_text = models.CharField(max_length=160, null=True, blank=True)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
+    addressed_on = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.CharField(max_length=160, null=True, blank=True)
+    notes = models.CharField(max_length=255, null=True, blank=True)
     
     def __unicode__(self):
         contact = self.requested_by.contact.name if self.requested_by.contact \
