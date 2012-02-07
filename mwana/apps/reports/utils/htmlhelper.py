@@ -35,13 +35,13 @@ def get_contacttype_dropdown_html(id, selected_worker_type=None):
 
 def get_contacttypes(slug):
     if slug is None:
-        print "-"*20
         return ContactType.objects.exclude(name__in=["Patient", "DBS Printer"])
     else:
-        print slug*20
         return ContactType.objects.filter(slug=slug).exclude(name__in=["Patient", "DBS Printer"])
 
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
+    if not facilities:
+        return '<select name="%s" size="1"></select>\n'%id
     code ='<select name="%s"" onchange="fire%sChange()" id="%s" size="1">\n' % (id, id, id)
     if selected_facility and get_only_select:
         pass
