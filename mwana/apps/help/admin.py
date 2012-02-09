@@ -12,7 +12,7 @@ class HelpRequestAdmin(admin.ModelAdmin):
     list_filter = ('requested_on',)
     list_select_related = True
     search_fields = ('requested_by__identity', 'status', 'requested_by__contact__name',
-    'requested_by__contact__location__parent__name',
+    'additional_text',
     'requested_by__contact__location__parent__name',
     'requested_by__contact__types__name',)
 
