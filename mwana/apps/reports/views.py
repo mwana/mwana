@@ -117,7 +117,7 @@ def get_groups_dropdown_html(id, selected_group):
 
 def read_request(request,param):
     try:
-        value = request.REQUEST[param]
+        value = request.REQUEST[param].strip()
         if value =='All':
             value = None
     except:
