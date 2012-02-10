@@ -9,9 +9,6 @@ from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
 
-EID_BIRTH_SUMMARY = "%(name)s, %(month)s %(location_name)s EID & Birth Totals\nDBS Samples sent: %(samples)s ***\nDBS Results received: %(results)s ***\nBirths registered: %(births)s"
-CBA_THANKS_MSG = "Thank you, %(name)s. You have helped about %(helps)s mothers in your community in %(month)s %(year)s. Keep up the good work, reminding mothers saves lives."
-CBA_REMINDER_MSG = "Hello %(name)s. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives."
 
 def year():
     return date.today().year
@@ -43,15 +40,14 @@ def get_results_data():
 def send_monitor_report(router):
     logger.info('sending monitoring information to support staff')
 
-    # TODO : move setting of recipients to database table
+    
     admins = Contact.active.filter(is_help_admin=True,
-                                   name__icontains="Trevor Sinkala",
-                                   connection__identity__icontains="096")
+                                   monitormessagerecipient__receive_sms=True)
 
     if not admins:
         logger.warning('No admins to send monitoring data to were found in system')
         return
-    message = "Payloads:\n%s;\nResults:\n%s" % (get_payload_data(), get_results_data())
+    message = "System message.\nPayloads:\n%s;\nResults:\n%s" % (get_payload_data(), get_results_data())
 
     
     for admin in admins:
