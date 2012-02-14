@@ -23,6 +23,7 @@ INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.filteredlogs")
 INSTALLED_APPS.append("mwana.apps.monitor")
 INSTALLED_APPS.append("mwana.apps.websmssender")
+INSTALLED_APPS.append("mwana.apps.issuetracking")
 
 
 ADMINS = (
