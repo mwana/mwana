@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from rapidsms.models import Contact
+from mwana.util import get_clinic_or_default
 from operator import itemgetter
 
 from datetime import date
@@ -12,6 +14,7 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class Results160Reports:
     def __init__(self, current_user=None, group=None, province=None,
@@ -542,6 +545,53 @@ class Results160Reports:
         table.append(['All listed districts', 'All listed  clinics', tt_samples, self.safe_rounding(avg)])
         return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_samples), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
+
+    def facility_contacts_report(self, page):
+        """
+        Returns active contacts
+        """
+        table = []
+       
+
+        locations = self.user_facilities()
+        contacts = Contact.active.filter(Q(location__in=locations)|
+        Q(location__parent__in=locations)).exclude(connection=None).order_by('location__parent__name')
+
+        if not page:
+            page = 1
+
+
+        paginator = Paginator(contacts, 50)
+        try:
+            messages = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            messages = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            messages = paginator.page(paginator.num_pages)
+
+        messages_number=messages.number
+        messages_has_previous = messages.has_previous()
+        messages_has_next = messages.has_next()
+        messages_paginator_num_pages = messages.paginator.num_pages
+
+        counter = messages.start_index()
+        for contact in messages.object_list:
+            facility = get_clinic_or_default(contact)
+            district = facility.parent
+            name = contact.name
+            type = ", ".join(t.name for t in contact.types.all())
+            backed = contact.default_connection.backend.name
+            phone = contact.default_connection.identity
+
+            table.append([counter, ' ' + district.name, ' ' + facility.name,
+                         name, type, backed, phone])
+            counter = counter + 1
+
+        table.insert(0, ['  #', '  District', '  Clinic', 'User Name','Type', 'Backend', 'Phone'])
+
+        return table,  messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous
 
 
 #Reminders

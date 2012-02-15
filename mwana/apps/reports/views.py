@@ -9,6 +9,32 @@ from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 
 
 
+
+
+def get_int(val):
+    return int(val) if str(val).isdigit() else None
+
+def get_default_int(val):
+    return int(val) if str(val).isdigit() else 0
+
+def get_groups_name(id):
+    try:
+        return ReportingGroup.objects.get(pk=id)
+    except:
+        return "All"
+
+def get_facility_name(slug):
+    try:
+        return Location.objects.get(slug=slug)
+    except:
+        return "All"
+
+def get_next_navigation(text):
+    try:
+        return {"Next":1,"Previous":-1}[text]
+    except:
+        return 0
+
 def text_date(text):
     delimiters = ('-', '/')
     for delim in delimiters:
@@ -265,6 +291,66 @@ def zambia_reports(request):
          'year_reporting': year_reporting,
          'is_report_admin': is_report_admin,
          'region_selectable': True,
+         'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
+         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
+         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
+         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
+     }, context_instance=RequestContext(request))
+
+@require_GET
+def contacts_report(request):
+
+    from webreports.reportcreator import Results160Reports
+
+    today = datetime.today().date()
+    
+
+    is_report_admin = False
+    try:
+        user_group_name = request.user.groupusermapping_set.all()[0].group.name
+        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
+        and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
+            is_report_admin = True
+    except:
+        pass
+
+    rpt_group = read_request(request, "rpt_group")
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+
+    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
+      
+    navigation = read_request(request, "navigate")
+    page = read_request(request, "page")
+
+    page = get_default_int(page)
+    page = page + get_next_navigation(navigation)
+
+
+
+
+    (facility_contacts, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = r.facility_contacts_report(page)
+
+   
+    return render_to_response('reports/contacts.html',
+        {
+         'today': today,
+         'adminEmail': get_admin_email_address(),
+         'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
+         'formattedtoday': today.strftime("%d %b %Y"),
+         'formattedtime': datetime.today().strftime("%I:%M %p"),
+         "messages_paginator_num_pages":  messages_paginator_num_pages,
+         "messages_number":  messages_number,
+         "messages_has_next":  messages_has_next,
+         "messages_has_previous":  messages_has_previous,
+         'implementer': get_groups_name(rpt_group),
+          'province': get_facility_name(rpt_provinces),
+          'district': get_facility_name(rpt_districts),
+                              
+         'is_report_admin': is_report_admin,
+         'region_selectable': True,
+         'facility_contacts': facility_contacts,
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,

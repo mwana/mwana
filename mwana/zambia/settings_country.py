@@ -66,6 +66,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
+    ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
