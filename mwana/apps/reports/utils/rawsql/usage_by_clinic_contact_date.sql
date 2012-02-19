@@ -8,8 +8,9 @@ join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_cont
 join contactsplus_contacttype on contactsplus_contacttype.id = rapidsms_contact_types.contacttype_id
 
 where messagelog_message.direction = 'I'
-and messagelog_message.date > '2010-06-13'
+--and messagelog_message.date > '2010-12-13'
 AND backEND <> 'message tester'
 and is_active = true
+--and parent.slug like '80%'
 
 order by parent.name, clinic, phone, text, contactsplus_contacttype.slug
