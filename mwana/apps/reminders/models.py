@@ -71,7 +71,13 @@ class PatientEvent(models.Model):
                                                 #child age, no)
     )
 
-    
+    LOCATION_TYPE_CHOICES = (
+        ('cm','Community'),
+        ('fc','Facility'),
+    )
+
+    event_location_type = models.CharField(choices=LOCATION_TYPE_CHOICES, max_length=5,
+                                     null=True, blank=True)
     patient = models.ForeignKey(Contact, related_name='patient_events',
                                 limit_choices_to={'types__slug': 'patient'})
     event = models.ForeignKey(Event, related_name='patient_events')

@@ -4,9 +4,8 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule, ALL
+from rapidsms.contrib.scheduler.models import EventSchedule
 
-from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
 from mwana import const
@@ -76,9 +75,23 @@ class App(rapidsms.apps.base.AppBase):
         up generating messages like "You have successfully registered a birth
         for 24. 06. 2010" (since the date is optional).
         """
-        parts = msg.text.split()[1:] # exclude the keyword (e.g., "birth")
+
+        keyword = msg.text.strip().split()[0].lower()
+        rest = msg.text.strip().split()[1:]
+
+        if keyword in ["mwanafc", "mwanacm"]:
+            keyword = keyword.replace("mwana" ,"mwana ", True)
+
+        to_parse = keyword.split() + rest
+        parts = to_parse[1:] # exclude the keyword (e.g., "birth")
         date_str = ''
         name = ''
+        location_type = None
+        
+        if parts and parts[0].lower() in ['fc', 'cm']:
+            location_type = parts[0].lower()
+            parts = parts[1:]
+
         for part in parts:
             if self.DATE_RE.match(part):
                 if date_str: date_str += ' '
@@ -86,7 +99,7 @@ class App(rapidsms.apps.base.AppBase):
             else:
                 if name: name += ' '
                 name += part
-        return date_str, name
+        return date_str, name, location_type
 
     def _get_event(self, slug):
         """
@@ -120,7 +133,7 @@ class App(rapidsms.apps.base.AppBase):
         event = self._get_event(event_slug)
         if not event:
             return False
-        date_str, patient_name = self._parse_message(msg)
+        date_str, patient_name, event_location_type = self._parse_message(msg)
         # if patient name is too long it's most likely the message sent was wrong
         if patient_name and len(patient_name) < 50: # the date is optional
             if date_str:
@@ -168,7 +181,9 @@ class App(rapidsms.apps.base.AppBase):
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
                 return True
             patient.patient_events.create(event=event, date=date,
-                                          cba_conn=msg.connection, notification_status="new")
+                                          cba_conn=msg.connection,
+                                          notification_status="new",
+                                          event_location_type=event_location_type)
             gender = event.possessive_pronoun
             msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "

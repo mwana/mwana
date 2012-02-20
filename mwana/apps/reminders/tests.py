@@ -58,18 +58,18 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth 1/1/2011 maria
-            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1 1 2011 laura
-            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1-1-2011 anna
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1.1.2011 michelle
-            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1. 1. 2011 anne
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 01012011 heidi
-            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2011. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1/1/2012 maria
+            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1 1 2012 laura
+            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1-1-2012 anna
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1.1.2012 michelle
+            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1. 1. 2012 anne
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 01012012 heidi
+            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2012. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 1/1 rachel
             kk     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 1 1 nancy
@@ -161,6 +161,38 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
+
+    def testFacilityBirthRegistration(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanafc", gender='f')
+        script = """
+            kk     > mwana fc 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwanafc 4/3/2010 Nelly Daka
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(2, patients.count())
+        
+        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='fc').count())
+
+    def testCommunityBirthRegistration(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanacm ", gender='f')
+        script = """
+            kk     > mwana cm 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwanacm 4/3/2010 Nelly Daka
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(2, patients.count())
+
+        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='cm').count())
 
     def testFutureEventRegistration(self):
         self._register()
