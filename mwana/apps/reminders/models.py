@@ -72,8 +72,8 @@ class PatientEvent(models.Model):
     )
 
     LOCATION_TYPE_CHOICES = (
-        ('cm','Community'),
-        ('fc','Facility'),
+        ('hm','Home'),
+        ('cl','Clinic'),
     )
 
     event_location_type = models.CharField(choices=LOCATION_TYPE_CHOICES, max_length=5,

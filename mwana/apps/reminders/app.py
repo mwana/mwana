@@ -79,7 +79,7 @@ class App(rapidsms.apps.base.AppBase):
         keyword = msg.text.strip().split()[0].lower()
         rest = msg.text.strip().split()[1:]
 
-        if keyword in ["mwanafc", "mwanacm"]:
+        if keyword in ["mwanacl", "mwanahm"]:
             keyword = keyword.replace("mwana" ,"mwana ", True)
 
         to_parse = keyword.split() + rest
@@ -88,7 +88,7 @@ class App(rapidsms.apps.base.AppBase):
         name = ''
         location_type = None
         
-        if parts and parts[0].lower() in ['fc', 'cm']:
+        if parts and parts[0].lower() in ['hm', 'cl']:
             location_type = parts[0].lower()
             parts = parts[1:]
 

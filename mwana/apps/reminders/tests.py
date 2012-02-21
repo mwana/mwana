@@ -165,34 +165,34 @@ class EventRegistration(TestScript):
     def testFacilityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanafc", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanacl", gender='f')
         script = """
-            kk     > mwana fc 4/3/2010 maria
+            kk     > mwana cl 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanafc 4/3/2010 Nelly Daka
+            kk     > mwanacl 4/3/2010 Nelly Daka
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(2, patients.count())
         
-        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='fc').count())
+        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
 
     def testCommunityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanacm ", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanahm ", gender='f')
         script = """
-            kk     > mwana cm 4/3/2010 maria
+            kk     > mwana hm 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanacm 4/3/2010 Nelly Daka
+            kk     > mwanahm 4/3/2010 Nelly Daka
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(2, patients.count())
 
-        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='cm').count())
+        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='hm').count())
 
     def testFutureEventRegistration(self):
         self._register()

@@ -37,7 +37,7 @@ class PatientEventAdmin(admin.ModelAdmin):
         try:
             return obj.patient.location.parent.name
         except:
-            return ""
+            return "Unknown"
         
     def cba(self, obj):        
         try:
