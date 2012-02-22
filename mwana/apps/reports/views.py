@@ -225,7 +225,8 @@ def zambia_reports(request):
 
     payloads = r.dbs_payloads_report(startdate, enddate)
 
-    births = r.reminders_patient_events_report(startdate, enddate)
+    births2 = r.rm_patient_events_report(startdate, enddate)
+    births_without_loc = r.rm_patient_events_report_unknown_location(startdate, enddate)
 
     single_bar_length, tt_in_graph, graph = r.dbs_graph_data(startdate,
                                                              enddate)
@@ -272,8 +273,9 @@ def zambia_reports(request):
          'samples_reported_rpt': samples_reported,
          'samples_at_lab_rpt': samples_at_lab,
          'pending_results': pending,
-         'payloads_rpt': payloads,
-         'births_rpt': births,
+         'payloads_rpt': payloads,         
+         'births_rpt2': births2,
+         'births_without_loc': births_without_loc,
          'formattedtoday': today.strftime("%d %b %Y"),
          'formattedtime': datetime.today().strftime("%I:%M %p"),
          'graph': graph,

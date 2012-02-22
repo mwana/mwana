@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.models import PatientEvent
 from rapidsms.models import Contact
 from mwana.util import get_clinic_or_default
 from operator import itemgetter
@@ -633,6 +634,134 @@ class Results160Reports:
             else:
                 table.append([' Unknown', row[1]])
         table.append(['All listed clinics', total])
+        return sorted(table, key=itemgetter(0))
+
+    def rm_patient_events_report(self, startdate=None, enddate=None):
+        """
+        Returns report table showing births per facility per event location type
+        """
+
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+
+        table = []
+
+        table.append(['  District', '  Facility', 'Community<br>Births', 'Clinic Births', 'Total Births'])
+
+        facility_dict = {}
+
+        events = PatientEvent.objects.filter(#Q(event__name='Birth'),
+                Q(date_logged__gte=self.dbsr_startdate) ,
+                Q(date_logged__lte=self.dbsr_enddate),
+#                Q(cba_conn__contact=None)|
+                Q(patient__location__parent__in=self.user_facilities()) |
+                Q(patient__location__in=self.user_facilities())
+                
+        ).distinct()
+
+        
+        for event in events:
+            location = "Unknown"
+            if event.cba_conn.contact:
+                location = event.cba_conn.contact.location
+                if location.type.slug == 'zone':
+                    location = location.parent
+
+            else:
+                location = event.cba_conn.identity
+
+
+            if location not in facility_dict.keys():
+                facility_dict[location] = [0, 0, 0]
+                
+            facility_dict[location][2] = facility_dict[location][2] + 1
+            if event.event_location_type == 'hm':
+                facility_dict[location][0] = facility_dict[location][0] + 1
+            elif event.event_location_type == 'cl':
+                facility_dict[location][1] = facility_dict[location][1] + 1
+                    
+            
+
+        tt_home, tt_clinic, tt_all = [0, 0, 0]
+
+        for key, value in facility_dict.iteritems():
+            facility_name = key
+            distict_name = "Unknown"
+            if not isinstance(key, (str, unicode)):                
+                facility_name = key.name
+                distict_name = key.parent.name
+
+
+            home, clinic, all = value
+
+            tt_home  = tt_home + home
+            tt_clinic  = tt_clinic + clinic
+            tt_all  = tt_all + all
+
+            table.append([" "+distict_name, " "+facility_name, home, clinic, all])
+        table.append(['All listed districts', 'All listed clinics', tt_home, tt_clinic, tt_all])
+        return sorted(table, key=itemgetter(0, 1))
+
+    def rm_patient_events_report_unknown_location(self, startdate=None, enddate=None):
+        """
+        Returns report table showing births per by unregistered users
+        """
+
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+
+        table = []
+
+        table.append(['  Phone', 'Community<br>Births', 'Clinic Births', 'Total Births'])
+
+        facility_dict = {}
+
+        events = PatientEvent.objects.filter(#event__name='Birth',
+                date_logged__gte=self.dbsr_startdate ,
+                date_logged__lte=self.dbsr_enddate,
+                cba_conn__contact=None
+        ).distinct()
+
+
+        for event in events:
+            location = event.cba_conn.identity
+
+
+            if location not in facility_dict.keys():
+                facility_dict[location] = [0, 0, 0]
+
+            facility_dict[location][2] = facility_dict[location][2] + 1
+            if event.event_location_type == 'hm':
+                facility_dict[location][0] = facility_dict[location][0] + 1
+            elif event.event_location_type == 'cl':
+                facility_dict[location][1] = facility_dict[location][1] + 1
+
+
+
+        tt_home, tt_clinic, tt_all = [0, 0, 0]
+
+        for key, value in facility_dict.iteritems():
+            facility_name = key
+
+
+            home, clinic, all = value
+
+            tt_home  = tt_home + home
+            tt_clinic  = tt_clinic + clinic
+            tt_all  = tt_all + all
+
+            table.append([ " "+facility_name, home, clinic, all])
+        table.append(['All listed numbers', tt_home, tt_clinic, tt_all])
         return sorted(table, key=itemgetter(0))
 
 #Graphing
