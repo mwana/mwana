@@ -31,7 +31,7 @@ class HelpHandler(KeywordHandler):
         
         # create the "ticket" in the db
         HelpRequest.objects.create(requested_by=self.msg.connection,
-                                   additional_text=text)
+                                   additional_text=text[:160])
         
         params = {"phone": self.msg.connection.identity}
         resp_template = ANONYMOUS_FORWARD
