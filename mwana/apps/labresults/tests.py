@@ -171,6 +171,13 @@ class TestApp(LabresultsSetUp):
         """
         self.runScript(script)
 
+    def testTooBigSampleNumber(self):
+        script = """
+            clinic_worker > SENT 302010
+            clinic_worker < To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
+        """
+        self.runScript(script)
+
     def testBadReportFormat(self):
         script = """
             clinic_worker > SENT some samples yo!
