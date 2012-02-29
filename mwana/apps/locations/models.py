@@ -95,6 +95,10 @@ class LocationBase(models.Model):
         abstract = True
 
     def __unicode__(self):
+
+        if self.type.slug == 'zone':
+            return "%s: Zone %s" % (self.parent.name, self.name)
+
         return self.name
 
     def __repr__(self):
