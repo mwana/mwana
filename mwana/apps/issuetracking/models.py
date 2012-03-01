@@ -21,6 +21,8 @@ class Issue(models.Model):
         ('completed', 'Completed'),
         ('bugfixed', 'Bug Fixed'),
         ('obsolete', 'Obsolete'),
+        ('resurfaced', 'Resurfaced'),
+        ('future', 'Future'),
         ('closed', 'Closed'),)
 
     PRIORITY_CHOICES = (
@@ -40,8 +42,11 @@ class Issue(models.Model):
     assigned_to = models.ForeignKey(User, null=True, blank=True,
                                     related_name="assigned_to",
                                     limit_choices_to={'is_active':'True', 'is_staff':'True'})
-    start_date = models.DateField(null=True, blank=True)
-    end_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(null=True, blank=True, verbose_name='Actual Start Date')
+    end_date = models.DateField(null=True, blank=True, verbose_name='Actual End Date')
+    desired_start_date = models.DateField(null=True, blank=True)
+    desired_completion_date = models.DateField(null=True, blank=True,  verbose_name='Desired End Date')
+    open = models.NullBooleanField(null=True, blank=True, editable=False)
 
     def __unicode__(self):
         return self.title

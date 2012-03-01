@@ -8,10 +8,10 @@ class CommentInline(admin.TabularInline):
 
 class IssueAdmin(admin.ModelAdmin):
     list_display = ('id','title', 'snippet' , 'type', 'status', 'priority',
-    'assigned_to','author','start_date','end_date','date_created',)
+    'assigned_to','author','desired_start_date', 'desired_completion_date','start_date','end_date',)
     inlines = (CommentInline,)
     date_hierarchy = 'date_created'
-    list_filter = ('type', 'status', 'assigned_to', 'web_author', 'sms_author',)
+    list_filter = ('open', 'type', 'status', 'assigned_to', 'web_author', 'sms_author',)
     search_fields = ('title', 'body',)
 
 
@@ -31,7 +31,12 @@ class IssueAdmin(admin.ModelAdmin):
         instance = form.save()
         if not instance.web_author and not instance.sms_author:
             instance.web_author = request.user
-            
+
+        if instance.status in ['new', 'ongoing', 'resurfaced', 'future']:
+            instance.open = True
+        elif instance.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
+            instance.open = False
+
         instance.save()
         return instance
 
