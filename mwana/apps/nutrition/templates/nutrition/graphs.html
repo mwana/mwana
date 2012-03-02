@@ -1,0 +1,258 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}Nutrition Reports{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/datepicker.css" type="text/css" media="screen" />
+<style type="text/css" media="screen">
+  #options {padding: 0px 1em 20px;}
+  #options table {border:0; margin-left:-10px;}
+  #options td {border:0; white-space: nowrap;}
+  p {width:700px; text-align:right; padding:20px 0 30px 0;}
+  label, input[type="text"] {float:left; display:block;}
+  label {font-weight: bold;}
+</style>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart','table']});
+    </script>
+    <script type="text/javascript">
+    function draw() {
+        
+    }
+function drawUnderweightChart() {
+    // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    var raw_data = [['Mild', 29.95, 28.05, 27.5],
+                    ['Moderate', 10.72, 10.37, 10.06],
+                    ['Severe', 4.00, 3.06, 2.8]];
+    
+    var districts = ['Chikwawa', 'Chiradzulu', 'Salima'];
+    
+    data.addColumn('string', 'Districts');
+    for (var i = 0; i  < raw_data.length; ++i) {
+        data.addColumn('number', raw_data[i][0]);    
+    }
+    
+    data.addRows(districts.length);
+    
+    for (var j = 0; j < districts.length; ++j) {    
+        data.setValue(j, 0, districts[j].toString());    
+    }
+    for (var i = 0; i  < raw_data.length; ++i) {
+        for (var j = 1; j  < raw_data[i].length; ++j) {
+            data.setValue(j-1, i+1, raw_data[i][j]);    
+        }
+    }
+    
+    // Create and draw the visualization.
+    new google.visualization.ColumnChart(document.getElementById('underweight_chart')).
+        draw(data,
+             {title:"Incidence as percentage of reports sent",
+              width:600, height:400,
+              hAxis: {title: "District"},
+              vAxis: {title: "Percentage %"}}
+            );
+}
+
+function drawUnderweightTable() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'District');
+    data.addColumn('number', 'Weight Captured');
+    data.addColumn('number', 'Weighing Efficiency');
+    data.addColumn('number', 'Mild');
+    data.addColumn('number', 'Moderate');
+    data.addColumn('number', 'Severe');
+    data.addRows([
+        ['Chikwawa', {v:5416, f:'5416'},{v:18, f:'18%'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
+        ['Chiradzulu', {v:755, f:'755'},{v:4, f:'4%'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
+        ['Salima', {v:789, f: '789'},{v:34, f: '34%'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
+    ]);
+
+    var table = new google.visualization.Table(document.getElementById('underweight_table'));
+    
+    // var formatter = new google.visualization.ArrowFormat();
+    // formatter.format(data, 1); // Apply formatter to second column
+    
+    table.draw(data, {allowHtml: true, showRowNumber: false});
+
+
+}
+
+function drawStuntingTable() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'District');
+    data.addColumn('number', 'Height Captured');
+    data.addColumn('number', 'Height Efficiency');
+    data.addColumn('number', 'Mild');
+    data.addColumn('number', 'Moderate');
+    data.addColumn('number', 'Severe');
+    data.addRows([
+        ['Chikwawa', {v:5416, f:'5416'},{v:18, f:'18%'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
+        ['Chiradzulu', {v:755, f:'755'},{v:4, f:'4%'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
+        ['Salima', {v:789, f: '789'},{v:34, f: '34%'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
+    ]);
+
+    var table = new google.visualization.Table(document.getElementById('stunting_table'));
+    
+    // var formatter = new google.visualization.ArrowFormat();
+    // formatter.format(data, 1); // Apply formatter to second column
+    
+    table.draw(data, {allowHtml: true, showRowNumber: false});
+
+
+}
+
+function drawWastingTable() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'District');
+    data.addColumn('number', 'MUAC Captured');
+    data.addColumn('number', 'MUAC Efficiency');
+    data.addColumn('number', 'Height captured');
+    data.addColumn('number', 'Mild');
+    data.addColumn('number', 'Moderate');
+    data.addColumn('number', 'Severe');
+    data.addRows([
+        ['Chikwawa', {v:35, f:'35'},{v:18, f:'18%'},{v:50, f:'50'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
+        ['Chiradzulu', {v:65, f:'65'},{v:4, f:'4%'},{v:200, f:'200'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
+        ['Salima', {v:78, f: '78'},{v:34, f: '34%'},{v:100, f:'100'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
+    ]);
+
+    var table = new google.visualization.Table(document.getElementById('wasting_table'));
+    
+    // var formatter = new google.visualization.ArrowFormat();
+    // formatter.format(data, 1); // Apply formatter to second column
+    
+    table.draw(data, {allowHtml: true, showRowNumber: false});
+
+
+}
+
+
+
+google.setOnLoadCallback(drawUnderweightChart);
+google.setOnLoadCallback(drawUnderweightTable);
+google.setOnLoadCallback(drawStuntingTable);
+google.setOnLoadCallback(drawWastingTable);
+    </script>
+
+<script type="text/javascript" src="{{ MEDIA_URL }}labresults/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+// <![CDATA[     
+   
+datePickerController.addEvent(window, "load", function() {
+      var start_opts = {
+        // The ID of the associated form element
+        id:"start_date",
+        // The date format to use
+        format:"Y-ds-m-ds-d",
+
+        // Do we hide the today button
+        noToday:true,
+        // Do we show weeks along the left hand side
+        showWeeks:true,
+
+        // Do we fill the entire grid with dates
+        fillGrid:true,
+      };
+      var end_opts = {
+        // The ID of the associated form element
+        id:"start_date",
+        // The date format to use
+        format:"Y-ds-m-ds-d",
+
+        // Do we hide the today button
+        noToday:true,
+        // Do we show weeks along the left hand side
+        showWeeks:true,
+
+        // Do we fill the entire grid with dates
+        fillGrid:true,
+      };
+      datePickerController.createDatePicker(start_opts);
+      datePickerController.createDatePicker(end_opts);
+});
+
+// ]]>
+</script>
+{% endblock javascripts %}
+
+{% block content %}
+<div id="graphs" class="module">
+  <h1>Report Options</h1>
+  <form method="#" id="options" action="">
+      <table width="700px" cellspacing="0" cellpadding="0" border="0">
+          <tr>
+              <td><label for="start_date">From:</label></td>
+              <td><input type="textbox" name="start_date" value="Sep" id="start_date" class="dateformat-Y-ds-m-ds-d" /></td>
+              <td><label for="end_date">To:</label></td>
+              <td><input type="textbox" name="end_date" value="Nov" id="end_date" class="dateformat-Y-ds-m-ds-d" /></td>
+              <td><label for="district">District:</label></td>
+              <td>
+                  <select name="district" id="district">
+                      <option selected="selected" value="All Districts">All Districts</option>
+                      <option>Chikwawa</option>
+                      <option>Chiradzulu</option>
+                  </select>
+              </td>
+          </tr>
+          <tr>
+              <td><label for="gender">Gender:</label></td>
+              <td>
+                  <select name="gender" id="gender">
+                      <option selected="selected" value="All">All</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                  </select>
+              </td>
+              <td><label for="age">Age:</label></td>
+              <td>
+                  <select name="age" id="age">
+                      <option selected="selected" value="All">All</option>
+                      <option value="3">0 - 1</option>
+                      <option value="6">0 - 2</option>
+                      <option value="9">1 - 5</option>
+                      <option value="12">2 - 5</option>
+                      <option value="12">0 - 5</option>
+                  </select>
+              </td>
+              <td><label for="percent">As percentage:</label></td>
+              <td><input type="checkbox" name="percent" value="checked" id="percent" checked="checked" /></td>
+          </tr>
+          <tr>
+              <td>&nbsp;</td>
+              <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
+          </tr>
+          
+      </table>
+  </form>
+
+  <h2>Underweight</h2>
+  <div id="underweight_chart" style="width:600px; height:400px;">
+  </div>
+  <div id="underweight_table" style="width:700px">
+  </div>
+  <p><a href="#">Export supporting data to Excel.</a></p>
+  
+  <h2>Stunting</h2>
+  <div id="stunting_chart" style="width:600px; height:400px;">
+  </div>
+  <div id="stunting_table" style="width:700px">
+  </div>
+  <p><a href="#">Export supporting data to Excel.</a></p>
+
+
+  <h2>Wasting</h2>
+  <div id="wasting_chart" style="width:600px; height:400px;">
+  </div>
+  <div id="wasting_table" style="width:700px">
+  </div>
+  <p><a href="#">Export supporting data to Excel.</a></p>
+  
+</div> 
+{% endblock content %}

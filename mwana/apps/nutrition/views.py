@@ -24,6 +24,14 @@ def index(req):
                               context_instance=RequestContext(req))
 
 
+def graphs(req):
+    template_name= "nutrition/graphs.html"
+    mytitle = "These are the nutrition graphs"
+    context = {'mytitle': mytitle} 
+    return render_to_response(template_name, context,
+                              context_instance=RequestContext(req))
+
+
 def instance_to_dict(instance):
     dict = {}
     for field in instance._meta.fields:
