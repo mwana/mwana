@@ -58,7 +58,7 @@
       <div>
 
 	<div class="module">
-          <h2>Percentage (%) Positivity</h2>                
+          <h2>Percentage (%) Positivity of selected sample data</h2>                
           <table width="100%" class="th" bgcolor="#EEEEEE">
             <tr class="th" >
               <td align="center" width="295">
@@ -78,7 +78,8 @@
         </div>
         <p align="center"><h3>Results160 Report 1 - Results
             Tested By Lab and Received By Facilities between 
-	    StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+	    StartDate: {{startdate}} Enddate: {{enddate}} | 
+<a href="{% url csv_report_one %}?location={{selected_location}}&start_date={{startdate}}&end_date={{enddate}}">Export CSV</a></h3>
 	<p><b>DEFINITION  - Tested - means processed by lab
 	    and result recorded,  Verified – means lab have
 	    approved its release,  Received - means facilities

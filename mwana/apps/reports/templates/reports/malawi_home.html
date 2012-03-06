@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+{% load labresults_tags %}
+
+{% block title %}Project Mwana Reports - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+
+{% block content %}
+<div>
+  <div class="left">
+    <div class="module">
+      <div>
+        <h2>Welcome to ProjectMwana Malawi</h2>
+      </div>
+    </div>
+    <div class="clear-hack"></div>
+  </div>
+</div>
+{% endblock %}

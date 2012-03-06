@@ -1,0 +1,53 @@
+
+#wrapper {
+    width: 94%;
+    background: #fff;
+    margin: 0.5em auto 0 auto;
+
+    /* a little pretty for the 10/dec demo */
+    -moz-box-shadow: 4px 4px 8px #aaa;
+    box-shadow: 4px 4px 8px #aaa;
+    -moz-border-radius-bottomright: 1em;
+    -moz-border-radius-bottomleft: 1em;
+}
+
+    /* no scaling for ie6 */
+    * html #wrapper {
+        width: 94%; }
+
+    #branding h1 {
+        background: url("../images/malawi-moh-logo.png") no-repeat 100% 50%;
+        height: 65px;
+        color: #fff;
+        margin: 0;
+    }
+
+/* nutrition cutoffs */
+.unusual, .very-tall, .obese {
+    background:#9c8aa5;
+}
+
+.overweight {
+    background:#0077bb;
+}
+
+.normal, .low-normal {
+    background:#00cd00;
+}
+
+.mild {
+    background:#fee01e;
+}
+
+.moderate {
+    background:#dd7500;
+}
+
+.severe, .oedema  {
+    background:#cd0000;
+}
+
+.pagination {
+    padding:16px 0 16px 8px;
+    font-size:13px;
+}

@@ -16,7 +16,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
 
-class ReportHandler(KeywordHandler):
+class ReportGMHandler(KeywordHandler):
 
     keyword = "gm"
 
@@ -155,7 +155,9 @@ class ReportHandler(KeywordHandler):
             else:
                 valid_weight = True 
             if muac is not None:
-                if 10.0 < float(muac) < 22.0:
+                if muac in ['n','N']:
+                    valid_muac = True
+                elif 10.0 < float(muac) < 22.0:
                     valid_muac = True
             else:
                 valid_muac = True
@@ -272,18 +274,20 @@ class ReportHandler(KeywordHandler):
         except Exception, e:
             self.exception('problem saving patient')
 
-        try:
-            # update age separately (should be the only volitile piece of info)
-            self.debug(survey_entry.age_in_months)
-            if survey_entry.age_in_months is not None:
-                patient.age_in_months = int(survey_entry.age_in_months)
-            else:
-                patient.age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
-            self.debug(patient.age_in_months)
-            patient.save()
-        except Exception, e:
-            self.exception('problem saving age')
-            return self.respond("There was a problem saving the age.")
+        # we must have a patient to update
+        if patient is not None:
+            try:
+                # update age separately (should be the only volitile piece of info)
+                self.debug(survey_entry.age_in_months)
+                if survey_entry.age_in_months is not None:
+                    patient.age_in_months = int(survey_entry.age_in_months)
+                else:
+                    patient.age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
+                self.debug(patient.age_in_months)
+                patient.save()
+            except Exception, e:
+                self.exception('problem saving age')
+                return self.respond("There was a problem saving the age.")
 
         # calculate age based on reported date of birth
         # respond if calcualted age differs from reported age
@@ -335,10 +339,10 @@ class ReportHandler(KeywordHandler):
                     "Gender=%s"      % (patient.gender or "??"),
                     "DOB=%s"        % (patient.date_of_birth or "??"),
                     "Age=%sm"      % (patient.age_in_months or "??"),
-                    "Weight=%skg"   % (ass.weight or "??"),
-                    "Height=%scm"  % (ass.height or "??"),
-                    "Oedema=%s"   % (ass.human_oedema or "??"),
-                    "MUAC=%scm"      % (ass.muac or "??")]
+                    "Weight=%skg"   % (measurements['weight'] or "??"),
+                    "Height=%scm"  % (measurements['height'] or "??"),
+                    "Oedema=%s"   % (human_oedema or "??"),
+                    "MUAC=%scm"      % (measurements['muac'] or "??")]
 
             self.debug('constructing confirmation')
             confirmation = REPORT_CONFIRM %\
@@ -350,9 +354,88 @@ class ReportHandler(KeywordHandler):
         try:
             # perform analysis based on cg instance from start()
             # TODO add to Assessment save method?
-            results = ass.analyze(cg)
-            self.debug('analyzed!')
-            self.debug(results)
+            if ass is not None:
+                results = ass.analyze(cg)
+                self.debug('assessment analyzed!')
+                self.debug(results)
+                # categorise child status based on results of zscores.
+                if ass.weight4age is not None:
+                    if (ass.weight4age >= D(str(3.00))):
+                        ass.underweight = 'V'
+                    elif (D(str(2.00)) <= ass.weight4age < D(str(3.00))):
+                        ass.underweight = 'T'
+                    elif (D(str(0.00)) <= ass.weight4age < D(str(2.00))):
+                        ass.underweight = 'G'
+                    elif (D(str(-1.00)) <= ass.weight4age < D(str(0.00))):
+                        ass.underweight = 'L'
+                    elif (D(str(-2.00)) <= ass.weight4age < D(str(-1.00))):
+                        ass.underweight = 'M'
+                    elif (D(str(-3.00)) <= ass.weight4age < D(str(-2.00))):
+                        ass.underweight = 'U'
+                    elif (ass.weight4age < D(str(-3.00))):
+                        ass.underweight = 'S'
+
+                if ass.height4age is not None:
+                    if (ass.height4age >= D(str(3.0))):
+                        ass.stunting = 'V'
+                    elif (D(str(2.00)) <= ass.height4age < D(str(3.00))):
+                        ass.stunting = 'T'
+                    elif (D(str(0.00)) <= ass.height4age < D(str(2.00))):
+                        ass.stunting = 'G'
+                    elif (D(str(-1.0)) <= ass.height4age < D(str(0.00))):
+                        ass.stunting = 'L'
+                    elif (D(str(-2.00)) <= ass.height4age < D(str(-1.00))):
+                        ass.stunting = 'M'
+                    elif (D(str(-3.00)) <= ass.height4age < D(str(-2.00))):
+                        ass.stunting = 'U'
+                    elif (ass.height4age < D(str(-3.00))):
+                        ass.stunting = 'S'
+
+                if ass.weight4height is not None:
+                    if (ass.weight4height >= D(str(3.0))):
+                        ass.wasting = 'V'
+                    elif (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
+                        ass.wasting = 'T'
+                    elif (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                        ass.wasting = 'G'
+                    elif (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
+                        ass.wasting = 'L'
+                    elif (D(str(-2.00)) <= ass.weight4height < D(str(-1.00))):
+                        ass.wasting = 'M'
+                    elif (D(str(-3.00)) < ass.weight4height < D(str(-2.00))):
+                        ass.wasting = 'U'
+                    elif (ass.weight4height <= D(str(-3.00))):
+                        ass.wasting = 'S'
+ 
+                if ass.muac is not None:
+                    if (D(str(12.51)) <= ass.muac <= D(str(13.50))):
+                        ass.wasting = 'M'
+                    elif (D(str(11.60)) <= ass.muac <= D(str(12.50))):
+                        ass.wasting = 'U'
+                    elif (ass.muac <= D(str(11.59))):
+                        ass.wasting = 'S'
+                    elif (ass.muac >= D(str(13.51))):
+                        ass.wasting = 'G'
+
+                if (ass.weight4height is not None and ass.muac is not None):
+                    if (ass.weight4height >= D(str(3.0))):
+                        ass.wasting = 'V'
+                    if (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
+                        ass.wasting = 'T'
+                    if (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                        ass.wasting = 'G'
+                    if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
+                        ass.wasting = 'L'
+                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (12.51 <= ass.muac <= 13.50) ):
+                        ass.wasting = 'M'
+                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (11.60 <= ass.muac <= 12.50 )):
+                        ass.wasting = 'U'
+                    if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= 11.59)):
+                        ass.wasting = 'S'
+                ass.save()
+
+            else:
+                self.debug('there is no assessment saved to analyse')
             #response_map = {
             #    'weight4age'    : 'Oops. I think weight or age is incorrect',
             #    'height4age'    : 'Oops. I think height or age is incorrect',
@@ -389,5 +472,8 @@ class ReportHandler(KeywordHandler):
             self.exception('problem with analysis')
 
         # send confirmation AFTER any error messages
-        self.respond(confirmation)
-        self.debug('sent confirmation')
+        if confirmation is not None:
+            self.respond(confirmation)
+            self.debug('sent confirmation')
+        else:
+            self.debug('there was a problem building the confirmation message')

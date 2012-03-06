@@ -3,6 +3,8 @@ from django.db import models
 from rapidsms.models import Connection
 import datetime
 
+from django.contrib.auth.models import User
+
 STATUS_CHOICES = (
     ("P", "pending"),
     ("A", "active"),
@@ -17,7 +19,9 @@ class HelpRequest(models.Model):
     requested_on = models.DateTimeField(default=datetime.datetime.utcnow)
     additional_text = models.CharField(max_length=160)
     status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="P")
-    
+    comments = models.TextField(null=True, blank=True)
+    resolved_by = models.ForeignKey(User, null=True, blank=True)
+
     def __unicode__(self):
         contact = self.requested_by.contact.name if self.requested_by.contact \
                     else self.requested_by.identity

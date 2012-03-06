@@ -5,7 +5,7 @@ DOB_MISMATCH = "Reported date of birth '%s' for Child ID %s does not match previ
 REGISTER_BEFORE_REPORTING = "Please register before submitting survey: Send JOIN HSA <LOCATIONCODE> <ZONE> <FIRSTNAME> <LASTNAME>."
 TOO_MANY_TOKENS = "Too much data!."
 INVALID_ID = "Sorry, ID code '%s' is not valid for a %s."
-INVALID_DOB = "Sorry I don't understand '%s' as a child's date of birth. Please use DDMMYY."
+INVALID_DOB = "Sorry I don't understand '%s' as a child's date of birth. Please use DDMMYY. For example, 271011"
 INVALID_GENDER = "Sorry I don't understand '%s' as a child's gender. Please use M for male or F for female."
 INVALID_MEASUREMENT = "Possible measurement error. Please check height, weight, MUAC or age of child: %s."
 REPORT_HELP = "To report measurements send: GM <CHILD ID> <DATEOFBIRTH> <GENDER> <WEIGHT> <HEIGHT> <OEDEMA> <MUAC>"
@@ -21,5 +21,4 @@ REMOVE_HELP = "To remove an Interviewer send: REMOVE <Inteviewer ID>."
 REMOVE_CONFIRM = "%s has been removed from Interviewer ID %s."
 ADMIT_HELP = "To admit a child send: ADMIT <CHILD ID> <NAME>"
 DISMISS_HELP = "To discharge a child send: DISMISS <CHILD_ID>"
-# only for testing
-ADMIT_HANDLE = "Admit is being handled. You sent the following text: %s."
+

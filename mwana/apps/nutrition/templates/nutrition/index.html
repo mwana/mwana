@@ -1,6 +1,17 @@
 {% extends "layout.html" %}
 {% load i18n %}
 {% block title %}Survey Entries{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
 {% block content %}
 
 <div class="module">
@@ -53,7 +64,7 @@
     <a href="{% url growth_assessments %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
 </div>
 
-</div>
+</div> <!-- 
 
 <div class="module">
 
@@ -97,5 +108,5 @@
    	<a href="{% url growth_surveyentries %}" class="export">{% trans "Export Survey Entries" %}</a>
 </div>
 
-</div>
+</div>  -->
 {% endblock %}

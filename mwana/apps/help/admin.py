@@ -11,6 +11,11 @@ class HelpRequestAdmin(admin.ModelAdmin):
     list_filter = ('requested_on',)
     list_select_related = True
     search_fields = ('requested_by', 'status',)
+    
+    def save_model(self, request, obj, form, change):
+        if getattr(obj, 'resolved_by', None) is None:
+            obj.resolved_by = request.user
+        obj.save()
 admin.site.register(help.HelpRequest, HelpRequestAdmin)
 
 

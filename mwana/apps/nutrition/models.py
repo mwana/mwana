@@ -22,6 +22,39 @@ class Assessment(models.Model):
         ('S', 'Suspect'),
     )
 
+    STUNTING_CHOICES = (
+        ('N', ''),
+        ('V', 'Very Tall'),
+        ('T', 'Normal'),
+        ('G', 'Normal'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
+    )
+
+    UNDERWEIGHT_CHOICES = (
+        ('N', ''),
+        ('V', 'Obese'),
+        ('T', 'Overweight'),
+        ('G', 'Normal'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
+    )
+
+    WASTING_CHOICES = (
+        ('N', ''),
+        ('V', 'Unusual'),
+        ('T', 'Normal'),
+        ('G', 'Normal'),
+        ('L', 'Low Normal'),
+        ('M', 'Mild'),
+        ('U', 'Moderate'),
+        ('S', 'Severe'),
+    )
+
     # who what where when why
     healthworker        = models.ForeignKey(Contact,null=True)
     patient             = models.ForeignKey(Person)
@@ -34,17 +67,16 @@ class Assessment(models.Model):
     weight              = models.DecimalField(max_digits=4,decimal_places=1,blank=True,null=True)
     muac                = models.DecimalField(max_digits=6,decimal_places=2,blank=True,null=True)
     oedema              = models.NullBooleanField(default=False)
-    #diarrea             = models.BooleanField(default=False)
-
-    # expensive calculations 
-    #mam                 = models.BooleanField(default=False)
-    #sam                 = models.BooleanField(default=False)
-    #stunting            = models.BooleanField(default=False)
 
     # z-scores
     weight4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     height4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     weight4height       = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
+
+    underweight = models.CharField(max_length=1,choices=UNDERWEIGHT_CHOICES, default='N')
+    stunting = models.CharField(max_length=1,choices=STUNTING_CHOICES, default='N')
+    wasting = models.CharField(max_length=1,choices=WASTING_CHOICES, default='N')
+
 
     class Meta:
         # define a permission for this app to use the @permission_required

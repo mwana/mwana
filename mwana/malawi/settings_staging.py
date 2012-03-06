@@ -14,6 +14,8 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
+TEMPLATE_DIRS = ("/home/mwana/staging-environment/code_root/mwana/malawi/templates",)
+
 #XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
@@ -24,6 +26,8 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 #WHITELIST_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
 #                     "phase. We will notify you when the system is live."
 
+DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
+
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
 #    ('rapidsms.views.dashboard', 'Dashboard'),
@@ -33,9 +37,9 @@ RAPIDSMS_TABS = [
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
 #    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.reports.views.malawi_reports', 'Reports'),
+    ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('growth_index', 'Growth Monitoring'),
+    ('growth_index', 'Growth Monitor'),
 #    ('xforms', 'XForms'),
 ]
 
@@ -89,7 +93,7 @@ DATABASES = {
     }
 }
 
-SEND_LIVE_LABRESULTS = True
+SEND_LIVE_LABRESULTS = False
 SEND_LIVE_BIRTH_REMINDERS = False
 
 CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'

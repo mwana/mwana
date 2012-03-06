@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+import os.path
 from mwana.settings_project import *
 
 # Malawi:
@@ -42,12 +43,16 @@ LANGUAGE_CODE = 'eng-us'
 
 LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
 
+MALAWI_ROOT = os.path.abspath(os.path.dirname(__file__))
+TEMPLATE_DIRS = (os.path.join(MALAWI_ROOT, "templates"),)
+MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ['pagination.middleware.PaginationMiddleware',]
 ROOT_URLCONF = 'mwana.malawi.urls'
 
 # Add XForms app + navigation and webreports:
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
+INSTALLED_APPS.insert(-1, 'pagination')
 #INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 #RAPIDSMS_TABS.append(('xforms', 'XForms'))
@@ -56,8 +61,10 @@ RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 # don't append, 'default' app should come last:
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
-RAPIDSMS_TABS.append(('growth_index', 'Nutrition'))
+RAPIDSMS_TABS.append(('growth_index', 'Growth Monitor'))
 RAPIDSMS_TABS.append(('growth_graphs', 'Nutrition Reports'))
+
+DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions
