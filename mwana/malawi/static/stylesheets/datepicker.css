@@ -102,7 +102,7 @@ a.date-picker-control:visited
         border:0 none;
         padding:0;
         margin:0 0 0 4px;
-        background:transparent url(../media/cal-grey.gif) no-repeat 50% 50%;
+        background:transparent url(images/cal-grey.gif) no-repeat 50% 50%;
         min-width:16px;
         line-height:1;
         cursor:pointer;
