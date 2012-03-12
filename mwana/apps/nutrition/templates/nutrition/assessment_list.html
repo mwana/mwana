@@ -48,7 +48,7 @@
     <table>
         <thead>
             <tr>
-                <th>Date Submitted</th><th>Facility</th><th>Interviewer Name</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th>
+                <th>Date Submitted</th><th>Facility</th><th>District</th><th>Interviewer Name</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th>
             </tr>
         </thead>
         <tbody>
@@ -57,6 +57,7 @@
             <tr>
                 <td>{{ ass.date|date:"Y-m-d" }}</td>
                 <td>{{ ass.healthworker.clinic }}</td>
+                <td>{{ ass.healthworker.clinic.parent.name }}</td>
                 <td>{{ ass.healthworker.name }}</td>
                 <td>{{ ass.patient.code }}</td>
                 <td>{{ ass.patient.gender }}</td>

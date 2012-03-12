@@ -210,6 +210,15 @@ class Survey(models.Model):
     location                = models.CharField(max_length=160,blank=True,null=True)
     description             = models.CharField(max_length=160,blank=True,null=True)
 
+    # required for configurable cutoffs in nutrition assessments
+    normal_muac             = models.DecimalField('Normal MUAC Cutoff', max_digits=4, decimal_places=2, default=13.50)
+    mild_muac               = models.DecimalField('Mild MUAC Cutoff', max_digits=4, decimal_places=2, default=12.50)
+    severe_muac             = models.DecimalField('Severe MUAC Cutoff', max_digits=4, decimal_places=2, default=11.50)
+    
+
+    # survey average limit for determination of suspect cases.
+    average_limit           = models.DecimalField('Survey Average Limit', max_digits=4, decimal_places=2, default=3.0)
+    
     # these should come from the latest survey completed in the
     # same season
     # -1.27

@@ -32,9 +32,9 @@
       <br>
       <form name="getValues" action="" method="GET">
         <p>Select Period
-          <input type="text" name="startdate" size="9" value={{ startdate }} />
+          <input type="text" name="startdate" size="9" value='{{ startdate|date:"Y-m-d" }}' />
           to
-          <input type="text" name="enddate" size="9" value={{ enddate }} />
+          <input type="text" name="enddate" size="9" value="{{ enddate|date:"Y-m-d"  }}" />
 	  Location:
 	  <select name="location" value="{{ location }}">
 	    <option value="All Districts"

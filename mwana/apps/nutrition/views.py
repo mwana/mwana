@@ -34,31 +34,37 @@ def index(req):
     return render_to_response(template_name, context,
                               context_instance=RequestContext(req))
 
-def graphs(req):
+def graphs(request):
     template_name= "nutrition/graphs.html"
-    mytitle = "These are the nutrition graphs"
-    context = {'mytitle': mytitle} 
+    location, startdate, enddate = get_report_criteria(request)
+    selected_location = str(location)
+    gender_opts = sorted(["All", "Male", "Female"])
+    age_opts = sorted(["All", "0 - 1", "0 - 2", "0 - 5", "1 - 5", "2 - 5"])
+    context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts, 
+               'age_opts': age_opts, 'selected_gender': request.GET.get('gender', "All"), 
+               'selected_age': request.GET.get('age', "All"), 'enddate': enddate, 
+               'selected_location': selected_location, 'startdate': startdate,
+               'selected_percent': request.GET.get('percent', "checked") } 
     return render_to_response(template_name, context,
-                              context_instance=RequestContext(req))
+                              context_instance=RequestContext(request))
 
 def reports(request):
     template_name="nutrition/reports.html"
     location, startdate, enddate = get_report_criteria(request)
     assessments = ass_dicts_for_display(location, startdate, enddate)
     selected_location = str(location)
-    locations = DISTRICTS
     limited_assessments = assessments[:501]
     table = AssessmentTable(limited_assessments)
     table.paginate(page=request.GET.get('page', 1))
     context = {'table': table, 'selected_location': selected_location,
-               'startdate': startdate, 'enddate': enddate, 'locations': locations}
+               'startdate': startdate, 'enddate': enddate, 'locations': sorted(DISTRICTS)}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
 def assessments(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
-    locations = DISTRICTS
+    locations = sorted(DISTRICTS)
     context = {'selected_location': selected_location,
                'startdate': startdate, 'enddate': enddate, 'locations': locations}
     asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate)).order_by('-date')
@@ -218,7 +224,7 @@ def get_report_criteria(request):
     location = request.GET.get('location', 'All Districts')
     default_end_date = datetime.today().date()
     default_start_date = default_end_date - timedelta(days=30)
-    startdate = request.GET.get('startdate', default_start_date)
-    enddate = request.GET.get('enddate', default_end_date)
+    startdate = request.GET.get('startdate', default_start_date.strftime("%Y-%m-%d"))
+    enddate = request.GET.get('enddate', default_end_date.strftime("%Y-%m-%d"))
 
     return location, startdate, enddate

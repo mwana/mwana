@@ -408,13 +408,13 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'S'
  
                 if ass.muac is not None:
-                    if (D(str(12.51)) <= ass.muac <= D(str(13.50))):
+                    if (survey.moderate_muac <= ass.muac <= survey.normal_muac):
                         ass.wasting = 'M'
-                    elif (D(str(11.60)) <= ass.muac <= D(str(12.50))):
+                    elif (survey.severe_muac <= ass.muac <= survey.moderate_muac):
                         ass.wasting = 'U'
-                    elif (ass.muac <= D(str(11.59))):
+                    elif (ass.muac <= survey.severe_muac):
                         ass.wasting = 'S'
-                    elif (ass.muac >= D(str(13.51))):
+                    elif (ass.muac >= survey.normal_muac):
                         ass.wasting = 'G'
 
                 if (ass.weight4height is not None and ass.muac is not None):
@@ -426,11 +426,11 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'G'
                     if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
                         ass.wasting = 'L'
-                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (12.51 <= ass.muac <= 13.50) ):
+                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.moderate_muac <= ass.muac <= survey.normal_muac ):
                         ass.wasting = 'M'
-                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (11.60 <= ass.muac <= 12.50 )):
+                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.moderate_muac ):
                         ass.wasting = 'U'
-                    if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= 11.59)):
+                    if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= survey.severe_muac):
                         ass.wasting = 'S'
                 ass.save()
 
@@ -450,9 +450,9 @@ class ReportGMHandler(KeywordHandler):
                 if z is not None:
                     survey_avg = average_zscores[ind]
                     # TODO plus or minus!
-                    survey_avg_limit = D(3)
+                    survey_avg_limit = survey.average_limit
                     if survey_avg is not None:
-                        survey_avg_limit = context.add(D(3), abs(survey_avg))
+                        survey_avg_limit = context.add(survey.average_limit, abs(survey_avg))
                     if abs(z) > survey_avg_limit:
                         self.debug('BIG Z: ' + ind)
                         self.debug('sample z: ' + str(z))

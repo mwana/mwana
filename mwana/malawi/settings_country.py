@@ -70,4 +70,5 @@ DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA f
 # Zambia, because different 3rd party apps add different model extensions
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'mwana.malawi.migrations.rapidsms',
+    'locations': 'mwana.malawi.migrations.locations',
 }
