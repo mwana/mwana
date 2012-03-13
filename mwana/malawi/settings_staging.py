@@ -40,6 +40,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('growth_index', 'Growth Monitor'),
+    ('growth_graphs', 'Nutrition Reports'),
 #    ('xforms', 'XForms'),
 ]
 
