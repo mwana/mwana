@@ -141,6 +141,7 @@ def ass_dicts_for_export(location, startdate, enddate):
         # queryset???
         ass_dict.update({'interviewer_name'   : ass.healthworker.name})
         ass_dict.update({'location'          : ass.healthworker.clinic})
+        ass_dict.update({'district'          : ass.healthworker.clinic.parent.name})
         ass_dict.update({'child_id'         : ass.patient.code})
         ass_dict.update({'sex'              : ass.patient.gender})
         ass_dict.update({'date_of_birth'    : ass.patient.date_of_birth})
@@ -182,11 +183,11 @@ def export(headers, keys, objects, file_name):
     return response
 
 def csv_assessments(req):
-    headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',
+    headers = ['Date Submitted', 'Facility', 'District', 'Interviewer Name', 'Child ID',
         'Sex', 'Date of Birth', 'Age in months', 'Height', 'Weight',
         'Oedema', 'MUAC', 'Weight for height Z', 'Wasting','Weight for age Z',
         'Underweight', 'Height for age Z', 'Stunting', 'Data Quality']
-    keys = ['date', 'location', 'interviewer_name', 'child_id',
+    keys = ['date', 'location', 'district', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'weight4height',
             'wasting_status', 'weight4age', 'underweight_status', 'height4age',
