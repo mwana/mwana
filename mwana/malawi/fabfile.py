@@ -204,11 +204,14 @@ def restart_route():
     deployer ALL=NOPASSWD: ALL
     """
     # using run instead of sudo because sudo prompts for a password
-    run('sudo /etc/init.d/mwana-route restart')
-    # print out the top of the log file in case there are errors
-    import time
-    time.sleep(2)
-    run('head -n 15 %s/route.log' % env.root)
+    if (env.environment == "staging-environment"):
+        pass
+    else:
+        run('sudo /etc/init.d/mwana-route restart')
+        # print out the top of the log file in case there are errors
+        import time
+        time.sleep(2)
+        run('head -n 15 %s/route.log' % env.root)
 
 
 def syncdb():

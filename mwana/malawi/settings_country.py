@@ -72,3 +72,6 @@ SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'mwana.malawi.migrations.rapidsms',
     'locations': 'mwana.malawi.migrations.locations',
 }
+
+# reduce noise in logs
+LOG_LEVEL = "INFO"
