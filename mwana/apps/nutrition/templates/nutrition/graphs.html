@@ -154,7 +154,7 @@ google.setOnLoadCallback(drawWastingTable);
 datePickerController.addEvent(window, "load", function() {
       var start_opts = {
         // The ID of the associated form element
-        id:"start_date",
+        id:"startdate",
         // The date format to use
         format:"Y-ds-m-ds-d",
 
@@ -168,7 +168,7 @@ datePickerController.addEvent(window, "load", function() {
       };
       var end_opts = {
         // The ID of the associated form element
-        id:"start_date",
+        id:"enddate",
         // The date format to use
         format:"Y-ds-m-ds-d",
 
@@ -226,17 +226,12 @@ datePickerController.addEvent(window, "load", function() {
 	              {% endfor %}
                   </select>
               </td>
-              <td><label for="age">Age:</label></td>
-              <td>
-                  <select name="age" id="age" value="{{age}}">
-                      {% for age in age_opts %}
-                      <option value="{{ age }}"
-		              {% ifequal selected_age age %} 
-		              selected="selected" 
-		              {% endifequal %}>{{ age }}</option>
-	              {% endfor %}
-                  </select>
-              </td>
+              <td><label for="startage">Age from:</label></td>
+              <td><input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" /></td>
+              <td><label for="endage">Age to:</label></td>
+              <td><input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" /></td>
+          </tr>
+          <tr>
               <td><label for="percent">As percentage:</label></td>
               <td><input type="checkbox" name="percent"
                          value="checked" id="percent" 

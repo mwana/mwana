@@ -39,12 +39,11 @@ def graphs(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     gender_opts = sorted(["All", "Male", "Female"])
-    age_opts = sorted(["All", "0 - 1", "0 - 2", "0 - 5", "1 - 5", "2 - 5"])
     context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts, 
-               'age_opts': age_opts, 'selected_gender': request.GET.get('gender', "All"), 
-               'selected_age': request.GET.get('age', "All"), 'enddate': enddate, 
-               'selected_location': selected_location, 'startdate': startdate,
-               'selected_percent': request.GET.get('percent', "checked") } 
+    'selected_gender': request.GET.get('gender', "All"),'enddate': enddate, 
+    'selected_location': selected_location, 'startdate': startdate,
+    'selected_percent': request.GET.get('percent', "checked"),
+    'startage': request.GET.get('startage', 0), 'endage': request.GET.get('endage', 5)} 
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
