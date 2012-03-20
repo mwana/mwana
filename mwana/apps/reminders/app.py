@@ -189,16 +189,22 @@ class App(rapidsms.apps.base.AppBase):
 
     def handle_mayi(self, msg, event):
         """Handles continuum of care submissions.
-    
-        Arguments:
-        - `msg`:
-        - `event`:
         """
         
-        if (len(msg.text.split()) > 4):
+        # Only allow registered HSA's to register mothers for care
+        if not msg.contact:
+            msg.respond(_("Please register as a Mobile agent to register mothers for care."
+                          " send JOIN <HSA> <CLINIC CODE> <ZONE #> <YOUR NAME>"))
+            return True
+        
+
+        if (len(msg.text.split()) >= 4):
             part_msg, cell_number = msg.text.rsplit(" ", 1)
             msg.text = part_msg
-        date_str, patient_name = self._parse_message(msg)
+            date_str, patient_name = self._parse_message(msg)
+        else:
+            date_str, patient_name = self._parse_message(msg)
+            
         if patient_name: # the date is not optional
             if date_str:
                 date = self._parse_date(date_str)
@@ -213,8 +219,6 @@ class App(rapidsms.apps.base.AppBase):
                 patient, created = Contact.objects.get_or_create(
                                             name=patient_name,
                                             location=msg.contact.location)
-            else:
-                patient = Contact.objects.create(name=patient_name)
 
             # make sure the contact has the correct type (patient)
             patient_t = const.get_patient_type()
@@ -232,9 +236,9 @@ class App(rapidsms.apps.base.AppBase):
                 msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s for a delivery date on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic. Her RAPIDSMS_ID is %(rsms_id)s."), cba=cba_name, gender=event.possessive_pronoun,
+                        "clinic. Her RAPIDSMS_ID is RS%(rsms_id)s."), cba=cba_name, gender=event.possessive_pronoun,
                         event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id="TODO")
+                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=patient.id)
                 return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="cooc", patient_conn=cell_number)
@@ -242,11 +246,11 @@ class App(rapidsms.apps.base.AppBase):
             msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s for a delivery date on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic. Her RAPIDSMS_ID is %(rsms_id)s."), cba=cba_name, gender=gender,
-                        event=event.name.lower(), rsms_id="TODO",
+                        "clinic. Her RAPIDSMS_ID is RS%(rsms_id)s."), cba=cba_name, gender=gender,
+                        event=event.name.lower(), rsms_id=patient.id,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
-            msg.respond(_("Sorry, I didn't understand that.") + " " +
-                        self.HELP_TEXT % {'event_lower': event.name.lower(),
-                                          'event_upper': event.name.upper()})
+            msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "
+                      "MAYI <DELIVERY_DATE> <MOTHERS_NAME> <OPTIONAL_MOTHERS_CELL_NUMBER>"))
+                      
         return True

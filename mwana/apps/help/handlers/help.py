@@ -4,7 +4,7 @@ from rapidsms.models import Contact
 from mwana.apps.help.models import HelpRequest
 from rapidsms.messages.outgoing import OutgoingMessage
 
-RESPONSE           = "Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon."
+HELP_RESPONSE      = "Sorry you're having trouble%s. Your help request has been forwarded to a support team member and they will call you soon."
 ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s as soon as you can!"
 CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s as soon as you can!"
 CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s as soon as you can!"
@@ -49,6 +49,6 @@ class HelpHandler(KeywordHandler):
             OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
         
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
-        self.respond(RESPONSE, person=person_arg)
+        self.respond(HELP_RESPONSE % (person_arg))
                                          
         
