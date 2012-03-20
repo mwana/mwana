@@ -63,7 +63,8 @@ class PatientEvent(models.Model):
     STATUS_CHOICES = (
         ('new', 'New birth registered'),
         ('notified', 'Clinic notified of new birth'),
-        ('sent', 'Birth details sent to clinic')    #set when server receives updates to a sample record
+        ('sent', 'Birth details sent to clinic'),
+        ('cooc', 'New continuum of care registered'),#set when server receives updates to a sample record
                                                 #AFTER this result has already been sent to the clinic.
                                                 #if result has not yet been sent, it keeps status 'new'.
                                                 #the updated data may or may not merit sending the
@@ -78,6 +79,7 @@ class PatientEvent(models.Model):
     cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events',
                                  limit_choices_to={'contact__types__slug': 
                                           'cba'},verbose_name='CBA Connection')
+    patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
     date = models.DateField()
     date_logged = models.DateTimeField()
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)   #New field added to accomodate birth notification status

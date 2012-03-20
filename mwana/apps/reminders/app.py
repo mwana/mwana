@@ -120,6 +120,11 @@ class App(rapidsms.apps.base.AppBase):
         event = self._get_event(event_slug)
         if not event:
             return False
+        # handle mayi messages differently.
+        if event_slug == "mayi":
+            self.handle_mayi(msg, event)
+            return True
+
         date_str, patient_name = self._parse_message(msg)
         if patient_name: # the date is optional
             if date_str:
@@ -174,6 +179,71 @@ class App(rapidsms.apps.base.AppBase):
                         "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=gender,
                         event=event.name.lower(),
+                        date=date.strftime('%d/%m/%Y'), name=patient.name)
+        else:
+            msg.respond(_("Sorry, I didn't understand that.") + " " +
+                        self.HELP_TEXT % {'event_lower': event.name.lower(),
+                                          'event_upper': event.name.upper()})
+        return True
+
+
+    def handle_mayi(self, msg, event):
+        """Handles continuum of care submissions.
+    
+        Arguments:
+        - `msg`:
+        - `event`:
+        """
+        
+        if (len(msg.text.split()) > 4):
+            part_msg, cell_number = msg.text.rsplit(" ", 1)
+            msg.text = part_msg
+        date_str, patient_name = self._parse_message(msg)
+        if patient_name: # the date is not optional
+            if date_str:
+                date = self._parse_date(date_str)
+                if not date:
+                    msg.respond(_("Sorry, I couldn't understand that date. "
+                                "Please enter the date like so: "
+                                "DDMMYY, for example: 271011"))
+                    return True
+        
+            # fetch or create the patient
+            if msg.contact and msg.contact.location:
+                patient, created = Contact.objects.get_or_create(
+                                            name=patient_name,
+                                            location=msg.contact.location)
+            else:
+                patient = Contact.objects.create(name=patient_name)
+
+            # make sure the contact has the correct type (patient)
+            patient_t = const.get_patient_type()
+            if not patient.types.filter(pk=patient_t.pk).count():
+                patient.types.add(patient_t)
+
+            # make sure we don't create a duplicate patient event
+            if msg.contact:
+                cba_name = ' %s' % msg.contact.name
+            else:
+                cba_name = ''
+            if patient.patient_events.filter(event=event, date=date).count():
+                #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
+                #you and get on with it.
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                        "%(name)s for a delivery date on %(date)s. You will be notified when "
+                        "it is time for %(gender)s next appointment at the "
+                        "clinic. Her RAPIDSMS_ID is %(rsms_id)s."), cba=cba_name, gender=event.possessive_pronoun,
+                        event=event.name.lower(),
+                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id="TODO")
+                return True
+            patient.patient_events.create(event=event, date=date,
+                                          cba_conn=msg.connection, notification_status="cooc", patient_conn=cell_number)
+            gender = event.possessive_pronoun
+            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                        "%(name)s for a delivery date on %(date)s. You will be notified when "
+                        "it is time for %(gender)s next appointment at the "
+                        "clinic. Her RAPIDSMS_ID is %(rsms_id)s."), cba=cba_name, gender=gender,
+                        event=event.name.lower(), rsms_id="TODO",
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond(_("Sorry, I didn't understand that.") + " " +

@@ -71,6 +71,7 @@ DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA f
 SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'mwana.malawi.migrations.rapidsms',
     'locations': 'mwana.malawi.migrations.locations',
+    'reminders': 'mwana.malawi.migrations.reminders',
 }
 
 # reduce noise in logs
