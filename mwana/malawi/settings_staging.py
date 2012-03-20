@@ -26,7 +26,7 @@ TEMPLATE_DIRS = ("/home/mwana/staging-environment/code_root/mwana/malawi/templat
 #WHITELIST_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
 #                     "phase. We will notify you when the system is live."
 
-DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
+#DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
 
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
@@ -54,41 +54,41 @@ RAPIDSMS_TABS = [
 #})
 
 # Add the kannel backends for Zain and TNM
-INSTALLED_BACKENDS.update({
-    "zain" : {
-        "ENGINE":  "rapidsms.backends.kannel",
-        "host": "127.0.0.1",
-        "port": 8081,
-        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "zain-modem",
-                           "from": "+265999279085", # will be overridden; set for consistency
-                           "username": "rapidsms",
-                           "password": ""}, # set password in localsettings.py
-        "coding": 0,
-        "charset": "ascii",
-        "encode_errors": "ignore", # strip out unknown (unicode) characters
-    },
-    "tnm" : {
-        "ENGINE":  "rapidsms.backends.kannel",
-        "host": "127.0.0.1",
-        "port": 8082,
-        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "tnm-smpp",
-                           "from": "88160", # not set automatically by SMSC
-                           "username": "rapidsms",
-                           "password": ""}, # set password in localsettings.py
-        "coding": 0,
-        "charset": "ascii",
-        "encode_errors": "ignore", # strip out unknown (unicode) characters
-    }
-})
+# INSTALLED_BACKENDS.update({
+#     "zain": {
+#         "ENGINE":  "rapidsms.backends.kannel",
+#         "host": "127.0.0.1",
+#         "port": 8081,
+#         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+#         "sendsms_params": {"smsc": "zain-modem",
+#                            "from": "+265999279085",  # will be overridden; set for consistency
+#                            "username": "rapidsms",
+#                            "password": ""},  # set password in localsettings.py
+#         "coding": 0,
+#         "charset": "ascii",
+#         "encode_errors": "ignore",  # strip out unknown (unicode) characters
+#     },
+#     "tnm": {
+#         "ENGINE":  "rapidsms.backends.kannel",
+#         "host": "127.0.0.1",
+#         "port": 8082,
+#         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
+#         "sendsms_params": {"smsc": "tnm-smpp",
+#                            "from": "88160",  # not set automatically by SMSC
+#                            "username": "rapidsms",
+#                            "password": ""},  # set password in localsettings.py
+#         "coding": 0,
+#         "charset": "ascii",
+#         "encode_errors": "ignore",  # strip out unknown (unicode) characters
+#     }
+# })
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "mwana_legacy_staging",
         "USER": "mwana",
-        "PASSWORD": "", # configure in localsettings.py
+        "PASSWORD": "",  # configure in localsettings.py
         "HOST": "localhost",
         "TEST_DATABASE_NAME": "test_mwana_legacy_staging",
     }
@@ -105,7 +105,7 @@ LOG_LEVEL = "DEBUG"
 LOG_FILE = "/var/log/rapidsms/rapidsms.route.log"
 DJANGO_LOG_FILE = "/var/log/rapidsms/rapidsms.django.log"
 LOG_FORMAT = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
-LOG_SIZE = 1000000 # in bytes
+LOG_SIZE = 1000000  # in bytes
 LOG_BACKUPS = 256     # number of logs to keep around
 
 # Configure email-based logging for errors & exceptions:

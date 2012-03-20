@@ -64,7 +64,7 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
 RAPIDSMS_TABS.append(('growth_index', 'Growth Monitor'))
 RAPIDSMS_TABS.append(('growth_graphs', 'Nutrition Reports'))
 
-DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
+#DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions
@@ -75,4 +75,4 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 # reduce noise in logs
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "DEBUG"

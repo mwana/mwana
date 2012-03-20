@@ -4,7 +4,7 @@ from rapidsms.models import Contact
 from mwana.apps.help.models import HelpRequest
 from rapidsms.messages.outgoing import OutgoingMessage
 
-HELP_RESPONSE      = "Sorry you're having trouble%s. Your help request has been forwarded to a support team member and they will call you soon."
+HELP_RESPONSE      = "Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon."
 ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s as soon as you can!"
 CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s as soon as you can!"
 CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s as soon as you can!"
@@ -30,7 +30,7 @@ class HelpHandler(KeywordHandler):
         # create the "ticket" in the db
         HelpRequest.objects.create(requested_by=self.msg.connection,
                                    additional_text=text)
-        
+
         params = {"phone": self.msg.connection.identity}
         resp_template = ANONYMOUS_FORWARD
         if self.msg.connection.contact:
@@ -38,17 +38,15 @@ class HelpHandler(KeywordHandler):
             if self.msg.connection.contact.location:
                 params["location"] = self.msg.connection.contact.location
                 resp_template = CON_LOC_FORWARD
-            else: 
+            else:
                 resp_template = CONTACT_FORWARD
-        
+
         if text:
             resp_template = resp_template + " " + ADDITIONAL_INFO
             params["message"] = text
 
+        person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
+        self.respond(HELP_RESPONSE % {'person':person_arg})
+
         for help_admin in Contact.active.filter(is_help_admin=True):
             OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
-        
-        person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
-        self.respond(HELP_RESPONSE % (person_arg))
-                                         
-        
