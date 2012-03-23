@@ -14,6 +14,7 @@ from django.views.generic import list_detail
 
 from .models import *
 from .table import AssessmentTable
+from .graphs import NutritionGraphs
 
 
 DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
@@ -38,12 +39,22 @@ def graphs(request):
     template_name= "nutrition/graphs.html"
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
-    gender_opts = sorted(["All", "Male", "Female"])
+    gender_opts = sorted(["Both", "Male", "Female"])
+    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate))
+    if selected_location != "All Districts":
+        r = NutritionGraphs(asses, selected_location)
+        weight_count, height_count, muac_count, weight_data, stunt_data, wasting_data, locations = r.get_facilities_data()
+    else:
+        r = NutritionGraphs(asses)
+        weight_count, height_count, muac_count, weight_data, stunt_data, wasting_data, locations = r.get_districts_data()
     context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts, 
-    'selected_gender': request.GET.get('gender', "All"),'enddate': enddate, 
+    'selected_gender': request.GET.get('gender', "Both"),'enddate': enddate, 
     'selected_location': selected_location, 'startdate': startdate,
     'selected_percent': request.GET.get('percent', "checked"),
-    'startage': request.GET.get('startage', 0), 'endage': request.GET.get('endage', 5)} 
+    'startage': request.GET.get('startage', 0), 'endage': request.GET.get('endage', 5),
+    'weight_count': weight_count, 'height_count': height_count, 'muac_count': muac_count,
+    'weight_data': weight_data, 'stunt_data': stunt_data, 'wasting_data': wasting_data,
+    'locations': locations }
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 

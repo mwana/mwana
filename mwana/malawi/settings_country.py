@@ -75,4 +75,4 @@ SOUTH_MIGRATION_MODULES = {
 }
 
 # reduce noise in logs
-LOG_LEVEL = "DEBUG"
+LOG_LEVEL = "INFO"

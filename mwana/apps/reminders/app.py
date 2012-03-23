@@ -181,9 +181,11 @@ class App(rapidsms.apps.base.AppBase):
                         event=event.name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
+            if event_slug == "mwana":
+                self.HELP_TEXT = _("To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>.")
             msg.respond(_("Sorry, I didn't understand that.") + " " +
                         self.HELP_TEXT % {'event_lower': event.name.lower(),
-                                          'event_upper': event.name.upper()})
+                                          'event_upper': event_slug.upper()})
         return True
 
 
@@ -233,21 +235,20 @@ class App(rapidsms.apps.base.AppBase):
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
-                        "%(name)s for a delivery date on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next appointment at the "
-                        "clinic. Her RAPIDSMS_ID is RS%(rsms_id)s."), cba=cba_name, gender=event.possessive_pronoun,
-                        event=event.name.lower(),
+                msg.respond(_("Thanks! You have registered "
+                        "%(name)s for a delivery on %(date)s. You will be notified "
+                        "for %(gender)s next clinic appointment."
+                        " Her RAPIDSMS_ID is RS%(rsms_id)s."), gender=event.possessive_pronoun,
                         date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=patient.id)
                 return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="cooc", patient_conn=cell_number)
             gender = event.possessive_pronoun
-            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
-                        "%(name)s for a delivery date on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next appointment at the "
-                        "clinic. Her RAPIDSMS_ID is RS%(rsms_id)s."), cba=cba_name, gender=gender,
-                        event=event.name.lower(), rsms_id=patient.id,
+            msg.respond(_("Thanks! You have registered "
+                        "%(name)s for a delivery on %(date)s. You will be notified for "
+                        "%(gender)s next clinic appointment."
+                        " Her RAPIDSMS_ID is RS%(rsms_id)s."), gender=gender,
+                        rsms_id=patient.id,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "

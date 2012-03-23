@@ -34,13 +34,13 @@
 function drawUnderweightChart() {
     // Create and populate the data table.
     var data = new google.visualization.DataTable();
-    var raw_data = [['Mild', 29.95, 28.05, 27.5],
-                    ['Moderate', 10.72, 10.37, 10.06],
-                    ['Severe', 4.00, 3.06, 2.8]];
+    var raw_data = {{weight_data|safe}};
     
-    var districts = ['Chikwawa', 'Chiradzulu', 'Salima'];
+    var districts = {{locations|safe}};
     
-    data.addColumn('string', 'Districts');
+    var chart_height = districts.length * 100;
+
+    data.addColumn('string', 'Locations');
     for (var i = 0; i  < raw_data.length; ++i) {
         data.addColumn('number', raw_data[i][0]);    
     }
@@ -59,10 +59,11 @@ function drawUnderweightChart() {
     // Create and draw the visualization.
     new google.visualization.BarChart(document.getElementById('underweight_chart')).
         draw(data,
-             {title:"Incidence as percentage of reports sent",
-              width:700, height:600,
-              hAxis: {title: "Percentage %"},
-              vAxis: {title: "District"}}
+             {title:"Incidence of reports sent",
+              width:'100%', height:'100%',
+              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
+              hAxis: {title: "Reports"},
+              vAxis: {title: "Location"}}
             );
 }
 
@@ -90,6 +91,42 @@ function drawUnderweightTable() {
 
 }
 
+function drawStuntingChart() {
+    // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    var raw_data = {{stunt_data|safe}};
+    
+    var districts = {{locations|safe}};
+    
+    var chart_height = districts.length * 100;
+
+    data.addColumn('string', 'Locations');
+    for (var i = 0; i  < raw_data.length; ++i) {
+        data.addColumn('number', raw_data[i][0]);    
+    }
+    
+    data.addRows(districts.length);
+    
+    for (var j = 0; j < districts.length; ++j) {    
+        data.setValue(j, 0, districts[j].toString());    
+    }
+    for (var i = 0; i  < raw_data.length; ++i) {
+        for (var j = 1; j  < raw_data[i].length; ++j) {
+            data.setValue(j-1, i+1, raw_data[i][j]);    
+        }
+    }
+    
+    // Create and draw the visualization.
+    new google.visualization.BarChart(document.getElementById('stunting_chart')).
+        draw(data,
+             {title:"Incidence of reports sent",
+              width:'100%', height:'100%',
+              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
+              hAxis: {title: "Reports"},
+              vAxis: {title: "Location"}}
+            );
+}
+
 function drawStuntingTable() {
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'District');
@@ -114,6 +151,42 @@ function drawStuntingTable() {
 
 }
 
+function drawWastingChart() {
+    // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    var raw_data = {{wasting_data|safe}};
+    
+    var districts = {{locations|safe}};
+    
+    var chart_height = districts.length * 100;
+
+    data.addColumn('string', 'Locations');
+    for (var i = 0; i  < raw_data.length; ++i) {
+        data.addColumn('number', raw_data[i][0]);    
+    }
+    
+    data.addRows(districts.length);
+    
+    for (var j = 0; j < districts.length; ++j) {    
+        data.setValue(j, 0, districts[j].toString());    
+    }
+    for (var i = 0; i  < raw_data.length; ++i) {
+        for (var j = 1; j  < raw_data[i].length; ++j) {
+            data.setValue(j-1, i+1, raw_data[i][j]);    
+        }
+    }
+    
+    // Create and draw the visualization.
+    new google.visualization.BarChart(document.getElementById('wasting_chart')).
+        draw(data,
+             {title:"Incidence of reports sent",
+              width:'100%', height:'100%',
+              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
+              hAxis: {title: "Reports"},
+              vAxis: {title: "Location"}}
+            );
+}
+
 function drawWastingTable() {
     var data = new google.visualization.DataTable();
     data.addColumn('string', 'District');
@@ -136,14 +209,15 @@ function drawWastingTable() {
     
     table.draw(data, {allowHtml: true, showRowNumber: false});
 
-
 }
 
 
 
 google.setOnLoadCallback(drawUnderweightChart);
 google.setOnLoadCallback(drawUnderweightTable);
+google.setOnLoadCallback(drawStuntingChart);
 google.setOnLoadCallback(drawStuntingTable);
+google.setOnLoadCallback(drawWastingChart);
 google.setOnLoadCallback(drawWastingTable);
     </script>
 
@@ -250,14 +324,14 @@ datePickerController.addEvent(window, "load", function() {
   <h2>Underweight</h2>
   <div id="underweight_chart" style="width:700px; height:700px;">
   </div>
-  <div id="underweight_table" style="width:700px">
+  <div id="underweight_table" style="width:700px;">
   </div>
   <p><a href="#">Export supporting data to Excel.</a></p>
   
   <h2>Stunting</h2>
   <div id="stunting_chart" style="width:700px; height:700px;">
   </div>
-  <div id="stunting_table" style="width:700px">
+  <div id="stunting_table" style="width:700px;">
   </div>
   <p><a href="#">Export supporting data to Excel.</a></p>
 
