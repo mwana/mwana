@@ -165,11 +165,11 @@ class EventRegistration(TestScript):
     def testFacilityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanacl", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
-            kk     > mwana cl 4/3/2010 maria
+            kk     > mwana f 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanacl 4/3/2010 Nelly Daka
+            kk     > mwanaf 4/3/2010 Nelly Daka
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
@@ -181,11 +181,11 @@ class EventRegistration(TestScript):
     def testCommunityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanahm ", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanah ", gender='f')
         script = """
-            kk     > mwana hm 4/3/2010 maria
+            kk     > mwana h 4/3/2010 maria
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanahm 4/3/2010 Nelly Daka
+            kk     > mwanah 4/3/2010 Nelly Daka
             kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)

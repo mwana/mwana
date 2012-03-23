@@ -17,6 +17,7 @@ _ = lambda s: s
 
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
+    LOCATION_TYPES = {'f':'cl', 'h':'hm', 'clinic':'cl', 'cl':'cl', 'hm':'hm', 'fa':'cl'}
     
     DATE_RE = re.compile(r"[\d/.-]+")
     HELP_TEXT = _("To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
@@ -79,7 +80,9 @@ class App(rapidsms.apps.base.AppBase):
         keyword = msg.text.strip().split()[0].lower()
         rest = msg.text.strip().split()[1:]
 
-        if keyword in ["mwanacl", "mwanahm"]:
+        #TODO This is a quick way of implementing registration of
+        #facility and/or home births. Use a longer term solution later
+        if 'mwana' in keyword and len('mwana') < len(keyword):
             keyword = keyword.replace("mwana" ,"mwana ", True)
 
         to_parse = keyword.split() + rest
@@ -88,8 +91,8 @@ class App(rapidsms.apps.base.AppBase):
         name = ''
         location_type = None
         
-        if parts and parts[0].lower() in ['hm', 'cl']:
-            location_type = parts[0].lower()
+        if parts and parts[0].lower() in self.LOCATION_TYPES:
+            location_type = self.LOCATION_TYPES[parts[0].lower()]
             parts = parts[1:]
 
         for part in parts:
