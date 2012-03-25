@@ -168,9 +168,9 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
             kk     > mwana f 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a facility birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > mwanaf 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a facility birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -184,9 +184,11 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwanah ", gender='f')
         script = """
             kk     > mwana h 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwana h 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
             kk     > mwanah 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     < Thank you Rupiah Banda! You have successfully registered a home birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')

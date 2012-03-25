@@ -176,24 +176,28 @@ class App(rapidsms.apps.base.AppBase):
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=event.possessive_pronoun,
                         event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
+                        date=date.strftime('%d/%m/%Y'), name=patient.name,
+                        location_type = " " + {"cl":"facility", "hm":"home"}\
+                        [event_location_type] if event_location_type else "")
                 return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection,
                                           notification_status="new",
                                           event_location_type=event_location_type)
             gender = event.possessive_pronoun
-            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+            msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=gender,
                         event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
+                        date=date.strftime('%d/%m/%Y'), name=patient.name,
+                        location_type = " " + {"cl":"facility", "hm":"home"}\
+                        [event_location_type] if event_location_type else "")
         else:
             msg.respond(_("Sorry, I didn't understand that.") + " " +
                         self.HELP_TEXT % {'event_lower': event.name.lower(),
