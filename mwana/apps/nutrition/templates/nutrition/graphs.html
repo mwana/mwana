@@ -1,3 +1,4 @@
+
 {% extends "layout.html" %}
 {% load i18n %}
 {% block title %}Nutrition Reports{% endblock %}
@@ -28,13 +29,31 @@
       google.load('visualization', '1', {packages: ['corechart','table']});
     </script>
     <script type="text/javascript">
-    function draw() {
-        
+    function drawPercentCharts() {
+        var weight_data_percent = {{weight_data_percent|safe}};
+        var xaxis = "Percentage % of reported values";
+        var stunt_data_percent = {{stunt_data_percent|safe}};
+        var wasting_data_percent = {{wasting_data_percent|safe}};
+
+        drawUnderweightChart(weight_data_percent, xaxis);
+        drawStuntingChart(stunt_data_percent, xaxis);
+        drawWastingChart(wasting_data_percent, xaxis);
     }
-function drawUnderweightChart() {
+
+function drawValueCharts(){
+    var weight_data = {{weight_data|safe}};
+    var xaxis = "Number of reported values";
+    var stunt_data = {{stunt_data|safe}};
+    var wasting_data = {{wasting_data|safe}};
+
+    drawUnderweightChart(weight_data, xaxis);
+    drawStuntingChart(stunt_data, xaxis);
+    drawWastingChart(wasting_data, xaxis);
+}
+function drawUnderweightChart(weight_data, xaxis) {
     // Create and populate the data table.
     var data = new google.visualization.DataTable();
-    var raw_data = {{weight_data|safe}};
+    var raw_data = weight_data;
     
     var districts = {{locations|safe}};
     
@@ -62,7 +81,7 @@ function drawUnderweightChart() {
              {title:"Incidence of reports sent",
               width:'100%', height:'100%',
               colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: "Reports"},
+              hAxis: {title: xaxis},
               vAxis: {title: "Location"}}
             );
 }
@@ -91,10 +110,10 @@ function drawUnderweightTable() {
 
 }
 
-function drawStuntingChart() {
+function drawStuntingChart(stunt_data, xaxis) {
     // Create and populate the data table.
     var data = new google.visualization.DataTable();
-    var raw_data = {{stunt_data|safe}};
+    var raw_data = stunt_data;
     
     var districts = {{locations|safe}};
     
@@ -122,7 +141,7 @@ function drawStuntingChart() {
              {title:"Incidence of reports sent",
               width:'100%', height:'100%',
               colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: "Reports"},
+              hAxis: {title: xaxis},
               vAxis: {title: "Location"}}
             );
 }
@@ -151,10 +170,10 @@ function drawStuntingTable() {
 
 }
 
-function drawWastingChart() {
+function drawWastingChart(wasting_data, xaxis) {
     // Create and populate the data table.
     var data = new google.visualization.DataTable();
-    var raw_data = {{wasting_data|safe}};
+    var raw_data = wasting_data;
     
     var districts = {{locations|safe}};
     
@@ -182,7 +201,7 @@ function drawWastingChart() {
              {title:"Incidence of reports sent",
               width:'100%', height:'100%',
               colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: "Reports"},
+              hAxis: {title: xaxis},
               vAxis: {title: "Location"}}
             );
 }
@@ -211,14 +230,7 @@ function drawWastingTable() {
 
 }
 
-
-
-google.setOnLoadCallback(drawUnderweightChart);
-google.setOnLoadCallback(drawUnderweightTable);
-google.setOnLoadCallback(drawStuntingChart);
-google.setOnLoadCallback(drawStuntingTable);
-google.setOnLoadCallback(drawWastingChart);
-google.setOnLoadCallback(drawWastingTable);
+google.setOnLoadCallback(drawPercentCharts);
     </script>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}labresults/javascripts/datepicker.js"></script>
@@ -263,85 +275,120 @@ datePickerController.addEvent(window, "load", function() {
 {% endblock javascripts %}
 
 {% block content %}
+<div class="module">
+  
 <div id="graphs" class="module">
-  <h1>Report Options</h1>
+  <h2>Report Options</h2>
   <form method="GET" id="options" action="">
-      <table width="700px" cellspacing="0" cellpadding="0" border="0">
-          <tr>
-              <td><label for="startdate">From:</label></td>
-              <td><input type="textbox" name="startdate" value='{{startdate}}' id="startdate" class="dateformat-Y-ds-m-ds-d" /></td>
-              <td><label for="enddate">To:</label></td>
-              <td><input type="textbox" name="enddate" value='{{enddate}}' id="enddate" class="dateformat-Y-ds-m-ds-d" /></td>
-              <td><label for="location">District:</label></td>
-              <td>
-                  <select name="location" id="location" value="{{location}}">
-                      <option value="All Districts"  
-                              {% ifequal selected_location "All Districts" %}
-                              selected="selected" 
-                              {% endifequal %}>All Districts</option>
-                      {% for location in districts %}
-                      <option value="{{ location }}"
-		              {% ifequal selected_location location %} 
-		              selected="selected" 
-		              {% endifequal %}>{{ location }}</option>
-	              {% endfor %}
-                  </select>
-              </td>
-          </tr>
-          <tr>
-              <td><label for="gender">Gender:</label></td>
-              <td>
-                  <select name="gender" id="gender" value="{{gender}}">
-                      {% for gender in gender_opts %}
-                      <option value="{{ gender }}"
-		              {% ifequal selected_gender gender %} 
-		              selected="selected" 
-		              {% endifequal %}>{{ gender }}</option>
-	              {% endfor %}
-                  </select>
-              </td>
-              <td><label for="startage">Age from:</label></td>
-              <td><input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" /></td>
-              <td><label for="endage">Age to:</label></td>
-              <td><input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" /></td>
-          </tr>
-          <tr>
-              <td><label for="percent">As percentage:</label></td>
-              <td><input type="checkbox" name="percent"
-                         value="checked" id="percent" 
-                         {% ifequal selected_percent "checked" %}
-                         checked="checked"
-                         {% endifequal %}/></td>
-          </tr>
-          <tr>
-              <td>&nbsp;</td>
-              <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
-          </tr>
-          
-      </table>
+    <table width="700px" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td><label for="startdate">From:</label></td>
+        <td><input type="textbox" name="startdate" value='{{startdate}}' id="startdate" class="dateformat-Y-ds-m-ds-d" /></td>
+        <td><label for="enddate">To:</label></td>
+        <td><input type="textbox" name="enddate" value='{{enddate}}' id="enddate" class="dateformat-Y-ds-m-ds-d" /></td>
+        <td><label for="location">District:</label></td>
+        <td>
+          <select name="location" id="location" value="{{location}}">
+            <option value="All Districts"  
+                    {% ifequal selected_location "All Districts" %}
+                    selected="selected" 
+                    {% endifequal %}>All Districts</option>
+            {% for location in districts %}
+            <option value="{{ location }}"
+		    {% ifequal selected_location location %} 
+		    selected="selected" 
+		    {% endifequal %}>{{ location }}</option>
+	    {% endfor %}
+          </select>
+        </td>
+      </tr>
+      <!-- <tr> -->
+      <!--     <td><label for="gender">Gender:</label></td> -->
+      <!--     <td> -->
+      <!--         <select name="gender" id="gender" value="{{gender}}"> -->
+      <!--             {% for gender in gender_opts %} -->
+      <!--             <option value="{{ gender }}" -->
+      <!--                     {% ifequal selected_gender gender %}  -->
+      <!--                     selected="selected"  -->
+      <!--                     {% endifequal %}>{{ gender }}</option> -->
+      <!--             {% endfor %} -->
+      <!--         </select> -->
+      <!--     </td> -->
+      <!--     <td><label for="startage">Age from:</label></td> -->
+      <!--     <td><input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" /></td> -->
+      <!--     <td><label for="endage">Age to:</label></td> -->
+      <!--     <td><input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" /></td> -->
+      <!-- </tr> -->
+      <!-- <tr> -->
+      <!--     <td><label for="percent">As percentage:</label></td> -->
+      <!--     <td><input type="checkbox" name="percent" -->
+      <!--                value="checked" id="percent"  -->
+      <!--                {% ifequal selected_percent "checked" %} -->
+      <!--                checked="checked" -->
+      <!--                {% endifequal %}/></td> -->
+      <!-- </tr> -->
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
+      </tr>
+      
+    </table>
   </form>
+</div> 
 
+<div class="module">
   <h2>Underweight</h2>
+  <div class="toolbar" style="whitespace:nowrap;"> 
+    <a href="#underweight_percent"
+       id="underweight_percent" 
+       onClick="return drawPercentCharts()">Graph as Percentages</a>
+    <a href="#underweight_values" 
+       id="underweight_values" 
+       onClick="return drawValueCharts()">Graph as Values</a>
+  </div>
   <div id="underweight_chart" style="width:700px; height:700px;">
   </div>
   <div id="underweight_table" style="width:700px;">
+    <table width="700px" cellspacing="" cellpadding="" border="">
+      
+    </table>
   </div>
   <p><a href="#">Export supporting data to Excel.</a></p>
-  
+</div>
+
+<div class="module">
   <h2>Stunting</h2>
-  <div id="stunting_chart" style="width:700px; height:700px;">
-  </div>
-  <div id="stunting_table" style="width:700px;">
-  </div>
-  <p><a href="#">Export supporting data to Excel.</a></p>
+  <div class="toolbar" style="whitespace:nowrap;">
+    <a href="#stunting_percent"
+       id="stunting_percent" 
+       onClick="return drawPercentCharts()">Graph as Percentages</a>
+    <a href="#stunting_values" 
+       id="stunting_values" i
+       onClick="return drawValueCharts()">Graph as Values</a></p>
+</div>
+<div id="stunting_chart" style="width:700px; height:700px;">
+</div>
+<div id="stunting_table" style="width:700px;">
+</div>
+<p><a href="#">Export supporting data to Excel.</a></p>
+</div>
 
-
+<div class="module">
   <h2>Wasting</h2>
+  <div class="toolbar" style="whitespace:nowrap;">
+    <a href="#wasting_percent"
+       id="wasting_percent" 
+       onClick="return drawPercentCharts()">Graph as Percentages</a>
+    <a href="#wasting_values" 
+       id="wasting_values" 
+       onClick="return drawValueCharts()">Graph as Values</a>
+  </div>
   <div id="wasting_chart" style="width:700px; height:700px;">
   </div>
   <div id="wasting_table" style="width:700px">
   </div>
   <p><a href="#">Export supporting data to Excel.</a></p>
-  
-</div> 
+</div>
+
+</div>
 {% endblock content %}

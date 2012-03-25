@@ -43,18 +43,19 @@ def graphs(request):
     asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate))
     if selected_location != "All Districts":
         r = NutritionGraphs(asses, selected_location)
-        weight_count, height_count, muac_count, weight_data, stunt_data, wasting_data, locations = r.get_facilities_data()
+        data = r.get_facilities_data()
     else:
         r = NutritionGraphs(asses)
-        weight_count, height_count, muac_count, weight_data, stunt_data, wasting_data, locations = r.get_districts_data()
+        data = r.get_districts_data()
     context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts, 
     'selected_gender': request.GET.get('gender', "Both"),'enddate': enddate, 
     'selected_location': selected_location, 'startdate': startdate,
     'selected_percent': request.GET.get('percent', "checked"),
     'startage': request.GET.get('startage', 0), 'endage': request.GET.get('endage', 5),
-    'weight_count': weight_count, 'height_count': height_count, 'muac_count': muac_count,
-    'weight_data': weight_data, 'stunt_data': stunt_data, 'wasting_data': wasting_data,
-    'locations': locations }
+    'weight_count': data['weight_count'], 'height_count': data['height_count'], 'muac_count':data['muac_count'],
+    'weight_data': data['weight_data'], 'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
+    'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'], 'stunt_data_percent': data['stunt_data_percent'],
+    'wasting_data_percent': data['wasting_data_percent']}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
