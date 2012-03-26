@@ -9,6 +9,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
+from mwana.malawi.lib import py_cupom
 from mwana import const
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -204,6 +205,7 @@ class App(rapidsms.apps.base.AppBase):
             part_msg, cell_number = msg.text.rsplit(" ", 1)
             msg.text = part_msg
             date_str, patient_name = self._parse_message(msg)
+            msg.text = " ".join([part_msg, cell_number])
         else:
             date_str, patient_name = self._parse_message(msg)
             
@@ -236,19 +238,17 @@ class App(rapidsms.apps.base.AppBase):
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
                 msg.respond(_("Thanks! You have registered "
-                        "%(name)s for a delivery on %(date)s. You will be notified "
-                        "for %(gender)s next clinic appointment."
-                        " Her RAPIDSMS_ID is RS%(rsms_id)s."), gender=event.possessive_pronoun,
-                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=patient.id)
+                        "%(name)s's EDD as %(date)s. Her RemindMi_ID is Mi%(rsms_id)s, you will be notified for "
+                              "%(gender)s next clinic appointment."), gender=event.possessive_pronoun,
+                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=py_cupom.encode(patient.id, 5, True))
                 return True
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection, notification_status="cooc", patient_conn=cell_number)
             gender = event.possessive_pronoun
             msg.respond(_("Thanks! You have registered "
-                        "%(name)s for a delivery on %(date)s. You will be notified for "
-                        "%(gender)s next clinic appointment."
-                        " Her RAPIDSMS_ID is RS%(rsms_id)s."), gender=gender,
-                        rsms_id=patient.id,
+                        "%(name)s's EDD as %(date)s. Her RemindMi_ID is Mi%(rsms_id)s, you will be notified for "
+                        "%(gender)s next clinic appointment."), gender=gender,
+                        rsms_id=py_cupom.encode(patient.id, 5, True),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "

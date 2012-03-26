@@ -6,6 +6,7 @@
 {% block stylesheets %}
 {{ block.super }}
 <link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+<!-- <link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/tables.css" type="text/css" media="screen" /> -->
 <style type="text/css" media="screen">
   #options {padding: 0px 1em 20px;}
   #options table {border:0; margin-left:auto; margin-right:auto;}
@@ -17,8 +18,33 @@
   #underweight_chart, #underweight_table,
   #stunting_chart, #stunting_table,
   #wasting_chart, #wasting_table {
-  margin-left:auto; margin-right:auto;
+  margin-left:auto; margin-right:auto;}
+
+  /* nutrition table styles.*/
+  td, th {
+  padding: 0.5em;
+  border: 1px solid #aaa;
+  
+  /* reset the "look" of headers to match regular cells,
+  * since they can appear anywhere (col or row scope) */
+  font-weight: normal;
+  text-align: left;
   }
+
+  tbody th, tbody td {
+  border-color: #aaa;
+  }
+  tbody tr:first-child th, tbody tr:first-child td {
+  border-top-color: #aaa;
+  }
+  tbody th:first-child, tbody td:first-child {
+  border-left-color: #aaa;
+  }
+  /* restore the dark outer borders of the tbody */
+  tbody tr:first-child th, tbody tr:first-child td { border-top-color:    #aaa; }
+  tbody th:last-child,     tbody td:last-child     { border-right-color:  #aaa; }
+  tbody tr:last-child th,  tbody tr:last-child td  { border-bottom-color: #aaa; }
+  tbody th:first-child,    tbody td:first-child    { border-left-color:   #aaa; }
 </style>
 {% endblock stylesheets %}
 
@@ -348,19 +374,20 @@ datePickerController.addEvent(window, "load", function() {
   </div>
   <div id="underweight_chart" style="width:700px; height:700px;">
   </div>
+  
   <div id="underweight_table" class="table-container" style="width:700px;">
     <table width="700px" cellspacing="" cellpadding="" border="">
       <thead>
         <tr>
-          <td>Location</td>
-          <td>Weight Captured</td>
-          <td>Weight Efficiency</td>
-          <td>Obese</td>
-          <td>Overweight</td>
-          <td>Normal</td>
-          <td>Mild</td>
-          <td>Moderate</td>
-          <td>Severe</td>
+          <th>Location</th>
+          <th>Weight Captured</th>
+          <th>Weight Efficiency</th>
+          <th>Obese</th>
+          <th>Overweight</th>
+          <th>Normal</th>
+          <th>Mild</th>
+          <th>Moderate</th>
+          <th>Severe</th>
         </tr>
       </thead>
       <tbody>
@@ -401,14 +428,14 @@ datePickerController.addEvent(window, "load", function() {
     <table width="700px" cellspacing="" cellpadding="" border="">
       <thead>
         <tr>
-          <td>Location</td>
-          <td>Height Captured</td>
-          <td>Height Efficiency</td>
-          <td>Very Tall</td>
-          <td>Normal</td>
-          <td>Mild</td>
-          <td>Moderate</td>
-          <td>Severe</td>
+          <th>Location</th>
+          <th>Height Captured</th>
+          <th>Height Efficiency</th>
+          <th>Very Tall</th>
+          <th>Normal</th>
+          <th>Mild</th>
+          <th>Moderate</th>
+          <th>Severe</th>
         </tr>
       </thead>
       <tbody>
@@ -451,16 +478,16 @@ datePickerController.addEvent(window, "load", function() {
     <table width="700px" cellspacing="" cellpadding="" border="">
       <thead>
         <tr>
-          <td>Location</td>
-          <td>MUAC Captured</td>
-          <td>MUAC Efficiency</td>
-          <td>Height Captured</td>
-          <td>Unusual</td>
-          <td>Normal</td>
-          <td>Mild</td>
-          <td>Moderate</td>
-          <td>Severe</td>
-          <td>Oedema</td>
+          <th>Location</th>
+          <th>MUAC Captured</th>
+          <th>MUAC Efficiency</th>
+          <th>Height Captured</th>
+          <th>Unusual</th>
+          <th>Normal</th>
+          <th>Mild</th>
+          <th>Moderate</th>
+          <th>Severe</th>
+          <th>Oedema</th>
         </tr>
       </thead>
       <tbody>
