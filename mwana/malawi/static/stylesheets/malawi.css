@@ -51,3 +51,29 @@
     padding:16px 0 16px 8px;
     font-size:13px;
 }
+
+  /* nutrition table styles.*/
+  td, th {
+  padding: 0.5em;
+  border: 1px solid #aaa;
+  
+  /* reset the "look" of headers to match regular cells,
+  * since they can appear anywhere (col or row scope) */
+  font-weight: normal;
+  text-align: left;
+  }
+
+  tbody th, tbody td {
+  border-color: #aaa;
+  }
+  tbody tr:first-child th, tbody tr:first-child td {
+  border-top-color: #aaa;
+  }
+  tbody th:first-child, tbody td:first-child {
+  border-left-color: #aaa;
+  }
+  /* restore the dark outer borders of the tbody */
+  tbody tr:first-child th, tbody tr:first-child td { border-top-color:    #aaa; }
+  tbody th:last-child,     tbody td:last-child     { border-right-color:  #aaa; }
+  tbody tr:last-child th,  tbody tr:last-child td  { border-bottom-color: #aaa; }
+  tbody th:first-child,    tbody td:first-child    { border-left-color:   #aaa; }
