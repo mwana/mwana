@@ -5,7 +5,8 @@
 
 {% block stylesheets %}
 {{ block.super }}
-<link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/datepicker.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" type="text/css" media="screen" />
 <style type="text/css" media="screen">
   #options {padding: 0px 1em 20px;}
   #options table {border:0; margin-left:auto; margin-right:auto;}
@@ -233,7 +234,7 @@ function drawWastingTable() {
 google.setOnLoadCallback(drawPercentCharts);
     </script>
 
-<script type="text/javascript" src="{{ MEDIA_URL }}labresults/javascripts/datepicker.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
 <script type="text/javascript">
 // <![CDATA[     
    
