@@ -174,9 +174,9 @@ class NutritionGraphs(object):
                 weight_captured[facility] = fac_asses.exclude(underweight='N').count()
                 height_captured[facility] = fac_asses.exclude(stunting='N').count()
 #                muac_captured[facility] = 
-                self.update_underweight_data(fac_asses) 
-                self.update_stunting_data(fac_asses) 
-                self.update_wasting_data(fac_asses)
+                self.update_underweight_data(fac_asses, facility) 
+                self.update_stunting_data(fac_asses, facility) 
+                self.update_wasting_data(fac_asses, facility)
 
             facility_locations = active_district_facilities[district]
         # return facilities data
