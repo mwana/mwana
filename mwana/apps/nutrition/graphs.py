@@ -25,11 +25,14 @@ class NutritionGraphs(object):
         self.stunting_data_percent = [['Very Tall'],['Normal'],['Mild'], ['Moderate'], ['Severe']]
         self.wasting_data_percent = [['Unusual'],['Normal'],['Mild'], ['Moderate'], ['Severe']]
         self.graph_data = {}
+        self.underweight_table = {}
+        self.stunting_table = {}
+        self.wasting_table = {}
 
     def percent(self, num=None, den=None):
-        if num is None:
+        if num is None or num == 0:
             return float(0)
-        elif den is None:
+        elif den is None or den == 0:
             return float(0)
         else:
             return 100 * num / den
@@ -48,55 +51,115 @@ class NutritionGraphs(object):
             district_facilities[district] = [str(unicode(item)) for item in facilities]
         return district_facilities
 
-    def update_underweight_data(self, fac_asses):
+    def update_underweight_data(self, fac_asses, location):
         """  Updates underweight status counts given a filtered queryset"""
+        obese = fac_asses.filter(underweight='V').count()
+        overweight = fac_asses.filter(underweight='T').count()
+        norm = fac_asses.filter(Q(underweight='G')|Q(underweight='L')).count()
+        mild = fac_asses.filter(underweight='M').count()
+        moderate = fac_asses.filter(underweight='U').count()
+        severe = fac_asses.filter(underweight='S').count()
         # update raw values data
-        self.underweight_data[0].append(fac_asses.filter(Q(underweight='V')).count())
-        self.underweight_data[1].append(fac_asses.filter(Q(underweight='T')).count())
-        self.underweight_data[2].append(fac_asses.filter(Q(underweight='G')|Q(underweight='L')).count())
-        self.underweight_data[3].append(fac_asses.filter(Q(underweight='M')).count())
-        self.underweight_data[4].append(fac_asses.filter(Q(underweight='U')).count())
-        self.underweight_data[5].append(fac_asses.filter(Q(underweight='S')).count())
+        self.underweight_data[0].append(obese)
+        self.underweight_data[1].append(overweight)
+        self.underweight_data[2].append(norm)
+        self.underweight_data[3].append(mild)
+        self.underweight_data[4].append(moderate)
+        self.underweight_data[5].append(severe)
         # update percentage data
         den = fac_asses.count()
-        self.underweight_data_percent[0].append(self.percent(fac_asses.filter(Q(underweight='V')).count(), den))
-        self.underweight_data_percent[1].append(self.percent(fac_asses.filter(Q(underweight='T')).count(), den))
-        self.underweight_data_percent[2].append(self.percent(fac_asses.filter(Q(underweight='G')|Q(underweight='L')).count(), den))
-        self.underweight_data_percent[3].append(self.percent(fac_asses.filter(Q(underweight='M')).count(), den))
-        self.underweight_data_percent[4].append(self.percent(fac_asses.filter(Q(underweight='U')).count(), den))
-        self.underweight_data_percent[5].append(self.percent(fac_asses.filter(Q(underweight='S')).count(), den))
+        self.underweight_data_percent[0].append(self.percent(obese, den))
+        self.underweight_data_percent[1].append(self.percent(overweight, den))
+        self.underweight_data_percent[2].append(self.percent(norm, den))
+        self.underweight_data_percent[3].append(self.percent(mild, den))
+        self.underweight_data_percent[4].append(self.percent(moderate, den))
+        self.underweight_data_percent[5].append(self.percent(severe, den))
+        # update table data
+        self.underweight_table[location] = []
+        self.underweight_table[location].append(fac_asses.exclude(underweight='N').count())
+        self.underweight_table[location].append("%")
+        self.underweight_table[location].append(obese)
+        self.underweight_table[location].append(overweight)
+        self.underweight_table[location].append(norm)
+        self.underweight_table[location].append(mild)
+        self.underweight_table[location].append(moderate)
+        self.underweight_table[location].append(severe)        
 
-    def update_stunting_data(self, fac_asses):
-        """  Updates stunting status counts given a queryset"""
-        # update raw values data
-        self.stunting_data[0].append(fac_asses.filter(Q(stunting='V')).count())
-        self.stunting_data[1].append(fac_asses.filter(Q(stunting='T')|Q(stunting='G')|Q(stunting='L')).count())
-        self.stunting_data[2].append(fac_asses.filter(Q(stunting='M')).count())
-        self.stunting_data[3].append(fac_asses.filter(Q(stunting='U')).count())
-        self.stunting_data[4].append(fac_asses.filter(Q(stunting='S')).count())
-        # update percentage data
+    def update_underweight_data(self, fac_asses, location):
+        """  Updates underweight status counts given a filtered queryset"""
+        metric = [fac_asses.filter(underweight='V').count(), fac_asses.filter(underweight='T').count(), fac_asses.filter(Q(underweight='G')|Q(underweight='L')).count(),fac_asses.filter(underweight='M').count(), fac_asses.filter(underweight='U').count(), fac_asses.filter(underweight='S').count()]
         den = fac_asses.count()
-        self.stunting_data_percent[0].append(self.percent(fac_asses.filter(Q(stunting='V')).count(), den))
-        self.stunting_data_percent[1].append(self.percent(fac_asses.filter(Q(stunting='T')|Q(stunting='G')|Q(stunting='L')).count(), den))
-        self.stunting_data_percent[2].append(self.percent(fac_asses.filter(Q(stunting='M')).count(), den))
-        self.stunting_data_percent[3].append(self.percent(fac_asses.filter(Q(stunting='U')).count(), den))
-        self.stunting_data_percent[4].append(self.percent(fac_asses.filter(Q(stunting='S')).count(), den))
+        self.underweight_table[location] = []
+        self.underweight_table[location].append(fac_asses.exclude(underweight='N').count())
+        self.underweight_table[location].append("%")
+        i = 0
+        while i < len(metric):
+            self.underweight_data[i].append(metric[i])
+            self.underweight_data_percent[i].append(self.percent(metric[i], den))
+            self.underweight_table[location].append(metric[i])
+            i += 1
 
-    def update_wasting_data(self, fac_asses):
-        """  Updates wasting status count given a queryset and status"""
-        # update raw values data
-        self.wasting_data[0].append(fac_asses.filter(Q(wasting='V')).count())
-        self.wasting_data[1].append(fac_asses.filter(Q(wasting='G')|Q(wasting='L')|Q(wasting='T')).count())
-        self.wasting_data[2].append(fac_asses.filter(Q(wasting='M')).count())
-        self.wasting_data[3].append(fac_asses.filter(Q(wasting='U')).count())
-        self.wasting_data[4].append(fac_asses.filter(Q(wasting='S')).count())
-        # update percentage data
-        den = fac_asses.count()
-        self.wasting_data_percent[0].append(self.percent(fac_asses.filter(Q(wasting='V')).count(), den))
-        self.wasting_data_percent[1].append(self.percent(fac_asses.filter(Q(wasting='G')|Q(wasting='L')|Q(wasting='T')).count(), den))
-        self.wasting_data_percent[2].append(self.percent(fac_asses.filter(Q(wasting='M')).count(), den))
-        self.wasting_data_percent[3].append(self.percent(fac_asses.filter(Q(wasting='U')).count(), den))
-        self.wasting_data_percent[4].append(self.percent(fac_asses.filter(Q(wasting='S')).count(), den))
+    def update_stunting_data(self, fac_asses, location):
+        """  Updates stunting status counts given a filtered queryset"""
+        metric = [fac_asses.filter(stunting='V').count(), fac_asses.filter(Q(stunting='T') | Q(stunting='G')|Q(stunting='L')).count(),fac_asses.filter(stunting='M').count(), fac_asses.filter(stunting='U').count(), fac_asses.filter(stunting='S').count()]
+        den = fac_asses.exclude(stunting='N').count()
+        self.stunting_table[location] = []
+        self.stunting_table[location].append(den)
+        self.stunting_table[location].append("%")
+        i = 0
+        while i < len(metric):
+            self.stunting_data[i].append(metric[i])
+            self.stunting_data_percent[i].append(self.percent(metric[i], den))
+            self.stunting_table[location].append(metric[i])
+            i += 1
+
+    def update_wasting_data(self, fac_asses, location):
+        """  Updates wasting status counts given a filtered queryset"""
+        metric = [fac_asses.filter(wasting='V').count(), fac_asses.filter(Q(wasting='T') | Q(wasting='G')|Q(wasting='L')).count(),fac_asses.filter(wasting='M').count(), fac_asses.filter(wasting='U').count(), fac_asses.filter(wasting='S').count()]
+        den = fac_asses.filter(muac__isnull=False).count()
+        self.wasting_table[location] = []
+        self.wasting_table[location].append(den)
+        self.wasting_table[location].append("%")
+        self.wasting_table[location].append(fac_asses.exclude(stunting='N').count())
+        i = 0
+        while i < len(metric):
+            self.wasting_data[i].append(metric[i])
+            self.wasting_data_percent[i].append(self.percent(metric[i], den))
+            self.wasting_table[location].append(metric[i])
+            i += 1
+        self.wasting_table[location].append(fac_asses.exclude(Q(oedema__isnull=True)|Q(oedema=False)).count())
+
+    # def update_stunting_data(self, fac_asses):
+    #     """  Updates stunting status counts given a queryset"""
+    #     # update raw values data
+    #     self.stunting_data[0].append(fac_asses.filter(Q(stunting='V')).count())
+    #     self.stunting_data[1].append(fac_asses.filter(Q(stunting='T')|Q(stunting='G')|Q(stunting='L')).count())
+    #     self.stunting_data[2].append(fac_asses.filter(Q(stunting='M')).count())
+    #     self.stunting_data[3].append(fac_asses.filter(Q(stunting='U')).count())
+    #     self.stunting_data[4].append(fac_asses.filter(Q(stunting='S')).count())
+    #     # update percentage data
+    #     den = fac_asses.count()
+    #     self.stunting_data_percent[0].append(self.percent(fac_asses.filter(Q(stunting='V')).count(), den))
+    #     self.stunting_data_percent[1].append(self.percent(fac_asses.filter(Q(stunting='T')|Q(stunting='G')|Q(stunting='L')).count(), den))
+    #     self.stunting_data_percent[2].append(self.percent(fac_asses.filter(Q(stunting='M')).count(), den))
+    #     self.stunting_data_percent[3].append(self.percent(fac_asses.filter(Q(stunting='U')).count(), den))
+    #     self.stunting_data_percent[4].append(self.percent(fac_asses.filter(Q(stunting='S')).count(), den))
+
+    # def update_wasting_data(self, fac_asses):
+    #     """  Updates wasting status count given a queryset and status"""
+    #     # update raw values data
+    #     self.wasting_data[0].append(fac_asses.filter(Q(wasting='V')).count())
+    #     self.wasting_data[1].append(fac_asses.filter(Q(wasting='G')|Q(wasting='L')|Q(wasting='T')).count())
+    #     self.wasting_data[2].append(fac_asses.filter(Q(wasting='M')).count())
+    #     self.wasting_data[3].append(fac_asses.filter(Q(wasting='U')).count())
+    #     self.wasting_data[4].append(fac_asses.filter(Q(wasting='S')).count())
+    #     # update percentage data
+    #     den = fac_asses.count()
+    #     self.wasting_data_percent[0].append(self.percent(fac_asses.filter(Q(wasting='V')).count(), den))
+    #     self.wasting_data_percent[1].append(self.percent(fac_asses.filter(Q(wasting='G')|Q(wasting='L')|Q(wasting='T')).count(), den))
+    #     self.wasting_data_percent[2].append(self.percent(fac_asses.filter(Q(wasting='M')).count(), den))
+    #     self.wasting_data_percent[3].append(self.percent(fac_asses.filter(Q(wasting='U')).count(), den))
+    #     self.wasting_data_percent[4].append(self.percent(fac_asses.filter(Q(wasting='S')).count(), den))
         
     def get_facilities_data(self):
         """Get facility data for each active facility in the district"""
@@ -117,9 +180,9 @@ class NutritionGraphs(object):
 
             facility_locations = active_district_facilities[district]
         # return facilities data
-        self.graph_data['weight_count'] = weight_captured
-        self.graph_data['height_count'] = height_captured
-        self.graph_data['muac_count'] = muac_captured
+        self.graph_data['weight_table'] = self.underweight_table
+        self.graph_data['stunt_table'] = self.stunting_table
+        self.graph_data['wasting_table'] = self.wasting_table
         self.graph_data['weight_data'] = self.underweight_data
         self.graph_data['stunt_data'] = self.stunting_data
         self.graph_data['wasting_data'] = self.wasting_data
@@ -131,23 +194,18 @@ class NutritionGraphs(object):
 
     def get_districts_data(self):
         """Get district data for each active district in the country"""
-        district_weight_captured = {}
-        district_height_captured = {}
-        district_muac_captured = {}
         district_locations = []
         for district in self.DISTRICTS:
             district_asses = self.asses.filter(healthworker__location__parent__parent__name=district)
             if district_asses.count() != 0:
-                district_weight_captured[district] = district_asses.exclude(underweight='N').count()
-                district_height_captured[district] = district_asses.exclude(stunting='N').count()
-                self.update_underweight_data(district_asses) 
-                self.update_stunting_data(district_asses) 
-                self.update_wasting_data(district_asses)
+                self.update_underweight_data(district_asses, district) 
+                self.update_stunting_data(district_asses, district) 
+                self.update_wasting_data(district_asses, district)
                 district_locations.append(district)
         # return district data
-        self.graph_data['weight_count'] = district_weight_captured
-        self.graph_data['height_count'] = district_height_captured
-        self.graph_data['muac_count'] = district_muac_captured
+        self.graph_data['weight_table'] = self.underweight_table
+        self.graph_data['stunt_table'] = self.stunting_table
+        self.graph_data['wasting_table'] = self.wasting_table
         self.graph_data['weight_data'] = self.underweight_data
         self.graph_data['stunt_data'] = self.stunting_data
         self.graph_data['wasting_data'] = self.wasting_data

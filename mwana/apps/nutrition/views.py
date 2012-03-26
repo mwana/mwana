@@ -52,7 +52,7 @@ def graphs(request):
     'selected_location': selected_location, 'startdate': startdate,
     'selected_percent': request.GET.get('percent', "checked"),
     'startage': request.GET.get('startage', 0), 'endage': request.GET.get('endage', 5),
-    'weight_count': data['weight_count'], 'height_count': data['height_count'], 'muac_count':data['muac_count'],
+    'weight_table': data['weight_table'], 'stunt_table': data['stunt_table'], 'wasting_table':data['wasting_table'],
     'weight_data': data['weight_data'], 'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
     'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'], 'stunt_data_percent': data['stunt_data_percent'],
     'wasting_data_percent': data['wasting_data_percent']}

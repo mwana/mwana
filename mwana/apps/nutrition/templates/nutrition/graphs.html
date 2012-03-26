@@ -140,7 +140,7 @@ function drawStuntingChart(stunt_data, xaxis) {
         draw(data,
              {title:"Incidence of reports sent",
               width:'100%', height:'100%',
-              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
+              colors: ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
               hAxis: {title: xaxis},
               vAxis: {title: "Location"}}
             );
@@ -200,7 +200,7 @@ function drawWastingChart(wasting_data, xaxis) {
         draw(data,
              {title:"Incidence of reports sent",
               width:'100%', height:'100%',
-              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
+              colors: ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
               hAxis: {title: xaxis},
               vAxis: {title: "Location"}}
             );
@@ -348,12 +348,40 @@ datePickerController.addEvent(window, "load", function() {
   </div>
   <div id="underweight_chart" style="width:700px; height:700px;">
   </div>
-  <div id="underweight_table" style="width:700px;">
+  <div id="underweight_table" class="table-container" style="width:700px;">
     <table width="700px" cellspacing="" cellpadding="" border="">
-      
+      <thead>
+        <tr>
+          <td>Location</td>
+          <td>Weight Captured</td>
+          <td>Weight Efficiency</td>
+          <td>Obese</td>
+          <td>Overweight</td>
+          <td>Normal</td>
+          <td>Mild</td>
+          <td>Moderate</td>
+          <td>Severe</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for location in locations %}
+        <tr>
+          <td>
+            {{location}}
+          </td>
+         {% for key, values in weight_table.items %}
+            {% if key == location %}
+              {% for item in values %}
+          <td>{{ item }}</td>
+              {% endfor %}
+            {% endif %}
+         {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
   </div>
-  <p><a href="#">Export supporting data to Excel.</a></p>
+  <p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export supporting data to Excel.</a></p>
 </div>
 
 <div class="module">
@@ -368,9 +396,42 @@ datePickerController.addEvent(window, "load", function() {
 </div>
 <div id="stunting_chart" style="width:700px; height:700px;">
 </div>
-<div id="stunting_table" style="width:700px;">
+<div id="stunting_table" class="table-container" style="width:700px;">
+
+    <table width="700px" cellspacing="" cellpadding="" border="">
+      <thead>
+        <tr>
+          <td>Location</td>
+          <td>Height Captured</td>
+          <td>Height Efficiency</td>
+          <td>Very Tall</td>
+          <td>Normal</td>
+          <td>Mild</td>
+          <td>Moderate</td>
+          <td>Severe</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for location in locations %}
+        <tr>
+          <td>
+            {{location}}
+          </td>
+         {% for key, values in stunt_table.items %}
+            {% if key == location %}
+              {% for item in values %}
+          <td>{{ item }}</td>
+              {% endfor %}
+            {% endif %}
+         {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
 </div>
-<p><a href="#">Export supporting data to Excel.</a></p>
+<p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export supporting data to Excel.</a></p>
 </div>
 
 <div class="module">
@@ -385,9 +446,44 @@ datePickerController.addEvent(window, "load", function() {
   </div>
   <div id="wasting_chart" style="width:700px; height:700px;">
   </div>
-  <div id="wasting_table" style="width:700px">
+  <div id="wasting_table" class="table-container" style="width:700px">
+
+    <table width="700px" cellspacing="" cellpadding="" border="">
+      <thead>
+        <tr>
+          <td>Location</td>
+          <td>MUAC Captured</td>
+          <td>MUAC Efficiency</td>
+          <td>Height Captured</td>
+          <td>Unusual</td>
+          <td>Normal</td>
+          <td>Mild</td>
+          <td>Moderate</td>
+          <td>Severe</td>
+          <td>Oedema</td>
+        </tr>
+      </thead>
+      <tbody>
+        {% for location in locations %}
+        <tr>
+          <td>
+            {{location}}
+          </td>
+         {% for key, values in wasting_table.items %}
+            {% if key == location %}
+              {% for item in values %}
+          <td>{{ item }}</td>
+              {% endfor %}
+            {% endif %}
+         {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
   </div>
-  <p><a href="#">Export supporting data to Excel.</a></p>
+  <p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export supporting data to Excel.</a></p>
 </div>
 
 </div>
