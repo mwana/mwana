@@ -48,7 +48,7 @@
     <table>
         <thead>
             <tr>
-                <th>Date Submitted</th><th>Facility</th><th>District</th><th>Interviewer Name</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th>
+                <th>Date Submitted</th><th>Facility</th><th>District</th><th>Interviewer Name</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th><th>Action Taken</th>
             </tr>
         </thead>
         <tbody>
@@ -65,19 +65,20 @@
                 <td>{{ ass.patient.age_in_months }}</td>
                 <td>{% if ass.height %}{{ ass.height }}{% endif %}</td>
                 <td>{% if ass.weight %}{{ ass.weight }}{% endif %}</td>
-                <td class="{% if ass.oedema %}oedema{% endif %}">{{ ass.oedema|yesno:"Yes,No, " }}</td>
-                <td class="{% if ass.muac %}{{ ass.get_wasting_display|slugify }}{% endif %}">{% if ass.muac %}{{ ass.muac }}{% endif %}</td>
-                <td class="{% if ass.weight4height %}{{ ass.get_wasting_display|slugify }}{% endif %}">{% if ass.weight4height %}{{ ass.weight4height }}{% endif %}</td>
+                <td {% if ass.oedema %}class="oedema"{% endif %}>{{ ass.oedema|yesno:"Yes,No, " }}</td>
+                <td {% if ass.muac %}class="{{ ass.get_wasting_display|slugify }}"{% endif %}>{% if ass.muac %}{{ ass.muac }}{% endif %}</td>
+                <td {% if ass.weight4height %}class="{{ ass.get_wasting_display|slugify }}"{% endif %}>{% if ass.weight4height %}{{ ass.weight4height }}{% endif %}</td>
                 <td class="{{ ass.get_wasting_display|slugify }}">{{ ass.get_wasting_display }}</td>
                 <td class="{{ ass.get_underweight_display|slugify }}">{% if ass.weight4age %}{{ ass.weight4age }}{% endif %}</td>
                 <td class="{{ ass.get_underweight_display|slugify }}">{{ ass.get_underweight_display }}</td>
                 <td class="{{ ass.get_stunting_display|slugify }}">{% if ass.height4age %}{{ ass.height4age }}{% endif %}</td>
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display }}</td>
                 <td>{{ ass.get_status_display }}</td>
+                <td></td>
             </tr>
             {% endfor %}
             <tr>
-                <td colspan="18">&nbsp;</td>
+                <td colspan="20">&nbsp;</td>
             </tr>
         </tbody>
     </table>
