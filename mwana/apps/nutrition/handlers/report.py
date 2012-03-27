@@ -408,9 +408,9 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'S'
  
                 if ass.muac is not None:
-                    if (survey.moderate_muac <= ass.muac <= survey.normal_muac):
+                    if (survey.mild_muac <= ass.muac <= survey.normal_muac):
                         ass.wasting = 'M'
-                    elif (survey.severe_muac <= ass.muac <= survey.moderate_muac):
+                    elif (survey.severe_muac <= ass.muac <= survey.mild_muac):
                         ass.wasting = 'U'
                     elif (ass.muac <= survey.severe_muac):
                         ass.wasting = 'S'
@@ -426,9 +426,9 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'G'
                     if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
                         ass.wasting = 'L'
-                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.moderate_muac <= ass.muac <= survey.normal_muac )):
+                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.mild_muac <= ass.muac <= survey.normal_muac )):
                         ass.wasting = 'M'
-                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.moderate_muac )):
+                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.mild_muac )):
                         ass.wasting = 'U'
                     if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= survey.severe_muac)):
                         ass.wasting = 'S'
