@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 {% load i18n %}
 {% block title %}Nutrition Reports{% endblock %}
@@ -8,295 +7,208 @@
 <link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
 <!-- <link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/tables.css" type="text/css" media="screen" /> -->
 <style type="text/css" media="screen">
-  #options {padding: 0px 1em 20px;}
-  #options table {border:0; margin-left:auto; margin-right:auto;}
-  #options td {border:0; white-space: nowrap;}
-  p {width:700px; text-align:right; padding:20px 0 30px 0;
-  margin-left:auto; margin-right:auto;}
-  label, input[type="text"] {float:left; display:block;}
-  label {font-weight: bold;}
-  #underweight_chart, #underweight_table,
-  #stunting_chart, #stunting_table,
-  #wasting_chart, #wasting_table {
-  margin-left:auto; margin-right:auto;}
+    #options {
+        padding:0 1em 20px;
+    }
 
-  /* nutrition table styles.*/
-  td, th {
-  padding: 0.5em;
-  border: 1px solid #aaa;
-  
-  /* reset the "look" of headers to match regular cells,
-  * since they can appear anywhere (col or row scope) */
-  font-weight: normal;
-  text-align: left;
-  }
+    #options table {
+        border:0;
+    }
 
-  tbody th, tbody td {
-  border-color: #aaa;
-  }
-  tbody tr:first-child th, tbody tr:first-child td {
-  border-top-color: #aaa;
-  }
-  tbody th:first-child, tbody td:first-child {
-  border-left-color: #aaa;
-  }
-  /* restore the dark outer borders of the tbody */
-  tbody tr:first-child th, tbody tr:first-child td { border-top-color:    #aaa; }
-  tbody th:last-child,     tbody td:last-child     { border-right-color:  #aaa; }
-  tbody tr:last-child th,  tbody tr:last-child td  { border-bottom-color: #aaa; }
-  tbody th:first-child,    tbody td:first-child    { border-left-color:   #aaa; }
+    #options td {
+        border:0;
+        white-space:nowrap;
+    }
+
+    p {
+        width:700px;
+        text-align:right;
+        margin-left:auto;
+        margin-right:auto;
+        padding:20px 0 30px;
+    }
+
+    label,input[type=text] {
+        float:left;
+        display:block;
+    }
+
+    label {
+        font-weight:700;
+    }
+
+    #underweight_chart,#underweight_table,#stunting_chart,#stunting_table,
+    #wasting_chart,#wasting_table {
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    td,th {
+        border:1px solid #aaa;
+        font-weight:400;
+        text-align:left;
+        padding:.5em;
+    }
+
+    tbody th,tbody td {
+        border-color:#aaa;
+    }
+
+    tbody tr:first-child th,tbody tr:first-child td {
+        border-top-color:#aaa;
+    }
+
+    tbody th:first-child,tbody td:first-child {
+        border-left-color:#aaa;
+    }
+
+    tbody th:last-child,tbody td:last-child {
+        border-right-color:#aaa;
+    }
+
+    tbody tr:last-child th,tbody tr:last-child td {
+        border-bottom-color:#aaa;
+    }
 </style>
 {% endblock stylesheets %}
 
 {% block javascripts %}
 {{ block.super }}
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-      google.load('visualization', '1', {packages: ['corechart','table']});
-    </script>
-    <script type="text/javascript">
+<script type="text/javascript">
+    google.load('visualization', '1', {packages: ['corechart','table']});
+</script>
+<script type="text/javascript">
+    // variables for ids
+        var weight = "underweight_chart";
+        var stunt = "stunting_chart";
+        var wasting = "wasting_chart";
+
+
     function drawPercentCharts() {
         var weight_data_percent = {{weight_data_percent|safe}};
         var xaxis = "Percentage % of reported values";
         var stunt_data_percent = {{stunt_data_percent|safe}};
         var wasting_data_percent = {{wasting_data_percent|safe}};
+        var chart_type = "percent";
 
-        drawUnderweightChart(weight_data_percent, xaxis);
-        drawStuntingChart(stunt_data_percent, xaxis);
-        drawWastingChart(wasting_data_percent, xaxis);
+        drawChart(weight_data_percent, xaxis, weight, chart_type);
+        drawChart(stunt_data_percent, xaxis, stunt, chart_type);
+        drawChart(wasting_data_percent, xaxis, wasting, chart_type);
     }
 
-function drawValueCharts(){
-    var weight_data = {{weight_data|safe}};
-    var xaxis = "Number of reported values";
-    var stunt_data = {{stunt_data|safe}};
-    var wasting_data = {{wasting_data|safe}};
+    function drawValueCharts(){
+        var weight_data = {{weight_data|safe}};
+        var xaxis = "Number of reported values";
+        var stunt_data = {{stunt_data|safe}};
+        var wasting_data = {{wasting_data|safe}};
+        var chart_type = "values"
 
-    drawUnderweightChart(weight_data, xaxis);
-    drawStuntingChart(stunt_data, xaxis);
-    drawWastingChart(wasting_data, xaxis);
-}
-function drawUnderweightChart(weight_data, xaxis) {
-    // Create and populate the data table.
-    var data = new google.visualization.DataTable();
-    var raw_data = weight_data;
-    
-    var districts = {{locations|safe}};
-    
-    var chart_height = districts.length * 100;
-
-    data.addColumn('string', 'Locations');
-    for (var i = 0; i  < raw_data.length; ++i) {
-        data.addColumn('number', raw_data[i][0]);    
+        drawChart(weight_data, xaxis, weight, chart_type);
+        drawChart(stunt_data, xaxis, stunt, chart_type);
+        drawChart(wasting_data, xaxis, wasting, chart_type);
     }
     
-    data.addRows(districts.length);
-    
-    for (var j = 0; j < districts.length; ++j) {    
-        data.setValue(j, 0, districts[j].toString());    
-    }
-    for (var i = 0; i  < raw_data.length; ++i) {
-        for (var j = 1; j  < raw_data[i].length; ++j) {
-            data.setValue(j-1, i+1, raw_data[i][j]);    
+    function drawChart(weight_data, xaxis, chart_id, chart_type) {
+        // Create and populate the data table.
+        var data = new google.visualization.DataTable();
+        var raw_data = weight_data;
+        
+        var districts = {{locations|safe}};
+        
+        var chart_height = districts.length * 100;
+
+        data.addColumn('string', 'Locations');
+        for (var i = 0; i  < raw_data.length; ++i) {
+            data.addColumn('number', raw_data[i][0]);    
         }
-    }
-    
-    // Create and draw the visualization.
-    new google.visualization.BarChart(document.getElementById('underweight_chart')).
-        draw(data,
-             {title:"Incidence of reports sent",
-              width:'100%', height:'100%',
-              colors: ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: xaxis},
-              vAxis: {title: "Location"}}
-            );
-}
-
-function drawUnderweightTable() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'District');
-    data.addColumn('number', 'Weight Captured');
-    data.addColumn('number', 'Weighing Efficiency');
-    data.addColumn('number', 'Mild');
-    data.addColumn('number', 'Moderate');
-    data.addColumn('number', 'Severe');
-    data.addRows([
-        ['Chikwawa', {v:5416, f:'5416'},{v:18, f:'18%'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
-        ['Chiradzulu', {v:755, f:'755'},{v:4, f:'4%'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
-        ['Salima', {v:789, f: '789'},{v:34, f: '34%'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
-    ]);
-
-    var table = new google.visualization.Table(document.getElementById('underweight_table'));
-    
-    // var formatter = new google.visualization.ArrowFormat();
-    // formatter.format(data, 1); // Apply formatter to second column
-    
-    table.draw(data, {allowHtml: true, showRowNumber: false});
-
-
-}
-
-function drawStuntingChart(stunt_data, xaxis) {
-    // Create and populate the data table.
-    var data = new google.visualization.DataTable();
-    var raw_data = stunt_data;
-    
-    var districts = {{locations|safe}};
-    
-    var chart_height = districts.length * 100;
-
-    data.addColumn('string', 'Locations');
-    for (var i = 0; i  < raw_data.length; ++i) {
-        data.addColumn('number', raw_data[i][0]);    
-    }
-    
-    data.addRows(districts.length);
-    
-    for (var j = 0; j < districts.length; ++j) {    
-        data.setValue(j, 0, districts[j].toString());    
-    }
-    for (var i = 0; i  < raw_data.length; ++i) {
-        for (var j = 1; j  < raw_data[i].length; ++j) {
-            data.setValue(j-1, i+1, raw_data[i][j]);    
+        
+        data.addRows(districts.length);
+        
+        for (var j = 0; j < districts.length; ++j) {    
+            data.setValue(j, 0, districts[j].toString());    
         }
-    }
-    
-    // Create and draw the visualization.
-    new google.visualization.BarChart(document.getElementById('stunting_chart')).
-        draw(data,
-             {title:"Incidence of reports sent",
-              width:'100%', height:'100%',
-              colors: ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: xaxis},
-              vAxis: {title: "Location"}}
-            );
-}
-
-function drawStuntingTable() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'District');
-    data.addColumn('number', 'Height Captured');
-    data.addColumn('number', 'Height Efficiency');
-    data.addColumn('number', 'Mild');
-    data.addColumn('number', 'Moderate');
-    data.addColumn('number', 'Severe');
-    data.addRows([
-        ['Chikwawa', {v:5416, f:'5416'},{v:18, f:'18%'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
-        ['Chiradzulu', {v:755, f:'755'},{v:4, f:'4%'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
-        ['Salima', {v:789, f: '789'},{v:34, f: '34%'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
-    ]);
-
-    var table = new google.visualization.Table(document.getElementById('stunting_table'));
-    
-    // var formatter = new google.visualization.ArrowFormat();
-    // formatter.format(data, 1); // Apply formatter to second column
-    
-    table.draw(data, {allowHtml: true, showRowNumber: false});
-
-
-}
-
-function drawWastingChart(wasting_data, xaxis) {
-    // Create and populate the data table.
-    var data = new google.visualization.DataTable();
-    var raw_data = wasting_data;
-    
-    var districts = {{locations|safe}};
-    
-    var chart_height = districts.length * 100;
-
-    data.addColumn('string', 'Locations');
-    for (var i = 0; i  < raw_data.length; ++i) {
-        data.addColumn('number', raw_data[i][0]);    
-    }
-    
-    data.addRows(districts.length);
-    
-    for (var j = 0; j < districts.length; ++j) {    
-        data.setValue(j, 0, districts[j].toString());    
-    }
-    for (var i = 0; i  < raw_data.length; ++i) {
-        for (var j = 1; j  < raw_data[i].length; ++j) {
-            data.setValue(j-1, i+1, raw_data[i][j]);    
+        for (var i = 0; i  < raw_data.length; ++i) {
+            for (var j = 1; j  < raw_data[i].length; ++j) {
+                data.setValue(j-1, i+1, raw_data[i][j]);    
+            }
         }
+
+
+        if (chart_type == "percent") {
+        
+            // Format the data.
+            var formatter = new google.visualization.NumberFormat({
+                fractionDigits: 1,
+                suffix: '%'
+            });
+    
+            for (var i = 0; i <= raw_data.length; ++i) {
+                 formatter.format(data, i);
+            }
+    
+        }
+
+        // Give appropriate colors to chart types
+        if (chart_id == "underweight_chart") {
+            var colors_list = ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'];
+        }else {
+            var colors_list = ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'];
+        }
+
+        // Create and draw the visualization.
+        new google.visualization.BarChart(document.getElementById(chart_id)).
+            draw(data,
+                 {title:"Incidence of reports sent",
+                  width:'100%', height: {{ chart_height }},
+                  colors: colors_list,
+                  hAxis: {title: xaxis},
+                  vAxis: {title: "Location"}}
+                );
     }
-    
-    // Create and draw the visualization.
-    new google.visualization.BarChart(document.getElementById('wasting_chart')).
-        draw(data,
-             {title:"Incidence of reports sent",
-              width:'100%', height:'100%',
-              colors: ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'],
-              hAxis: {title: xaxis},
-              vAxis: {title: "Location"}}
-            );
-}
 
-function drawWastingTable() {
-    var data = new google.visualization.DataTable();
-    data.addColumn('string', 'District');
-    data.addColumn('number', 'MUAC Captured');
-    data.addColumn('number', 'MUAC Efficiency');
-    data.addColumn('number', 'Height captured');
-    data.addColumn('number', 'Mild');
-    data.addColumn('number', 'Moderate');
-    data.addColumn('number', 'Severe');
-    data.addRows([
-        ['Chikwawa', {v:35, f:'35'},{v:18, f:'18%'},{v:50, f:'50'},{v:29.95, f:'29.95%'},{v:10.72, f:'10.72%'},{v:4, f: '4.00%'}],
-        ['Chiradzulu', {v:65, f:'65'},{v:4, f:'4%'},{v:200, f:'200'},{v:28.05, f: '28.05%'},{v:10.37, f: '10.37%'},{v:3.06, f: '3.06%'}],
-        ['Salima', {v:78, f: '78'},{v:34, f: '34%'},{v:100, f:'100'},{v:27.5, f:'27.5%'},{v:10.06, f:'10.06%'},{v:2.8, f:'2.8%'}]
-    ]);
+    google.setOnLoadCallback(drawPercentCharts);
 
-    var table = new google.visualization.Table(document.getElementById('wasting_table'));
-    
-    // var formatter = new google.visualization.ArrowFormat();
-    // formatter.format(data, 1); // Apply formatter to second column
-    
-    table.draw(data, {allowHtml: true, showRowNumber: false});
-
-}
-
-google.setOnLoadCallback(drawPercentCharts);
-    </script>
+</script>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
 <script type="text/javascript">
-// <![CDATA[     
-   
-datePickerController.addEvent(window, "load", function() {
-      var start_opts = {
-        // The ID of the associated form element
-        id:"startdate",
-        // The date format to use
-        format:"Y-ds-m-ds-d",
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
 
-        // Do we hide the today button
-        noToday:true,
-        // Do we show weeks along the left hand side
-        showWeeks:true,
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
 
-        // Do we fill the entire grid with dates
-        fillGrid:true,
-      };
-      var end_opts = {
-        // The ID of the associated form element
-        id:"enddate",
-        // The date format to use
-        format:"Y-ds-m-ds-d",
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
 
-        // Do we hide the today button
-        noToday:true,
-        // Do we show weeks along the left hand side
-        showWeeks:true,
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
 
-        // Do we fill the entire grid with dates
-        fillGrid:true,
-      };
-      datePickerController.createDatePicker(start_opts);
-      datePickerController.createDatePicker(end_opts);
-});
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
 
-// ]]>
+    // ]]>
 </script>
 {% endblock javascripts %}
 
@@ -372,7 +284,7 @@ datePickerController.addEvent(window, "load", function() {
        id="underweight_values" 
        onClick="return drawValueCharts()">Graph as Values</a>
   </div>
-  <div id="underweight_chart" style="width:700px; height:700px;">
+  <div id="underweight_chart" style="width:700px; height:{{ chart_height }}px;">
   </div>
   
   <div id="underweight_table" class="table-container" style="width:700px;">
@@ -421,7 +333,7 @@ datePickerController.addEvent(window, "load", function() {
        id="stunting_values" i
        onClick="return drawValueCharts()">Graph as Values</a></p>
 </div>
-<div id="stunting_chart" style="width:700px; height:700px;">
+<div id="stunting_chart" style="width:700px; height:{{ chart_height }}px;">
 </div>
 <div id="stunting_table" class="table-container" style="width:700px;">
 
@@ -471,7 +383,7 @@ datePickerController.addEvent(window, "load", function() {
        id="wasting_values" 
        onClick="return drawValueCharts()">Graph as Values</a>
   </div>
-  <div id="wasting_chart" style="width:700px; height:700px;">
+  <div id="wasting_chart" style="width:700px; height:{{ chart_height }}px;">
   </div>
   <div id="wasting_table" class="table-container" style="width:700px">
 

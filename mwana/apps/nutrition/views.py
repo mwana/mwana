@@ -55,7 +55,7 @@ def graphs(request):
     'weight_table': data['weight_table'], 'stunt_table': data['stunt_table'], 'wasting_table':data['wasting_table'],
     'weight_data': data['weight_data'], 'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
     'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'], 'stunt_data_percent': data['stunt_data_percent'],
-    'wasting_data_percent': data['wasting_data_percent']}
+    'wasting_data_percent': data['wasting_data_percent'], 'chart_height': len(data['locations']) * 100}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
