@@ -201,7 +201,7 @@ class App(rapidsms.apps.base.AppBase):
             return True
         
 
-        if (len(msg.text.split()) >= 4):
+        if (len(msg.text.split()) > 4):
             part_msg, cell_number = msg.text.rsplit(" ", 1)
             msg.text = part_msg
             date_str, patient_name = self._parse_message(msg)

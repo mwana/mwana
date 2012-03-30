@@ -7,6 +7,45 @@
 
 {% block javascripts %}
 {{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
 {% endblock %}
 
 {% block stylesheets %}
@@ -19,6 +58,7 @@
       href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
 <link type="text/css" rel="stylesheet" 
       href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
 {% endblock %}
 
 {% block content %}
@@ -37,13 +77,13 @@
           <input type="text" name="enddate" size="9" value="{{ enddate|date:"Y-m-d"  }}" />
 	  Location:
 	  <select name="location" value="{{ location }}">
-	    <option value="All Districts"
+	    <option value="All Districts">
 		    {% ifequal selected_location "All districts" %}
 		    selected="selected"
 		    {% endifequal %}>
 	      All Districts</option>
 	    {% for location in districts %}
-	    <option value="{{ location }}"
+	    <option value="{{ location }}">
 		    {% ifequal selected_location location %} 
 		    selected="selected" 
 		    {% endifequal %}>
@@ -70,8 +110,8 @@
               <td width="407" colspan="2">
                 Average Positivity for {{total_dbs}} samples processed from 
 		{{startdate}} to {{enddate}}
-                <p>{{percent_negative_district}}% Negative,
-                <p>{{percent_rejected_district}}% Rejected
+                <p>{{percent_negative_district}}% Negative,</p>
+                <p>{{percent_rejected_district}}% Rejected</p>
               </td>
             </tr>                    
           </table>               
