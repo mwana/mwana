@@ -125,16 +125,16 @@ class NutritionGraphs(object):
         """Get facility data for each active facility in the district"""
         active_district_facilities = self.get_active_district_facilities()
         district = self.district
+        facility_locations = []
         if active_district_facilities[district]:
             for facility in active_district_facilities[district]:
                 fac_asses = self.asses.filter(healthworker__location__parent__name=facility)
                 self.update_underweight_data(fac_asses, facility) 
                 self.update_stunting_data(fac_asses, facility) 
                 self.update_wasting_data(fac_asses, facility)
-
             facility_locations = active_district_facilities[district]
-        # return facilities data
-        self.set_graph_data(facility_locations)
+            # return facilities data
+            self.set_graph_data(facility_locations)
         return self.graph_data
 
     def get_districts_data(self):
