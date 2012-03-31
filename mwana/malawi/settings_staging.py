@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.malawi.settings_country import *
 
-DEBUG = False
+DEBUG = True 
 
 ADMINS = (
     ('Tobias McNulty', 'mwana@caktusgroup.com'),
