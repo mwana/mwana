@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.issuetracking.models import Issue, Comment
+from mwana.apps.issuetracking.utils import send_issue_email
 from django.contrib import admin
+import logging
 
 class CommentInline(admin.TabularInline):
     model = Comment
@@ -36,6 +38,14 @@ class IssueAdmin(admin.ModelAdmin):
             instance.open = True
         elif instance.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
             instance.open = False
+
+        
+        if instance.web_author and request.user:    
+            try:
+                send_issue_email(instance, request.user)
+            except Exception, e:
+                logger = logging.getLogger(__name__)
+                logger.error(e)
 
         instance.save()
         return instance
