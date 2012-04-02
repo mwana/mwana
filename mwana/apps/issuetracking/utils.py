@@ -48,15 +48,12 @@ Thank you,
     email_sender = EmailSender()
 
     for sg in support_group:
-#        email_sender.send(sg.user.email, message)
-        recipients.append(sg.user)
+        recipients.append(sg.user.email)
 
     if user.email and '@' in user.email:
-#        email_sender.send(user.email, message)
         recipients.append(user.email)
 
     if issue.assigned_to.email and issue.assigned_to.email not in recipients:
         recipients.append(issue.assigned_to.email)
-#        email_sender.send(issue.assigned_to.email, message)
 
-    email_sender.send(recipients, subject, message)
+    email_sender.send(list(set(recipients)), subject, message)
