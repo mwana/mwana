@@ -39,15 +39,14 @@ class IssueAdmin(admin.ModelAdmin):
         elif instance.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
             instance.open = False
 
-        
+        instance.save()
         if instance.web_author and request.user:    
             try:
                 send_issue_email(instance, request.user)
             except Exception, e:
                 logger = logging.getLogger(__name__)
                 logger.error(e)
-
-        instance.save()
+        
         return instance
 
 admin.site.register(Issue, IssueAdmin)
