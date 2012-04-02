@@ -36,7 +36,7 @@ class NutritionGraphs(object):
         elif den is None or den == 0:
             return float(0)
         else:
-            return 100 * num / den
+            return 100 * num / float(den)
         
     def get_active_district_facilities(self):
         district_facilities = {}
@@ -53,20 +53,22 @@ class NutritionGraphs(object):
         return district_facilities
 
     def get_population(self, location):
+        # Return the catchment population of a location or a default, 5000.
         location = Location.objects.filter(name=location).distinct()
         if location:
             return location[0].population
+        else:
+            return 5000
 
     def update_underweight_data(self, fac_asses, location):
         """  Updates underweight status counts given a filtered queryset"""
         metric = [fac_asses.filter(underweight='V').count(), fac_asses.filter(underweight='T').count(), fac_asses.filter(Q(underweight='G')|Q(underweight='L')).count(),fac_asses.filter(underweight='M').count(), fac_asses.filter(underweight='U').count(), fac_asses.filter(underweight='S').count()]
         den = fac_asses.count()
         weight_captured = fac_asses.exclude(underweight='N').count()
-        # populace = self.get_population(location)
-        # efficiency = "%.1f%%" % (self.percent(weight_captured/populace))
+        populace = self.get_population(location)
         self.underweight_table[location] = []
         self.underweight_table[location].append(weight_captured)
-        self.underweight_table[location].append("%")
+        self.underweight_table[location].append("%.1f%%" % (100 * (weight_captured/populace)))
         i = 0
         while i < len(metric):
             self.underweight_data[i].append(metric[i])
@@ -78,11 +80,10 @@ class NutritionGraphs(object):
         """  Updates stunting status counts given a filtered queryset"""
         metric = [fac_asses.filter(stunting='V').count(), fac_asses.filter(Q(stunting='T') | Q(stunting='G')|Q(stunting='L')).count(),fac_asses.filter(stunting='M').count(), fac_asses.filter(stunting='U').count(), fac_asses.filter(stunting='S').count()]
         den = fac_asses.exclude(stunting='N').count()
-        # populace = self.get_population(location)
-        # efficiency = "%.1f%%" % (self.percent(den/populace))
+        populace = self.get_population(location)
         self.stunting_table[location] = []
         self.stunting_table[location].append(den)
-        self.stunting_table[location].append("%")
+        self.stunting_table[location].append("%.1f%%" % (100 * (den/populace)))
         i = 0
         while i < len(metric):
             self.stunting_data[i].append(metric[i])
@@ -94,11 +95,10 @@ class NutritionGraphs(object):
         """  Updates wasting status counts given a filtered queryset"""
         metric = [fac_asses.filter(wasting='V').count(), fac_asses.filter(Q(wasting='T') | Q(wasting='G')|Q(wasting='L')).count(),fac_asses.filter(wasting='M').count(), fac_asses.filter(wasting='U').count(), fac_asses.filter(wasting='S').count()]
         den = fac_asses.filter(muac__isnull=False).count()
-        # populace = self.get_population(location)
-        # efficiency = "%.1f%%" % (self.percent(den/populace))        
+        populace = self.get_population(location)
         self.wasting_table[location] = []
         self.wasting_table[location].append(den)
-        self.wasting_table[location].append("%")
+        self.wasting_table[location].append("%.1f%%" % (100 * (den/populace)))
         self.wasting_table[location].append(fac_asses.exclude(stunting='N').count())
         i = 0
         while i < len(metric):
