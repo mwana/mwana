@@ -22,3 +22,4 @@ class EmailSender:
         host.login(user, password)
         host.sendmail(user, recipient, msg.as_string())
         host.quit()
+        

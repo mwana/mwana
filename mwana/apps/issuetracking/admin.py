@@ -49,4 +49,5 @@ class IssueAdmin(admin.ModelAdmin):
         
         return instance
 
+
 admin.site.register(Issue, IssueAdmin)
