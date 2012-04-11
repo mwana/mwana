@@ -21,6 +21,8 @@ INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.filteredlogs")
+INSTALLED_APPS.append("rapidsms_xforms")
+INSTALLED_APPS.append("uni_form")
 
 TIME_ZONE = 'Africa/Lusaka'
 
@@ -50,6 +52,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
+    ('xforms', 'XForms'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

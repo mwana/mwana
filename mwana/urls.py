@@ -35,6 +35,7 @@ urlpatterns = patterns('',
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
+    (r'^', include('rapidsms_xforms.urls')),
 
     #Kwabi: quick fix to provide a passsword change form to non admins
     #(r'^changepassword/$', 'nonauth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
