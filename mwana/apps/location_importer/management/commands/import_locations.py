@@ -74,7 +74,7 @@ def load_locations(file_path):
         province_name, district_name, facility_name, code, facility_type,\
                                                      latitude, longitude = line
         #leave out first line
-        if "latitude" in latitude:
+        if "latitude" in latitude.lower():
             continue
         
         province_type = None
@@ -88,7 +88,7 @@ def load_locations(file_path):
                                                 type=province_type)
             except Location.DoesNotExist:
                 province = Location.objects.create(name=province_name,
-                                                   type=_province_type,
+                                                   type=_province_type(),
                                                    slug=clean(province_name))
         else:
             province = None
@@ -96,14 +96,15 @@ def load_locations(file_path):
         if district_name:
             #create/load district
             # only create the type if we actually have a district record
-            if not province_type:
-                district_type = _district_type()
+            district_type = _district_type()
             try:
                 district = Location.objects.get(name=district_name,
                                                 type=district_type)
-            except Location.DoesNotExist:
+            except Location.DoesNotExist as e:
+                print e
+                print 'Trying to create a District location! Name:%s, Type:%s, slug:%s, parent:%s' % (district_name, _district_type(), clean(district_name), province)
                 district = Location.objects.create(name=district_name,
-                                                   type=district_type,
+                                                   type=_district_type(),
                                                    slug=clean(district_name),
                                                    parent=province)
         else:
@@ -125,6 +126,7 @@ def load_locations(file_path):
         facility.name = facility_name
         facility.parent = district
         if latitude and longitude:
+            print 'Latitude:%s, Longitude:%s' % (latitude, longitude)
             facility.point, _ = Point.objects.get_or_create(latitude=latitude,
                                                             longitude=longitude)
         facility.type = type

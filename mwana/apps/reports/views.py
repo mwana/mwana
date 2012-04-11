@@ -89,13 +89,14 @@ def get_facilities_dropdown_html(id, facilities, selected_facility):
     #TODO: move this implemention to templates
     code ='<select name="%s" size="1">\n'%id
     code +='<option value="All">All</option>\n'
-    for fac in facilities:
-        if fac.slug == selected_facility:
-            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
-        else:
-            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
+    if facilities:
+        for fac in facilities:
+            if fac.slug == selected_facility:
+                code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+            else:
+                code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
 
-    code = code +'</select>'
+        code = code +'</select>'
     return code
 
 def get_groups_dropdown_html(id, selected_group):
