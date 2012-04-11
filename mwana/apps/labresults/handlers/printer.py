@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.conf import settings
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler

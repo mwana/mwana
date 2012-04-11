@@ -136,12 +136,14 @@ class App (rapidsms.apps.base.AppBase):
             self.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
                        (clinic, message.connection.contact))
             message.respond("Sorry, there are no new EID results for %s." % clinic)
-            self.waiting_for_pin.pop(message.connection)
+#            self.waiting_for_pin.pop(message.connection)
+            self. pop_pending_connection(message.connection)
         else:
             self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
 
-            self.waiting_for_pin.pop(message.connection)
+#            self.waiting_for_pin.pop(message.connection)
+            self. pop_pending_connection(message.connection)
             
             # remove pending contacts for this clinic and notify them it 
             # was taken care of 
@@ -151,7 +153,8 @@ class App (rapidsms.apps.base.AppBase):
             
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
-                    self.waiting_for_pin.pop(conn)
+#                    self.waiting_for_pin.pop(conn)
+                    self. pop_pending_connection(conn)
                     OutgoingMessage(conn, RESULTS_PROCESSED, 
                                     name=message.connection.contact.name).send()
 
@@ -248,7 +251,7 @@ class App (rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.labresults.tasks.send_results_to_printer'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[7, 8, 9, 10, 13, 14, 16], minutes=[50],
+        EventSchedule.objects.create(callback=callback, hours=[8, 10, 14, 16], minutes=[50],
                                      days_of_week=[0, 1, 2, 3, 4])
 
     def notify_clinic_pending_results(self, clinic):
@@ -276,7 +279,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         Sends new results to printers at clinics.
         """
-        results = self._pending_results(clinic)
+        results = self._pending_results(clinic, True)
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)

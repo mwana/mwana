@@ -1,8 +1,10 @@
 # vim: ai ts=4 sts=4 et sw=4
-from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.models import Contact
 from mwana.apps.help.models import HelpRequest
+from mwana.util import get_clinic_or_default
+from mwana.util import get_contact_type_slug
+from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
+from rapidsms.models import Contact
 
 RESPONSE           = "Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon."
 ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s as soon as you can!"
@@ -29,14 +31,15 @@ class HelpHandler(KeywordHandler):
         
         # create the "ticket" in the db
         HelpRequest.objects.create(requested_by=self.msg.connection,
-                                   additional_text=text)
+                                   additional_text=text[:160])
         
         params = {"phone": self.msg.connection.identity}
         resp_template = ANONYMOUS_FORWARD
         if self.msg.connection.contact:
-            params["name"] = self.msg.connection.contact.name
+            params["name"] = "%s (%s)" % (self.msg.connection.contact.name,
+                                          get_contact_type_slug(self.msg.contact))
             if self.msg.connection.contact.location:
-                params["location"] = self.msg.connection.contact.location
+                params["location"] = get_clinic_or_default(self.msg.contact)
                 resp_template = CON_LOC_FORWARD
             else: 
                 resp_template = CONTACT_FORWARD

@@ -6,6 +6,137 @@
 
 {% block javascripts %}
 {{ block.super }}
+<script type="text/javascript">
+    var _allProvinces = []
+    var _allDistricts = []
+    var _allFacilities = []
+    var _loaded = false
+    function loadLocationData(){
+        if(_loaded){
+            return
+        }
+
+        var provinces = document.getElementById('rpt_provinces');
+        for(i in provinces.options){
+
+            if(provinces.options[i].value){
+                _allProvinces.push([provinces.options[i].value, provinces.options[i].innerHTML])
+            }
+
+        }
+        var districts = document.getElementById('rpt_districts');
+        for(i in districts.options){
+            if(districts.options[i].value){
+                _allDistricts.push([districts.options[i].value, districts.options[i].innerHTML])
+            }
+        }
+        var facilities = document.getElementById('rpt_facilities');
+        for(i in facilities.options){
+            if(facilities.options[i].value){
+                _allFacilities.push([facilities.options[i].value, facilities.options[i].innerHTML])
+            }
+        }
+
+        _loaded = true
+    }
+
+    function clearDropDown(element){
+        while ( element.options.length ){
+            element.options[0] = null;
+        }
+    }
+
+    // to be called when selected province changes
+    function firerpt_provincesChange(){
+        loadLocationData()
+        var provinceDropDown = document.getElementById('rpt_provinces');
+        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+        var districtDropDown = document.getElementById('rpt_districts');
+        var facilityDropDown = document.getElementById('rpt_facilities');
+
+        // reload district combo
+        clearDropDown(districtDropDown);
+        var childDistricts = []
+        for(value in _allDistricts){
+            if(provinceSlug=="Al" || provinceSlug ==_allDistricts[value][0].substring(0, 2) || _allDistricts[value][0]=="All"){
+                childDistricts.push(_allDistricts[value])
+            }
+        }
+        fillList(districtDropDown, childDistricts)
+
+        // reload facility combo
+        clearDropDown(facilityDropDown);
+        var childFacilities = []
+        for(value in _allFacilities){
+            if(provinceSlug=="Al" ||
+                provinceSlug ==_allFacilities[value][0].substring(0, 2) ||
+                _allFacilities[value][0]=="All"){
+                childFacilities.push(_allFacilities[value])
+            }
+        }
+        fillList(facilityDropDown, childFacilities)
+    }
+
+    function firerpt_districtsChange(){
+        loadLocationData()
+        var provinceDropDown = document.getElementById('rpt_provinces');
+        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+        var districtDropDown = document.getElementById('rpt_districts');
+        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
+
+        if(districtSlug != "All"){
+            districtSlug = districtSlug.substring(0, 4)
+        }
+        var facilityDropDown = document.getElementById('rpt_facilities');
+
+
+        // reload facility combo
+        clearDropDown(facilityDropDown);
+        var childFacilitiesInProvince = []
+
+        for(value in _allFacilities){
+            if(provinceSlug=="Al" ||
+                provinceSlug ==_allFacilities[value][0].substring(0, 2)
+                || _allFacilities[value][0]=="All"){
+                childFacilitiesInProvince.push(_allFacilities[value])
+            }
+        }
+
+        var childFacilities = []
+
+        for(value in childFacilitiesInProvince){
+            if(districtSlug == "All" ||
+                districtSlug == childFacilitiesInProvince[value][0].substring(0, 4) ||
+                childFacilitiesInProvince[value][0]=="All"){
+                childFacilities.push(childFacilitiesInProvince[value])
+            }
+        }
+
+        fillList(facilityDropDown, childFacilities)
+    }
+
+    function fillList( box, arr ) {
+        // arr[0] holds the display text
+        // arr[1] are the values
+
+        for ( i in arr ) {
+
+            // Create a new drop down option with the
+            // display text and value from arr
+
+            option = new Option( arr[i][1], arr[i][0]);
+
+            // Add to the end of the existing options
+
+            box.options[box.length] = option;
+        }
+
+        // Preselect option 0
+
+        box.selectedIndex=0;
+    }
+    
+</script>
 {% endblock %}
 
 {% block stylesheets %}
@@ -18,6 +149,7 @@
 
 
     <div class="left">
+        <form name="getValues" action="" method="GET">
         <div class="module">
             
 
@@ -26,7 +158,7 @@
 
             <h2>Filtered Message Logs</h2>
             <br>
-            <form name="getValues" action="" method="GET">
+            
                 <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <input type="text" name="startdate" size="9" value={{ fstartdate }} />
                            to
@@ -43,6 +175,11 @@
                     {{rpt_facilities}}
                     {% endautoescape %}&nbsp;
 
+                <p>Search: &nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="search_key" size="17" value="{{ search_key }}">
+                    &nbsp;
                     {% if is_report_admin %}
                 <p>Select Implementer:
                     {% autoescape off %}
@@ -54,7 +191,7 @@
 
                     &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
 
-            </form>
+            
             <hr>
            <div>
               
@@ -63,26 +200,12 @@
                 Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
                 </h3>
-<!--            <p>
-                Showing average time between the Date DBS
-                samples are collected at the facilities and the Date the results
-                for these samples are received at the facility.
-                <br>
-                Minimum Average Days = {{min_turnaround_time}}; &nbsp;
-                Maximum Average Days = {{max_turnaround_time}}; &nbsp;
-                Out of {{num_of_results}} results in {{num_of_facilities}}
-                facilities in period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
-            <p>-->
-            <table width="100%">
+              
+
+       <table width="100%">
                 {% for record in messages %}
                 <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                    <td >
-                        {% if forloop.counter0 %}
-                        
-                        {{ forloop.counter0 }}
-                        
-                        {% endif %}
-                    </td>
+                    
                     {% for column in record %}
                     {% if column %}
                     {% if not forloop.parentloop.counter0 %}
@@ -107,6 +230,25 @@
         </div>
         <div class="clear-hack"></div>
     </div>
+        
+        <div class="pagination">
+    <span class="step-links">
+        {% if messages_has_previous %}
+            <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
+
+        <span class="current">
+            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+        </span>
+
+        {% if messages_has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ messages_number }}>
+    </span>
+
+</div>
+        </form>
 
 </div>
 {% endblock %}

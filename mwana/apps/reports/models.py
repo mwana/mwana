@@ -13,7 +13,7 @@ class Turnaround(models.Model):
     facility = models.CharField(max_length=100)
     transporting = models.IntegerField(blank=True, null=True)
     processing = models.IntegerField(blank=True, null=True)
-    delays = models.IntegerField(blank=True, null=True)
+    delays = models.IntegerField(blank=True, null=True, verbose_name="Entering Time")
     retrieving = models.IntegerField(blank=True, null=True)
     turnaround = models.IntegerField(blank=True, null=True)
     date_reached_moh = models.DateTimeField(blank=True, null=True)

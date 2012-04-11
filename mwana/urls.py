@@ -2,7 +2,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
-import mwana.apps.labresults.views
 
 admin.autodiscover()
 
@@ -22,15 +21,16 @@ urlpatterns = patterns('',
     # Mwana app URLs
     (r'^labresults/', include('mwana.apps.labresults.urls')),
     (r'^alerts/', include('mwana.apps.alerts.urls')),
+    (r'^websms/', include('mwana.apps.websmssender.urls')),
     #(r'^supplies/', include('mwana.apps.supply.urls')),
     #url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     #url(r'^$', mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     (r'^export/', include('rapidsms.contrib.export.urls')),
     (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
-    (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
-    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
-    (r'^registration/', include('rapidsms.contrib.registration.urls')),
+#    (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
+#    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
+#    (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),

@@ -31,10 +31,10 @@ class ConfirmHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed"
+    keyword = "cofirm|confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed"
 #    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
-    help_txt = "Sorry, the system could not understand your message. To confirm a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>"
+    help_txt = "To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
     response_confirmed_thanks_txt = "Thank you %s! You have confirmed that %s has been to the clinic!"
                                
@@ -53,7 +53,11 @@ class ConfirmHandler(KeywordHandler):
         # CONTACT is valid        
         if not self.contact_valid():
             return
-        
+
+        if len(text.split()) > 4:
+            self.help()
+            return True
+
         self.confirm(text)
         return True
 

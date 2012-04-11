@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.patienttracing.handlers.trace import TraceHandler
 import rapidsms
 import re
 from mwana.apps.labresults.handlers.results import ResultsHandler
@@ -37,6 +38,7 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(DistrictHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(HSAHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(MessageHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(TraceHandler.keyword.split('|')))
         
         # remove leading/trailing whitespace
         # get out your featherduster
@@ -46,7 +48,7 @@ class App (rapidsms.apps.base.AppBase):
             keyword = msgtxt.split()[0].lower()
             if keyword in broadcast_keywords:
                 message.text = msgtxt
-                self.info('Skipping string cleaning. this is a broacast message')
+                self.info('Skipping string cleaning for %s message' % msgtxt.split()[0])
                 return
 
         # replace separation marks with a space

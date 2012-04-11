@@ -1,0 +1,249 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Message Logs - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript">
+    var _allProvinces = []
+    var _allDistricts = []
+    var _allFacilities = []
+    var _loaded = false
+    function loadLocationData(){
+        if(_loaded){
+            return
+        }
+
+        var provinces = document.getElementById('rpt_provinces');
+        for(i in provinces.options){
+
+            if(provinces.options[i].value){
+                _allProvinces.push([provinces.options[i].value, provinces.options[i].innerHTML])
+            }
+
+        }
+        var districts = document.getElementById('rpt_districts');
+        for(i in districts.options){
+            if(districts.options[i].value){
+                _allDistricts.push([districts.options[i].value, districts.options[i].innerHTML])
+            }
+        }
+        var facilities = document.getElementById('rpt_facilities');
+        for(i in facilities.options){
+            if(facilities.options[i].value){
+                _allFacilities.push([facilities.options[i].value, facilities.options[i].innerHTML])
+            }
+        }
+
+        _loaded = true
+    }
+
+    function clearDropDown(element){
+        while ( element.options.length ){
+            element.options[0] = null;
+        }
+    }
+
+    // to be called when selected province changes
+    function firerpt_provincesChange(){
+        loadLocationData()
+        var provinceDropDown = document.getElementById('rpt_provinces');
+        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+        var districtDropDown = document.getElementById('rpt_districts');
+        var facilityDropDown = document.getElementById('rpt_facilities');
+
+        // reload district combo
+        clearDropDown(districtDropDown);
+        var childDistricts = []
+        for(value in _allDistricts){
+            if(provinceSlug=="Al" || provinceSlug ==_allDistricts[value][0].substring(0, 2) || _allDistricts[value][0]=="All"){
+                childDistricts.push(_allDistricts[value])
+            }
+        }
+        fillList(districtDropDown, childDistricts)
+
+        // reload facility combo
+        clearDropDown(facilityDropDown);
+        var childFacilities = []
+        for(value in _allFacilities){
+            if(provinceSlug=="Al" ||
+                provinceSlug ==_allFacilities[value][0].substring(0, 2) ||
+                _allFacilities[value][0]=="All"){
+                childFacilities.push(_allFacilities[value])
+            }
+        }
+        fillList(facilityDropDown, childFacilities)
+    }
+
+    function firerpt_districtsChange(){
+        loadLocationData()
+        var provinceDropDown = document.getElementById('rpt_provinces');
+        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+        var districtDropDown = document.getElementById('rpt_districts');
+        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
+
+        if(districtSlug != "All"){
+            districtSlug = districtSlug.substring(0, 4)
+        }
+        var facilityDropDown = document.getElementById('rpt_facilities');
+
+
+        // reload facility combo
+        clearDropDown(facilityDropDown);
+        var childFacilitiesInProvince = []
+
+        for(value in _allFacilities){
+            if(provinceSlug=="Al" ||
+                provinceSlug ==_allFacilities[value][0].substring(0, 2)
+                || _allFacilities[value][0]=="All"){
+                childFacilitiesInProvince.push(_allFacilities[value])
+            }
+        }
+
+        var childFacilities = []
+
+        for(value in childFacilitiesInProvince){
+            if(districtSlug == "All" ||
+                districtSlug == childFacilitiesInProvince[value][0].substring(0, 4) ||
+                childFacilitiesInProvince[value][0]=="All"){
+                childFacilities.push(childFacilitiesInProvince[value])
+            }
+        }
+
+        fillList(facilityDropDown, childFacilities)
+    }
+
+    function fillList( box, arr ) {
+        // arr[0] holds the display text
+        // arr[1] are the values
+
+        for ( i in arr ) {
+
+            // Create a new drop down option with the
+            // display text and value from arr
+
+            option = new Option( arr[i][1], arr[i][0]);
+
+            // Add to the end of the existing options
+
+            box.options[box.length] = option;
+        }
+
+        // Preselect option 0
+
+        box.selectedIndex=0;
+    }
+
+</script>
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{%if userHasNoAssingedFacilities%}
+You currently don't belong to any group for viewing reports. Contact the system administrator at <a href="mailto:{{adminEmail}}">{{adminEmail}}</a>  for help.
+{%else%}
+
+    <div class="left">
+        <form name="getValues" action="" method="GET">
+        <div class="module">
+
+
+            <!--h1>Filtered Message Logs:</h1-->
+
+
+            <h2>SMS Contacts</h2>
+            <br>
+
+                 {% if region_selectable %}
+                <p>Select Region: &nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}&nbsp;
+                    or District:{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}&nbsp;
+                    or Facility:{% autoescape off %}
+                    {{rpt_facilities}}
+                    {% endautoescape %}&nbsp;
+
+                    {% if is_report_admin %}
+                <p>Select Implementer:
+                    {% autoescape off %}
+                    {{rpt_group}}
+                    {% endautoescape %}
+                    &nbsp;
+                    {%endif%}
+                    {%endif%}
+
+                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+
+
+            <hr>
+           <div>
+
+
+            <h3>
+                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                </h3>
+
+
+       <table width="100%">
+                {% for record in facility_contacts %}
+                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                    {% for column in record %}
+                    {% if column %}
+                    {% if not forloop.parentloop.counter0 %}
+                    <td ><u>{{ column }}</u></td>
+                    {% else %}
+                    <td >{{ column }}</td>
+
+                    {% endif %}
+                    {% else %}
+                    {% if forloop.parentloop.last %}
+                    <td><b> 0 </b></td>
+                    {% else %}
+                    <td> 0 </td>
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+
+
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+
+        <div class="pagination">
+    <span class="step-links">
+        {% if messages_has_previous %}
+            <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
+
+        <span class="current">
+            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+        </span>
+
+        {% if messages_has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ messages_number }}>
+    </span>
+
+</div>
+        </form>
+
+</div>
+{% endif %}
+{% endblock %}
+

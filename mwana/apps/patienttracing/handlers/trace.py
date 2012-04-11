@@ -42,7 +42,12 @@ class TraceHandler(KeywordHandler):
         if not self.contact_valid():
             return
         #pass it off to trace() for processing.
-        self.man_trace(text)
+        mytext = text.lower().replace("&", ",").replace(" and", ",").replace(".", ",")
+        for name in mytext.split(","):
+            if len(name) > 50:
+                self.respond("%s is too long for a name." % name)
+            elif name:
+                self.man_trace(name.title())
         return True
         
     def contact_valid(self):
