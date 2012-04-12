@@ -34,3 +34,5 @@ pygrowup-0.4.tar.gz
 -e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
 # south (from http://south.aeracode.org/)
 south-0.7.3.tar.gz
+# django-pagination (for some nutrition reports)
+django-pagination-1.0.7.tar.gz
