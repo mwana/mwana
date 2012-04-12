@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.ajax",
-
+    "uni_form",
+    "eav",
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -82,6 +83,7 @@ INSTALLED_APPS = [
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.reports",
+    "rapidsms_xforms",
     "mwana.apps.training",
     "mwana.apps.help",
     "mwana.apps.alerts",
@@ -125,7 +127,8 @@ DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESU
 # when reporting bugs. don't forget to turn this off in production.
 DEBUG = TEMPLATE_DEBUG = True
 
-
+BASE_TEMPLATE_SPLIT_2 = "layout-split-2.html"
+BASE_TEMPLATE = "layout.html"
 # after login (which is handled by django.contrib.auth), redirect to the
 # dashboard rather than 'accounts/profile' (the default).
 LOGIN_REDIRECT_URL = "/"
@@ -180,6 +183,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.media",
     "django.core.context_processors.request",
     "django.core.context_processors.csrf",
+    "rapidsms.context_processors.logo",
 ]
 
 
@@ -247,3 +251,5 @@ RESULTS160_SLUGS = {
 
 # RemindMi setting to configure ...
 SEND_LIVE_BIRTH_REMINDERS = True
+
+XFORMS_HOST = "localhost:8000"
