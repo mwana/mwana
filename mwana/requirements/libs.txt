@@ -36,3 +36,5 @@ pygrowup-0.4.tar.gz
 south-0.7.3.tar.gz
 # django-pagination (for some nutrition reports)
 django-pagination-1.0.7.tar.gz
+# django-tables2 (for nutrition reports)
+django-tables2-0.10.4.tar.gz
