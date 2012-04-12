@@ -171,12 +171,14 @@ class EventRegistration(TestScript):
             kk     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
             kk     > mwanaf 4/3/2010 Nelly Daka
             kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana facility 4/3/2010 Nelly Mwansa
+            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2010. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(2, patients.count())
+        self.assertEqual(3, patients.count())
         
-        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
+        self.assertEqual(3, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
 
     def testCommunityBirthRegistration(self):
         self._register()

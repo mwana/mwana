@@ -17,7 +17,10 @@ _ = lambda s: s
 
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
-    LOCATION_TYPES = {'f':'cl', 'h':'hm', 'clinic':'cl', 'cl':'cl', 'hm':'hm', 'fa':'cl'}
+    
+    #TODO move this to database
+    LOCATION_TYPES = {'f':'cl', 'h':'hm', 'clinic':'cl', 'cl':'cl', 'hm':'hm',
+                        'fa':'cl', 'home':'hm', 'facility':'cl'}
     
     DATE_RE = re.compile(r"[\d/.-]+")
     HELP_TEXT = _("To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
