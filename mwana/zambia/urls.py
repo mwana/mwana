@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url(r'^$', views.zambia_reports, name='mwana_reports'),
     url(r'^contacts/', views.contacts_report, name='mwana_contacts'),
     (r'^logs/', include('mwana.apps.filteredlogs.urls')),
+    (r'^issues/', include('mwana.apps.issuetracking.urls')),
 )
