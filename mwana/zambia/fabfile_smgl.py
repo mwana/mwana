@@ -179,6 +179,7 @@ def clone_repo():
     with settings(warn_only=True):
         with cd(env.root):
             sudo('git clone %(code_repo)s %(code_root)s' % env, user=env.sudo_user)
+            sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
 
 def deploy():
     """ deploy code to remote host by checking out the latest via git """
@@ -215,7 +216,7 @@ def update_requirements():
     with cd(requirements):
         cmd = ['pip install']
         cmd += ['-E %(virtualenv_root)s' % env]
-        cmd += ['--requirement %s' % posixpath.join(requirements, 'apps.txt')]
+        cmd += ['--requirement %s' % posixpath.join(requirements, env.pip_requires_filename)]
         sudo(' '.join(cmd), user=env.sudo_user)
 
 def touch():

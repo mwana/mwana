@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     "rapidsms",
 
     # common dependencies (which don't clutter up the ui).
-    "rapidsms.contrib.handlers",
+
     "rapidsms.contrib.ajax",
     "uni_form",
     "eav",
@@ -65,29 +65,33 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
 
     # the rapidsms contrib apps.
+
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
-#    "mwana.apps.locations",
+    "mwana.apps.locations",
+    "rapidsms_xforms",
+    "rapidsms.contrib.handlers",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
 #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
+    "mwana.apps.smgl",
     "mwana.apps.echo",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.agents",
     "mwana.apps.broadcast",
+
     "mwana.apps.labresults",
     "mwana.apps.reminders",
 #    "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
 #    "mwana.apps.supply",
     "mwana.apps.reports",
-    "rapidsms_xforms",
     "mwana.apps.training",
     "mwana.apps.help",
     "mwana.apps.alerts",
-    "mwana.apps.locations",
+
     "mwana.apps.patienttracing",
     "mwana.apps.hub_workflow",
     "mwana.apps.stringcleaning",
@@ -239,10 +243,15 @@ RESULTS160_SLUGS = {
     'PATIENT_SLUG': 'patient',
     'CLINIC_WORKER_SLUG': 'clinic-worker',
     'DISTRICT_WORKER_SLUG': 'district-worker',
+    'EMERGENCY_RESPONDER_SLUG': 'er',
+    'AMBULANCE_DRIVER_SLUG' : 'ad',
+    'TRIAGE_NURSE_SLUG' : 'tn',
 # location types:
     'CLINIC_SLUGS': ('clinic',),
     'ZONE_SLUGS': ('zone',),
     'DISTRICT_SLUGS': ('district',),
+    'RHC_SLUGS': ('rhc',),
+    'UHC_SLUGS': ('uhc',),
 }
 
 # -------------------------------------------------------------------- #
@@ -250,6 +259,6 @@ RESULTS160_SLUGS = {
 # -------------------------------------------------------------------- #
 
 # RemindMi setting to configure ...
-SEND_LIVE_BIRTH_REMINDERS = True
+SEND_LIVE_BIRTH_REMINDERS = False
 
 XFORMS_HOST = "localhost:8000"
