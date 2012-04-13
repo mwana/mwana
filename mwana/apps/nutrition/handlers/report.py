@@ -16,11 +16,11 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
 
+
 class ReportGMHandler(KeywordHandler):
 
     keyword = "gm"
 
-    
     def help(self):
         self.respond(REPORT_HELP)
 
@@ -37,7 +37,7 @@ class ReportGMHandler(KeywordHandler):
         # Also this seems sensible if this code gets refactored it will be
         # easier to port old data...
         person_type, created = PersonType.objects.get_or_create(singular='Patient', plural='Patients')
-        kwargs.update({'type':person_type})
+        kwargs.update({'type': person_type})
 
         try:
             # first try to look up patient using only id
@@ -52,7 +52,7 @@ class ReportGMHandler(KeywordHandler):
             if False not in has_ids:
                 self.debug("has ids...")
                 id_kwargs = {}
-                [id_kwargs.update({id : patient_args.pop(id)}) for id in ids]
+                [id_kwargs.update({id: patient_args.pop(id)}) for id in ids]
                 self.debug(id_kwargs)
                 # next line should bump us into the exception if we have a new kid
                 patient = Person.objects.get(**id_kwargs)
@@ -75,7 +75,7 @@ class ReportGMHandler(KeywordHandler):
         except ObjectDoesNotExist, IndexError:
             # patient doesnt already exist, so create with all arguments
             self.debug("new patient!")
-            patient, created  = Person.objects.get_or_create(**kwargs)
+            patient, created = Person.objects.get_or_create(**kwargs)
             return patient, created
 
     def _validate_date(self, potential_date):
@@ -89,7 +89,7 @@ class ReportGMHandler(KeywordHandler):
             self.debug(potential_date)
             good_date_str, good_date_obj = helpers.get_good_date(potential_date)
             self.debug(good_date_str)
-            return good_date_str, good_date_obj 
+            return good_date_str, good_date_obj
             #else:
             #    return None, None
         except Exception, e:
@@ -107,7 +107,7 @@ class ReportGMHandler(KeywordHandler):
                 return None
         except Exception, e:
             self.exception('problem validating sex')
-    
+
     def _validate_bool(self, potential_bool):
         self.debug("validate bool...")
         self.debug(potential_bool)
@@ -129,11 +129,11 @@ class ReportGMHandler(KeywordHandler):
         try:
             valid_ids = {}
             invalid_ids = {}
-            for k,v in id_dict.iteritems():
+            for k, v in id_dict.iteritems():
                 if v.isdigit() or v.upper().startswith('X'):
-                    valid_ids.update({k:v})
+                    valid_ids.update({k: v})
                 else:
-                    invalid_ids.update({k:v})
+                    invalid_ids.update({k: v})
             return valid_ids, invalid_ids
         except Exception, e:
             self.exception('problem validating ids')
@@ -153,9 +153,9 @@ class ReportGMHandler(KeywordHandler):
                 if 1.5 < float(weight) < 35.0:
                     valid_weight = True
             else:
-                valid_weight = True 
+                valid_weight = True
             if muac is not None:
-                if muac in ['n','N']:
+                if muac in ['n', 'N']:
                     valid_muac = True
                 elif 10.0 < float(muac) < 22.0:
                     valid_muac = True
@@ -197,7 +197,7 @@ class ReportGMHandler(KeywordHandler):
         token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac']
 
         token_data = text.split()
-        
+
         try:
             if len(token_data) > 7:
                 self.debug("too much data")
@@ -208,7 +208,7 @@ class ReportGMHandler(KeywordHandler):
             for k, v in tokens.iteritems():
                 # replace 'no data' shorthands with None
                 if v.upper() in ['X', 'XX', 'XXX']:
-                    tokens.update({k : None})
+                    tokens.update({k: None})
 
             # save record of survey submission before doing any processing
             # so we have all of the entries as they were submitted
@@ -226,43 +226,47 @@ class ReportGMHandler(KeywordHandler):
 
         # check that id codes are numbers
         valid_ids, invalid_ids = self._validate_ids(
-            {'child' : survey_entry.child_id})
+            {'child': survey_entry.child_id})
         # send responses for each invalid id, if any
         if len(invalid_ids) > 0:
-            for k,v in invalid_ids.iteritems():
+            for k, v in invalid_ids.iteritems():
                 self.respond(INVALID_ID % (v, k))
             # halt reporting process if any of the id codes are invalid
             return True
 
-        for k,v in valid_ids.iteritems():
+        for k, v in valid_ids.iteritems():
             # replace 'no data' shorthands with None
             if v.upper().startswith('X'):
-                tokens.update({k : None})
+                tokens.update({k: None})
 
         self.debug("getting patient...")
         # begin collecting valid patient arguments
-        patient_kwargs = {'code' : survey_entry.child_id}
+        patient_kwargs = {'code': survey_entry.child_id}
+
+        # debug crash on future date
+        import pdb
+        pdb.set_trace()
 
         # no submitted bday
         if survey_entry.date_of_birth is None:
-            patient_kwargs.update({'date_of_birth' : None})
+            patient_kwargs.update({'date_of_birth': None})
         # make sure submitted bday is valid
         else:
             dob_str, dob_obj = self._validate_date(survey_entry.date_of_birth)
             if dob_obj is not None:
                 self.debug(dob_obj)
-                patient_kwargs.update({'date_of_birth' : dob_obj})
+                patient_kwargs.update({'date_of_birth': dob_obj})
             else:
-                patient_kwargs.update({'date_of_birth' : ""})
+                patient_kwargs.update({'date_of_birth': ""})
                 self.respond(INVALID_DOB % (survey_entry.date_of_birth))
 
         # make sure reported gender is valid
         good_sex = self._validate_sex(survey_entry.gender)
         if good_sex is not None:
             self.debug(good_sex)
-            patient_kwargs.update({'gender' : good_sex})
+            patient_kwargs.update({'gender': good_sex})
         else:
-            patient_kwargs.update({'gender' : ""}) 
+            patient_kwargs.update({'gender': ""})
             # halt reporting process if we dont have a valid gender.
             # this can't be unknown. check in their pants if you arent sure
             return self.respond(INVALID_GENDER % (survey_entry.gender))
@@ -305,9 +309,9 @@ class ReportGMHandler(KeywordHandler):
             self.debug(survey_entry.weight)
             self.debug(survey_entry.muac)
 
-            measurements = {"height" : survey_entry.height,\
-                "weight" : survey_entry.weight, "muac" : survey_entry.muac}
-            
+            measurements = {"height": survey_entry.height,\
+                "weight": survey_entry.weight, "muac": survey_entry.muac}
+
             human_oedema, bool_oedema = self._validate_bool(survey_entry.oedema)
             valid_height, valid_weight, valid_muac = self._validate_measurements(\
                 measurements['height'], measurements['weight'], measurements['muac'])
@@ -331,18 +335,16 @@ class ReportGMHandler(KeywordHandler):
             self.exception("problem making assessment")
             self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))
 
-
-
         try:
             data = [
-                    "ChildID=%s"  % (patient.code or "??"),
-                    "Gender=%s"      % (patient.gender or "??"),
-                    "DOB=%s"        % (patient.date_of_birth or "??"),
-                    "Age=%sm"      % (patient.age_in_months or "??"),
-                    "Weight=%skg"   % (measurements['weight'] or "??"),
-                    "Height=%scm"  % (measurements['height'] or "??"),
-                    "Oedema=%s"   % (human_oedema or "??"),
-                    "MUAC=%scm"      % (measurements['muac'] or "??")]
+                    "ChildID=%s" % (patient.code or "??"),
+                    "Gender=%s" % (patient.gender or "??"),
+                    "DOB=%s" % (patient.date_of_birth or "??"),
+                    "Age=%sm" % (patient.age_in_months or "??"),
+                    "Weight=%skg" % (measurements['weight'] or "??"),
+                    "Height=%scm" % (measurements['height'] or "??"),
+                    "Oedema=%s" % (human_oedema or "??"),
+                    "MUAC=%scm" % (measurements['muac'] or "??")]
 
             self.debug('constructing confirmation')
             confirmation = REPORT_CONFIRM %\
@@ -406,7 +408,7 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'U'
                     elif (ass.weight4height <= D(str(-3.00))):
                         ass.wasting = 'S'
- 
+
                 if ass.muac is not None:
                     if (survey.mild_muac <= ass.muac <= survey.normal_muac):
                         ass.wasting = 'M'
@@ -426,9 +428,9 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'G'
                     if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
                         ass.wasting = 'L'
-                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.mild_muac <= ass.muac <= survey.normal_muac )):
+                    if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.mild_muac <= ass.muac <= survey.normal_muac)):
                         ass.wasting = 'M'
-                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.mild_muac )):
+                    if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.mild_muac)):
                         ass.wasting = 'U'
                     if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= survey.severe_muac)):
                         ass.wasting = 'S'

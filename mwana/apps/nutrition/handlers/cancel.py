@@ -16,10 +16,8 @@ class CancelHandler(KeywordHandler):
 
     keyword = "cancel|can"
 
-
     def help(self):
         self.respond(CANCEL_HELP)
-
 
     def handle(self, text):
         PATTERN = re.compile(r'(?P<child_id>\d+)\s+', re.IGNORECASE)
@@ -38,4 +36,3 @@ class CancelHandler(KeywordHandler):
                 self.respond(CANCEL_ERROR % (child,))
         except ObjectDoesNotExist:
             self.respond(CANCEL_ERROR % (child,))
-            
