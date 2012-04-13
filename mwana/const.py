@@ -18,10 +18,17 @@ PROVINCE_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PROVINCE_WORKER_SLUG',
 DBS_PRINTER_SLUG = settings.RESULTS160_SLUGS.get('DBS_PRINTER_SLUG',
                                                  'dbs-printer')
 
+EMERGENCY_RESPONDER_SLUG = settings.RESULTS160_SLUGS.get('EMERGENCY_RESPONDER_SLUG','er')
+AMBULANCE_DRIVER_SLUG = settings.RESULTS160_SLUGS.get('AMBULANCE_DRIVER_SLUG','ad')
+TRIAGE_NURSE_SLUG = settings.RESULTS160_SLUGS.get('TRIAGE_NURSE_SLUG','tn')
+
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))
 ZONE_SLUGS = settings.RESULTS160_SLUGS.get('ZONE_SLUGS', ('zone',))
 DISTRICT_SLUGS = settings.RESULTS160_SLUGS.get('DISTRICT_SLUGS', ('district',))
+RHC_SLUGS = settings.RESULTS160_SLUGS.get('RHC_SLUGS', ('rhc',))
+UHC_SLUGS = settings.RESULTS160_SLUGS.get('UHC_SLUGS', ('uhc',))
+
 
 # PROVINCE_SLUGS is optional (not all countries have provinces)
 # it should NOT be set to None, as that would cause filters by the 'province'
@@ -62,20 +69,32 @@ def get_cba_type():
 def get_dbs_printer_type():
     return _get_contacttype(DBS_PRINTER_SLUG, 'DBS Printer')
 
-
 def get_patient_type():
     return _get_contacttype(PATIENT_SLUG, 'Patient')
 
 def get_zone_type():
     return _get_locationtype(ZONE_SLUGS, 'Zone')
 
+def get_rhc_type():
+    return _get_locationtype(RHC_SLUGS, 'RHC')
+
+def get_uhc_type():
+    return _get_locationtype(UHC_SLUGS, 'UHC')
+
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
-
 
 def get_district_worker_type():
     return _get_contacttype(DISTRICT_WORKER_SLUG, 'District Worker')
 
+def get_emergency_responder_type():
+    return _get_contacttype(EMERGENCY_RESPONDER_SLUG, 'Emergency Responder')
+
+def get_ambulance_driver_type():
+    return _get_contacttype(AMBULANCE_DRIVER_SLUG, 'Ambulance Driver')
+
+def get_triage_nurse_type():
+    return _get_contacttype(TRIAGE_NURSE_SLUG, 'Triage Nurse')
 
 def get_province_worker_type():
     return _get_contacttype(PROVINCE_WORKER_SLUG, 'Province Worker')
