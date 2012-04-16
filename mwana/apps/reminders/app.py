@@ -189,17 +189,15 @@ class App(rapidsms.apps.base.AppBase):
                                           'event_upper': event_slug.upper()})
         return True
 
-
     def handle_mayi(self, msg, event):
         """Handles continuum of care submissions.
         """
-        
+
         # Only allow registered HSA's to register mothers for care
         if not msg.contact:
             msg.respond(_("Please register as a Mobile agent to register mothers for care."
                           " send JOIN <HSA> <CLINIC CODE> <ZONE #> <YOUR NAME>"))
             return True
-        
 
         if (len(msg.text.split()) > 4):
             part_msg, cell_number = msg.text.rsplit(" ", 1)
@@ -208,8 +206,8 @@ class App(rapidsms.apps.base.AppBase):
             msg.text = " ".join([part_msg, cell_number])
         else:
             date_str, patient_name = self._parse_message(msg)
-            
-        if patient_name: # the date is not optional
+
+        if patient_name:  # the date is not optional
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
@@ -217,7 +215,7 @@ class App(rapidsms.apps.base.AppBase):
                                 "Please enter the date like so: "
                                 "DDMMYY, for example: 271011"))
                     return True
-        
+
             # fetch or create the patient
             if msg.contact and msg.contact.location:
                 patient, created = Contact.objects.get_or_create(
@@ -253,5 +251,5 @@ class App(rapidsms.apps.base.AppBase):
         else:
             msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "
                       "MAYI <DELIVERY_DATE> <MOTHERS_NAME> <OPTIONAL_MOTHERS_CELL_NUMBER>"))
-                      
+
         return True

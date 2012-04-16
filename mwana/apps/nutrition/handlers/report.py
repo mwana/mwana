@@ -182,6 +182,10 @@ class ReportGMHandler(KeywordHandler):
         except ObjectDoesNotExist, MultipleObjectsReturned:
             return self.respond("No active survey at this date")
 
+        # debug crash on future date
+        # import pdb
+        # pdb.set_trace()
+
         self.debug("initialising separate childgrowth instance..")
         cg = childgrowth(False, False)
 
@@ -197,6 +201,12 @@ class ReportGMHandler(KeywordHandler):
         token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac']
 
         token_data = text.split()
+
+        # check it is not a future date
+        date_string, date_obj = self._validate_date(token_data[1])
+        if date_obj is not None:
+            if date_obj > date.today():
+                return self.respond(INVALID_GM)
 
         try:
             if len(token_data) > 7:
@@ -219,6 +229,7 @@ class ReportGMHandler(KeywordHandler):
             if raw_dob_obj is not None:
                 survey_entry.age_in_months = helpers.date_to_age_in_months(raw_dob_obj)
             survey_entry.save()
+            # you cannot monitor a child who is not yet born.
         except Exception, e:
             self.exception()
             self.respond(INVALID_MEASUREMENT %\
@@ -242,10 +253,6 @@ class ReportGMHandler(KeywordHandler):
         self.debug("getting patient...")
         # begin collecting valid patient arguments
         patient_kwargs = {'code': survey_entry.child_id}
-
-        # debug crash on future date
-        import pdb
-        pdb.set_trace()
 
         # no submitted bday
         if survey_entry.date_of_birth is None:
