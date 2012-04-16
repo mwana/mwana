@@ -16,9 +16,10 @@ _ = lambda s: s
 
 # Begin Translatable messages
 FACILITY_NOT_RECOGNIZED = _("Sorry, the facility '%(fac)s' is not recognized. Please try again.")
-ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(type)s at %(facility)s")
+ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_user_type)s at %(fac)s but your details have been updated")
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the Title Code '%(title)s' is not recognized. Please try again.")
-ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(type)s!")
+ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
+USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(fac)s.")
 
 logger = logging.getLogger('mwana.apps.smgl.app')
 logger.setLevel(logging.DEBUG)
@@ -51,17 +52,13 @@ def _get_valid_model(model,slug=None,name=None):
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
     zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
-    try:
-        # get_or_create does not work with iexact
-        zone = Location.objects.get(name__iexact=name,
-                                    parent=clinic,
-                                    type=zone_type)
-    except ObjectDoesNotExist:
-        zone = Location.objects.create(name=name,
-                                       parent=clinic,
-                                       slug=get_unique_value(Location.objects, "slug", name),
-                                       type=zone_type)
-
+    zone = Location.objects.get_or_create(name__iexact=name,
+                                parent=clinic,
+                                type=zone_type,
+                                defaults={
+                                    'name': name,
+                                    'slug': get_unique_value(Location.objects, "slug", name),
+                                })
 
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
@@ -81,7 +78,7 @@ def join_generic(submission, xform):
     # Return a message indicating that it is already registered.
     #Same logic for facility.
     connection = submission.connection
-    reg_type = _get_value_for_command('title', submission)
+    reg_type = _get_value_for_command('title', submission).lower()
     facility = _get_value_for_command('fac', submission)
     name = _get_value_for_command('name', submission)
     zone_name = _get_value_for_command('zone', submission)
@@ -92,27 +89,46 @@ def join_generic(submission, xform):
 
     location = _get_valid_model(Location, name=facility)
     if not location:
+        logger.debug('A valid location was not found for %s' % facility)
         OutgoingMessage(connection, FACILITY_NOT_RECOGNIZED, **submission.template_vars).send()
         return True
+    logger.debug('Got a valid location')
     contactType = _get_valid_model(ContactType, slug=reg_type)
     if not contactType:
         OutgoingMessage(connection, CONTACT_TYPE_NOT_RECOGNIZED, **submission.template_vars).send()
         return True
+    logger.debug('Got a good ContactType')
+    #update the template dict to have a human readable name of the type of contact we're registering
+    submission.template_vars.update({"readable_user_type": contactType.name})
+
     zone = None
     if zone_name and reg_type == 'cba':
         zone = _get_or_create_zone(location, zone_name)
     elif zone_name and reg_type != 'cba':
+        logger.debug('Zone field was specified even though registering type is not CBA')
         OutgoingMessage(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **submission.template_vars)
         return True
 
     #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
     #Name can't really be validated.
 
-    #Check if Contact exists
-    contact = Contact.objects.get_or_create(name=name, location=(zone or location))
-        self.msg.connection.contact = cba
-        self.msg.connection.save()
-    (contact, created) = Contact.objects.get_or_create()
+    (contact, created) = Contact.objects.get_or_create(name=name, location=(zone or location), alias = uid)
+    submission.connection.contact = contact
+    submission.connection.save()
+    types = contact.types.all()
+    if contactType not in types:
+        contact.types.add(contactType)
+    else: #Already registered
+        OutgoingMessage(connection, ALREADY_REGISTERED, **submission.template_vars).send()
+        return True
+    contact.location = location
+    contact.save()
+
+    OutgoingMessage(connection, USER_SUCCESS_REGISTERED, **submission.template_vars).send()
+
+    #prevent default response
+    return True
+
 
 def pregnant_registration(submission, xform):
     pass
