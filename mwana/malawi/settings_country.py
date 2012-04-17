@@ -61,8 +61,8 @@ RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 # don't append, 'default' app should come last:
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
-RAPIDSMS_TABS.append(('growth_index', 'Growth Monitor'))
-RAPIDSMS_TABS.append(('growth_graphs', 'Nutrition Reports'))
+RAPIDSMS_TABS.append(('growth_index', 'AnthroWatch Reports'))
+RAPIDSMS_TABS.append(('growth_graphs', 'AnthroWatch Analysis'))
 
 #DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
 
