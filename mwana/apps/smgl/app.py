@@ -1,13 +1,22 @@
+import datetime
+import logging
+
+from .models import XFormKeywordHandler, FacilityVisit
+
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
-from rapidsms.models import Contact
 from mwana.apps.contactsplus.models import ContactType
-from rapidsms_xforms.models import xform_received, XForm
-from .models import XFormKeywordHandler
-from rapidsms.messages import OutgoingMessage
-import logging
-from django.core.exceptions import ObjectDoesNotExist
+from mwana.apps.smgl.models import PregnantMother
 from mwana import const
+
+from rapidsms_xforms.models import xform_received, XForm
+from rapidsms.models import Contact
+from rapidsms.messages import OutgoingMessage
+
+from dimagi.utils.modules import to_function
+
+from django.core.exceptions import ObjectDoesNotExist
+
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -20,6 +29,14 @@ ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_use
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the Title Code '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
 USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(fac)s.")
+MOTHER_SUCCESS_REGISTERED = _("Thank you, mother has been registered succesfully!")
+NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
+NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
+DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
+                                       "DD MM YYYY. Please try again.")
+
+DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format"
+                                    "YYYY (four digit year). Please try again.")
 
 logger = logging.getLogger('mwana.apps.smgl.app')
 logger.setLevel(logging.DEBUG)
@@ -60,6 +77,24 @@ def _get_or_create_zone(clinic, name):
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
 
+def get_location(submission, facility):
+    location = _get_valid_model(Location, name=facility)
+    error = False
+    if not location:
+        logger.debug('A valid location was not found for %s' % facility)
+        OutgoingMessage(submission.connection, FACILITY_NOT_RECOGNIZED, **submission.template_vars).send()
+        error = True
+    return location, error
+
+
+def get_contacttype(submission, reg_type):
+    contactType = _get_valid_model(ContactType, slug=reg_type)
+    error = False
+    if not contactType:
+        OutgoingMessage(submission.connection, CONTACT_TYPE_NOT_RECOGNIZED, **submission.template_vars).send()
+        error=True
+    return contactType, error
+
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
 ##===========================================================================##
@@ -69,6 +104,8 @@ def join_generic(submission, xform):
     It deals with registering CBA's, Triage Nurses, Ambulance Drivers
     and Hospital Staff
 
+    Message Format:
+    JOIN UniqueID NAME FACILITY TITLE(TN/DA/CBA) ZONE(IF COUNSELLOR)
     """
     logger.debug('Handling the JOIN keyword form')
 
@@ -87,17 +124,12 @@ def join_generic(submission, xform):
     logger.debug('Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
                  (facility, reg_type, connection, name, uid))
 
-    location = _get_valid_model(Location, name=facility)
-    if not location:
-        logger.debug('A valid location was not found for %s' % facility)
-        OutgoingMessage(connection, FACILITY_NOT_RECOGNIZED, **submission.template_vars).send()
+    location, error = get_location(submission, facility)
+    if error:
         return True
-    logger.debug('Got a valid location')
-    contactType = _get_valid_model(ContactType, slug=reg_type)
-    if not contactType:
-        OutgoingMessage(connection, CONTACT_TYPE_NOT_RECOGNIZED, **submission.template_vars).send()
+    contactType, error = get_contacttype(submission, reg_type)
+    if error:
         return True
-    logger.debug('Got a good ContactType')
     #update the template dict to have a human readable name of the type of contact we're registering
     submission.template_vars.update({"readable_user_type": contactType.name})
 
@@ -112,7 +144,7 @@ def join_generic(submission, xform):
     #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
     #Name can't really be validated.
 
-    (contact, created) = Contact.objects.get_or_create(name=name, location=(zone or location), alias = uid)
+    (contact, created) = Contact.objects.get_or_create(name=name, location=(zone or location), unique_id = uid)
     submission.connection.contact = contact
     submission.connection.save()
     types = contact.types.all()
@@ -129,9 +161,109 @@ def join_generic(submission, xform):
     #prevent default response
     return True
 
+def _make_date(dd, mm, yy):
+    """
+    Returns a tuple: (datetime.date, ERROR_MSG)
+    ERROR_MSG will be False if datetime.date is sucesfully constructed.
+    Be sure to include the dictionary key-value "date_name": DATE_NAME
+    when sending out the error message as an outgoing message.
+    """
+    try:
+        dd = int(dd)
+        mm = int(mm)
+        yy = int(yy)
+    except ValueError:
+        return None, DATE_INCORRECTLY_FORMATTED_GENERAL
+
+    if yy < 1900: #Make sure yy is a 4 digit date
+        return None, True, DATE_YEAR_INCORRECTLY_FORMATTED
+
+    try:
+        ret_date = datetime.date(yy,mm,dd)
+    except ValueError as msg:
+        return None, True, msg #<-- will send descriptive message of exact error (like month not in 1..12, etc)
+
+    return ret_date, False, None
+
+
 
 def pregnant_registration(submission, xform):
-    pass
+    """
+    Handler for REG keyword (registration of pregnant mothers).
+    Format:
+    REG Mother_UID FIRST_NAME LAST_NAME HIGH_RISK_HISTORY FOLLOW_UP_DATE_dd FOLLOW_UP_DATE_mm FOLLOW_UP_DATE_yyyy \
+        REASON_FOR_VISIT(ROUTINE/NON-ROUTINE) ZONE LMP_dd LMP_mm LMP_yyyy EDD_dd EDD_mm EDD_yyyy
+    """
+    logger.debug('Handling the REG keyword form')
+
+    #Create a contact for this connection.  If it already exists,
+    #Verify that it is a contact of the specified type. If not,
+    #Add it.  If it does already have that type associated with it
+    # Return a message indicating that it is already registered.
+    #Same logic for facility.
+    connection = submission.connection
+
+    #get or create a new Mother Object without saving the object (and triggering premature errors)
+    uid = _get_value_for_command('uid', submission)
+    try:
+        mother = PregnantMother.objects.get(uid=uid)
+    except ObjectDoesNotExist:
+        mother = {}
+
+    mother["name"] = _get_value_for_command('first_name', submission)
+    mother["uid"] = uid
+    mother["high_risk_history"] = _get_value_for_command('high_risk_history', submission)
+    mother["next_visit"] = _get_value_for_command('next_visit', submission)
+    mother["reason_for_visit"] = _get_value_for_command('reason_for_visit', submission)
+    zone_name = _get_value_for_command('zone', submission)
+    date_name = {"date_name": "LMP"}
+
+    lmp_dd = _get_value_for_command('lmp_dd', submission)
+    lmp_mm = _get_value_for_command('lmp_mm', submission)
+    lmp_yy = _get_value_for_command('lmp_yy', submission)
+
+    lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
+    if error:
+        OutgoingMessage(connection, error_msg, **date_name)
+
+    mother["lmp"] = lmp_date
+
+
+
+    logger.debug('Mother UID: %s, is_referral: %s' % \
+                 (mother.uid, str(mother.is_referral)))
+
+    #We must get the location from the Contact (Data Associate) who should be registered with this
+    #phone number.  If the contact does not exist (unregistered) we throw an error.
+    contactType, error = get_contacttype(submission, 'da') #da = Data Associate
+    if error:
+        OutgoingMessage(connection, NOT_A_DATA_ASSOCIATE)
+        return True
+    logging.debug('Data associate:: Connection: %s, Type: %s' % (connection, contactType))
+    try:
+        data_associate = Contact.objects.get(connection=connection, types=contactType)
+    except ObjectDoesNotExist:
+        logger.info("Data Associate Contact not found.  Mother cannot be correctly registered!")
+        OutgoingMessage(connection, NOT_REGISTERED_FOR_DATA_ASSOC)
+        return True
+
+    mother.location = data_associate.location
+    if zone_name:
+        mother.zone = _get_or_create_zone(mother.location, zone_name)
+    mother.save()
+
+    #Create a facility visit object and link it to the mother
+    visit = FacilityVisit()
+    visit.location = mother.location
+    visit.visit_date = datetime.date.today()
+    visit.reason_for_visit = 'initial_registration'
+    visit.next_visit = mother.next_visit
+    visit.mother = mother
+    visit.save()
+
+    OutgoingMessage(connection, MOTHER_SUCCESS_REGISTERED, **submission.template_vars).send()
+    #prevent default response
+    return True
 
 def follow_up_appt(submission, xform):
     pass
@@ -158,15 +290,6 @@ def death_registration(submission, xform, **args):
     pass
 ###############################################################################
 
-def get_handler_func(funcpath):
-    dot = funcpath.rindex('.')
-    module = funcpath[:dot]
-    func_name = funcpath[(dot+1):]
-    module = __import__(module, fromlist=[func_name]) #one would think that this returns the function. One would be wrong (???).
-                                                      #it returns the module only.  Without the fromlist param it imports the project root __init__.py (???)
-    return getattr(module, func_name)  #this does return the function.
-
-
 
 # define a listener
 def handle_submission(sender, **args):
@@ -183,9 +306,7 @@ def handle_submission(sender, **args):
     except ObjectDoesNotExist:
         logger.debug('No keyword handler found for the xform submission with keyword: %s' % keyword)
         return
-
-    func = get_handler_func(kw_handler.function_path)
-
+    func = to_function(kw_handler.function_path, True)
     #call the actual handling function
     return func(submission, xform)
 

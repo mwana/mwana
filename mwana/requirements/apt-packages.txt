@@ -13,3 +13,4 @@ supervisor
 git-core
 build-essential
 couchdb
+jython

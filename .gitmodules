@@ -1,0 +1,6 @@
+[submodule "submodules/rapidsms-smsforms"]
+	path = submodules/rapidsms-smsforms
+	url = ssh://adewinter@local-vm/home/adewinter/repos/rapidsms-smsforms
+[submodule "submodules/touchforms"]
+	path = submodules/touchforms
+	url = ssh://adewinter@local-vm/home/adewinter/repos/touchforms

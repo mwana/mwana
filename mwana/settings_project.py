@@ -63,7 +63,8 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
-
+    "touchforms.formplayer",
+    "smsforms",
     # the rapidsms contrib apps.
 
     "rapidsms.contrib.export",
@@ -99,10 +100,15 @@ INSTALLED_APPS = [
     "rapidsms.contrib.default",
 ]
 
+#TOUCHFORMS CONFIG
+XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
+
 # this rapidsms-specific setting defines which views are linked by the
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
+    ('smsforms.views.list_forms', 'Decision Tree XForms'),
+    ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
     ('rapidsms.views.dashboard', 'Dashboard'),
     ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
     ('mwana.apps.locations.views.dashboard', 'Map'),
@@ -240,6 +246,7 @@ ON_LIVE_SERVER = False
 RESULTS160_SLUGS = {
 # contact types:
     'CBA_SLUG': 'cba',
+    'DATA_ASSOCIATE_SLUG': 'da',
     'PATIENT_SLUG': 'patient',
     'CLINIC_WORKER_SLUG': 'clinic-worker',
     'DISTRICT_WORKER_SLUG': 'district-worker',

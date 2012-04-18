@@ -18,12 +18,25 @@ if not settings_specified and len(sys.argv) >= 2:
     sys.argv.append('--settings=%s' % settings)
 
 
+#just add the name of the submodule you want to include here.
+#Make sure it's in the repo_root/submodules folder!
+SUBMODULE_NAMES = [
+    'rapidsms-smsforms',
+    'touchforms'
+]
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('mwana.'):
     project_root = os.path.abspath(os.path.dirname(__file__))
     if project_root in sys.path:
         sys.path.remove(project_root)
     sys.path.insert(0, os.path.dirname(project_root))
+
+
+    #add submodules
+    submodule_root = os.path.join(project_root, '..', 'submodules')
+    for submodule in SUBMODULE_NAMES:
+        submodule_path = os.path.join(submodule_root, submodule)
+        sys.path.append(submodule_path)
 
     from mwana import settings_project    
     if len(sys.argv) > 1 and sys.argv[1] == 'test' and settings_project.ON_LIVE_SERVER:
