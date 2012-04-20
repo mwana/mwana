@@ -82,7 +82,7 @@ class TestApp(TestScript):
         script = """
             tz > training start kdh
             ha < Training is starting at Kafue District Hospital, kdh. Notification was sent by Trainer Zulu, tz
-            hub_worker < Hi Hub Man. Training is starting at Kafue District Hospital, kdh. Treat nofications you receive from this clinic as training data
+            hub_worker < Hi Hub Man. Training is starting at Kafue District Hospital, kdh. Treat notifications you receive from this clinic as training data
             tz < Thanks Trainer Zulu for your message that training is starting for Kafue District Hospital. At end of training please send TRAINING STOP
             """
         self.runScript(script)
@@ -91,7 +91,7 @@ class TestApp(TestScript):
         script = """
             tz > training stop kdh
             ha < Training has stopped at Kafue District Hospital, kdh. Notification was sent by Trainer Zulu, tz            
-            hub_worker < Hi Hub Man. Training has stopped at Kafue District Hospital, kdh. Treat nofications you receive from this clinic as live data
+            hub_worker < Hi Hub Man. Training has stopped at Kafue District Hospital, kdh. Treat notifications you receive from this clinic as live data
             tz < Thanks Trainer Zulu for your message that training has stopped for Kafue District Hospital.
             """
         self.runScript(script)
@@ -101,7 +101,7 @@ class TestApp(TestScript):
         script = """
             tz > training start 403012
             ha < Training is starting at Central Clinic, 403012. Notification was sent by Trainer Zulu, tz
-            hub_worker < Hi Hub Man. Training is starting at Central Clinic, 403012. Treat nofications you receive from this clinic as training data
+            hub_worker < Hi Hub Man. Training is starting at Central Clinic, 403012. Treat notifications you receive from this clinic as training data
             tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP
             """
         self.runScript(script)
@@ -127,7 +127,7 @@ class TestApp(TestScript):
         script = """
             tz > training stop 403012
             ha < Training has stopped at Central Clinic, 403012. Notification was sent by Trainer Zulu, tz
-            hub_worker < Hi Hub Man. Training has stopped at Central Clinic, 403012. Treat nofications you receive from this clinic as live data
+            hub_worker < Hi Hub Man. Training has stopped at Central Clinic, 403012. Treat notifications you receive from this clinic as live data
             tz < Thanks Trainer Zulu for your message that training has stopped for Central Clinic.
             """
         self.runScript(script)

@@ -26,8 +26,8 @@ CBA_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, 
 DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
 PHO_DEFAULT_RESPONSE = "Sorry %s. Respond with keyword HELP for assistance."
 UNREGISTERED_DEFAULT_RESPONSE = "Invalid Keyword. Please send the keyword HELP if you need to be assisted."
-HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat nofications you receive from this clinic as training data"
-HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat nofications you receive from this clinic as live data"
+HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as training data"
+HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as live data"
 
 TEST_TYPE = "HIV-DNAPCR Result"
 
