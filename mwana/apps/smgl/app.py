@@ -98,10 +98,34 @@ def get_contacttype(session, reg_type):
         error=True
     return contactType, error
 
+def _make_date(dd, mm, yy):
+    """
+    Returns a tuple: (datetime.date, ERROR_MSG)
+    ERROR_MSG will be False if datetime.date is sucesfully constructed.
+    Be sure to include the dictionary key-value "date_name": DATE_NAME
+    when sending out the error message as an outgoing message.
+    """
+    try:
+        dd = int(dd)
+        mm = int(mm)
+        yy = int(yy)
+    except ValueError:
+        return None, True, DATE_INCORRECTLY_FORMATTED_GENERAL
+
+    if yy < 1900: #Make sure yy is a 4 digit date
+        return None, True, DATE_YEAR_INCORRECTLY_FORMATTED
+
+    try:
+        ret_date = datetime.date(yy,mm,dd)
+    except ValueError as msg:
+        return None, True, msg #<-- will send descriptive message of exact error (like month not in 1..12, etc)
+
+    return ret_date, False, None
+
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
 ##===========================================================================##
-def join_generic(submission, xform):
+def join_generic(session, xform):
     """
     This is the generic JOIN handler for the SMGL project.
     It deals with registering CBA's, Triage Nurses, Ambulance Drivers
@@ -117,7 +141,7 @@ def join_generic(submission, xform):
     #Add it.  If it does already have that type associated with it
     # Return a message indicating that it is already registered.
     #Same logic for facility.
-    connection = submission.connection
+    connection = session.connection
     reg_type = _get_value_for_command('title', xform).lower()
     facility = _get_value_for_command('fac', xform)
     name = _get_value_for_command('name', xform)
@@ -127,70 +151,44 @@ def join_generic(submission, xform):
     logger.debug('Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
                  (facility, reg_type, connection, name, uid))
 
-    location, error = get_location(submission, facility)
+    location, error = get_location(session, facility)
     if error:
         return True
-    contactType, error = get_contacttype(submission, reg_type)
+    contactType, error = get_contacttype(session, reg_type)
     if error:
         return True
     #update the template dict to have a human readable name of the type of contact we're registering
-    submission.template_vars.update({"readable_user_type": contactType.name})
+    session.template_vars.update({"readable_user_type": contactType.name})
 
     zone = None
     if zone_name and reg_type == 'cba':
         zone = _get_or_create_zone(location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
-        OutgoingMessage(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **submission.template_vars)
+        OutgoingMessage(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **session.template_vars)
         return True
 
     #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
     #Name can't really be validated.
 
     (contact, created) = Contact.objects.get_or_create(name=name, location=(zone or location), unique_id = uid)
-    submission.connection.contact = contact
-    submission.connection.save()
+    session.connection.contact = contact
+    session.connection.save()
     types = contact.types.all()
     if contactType not in types:
         contact.types.add(contactType)
     else: #Already registered
-        OutgoingMessage(connection, ALREADY_REGISTERED, **submission.template_vars).send()
+        OutgoingMessage(connection, ALREADY_REGISTERED, **session.template_vars).send()
         return True
     contact.location = location
     contact.save()
 
-    OutgoingMessage(connection, USER_SUCCESS_REGISTERED, **submission.template_vars).send()
+    OutgoingMessage(connection, USER_SUCCESS_REGISTERED, **session.template_vars).send()
 
     #prevent default response
     return True
 
-def _make_date(dd, mm, yy):
-    """
-    Returns a tuple: (datetime.date, ERROR_MSG)
-    ERROR_MSG will be False if datetime.date is sucesfully constructed.
-    Be sure to include the dictionary key-value "date_name": DATE_NAME
-    when sending out the error message as an outgoing message.
-    """
-    try:
-        dd = int(dd)
-        mm = int(mm)
-        yy = int(yy)
-    except ValueError:
-        return None, DATE_INCORRECTLY_FORMATTED_GENERAL
-
-    if yy < 1900: #Make sure yy is a 4 digit date
-        return None, True, DATE_YEAR_INCORRECTLY_FORMATTED
-
-    try:
-        ret_date = datetime.date(yy,mm,dd)
-    except ValueError as msg:
-        return None, True, msg #<-- will send descriptive message of exact error (like month not in 1..12, etc)
-
-    return ret_date, False, None
-
-
-
-def pregnant_registration(submission, xform):
+def pregnant_registration(session, xform):
     """
     Handler for REG keyword (registration of pregnant mothers).
     Format:
@@ -204,7 +202,7 @@ def pregnant_registration(submission, xform):
     #Add it.  If it does already have that type associated with it
     # Return a message indicating that it is already registered.
     #Same logic for facility.
-    connection = submission.connection
+    connection = session.connection
 
     #get or create a new Mother Object without saving the object (and triggering premature errors)
     uid = _get_value_for_command('uid', xform)
@@ -220,25 +218,22 @@ def pregnant_registration(submission, xform):
     mother["reason_for_visit"] = _get_value_for_command('reason_for_visit', xform)
     zone_name = _get_value_for_command('zone', xform)
     date_name = {"date_name": "LMP"}
-
+    session.template_vars.update(date_name)
     lmp_dd = _get_value_for_command('lmp_dd', xform)
     lmp_mm = _get_value_for_command('lmp_mm', xform)
     lmp_yy = _get_value_for_command('lmp_yy', xform)
 
     lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
     if error:
-        OutgoingMessage(connection, error_msg, **date_name)
+        OutgoingMessage(connection, error_msg, **session.template_vars)
 
     mother["lmp"] = lmp_date
-
-
-
     logger.debug('Mother UID: %s, is_referral: %s' % \
                  (mother.uid, str(mother.is_referral)))
 
     #We must get the location from the Contact (Data Associate) who should be registered with this
     #phone number.  If the contact does not exist (unregistered) we throw an error.
-    contactType, error = get_contacttype(submission, 'da') #da = Data Associate
+    contactType, error = get_contacttype(session, 'da') #da = Data Associate
     if error:
         OutgoingMessage(connection, NOT_A_DATA_ASSOCIATE)
         return True
@@ -264,7 +259,7 @@ def pregnant_registration(submission, xform):
     visit.mother = mother
     visit.save()
 
-    OutgoingMessage(connection, MOTHER_SUCCESS_REGISTERED, **submission.template_vars).send()
+    OutgoingMessage(connection, MOTHER_SUCCESS_REGISTERED, **session.template_vars).send()
     #prevent default response
     return True
 
@@ -308,6 +303,7 @@ def handle_submission(sender, **args):
         logger.debug('No keyword handler found for the xform submission with keyword: %s' % keyword)
         return
     func = to_function(kw_handler.function_path, True)
+    session.template_vars = {} #legacy from using rapidsms-xforms
     #call the actual handling function
     return func(session, xform)
 
