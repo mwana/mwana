@@ -22,7 +22,12 @@ if not settings_specified and len(sys.argv) >= 2:
 #Make sure it's in the repo_root/submodules folder!
 SUBMODULE_NAMES = [
     'rapidsms-smsforms',
-    'touchforms'
+    'touchforms',
+    "rapidsms-smscouchforms",
+    "couchforms",
+    "couchexport",
+    "couchlog",
+    "django-soil",
 ]
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('mwana.'):

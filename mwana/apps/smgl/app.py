@@ -1,5 +1,6 @@
 import datetime
 import logging
+from rapidsms.apps.base import AppBase
 
 from .models import XFormKeywordHandler, FacilityVisit
 
@@ -16,6 +17,9 @@ from rapidsms.messages import OutgoingMessage
 from dimagi.utils.modules import to_function
 
 from django.core.exceptions import ObjectDoesNotExist
+from smscouchforms.signals import xform_saved_with_session
+
+from smsforms.signals import form_complete
 
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -41,15 +45,14 @@ DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s
 logger = logging.getLogger('mwana.apps.smgl.app')
 logger.setLevel(logging.DEBUG)
 
-def _get_standard_xform_response(submission, xform):
-    """
-    Gets the template rendered response as normally returned by rapidsms_xforms
-    """
-    return XForm.render_response(xform.response, submission.template_vars)
+class SMGL(AppBase):
+    # We're handling the submission process using signal hooks
+    # Code is located here (in app.py) for ease of finding for other devs.
+    pass
 
-def _get_value_for_command(command, submission):
+def _get_value_for_command(command, xform):
     try:
-        return submission.values.get(attribute__xformfield__command=command).value
+        return xform.xpath('form/%s' % command)
     except ObjectDoesNotExist:
         return None
 
@@ -66,6 +69,7 @@ def _get_valid_model(model,slug=None,name=None):
         return None
 
  # Taken from mwana.apps.agents.handler.agrent.AgentHandler
+
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
     zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
@@ -77,21 +81,20 @@ def _get_or_create_zone(clinic, name):
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
 
-def get_location(submission, facility):
+def get_location(session, facility):
     location = _get_valid_model(Location, name=facility)
     error = False
     if not location:
         logger.debug('A valid location was not found for %s' % facility)
-        OutgoingMessage(submission.connection, FACILITY_NOT_RECOGNIZED, **submission.template_vars).send()
+        OutgoingMessage(session.connection, FACILITY_NOT_RECOGNIZED, **session.template_vars).send()
         error = True
     return location, error
 
-
-def get_contacttype(submission, reg_type):
+def get_contacttype(session, reg_type):
     contactType = _get_valid_model(ContactType, slug=reg_type)
     error = False
     if not contactType:
-        OutgoingMessage(submission.connection, CONTACT_TYPE_NOT_RECOGNIZED, **submission.template_vars).send()
+        OutgoingMessage(session.connection, CONTACT_TYPE_NOT_RECOGNIZED, **session.template_vars).send()
         error=True
     return contactType, error
 
@@ -115,11 +118,11 @@ def join_generic(submission, xform):
     # Return a message indicating that it is already registered.
     #Same logic for facility.
     connection = submission.connection
-    reg_type = _get_value_for_command('title', submission).lower()
-    facility = _get_value_for_command('fac', submission)
-    name = _get_value_for_command('name', submission)
-    zone_name = _get_value_for_command('zone', submission)
-    uid = _get_value_for_command('uid', submission)
+    reg_type = _get_value_for_command('title', xform).lower()
+    facility = _get_value_for_command('fac', xform)
+    name = _get_value_for_command('name', xform)
+    zone_name = _get_value_for_command('zone', xform)
+    uid = _get_value_for_command('uid', xform)
 
     logger.debug('Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
                  (facility, reg_type, connection, name, uid))
@@ -204,23 +207,23 @@ def pregnant_registration(submission, xform):
     connection = submission.connection
 
     #get or create a new Mother Object without saving the object (and triggering premature errors)
-    uid = _get_value_for_command('uid', submission)
+    uid = _get_value_for_command('uid', xform)
     try:
         mother = PregnantMother.objects.get(uid=uid)
     except ObjectDoesNotExist:
         mother = {}
 
-    mother["name"] = _get_value_for_command('first_name', submission)
+    mother["name"] = _get_value_for_command('first_name', xform)
     mother["uid"] = uid
-    mother["high_risk_history"] = _get_value_for_command('high_risk_history', submission)
-    mother["next_visit"] = _get_value_for_command('next_visit', submission)
-    mother["reason_for_visit"] = _get_value_for_command('reason_for_visit', submission)
-    zone_name = _get_value_for_command('zone', submission)
+    mother["high_risk_history"] = _get_value_for_command('high_risk_history', xform)
+    mother["next_visit"] = _get_value_for_command('next_visit', xform)
+    mother["reason_for_visit"] = _get_value_for_command('reason_for_visit', xform)
+    zone_name = _get_value_for_command('zone', xform)
     date_name = {"date_name": "LMP"}
 
-    lmp_dd = _get_value_for_command('lmp_dd', submission)
-    lmp_mm = _get_value_for_command('lmp_mm', submission)
-    lmp_yy = _get_value_for_command('lmp_yy', submission)
+    lmp_dd = _get_value_for_command('lmp_dd', xform)
+    lmp_mm = _get_value_for_command('lmp_mm', xform)
+    lmp_yy = _get_value_for_command('lmp_yy', xform)
 
     lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
     if error:
@@ -293,14 +296,12 @@ def death_registration(submission, xform, **args):
 
 # define a listener
 def handle_submission(sender, **args):
-    submission = args['submission']
+    session = args['session']
     xform = args['xform']
-    keyword = xform.keyword
-    has_errors = submission.has_errors
+    keyword = session.trigger.trigger_keyword
 
-    if has_errors:
-        logger.debug('Attempted to handle form submission with keyword: %s but the form had errors.' % keyword)
-        return
+    logging.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
+
     try:
         kw_handler = XFormKeywordHandler.objects.get(keyword=keyword)
     except ObjectDoesNotExist:
@@ -308,7 +309,7 @@ def handle_submission(sender, **args):
         return
     func = to_function(kw_handler.function_path, True)
     #call the actual handling function
-    return func(submission, xform)
+    return func(session, xform)
 
 # then wire it to the xform_received signal
-xform_received.connect(handle_submission)
+xform_saved_with_session.connect(handle_submission)

@@ -63,11 +63,17 @@ RAPIDSMS_TABS = [
 #    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.reports.views.zambia_reports', 'Reports'),
-    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
-    ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
+#    ('mwana.apps.reports.views.zambia_reports', 'Reports'),
+#    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
+#    ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
+#    ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
     ('xforms', 'XForms'),
+    ('rapidsms.views.dashboard', 'Dashboard'),
+    ('smsforms.views.list_forms', 'Decision Tree XForms'),
+    ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
+    ("smscouchforms.views.download",       "View Data"),
+    ("httptester-index", "Message Tester"),
+    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

@@ -14,3 +14,9 @@ pygrowup
 -e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
 south
 posixpath
+lxml
+django-tastypie
+requests
+-e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=rapidsms-threadless-router
+importlib
+-e git+http://github.com/dimagi/django-soil.git#egg=django-soil

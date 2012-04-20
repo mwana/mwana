@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-# vim: ai ts=4 sts=4 et sw=4
-# encoding=utf-8
-
+import os
 # -------------------------------------------------------------------- #
 #                        PROJECT CONFIGURATION                         #
 # -------------------------------------------------------------------- #
@@ -31,15 +29,16 @@ INSTALLED_BACKENDS = {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
     #},
-    "message_tester": {
-        "ENGINE": "rapidsms.backends.bucket",
-    }
+    "httptester": {
+            "ENGINE": "threadless_router.backends.httptester.backend",
+    },
 }
 
 
 # to help you get started quickly, many django/rapidsms apps are enabled
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
+    "threadless_router.backends.httptester",
     "mwana.apps.broadcast",
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
     'south',
     # the essentials.
     "django_nose",
+    "soil",
     "djtables",
     "rapidsms",
 
@@ -63,9 +63,14 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
+    "django.contrib.staticfiles",
     "touchforms.formplayer",
     "smsforms",
     # the rapidsms contrib apps.
+    "smscouchforms",
+    "couchforms",
+    "couchexport",
+    "couchlog",
 
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
@@ -107,10 +112,10 @@ XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
+    ('rapidsms.views.dashboard', 'Dashboard'),
     ('smsforms.views.list_forms', 'Decision Tree XForms'),
     ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
-    ('rapidsms.views.dashboard', 'Dashboard'),
-    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ("smscouchforms.views.download",       "View Data"),
     ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
@@ -131,6 +136,7 @@ DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESU
 #                         BORING CONFIGURATION                         #
 # -------------------------------------------------------------------- #
 
+SECRET_KEY = "SET_ME_TO_SOMETHING_UNIQUE"
 
 # debug mode is turned on as default, since rapidsms is under heavy
 # development at the moment, and full stack traces are very useful
@@ -149,14 +155,24 @@ LOGIN_REDIRECT_URL = "/"
 # all manually is tiresome and error-prone.
 #TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder"
+    )
 
-# for some reason this setting is blank in django's global_settings.py,
-# but it is needed for static assets to be linkable.
-MEDIA_URL = "/static/"
+SETTINGS_PATH = os.path.dirname(__file__)
+FORMDESIGNER_PATH = os.path.join(SETTINGS_PATH, '..', 'submodules', 'vellum')
 
+STATICFILES_DIRS = (
+    ("formdesigner", FORMDESIGNER_PATH),
+)
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+STATIC_ROOT = "../STATICFILES/"
+STATIC_DOC_ROOT = "../static_docs/"
 
-# URL for admin media (also defined in apache configuration)
-ADMIN_MEDIA_PREFIX = '/admin-media/'
+## URL for admin media (also defined in apache configuration)
+#ADMIN_MEDIA_PREFIX = '/admin-media/'
 
 
 # this is required for the django.contrib.sites tests to run, but also
@@ -187,11 +203,13 @@ MIDDLEWARE_CLASSES = [
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
 TEMPLATE_CONTEXT_PROCESSORS = [
-    "django.core.context_processors.auth",
+    "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
+    "django.core.context_processors.static",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+    "touchforms.context_processors.meta",
     "django.core.context_processors.csrf",
     "rapidsms.context_processors.logo",
 ]
@@ -271,3 +289,32 @@ RESULTS160_SLUGS = {
 SEND_LIVE_BIRTH_REMINDERS = False
 
 XFORMS_HOST = "localhost:8000"
+
+FORMDESIGNER_PATH = "/path/to/formdesigner"
+
+#Used by touchforms?
+GMAPS_API_KEY = 'foo'
+REVISION = '1.0'
+######################################
+## Set these in your localsettings!
+#####################################
+#COUCH_SERVER_ROOT='localhost:5984'
+#COUCH_USERNAME=''
+#COUCH_PASSWORD=''
+#COUCH_DATABASE_NAME=''
+####### Couch Forms & Couch DB Kit Settings #######
+#def get_server_url(server_root, username, password):
+#    if username and password:
+#        return "http://%(user)s:%(pass)s@%(server)s" % {"user": username,
+#                                                        "pass": password,
+#                                                        "server": server_root }
+#    else:
+#        return "http://%(server)s" % {"server": server_root }
+#
+#COUCH_SERVER = get_server_url(COUCH_SERVER_ROOT, COUCH_USERNAME, COUCH_PASSWORD)
+#
+#COUCH_DATABASE = "%(server)s/%(database)s" % {"server": COUCH_SERVER, "database": COUCH_DATABASE_NAME }
+#
+#COUCHDB_DATABASES = [(app_label, COUCH_DATABASE) for app_label in COUCHDB_APPS]
+#
+#XFORMS_POST_URL = "%s/_design/couchforms/_update/xform/" % COUCH_DATABASE
