@@ -15,6 +15,7 @@ from rapidsms.models import Contact
 from rapidsms.messages import OutgoingMessage
 
 from dimagi.utils.modules import to_function
+from threadless_router.router import Router
 
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
@@ -42,13 +43,19 @@ DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s i
 DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format"
                                     "YYYY (four digit year). Please try again.")
 
-logger = logging.getLogger('mwana.apps.smgl.app')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class SMGL(AppBase):
+    #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
+    @property
+    def _logger(self):
+        return logging.getLogger(__name__)
+    def handle(self, msg):
+        pass
+
     # We're handling the submission process using signal hooks
     # Code is located here (in app.py) for ease of finding for other devs.
-    pass
+
 
 def _get_value_for_command(command, xform):
     try:
@@ -81,12 +88,15 @@ def _get_or_create_zone(clinic, name):
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
 
+router = Router()
+
 def get_location(session, facility):
     location = _get_valid_model(Location, name=facility)
     error = False
     if not location:
         logger.debug('A valid location was not found for %s' % facility)
-        OutgoingMessage(session.connection, FACILITY_NOT_RECOGNIZED, **session.template_vars).send()
+        omsg = OutgoingMessage(session.connection, FACILITY_NOT_RECOGNIZED, **session.template_vars)
+        router.outgoing(omsg)
         error = True
     return location, error
 
@@ -94,7 +104,8 @@ def get_contacttype(session, reg_type):
     contactType = _get_valid_model(ContactType, slug=reg_type)
     error = False
     if not contactType:
-        OutgoingMessage(session.connection, CONTACT_TYPE_NOT_RECOGNIZED, **session.template_vars).send()
+        omsg = OutgoingMessage(session.connection, CONTACT_TYPE_NOT_RECOGNIZED, **session.template_vars)
+        router.outgoing(omsg)
         error=True
     return contactType, error
 
@@ -165,7 +176,8 @@ def join_generic(session, xform):
         zone = _get_or_create_zone(location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
-        OutgoingMessage(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **session.template_vars)
+        omsg = OutgoingMessage(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **session.template_vars)
+        router.outgoing(omsg)
         return True
 
     #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
@@ -178,12 +190,14 @@ def join_generic(session, xform):
     if contactType not in types:
         contact.types.add(contactType)
     else: #Already registered
-        OutgoingMessage(connection, ALREADY_REGISTERED, **session.template_vars).send()
+        omsg = OutgoingMessage(connection, ALREADY_REGISTERED, **session.template_vars)
+        router.outgoing(omsg)
         return True
     contact.location = location
     contact.save()
 
-    OutgoingMessage(connection, USER_SUCCESS_REGISTERED, **session.template_vars).send()
+    omsg = OutgoingMessage(connection, USER_SUCCESS_REGISTERED, **session.template_vars)
+    router.outgoing(omsg)
 
     #prevent default response
     return True
@@ -225,7 +239,8 @@ def pregnant_registration(session, xform):
 
     lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
     if error:
-        OutgoingMessage(connection, error_msg, **session.template_vars)
+        omsg = OutgoingMessage(connection, error_msg, **session.template_vars)
+        router.outgoing(omsg)
 
     mother["lmp"] = lmp_date
     logger.debug('Mother UID: %s, is_referral: %s' % \
@@ -235,14 +250,16 @@ def pregnant_registration(session, xform):
     #phone number.  If the contact does not exist (unregistered) we throw an error.
     contactType, error = get_contacttype(session, 'da') #da = Data Associate
     if error:
-        OutgoingMessage(connection, NOT_A_DATA_ASSOCIATE)
+        omsg = OutgoingMessage(connection, NOT_A_DATA_ASSOCIATE)
+        router.outgoing(omsg)
         return True
     logging.debug('Data associate:: Connection: %s, Type: %s' % (connection, contactType))
     try:
         data_associate = Contact.objects.get(connection=connection, types=contactType)
     except ObjectDoesNotExist:
         logger.info("Data Associate Contact not found.  Mother cannot be correctly registered!")
-        OutgoingMessage(connection, NOT_REGISTERED_FOR_DATA_ASSOC)
+        omsg = OutgoingMessage(connection, NOT_REGISTERED_FOR_DATA_ASSOC)
+        router.outgoing(omsg)
         return True
 
     mother.location = data_associate.location
@@ -259,7 +276,8 @@ def pregnant_registration(session, xform):
     visit.mother = mother
     visit.save()
 
-    OutgoingMessage(connection, MOTHER_SUCCESS_REGISTERED, **session.template_vars).send()
+    omsg = OutgoingMessage(connection, MOTHER_SUCCESS_REGISTERED, **session.template_vars)
+    router.outgoing(omsg)
     #prevent default response
     return True
 
@@ -304,6 +322,12 @@ def handle_submission(sender, **args):
         return
     func = to_function(kw_handler.function_path, True)
     session.template_vars = {} #legacy from using rapidsms-xforms
+    logging.error('==================')
+    logging.error(xform.top_level_tags())
+    logging.error(dir(xform.top_level_tags()))
+    for k,v in xform.top_level_tags().iteritems():
+        session.template_vars[k] = v
+#    session.template_vars.update(xform.top_level_tags) #this doesn't work for some reason
     #call the actual handling function
     return func(session, xform)
 
