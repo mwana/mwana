@@ -1,4 +1,4 @@
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 from django.db import models
 
 # Create your models here.
@@ -47,6 +47,54 @@ class FacilityVisit(models.Model):
     next_visit = models.DateField()
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
 
+class AmbulanceRequest(models.Model):
+    """
+    Bucket for ambulance request info
+    """
+    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency response",
+                                null=True, blank=True, related_name="er_iniator")
+    connection = models.ForeignKey(Connection, help_text="If not a registered contact, the connection " \
+                                                         "of the person who initiated ER",
+                                    null=True, blank=True)
+    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
+    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
+    #Similarly it shouldn't matter if this field is filled in or not.
+    danger_sign = models.CharField(max_length=255, null=True, blank=True,
+                            help_text="Danger signs that prompted the ER")
+    from_location = models.ForeignKey(Location, null=True, blank=True,
+                                help_text="The Location the Emergency Request ORIGINATED from",
+                                related_name="from_location")
+
+    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True,
+                                        help_text="The Ambulance Driver/Dispatcher who was contacted",
+                                        related_name="ambulance_driver")
+    ad_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Ambulance?")
+    ad_confirmed = models.BooleanField(default=False, help_text="Has the Ambulance Driver confirmed receipt of this ER?")
+    ad_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Ambulance Driver confirm?")
+
+    tn_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Triage Nurse?")
+    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted",
+                                    related_name="triage_nurse")
+    tn_confirmed = models.BooleanField(default=False, help_text="Has the Triage Nurse confirmed receipt of this ER?")
+    tn_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Traige Nurse confirm?")
+
+    other_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Other Recipient?")
+    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER",
+                                        related_name="other_recipient")
+    other_confirmed = models.BooleanField(default=False, help_text="Has the Other Recipient confirmed receipt of this ER?")
+    other_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Other Recipient confirm?")
+
+
+    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility",
+                                        related_name="receiving_facility")
+
+    requested_on = models.DateTimeField(auto_now_add=True)
+    sent_response = models.BooleanField(default=False)
+
+#class AmbulanceResponse(models.ModelField):
+#
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
@@ -73,3 +121,4 @@ class PreRegistration(models.Model):
     title = models.CharField(max_length=255, help_text="User title", choices=PRE_REG_TITLE_CHOICES)
     zone = models.CharField(max_length=20, help_text="User Zone (optional)", blank=True, null=True)
     language = models.CharField(max_length=255, help_text="Preferred Language", default="english", choices=LANGUAGES_CHOICES)
+    has_confirmed = models.BooleanField(default=False, help_text="Has this User confirmed their registration?")

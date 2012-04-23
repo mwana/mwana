@@ -7,7 +7,7 @@ from .models import XFormKeywordHandler, FacilityVisit
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.contactsplus.models import ContactType
-from mwana.apps.smgl.models import PregnantMother
+from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
 from mwana import const
 
 from rapidsms_xforms.models import xform_received, XForm
@@ -41,14 +41,14 @@ NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please 
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
 DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
                                        "DD MM YYYY. Please try again.")
-
 DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format"
                                     "YYYY (four digit year). Please try again.")
-
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
-
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
-
+INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
+ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
+ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
+ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 logger = logging.getLogger(__name__)
 
 class SMGL(AppBase):
@@ -61,6 +61,49 @@ class SMGL(AppBase):
 
     # We're handling the submission process using signal hooks
     # Code is located here (in app.py) for ease of finding for other devs.
+
+
+def _generate_uid_for_er():
+    #grab all the existing amb requests that have made up UIDs:
+    ers = AmbulanceRequest.objects.filter(mother_uid__icontains='A')
+
+    if not ers.count():
+        uid = 'A1'
+    else:
+        counter = ers.count()
+        uids = ers.values_list('mother_uid')
+        uids = map(lambda x: x[0], uids) #gets us a nice list of uids
+        uid = 'A%s' % counter #starting point
+        counter += 1
+        while uid in uids: #iterate until we find a good UID
+            uid = 'A%s' % counter
+            counter += 1
+
+    return uid
+
+def _pick_er_driver(session, xform):
+    ad_type, error = get_contacttype(session, 'am')
+    ads = Contact.objects.filter(types=ad_type)
+    if ads.count():
+        return ads[0]
+    else:
+        raise TypeError('No Ambulance Driver type found!')
+
+def _pick_other_er_recip(session, xform):
+    other_type, error = get_contacttype(session, 'dmo')
+    others = Contact.objects.filter(types=other_type)
+    if others.count():
+        return others[0]
+    else:
+        raise TypeError('No Other recipient type found for Ambulance Request Workflow!')
+
+def _pick_er_triage_nurse(session, xform):
+    tn_type, error = get_contacttype(session, 'tn')
+    tns = Contact.objects.filter(types=tn_type)
+    if tns.count():
+        return tns[0]
+    else:
+        raise TypeError('No Triage Nurse type found!')
 
 def _send_msg(connection, txt, **kwargs):
     logger.debug('Connection: %s, txt: %s, kwargs: %s' % (connection, txt, kwargs))
@@ -121,6 +164,13 @@ def get_contacttype(session, reg_type):
     if not contactType:
         error=True
     return contactType, error
+
+def get_connection_from_contact(contact):
+    connections = contact.connection_set.all()
+    if connections.count():
+        return connections[0]
+    else:
+        return None
 
 def _make_date(dd, mm, yy):
     """
@@ -271,8 +321,76 @@ def pregnant_registration(session, xform):
 def follow_up_appt(submission, xform):
     pass
 
-def ambulance_request(submission, xform):
-    pass
+def ambulance_request(session, xform):
+    connection = session.connection
+    unique_id = _get_value_for_command('unique_id', xform)
+    danger_signs = _get_value_for_command('danger_signs', xform)
+
+    session.template_vars.update({"sender_phone_number": connection.identity})
+    amb = AmbulanceRequest()
+    amb.connection = connection
+    contact = None
+    try:
+        contact = Contact.objects.get(connection=connection)
+    except ObjectDoesNotExist:
+        pass
+    amb.contact = contact
+    if contact:
+        amb.from_location = contact.location
+        session.template_vars.update({"from_location": str(contact.location.name)})
+    else:
+        session.template_vars.update({"from_location": "UNKNOWN"})
+
+    if not unique_id:
+        unique_id = _generate_uid_for_er()
+
+    session.template_vars.update({'unique_id': unique_id})
+    amb.mother_uid = unique_id
+
+    #try match uid to mother
+    mother = None
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        pass
+    amb.mother = mother
+    amb.save()
+
+    #Respond that we're on it.
+    _send_msg(connection, INITIAL_AMBULANCE_RESPONSE, **session.template_vars)
+
+    #Figure out who to alert
+    ambulance_driver = _pick_er_driver(session, xform)
+    amb.ambulance_driver = ambulance_driver
+    driver_conn = get_connection_from_contact(ambulance_driver)
+    if driver_conn:
+        _send_msg(driver_conn, ER_TO_DRIVER, **session.template_vars)
+        amb.ad_msg_sent = True
+    else:
+        amb.ad_msg_sent = False
+
+    tn = _pick_er_triage_nurse(session, xform)
+    amb.triage_nurse = tn
+    tn_conn = get_connection_from_contact(tn)
+    if tn_conn:
+        _send_msg(tn_conn, ER_TO_TRIAGE_NURSE, **session.template_vars)
+        amb.tn_msg_sent = True
+    else:
+        amb.tn_msg_sent = False
+
+    other_recip = _pick_other_er_recip(session,xform)
+    if other_recip: #less important, so not critical if this contact doesn't exist.
+        amb.other_recipient = other_recip
+        other_conn = get_connection_from_contact(other_recip)
+        if other_conn:
+            _send_msg(other_conn, ER_TO_OTHER, **session.template_vars)
+            amb.other_msg_sent = True
+        else:
+            amb.other_msg_sent = False
+
+    amb.save()
+
+    return True
 
 def ambulance_driver_response(submission, xform):
     pass

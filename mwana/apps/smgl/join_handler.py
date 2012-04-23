@@ -18,7 +18,11 @@ def join_secure(session, xform):
         _send_msg(connection, NOT_PREREGISTERED)
         return True
 
-    return join_generic(session, xform, prereg)
+    if prereg.has_confirmed:
+        _send_msg(session.connection, ALREADY_REGISTERED)
+        return True
+    else:
+        return join_generic(session, xform, prereg)
 
 
 
@@ -104,6 +108,7 @@ def join_generic(session, xform, prereg):
 
     #lastly, link this contact to its owning pre-reg info
     prereg.contact = contact
+    prereg.has_confirmed = True
     prereg.save()
     _send_msg(connection, USER_SUCCESS_REGISTERED, **session.template_vars)
     return True

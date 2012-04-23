@@ -5,7 +5,7 @@ class XFormKeywordHandlerAdmin(admin.ModelAdmin):
     list_display = ['keyword', 'function_path']
 
 class PreRegsitrationAdmin(admin.ModelAdmin):
-    list_display = ['phone_number', 'first_name', 'last_name', 'facility_name', 'facility_code', 'title', 'language']
+    list_display = ['phone_number', 'has_confirmed', 'first_name', 'last_name', 'facility_name', 'facility_code', 'title', 'language']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
     list_display = ['uid', 'first_name', 'last_name', 'lmp', 'edd', 'next_visit']
