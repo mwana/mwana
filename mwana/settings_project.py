@@ -75,7 +75,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "mwana.apps.locations",
-    "rapidsms_xforms",
+#    "rapidsms_xforms",
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",

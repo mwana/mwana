@@ -8,22 +8,14 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Adding model 'FacilityVisit'
-        db.create_table('smgl_facilityvisit', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('mother', self.gf('django.db.models.fields.related.ForeignKey')(related_name='facility_visits', to=orm['smgl.PregnantMother'])),
-            ('location', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['locations.Location'])),
-            ('visit_date', self.gf('django.db.models.fields.DateField')()),
-            ('reason_for_visit', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('next_visit', self.gf('django.db.models.fields.DateField')()),
-        ))
-        db.send_create_signal('smgl', ['FacilityVisit'])
+        # Changing field 'PreRegistration.title'
+        db.alter_column('smgl_preregistration', 'title', self.gf('django.db.models.fields.CharField')(max_length=255))
 
 
     def backwards(self, orm):
         
-        # Deleting model 'FacilityVisit'
-        db.delete_table('smgl_facilityvisit')
+        # Changing field 'PreRegistration.title'
+        db.alter_column('smgl_preregistration', 'title', self.gf('django.db.models.fields.CharField')(max_length=3))
 
 
     models = {
@@ -73,6 +65,7 @@ class Migration(SchemaMigration):
         },
         'smgl.facilityvisit': {
             'Meta': {'object_name': 'FacilityVisit'},
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['locations.Location']"}),
             'mother': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'facility_visits'", 'to': "orm['smgl.PregnantMother']"}),
@@ -82,20 +75,32 @@ class Migration(SchemaMigration):
         },
         'smgl.pregnantmother': {
             'Meta': {'object_name': 'PregnantMother'},
-            'age': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True', 'blank': 'True'}),
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']"}),
             'edd': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
-            'gravitas_data': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'}),
+            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '160'}),
+            'high_risk_history': ('django.db.models.fields.CharField', [], {'max_length': '160'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'lmp': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'}),
+            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '160'}),
+            'lmp': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'location': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['locations.Location']"}),
-            'medical_history': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'}),
             'next_visit': ('django.db.models.fields.DateField', [], {}),
-            'reason_for_visit': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'}),
-            'referral': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'reason_for_visit': ('django.db.models.fields.CharField', [], {'max_length': '160'}),
             'uid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '160'}),
             'zone': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'})
+        },
+        'smgl.preregistration': {
+            'Meta': {'object_name': 'PreRegistration'},
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True', 'blank': 'True'}),
+            'facility_code': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'facility_name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'language': ('django.db.models.fields.CharField', [], {'default': "'english'", 'max_length': '255'}),
+            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'phone_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'unique_id': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'zone': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'})
         },
         'smgl.xformkeywordhandler': {
             'Meta': {'object_name': 'XFormKeywordHandler'},
