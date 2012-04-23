@@ -41,9 +41,10 @@ class FacilityVisit(models.Model):
     """
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(Location, help_text="The location of this visit")
-    visit_date = models.DateField()
+    visit_date = models.DateField(auto_now_add=True)
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
+    edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
     next_visit = models.DateField()
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
 
@@ -93,8 +94,33 @@ class AmbulanceRequest(models.Model):
     requested_on = models.DateTimeField(auto_now_add=True)
     sent_response = models.BooleanField(default=False)
 
-#class AmbulanceResponse(models.ModelField):
-#
+class AmbulanceResponse(models.Model):
+    ER_RESPONSE_CHOICES = (
+        ('cancelled', 'Cancelled'),
+        ('arrived', 'Arrived'),
+        ('pending', 'Pending')
+    )
+
+    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
+    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
+    ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
+    response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
+
+
+class AmbulanceOutcome(models.Model):
+    ER_OUTCOME_CHOICES = (
+        ('under-care', 'Under Care'),
+        ('treated_discharged', 'Treated and Discharged'),
+        ('deceased', 'Deceased'),
+    )
+    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
+    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
+    ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
+    outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (

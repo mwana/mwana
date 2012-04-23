@@ -49,6 +49,12 @@ INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been
 ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
+FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
+FOLLOW_UP_COMPLETE = _("Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!.")
+ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
+NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance of DMO")
+THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
+
 logger = logging.getLogger(__name__)
 
 class SMGL(AppBase):
@@ -146,8 +152,6 @@ def _get_or_create_zone(clinic, name):
                                     'name': name,
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
-
-
 
 def get_location(session, facility):
     logger.debug('In get_location(), Session: %s, Facility: %s' % (session, facility))
@@ -280,10 +284,10 @@ def pregnant_registration(session, xform):
     mother.lmp = lmp_date
 
 
-    lmp_dd = _get_value_for_command('edd_dd', xform)
-    lmp_mm = _get_value_for_command('edd_mm', xform)
-    lmp_yy = _get_value_for_command('edd_yy', xform)
-    lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
+    edd_dd = _get_value_for_command('edd_dd', xform)
+    edd_mm = _get_value_for_command('edd_mm', xform)
+    edd_yy = _get_value_for_command('edd_yy', xform)
+    edd_date, error, error_msg = _make_date(edd_dd, edd_mm, edd_yy)
     date_dict = {
         "date_name": "EDD",
         "error_msg": error_msg,
@@ -292,7 +296,7 @@ def pregnant_registration(session, xform):
     if error:
         _send_msg(connection, DATE_ERROR, **session.template_vars)
         return True
-    mother.edd = lmp_date
+    mother.edd = edd_date
 
     logger.debug('Mother UID: %s' % mother.uid)
 
@@ -318,8 +322,61 @@ def pregnant_registration(session, xform):
     #prevent default response
     return True
 
-def follow_up_appt(submission, xform):
-    pass
+def follow_up(session, xform):
+    connection = session.connection
+    try:
+        da_type, error = get_contacttype(session, 'da')
+        contact = Contact.objects.get(types=da_type, connection=connection)
+    except ObjectDoesNotExist:
+        _send_msg(connection, NOT_A_DATA_ASSOCIATE, **session.template_vars)
+        return True
+    unique_id = _get_value_for_command('unique_id', xform)
+    session.template_vars.update({"unique_id": unique_id})
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        _send_msg(connection, FUP_MOTHER_DOES_NOT_EXIST, **session.template_vars)
+        return True
+
+    edd_dd = _get_value_for_command('edd_dd', xform)
+    edd_mm = _get_value_for_command('edd_mm', xform)
+    edd_yy = _get_value_for_command('edd_yy', xform)
+    edd_date, error, error_msg = _make_date(edd_dd, edd_mm, edd_yy)
+    date_dict = {
+        "date_name": "EDD",
+        "error_msg": error_msg,
+        }
+    session.template_vars.update(date_dict)
+    if error:
+        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        return True
+
+    visit_reason = _get_value_for_command('visit_reason', xform)
+
+    next_visit_dd = _get_value_for_command('next_visit_dd', xform)
+    next_visit_mm = _get_value_for_command('next_visit_mm', xform)
+    next_visit_yy = _get_value_for_command('next_visit_yy', xform)
+    next_visit, error, error_msg = _make_date(next_visit_dd, next_visit_mm, next_visit_yy)
+    date_dict = {
+        "date_name": "Next Visit",
+        "error_msg": error_msg,
+        }
+    session.template_vars.update(date_dict)
+    if error:
+        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        return True
+
+    #Make the follow up facility visit thinger.
+    visit = FacilityVisit()
+    visit.mother = mother
+    visit.contact = contact
+    visit.location = contact.location
+    visit.edd = edd_date
+    visit.reason_for_visit = visit_reason
+    visit.next_visit = next_visit
+    visit.save()
+
+    _send_msg(connection, FOLLOW_UP_COMPLETE, **session.template_vars)
 
 def ambulance_request(session, xform):
     connection = session.connection
@@ -392,8 +449,53 @@ def ambulance_request(session, xform):
 
     return True
 
-def ambulance_driver_response(submission, xform):
+def ambulance_confirm(session, xform):
+    connection = session.connection
+    tn_type, error = get_contacttype(session, 'tn')
+    amb_type, error = get_contacttype(session, 'am')
+    other_type, error = get_contacttype(session, 'dmo')
+    types = [tn_type, amb_type, other_type]
+    try:
+        contact = Contact.objects.get(connection=connection, types__in=types)
+    except ObjectDoesNotExist:
+        _send_msg(connection, NOT_REGISTERED_TO_CONFIRM_ER, **session.template_vars)
+
+    unique_id = _get_value_for_command('unique_id', xform)
+    session.template_vars.update({'unique_id': unique_id})
+
+    #we might be dealing with a mother that has gone through ER multiple times
+    responses = AmbulanceRequest.objects.filter(mother_uid=unique_id).order_by('-requested_on')
+    if not responses.count():
+        _send_msg(connection, ER_CONFIRM_SESS_NOT_FOUND, **session.template_vars)
+        return True
+
+    #great we found what they're responding to.
+    response = responses[0]
+
+    if Contact.objects.filter(connection=connection, types=tn_type).count():
+        #this s a Triage Nurse
+        response.tn_confirmed = True
+        response.tn_confirmed_on = datetime.datetime.utcnow()
+    elif Contact.objects.filter(connection=connection, types=amb_type).count():
+        #Ambulance (Driver) type
+        response.ad_confirmed = True
+        response.ad_confirmed_on = datetime.datetime.utcnow()
+    elif Contact.objects.filter(connection=connection, types=other_type).count():
+        #other type
+        response.other_confirmed = True
+        response.other_confirmed_on = datetime.datetime.utcnow()
+    else:
+        #We really shouldn't be here at this point
+        pass
+
+    response.save()
+
+    _send_msg(connection, THANKS_ER_CONFIRM, **session.template_vars)
+    return True
+
+def ambulance_response(session, xform):
     pass
+
 
 def referral(submission, xform):
     pass
