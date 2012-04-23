@@ -7,7 +7,7 @@ from .models import XFormKeywordHandler, FacilityVisit
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.contactsplus.models import ContactType
-from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
+from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest, AmbulanceResponse, AmbulanceOutcome
 from mwana import const
 
 from rapidsms_xforms.models import xform_received, XForm
@@ -54,9 +54,16 @@ FOLLOW_UP_COMPLETE = _("Thanks! Follow up registration for Mother ID: %(unique_i
 ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
 NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance of DMO")
 THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
+NOT_ALLOWED_ER_WORKFLOW = _("Sorry, your registration type is not allowed to send Emergency Response type messages")
+AMB_RESPONSE_THANKS = _("Thank you. The ambulance for this request has been marked as %(response)s. We will notify the Rural Facility.")
+AMB_CANT_FIND_UID = _("Sorry. We cannot find the Mother's Unique ID you specified. Please try again or contact the DMO")
+AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("Emergency Response: The ambulance for the Unique ID: %(unique_id)s has been marked %(response)s")
+AMB_OUTCOME_NO_OUTCOME = _("No OUTCOME Specified.  Please send an outcome!")
+AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
+AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
+
 
 logger = logging.getLogger(__name__)
-
 class SMGL(AppBase):
     #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
     @property
@@ -67,7 +74,6 @@ class SMGL(AppBase):
 
     # We're handling the submission process using signal hooks
     # Code is located here (in app.py) for ease of finding for other devs.
-
 
 def _generate_uid_for_er():
     #grab all the existing amb requests that have made up UIDs:
@@ -168,6 +174,22 @@ def get_contacttype(session, reg_type):
     if not contactType:
         error=True
     return contactType, error
+
+
+
+def _get_allowed_ambulance_workflow_contact(session):
+    connection = session.connection
+    tn_type, error = get_contacttype(session, 'tn')
+    amb_type, error = get_contacttype(session, 'am')
+    other_type, error = get_contacttype(session, 'dmo')
+    types = [tn_type, amb_type, other_type]
+    try:
+        contact = Contact.objects.get(connection=connection, types__in=types)
+        return contact
+    except ObjectDoesNotExist:
+        return None
+
+
 
 def get_connection_from_contact(contact):
     connections = contact.connection_set.all()
@@ -451,13 +473,8 @@ def ambulance_request(session, xform):
 
 def ambulance_confirm(session, xform):
     connection = session.connection
-    tn_type, error = get_contacttype(session, 'tn')
-    amb_type, error = get_contacttype(session, 'am')
-    other_type, error = get_contacttype(session, 'dmo')
-    types = [tn_type, amb_type, other_type]
-    try:
-        contact = Contact.objects.get(connection=connection, types__in=types)
-    except ObjectDoesNotExist:
+    contact = _get_allowed_ambulance_workflow_contact(session)
+    if not contact:
         _send_msg(connection, NOT_REGISTERED_TO_CONFIRM_ER, **session.template_vars)
 
     unique_id = _get_value_for_command('unique_id', xform)
@@ -471,6 +488,9 @@ def ambulance_confirm(session, xform):
 
     #great we found what they're responding to.
     response = responses[0]
+    tn_type, error = get_contacttype(session,'TN')
+    amb_type, error = get_contacttype(session, 'AM')
+    other_type, error = get_contacttype(session, 'DMO')
 
     if Contact.objects.filter(connection=connection, types=tn_type).count():
         #this s a Triage Nurse
@@ -494,7 +514,75 @@ def ambulance_confirm(session, xform):
     return True
 
 def ambulance_response(session, xform):
-    pass
+    connection = session.connection
+    contact = _get_allowed_ambulance_workflow_contact(session)
+    if not contact:
+        _send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, **session.template_vars)
+        return True
+
+    resp = AmbulanceResponse()
+    unique_id = _get_value_for_command('unique_id', xform)
+    session.template_vars.update({"unique_id": unique_id})
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        mother = None
+    resp.mother_uid = unique_id
+    resp.mother = mother
+
+    try:
+        req = AmbulanceRequest.objects.get(mother_uid=unique_id)
+    except ObjectDoesNotExist:
+        #Abort here and notify this connection that we can't find a matching UID
+        _send_msg(connection, AMB_CANT_FIND_UID, **session.template_vars)
+        return True
+
+    resp.ambulance_request = req
+    resp.response = _get_value_for_command('response', xform)
+    resp.save()
+    session.template_vars.update({"response":resp.response})
+    _send_msg(connection, AMB_RESPONSE_THANKS, **session.template_vars)
+    _send_msg(req.connection, AMB_RESPONSE_ORIGINATING_LOCATION_INFO, **session.template_vars)
+    return True
+
+def ambulance_outcome(session, xform):
+    connection = session.connection
+    contact = _get_allowed_ambulance_workflow_contact(session)
+    if not contact:
+        _send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, **session.template_vars)
+        return True
+
+    unique_id = _get_value_for_command('unique_id', xform)
+    outcome = _get_value_for_command('outcome', xform)
+    session.template_vars.update({
+        "unique_id": unique_id,
+        "outcome": outcome
+    })
+    try:
+        req = AmbulanceRequest.objects.get(mother_uid=unique_id)
+    except ObjectDoesNotExist:
+        _send_msg(connection, AMB_CANT_FIND_UID, **session.template_vars)
+        return True
+
+    if not outcome:
+        _send_msg(connection, AMB_OUTCOME_NO_OUTCOME, **session.template_vars)
+        return True
+
+    outcome = AmbulanceOutcome()
+    outcome.ambulance_request = req
+    outcome.mother_uid = unique_id
+    outcome.outcome = outcome
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        mother = None
+    outcome.mother = mother
+    outcome.save()
+
+    _send_msg(connection, AMB_OUTCOME_MSG_RECEIVED, **session.template_vars)
+    _send_msg(req.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, **session.template_vars)
+    return True
+
 
 
 def referral(submission, xform):
