@@ -10,7 +10,6 @@ django-uni-form
 -e git://github.com/adewinter/rapidsms-xforms.gitrapidsms-xforms#egg=rapidsms-xforms
 pyserial
 pygrowup
--e git+http://github.com/mwana/rapidsms-growthmonitoring-app.git#egg=rapidsms-growthmonitoring-app
 -e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
 south
 posixpath
