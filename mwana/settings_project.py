@@ -75,7 +75,6 @@ INSTALLED_APPS = [
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "mwana.apps.locations",
-#    "rapidsms_xforms",
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
@@ -295,9 +294,11 @@ FORMDESIGNER_PATH = "/path/to/formdesigner"
 #Used by touchforms?
 GMAPS_API_KEY = 'foo'
 REVISION = '1.0'
+
 ######################################
 ## Set these in your localsettings!
 #####################################
+
 #COUCH_SERVER_ROOT='localhost:5984'
 #COUCH_USERNAME=''
 #COUCH_PASSWORD=''

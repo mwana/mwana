@@ -1,4 +1,4 @@
-django>=1.2.3
+django>=1.4
 nose>=0.11.2
 django-nose>=0.1.2
 djtables>=0.1.1
@@ -20,3 +20,4 @@ requests
 -e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=rapidsms-threadless-router
 importlib
 -e git+http://github.com/dimagi/django-soil.git#egg=django-soil
+south
