@@ -67,7 +67,6 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 #    ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
 #    ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
-    ('xforms', 'XForms'),
     ('rapidsms.views.dashboard', 'Dashboard'),
     ('smsforms.views.list_forms', 'Decision Tree XForms'),
     ('smsforms.views.view_triggers', 'Decision Tree Triggers'),

@@ -7,7 +7,6 @@ pytz
 -e git+https://github.com/dimagi/rapidsms.git#egg=rapidsms
 django-uni-form
 -e git+http://github.com/mvpdev/django-eav.git#egg=django-eav
--e git://github.com/adewinter/rapidsms-xforms.gitrapidsms-xforms#egg=rapidsms-xforms
 pyserial
 pygrowup
 -e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
@@ -19,3 +18,5 @@ requests
 -e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=rapidsms-threadless-router
 importlib
 -e git+http://github.com/dimagi/django-soil.git#egg=django-soil
+couchdbkit
+-e git+http://github.com/dimagi/dimagi-utils.git#egg=dimagi-utils

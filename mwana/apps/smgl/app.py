@@ -10,7 +10,6 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest, AmbulanceResponse, AmbulanceOutcome
 from mwana import const
 
-from rapidsms_xforms.models import xform_received, XForm
 from rapidsms.models import Contact
 from rapidsms.messages import OutgoingMessage
 
