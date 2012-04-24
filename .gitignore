@@ -12,3 +12,4 @@ mwana/*.bak
 mwana/build/*
 mwana/.idea/*
 STATICFILES/*
+static_files/*
