@@ -19,4 +19,3 @@ requests
 -e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=rapidsms-threadless-router
 importlib
 -e git+http://github.com/dimagi/django-soil.git#egg=django-soil
-south
