@@ -55,7 +55,7 @@ INSTALLED_APPS.insert(-1, 'uni_form')
 INSTALLED_APPS.insert(-1, 'pagination')
 #INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
-#RAPIDSMS_TABS.append(('xforms', 'XForms'))
+RAPIDSMS_TABS.append(('remindmi_reports', 'RemindMi'))
 
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:

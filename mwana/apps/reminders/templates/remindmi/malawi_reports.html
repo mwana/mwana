@@ -1,0 +1,199 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}RemindMi Reports{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+<style type="text/css" media="screen">
+    #options {
+        padding:0 1em 20px;
+    }
+
+    #options table {
+        border:0;
+    }
+
+    #options td {
+        border:0;
+        white-space:nowrap;
+    }
+
+    p {
+        width:700px;
+        text-align:right;
+        margin-left:auto;
+        margin-right:auto;
+        padding:20px 0 30px;
+    }
+
+    label,input[type=text] {
+        float:left;
+        display:block;
+    }
+
+    label {
+        font-weight:700;
+    }
+
+   table {
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    td,th {
+        border:1px solid #aaa;
+        font-weight:400;
+        text-align:left;
+        padding:.5em;
+    }
+
+    tbody th,tbody td {
+        border-color:#aaa;
+    }
+
+    tbody tr:first-child th,tbody tr:first-child td {
+        border-top-color:#aaa;
+    }
+
+    tbody th:first-child,tbody td:first-child {
+        border-left-color:#aaa;
+    }
+
+    tbody th:last-child,tbody td:last-child {
+        border-right-color:#aaa;
+    }
+
+    tbody tr:last-child th,tbody tr:last-child td {
+        border-bottom-color:#aaa;
+    }
+</style>
+{% endblock stylesheets %}
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
+{% endblock javascripts %}
+{% block content %}
+<div class="module">
+  
+<div id="graphs" class="module">
+  <h2>Report Options</h2>
+  <form method="GET" id="options" action="">
+    <table width="700px" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td><label for="startdate">From:</label></td>
+        <td><input type="textbox" name="startdate" value='{{startdate}}' id="startdate" class="dateformat-Y-ds-m-ds-d" /></td>
+        <td><label for="enddate">To:</label></td>
+        <td><input type="textbox" name="enddate" value='{{enddate}}' id="enddate" class="dateformat-Y-ds-m-ds-d" /></td>
+        <td><label for="location">District:</label></td>
+        <td>
+          <select name="location" id="location" value="{{location}}">
+            <option value="All Districts"  
+                    {% ifequal selected_location "All Districts" %}
+                    selected="selected" 
+                    {% endifequal %}>All Districts</option>
+            {% for location in districts %}
+            <option value="{{ location }}"
+		    {% ifequal selected_location location %} 
+		    selected="selected" 
+		    {% endifequal %}>{{ location }}</option>
+	    {% endfor %}
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
+      </tr>
+      
+    </table>
+  </form>
+</div> 
+
+<div class="module">
+  <h2>Mwana Registrations</h2>
+  <br />
+  <br />
+    <table width="700px" cellspacing="" cellpadding="" border="">
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Count of Births</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for count in child_count %}
+        <tr>
+            {% for item in count %}
+            <td>{{ item }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p><a href="/csv/child-count/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export data to Excel.</a></p>
+</div>
+
+<div class="module">
+  <h2>Mayi Registrations</h2>
+  <br />
+  <br />
+  <table width="700px" cellspacing="" cellpadding="" border="">
+      <thead>
+          <tr>
+              <th>Location</th>
+              <th>Count of Mothers</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for count in mother_count %}
+          <tr>
+              {% for item in count %}
+              <td>{{ item }}</td>
+              {% endfor %}
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+  <p><a href="/csv/mother-count/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export data to Excel.</a></p>
+</div>
+
+</div>
+{% endblock content %}

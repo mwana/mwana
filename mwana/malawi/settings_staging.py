@@ -39,6 +39,7 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
+    ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
     ('growth_index', 'AnthroWatch Reports'),
     ('growth_graphs', 'AnthroWatch Analysis'),
 #    ('xforms', 'XForms'),
