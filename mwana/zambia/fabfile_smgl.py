@@ -264,27 +264,27 @@ def netstat_plnt():
 def stop():
     """ stop server and celery on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('stop %(project)s-%(environment)s:*' % env)
+    _supervisor_command('stop %(project)s:*' % env)
 
 def start():
     """ start server and celery on remote host """
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('start %(project)s-%(environment)s:*' % env)
+    _supervisor_command('start %(project)s:*' % env)
 
 def servers_start():
     ''' Start the gunicorn servers '''
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('start  %(project)s-%(environment)s:%(project)s-%(environment)s-server' % env)
+    _supervisor_command('start  %(project)s:server' % env)
 
 def servers_stop():
     ''' Stop the gunicorn servers '''
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('stop  %(project)s-%(environment)s:%(project)s-%(environment)s-server' % env)
+    _supervisor_command('stop  %(project)s:server' % env)
 
 def servers_restart():
     ''' Start the gunicorn servers '''
     require('environment', provided_by=('staging', 'demo', 'production'))
-    _supervisor_command('restart  %(project)s-%(environment)s:%(project)s-%(environment)s-server' % env)
+    _supervisor_command('restart  %(project)s:server' % env)
 
 def migrate():
     """ run south migration on remote environment """

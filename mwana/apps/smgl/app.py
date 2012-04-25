@@ -29,6 +29,9 @@ _ = lambda s: s
 
 router = Router()
 
+#Values that are used to indicate 'no answer' in fields of a form (especially in the case of optional values)
+NONE_VALUES = ['none', 'n', None]
+
 # Begin Translatable messages
 FACILITY_NOT_RECOGNIZED = _("Sorry, the facility '%(facility)s' is not recognized. Please try again.")
 ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_user_type)s at %(facility)s but your details have been updated")
@@ -60,7 +63,8 @@ AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("Emergency Response: The ambulance fo
 AMB_OUTCOME_NO_OUTCOME = _("No OUTCOME Specified.  Please send an outcome!")
 AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
 AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
-
+LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
+DATE_NOT_OPTIONAL = _("This date is not optional!")
 
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
@@ -197,7 +201,7 @@ def get_connection_from_contact(contact):
     else:
         return None
 
-def _make_date(dd, mm, yy):
+def _make_date(dd, mm, yy, is_optional=False):
     """
     Returns a tuple: (datetime.date, ERROR_MSG)
     ERROR_MSG will be False if datetime.date is sucesfully constructed.
@@ -205,6 +209,13 @@ def _make_date(dd, mm, yy):
     when sending out the error message as an outgoing message.
     """
     logger.debug('in _make_date(). Trying to make a date from %s %s %s' % (dd,mm,yy))
+    dd_is_none = dd.lower() in NONE_VALUES
+    mm_is_none = mm.lower() in NONE_VALUES
+    yy_is_none = yy.lower() in NONE_VALUES
+    if dd_is_none and mm_is_none and yy_is_none and is_optional:
+        return None, False, None
+    elif dd_is_none or mm_is_none or yy_is_none:
+        return None, True, DATE_NOT_OPTIONAL
     try:
         dd = int(dd)
         mm = int(mm)
@@ -289,34 +300,36 @@ def pregnant_registration(session, xform):
     mother.reason_for_visit = _get_value_for_command('visit_reason', xform)
     zone_name = _get_value_for_command('zone', xform)
 
-
     lmp_dd = _get_value_for_command('lmp_dd', xform)
     lmp_mm = _get_value_for_command('lmp_mm', xform)
     lmp_yy = _get_value_for_command('lmp_yy', xform)
-    lmp_date, error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy)
+    lmp_date, lmp_error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy, is_optional=True)
     date_dict = {
         "date_name": "LMP",
         "error_msg": error_msg,
         }
     session.template_vars.update(date_dict)
-    if error:
+    if lmp_error:
         _send_msg(connection, DATE_ERROR, **session.template_vars)
         return True
-    mother.lmp = lmp_date
-
 
     edd_dd = _get_value_for_command('edd_dd', xform)
     edd_mm = _get_value_for_command('edd_mm', xform)
     edd_yy = _get_value_for_command('edd_yy', xform)
-    edd_date, error, error_msg = _make_date(edd_dd, edd_mm, edd_yy)
+    edd_date, edd_error, error_msg = _make_date(edd_dd, edd_mm, edd_yy, is_optional=True)
     date_dict = {
         "date_name": "EDD",
         "error_msg": error_msg,
         }
     session.template_vars.update(date_dict)
-    if error:
+    if edd_error:
         _send_msg(connection, DATE_ERROR, **session.template_vars)
         return True
+
+    if lmp_date is None and edd_date is None:
+        _send_msg(connection, LMP_OR_EDD_DATE_REQUIRED, **session.template_vars)
+
+    mother.lmp = lmp_date
     mother.edd = edd_date
 
     logger.debug('Mother UID: %s' % mother.uid)
