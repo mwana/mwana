@@ -39,6 +39,7 @@ INSTALLED_BACKENDS = {
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
     "threadless_router.backends.httptester",
+    "threadless_router.backends.kannel",
     "mwana.apps.broadcast",
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
