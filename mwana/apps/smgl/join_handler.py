@@ -70,6 +70,7 @@ def join_generic(session, xform, prereg):
         _send_msg(connection, FACILITY_NOT_RECOGNIZED, **session.template_vars)
         return True
     contactType, error = get_contacttype(session, reg_type)
+    session.template_vars.update({"title": reg_type})
     if error:
         _send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, **session.template_vars)
         return True
