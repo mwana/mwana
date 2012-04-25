@@ -373,10 +373,8 @@ class ReportGMHandler(KeywordHandler):
                         ass.underweight = 'V'
                     elif (D(str(2.00)) <= ass.weight4age < D(str(3.00))):
                         ass.underweight = 'T'
-                    elif (D(str(0.00)) <= ass.weight4age < D(str(2.00))):
+                    elif (D(str(-1.00)) <= ass.weight4age < D(str(2.00))):
                         ass.underweight = 'G'
-                    elif (D(str(-1.00)) <= ass.weight4age < D(str(0.00))):
-                        ass.underweight = 'L'
                     elif (D(str(-2.00)) <= ass.weight4age < D(str(-1.00))):
                         ass.underweight = 'M'
                     elif (D(str(-3.00)) <= ass.weight4age < D(str(-2.00))):
@@ -385,14 +383,8 @@ class ReportGMHandler(KeywordHandler):
                         ass.underweight = 'S'
 
                 if ass.height4age is not None:
-                    if (ass.height4age >= D(str(3.0))):
-                        ass.stunting = 'V'
-                    elif (D(str(2.00)) <= ass.height4age < D(str(3.00))):
-                        ass.stunting = 'T'
-                    elif (D(str(0.00)) <= ass.height4age < D(str(2.00))):
+                    if (ass.height4age >= D(str(-1.00))):
                         ass.stunting = 'G'
-                    elif (D(str(-1.0)) <= ass.height4age < D(str(0.00))):
-                        ass.stunting = 'L'
                     elif (D(str(-2.00)) <= ass.height4age < D(str(-1.00))):
                         ass.stunting = 'M'
                     elif (D(str(-3.00)) <= ass.height4age < D(str(-2.00))):
@@ -401,14 +393,8 @@ class ReportGMHandler(KeywordHandler):
                         ass.stunting = 'S'
 
                 if ass.weight4height is not None:
-                    if (ass.weight4height >= D(str(3.0))):
-                        ass.wasting = 'V'
-                    elif (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
-                        ass.wasting = 'T'
-                    elif (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                    if (ass.weight4height >= D(str(-1.00))):
                         ass.wasting = 'G'
-                    elif (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
-                        ass.wasting = 'L'
                     elif (D(str(-2.00)) <= ass.weight4height < D(str(-1.00))):
                         ass.wasting = 'M'
                     elif (D(str(-3.00)) < ass.weight4height < D(str(-2.00))):
@@ -427,14 +413,8 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'G'
 
                 if (ass.weight4height is not None and ass.muac is not None):
-                    if (ass.weight4height >= D(str(3.0))):
-                        ass.wasting = 'V'
-                    if (D(str(2.00)) <= ass.weight4height < D(str(3.00))):
-                        ass.wasting = 'T'
-                    if (D(str(0.00)) <= ass.weight4height < D(str(2.00))):
+                    if (D(str(-1.0)) <= ass.weight4height):
                         ass.wasting = 'G'
-                    if (D(str(-1.0)) <= ass.weight4height < D(str(0.00))):
-                        ass.wasting = 'L'
                     if ((D(str(-2.00)) < ass.weight4height <= D(str(-1.00))) or (survey.mild_muac <= ass.muac <= survey.normal_muac)):
                         ass.wasting = 'M'
                     if ((D(str(-3.00)) < ass.weight4height <= D(str(-2.00))) or (survey.severe_muac <= ass.muac <= survey.mild_muac)):
