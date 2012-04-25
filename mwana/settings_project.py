@@ -320,3 +320,14 @@ REVISION = '1.0'
 #COUCHDB_DATABASES = [(app_label, COUCH_DATABASE) for app_label in COUCHDB_APPS]
 #
 #XFORMS_POST_URL = "%s/_design/couchforms/_update/xform/" % COUCH_DATABASE
+
+#URLs listed here won't require logging in.  The match is done by using startswith(): if the current url starts
+#with one of the items below, it's a match.
+NO_LOGIN_REQUIRED_WHITELIST = [
+    '/admin/',
+    '/accounts/login/',
+    '/accounts/logout/',
+    '/labresults/incoming/',
+    MEDIA_URL,
+    '/backend/'
+]

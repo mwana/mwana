@@ -160,7 +160,7 @@ def _get_or_create_zone(clinic, name):
 
 def get_location(session, facility):
     logger.debug('In get_location(), Session: %s, Facility: %s' % (session, facility))
-    location = _get_valid_model(Location, name=facility, iexact=True)
+    location = _get_valid_model(Location, slug=facility, iexact=True)
     error = False
     if not location:
         logger.debug('A valid location was not found for %s' % facility)

@@ -77,7 +77,7 @@ def production():
     env.code_branch = 'zhcard_dev'
     env.sudo_user = 'mwana'
     env.environment = 'production'
-    env.server_port = '9000'
+    env.server_port = '9001'
     env.server_name = 'smgl-production'
 #    env.hosts = ['10.84.168.98']
 #    env.hosts = ['173.203.221.48']

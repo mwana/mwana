@@ -23,8 +23,7 @@ class LoginRequired(object):
     URLs.
     """
     
-    urls = ['/admin/', '/accounts/login/', '/accounts/logout/',
-            '/labresults/incoming/', settings.MEDIA_URL, '/backend/']
+    urls = settings.NO_LOGIN_REQUIRED_WHITELIST
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         for url in self.urls:
