@@ -1,5 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 from django.conf import settings
 from django.contrib import admin
 
@@ -30,6 +30,7 @@ urlpatterns = patterns('',
         'threadless_router.backends.httptester.views.generate_identity',
         {'backend_name': 'httptester'}, name='httptester-index'),
     (r'^httptester/', include('threadless_router.backends.httptester.urls')),
+    (r'^backend/', include('threadless_router.backends.kannel.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
 #    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
@@ -47,6 +48,7 @@ urlpatterns = patterns('',
     (r'^touchforms/', include('touchforms.urls')),
     #Kwabi: quick fix to provide a passsword change form to non admins
     #(r'^changepassword/$', 'nonauth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
+
 
 )
 
