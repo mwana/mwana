@@ -1,32 +1,39 @@
-from rapidsms.models import Contact
-from threadless_router.router import Router
-from app import _get_value_for_command
-from django.core.exceptions import ObjectDoesNotExist
-from models import PreRegistration
 import logging
-from mwana.apps.smgl.app import _send_msg, NOT_PREREGISTERED, get_location, FACILITY_NOT_RECOGNIZED, get_contacttype, CONTACT_TYPE_NOT_RECOGNIZED, _get_or_create_zone, ZONE_SPECIFIED_BUT_NOT_CBA, ALREADY_REGISTERED, USER_SUCCESS_REGISTERED
 
-
-router = Router()
+from rapidsms.models import Contact
+from django.core.exceptions import ObjectDoesNotExist
+from mwana.apps.smgl.models import PreRegistration
+from mwana.apps.smgl.app import _send_msg, _get_value_for_command,NOT_PREREGISTERED, get_location, \
+    FACILITY_NOT_RECOGNIZED, get_contacttype, CONTACT_TYPE_NOT_RECOGNIZED, _get_or_create_zone, \
+    ZONE_SPECIFIED_BUT_NOT_CBA, ALREADY_REGISTERED, USER_SUCCESS_REGISTERED
 
 logger = logging.getLogger(__name__)
-def join_secure(session, xform):
+
+def join_secure(session, xform, router):
+    logger.debug('HANDLING JOIN KEYWORD')
+    logger.debug('Router: %s.  Instance of: %s' % (router, type(router)))
     connection = session.connection
     try:
         prereg = PreRegistration.objects.get(phone_number=connection.identity)
     except ObjectDoesNotExist:
-        _send_msg(connection, NOT_PREREGISTERED)
+        _send_msg(connection, NOT_PREREGISTERED, router)
         return True
 
     if prereg.has_confirmed:
-        _send_msg(session.connection, ALREADY_REGISTERED)
+        contact = Contact.objects.get(connection__identity__icontains=prereg.phone_number)
+        session.template_vars.update({
+            "name": contact.name,
+            "readable_user_type": contact.types.all()[0].name,
+            "facility": contact.location.name
+        })
+        _send_msg(session.connection, ALREADY_REGISTERED, router, **session.template_vars)
         return True
     else:
-        return join_generic(session, xform, prereg)
+        return join_generic(session, xform, prereg, router)
 
 
 
-def join_generic(session, xform, prereg):
+def join_generic(session, xform, prereg, router):
     """
     This is the generic JOIN handler for the SMGL project.
     It deals with registering CBA's, Triage Nurses, Ambulance Drivers
@@ -35,7 +42,7 @@ def join_generic(session, xform, prereg):
     Message Format:
     JOIN UniqueID NAME FACILITY TITLE(TN/DA/CBA) ZONE(IF COUNSELLOR)
     """
-    logger.debug('Handling the JOIN keyword form')
+    logger.error('Handling the JOIN keyword form')
 
     #Create a contact for this connection.  If it already exists,
     #Verify that it is a contact of the specified type. If not,
@@ -50,7 +57,8 @@ def join_generic(session, xform, prereg):
     name = _get_value_for_command('name', xform) #this provided by user
     zone_name = prereg.zone
     uid = prereg.unique_id
-    language = prereg.language
+    language = _get_value_for_command('language', xform) or prereg.language
+
     session.template_vars.update({
         'reg_type': reg_type,
         'facility': facility,
@@ -61,18 +69,17 @@ def join_generic(session, xform, prereg):
         'unique_id': uid
     })
 
-
-    logger.debug('Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
+    logger.debug('Data from Pre Registration and Input XForm:: Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
                  (facility, reg_type, connection, '%s %s' % (fname, lname), uid))
 
     location, error = get_location(session, facility)
     if error:
-        _send_msg(connection, FACILITY_NOT_RECOGNIZED, **session.template_vars)
+        _send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **session.template_vars)
         return True
     contactType, error = get_contacttype(session, reg_type)
-    session.template_vars.update({"title": reg_type})
+    session.template_vars.update({"title": reg_type, "facility": location.name})
     if error:
-        _send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, **session.template_vars)
+        _send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router, **session.template_vars)
         return True
     #update the template dict to have a human readable name of the type of contact we're registering
     session.template_vars.update({"readable_user_type": contactType.name})
@@ -82,7 +89,7 @@ def join_generic(session, xform, prereg):
         zone = _get_or_create_zone(location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
-        _send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, **session.template_vars)
+        _send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **session.template_vars)
         return True
 
     #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
@@ -102,7 +109,8 @@ def join_generic(session, xform, prereg):
     if contactType not in types:
         contact.types.add(contactType)
     else: #Already registered
-        _send_msg(connection, ALREADY_REGISTERED, **session.template_vars)
+        logger.debug('HERE ARE THE TEMPLATE_VARS: %s' % session.template_vars)
+        _send_msg(connection, ALREADY_REGISTERED, router, **session.template_vars)
         return True
     contact.location = location
     contact.save()
@@ -111,6 +119,6 @@ def join_generic(session, xform, prereg):
     prereg.contact = contact
     prereg.has_confirmed = True
     prereg.save()
-    _send_msg(connection, USER_SUCCESS_REGISTERED, **session.template_vars)
+    _send_msg(connection, USER_SUCCESS_REGISTERED, router, **session.template_vars)
     return True
 

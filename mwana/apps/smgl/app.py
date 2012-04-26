@@ -7,27 +7,21 @@ from .models import XFormKeywordHandler, FacilityVisit
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.contactsplus.models import ContactType
-from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest, AmbulanceResponse, AmbulanceOutcome
+from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
 from mwana import const
 
 from rapidsms.models import Contact
 from rapidsms.messages import OutgoingMessage
 
 from dimagi.utils.modules import to_function
-from threadless_router.router import Router
 
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
-
-from smsforms.signals import form_complete
-
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
 # our text.
 _ = lambda s: s
-
-router = Router()
 
 #Values that are used to indicate 'no answer' in fields of a form (especially in the case of optional values)
 NONE_VALUES = ['none', 'n', None]
@@ -120,8 +114,8 @@ def _pick_er_triage_nurse(session, xform):
     else:
         raise TypeError('No Triage Nurse type found!')
 
-def _send_msg(connection, txt, **kwargs):
-    logger.debug('Connection: %s, txt: %s, kwargs: %s' % (connection, txt, kwargs))
+def _send_msg(connection, txt, router, **kwargs):
+    logger.debug('Sending Message: Connection: %s, txt: %s, kwargs: %s' % (connection, txt, kwargs))
     omsg = OutgoingMessage(connection, txt, **kwargs)
     router.outgoing(omsg)
 
@@ -154,7 +148,7 @@ def _get_valid_model(model,slug=None,name=None, iexact=False):
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
     zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
-    zone = Location.objects.get_or_create(name__iexact=name,
+    return Location.objects.get_or_create(name__iexact=name,
                                 parent=clinic,
                                 type=zone_type,
                                 defaults={
@@ -238,7 +232,7 @@ def _make_date(dd, mm, yy, is_optional=False):
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
 ##===========================================================================##
-def pregnant_registration(session, xform):
+def pregnant_registration(session, xform, router):
     """
     Handler for REG keyword (registration of pregnant mothers).
     Format:
@@ -258,14 +252,14 @@ def pregnant_registration(session, xform):
     #phone number.  If the contact does not exist (unregistered) we throw an error.
     contactType, error = get_contacttype(session, 'da') #da = Data Associate
     if error:
-        _send_msg(connection, NOT_A_DATA_ASSOCIATE)
+        _send_msg(connection, NOT_A_DATA_ASSOCIATE, router)
         return True
     logging.debug('Data associate:: Connection: %s, Type: %s' % (connection, contactType))
     try:
         data_associate = Contact.objects.get(connection=connection, types=contactType)
     except ObjectDoesNotExist:
         logger.info("Data Associate Contact not found.  Mother cannot be correctly registered!")
-        _send_msg(connection, NOT_REGISTERED_FOR_DATA_ASSOC)
+        _send_msg(connection, NOT_REGISTERED_FOR_DATA_ASSOC, router)
         return True
 
 
@@ -293,7 +287,7 @@ def pregnant_registration(session, xform):
         }
     session.template_vars.update(date_dict)
     if error:
-        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
     mother.next_visit = next_visit
 
@@ -310,7 +304,7 @@ def pregnant_registration(session, xform):
         }
     session.template_vars.update(date_dict)
     if lmp_error:
-        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
         return True
 
     edd_dd = _get_value_for_command('edd_dd', xform)
@@ -323,11 +317,11 @@ def pregnant_registration(session, xform):
         }
     session.template_vars.update(date_dict)
     if edd_error:
-        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
         return True
 
     if lmp_date is None and edd_date is None:
-        _send_msg(connection, LMP_OR_EDD_DATE_REQUIRED, **session.template_vars)
+        _send_msg(connection, LMP_OR_EDD_DATE_REQUIRED, router,  **session.template_vars)
 
     mother.lmp = lmp_date
     mother.edd = edd_date
@@ -352,24 +346,24 @@ def pregnant_registration(session, xform):
     visit.contact = data_associate
     visit.save()
 
-    _send_msg(connection, MOTHER_SUCCESS_REGISTERED, **session.template_vars)
+    _send_msg(connection, MOTHER_SUCCESS_REGISTERED, router,  **session.template_vars)
     #prevent default response
     return True
 
-def follow_up(session, xform):
+def follow_up(session, xform, router):
     connection = session.connection
     try:
         da_type, error = get_contacttype(session, 'da')
         contact = Contact.objects.get(types=da_type, connection=connection)
     except ObjectDoesNotExist:
-        _send_msg(connection, NOT_A_DATA_ASSOCIATE, **session.template_vars)
+        _send_msg(connection, NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
         return True
     unique_id = _get_value_for_command('unique_id', xform)
     session.template_vars.update({"unique_id": unique_id})
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        _send_msg(connection, FUP_MOTHER_DOES_NOT_EXIST, **session.template_vars)
+        _send_msg(connection, FUP_MOTHER_DOES_NOT_EXIST, router, **session.template_vars)
         return True
 
     edd_dd = _get_value_for_command('edd_dd', xform)
@@ -382,7 +376,7 @@ def follow_up(session, xform):
         }
     session.template_vars.update(date_dict)
     if error:
-        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
 
     visit_reason = _get_value_for_command('visit_reason', xform)
@@ -397,7 +391,7 @@ def follow_up(session, xform):
         }
     session.template_vars.update(date_dict)
     if error:
-        _send_msg(connection, DATE_ERROR, **session.template_vars)
+        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
 
     #Make the follow up facility visit thinger.
@@ -410,197 +404,13 @@ def follow_up(session, xform):
     visit.next_visit = next_visit
     visit.save()
 
-    _send_msg(connection, FOLLOW_UP_COMPLETE, **session.template_vars)
-
-def ambulance_request(session, xform):
-    connection = session.connection
-    unique_id = _get_value_for_command('unique_id', xform)
-    danger_signs = _get_value_for_command('danger_signs', xform)
-
-    session.template_vars.update({"sender_phone_number": connection.identity})
-    amb = AmbulanceRequest()
-    amb.connection = connection
-    contact = None
-    try:
-        contact = Contact.objects.get(connection=connection)
-    except ObjectDoesNotExist:
-        pass
-    amb.contact = contact
-    if contact:
-        amb.from_location = contact.location
-        session.template_vars.update({"from_location": str(contact.location.name)})
-    else:
-        session.template_vars.update({"from_location": "UNKNOWN"})
-
-    if not unique_id:
-        unique_id = _generate_uid_for_er()
-
-    session.template_vars.update({'unique_id': unique_id})
-    amb.mother_uid = unique_id
-
-    #try match uid to mother
-    mother = None
-    try:
-        mother = PregnantMother.objects.get(uid=unique_id)
-    except ObjectDoesNotExist:
-        pass
-    amb.mother = mother
-    amb.save()
-
-    #Respond that we're on it.
-    _send_msg(connection, INITIAL_AMBULANCE_RESPONSE, **session.template_vars)
-
-    #Figure out who to alert
-    ambulance_driver = _pick_er_driver(session, xform)
-    amb.ambulance_driver = ambulance_driver
-    driver_conn = get_connection_from_contact(ambulance_driver)
-    if driver_conn:
-        _send_msg(driver_conn, ER_TO_DRIVER, **session.template_vars)
-        amb.ad_msg_sent = True
-    else:
-        amb.ad_msg_sent = False
-
-    tn = _pick_er_triage_nurse(session, xform)
-    amb.triage_nurse = tn
-    tn_conn = get_connection_from_contact(tn)
-    if tn_conn:
-        _send_msg(tn_conn, ER_TO_TRIAGE_NURSE, **session.template_vars)
-        amb.tn_msg_sent = True
-    else:
-        amb.tn_msg_sent = False
-
-    other_recip = _pick_other_er_recip(session,xform)
-    if other_recip: #less important, so not critical if this contact doesn't exist.
-        amb.other_recipient = other_recip
-        other_conn = get_connection_from_contact(other_recip)
-        if other_conn:
-            _send_msg(other_conn, ER_TO_OTHER, **session.template_vars)
-            amb.other_msg_sent = True
-        else:
-            amb.other_msg_sent = False
-
-    amb.save()
-
-    return True
-
-def ambulance_confirm(session, xform):
-    connection = session.connection
-    contact = _get_allowed_ambulance_workflow_contact(session)
-    if not contact:
-        _send_msg(connection, NOT_REGISTERED_TO_CONFIRM_ER, **session.template_vars)
-
-    unique_id = _get_value_for_command('unique_id', xform)
-    session.template_vars.update({'unique_id': unique_id})
-
-    #we might be dealing with a mother that has gone through ER multiple times
-    responses = AmbulanceRequest.objects.filter(mother_uid=unique_id).order_by('-requested_on')
-    if not responses.count():
-        _send_msg(connection, ER_CONFIRM_SESS_NOT_FOUND, **session.template_vars)
-        return True
-
-    #great we found what they're responding to.
-    response = responses[0]
-    tn_type, error = get_contacttype(session,'TN')
-    amb_type, error = get_contacttype(session, 'AM')
-    other_type, error = get_contacttype(session, 'DMO')
-
-    if Contact.objects.filter(connection=connection, types=tn_type).count():
-        #this s a Triage Nurse
-        response.tn_confirmed = True
-        response.tn_confirmed_on = datetime.datetime.utcnow()
-    elif Contact.objects.filter(connection=connection, types=amb_type).count():
-        #Ambulance (Driver) type
-        response.ad_confirmed = True
-        response.ad_confirmed_on = datetime.datetime.utcnow()
-    elif Contact.objects.filter(connection=connection, types=other_type).count():
-        #other type
-        response.other_confirmed = True
-        response.other_confirmed_on = datetime.datetime.utcnow()
-    else:
-        #We really shouldn't be here at this point
-        pass
-
-    response.save()
-
-    _send_msg(connection, THANKS_ER_CONFIRM, **session.template_vars)
-    return True
-
-def ambulance_response(session, xform):
-    connection = session.connection
-    contact = _get_allowed_ambulance_workflow_contact(session)
-    if not contact:
-        _send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, **session.template_vars)
-        return True
-
-    resp = AmbulanceResponse()
-    unique_id = _get_value_for_command('unique_id', xform)
-    session.template_vars.update({"unique_id": unique_id})
-    try:
-        mother = PregnantMother.objects.get(uid=unique_id)
-    except ObjectDoesNotExist:
-        mother = None
-    resp.mother_uid = unique_id
-    resp.mother = mother
-
-    try:
-        req = AmbulanceRequest.objects.get(mother_uid=unique_id)
-    except ObjectDoesNotExist:
-        #Abort here and notify this connection that we can't find a matching UID
-        _send_msg(connection, AMB_CANT_FIND_UID, **session.template_vars)
-        return True
-
-    resp.ambulance_request = req
-    resp.response = _get_value_for_command('response', xform)
-    resp.save()
-    session.template_vars.update({"response":resp.response})
-    _send_msg(connection, AMB_RESPONSE_THANKS, **session.template_vars)
-    _send_msg(req.connection, AMB_RESPONSE_ORIGINATING_LOCATION_INFO, **session.template_vars)
-    return True
-
-def ambulance_outcome(session, xform):
-    connection = session.connection
-    contact = _get_allowed_ambulance_workflow_contact(session)
-    if not contact:
-        _send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, **session.template_vars)
-        return True
-
-    unique_id = _get_value_for_command('unique_id', xform)
-    outcome = _get_value_for_command('outcome', xform)
-    session.template_vars.update({
-        "unique_id": unique_id,
-        "outcome": outcome
-    })
-    try:
-        req = AmbulanceRequest.objects.get(mother_uid=unique_id)
-    except ObjectDoesNotExist:
-        _send_msg(connection, AMB_CANT_FIND_UID, **session.template_vars)
-        return True
-
-    if not outcome:
-        _send_msg(connection, AMB_OUTCOME_NO_OUTCOME, **session.template_vars)
-        return True
-
-    outcome = AmbulanceOutcome()
-    outcome.ambulance_request = req
-    outcome.mother_uid = unique_id
-    outcome.outcome = outcome
-    try:
-        mother = PregnantMother.objects.get(uid=unique_id)
-    except ObjectDoesNotExist:
-        mother = None
-    outcome.mother = mother
-    outcome.save()
-
-    _send_msg(connection, AMB_OUTCOME_MSG_RECEIVED, **session.template_vars)
-    _send_msg(req.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, **session.template_vars)
-    return True
+    _send_msg(connection, FOLLOW_UP_COMPLETE, router, **session.template_vars)
 
 
-
-def referral(submission, xform):
+def referral(submission, xform, router):
     pass
 
-def birth_registration(submission, xform):
+def birth_registration(submission, xform, router):
     """
     Keyword: BIRTH
     """
@@ -618,9 +428,11 @@ def death_registration(submission, xform, **args):
 def handle_submission(sender, **args):
     session = args['session']
     xform = args['xform']
+    router = args['router']
+
     keyword = session.trigger.trigger_keyword
 
-    logging.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
+    logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
 
     try:
         kw_handler = XFormKeywordHandler.objects.get(keyword=keyword)
@@ -629,14 +441,11 @@ def handle_submission(sender, **args):
         return
     func = to_function(kw_handler.function_path, True)
     session.template_vars = {} #legacy from using rapidsms-xforms
-    logging.error('==================')
-    logging.error(xform.top_level_tags())
-    logging.error(dir(xform.top_level_tags()))
     for k,v in xform.top_level_tags().iteritems():
         session.template_vars[k] = v
-#    session.template_vars.update(xform.top_level_tags) #this doesn't work for some reason
+
     #call the actual handling function
-    return func(session, xform)
+    return func(session, xform, router)
 
 # then wire it to the xform_received signal
 xform_saved_with_session.connect(handle_submission)

@@ -10,10 +10,7 @@ DEFAULT_SETTINGS = 'mwana.localsettings'
 DEFAULT_TEST_SETTINGS = 'mwana.test_localsettings'
 settings_specified = any([arg.startswith('--settings=') for arg in sys.argv])
 if not settings_specified and len(sys.argv) >= 2:
-    if sys.argv[1] == 'test':
-        settings = DEFAULT_TEST_SETTINGS
-    else:
-        settings = DEFAULT_SETTINGS
+    settings = DEFAULT_SETTINGS
     print "NOTICE: using default settings module '%s'" % settings    
     sys.argv.append('--settings=%s' % settings)
 

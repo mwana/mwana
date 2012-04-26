@@ -20,3 +20,4 @@ importlib
 -e git+http://github.com/dimagi/django-soil.git#egg=django-soil
 couchdbkit
 -e git+http://github.com/dimagi/dimagi-utils.git#egg=dimagi-utils
+django-rosetta

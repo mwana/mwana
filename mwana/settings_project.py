@@ -40,11 +40,12 @@ INSTALLED_BACKENDS = {
 INSTALLED_APPS = [
     "threadless_router.backends.httptester",
     "threadless_router.backends.kannel",
+    "rosetta",
     "mwana.apps.broadcast",
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
     "mwana.apps.tlcprinters",
-    'south',
+#    'south',
     # the essentials.
     "django_nose",
     "soil",
@@ -129,7 +130,7 @@ RAPIDSMS_TABS = [
 
 # TODO: make a better default response, include other apps, and maybe 
 # this dynamic?
-DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
+DEFAULT_RESPONSE = "Invalid Keyword."
 
 
 # -------------------------------------------------------------------- #

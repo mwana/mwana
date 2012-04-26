@@ -63,14 +63,10 @@ urlpatterns += patterns('django.contrib.auth.views',
     url(r'^account/password/reset/done/$', 'password_reset_done', name='auth_password_reset_done'),
 )
 
-
-from django.contrib import auth
-urlpatterns += patterns('',
-    #Kwabi: quick fix to provide a passsword change form to non admins
-    #url(r'^changepassword$', 'auth.views.password_change', name='change-password'),
-    #(r'^changepassword/$', 'auth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
-)
-
+if 'rosetta' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('',
+        url(r'^rosetta/', include('rosetta.urls')),
+    )
 
 if settings.DEBUG:
     urlpatterns += patterns('',
