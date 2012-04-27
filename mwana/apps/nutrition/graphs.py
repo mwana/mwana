@@ -20,11 +20,11 @@ class NutritionGraphs(object):
         self.district = district
         self.asses = assessments
         self.underweight_data = [['Obese'], ['Overweight'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.stunting_data = [['Very Tall'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.wasting_data = [['Unusual'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.stunting_data = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.wasting_data = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
         self.underweight_data_percent = [['Obese'], ['Overweight'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.stunting_data_percent = [['Very Tall'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.wasting_data_percent = [['Unusual'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.stunting_data_percent = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.wasting_data_percent = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
         self.graph_data = {}
         self.underweight_table = {}
         self.stunting_table = {}
@@ -82,8 +82,7 @@ class NutritionGraphs(object):
 
     def update_stunting_data(self, fac_asses, location):
         """  Updates stunting status counts given a filtered queryset"""
-        metric = [fac_asses.filter(stunting='V').count(),
-                  fac_asses.filter(Q(stunting='T') | Q(stunting='G') | Q(stunting='L')).count(),
+        metric = [fac_asses.filter(Q(stunting='V') | Q(stunting='T') | Q(stunting='G') | Q(stunting='L')).count(),
                   fac_asses.filter(stunting='M').count(),
                   fac_asses.filter(stunting='U').count(),
                   fac_asses.filter(stunting='S').count()]
@@ -101,8 +100,7 @@ class NutritionGraphs(object):
 
     def update_wasting_data(self, fac_asses, location):
         """  Updates wasting status counts given a filtered queryset"""
-        metric = [fac_asses.filter(wasting='V').count(),
-                  fac_asses.filter(Q(wasting='T') | Q(wasting='G') | Q(wasting='L')).count(),
+        metric = [fac_asses.filter(Q(wasting='V') | Q(wasting='T') | Q(wasting='G') | Q(wasting='L')).count(),
                   fac_asses.filter(wasting='M').count(),
                   fac_asses.filter(wasting='U').count(),
                   fac_asses.filter(wasting='S').count()]

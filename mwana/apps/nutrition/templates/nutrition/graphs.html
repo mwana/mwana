@@ -153,7 +153,7 @@
         if (chart_id == "underweight_chart") {
             var colors_list = ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'];
         }else {
-            var colors_list = ['#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'];
+            var colors_list = ['#00cd00','#fee01e', '#dd7500', '#cd0000'];
         }
 
         // Create and draw the visualization.
@@ -335,8 +335,7 @@
           <th>Location</th>
           <th>Height Captured</th>
           <th>Height Efficiency</th>
-          <th>Very Tall</th>
-          <th>Normal</th>
+         <th>Normal</th>
           <th>Mild</th>
           <th>Moderate</th>
           <th>Severe</th>
@@ -386,8 +385,7 @@
           <th>MUAC Captured</th>
           <th>MUAC Efficiency</th>
           <th>Height Captured</th>
-          <th>Unusual</th>
-          <th>Normal</th>
+         <th>Normal</th>
           <th>Mild</th>
           <th>Moderate</th>
           <th>Severe</th>
@@ -416,6 +414,6 @@
   </div>
   <p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}&gender={{selected_gender}}&startage={{startage}}&endage={{endage}}">Export supporting data to Excel.</a></p>
 </div>
-
+<p>Categorization is according to <a href="http://www.who.int/childgrowth/en/">WHO Child Growth Standards</a></p>
 </div>
 {% endblock content %}
