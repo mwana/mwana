@@ -22,9 +22,6 @@ urlpatterns = patterns('',
     (r'^labresults/', include('mwana.apps.labresults.urls')),
     (r'^alerts/', include('mwana.apps.alerts.urls')),
     (r'^websms/', include('mwana.apps.websmssender.urls')),
-    #(r'^supplies/', include('mwana.apps.supply.urls')),
-    #url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
-    #url(r'^$', mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     (r'^export/', include('rapidsms.contrib.export.urls')),
     url(r'^httptester/$',
         'threadless_router.backends.httptester.views.generate_identity',
@@ -33,8 +30,6 @@ urlpatterns = patterns('',
     (r'^backend/', include('threadless_router.backends.kannel.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
-#    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
-#    (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),
@@ -44,12 +39,7 @@ urlpatterns = patterns('',
     (r'^couchexport/', include('couchexport.urls')),
     (r'^couchforms/', include('couchforms.urls')),
     (r'^couchlog/', include('couchlog.urls')),
-#    (r'^formplayer/', include('touchforms.formplayer.urls')),
     (r'^touchforms/', include('touchforms.urls')),
-    #Kwabi: quick fix to provide a passsword change form to non admins
-    #(r'^changepassword/$', 'nonauth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
-
-
 )
 
 # Contrib Auth Password Management

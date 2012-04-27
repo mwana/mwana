@@ -103,7 +103,7 @@ INSTALLED_APPS = [
     "mwana.apps.hub_workflow",
     "mwana.apps.stringcleaning",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
-    "rapidsms.contrib.default",
+    "mwana.apps.default",
 ]
 
 #TOUCHFORMS CONFIG
@@ -112,24 +112,9 @@ XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
 # this rapidsms-specific setting defines which views are linked by the
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
-RAPIDSMS_TABS = [
-    ('rapidsms.views.dashboard', 'Dashboard'),
-    ('smsforms.views.list_forms', 'Decision Tree XForms'),
-    ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
-    ("smscouchforms.views.download",       "View Data"),
-    ('mwana.apps.locations.views.dashboard', 'Map'),
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-#    ('rapidsms.contrib.registration.views.registration', 'Registration'),
-#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-#    ('mwana.apps.supply.views.dashboard', 'Supplies'),
-    ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-]
-
-
-# TODO: make a better default response, include other apps, and maybe 
+#RAPIDSMS_TABS = []    # SET ME IN COUNTRY/LOCALSETTINGS!
 # this dynamic?
+
 DEFAULT_RESPONSE = "Invalid Keyword."
 
 
