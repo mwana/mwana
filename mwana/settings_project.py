@@ -317,3 +317,9 @@ NO_LOGIN_REQUIRED_WHITELIST = [
     MEDIA_URL,
     '/backend/'
 ]
+
+
+
+SITE_TITLE = "SMGL - Saving Mothers Giving Life"
+LOGO_LEFT_URL = ''
+LOGO_RIGHT_URL = ''

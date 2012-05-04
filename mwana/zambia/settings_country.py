@@ -40,7 +40,7 @@ DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
 TIME_ZONE = 'Africa/Lusaka'
 
-LANGUAGE_CODE = 'bem-zm'
+LANGUAGE_CODE = 'to-zm'
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
@@ -61,5 +61,13 @@ RAPIDSMS_TABS = [
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
+
+
+gettext = lambda s: s
+
+LANGUAGES = (
+             ('to', gettext('Tonga')),
+             ('en', gettext('English'))
+             )
 
 
