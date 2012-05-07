@@ -77,13 +77,13 @@
           <input type="text" name="enddate" size="9" value="{{ enddate|date:"Y-m-d"  }}" />
 	  Location:
 	  <select name="location" value="{{ location }}">
-	    <option value="All Districts">
+	    <option value="All Districts" 
 		    {% ifequal selected_location "All districts" %}
 		    selected="selected"
 		    {% endifequal %}>
 	      All Districts</option>
 	    {% for location in districts %}
-	    <option value="{{ location }}">
+	    <option value="{{ location }}" 
 		    {% ifequal selected_location location %} 
 		    selected="selected" 
 		    {% endifequal %}>
