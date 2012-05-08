@@ -8,7 +8,7 @@ from mwana.apps.locations.models import LocationType
 from mwana.apps.reminders.models import Event
 from mwana.apps.contactsplus.models import ContactType
 from threadless_router.tests.scripted import TestScript
-from mwana.apps.smgl.app import USER_SUCCESS_REGISTERED
+from mwana.apps.smgl.app import USER_SUCCESS_REGISTERED, ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER
 from mwana.apps.smgl.models import PreRegistration
 
 def _create_prereg_user(fname, location_code, ident, ctype, lang=None):
@@ -42,23 +42,6 @@ class SMGLSetUp(TestScript):
         super(SMGLSetUp, self).setUp()
         backends = {'mockbackend': {"ENGINE": MockBackend}}
         router = Router(backends=backends)
-        #Create the bare locations and locationtypes required for testing the smgl app
-#        self.type_uhc = LocationType.objects.get_or_create(singular="clinic", plural="uhc", slug='uhc')[0]
-#        self.type_rhc = LocationType.objects.get_or_create(singular="clinic", plural="rhc", slug='rhc')[0]
-#        self.type_district = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]
-#        self.type_province = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]
-#        self.southern_province = Location.objects.create(type=self.type_province, name="Southern Province", slug="400000")
-#        self.kalomo_district = Location.objects.create(type=self.type_district, name="Kalomo District", slug="403000", parent=self.southern_province)
-#        self.kalomo_uhc = Location.objects.create(type=self.type_uhc, name="Kalomo UHC", slug="404000", parent=self.kalomo_district)
-#        self.chilele = Location.objects.create(type=self.type_rhc, name="Chilele Clinic", slug="403029", parent=self.kalomo_uhc, send_live_results=True)
-#        self.zimba_uhc = Location.objects.create(type=self.type_uhc, name="Zimba UHC", slug="403012", parent=self.kalomo_district, send_live_results=True)
-#
-#        #create the contact types we'll use
-#        self.ctype_tn = ContactType.objects.get_or_create(name="Triage Nurse", slug="TN")[0]
-#        self.ctype_cba = ContactType.objects.get_or_create(name="Community Based Agent", slug="CBA")[0]
-#        self.ctype_dmho = ContactType.objects.get_or_create(name="District mHealth Officer", slug="dmho")[0]
-#        self.ctype_amb = ContactType.objects.get_or_create(name="Ambulance", slug="am")[0]
-#        self.ctype_smgladmin = ContactType.objects.get_or_create(name="SMGL Super User", slug="smgl")[0]
 
 class SMGLJoinTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
@@ -77,6 +60,27 @@ class SMGLJoinTest(SMGLSetUp):
             11 < Anton, you are already registered as a Triage Nurse at Chilala but your details have been updated
         """
         self.runScript(script)
+
+    def testJoin(self):
+        _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
+        _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
+        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'clinic-worker', 'en')
+        _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
+        _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
+
+        create_users = """
+            11 > Join AntonTN EN
+            11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
+            12 > join ANTONAD en
+            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo HAHC.
+            13 > join antonCW en
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo HAHC.
+            14 > join antonOther en
+            14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
+            15 > join AntonAD en
+            15 < Thank you for registering! You have successfully registered as a Data Associate at Chilala.
+        """
+        self.runScript(create_users)
 
     def testNotPreRegd(self):
         script = """
@@ -103,20 +107,41 @@ class SMGLAmbulanceTest(SMGLSetUp):
     def setUp(self):
         # this call is required if you want to override setUp
         super(SMGLSetUp, self).setUp()
+        _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
+        _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
+        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'clinic-worker', 'en')
+        _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
+        _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
 
+        create_users = """
+            11 > Join AntonTN EN
+            11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
+            12 > join ANTONAmb en
+            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo HAHC.
+            13 > join antonCW en
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo HAHC.
+            14 > join antonOther en
+            14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
+            15 > join AntonDA en
+            15 < Thank you for registering! You have successfully registered as a Data Associate at Chilala.
+        """
+        self.runScript(create_users)
 
-#    def testDhoEidAndBirthReports(self):
-##        self.assertEqual(0, DhoReportNotification.objects.count())
-#        Event.objects.create(name="Birth", slug="birth")
-#
-#        today = date.today()
-#        month_ago = date(today.year, today.month, 1)-timedelta(days=1)
-#
-#        script = """
-#            cba > birth 2 %(last_month)s %(last_month_year)s unicef innovation
-#            cba > birth 4 %(last_month)s %(last_month_year)s unicef innovation
-#            cba < some_stuff
-#        """ % {"last_month":month_ago.month, "last_month_year":month_ago.year}
-#        self.runScript(script)
-
-
+    def testAmbRequest(self):
+        d = {
+            "unique_id": '1234',
+            "from_location": 'Chilala',
+            "sender_phone_number": '15'
+        }
+        script = """
+            15 > AMB 1234 1
+            15 < Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!
+            11 < {0}
+            12 < {1}
+            13 < {2}
+            14 < {3}
+        """.format(ER_TO_TRIAGE_NURSE % d,
+            ER_TO_DRIVER % d,
+            ER_TO_CLINIC_WORKER % d,
+            ER_TO_OTHER % d)
+        self.runScript(script)

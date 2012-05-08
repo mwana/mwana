@@ -6,6 +6,7 @@ class XFormKeywordHandlerAdmin(admin.ModelAdmin):
 
 class PreRegsitrationAdmin(admin.ModelAdmin):
     list_display = ['phone_number', 'has_confirmed', 'first_name', 'last_name', 'facility_name', 'facility_code', 'title', 'language']
+    exclude = ['contact', 'facility_name', 'has_confirmed']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
     list_display = ['uid', 'first_name', 'last_name', 'lmp', 'edd', 'next_visit']

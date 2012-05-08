@@ -59,6 +59,7 @@ AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patien
 AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
 LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
 DATE_NOT_OPTIONAL = _("This date is not optional!")
+ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
 
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
@@ -89,30 +90,6 @@ def _generate_uid_for_er():
             counter += 1
 
     return uid
-
-def _pick_er_driver(session, xform):
-    ad_type, error = get_contacttype(session, 'am')
-    ads = Contact.objects.filter(types=ad_type)
-    if ads.count():
-        return ads[0]
-    else:
-        raise TypeError('No Ambulance Driver type found!')
-
-def _pick_other_er_recip(session, xform):
-    other_type, error = get_contacttype(session, 'dmo')
-    others = Contact.objects.filter(types=other_type)
-    if others.count():
-        return others[0]
-    else:
-        raise TypeError('No Other recipient type found for Ambulance Request Workflow!')
-
-def _pick_er_triage_nurse(session, xform):
-    tn_type, error = get_contacttype(session, 'tn')
-    tns = Contact.objects.filter(types=tn_type)
-    if tns.count():
-        return tns[0]
-    else:
-        raise TypeError('No Triage Nurse type found!')
 
 def _send_msg(connection, txt, router, **kwargs):
     logger.debug('Sending Message: Connection: %s, txt: %s, kwargs: %s' % (connection, txt, kwargs))

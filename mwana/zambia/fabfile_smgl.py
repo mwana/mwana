@@ -27,7 +27,7 @@ import posixpath
 PROJECT_ROOT = os.path.join(os.path.dirname(__file__), '..')
 env.home = '/home/mwana'
 env.project = 'mwana'
-env.code_repo = 'git://github.com/mwana/mwana.git'
+env.code_repo = 'git@github.com:mwana/mwana.git'
 env.country = 'zambia'
 env.pip_requires_filename = 'from_www_libs.txt'
 
@@ -194,9 +194,12 @@ def deploy():
     try:
         with cd(env.code_root):
             sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
+            sudo('git commit -am "Automatic server side commit (Translations)"') #commit any new translations
             sudo('git pull', user=env.sudo_user)
             sudo('git submodule init', user=env.sudo_user)
             sudo('git submodule update', user=env.sudo_user)
+            sudo('git push origin %(code_branch)s' % env, user=env.sudo_user) #get any translations commits back up to
+                                                                            #server. MAKE SURE ORIGIN IS WRITE ENABLED
 #        update_requirements()
 #        update_services()
         migrate()

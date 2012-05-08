@@ -72,37 +72,39 @@ class AmbulanceRequest(models.Model):
                                         help_text="The Ambulance Driver/Dispatcher who was contacted",
                                         related_name="ambulance_driver")
     ad_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Ambulance?")
-    ad_confirmed = models.BooleanField(default=False, help_text="Has the Ambulance Driver confirmed receipt of this ER?")
     ad_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Ambulance Driver confirm?")
 
     tn_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Triage Nurse?")
     triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted",
                                     related_name="triage_nurse")
-    tn_confirmed = models.BooleanField(default=False, help_text="Has the Triage Nurse confirmed receipt of this ER?")
     tn_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Traige Nurse confirm?")
 
     other_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Other Recipient?")
     other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER",
                                         related_name="other_recipient")
-    other_confirmed = models.BooleanField(default=False, help_text="Has the Other Recipient confirmed receipt of this ER?")
     other_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Other Recipient confirm?")
 
+    receiving_facility_recipient_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Receiving Clinic?")
+    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER",
+                                        related_name="receiving_facility_recipient")
+    receiving_facility_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Receiving Clinic confirm?")
 
     receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility",
                                         related_name="receiving_facility")
-
     requested_on = models.DateTimeField(auto_now_add=True)
     sent_response = models.BooleanField(default=False)
+    confirmed = models.BooleanField(default=False)
+    confirmed_on = models.DateTimeField(null=True, blank=True)
 
 class AmbulanceResponse(models.Model):
     ER_RESPONSE_CHOICES = (
         ('cancelled', 'Cancelled'),
-        ('arrived', 'Arrived'),
-        ('pending', 'Pending')
+        ('confirmed', 'Confirmed'),
     )
 
     #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
     #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    responded_on = models.DateTimeField(auto_now_add=True, help_text="Date the response happened")
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
@@ -117,6 +119,7 @@ class AmbulanceOutcome(models.Model):
     )
     #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
     #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    outcome_on = models.DateTimeField(auto_now_add=True, help_text = "Date and Time this outcome was provided")
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)

@@ -7,10 +7,10 @@ from .models import *
 
 
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ("name", "type", "full_name", "send_live_results",
-                    "has_independent_printer")
-    list_filter = ("type", "send_live_results", "has_independent_printer")
-    search_fields = ("name", "slug")
+    list_display = ("name", "type", "full_name")
+    list_filter = ("type",)
+    search_fields = ("name", "slug", "type")
+    exclude = ('send_live_results', 'has_independent_printer', 'point',)
 
 
 admin.site.register(Point)

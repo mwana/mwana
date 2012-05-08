@@ -1,0 +1,182 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-04 10:00-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\app.py:30
+#, python-format
+msgid "Sorry, the facility '%(facility)s' is not recognized. Please try again."
+msgstr ""
+
+#: .\app.py:31
+#, python-format
+msgid ""
+"%(name)s, you are already registered as a %(readable_user_type)s at %"
+"(facility)s but your details have been updated"
+msgstr ""
+
+#: .\app.py:32
+#, python-format
+msgid "Sorry, the User Type '%(title)s' is not recognized. Please try again."
+msgstr ""
+
+#: .\app.py:33
+#, python-format
+msgid "You can not specify a zone when registering as a %(reg_type)s!"
+msgstr ""
+
+#: .\app.py:34
+#, python-format
+msgid ""
+"Thank you for registering! You have successfully registered as a %"
+"(readable_user_type)s at %(facility)s."
+msgstr ""
+
+#: .\app.py:35
+msgid "Thank you, mother has been registered succesfully!"
+msgstr ""
+
+#: .\app.py:36
+msgid ""
+"Sorry, this number is not registered. Please register with the JOIN keyword "
+"and try again"
+msgstr ""
+
+#: .\app.py:37
+msgid ""
+"You are not registered as a Data Associate and are not allowed to register "
+"mothers!"
+msgstr ""
+
+#: .\app.py:38
+#, python-format
+msgid ""
+"The date you entered for %(date_name)s is incorrectly formatted.  Format "
+"should be DD MM YYYY. Please try again."
+msgstr ""
+
+#: .\app.py:40
+#, python-format
+msgid ""
+"The year you entered for date %(date_name)s is incorrectly formatted.  "
+"Should be in the formatYYYY (four digit year). Please try again."
+msgstr ""
+
+#: .\app.py:42
+msgid ""
+"Sorry, you are not on the pre-registered users list. Please contact ZCAHRD "
+"for assistance"
+msgstr ""
+
+#: .\app.py:43
+#, python-format
+msgid "%(error_msg)s for %(date_name)s"
+msgstr ""
+
+#: .\app.py:44
+msgid ""
+"Thank you.Your request for an ambulance has been received. Someone will be "
+"in touch with you shortly.If no one contacts you,please call the emergency "
+"number!"
+msgstr ""
+
+#: .\app.py:45 .\app.py:46 .\app.py:47
+#, python-format
+msgid ""
+"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
+"%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this"
+msgstr ""
+
+#: .\app.py:48
+msgid ""
+"Sorry, the mother you are trying to Follow Up is not registered in the "
+"system. Please check the UID and try again or register her first."
+msgstr ""
+
+#: .\app.py:49
+#, python-format
+msgid ""
+"Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!."
+msgstr ""
+
+#: .\app.py:50
+#, python-format
+msgid ""
+"The Emergency with ID:%(unique_id)s can not be found! Please try again or "
+"contact your DMO immediately."
+msgstr ""
+
+#: .\app.py:51
+msgid "Sorry. You are not registered as Triage Nurse, Ambulance of DMO"
+msgstr ""
+
+#: .\app.py:52
+msgid ""
+"Thank you for confirming. When you know the status of the Ambulance, please "
+"send RESP <RESPONSE_TYPE>!"
+msgstr ""
+
+#: .\app.py:53
+msgid ""
+"Sorry, your registration type is not allowed to send Emergency Response type "
+"messages"
+msgstr ""
+
+#: .\app.py:54
+#, python-format
+msgid ""
+"Thank you. The ambulance for this request has been marked as %(response)s. "
+"We will notify the Rural Facility."
+msgstr ""
+
+#: .\app.py:55
+msgid ""
+"Sorry. We cannot find the Mother's Unique ID you specified. Please try again "
+"or contact the DMO"
+msgstr ""
+
+#: .\app.py:56
+#, python-format
+msgid ""
+"Emergency Response: The ambulance for the Unique ID: %(unique_id)s has been "
+"marked %(response)s"
+msgstr ""
+
+#: .\app.py:57
+msgid "No OUTCOME Specified.  Please send an outcome!"
+msgstr ""
+
+#: .\app.py:58
+#, python-format
+msgid ""
+"Thanks for your message! We have marked the patient with unique_id %"
+"(unique_id)s as outcome: %(outcome)s"
+msgstr ""
+
+#: .\app.py:59
+#, python-format
+msgid ""
+"We have been notified of the patient outcome for patient with unique_id: %"
+"(unique_id)s. Outcome: %(outcome)s"
+msgstr ""
+
+#: .\app.py:60
+msgid "Sorry, either the LMP or the EDD must be filled in!"
+msgstr ""
+
+#: .\app.py:61
+msgid "This date is not optional!"
+msgstr ""
