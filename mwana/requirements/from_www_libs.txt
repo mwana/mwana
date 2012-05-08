@@ -1,23 +1,47 @@
-django>=1.4
-nose>=0.11.2
-django-nose>=0.1.2
-djtables>=0.1.1
-djappsettings>=0.1.0
-pytz
--e git+https://github.com/dimagi/rapidsms.git#egg=rapidsms
-django-uni-form
--e git+http://github.com/mvpdev/django-eav.git#egg=django-eav
-pyserial
-pygrowup
--e git+http://github.com/mwana/rapidsms-people-app.git#egg=rapidsms-people-app
-south
-posixpath
-lxml
-django-tastypie
-requests
-    -e git+http://github.com/caktus/rapidsms-threadless-router.git@develop#egg=rapidsms-threadless-router
-importlib
--e git+http://github.com/dimagi/django-soil.git#egg=django-soil
-couchdbkit
--e git+http://github.com/dimagi/dimagi-utils.git#egg=dimagi-utils
-django-rosetta
+Django==1.4
+RapidSMS==0.9.6a
+South==0.7.3
+Unidecode==0.04.9
+amqplib==1.0.2
+anyjson==0.3.1
+-e git+https://github.com/dimagi/auditcare.git@e6d45860f99cb081fe358492542f093ff927860a#egg=auditcare-dev
+celery==2.5.1
+couchdbkit==0.5.4
+-e git+https://github.com/dimagi/couchlog.git@9733da45024b981a73901e2253f4b8d54b2d7400#egg=couchlog-dev
+-e git+https://github.com/caktus/rapidsms-decisiontree-app.git@ac4b647eecddb35176c7d43a95fcd915464ddfdc#egg=decisiontree-dev
+-e git+ssh://adewinter@local-vm/home/adewinter/repos/dimagi-utils@3283a38384ef4c902d4a7f67ae756a4cf298be6e#egg=dimagi_utils-dev
+distribute==0.6.19
+django-digest==1.13
+-e git+http://github.com/mvpdev/django-eav.git@24be357a3044a7d5aa0a3ae482766c158fd59dce#egg=django_eav-dev
+django-nose==0.1.2
+django-rosetta==0.6.6
+-e hg+https://bitbucket.org/mlavin/django-selectable@33e4e93b3fb3ce3a747c57fb73ae6faa1588e5a6#egg=django_selectable-dev
+django-tastypie==0.9.11
+django-timezones==0.2
+django-uni-form==0.8.0
+djappsettings==0.1.0
+djtables==0.1.2
+gunicorn==0.12.2
+http-parser==0.7.1
+importlib==1.0.2
+ipython==0.12.1
+kombu==2.1.1
+lxml==2.2.4
+mimeparse==0.1.3
+nose==0.11.2
+openpyxl==1.5.8
+ordereddict==1.1
+psycopg2==2.2.1
+pyreadline==2.0-dev1
+python-dateutil==1.5
+python-digest==1.7
+python-memcached==1.45
+pytz==2012c
+rapidsms-growthmonitoring==0.1
+rapidsms-people==0.1
+-e git://github.com/adewinter/rapidsms-xforms.git@e188c6922ae49f3315b6861b79e781555b9e592e#egg=rapidsms_xforms-dev
+requests==0.7.5
+restkit==3.3.1
+-e git+https://github.com/dimagi/rapidsms-tropo.git@ca0c13d2c15e9c057262d86ee35f4c877c499b88#egg=rtropo-dev
+six==1.1.0
+-e git+http://github.com/caktus/rapidsms-threadless-router.git@d3ecbd7c031c91b5ca0bc97f263cbc050d46675e#egg=threadless_router-dev
