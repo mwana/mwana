@@ -1,0 +1,158 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-05-08 21:22+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+
+
+
+#: .\apps\labresults\handlers\join.py:222
+#, python-format
+msgid "Please notify us next time there is a %(event)s in your zone."
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:261
+msgid ""
+"To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> "
+"<YOUR NAME>"
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:274
+#, python-format
+msgid ""
+"Sorry, I don't know about a clinic with code %(code)s. Please check your "
+"code and try again."
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:284
+#, python-format
+msgid ""
+"Hello %(name)s! You are already registered as a RemindMi Agent for zone %"
+"(zone)s of %(clinic)s."
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:291
+#, python-format
+msgid ""
+"Hello %(name)s! You are already registered as a RemindMi Agent for %"
+"(old_clinic)s. To leave your current clinic and join %(new_clinic)s, reply "
+"with LEAVE and then re-send your message."
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:315
+#, python-format
+msgid ""
+"Thank you %(name)s! You have successfully registered as a RemindMi Agent for "
+"zone %(zone)s of %(clinic)s."
+msgstr ""
+
+#: .\apps\labresults\handlers\join.py:322
+msgid "Please notify us next time there is a birth in your zone."
+msgstr "Mukawayi mukatwebe elyo umuntu akapaapa muchende yenu."
+
+
+#: .\apps\labresults\handlers\leave.py:9
+#, python-format
+msgid ""
+"You have successfully unregistered, %(name)s. We're sorry to see you go."
+msgstr ""
+
+#: .\apps\labresults\handlers\leave.py:10
+msgid ""
+"Whoops - you tried to unregister from the system but I don't know who you "
+"are! Don't worry, you won't be receiving any messages from us."
+msgstr ""
+
+#: .\apps\labresults\handlers\printer.py:17
+msgid ""
+"To add or remove a printer, send PRINTER ADD|REMOVE <location> <backend> "
+"<phone #>"
+msgstr ""
+
+#: .\apps\locations\forms.py:36
+msgid "Enter a valid latitude."
+msgstr ""
+
+#: .\apps\locations\forms.py:37
+msgid "Enter a valid longitude."
+msgstr ""
+
+#: .\apps\reminders\app.py:26
+#, python-format
+msgid ""
+"To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
+"optional and is logged as TODAY if left out."
+msgstr ""
+
+#: .\apps\reminders\app.py:148
+msgid ""
+"Sorry, I couldn't understand that date. Please enter the date like so: DAY "
+"MONTH YEAR, for example: 23 04 2010"
+msgstr ""
+"Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI "
+"UMWAKA - 23 04 2010."
+
+#: .\apps\reminders\app.py:157
+#, python-format
+msgid "Sorry, you can not register a %s with a date after today's."
+msgstr "Munjeleleko, teti mulembeshe ukupaapa(%s) pa nshiku iyishilafika"
+
+
+
+
+
+#: .\apps\reminders\app.py:187 .\apps\reminders\app.py:216
+#, python-format
+msgid ""
+"Thank you%(cba)s! You registered a%(location_type)s %(event)s for %(name)s "
+"on %(date)s. You will be notified when it is time for %(gender)s next clinic "
+"appointment."
+msgstr ""
+"Twatotela ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)s) kwa ba %(name)s pa "
+"%(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika iyakuya ku chipatala."
+
+#: .\apps\reminders\app.py:196 .\apps\reminders\app.py:225
+#, python-format
+msgid ""
+"Thank you%(cba)s! You have successfully registered a%(location_type)s %"
+"(event)s for %(name)s on %(date)s. You will be notified when it is time for %"
+"(gender)s next appointment at the clinic."
+msgstr ""
+"Twatotela ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)s) kwa ba %(name)s pa "
+"%(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika iyakuya ku chipatala."
+
+msgid "facility"
+msgstr "kwa mu chipatala"
+
+msgid "home"
+msgstr "kwa mu ng'anda"
+
+
+#: .\apps\reminders\app.py:234
+msgid "Sorry, I didn't understand that."
+msgstr "Njeleleeniko, nshacumfwa iyo imbila"
+
+#: .\apps\reminders\tasks.py:67
+#, python-format
+msgid ""
+"Hi%(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
+"remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
+msgstr ""
+"Ba%(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)s naifika. "
+"Bebukisheni ukuya ku %(clinic)s, elyo mutume ati TOLD %(patient)s"
+"shitatu."
+

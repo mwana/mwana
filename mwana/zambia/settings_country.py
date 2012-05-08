@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.settings_project import *
 
+_ = lambda s:s
+
 # Zambia:
 RESULTS160_SLUGS = {
     'CBA_SLUG': 'cba',
@@ -42,6 +44,10 @@ DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'bem-zm'
+LANGUAGES = (
+    ('bem_ZM', _('Bemba')),
+    ('en', _('English')),
+)
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
