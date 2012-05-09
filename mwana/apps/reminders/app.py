@@ -231,7 +231,8 @@ class App(rapidsms.apps.base.AppBase):
                     location_type = " " + {"cl":"facility", "hm":"home"}\
                     [event_location_type] if event_location_type else "")
         else:
-            msg.respond(_("Sorry, I didn't understand that.") + " " +
-                        self.HELP_TEXT % {'event_lower': event.name.lower(),
-                                          'event_upper': event.name.upper()})
+            msg.respond(_("Sorry, I didn't understand that. "
+                        "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."
+                " The date is optional and is logged as TODAY if left out."), event_lower= event.name.lower(),
+                                          event_upper = event.name.upper())
         return True

@@ -97,6 +97,18 @@ msgid ""
 "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
 "optional and is logged as TODAY if left out."
 msgstr ""
+"Pakulembesha %(event_lower)s, tumeni %(event_upper)s <INSHIKU> <ISHINA LYABANINA>."
+"Ichilangililo, MWANA 12 3 2012 Bana Kalaba."
+
+
+
+
+msgid ""
+"Sorry, I didn't understand that. To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
+"optional and is logged as TODAY if left out."
+msgstr ""
+"Njeleleeniko, nshacumfwa iyo imbila. Pakulembesha %(event_lower)s, tumeni %(event_upper)s <INSHIKU> <ISHINA LYABANINA>."
+"Ichilangililo, MWANA 12 3 2012 Bana Kalaba."
 
 #: .\apps\reminders\app.py:148
 msgid ""
@@ -154,5 +166,4 @@ msgid ""
 msgstr ""
 "Ba%(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)s naifika. "
 "Bebukisheni ukuya ku %(clinic)s, elyo mutume ati TOLD %(patient)s"
-"shitatu."
 

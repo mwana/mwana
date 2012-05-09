@@ -43,7 +43,7 @@ DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
 TIME_ZONE = 'Africa/Lusaka'
 
-LANGUAGE_CODE = 'bem-zm'
+LANGUAGE_CODE = 'en'
 LANGUAGES = (
     ('bem_ZM', _('Bemba')),
     ('en', _('English')),
