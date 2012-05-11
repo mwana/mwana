@@ -77,6 +77,33 @@ class TestApp(TestScript):
             0974 < Contacts at Central Clinic: Worker Two;0972.
         """
         self.runScript(script)
+
+    def testGettingCodes(self):
+        """
+        Tests getting codes for a clinic by HELP ADMINS
+        """
+
+        script = """
+            unknown > code
+            unknown < To get the code for a clinic, send <CODE> <CLINIC NAME>
+            unknown > code kdh
+            unknown < Sorry, you must be registered as HELP ADMIN to request for facility codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0971 > code kdh
+            0971 < Sorry, you must be registered as HELP ADMIN to request for facility codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0974 > code unknown
+            0974 < There are no locations matching unknown
+            0974 > code Kafue
+            0974 < kdh-Kafue District Hospital.
+            0974 > code Central Clinic
+            0974 < 403012-Central Clinic.
+            0974 > code Central what ever
+            0974 < 403012-Central Clinic.
+            0974 > code 403012
+            0974 < 403012-Central Clinic.
+            0974 > code 403012 whatever
+            0974 < 403012-Central Clinic.
+        """
+        self.runScript(script)
         
     def _post_json(self, url, data):
         if not isinstance(data, basestring):

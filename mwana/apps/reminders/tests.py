@@ -165,28 +165,32 @@ class EventRegistration(TestScript):
     def testFacilityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanacl", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
-            kk     > mwana cl 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanacl 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwana f 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwanaf 4/3/2010 Nelly Daka
+            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana facility 4/3/2010 Nelly Mwansa
+            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2010. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
-        self.assertEqual(2, patients.count())
+        self.assertEqual(3, patients.count())
         
-        self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
+        self.assertEqual(3, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
 
     def testCommunityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanahm ", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanah ", gender='f')
         script = """
-            kk     > mwana hm 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwanahm 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwana h 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana h 4/3/2010 maria
+            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwanah 4/3/2010 Nelly Daka
+            kk     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')

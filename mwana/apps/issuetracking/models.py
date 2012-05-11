@@ -2,6 +2,8 @@
 from django.db import models
 from rapidsms.models import Contact
 from django.contrib.auth.models import User
+from mwana.apps.issuetracking.utils import send_comment_email
+import logging
 
 
 
@@ -51,12 +53,28 @@ class Issue(models.Model):
     def __unicode__(self):
         return self.title
 
-
+        
 class Comment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     edited_on = models.DateTimeField(auto_now=True)
     body = models.TextField()
     issue = models.ForeignKey(Issue)
 
+    def save(self, *args, **kwargs):
+
+        super(Comment, self).save(*args, **kwargs)
+        
+        if self.issue.web_author:
+            try:
+                send_comment_email(self)
+            except Exception, e:
+                logger = logging.getLogger(__name__)
+                logger.error(e)
+
+        
+
     def __unicode__(self):
         return "%s..." % self.body[0:50]
+
+    class Meta:
+            ordering = ["edited_on"]

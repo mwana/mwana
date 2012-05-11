@@ -318,7 +318,9 @@ class JoinHandler(KeywordHandler):
                                  zone=zone.name, clinic=clinic.name)
             notify_text, kwargs = self._get_notify_text()
             if notify_text:
-                msg.append(notify_text, **kwargs)
+#                msg.append(notify_text, **kwargs)
+                msg.append(_("Please notify us next time there is a birth in your "
+                     "zone."))
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
             msg.append(HELP_TEXT)

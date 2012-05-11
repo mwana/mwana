@@ -7,9 +7,9 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 
 RESPONSE           = "Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon."
-ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s as soon as you can!"
-CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s as soon as you can!"
-CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s as soon as you can!"
+ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s."
+CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s."
+CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s."
 ADDITIONAL_INFO    = "Their message was: %(message)s"
 
 class HelpHandler(KeywordHandler):

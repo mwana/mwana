@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.settings_project import *
 
+_ = lambda s:s
+
 # Zambia:
 RESULTS160_SLUGS = {
     'CBA_SLUG': 'cba',
@@ -24,6 +26,7 @@ INSTALLED_APPS.append("mwana.apps.filteredlogs")
 INSTALLED_APPS.append("mwana.apps.monitor")
 INSTALLED_APPS.append("mwana.apps.websmssender")
 INSTALLED_APPS.append("mwana.apps.issuetracking")
+INSTALLED_APPS.append("mwana.apps.email")
 
 
 ADMINS = (
@@ -40,7 +43,11 @@ DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
 TIME_ZONE = 'Africa/Lusaka'
 
-LANGUAGE_CODE = 'bem-zm'
+LANGUAGE_CODE = 'en'
+LANGUAGES = (
+    ('bem_ZM', _('Bemba')),
+    ('en', _('English')),
+)
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
@@ -67,6 +74,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
+    ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

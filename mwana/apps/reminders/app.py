@@ -18,6 +18,10 @@ _ = lambda s: s
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
     
+    #TODO move this to database
+    LOCATION_TYPES = {'f':'cl', 'h':'hm', 'clinic':'cl', 'cl':'cl', 'hm':'hm',
+                        'fa':'cl', 'home':'hm', 'facility':'cl'}
+    
     DATE_RE = re.compile(r"[\d/.-]+")
     HELP_TEXT = _("To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
                 " The date is optional and is logged as TODAY if left out.")
@@ -79,7 +83,9 @@ class App(rapidsms.apps.base.AppBase):
         keyword = msg.text.strip().split()[0].lower()
         rest = msg.text.strip().split()[1:]
 
-        if keyword in ["mwanacl", "mwanahm"]:
+        #TODO This is a quick way of implementing registration of
+        #facility and/or home births. Use a longer term solution later
+        if 'mwana' in keyword and len('mwana') < len(keyword):
             keyword = keyword.replace("mwana" ,"mwana ", True)
 
         to_parse = keyword.split() + rest
@@ -88,8 +94,8 @@ class App(rapidsms.apps.base.AppBase):
         name = ''
         location_type = None
         
-        if parts and parts[0].lower() in ['hm', 'cl']:
-            location_type = parts[0].lower()
+        if parts and parts[0].lower() in self.LOCATION_TYPES:
+            location_type = self.LOCATION_TYPES[parts[0].lower()]
             parts = parts[1:]
 
         for part in parts:
@@ -173,26 +179,60 @@ class App(rapidsms.apps.base.AppBase):
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                
+                # TODO: This is temporal. In future responses will be same save for
+                # the words facilty/home. Malawi/Zambia will have to agree on
+                # the words to use
+                if event_location_type:
+                    msg.respond(_("Thank you%(cba)s! You registered a%(location_type)s %(event)s for "
+                        "%(name)s on %(date)s. You will be notified when "
+                        "it is time for %(gender)s next clinic appointment.")
+                        , cba=cba_name, gender=event.possessive_pronoun,
+                        event=event.name.lower(),
+                        date=date.strftime('%d/%m/%Y'), name=patient.name,
+                        location_type = " " + {"cl":"facility", "hm":"home"}\
+                        [event_location_type] if event_location_type else "")
+                else:
+                    msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=event.possessive_pronoun,
                         event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
+                        date=date.strftime('%d/%m/%Y'), name=patient.name,
+                        location_type = " " + {"cl":"facility", "hm":"home"}\
+                        [event_location_type] if event_location_type else "")
                 return True
+
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection,
                                           notification_status="new",
                                           event_location_type=event_location_type)
             gender = event.possessive_pronoun
-            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
-                        "%(name)s on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next appointment at the "
+            
+            # TODO: This is temporal. In future responses will be same save for
+            # the words facilty/home. Malawi/Zambia will have to agree on
+            # the words to use
+            if event_location_type:
+                msg.respond(_("Thank you%(cba)s! You registered a%(location_type)s %(event)s for "
+                    "%(name)s on %(date)s. You will be notified when "
+                    "it is time for %(gender)s next clinic appointment.")
+                    , cba=cba_name, gender=event.possessive_pronoun,
+                    event=event.name.lower(),
+                    date=date.strftime('%d/%m/%Y'), name=patient.name,
+                    location_type = " " + {"cl":"facility", "hm":"home"}\
+                    [event_location_type] if event_location_type else "")
+            else:
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
+                    "%(name)s on %(date)s. You will be notified when "
+                    "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=gender,
-                        event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
+                    event=event.name.lower(),
+                    date=date.strftime('%d/%m/%Y'), name=patient.name,
+                    location_type = " " + {"cl":"facility", "hm":"home"}\
+                    [event_location_type] if event_location_type else "")
         else:
-            msg.respond(_("Sorry, I didn't understand that.") + " " +
-                        self.HELP_TEXT % {'event_lower': event.name.lower(),
-                                          'event_upper': event.name.upper()})
+            msg.respond(_("Sorry, I didn't understand that. "
+                        "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."
+                " The date is optional and is logged as TODAY if left out."), event_lower= event.name.lower(),
+                                          event_upper = event.name.upper())
         return True

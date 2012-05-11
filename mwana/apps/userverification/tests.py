@@ -103,7 +103,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
     def testSendingOnlyOnceInAPeriod(self):
@@ -116,6 +115,7 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
         time.sleep(.1)
 
         self.startRouter()
+        tasks.send_verification_request(self.router)
         tasks.send_verification_request(self.router)
         msgs = self.receiveAllMessages()
 
@@ -131,7 +131,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
     def testSendingOnlyToDefautingClinicWorkers(self):
@@ -163,7 +162,7 @@ Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Resul
         self.assertEqual(len(msgs), 3)
         self.stopRouter()
 
-        # let's face that central_worker used the system a very long time ago
+        # let's fake that central_worker used the system a very long time ago
         msg = Message.objects.get(direction="I", contact__name="Central Man", connection__identity="central_worker")
         msg.date = today - timedelta(days = 100)
         msg.save()
@@ -207,7 +206,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
         script = """

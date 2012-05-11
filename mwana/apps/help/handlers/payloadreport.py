@@ -1,7 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
 import datetime
-from django.db.models import Q
-from mwana.apps.labresults.models import Payload
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
