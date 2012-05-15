@@ -2,7 +2,7 @@ SELECT distinct parent."name" as "District", clinic, --phone,
 --rapidsms_contact.name,
 --messagelog_message.date ::date as "Date",
 year(messagelog_message.date ::date) as "Year",
-(select extract (month from messagelog_message.date))::INTEGER  as "Week"
+(select extract (week from messagelog_message.date))::INTEGER  as "Week"
 ,'Trace' as "Command"
 ,count (messagelog_message.text) as "Count"
 from reports_messagegroup
