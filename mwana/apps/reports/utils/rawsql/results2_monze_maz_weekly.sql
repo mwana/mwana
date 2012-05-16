@@ -20,7 +20,12 @@ and messagelog_message.date >= '2011-01-7' and messagelog_message.date < '2012-0
 AND backEND <> 'message tester'
 and parent."name" in ('Mazabuka','Monze')
 and messagelog_message.text not like '999%' --
-and (messagelog_message.text ilike '%It looks like%' or messagelog_message.text ilike '%here are your%')
+and messagelog_message.text not like 'Result 160%' --
+and messagelog_message.text not like 'Results 160%' --
+and (messagelog_message.text ilike '%It looks like%' or messagelog_message.text ilike '%here are your%'
+or messagelog_message.text ilike 'Result %'
+or messagelog_message.text ilike 'Results %'
+)
 --and parent.slug like '80%'
 
 group by parent."name",clinic, "Year","Week"--, contactsplus_contacttype.slug--, phone
