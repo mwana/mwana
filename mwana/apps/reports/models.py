@@ -4,6 +4,7 @@ from mwana.apps.locations.models import Location
 #from rapidsms.models import Connection
 from rapidsms.models import Contact
 from datetime import datetime
+from django.contrib.auth.models import User
 
 class Turnaround(models.Model):
     """
@@ -123,3 +124,10 @@ class CbaEncouragement(models.Model):
     def __unicode__(self):
         return "Encouragement message to %s to register births" % \
             (self.contact.name)
+
+class Login(models.Model):
+    user = models.ForeignKey(User)
+    ever_logged_in = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return "%s: Ever logged in? %s" % (self.user, "Yes" if self.ever_logged_in else "No")
