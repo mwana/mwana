@@ -56,5 +56,11 @@ class CbaEncouragementAdmin(admin.ModelAdmin):
     search_fields = ('contact__name', )
 admin.site.register(CbaEncouragement, CbaEncouragementAdmin)
 
-admin.site.register(Login)
+class LoginAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ever_logged_in',)
+    list_filter = ('ever_logged_in',)
+    search_fields = ('user__username', )
+    list_editable = ('ever_logged_in',)
+
+admin.site.register(Login, LoginAdmin)
 
