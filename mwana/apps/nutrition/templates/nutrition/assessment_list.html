@@ -66,7 +66,7 @@
                 <td>{{ ass.date|date:"Y-m-d" }}</td>
                 <td>{{ ass.healthworker.clinic }}</td>
                 <td>{{ ass.healthworker.clinic.parent.name }}</td>
-                <td>{{ ass.healthworker.name }}</td>
+                <td title="Contact on {{ ass.healthworker.default_connection.identity }}">{{ ass.healthworker.name }}</td>
                 <td>{{ ass.patient.code }}</td>
                 <td>{{ ass.patient.gender }}</td>
                 <td>{{ ass.patient.date_of_birth }}</td>
