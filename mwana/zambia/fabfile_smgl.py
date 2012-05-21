@@ -81,7 +81,7 @@ def production():
     env.server_name = 'smgl-production'
 #    env.hosts = ['10.84.168.98']
 #    env.hosts = ['173.203.221.48']
-    env.hosts = ['smgl']
+    env.hosts = ['smgl:9000']
     env.settings = '%(project)s.localsettings' % env
     env.remote_os = None # e.g. 'ubuntu' or 'redhat'.  Gets autopopulated by what_os() if you don't know what it is or don't want to specify.
     env.db = '%s_%s' % (env.project, env.environment)
@@ -194,11 +194,11 @@ def deploy():
     try:
         with cd(env.code_root):
             sudo('git checkout %(code_branch)s' % env, user=env.sudo_user)
-            sudo('git commit -am "Automatic server side commit (Translations)"') #commit any new translations
-            sudo('git pull', user=env.sudo_user)
+#            sudo('git commit -am "Automatic server side commit (Translations)"', user=env.sudo_user) #commit any new translations
+            sudo('git pull origin %(code_branch)s' % env, user=env.sudo_user)
             sudo('git submodule init', user=env.sudo_user)
             sudo('git submodule update', user=env.sudo_user)
-            sudo('git push origin %(code_branch)s' % env, user=env.sudo_user) #get any translations commits back up to
+#            sudo('git push origin %(code_branch)s' % env, user=env.sudo_user) #get any translations commits back up to
                                                                             #server. MAKE SURE ORIGIN IS WRITE ENABLED
 #        update_requirements()
 #        update_services()

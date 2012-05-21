@@ -62,44 +62,26 @@ class AmbulanceRequest(models.Model):
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     #Similarly it shouldn't matter if this field is filled in or not.
-    danger_sign = models.CharField(max_length=255, null=True, blank=True,
-                            help_text="Danger signs that prompted the ER")
-    from_location = models.ForeignKey(Location, null=True, blank=True,
-                                help_text="The Location the Emergency Request ORIGINATED from",
-                                related_name="from_location")
+    danger_sign = models.CharField(max_length=255, null=True, blank=True,help_text="Danger signs that prompted the ER")
+    from_location = models.ForeignKey(Location, null=True, blank=True,help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
 
-    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True,
-                                        help_text="The Ambulance Driver/Dispatcher who was contacted",
-                                        related_name="ambulance_driver")
-    ad_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Ambulance?")
-    ad_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Ambulance Driver confirm?")
+    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted",related_name="ambulance_driver")
 
-    tn_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Triage Nurse?")
-    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted",
-                                    related_name="triage_nurse")
-    tn_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Traige Nurse confirm?")
+    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted",related_name="triage_nurse")
 
-    other_msg_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Other Recipient?")
-    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER",
-                                        related_name="other_recipient")
-    other_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Other Recipient confirm?")
+    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER",related_name="other_recipient")
 
-    receiving_facility_recipient_sent = models.BooleanField(default=False, help_text="Was the initial ER notification sent to the Receiving Clinic?")
-    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER",
-                                        related_name="receiving_facility_recipient")
-    receiving_facility_confirmed_on = models.DateTimeField(null=True, blank=True, help_text="When did the Receiving Clinic confirm?")
+    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER",related_name="receiving_facility_recipient")
+    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility",related_name="receiving_facility")
 
-    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility",
-                                        related_name="receiving_facility")
     requested_on = models.DateTimeField(auto_now_add=True)
-    sent_response = models.BooleanField(default=False)
-    confirmed = models.BooleanField(default=False)
-    confirmed_on = models.DateTimeField(null=True, blank=True)
+    received_response = models.BooleanField(default=False)
 
 class AmbulanceResponse(models.Model):
     ER_RESPONSE_CHOICES = (
         ('cancelled', 'Cancelled'),
         ('confirmed', 'Confirmed'),
+        ('pending', 'Pending'),
     )
 
     #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
@@ -109,6 +91,7 @@ class AmbulanceResponse(models.Model):
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
+    responder = models. ForeignKey(Contact, help_text="The contact that responded to this ER event")
 
 
 class AmbulanceOutcome(models.Model):
@@ -136,9 +119,10 @@ class PreRegistration(models.Model):
         ('TN', 'Triage Nurse'),
         ('DA', 'Data Associate'),
         ('worker', 'Clinic Worker'),
-        ('DMO', 'DMO'),
+        ('DHO', 'District Health Officer'),
+        ('DMHO', 'District mHealth Officer'),
+        ('district', 'District Worker'),
         ('AM', 'Ambulance'),
-        ('ER', 'Emergency Responder'),
     )
     contact = models.ForeignKey(Contact, null=True, blank=True)
     phone_number = models.CharField(max_length=255, help_text="User phone number", unique=True)

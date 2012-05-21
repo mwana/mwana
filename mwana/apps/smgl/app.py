@@ -48,7 +48,7 @@ ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!.")
 ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
-NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance of DMO")
+NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance or DMO")
 THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
 NOT_ALLOWED_ER_WORKFLOW = _("Sorry, your registration type is not allowed to send Emergency Response type messages")
 AMB_RESPONSE_THANKS = _("Thank you. The ambulance for this request has been marked as %(response)s. We will notify the Rural Facility.")
@@ -156,7 +156,8 @@ def _get_allowed_ambulance_workflow_contact(session):
     tn_type, error = get_contacttype(session, 'tn')
     amb_type, error = get_contacttype(session, 'am')
     other_type, error = get_contacttype(session, 'dmo')
-    types = [tn_type, amb_type, other_type]
+    cw_type, error = get_contacttype(session, 'worker')
+    types = [tn_type, amb_type, other_type, cw_type]
     try:
         contact = Contact.objects.get(connection=connection, types__in=types)
         return contact
@@ -406,6 +407,7 @@ def handle_submission(sender, **args):
     session = args['session']
     xform = args['xform']
     router = args['router']
+    xform.initiating_phone_number = session.connection.identity
 
     keyword = session.trigger.trigger_keyword
 

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>MultiSelectForm</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/19DCB1B6-0D26-4536-BECD-56B13EFFA2AF" uiVersion="1" version="1" name="MultiSelectForm">
+					<mselect_question />
+				</data>
+			</instance>
+			<bind nodeset="/data/mselect_question" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="mselect_question-label">
+						<value>Multi Select Question</value>
+					</text>
+					<text id="mselect_question-one-label">
+						<value>First</value>
+					</text>
+					<text id="mselect_question-two-label">
+						<value>Second</value>
+					</text>
+					<text id="mselect_question-three-label">
+						<value>Third</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<select ref="/data/mselect_question">
+			<label ref="jr:itext('mselect_question-label')" />
+			<item>
+				<label ref="jr:itext('mselect_question-one-label')" />
+				<value>one</value>
+			</item>
+			<item>
+				<label ref="jr:itext('mselect_question-two-label')" />
+				<value>two</value>
+			</item>
+			<item>
+				<label ref="jr:itext('mselect_question-three-label')" />
+				<value>three</value>
+			</item>
+		</select>
+	</h:body>
+</h:html>

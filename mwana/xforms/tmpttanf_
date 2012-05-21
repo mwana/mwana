@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Woman Registration</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/025EBA37-2EBA-4FA7-B189-BCF28F570A1F" uiVersion="1" version="1" name="Woman Registration">
+					<unique_id />
+					<first_name />
+					<last_name />
+					<high_risk_factor />
+					<next_visit_dd />
+					<next_visit_mm />
+					<next_visit_yy />
+					<visit_reason />
+					<zone />
+					<lmp_dd />
+					<lmp_mm />
+					<lmp_yy />
+					<edd_dd />
+					<edd_mm />
+					<edd_yy />
+				</data>
+			</instance>
+			<bind nodeset="/data/unique_id" type="xsd:string" />
+			<bind nodeset="/data/first_name" type="xsd:string" />
+			<bind nodeset="/data/last_name" type="xsd:string" />
+			<bind nodeset="/data/high_risk_factor" type="xsd:string" />
+			<bind nodeset="/data/next_visit_dd" type="xsd:string" />
+			<bind nodeset="/data/next_visit_mm" type="xsd:string" />
+			<bind nodeset="/data/next_visit_yy" type="xsd:string" />
+			<bind nodeset="/data/visit_reason" type="xsd:string" />
+			<bind nodeset="/data/zone" type="xsd:string" />
+			<bind nodeset="/data/lmp_dd" type="xsd:string" />
+			<bind nodeset="/data/lmp_mm" type="xsd:string" />
+			<bind nodeset="/data/lmp_yy" type="xsd:string" />
+			<bind nodeset="/data/edd_dd" type="xsd:string" />
+			<bind nodeset="/data/edd_mm" type="xsd:string" />
+			<bind nodeset="/data/edd_yy" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="unique_id-label">
+						<value>Woman's Unique ID</value>
+					</text>
+					<text id="first_name-label">
+						<value>First Name</value>
+					</text>
+					<text id="last_name-label">
+						<value>Last Name</value>
+					</text>
+					<text id="high_risk_factor-label">
+						<value>High Risk Factor</value>
+					</text>
+					<text id="next_visit_dd-label">
+						<value>Next Visit Day (DD)</value>
+					</text>
+					<text id="next_visit_mm-label">
+						<value>Next Visit Month (MM)</value>
+					</text>
+					<text id="next_visit_yy-label">
+						<value>Next Visit Year (YY)</value>
+					</text>
+					<text id="visit_reason-label">
+						<value>Reason For Visit (R/NR)</value>
+					</text>
+					<text id="zone-label">
+						<value>Zone</value>
+					</text>
+					<text id="lmp_dd-label">
+						<value>LMP (DD)</value>
+					</text>
+					<text id="edd_dd-label">
+						<value>EDD (DD)</value>
+					</text>
+					<text id="lmp_mm-label">
+						<value>LMP (MM)</value>
+					</text>
+					<text id="lmp_yy-label">
+						<value>LMP (YY)</value>
+					</text>
+					<text id="edd_mm-label">
+						<value>EDD (MM)</value>
+					</text>
+					<text id="edd_yy-label">
+						<value>EDD (YY)</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/unique_id">
+			<label ref="jr:itext('unique_id-label')" />
+		</input>
+		<input ref="/data/first_name">
+			<label ref="jr:itext('first_name-label')" />
+		</input>
+		<input ref="/data/last_name">
+			<label ref="jr:itext('last_name-label')" />
+		</input>
+		<input ref="/data/high_risk_factor">
+			<label ref="jr:itext('high_risk_factor-label')" />
+		</input>
+		<input ref="/data/next_visit_dd">
+			<label ref="jr:itext('next_visit_dd-label')" />
+		</input>
+		<input ref="/data/next_visit_mm">
+			<label ref="jr:itext('next_visit_mm-label')" />
+		</input>
+		<input ref="/data/next_visit_yy">
+			<label ref="jr:itext('next_visit_yy-label')" />
+		</input>
+		<input ref="/data/visit_reason">
+			<label ref="jr:itext('visit_reason-label')" />
+		</input>
+		<input ref="/data/zone">
+			<label ref="jr:itext('zone-label')" />
+		</input>
+		<input ref="/data/lmp_dd">
+			<label ref="jr:itext('lmp_dd-label')" />
+		</input>
+		<input ref="/data/lmp_mm">
+			<label ref="jr:itext('lmp_mm-label')" />
+		</input>
+		<input ref="/data/lmp_yy">
+			<label ref="jr:itext('lmp_yy-label')" />
+		</input>
+		<input ref="/data/edd_dd">
+			<label ref="jr:itext('edd_dd-label')" />
+		</input>
+		<input ref="/data/edd_mm">
+			<label ref="jr:itext('edd_mm-label')" />
+		</input>
+		<input ref="/data/edd_yy">
+			<label ref="jr:itext('edd_yy-label')" />
+		</input>
+	</h:body>
+</h:html>

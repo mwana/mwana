@@ -8,6 +8,11 @@ from mwana.apps.smgl.app import _send_msg, _get_value_for_command,NOT_PREREGISTE
     ZONE_SPECIFIED_BUT_NOT_CBA, ALREADY_REGISTERED, USER_SUCCESS_REGISTERED
 
 logger = logging.getLogger(__name__)
+# In RapidSMS, message translation is done in OutgoingMessage, so no need
+# to attempt the real translation here.  Use _ so that makemessages finds
+# our text.
+_ = lambda s: s
+
 
 def join_secure(session, xform, router):
     logger.debug('HANDLING JOIN KEYWORD')
@@ -16,6 +21,8 @@ def join_secure(session, xform, router):
     try:
         prereg = PreRegistration.objects.get(phone_number=connection.identity)
     except ObjectDoesNotExist:
+        logger.debug('Could not find a PreRegistration Object corresponding to the identity:%s' % connection.identity)
+        logger.debug('Prereg objects are: %s' % PreRegistration.objects.all())
         _send_msg(connection, NOT_PREREGISTERED, router)
         return True
 
@@ -42,7 +49,6 @@ def join_generic(session, xform, prereg, router):
     Message Format:
     JOIN UniqueID NAME FACILITY TITLE(TN/DA/CBA) ZONE(IF COUNSELLOR)
     """
-    logger.error('Handling the JOIN keyword form')
 
     #Create a contact for this connection.  If it already exists,
     #Verify that it is a contact of the specified type. If not,
@@ -57,7 +63,7 @@ def join_generic(session, xform, prereg, router):
     name = _get_value_for_command('name', xform) #this provided by user
     zone_name = prereg.zone
     uid = prereg.unique_id
-    language = _get_value_for_command('language', xform) or prereg.language
+    language = (_get_value_for_command('language', xform) or prereg.language).lower()
 
     session.template_vars.update({
         'reg_type': reg_type,
@@ -86,7 +92,7 @@ def join_generic(session, xform, prereg, router):
 
     zone = None
     if zone_name and reg_type == 'cba':
-        zone = _get_or_create_zone(location, zone_name)
+        zone, error = _get_or_create_zone(location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
         _send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **session.template_vars)

@@ -59,4 +59,9 @@ if __name__ == "__main__":
         print 'NOTICE: running tests for the following mwana apps: %s' %\
               ', '.join(apps)
         sys.argv.extend(apps)
+    # Use test_database for tests instead of regular database settings
+    elif len(sys.argv) > 1 and sys.argv[1] == 'test':
+        import mwana.localsettings as localsettings
+        test_db = getattr(localsettings, 'TEST_DATABASES', localsettings.DATABASES)
+        localsettings.DATABASES = test_db
     execute_manager(settings_project)

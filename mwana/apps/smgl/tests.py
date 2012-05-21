@@ -10,18 +10,20 @@ from mwana.apps.contactsplus.models import ContactType
 from threadless_router.tests.scripted import TestScript
 from mwana.apps.smgl.app import USER_SUCCESS_REGISTERED, ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER
 from mwana.apps.smgl.models import PreRegistration
+import logging
+logging = logging.getLogger(__name__)
 
 def _create_prereg_user(fname, location_code, ident, ctype, lang=None):
+    if not lang:
+        lang = "en"
+    logging.debug('Creating Prereg Object in DB: ident:%s, contact_type:%s, lang:%s' % (ident, ctype, lang))
     pre = PreRegistration()
     pre.first_name = fname
     pre.facility_code = location_code
     pre.phone_number = ident
     pre.unique_id = ident.strip().strip('+')
     pre.title = ctype
-    if lang:
-        pre.language=lang
-    else:
-        pre.langauge="en"
+    pre.language=lang
     pre.save()
     return pre
 
@@ -64,7 +66,7 @@ class SMGLJoinTest(SMGLSetUp):
     def testJoin(self):
         _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
         _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
-        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'clinic-worker', 'en')
+        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'worker', 'en')
         _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
         _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
 
@@ -89,17 +91,17 @@ class SMGLJoinTest(SMGLSetUp):
         """
         self.runScript(script)
 
-    def testCreateUserOtherLang(self):
-        pre_reg = _create_prereg_user("Anton", "chilala", "11", "TN", "en")
-        script = """
-            11 > join Anton TO
-            11 < %s
-
-        """ % (USER_SUCCESS_REGISTERED % {"name" : "Anton", "readable_user_type": "Triage Nurse",
-                                          "facility": "Chilala"}) #TODO:Is this bad testing style?
-        self.runScript(script)
-        c = Contact.objects.get(connection__identity="11")
-        self.assertEqual(c.language, "TO", "Language in Contact object should be set to \"TO\"")
+#    def testCreateUserOtherLang(self):
+#        pre_reg = _create_prereg_user("Anton", "chilala", "11", "TN", "en")
+#        script = """
+#            11 > join Anton TO
+#            11 < %s
+#
+#        """ % (USER_SUCCESS_REGISTERED % {"name" : "Anton", "readable_user_type": "Triage Nurse",
+#                                          "facility": "Chilala"}) #TODO:Is this bad testing style?
+#        self.runScript(script)
+#        c = Contact.objects.get(connection__identity="11")
+#        self.assertEqual(c.language, "TO", "Language in Contact object should be set to \"TO\"")
 
 
 
@@ -109,7 +111,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
         super(SMGLSetUp, self).setUp()
         _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
         _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
-        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'clinic-worker', 'en')
+        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'worker', 'en')
         _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
         _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
 
@@ -144,4 +146,24 @@ class SMGLAmbulanceTest(SMGLSetUp):
             ER_TO_DRIVER % d,
             ER_TO_CLINIC_WORKER % d,
             ER_TO_OTHER % d)
+
+
+        d = {
+            "unique_id": '1234',
+            "status" : "CONFIRMED",
+            "confirm_type": "Triage Nurse",
+            "name": "AntonTN",
+        }
+        response_string = "The Emergency Request for Mother with Unique ID: " \
+                          "%(unique_id)s has been marked %(status)s by %(name)s " \
+                          "(%(confirm_type)s)" % d
+        script += """
+            11 > resp 1234 confirmed
+            11 < {0}
+            12 < {0}
+            13 < {0}
+            14 < {0}
+            15 < {0}
+        """.format(response_string)
+
         self.runScript(script)

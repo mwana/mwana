@@ -2,30 +2,32 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-04-27 15:18+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2012-05-17 11:11\n"
+"Last-Translator:   <adewinter@dimagi.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Translated-Using: django-rosetta 0.6.6\n"
 
 #: .\app.py:30
 #, python-format
-msgid "Sorry, the facility '%(facility)s' is not recognized. Please try again."
+msgid ""
+"Sorry, the facility '%(facility)s' is not recognized. Please try again."
 msgstr ""
 
 #: .\app.py:31
 #, python-format
 msgid ""
-"%(name)s, you are already registered as a %(readable_user_type)s at %"
-"(facility)s but your details have been updated"
+"%(name)s, you are already registered as a %(readable_user_type)s at "
+"%(facility)s but your details have been updated"
 msgstr ""
 
 #: .\app.py:32
@@ -41,8 +43,8 @@ msgstr ""
 #: .\app.py:34
 #, python-format
 msgid ""
-"Thank you for registering! You have successfully registered as a %"
-"(readable_user_type)s at %(facility)s."
+"Thank you for registering! You have successfully registered as a "
+"%(readable_user_type)s at %(facility)s."
 msgstr ""
 
 #: .\app.py:35
@@ -96,8 +98,9 @@ msgstr ""
 #: .\app.py:45 .\app.py:46 .\app.py:47
 #, python-format
 msgid ""
-"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
-"%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this"
+"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact "
+"num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see "
+"this"
 msgstr ""
 
 #: .\app.py:48
@@ -131,8 +134,8 @@ msgstr ""
 
 #: .\app.py:53
 msgid ""
-"Sorry, your registration type is not allowed to send Emergency Response type "
-"messages"
+"Sorry, your registration type is not allowed to send Emergency Response type"
+" messages"
 msgstr ""
 
 #: .\app.py:54
@@ -144,8 +147,8 @@ msgstr ""
 
 #: .\app.py:55
 msgid ""
-"Sorry. We cannot find the Mother's Unique ID you specified. Please try again "
-"or contact the DMO"
+"Sorry. We cannot find the Mother's Unique ID you specified. Please try again"
+" or contact the DMO"
 msgstr ""
 
 #: .\app.py:56
@@ -162,15 +165,15 @@ msgstr ""
 #: .\app.py:58
 #, python-format
 msgid ""
-"Thanks for your message! We have marked the patient with unique_id %"
-"(unique_id)s as outcome: %(outcome)s"
+"Thanks for your message! We have marked the patient with unique_id "
+"%(unique_id)s as outcome: %(outcome)s"
 msgstr ""
 
 #: .\app.py:59
 #, python-format
 msgid ""
-"We have been notified of the patient outcome for patient with unique_id: %"
-"(unique_id)s. Outcome: %(outcome)s"
+"We have been notified of the patient outcome for patient with unique_id: "
+"%(unique_id)s. Outcome: %(outcome)s"
 msgstr ""
 
 #: .\app.py:60

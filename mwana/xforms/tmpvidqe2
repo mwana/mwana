@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Ambulance Request Confirmation</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3" uiVersion="1" version="1" name="Ambulance Request Confirmation">
+					<unique_id />
+					<status />
+				</data>
+			</instance>
+			<bind nodeset="/data/unique_id" type="xsd:string" />
+			<bind nodeset="/data/status" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="unique_id-label">
+						<value>Unique ID</value>
+					</text>
+					<text id="status-label">
+						<value>status</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/unique_id">
+			<label ref="jr:itext('unique_id-label')" />
+		</input>
+		<input ref="/data/status">
+			<label ref="jr:itext('status-label')" />
+		</input>
+	</h:body>
+</h:html>

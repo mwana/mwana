@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
     "mwana.apps.tlcprinters",
-#    'south',
+    'south',
     # the essentials.
     "django_nose",
     "soil",
@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
 #    "rapidsms.contrib.registration",
-    "rapidsms.contrib.scheduler",
+#    "rapidsms.contrib.scheduler",
     "mwana.apps.smgl",
     "mwana.apps.echo",
     "mwana.apps.contactsplus",

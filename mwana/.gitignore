@@ -1,4 +1,3 @@
 zambia/build
 *.pyc
-xforms/*
 *.sqlite3

@@ -1,8 +1,11 @@
 import datetime
+import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
 from mwana.apps.smgl.app import _get_value_for_command, _send_msg, get_contacttype, get_connection_from_contact, ER_TO_DRIVER, ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er, INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact, NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID, AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, AMB_OUTCOME_ORIGINATING_LOCATION_INFO
 from mwana.apps.smgl.models import AmbulanceRequest, PregnantMother, AmbulanceResponse, AmbulanceOutcome
+
+logger = logging.getLogger(__name__)
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -35,7 +38,7 @@ def _pick_er_driver(session, xform):
     if ads.count():
         return ads[0]
     else:
-        raise TypeError('No Ambulance Driver type found!')
+        logger.error('No Ambulance Driver type found!')
 
 def _pick_other_er_recip(session, xform):
     other_type, error = get_contacttype(session, 'dmho')
@@ -43,7 +46,7 @@ def _pick_other_er_recip(session, xform):
     if others.count():
         return others[0]
     else:
-        raise TypeError('No Other recipient type found for Ambulance Request Workflow!')
+        logger.error('No Other recipient type found for Ambulance Request Workflow!')
 
 def _pick_er_triage_nurse(session, xform):
     tn_type, error = get_contacttype(session, 'tn')
@@ -51,17 +54,21 @@ def _pick_er_triage_nurse(session, xform):
     if tns.count():
         return tns[0]
     else:
-        raise TypeError('No Triage Nurse type found!')
+        logger.error('No Triage Nurse type found!')
 
 def _pick_clinic_recip(session, xform):
-    cw_type, error = get_contacttype(session, 'clinic-worker')
+    cw_type, error = get_contacttype(session, 'worker')
     cws = Contact.objects.filter(types=cw_type)
     if cws.count():
         return cws[0]
     else:
-        raise TypeError('No clinic worker found!')
+        logger.error('No clinic worker found!')
 
 def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=None):
+    """
+    Broadcasts a message to the Emergency Response users.  If message is not
+    specified, will send the default initial ER message to each respondent.
+    """
     #Figure out who to alert
     ambulance_driver = _pick_er_driver(session, xform)
     ambulance_session.ambulance_driver = ambulance_driver
@@ -71,9 +78,8 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
             _send_msg(driver_conn, message, router, **session.template_vars)
         else:
             _send_msg(driver_conn, ER_TO_DRIVER, router, **session.template_vars)
-        ambulance_session.ad_msg_sent = True
     else:
-        ambulance_session.ad_msg_sent = False
+        logger.error('No Ambulance Driver found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     tn = _pick_er_triage_nurse(session, xform)
     ambulance_session.triage_nurse = tn
@@ -83,9 +89,8 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
             _send_msg(tn_conn, message, router, **session.template_vars)
         else:
             _send_msg(tn_conn, ER_TO_TRIAGE_NURSE, router, **session.template_vars)
-        ambulance_session.tn_msg_sent = True
     else:
-        ambulance_session.tn_msg_sent = False
+        logger.error('No Triage Nurse found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     other_recip = _pick_other_er_recip(session,xform)
     if other_recip: #less important, so not critical if this contact doesn't exist.
@@ -96,9 +101,9 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
                 _send_msg(other_conn, message, router, **session.template_vars)
             else:
                 _send_msg(other_conn, ER_TO_OTHER, router, **session.template_vars)
-            ambulance_session.other_msg_sent = True
         else:
-            ambulance_session.other_msg_sent = False
+            #only warn because we may not have specified one on purpose
+            logger.warn('No Other Recipient found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     clinic_recip = _pick_clinic_recip(session, xform)
     if clinic_recip:
@@ -109,13 +114,13 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
                 _send_msg(clinic_conn, message, router, **session.template_vars)
             else:
                 _send_msg(clinic_conn, ER_TO_CLINIC_WORKER, router, **session.template_vars)
-            ambulance_session.receiving_facility_recipient_sent = True
         else:
-            ambulance_session.other_clinic_worker_sent = False
+            logger.error('No Receiving Clinic Worker found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     ambulance_session.save()
 
 def ambulance_request(session, xform, router):
+    logger.debug('POST PROCESSING FOR AMB KEYWORD')
     connection = session.connection
     unique_id = _get_value_for_command('unique_id', xform)
     danger_signs = _get_symptom_from_code(xform)
@@ -159,62 +164,52 @@ def ambulance_request(session, xform, router):
 
     return True
 
-def ambulance_confirm(session, xform, router):
+def ambulance_response(session, xform, router):
+    """
+    This handler deals with a status update from an ER user about a specific ambulance
+    i.e. Ambulance confirmed/cancelled/pending
+    """
+    logger.debug('POST PROCESSING FOR RESP KEYWORD')
     connection = session.connection
     contact = _get_allowed_ambulance_workflow_contact(session)
     if not contact:
         _send_msg(connection, NOT_REGISTERED_TO_CONFIRM_ER, router, **session.template_vars)
+        return True
 
     ambulance_response = AmbulanceResponse()
+    ambulance_response.responder = contact
 
     unique_id = _get_value_for_command('unique_id', xform)
     ambulance_response.mother_uid = unique_id
     session.template_vars.update({'unique_id': unique_id})
     #try match uid to mother
     mother = None
+    logger.debug('Attempting to find Pregnant mother linked to this case with UID: %s' % unique_id)
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
+        logger.debug('Could not find PregnantMother with UID: %s' % unique_id)
         pass
     ambulance_response.mother = mother
+    ambulance_response.mother_uid = unique_id
 
-    status = _get_value_for_command('response', xform)
+    status = _get_value_for_command('status', xform).lower()
     ambulance_response.response = status
+    session.template_vars.update({"status": status.upper()})
 
     #we might be dealing with a mother that has gone through ER multiple times
     ambulance_requests = AmbulanceRequest.objects.filter(mother_uid=unique_id)\
-                .exclude(confirmed=True)\
+                .exclude(received_response=True)\
                 .order_by('-requested_on')
     if not ambulance_requests.count():
+        #session doesn't exist or it has already been confirmed
         _send_msg(connection, ER_CONFIRM_SESS_NOT_FOUND, router, **session.template_vars)
         return True
 
-    ambulance_response.ambulance_request = ambulance_requests[0]
+    #take the latest one in case this mother has been ER'd a bunch
+    ambulance_response.ambulance_request = ambulance_request =  ambulance_requests[0]
 
-    #great we found what they're responding to.
-    ambulance_request = ambulance_requests[0]
-    tn_type, error = get_contacttype(session,'TN')
-    amb_type, error = get_contacttype(session, 'AM')
-    other_type, error = get_contacttype(session, 'DMO')
-    clinic_type, error = get_contacttype(session, 'clinic-worker')
-    ambulance_request.confirmed = True
-    confirm_contact_type = None
-    if Contact.objects.filter(connection=connection, types=tn_type).count():
-        #this s a Triage Nurse
-        ambulance_request.tn_confirmed_on = datetime.datetime.utcnow()
-        confirm_contact_type = tn_type
-    elif Contact.objects.filter(connection=connection, types=amb_type).count():
-        #Ambulance (Driver) type
-        ambulance_request.ad_confirmed_on = datetime.datetime.utcnow()
-        confirm_contact_type = amb_type
-    elif Contact.objects.filter(connection=connection, types=other_type).count():
-        #other type
-        ambulance_request.other_confirmed_on = datetime.datetime.utcnow()
-        confirm_contact_type = other_type
-    elif Contact.objects.filter(connection=connection, types=clinic_type).count():
-        #Receiving Facility Clinic Worker type
-        ambulance_request.receiving_facility_confirmed_on = datetime.datetime.utcnow()
-        confirm_contact_type = clinic_type
+    confirm_contact_type = contact.types.all()[0]
     session.template_vars.update({"confirm_type": confirm_contact_type,
                                   "name": contact.name})
 
