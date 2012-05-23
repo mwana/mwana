@@ -122,9 +122,10 @@ class MessageFilter:
         
 
         if search_key and search_key.strip():
-            search = Q(text__icontains=search_key) |\
-            Q(connection__identity__icontains=search_key.strip()) |\
-            Q(contact__name__icontains=search_key.strip())
+            stripped = search_key.strip();
+            search = Q(text__icontains=stripped) |\
+            Q(connection__identity__icontains=stripped) |\
+            Q(contact__name__icontains=stripped)
             msgs = Message.objects.filter(locations).filter(daterange).filter(search).order_by('-date')
 
         table = []
@@ -151,13 +152,14 @@ class MessageFilter:
             direction = msg.direction
             name = msg.contact.name if msg.contact else None
             phone = msg.connection.identity
+            type = ",".join(type.name for type in msg.contact.types.all())
             text = msg.text
             text =self.get_filtered_message(text)
             table.append([counter,date,clinic, direction,\
-                      name, phone, text])
+                      name, type, phone, text])
             counter = counter + 1
      
-        table.insert(0, ['  #', '  Date', '  Clinic', 'Direction', 'Who', 'Phone number',
+        table.insert(0, ['  #', '  Date', '  Clinic', 'Direction', 'Who', 'Worker type','Phone number',
                      'Text'])
         messages_number=messages.number
         messages_has_previous = messages.has_previous()
