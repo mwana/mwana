@@ -45,7 +45,8 @@ TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'en'
 LANGUAGES = (
-    ('bem_ZM', _('Bemba')),
+    ('bem', _('Bemba')),
+    ('tn', _('Tonga')),
     ('en', _('English')),
 )
 
