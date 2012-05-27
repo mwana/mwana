@@ -248,7 +248,8 @@ class Alerter:
     def last_used_check(self, location):
         try:
             return Message.objects.filter(contact__location=location ,
-                                                  text__iregex='\s*check\s*'
+                                                  direction='I',
+                                                  text__iregex='^check\s*'
                                                   ).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
