@@ -33,7 +33,10 @@ class Command(LabelCommand):
         print "_" * 60
         print "Processing %s for the following %s facilities: %s" % (keyword, len(facilities), ", ".join(fac.slug+": "+fac.name for fac in facilities))
 
-        self.notification_told_interval(facilities)
+        if keyword.lower() == 'told':
+            self.notification_told_interval(facilities)
+        elif keyword.lower() == 'told2':
+            self.notification_told_interval_exact(facilities)
 
 
     def deidentify(self, name, deid=True):
@@ -45,6 +48,14 @@ class Command(LabelCommand):
 
         notification = SentNotification.objects.filter(date_logged__lt=toldtime,
                                                patient_event__cba_conn=cba_conn).\
+                                               order_by('-date_logged')[0]
+        return notification.date_logged, notification.patient_event.patient.name
+
+    def last_notified(self, cba_conn, toldtime, who):
+
+        notification = SentNotification.objects.filter(date_logged__lt=toldtime,
+                                               patient_event__cba_conn=cba_conn,
+                                               patient_event__patient__name__icontains=who).\
                                                order_by('-date_logged')[0]
         return notification.date_logged, notification.patient_event.patient.name
 
@@ -60,6 +71,21 @@ class Command(LabelCommand):
                 last_notified, remind_who = self.last_notified(msg.connection, msg.date)
                 interval = msg.date - last_notified
                 print "%s,%s,%s" %(interval, self.deidentify(remind_who, False), self.deidentify(msg.text[msg.text.index(' '):].strip(),False))
+            except:
+                pass
+
+    def notification_told_interval_exact(self, facilities):
+
+        msgs = Message.objects.filter(direction='I',
+                               contact__location__parent__in=facilities,
+                               text__iregex='^told|^toll|^teld|^tod|^telld|^t0ld|^TOLD|^t01d|^t0ld').distinct()
+
+        for msg in msgs:
+            try:
+                told_who = msg.text[msg.text.index(' '):].strip()
+                last_notified, remind_who = self.last_notified(msg.connection, msg.date, told_who)
+                interval = msg.date - last_notified
+                print "%s,%s,%s" %(interval, self.deidentify(remind_who, False), self.deidentify(told_who,False))
             except:
                 pass
 
