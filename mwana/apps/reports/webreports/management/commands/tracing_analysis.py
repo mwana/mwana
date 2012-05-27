@@ -51,7 +51,7 @@ class Command(LabelCommand):
                                                order_by('-date_logged')[0]
         return notification.date_logged, notification.patient_event.patient.name
 
-    def last_notified(self, cba_conn, toldtime, who):
+    def last_notified_exact(self, cba_conn, toldtime, who):
 
         notification = SentNotification.objects.filter(date_logged__lt=toldtime,
                                                patient_event__cba_conn=cba_conn,
@@ -70,7 +70,7 @@ class Command(LabelCommand):
             try:
                 last_notified, remind_who = self.last_notified(msg.connection, msg.date)
                 interval = msg.date - last_notified
-                print "%s,%s,%s" %(interval, self.deidentify(remind_who, False), self.deidentify(msg.text[msg.text.index(' '):].strip(),False))
+                print "%s|%s|%s" %(interval, self.deidentify(remind_who, False), self.deidentify(msg.text[msg.text.index(' '):].strip(),False))
             except:
                 pass
 
@@ -83,9 +83,9 @@ class Command(LabelCommand):
         for msg in msgs:
             try:
                 told_who = msg.text[msg.text.index(' '):].strip()
-                last_notified, remind_who = self.last_notified(msg.connection, msg.date, told_who)
+                last_notified, remind_who = self.last_notified_exact(msg.connection, msg.date, told_who)
                 interval = msg.date - last_notified
-                print "%s,%s,%s" %(interval, self.deidentify(remind_who, False), self.deidentify(told_who,False))
+                print "%s|%s|%s" %(interval, self.deidentify(remind_who, False), self.deidentify(told_who,False))
             except:
                 pass
 
