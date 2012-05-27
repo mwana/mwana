@@ -85,8 +85,11 @@ class Command(LabelCommand):
                 told_who = msg.text[msg.text.index(' '):].strip()
                 last_notified, remind_who = self.last_notified_exact(msg.connection, msg.date, told_who)
                 interval = msg.date - last_notified
-                print "%s|%s|%s" %(interval, self.deidentify(remind_who, False), self.deidentify(told_who,False))
-            except:
+                facility = msg.contact.location.parent.name
+                district = msg.contact.location.parent.parent.name
+                interval = msg.date - last_notified
+                print "%s|%s|%s|%s|%s|%s|%s" %(district, facility, last_notified, msg.date, interval, self.deidentify(remind_who, False), self.deidentify(told_who,False))
+            except Exception, e:
                 pass
 
 #    def told_confirm_interval(self, facilities):
