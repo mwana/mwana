@@ -10,7 +10,7 @@ class ForwardedMessageAdmin(admin.ModelAdmin):
 
     def who(self, obj):
         try:
-            return Contact.active.get(connection__backend__name='message_tester',
+            return Contact.active.get(connection__backend__name='zain',
                                       connection__identity=obj.connection.identity).name
         except:
             return ""
