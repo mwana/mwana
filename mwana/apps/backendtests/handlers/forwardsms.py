@@ -48,8 +48,8 @@ If you think this message is a mistake, respond with keyword 'HELP'"
             self.respond("You cannot forward on %s backend" % backend_id)
             return True
 
-#        contacts = Contact.active.filter(connection__identity__startswith='+26097', types__slug='worker')
-        contacts = Contact.active.filter(connection__identity__startswith='+260979565992', types__slug='worker')
+        contacts = Contact.active.filter(connection__identity__startswith='+26097', types__slug='worker')
+#        contacts = Contact.active.filter(connection__identity__startswith='+260979565992', types__slug='worker')
 
         backend= Backend.objects.get(name=backend_id)
 
