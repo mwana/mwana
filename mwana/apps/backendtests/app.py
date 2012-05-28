@@ -20,7 +20,7 @@ class App (rapidsms.apps.base.AppBase):
             return True
         except Exception, e:
             logger.warn(e)
-            if(message.connection.backend.slug=='zain-smpp'):
+            if(message.connection.backend.name=='zain-smpp'):
                 return True
 
     
