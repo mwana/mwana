@@ -41,7 +41,7 @@ If you think this message is a mistake, respond with keyword 'HELP'"
             logger.warn(e)
 
         connection,_ = Connection.objects.get_or_create(identity='7160',
-        backend=Backend.objects.get(name='mtn'))
+        backend=Backend.objects.get(name='zain'))
         
         for i in range(count):
             OutgoingMessage(connection, 'acceptsms hello world').send()

@@ -21,7 +21,7 @@ If you think this message is a mistake, respond with keyword 'HELP'"
 
     def handle(self, text):
         
-        if not ('0965000960' in self.msg.connection.identity):
+        if not ('0978775414' in self.msg.connection.identity):
             return True
 
         contacts = Contact.active.filter(connection__backend__name='zain-smpp', types__slug='worker', location__slug='999999')
