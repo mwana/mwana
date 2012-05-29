@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 class App (rapidsms.apps.base.AppBase):
     
     def handle (self, message):
+        if message.connection.backend.name != 'zain-smpp':
+            return False
+
         try:
             fm = ForwardedMessage.objects.get(connection=message.connection,
                                             responded=False)
