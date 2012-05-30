@@ -1,24 +1,24 @@
 [submodule "submodules/rapidsms-smsforms"]
 	path = submodules/rapidsms-smsforms
-	url = ssh://adewinter@local-vm/home/adewinter/repos/rapidsms-smsforms
+	url = git://github.com/dimagi/rapidsms-smsforms.git
 [submodule "submodules/touchforms"]
 	path = submodules/touchforms
-	url = ssh://adewinter@local-vm/home/adewinter/repos/touchforms
+	url = git://github.com/dimagi/touchforms.git
 [submodule "submodules/rapidsms-smscouchforms"]
 	path = submodules/rapidsms-smscouchforms
-	url = ssh://adewinter@local-vm/home/adewinter/repos/rapidsms-smscouchforms
+	url = git://github.com/dimagi/rapidsms-smscouchforms.git
 [submodule "submodules/couchlog"]
 	path = submodules/couchlog
-	url = ssh://adewinter@local-vm/home/adewinter/repos/couchlog
+	url = git://github.com/dimagi/couchlog.git
 [submodule "submodules/couchexport"]
 	path = submodules/couchexport
-	url = ssh://adewinter@local-vm/home/adewinter/repos/couchexport
+	url = git://github.com/dimagi/couchexport.git
 [submodule "submodules/couchforms"]
 	path = submodules/couchforms
-	url = ssh://adewinter@local-vm/home/adewinter/repos/couchforms.git
+	url = git://github.com/dimagi/couchforms.git
 [submodule "submodules/vellum"]
 	path = submodules/vellum
-	url = ssh://adewinter@local-vm/home/adewinter/repos/Vellum.git
+	url = git://github.com/dimagi/Vellum.git
 [submodule "submodules/django-soil"]
 	path = submodules/django-soil
 	url = git://github.com/dimagi/django-soil.git
