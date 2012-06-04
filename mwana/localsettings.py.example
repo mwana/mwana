@@ -1,35 +1,214 @@
-from mwana.<country>.settings_country import *
+from mwana.zambia.settings_country import *
+import os
+import sys
+
+
+RAPIDSMS_TABS.append(("httptester-index", "Message Tester"))
 
 # you should configure your database here before doing any real work.
 # see: http://docs.djangoproject.com/en/dev/ref/settings/#databases
 
-# for sqlite3:
-#DATABASES = {
-#    "default": {
-#        "ENGINE": "django.db.backends.sqlite3",
-#        "NAME": "db.sqlite3",
-#        "USER": "",
-#        "PASSWORD": "",
-#        "HOST": "",
-# since we might hit the database from any thread during testing, the
-# in-memory sqlite database isn't sufficient. it spawns a separate
-# virtual database for each thread, and syncdb is only called for the
-# first. this leads to confusing "no such table" errors. We create
-# a named temporary instance instead.
+## for sqlite3:
+TEST_DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": "db.sqlite3",
+        "USER": "",
+        "PASSWORD": "",
+        "HOST": "",
+##since we might hit the database from any thread during testing, the
+##in-memory sqlite database isn't sufficient. it spawns a separate
+##virtual database for each thread, and syncdb is only called for the
+##first. this leads to confusing "no such table" errors. We create
+##a named temporary instance instead.
 #        "TEST_NAME": "test_db.sqlite3",
-#    }
-#}
+    }
+}
 
 # for postgresql:
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "mwana_devel",
-        "USER": "",
-        "PASSWORD": "",
-        "HOST": "",
+        "NAME": "", #FILL ME IN
+        "USER": "postgres",
+        "PASSWORD": "", #FILL ME IN
+        "HOST": "", #FILL ME IN
+        "PORT": "", #FILL ME IN
     }
 }
 
+COUCH_SERVER_ROOT='localhost:5984'
+COUCH_USERNAME='aremind'
+COUCH_PASSWORD='PASSWORD'
+COUCH_DATABASE_NAME='mwana'
+
+COUCHDB_APPS=['couchlog', 'formplayer', 'couchforms', 'couchexport', 'smscouchforms']
+
+def get_server_url(server_root, username, password):
+    if username and password:
+        return "http://%(user)s:%(pass)s@%(server)s" % {"user": username,
+                                                        "pass": password,
+                                                        "server": server_root }
+    else:
+        return "http://%(server)s" % {"server": server_root }
+
+COUCH_SERVER = get_server_url(COUCH_SERVER_ROOT, COUCH_USERNAME, COUCH_PASSWORD)
+
+COUCH_DATABASE = "%(server)s/%(database)s" % {"server": COUCH_SERVER, "database": COUCH_DATABASE_NAME
+
+COUCHDB_DATABASES = [(app_label, COUCH_DATABASE) for app_label in COUCHDB_APPS]
+
+XFORMS_POST_URL = "%s/_design/couchforms/_update/xform/" % COUCH_DATABASE
+
 PROJECT_LOGO_URL = '/opt/mwana/mwana/data/mylogo.jpg'
 
+LOG_FILE    = '../../logs/mwana.log'
+LOG_LEVEL   = "DEBUG"
+DJANGO_LOG_FILE  = '../../logs/django.log'
+
+SETTINGS_DIR = os.path.dirname(__file__)
+
+FORMDESIGNER_PATH = os.path.join(SETTINGS_DIR, '..', 'submodules', 'vellum')
+
+# For Schema Migration
+SOUTH_MIGRATION_MODULES = {
+    'rapidsms': 'mwana.apps.smgl.rapidsms_migrations',
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+
+#        %(name)s            Name of the logger (logging channel)
+#        %(levelno)s         Numeric logging level for the message (DEBUG, INFO,
+#                            WARNING, ERROR, CRITICAL)
+#        %(levelname)s       Text logging level for the message ("DEBUG", "INFO",
+#                            "WARNING", "ERROR", "CRITICAL")
+#        %(pathname)s        Full pathname of the source file where the logging
+#                            call was issued (if available)
+#        %(filename)s        Filename portion of pathname
+#        %(module)s          Module (name portion of filename)
+#        %(lineno)d          Source line number where the logging call was issued
+#                            (if available)
+#        %(funcName)s        Function name
+#        %(created)f         Time when the LogRecord was created (time.time()
+#                            return value)
+#        %(asctime)s         Textual time when the LogRecord was created
+#        %(msecs)d           Millisecond portion of the creation time
+#        %(relativeCreated)d Time in milliseconds when the LogRecord was created,
+#                            relative to the time the logging module was loaded
+#                            (typically at application startup time)
+#        %(thread)d          Thread ID (if available)
+#        %(threadName)s      Thread name (if available)
+#        %(process)d         Process ID (if available)
+#        %(message)s         The result of record.getMessage(), computed just as
+#                            the record is emitted
+        'verbose': {
+            # %(process)d %(thread)d
+            'format': '%(levelname)s %(asctime)s - [%(name)s|%(module)s] - %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s - [%(module)s] - %(message)s'
+        },
+    },
+    'filters': {
+    },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+#            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'console':{
+            'level':'DEBUG',
+            'class':'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        }
+    },
+    'loggers': {
+        'south': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'restkit': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'couchdbkit': {
+            'handlers':['console'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'django': {
+            'handlers':['console'],
+            'propagate': True,
+            'level':'DEBUG',
+        },
+        'django.db': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+#        'django.request': {
+#            'handlers': ['console'],
+#            'level': 'INFO',
+#            'propagate': False,
+#        },
+        'mwana.apps.smgl' : {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'formatter': 'verbose'
+        },
+        'smsforms' : {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'formatter': 'verbose'
+        },
+#        'smscouchforms' : {
+#            'handlers': ['null'],
+#            'level': 'INFO',
+#            'propagate': True,
+#            'formatter': 'verbose'
+#        },
+##        'touchforms' : {
+##            'handlers': ['console'],
+##            'level': 'DEBUG',
+##            'propagate': True,
+##            'formatter': 'verbose'
+##        },
+        'touchforms.formplayer' : {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'formatter': 'verbose'
+        },
+        'router' : {
+            'handlers': ['null'],
+            'level': 'DEBUG',
+            'propagate': True,
+            'formatter': 'verbose'
+        },
+        'mwana.apps.default.app' : {
+                    'handlers': ['console'],
+                    'level': 'DEBUG',
+                    'propagate': True,
+                    'formatter': 'verbose'
+        },
+#        'xformsresponse': {
+#            'handlers': ['null'],
+#            'level': 'DEBUG',
+#            'formatter': 'verbose'
+#        },
+    }
+}
