@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.translator.util import Translator
 import re
 import rapidsms
 import datetime
@@ -14,6 +15,8 @@ from mwana import const
 # to attempt the real translation here.  Use _ so that ./manage.py makemessages
 # finds our text.
 _ = lambda s: s
+
+translator = Translator()
 
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
@@ -139,6 +142,16 @@ class App(rapidsms.apps.base.AppBase):
         event = self._get_event(event_slug)
         if not event:
             return False
+
+        lang_code = None
+        if msg.contact:
+            cba_name = ' %s' % msg.contact.name
+            lang_code = msg.contact.language
+        else:
+            cba_name = ''
+            
+        event_name = translator.translate(lang_code, event.name)
+
         date_str, patient_name, event_location_type = self._parse_message(msg)
         # if patient name is too long it's most likely the message sent was wrong
         if patient_name and len(patient_name) < 50: # the date is optional
@@ -171,11 +184,18 @@ class App(rapidsms.apps.base.AppBase):
             if not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
 
-            # make sure we don't create a duplicate patient event
-            if msg.contact:
-                cba_name = ' %s' % msg.contact.name
-            else:
-                cba_name = ''
+
+
+            
+            location_type = {"cl":"facility", "hm":"home"}\
+                        [event_location_type] if event_location_type else ""
+
+            descriptive_event = "%(location_type)s %(event)s" % {'event':event,
+            'location_type' :location_type}
+
+            descriptive_event = translator.translate(lang_code, descriptive_event)
+            gender = translator.translate(lang_code, event.possessive_pronoun)
+
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
@@ -184,55 +204,48 @@ class App(rapidsms.apps.base.AppBase):
                 # the words facilty/home. Malawi/Zambia will have to agree on
                 # the words to use
                 if event_location_type:
-                    msg.respond(_("Thank you%(cba)s! You registered a%(location_type)s %(event)s for "
+                    msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next clinic appointment.")
-                        , cba=cba_name, gender=event.possessive_pronoun,
-                        event=event.name.lower(),
+                        , cba=cba_name, gender=gender,
                         date=date.strftime('%d/%m/%Y'), name=patient.name,
-                        location_type = " " + {"cl":"facility", "hm":"home"}\
-                        [event_location_type] if event_location_type else "")
+                        descriptive_event = descriptive_event.lower())
                 else:
-                    msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
+                    msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
-                        "clinic."), cba=cba_name, gender=event.possessive_pronoun,
-                        event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name,
-                        location_type = " " + {"cl":"facility", "hm":"home"}\
-                        [event_location_type] if event_location_type else "")
+                        "clinic."), cba=cba_name, gender=gender,
+                        event=event_name.lower(),
+                        date=date.strftime('%d/%m/%Y'), name=patient.name)
                 return True
 
             patient.patient_events.create(event=event, date=date,
                                           cba_conn=msg.connection,
                                           notification_status="new",
                                           event_location_type=event_location_type)
-            gender = event.possessive_pronoun
+
+            
             
             # TODO: This is temporal. In future responses will be same save for
             # the words facilty/home. Malawi/Zambia will have to agree on
             # the words to use
             if event_location_type:
-                msg.respond(_("Thank you%(cba)s! You registered a%(location_type)s %(event)s for "
+                msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
                     "%(name)s on %(date)s. You will be notified when "
                     "it is time for %(gender)s next clinic appointment.")
-                    , cba=cba_name, gender=event.possessive_pronoun,
-                    event=event.name.lower(),
+                    , cba=cba_name, gender=gender,
                     date=date.strftime('%d/%m/%Y'), name=patient.name,
-                    location_type = " " + {"cl":"facility", "hm":"home"}\
-                    [event_location_type] if event_location_type else "")
+                    descriptive_event = descriptive_event.lower())
             else:
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a%(location_type)s %(event)s for "
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                     "%(name)s on %(date)s. You will be notified when "
                     "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=gender,
-                    event=event.name.lower(),
-                    date=date.strftime('%d/%m/%Y'), name=patient.name,
-                    location_type = " " + {"cl":"facility", "hm":"home"}\
-                    [event_location_type] if event_location_type else "")
+                    event=event_name.lower(),
+                    date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             msg.respond(_("Sorry, I didn't understand that. "
                         "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."
-                " The date is optional and is logged as TODAY if left out."), event_lower= event.name.lower(),
-                                          event_upper = event.name.upper())
+                " The date is optional and is logged as TODAY if left out."), event_lower= event_name.lower(),
+                                          event_upper = translator.translate(lang_code, event.name, 1).upper())
         return True
