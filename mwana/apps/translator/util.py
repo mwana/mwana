@@ -28,17 +28,20 @@ class Translator:
             pass
 
     def translate(self, language_code, key_phrase, alternate=0):
+        if not (language_code and key_phrase):
+            return key_phrase
+        
         if alternate == 0:
             try:
-                return self.dictionary["%s:%s" % (language_code.lower(), key_phrase.lower())]
+                return self.dictionary["%s:%s" % (language_code.strip().lower(), key_phrase.strip().lower())]
             except Exception, e:
                 logger.error("could not do custom translation for %s. It is likely missing in the disctionary." % e.message)
                 return key_phrase
         elif alternate == 1:
             try:
-                return self.dictionary_one["%s:%s" % (language_code.lower(), key_phrase.lower())]
+                return self.dictionary_one["%s:%s" % (language_code.strip().lower(), key_phrase.strip().lower())]
             except Exception, e:
-                logger.error("could not do custom translation for %s. It is likely missing in the disctionary." % e.message)
+                logger.error("could not do alternate custom translation for %s. It is likely missing in the disctionary." % e.message)
                 return key_phrase
             
     
