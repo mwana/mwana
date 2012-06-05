@@ -8,6 +8,7 @@ smgl/fixtures/initial_data.json
 -------------------------------
 
 *Note* you should look at the fixtures file as it will be loaded and overwrite anything else present everytime you syncdb.  Make sure this file stays up to date!
+The fixture file is essential for unit testing (or you'd have to create all the structures by hand and ensure that they're in sync with what's really happening on production).
 The fixture file contains:
 
 * Contact Types essential to the project
@@ -54,3 +55,11 @@ ALL OTHER WORFLOWS.  This needs to be broken down in similar way to ambulance_wo
 * Contains the follow_up handlers
 * Placeholders for referral, birth and death registration.
 * Contains core code for how xform_saved signal gets handled and delegated out to the handler functions (see `handle_submission()` )
+
+smgl/models.py
+--------------
+Fairly straightforwad.  Contains 
+* ORM models for mother pregnancy
+* various stages of ambulance workflow
+* XFormKeywordHanlder model
+* FacilityVisit
