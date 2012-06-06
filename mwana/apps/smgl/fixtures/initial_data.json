@@ -801,7 +801,7 @@
       "checksum": "f44f03ce2b8a1e021fa6115bacf6727ca5c9bcff", 
       "namespace": "http://openrosa.org/formdesigner/CF78E56F-828D-45AC-B138-4140FE9496CD", 
       "version": 1, 
-      "file": "xforms/tmphbugm2"
+      "file": "xforms/join.xml"
     }
   }, 
   {
@@ -814,7 +814,7 @@
       "checksum": "d397a6c6b41e9dee200cdd3bcf33f7d376f9b673", 
       "namespace": "http://openrosa.org/formdesigner/025EBA37-2EBA-4FA7-B189-BCF28F570A1F", 
       "version": 1, 
-      "file": "xforms/tmpttanf_"
+      "file": "xforms/woman_reg.xml"
     }
   }, 
   {
@@ -827,7 +827,7 @@
       "checksum": "f0325162cc4362250c83a1b69d79578db1151cee", 
       "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47", 
       "version": 1, 
-      "file": "xforms/tmpbeoasb"
+      "file": "xforms/amb.xml"
     }
   }, 
   {
@@ -840,7 +840,7 @@
       "checksum": "25366de10b5e2f559fc942e79f8d6bb9fb7d181c", 
       "namespace": "http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C", 
       "version": 1, 
-      "file": "xforms/tmprrtzda"
+      "file": "xforms/followup.xml"
     }
   }, 
   {
@@ -853,7 +853,7 @@
       "checksum": "60e84f209a390dbd26af2b93da7dc606d17f521f", 
       "namespace": "http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A", 
       "version": 1, 
-      "file": "xforms/tmpdvzspy"
+      "file": "xforms/amb_resp.xml"
     }
   }, 
   {
@@ -866,7 +866,7 @@
       "checksum": "0cb08c35f35deae9e6e71fd7ba4902a119d9a757", 
       "namespace": "http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E", 
       "version": 1, 
-      "file": "xforms/tmp2gnmp0"
+      "file": "xforms/amb_outcome.xml"
     }
   }, 
   {
@@ -879,7 +879,7 @@
       "checksum": "ae660f37e1739bf30576b885e3d99afc2847cdde", 
       "namespace": "http://openrosa.org/formdesigner/592C2F2A-5CEB-492A-91ED-705AD027E421", 
       "version": 1, 
-      "file": "xforms/tmpbygfvz"
+      "file": "xforms/birth_reg.xml"
     }
   }, 
   {
@@ -892,7 +892,7 @@
       "checksum": "bb3154d6fac032ffab5b03ae70d055c37c358388", 
       "namespace": "http://openrosa.org/formdesigner/E9B35B44-9CB2-4D22-98BD-4454E9A050CD", 
       "version": 1, 
-      "file": "xforms/tmppdhexj"
+      "file": "xforms/death_reg.xml"
     }
   }, 
   {
@@ -905,7 +905,7 @@
       "checksum": "f2901d7cc981730244271f1d9c1bb4bd1884e86e", 
       "namespace": "http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3", 
       "version": 1, 
-      "file": "xforms/tmp_q3qql"
+      "file": "xforms/amb_request_conf.xml"
     }
   }
 ]
