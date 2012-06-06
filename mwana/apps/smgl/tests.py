@@ -48,7 +48,7 @@ class SMGLSetUp(TestScript):
 class SMGLJoinTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
     def testCreateUser(self):
-        pre_reg = _create_prereg_user("Anton", "chilala", "11", "TN", "en")
+        pre_reg = _create_prereg_user("Anton", "804024", "11", "TN", "en")
         script = """
             11 > join Anton
             11 < %s
@@ -65,18 +65,18 @@ class SMGLJoinTest(SMGLSetUp):
 
     def testJoin(self):
         _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
-        _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
-        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'worker', 'en')
+        _create_prereg_user("AntonAD", "804030", '12', 'AM', 'en')
+        _create_prereg_user("AntonCW", "804030", '13', 'worker', 'en')
         _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
-        _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
+        _create_prereg_user("AntonDA", "804024", "15", "DA", 'en')
 
         create_users = """
             11 > Join AntonTN EN
             11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
             12 > join ANTONAD en
-            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo HAHC.
+            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo District Hospital HAHC.
             13 > join antonCW en
-            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo HAHC.
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo District Hospital HAHC.
             14 > join antonOther en
             14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
             15 > join AntonAD en
@@ -110,18 +110,18 @@ class SMGLAmbulanceTest(SMGLSetUp):
         # this call is required if you want to override setUp
         super(SMGLSetUp, self).setUp()
         _create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
-        _create_prereg_user("AntonAD", "kalomo_hahc", '12', 'AM', 'en')
-        _create_prereg_user("AntonCW", "kalomo_hahc", '13', 'worker', 'en')
+        _create_prereg_user("AntonAD", "804030", '12', 'AM', 'en')
+        _create_prereg_user("AntonCW", "804030", '13', 'worker', 'en')
         _create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
-        _create_prereg_user("AntonDA", "chilala", "15", "DA", 'en')
+        _create_prereg_user("AntonDA", "804024", "15", "DA", 'en')
 
         create_users = """
             11 > Join AntonTN EN
             11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
             12 > join ANTONAmb en
-            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo HAHC.
+            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo District Hospital HAHC.
             13 > join antonCW en
-            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo HAHC.
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo District Hospital HAHC.
             14 > join antonOther en
             14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
             15 > join AntonDA en
