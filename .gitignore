@@ -13,3 +13,4 @@ mwana/build/*
 mwana/.idea/*
 STATICFILES/*
 static_files/*
+mwana/bu-dev/*
