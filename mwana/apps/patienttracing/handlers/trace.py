@@ -11,6 +11,7 @@ from mwana.const import get_cba_type
 from mwana.apps.patienttracing import models as patienttracing
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
+_ = lambda s: s
 
 
 class TraceHandler(KeywordHandler):

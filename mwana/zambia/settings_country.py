@@ -47,6 +47,7 @@ LANGUAGE_CODE = 'en'
 LANGUAGES = (
     ('bem_ZM', _('Bemba')),
     ('en', _('English')),
+    ('nya', _('Nyanja')),
 )
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'

@@ -11,6 +11,7 @@ from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
+_ = lambda s: s
 
 class ConfirmHandler(KeywordHandler):
     '''
@@ -36,7 +37,7 @@ class ConfirmHandler(KeywordHandler):
     
     help_txt = "To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_confirmed_thanks_txt = "Thank you %s! You have confirmed that %s has been to the clinic!"
+    response_confirmed_thanks_txt = _("Thank you %()s! You have confirmed that %()s has been to the clinic!")
                                
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
     

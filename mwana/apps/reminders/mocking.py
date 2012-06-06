@@ -8,7 +8,7 @@ from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
-
+_ = lambda s: s
 
 class MockRemindMiUtility(LoggerMixin):
     """
@@ -39,10 +39,10 @@ class MockRemindMiUtility(LoggerMixin):
         
         appt_date = date.today() + timedelta(days=3)
         for cba in cbas:
-            OutgoingMessage(cba.default_connection, ("Hi %(cba)s.%(patient)s is due for "
+            OutgoingMessage(cba.default_connection,(_("Hi %(cba)s.%(patient)s is due for "
                                   "%(type)s clinic visit on %(date)s.Please "
                                   "remind them to visit %(clinic)s, then "
-                                  "reply with TOLD %(patient)s"),
+                                  "reply with TOLD %(patient)s")),
                                   cba=cba.name, patient=patient_name,
                                   date=appt_date.strftime('%d/%m/%Y'),
                                   clinic=clinic.name, type="6 day").send()
