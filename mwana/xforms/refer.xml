@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Referral</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/6BFE6EC2-4553-4030-B67D-57C879492824" uiVersion="1" version="1" name="Referral">
+					<unique_id />
+					<facility />
+				</data>
+			</instance>
+			<bind nodeset="/data/unique_id" type="xsd:string" />
+			<bind nodeset="/data/facility" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="unique_id-label">
+						<value>Safe Motherhood Number</value>
+					</text>
+					<text id="facility-label">
+						<value>Referral Facility</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/unique_id">
+			<label ref="jr:itext('unique_id-label')" />
+		</input>
+		<input ref="/data/facility">
+			<label ref="jr:itext('facility-label')" />
+		</input>
+	</h:body>
+</h:html>
