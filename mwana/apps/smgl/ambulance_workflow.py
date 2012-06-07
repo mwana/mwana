@@ -39,7 +39,7 @@ def _pick_er_driver(session, xform):
     if ads.count():
         return ads[0]
     else:
-        logger.error('No Ambulance Driver type found!')
+        raise Exception('No Ambulance Driver type found!')
 
 def _pick_other_er_recip(session, xform):
     other_type, error = get_contacttype(session, 'dmho')
@@ -55,7 +55,7 @@ def _pick_er_triage_nurse(session, xform):
     if tns.count():
         return tns[0]
     else:
-        logger.error('No Triage Nurse type found!')
+        raise Exception('No Triage Nurse type found!')
 
 def _pick_clinic_recip(session, xform):
     cw_type, error = get_contacttype(session, 'worker')
@@ -206,6 +206,7 @@ def ambulance_response(session, xform, router):
 
     #take the latest one in case this mother has been ER'd a bunch
     ambulance_response.ambulance_request = ambulance_request =  ambulance_requests[0]
+    ambulance_request.received_response = True
 
     confirm_contact_type = contact.types.all()[0]
     session.template_vars.update({"confirm_type": confirm_contact_type,
@@ -227,13 +228,13 @@ def ambulance_outcome(session, xform, router):
         return True
 
     unique_id = _get_value_for_command('unique_id', xform)
-    outcome = _get_value_for_command('outcome', xform)
+    outcome_string = _get_value_for_command('outcome', xform)
     session.template_vars.update({
         "unique_id": unique_id,
-        "outcome": outcome
+        "outcome": outcome_string
     })
 
-    if not outcome:
+    if not outcome_string:
         _send_msg(connection, AMB_OUTCOME_NO_OUTCOME, router,
             **session.template_vars)
         return True
@@ -247,7 +248,7 @@ def ambulance_outcome(session, xform, router):
     outcome = AmbulanceOutcome()
     outcome.ambulance_request = req
     outcome.mother_uid = unique_id
-    outcome.outcome = outcome
+    outcome.outcome = outcome_string
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
