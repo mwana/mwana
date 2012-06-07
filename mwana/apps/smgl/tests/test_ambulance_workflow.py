@@ -2,7 +2,8 @@ from rapidsms.models import Contact
 from rapidsms.tests.harness import MockBackend
 from threadless_router.router import Router
 from threadless_router.tests.scripted import TestScript
-from mwana.apps.smgl.app import ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER
+from mwana.apps.smgl.app import ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER,\
+    ER_STATUS_UPDATE, AMB_OUTCOME_FILED
 import logging
 from mwana.apps.smgl.tests.shared import SMGLSetUp, create_prereg_user
 logging = logging.getLogger(__name__)
@@ -46,20 +47,17 @@ class SMGLAmbulanceTest(SMGLSetUp):
             13 < {2}
             14 < {3}
         """.format(ER_TO_TRIAGE_NURSE % d,
-            ER_TO_DRIVER % d,
-            ER_TO_CLINIC_WORKER % d,
-            ER_TO_OTHER % d)
-
-
+                   ER_TO_DRIVER % d,
+                   ER_TO_CLINIC_WORKER % d,
+                   ER_TO_OTHER % d)
+        
         d = {
             "unique_id": '1234',
             "status" : "CONFIRMED",
             "confirm_type": "Triage Nurse",
             "name": "AntonTN",
         }
-        response_string = "The Emergency Request for Mother with Unique ID: " \
-                          "%(unique_id)s has been marked %(status)s by %(name)s " \
-                          "(%(confirm_type)s)" % d
+        response_string = ER_STATUS_UPDATE  % d
         script += """
             11 > resp 1234 confirmed
             11 < {0}
@@ -70,3 +68,15 @@ class SMGLAmbulanceTest(SMGLSetUp):
         """.format(response_string)
 
         self.runScript(script)
+        
+        outcome_string = AMB_OUTCOME_FILED  % d
+        script += """
+            11 > outc 1234 good
+            11 < {0}
+            12 < {0}
+            13 < {0}
+            14 < {0}
+            15 < {0}
+        """.format(outcome_string)
+
+        

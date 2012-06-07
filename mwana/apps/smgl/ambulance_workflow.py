@@ -2,7 +2,8 @@ import datetime
 import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
-from mwana.apps.smgl.app import _get_value_for_command, _send_msg, get_contacttype, get_connection_from_contact, ER_TO_DRIVER, ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er, INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact, NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID, AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, AMB_OUTCOME_ORIGINATING_LOCATION_INFO
+from mwana.apps.smgl.app import _get_value_for_command, _send_msg, get_contacttype, ER_TO_DRIVER, ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er, INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact, NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID, AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,\
+    ER_STATUS_UPDATE, AMB_OUTCOME_FILED
 from mwana.apps.smgl.models import AmbulanceRequest, PregnantMother, AmbulanceResponse, AmbulanceOutcome
 
 logger = logging.getLogger(__name__)
@@ -72,35 +73,33 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     #Figure out who to alert
     ambulance_driver = _pick_er_driver(session, xform)
     ambulance_session.ambulance_driver = ambulance_driver
-    driver_conn = get_connection_from_contact(ambulance_driver)
-    if driver_conn:
+    if ambulance_driver.default_connection:
         if message:
-            _send_msg(driver_conn, message, router, **session.template_vars)
+            _send_msg(ambulance_driver.default_connection, message, router, **session.template_vars)
         else:
-            _send_msg(driver_conn, ER_TO_DRIVER, router, **session.template_vars)
+            _send_msg(ambulance_driver.default_connection, ER_TO_DRIVER, router, **session.template_vars)
     else:
         logger.error('No Ambulance Driver found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     tn = _pick_er_triage_nurse(session, xform)
     ambulance_session.triage_nurse = tn
-    tn_conn = get_connection_from_contact(tn)
-    if tn_conn:
+    
+    if tn.default_connection:
         if message:
-            _send_msg(tn_conn, message, router, **session.template_vars)
+            _send_msg(tn.default_connection, message, router, **session.template_vars)
         else:
-            _send_msg(tn_conn, ER_TO_TRIAGE_NURSE, router, **session.template_vars)
+            _send_msg(tn.default_connection, ER_TO_TRIAGE_NURSE, router, **session.template_vars)
     else:
         logger.error('No Triage Nurse found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
     other_recip = _pick_other_er_recip(session,xform)
     if other_recip: #less important, so not critical if this contact doesn't exist.
         ambulance_session.other_recipient = other_recip
-        other_conn = get_connection_from_contact(other_recip)
-        if other_conn:
+        if other_recip.default_connection:
             if message:
-                _send_msg(other_conn, message, router, **session.template_vars)
+                _send_msg(other_recip.default_connection, message, router, **session.template_vars)
             else:
-                _send_msg(other_conn, ER_TO_OTHER, router, **session.template_vars)
+                _send_msg(other_recip.default_connection, ER_TO_OTHER, router, **session.template_vars)
         else:
             #only warn because we may not have specified one on purpose
             logger.warn('No Other Recipient found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
@@ -108,12 +107,11 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     clinic_recip = _pick_clinic_recip(session, xform)
     if clinic_recip:
         ambulance_session.receiving_facility_recipient = clinic_recip
-        clinic_conn = get_connection_from_contact(clinic_recip)
-        if clinic_conn:
+        if clinic_recip.default_connection:
             if message:
-                _send_msg(clinic_conn, message, router, **session.template_vars)
+                _send_msg(clinic_recip.default_connection, message, router, **session.template_vars)
             else:
-                _send_msg(clinic_conn, ER_TO_CLINIC_WORKER, router, **session.template_vars)
+                _send_msg(clinic_recip.default_connection, ER_TO_CLINIC_WORKER, router, **session.template_vars)
         else:
             logger.error('No Receiving Clinic Worker found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
@@ -214,9 +212,7 @@ def ambulance_response(session, xform, router):
                                   "name": contact.name})
 
     _broadcast_to_ER_users(ambulance_request, session, xform,
-        message=_("The Emergency Request for Mother with Unique ID: "
-                  "%(unique_id)s has been marked %(status)s by %(name)s "
-                  "(%(confirm_type)s)"), router=router)
+        message=_(ER_STATUS_UPDATE), router=router)
 
     ambulance_request.save()
     ambulance_response.save()
@@ -261,8 +257,6 @@ def ambulance_outcome(session, xform, router):
     session.template_vars.update({"contact_type": contact.types.all()[0],
                                   "name": contact.name})
     _broadcast_to_ER_users(req,session, xform,
-        message=_("A patient outcome for an Emergency Response for "
-                  "Patient (%(unique_id)s) has been filed by %(name)s "
-                  "(%(contact_type)s)"), router=router)
+                           message=_(AMB_OUTCOME_FILED), router=router)
     _send_msg(req.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
     return True

@@ -42,7 +42,7 @@ DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
 INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
-ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
+ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if you see this")
 ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
@@ -57,10 +57,12 @@ AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("Emergency Response: The ambulance fo
 AMB_OUTCOME_NO_OUTCOME = _("No OUTCOME Specified.  Please send an outcome!")
 AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
 AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
+AMB_OUTCOME_FILED = _("A patient outcome for an Emergency Response for Patient (%(unique_id)s) has been filed by %(name)s (%(contact_type)s)")
 LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
 DATE_NOT_OPTIONAL = _("This date is not optional!")
 ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
-
+ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
+                     
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
     #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
@@ -162,15 +164,6 @@ def _get_allowed_ambulance_workflow_contact(session):
         contact = Contact.objects.get(connection=connection, types__in=types)
         return contact
     except ObjectDoesNotExist:
-        return None
-
-
-
-def get_connection_from_contact(contact):
-    connections = contact.connection_set.all()
-    if connections.count():
-        return connections[0]
-    else:
         return None
 
 def _make_date(dd, mm, yy, is_optional=False):
