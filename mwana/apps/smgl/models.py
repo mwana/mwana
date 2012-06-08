@@ -3,6 +3,7 @@ from django.db import models
 
 # Create your models here.
 from mwana.apps.locations.models import Location
+from smscouchforms.models import FormReferenceBase
 
 REASON_FOR_VISIT_CHOICES = (
     ('initial_registration', 'Initial Registration'),
@@ -17,6 +18,7 @@ REASON_FOR_VISIT_CHOICES = (
 class XFormKeywordHandler(models.Model):
     keyword = models.CharField(max_length=255, help_text="The keyword that you want to associate with this handler.")
     function_path = models.CharField(max_length=255, help_text="The full path to the handler function. E.g: 'mwana.apps.smgl.app.birth_registration'")
+
 
 class PregnantMother(models.Model):
     contact = models.ForeignKey(Contact, help_text="The contact that registered this mother")
@@ -33,6 +35,28 @@ class PregnantMother(models.Model):
 
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
+
+class MotherReferenceBase(models.Model):
+    """
+    An abstract base class to hold mothers. Provides some shared functionalityn
+    and consistent field naming.
+    """
+    # Note: we capture both the mom UID and try to match it to a pregnant 
+    # mother foreignkey. In the event that an ER is started for NOT a mother or
+    # the UID is garbled/unmatcheable we still want to capture it for analysis.
+    mother_uid = models.CharField(max_length=255, null=True, blank=True,
+                                  help_text="Unique ID of mother")
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
+    
+    def set_mother(self, mother_id):
+        self.mother_uid = mother_id
+        try:
+            self.mother = PregnantMother.objects.get(uid__iexact=mother_id)
+        except PregnantMother.DoesNotExist:
+            pass
+        
+    class Meta:
+        abstract = True
 
 class FacilityVisit(models.Model):
     """
@@ -100,13 +124,19 @@ class AmbulanceOutcome(models.Model):
         ('treated_discharged', 'Treated and Discharged'),
         ('deceased', 'Deceased'),
     )
-    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
-    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
+    # Note: we capture both the mom UID and try to match it to a pregnant 
+    # mother foreignkey. In the event that an ER is started for NOT a mother 
+    # or the UID is garbled/unmatcheable we still want to capture it for analysis.
     outcome_on = models.DateTimeField(auto_now_add=True, help_text = "Date and Time this outcome was provided")
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
+
+
+class Referral(FormReferenceBase, MotherReferenceBase):
+    facility = models.ForeignKey(Location, 
+                                 help_text="The referred facility")
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (

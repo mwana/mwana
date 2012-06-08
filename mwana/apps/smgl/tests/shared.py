@@ -3,6 +3,8 @@ from threadless_router.router import Router
 from threadless_router.tests.scripted import TestScript
 from mwana.apps.smgl.models import PreRegistration
 import logging
+from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.locations.models import Location
 
 def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     if not lang:
@@ -20,11 +22,14 @@ def create_prereg_user(fname, location_code, ident, ctype, lang=None):
 
 class SMGLSetUp(TestScript):
 
-    def createUser(self, ctype, ident):
-        create_prereg_user("Anton", "403029", ident, ctype, "en")
+    def createUser(self, ctype, ident, name="Anton", location="804024"):
+        create_prereg_user(name, location, ident, ctype, "en")
+        type_display = ContactType.objects.get(slug__iexact=ctype).name
+        place_display = Location.objects.get(slug__iexact=location).name
         script = """
-            %s > join Anton
-        """ % ident
+            %(num)s > join %(name)s
+            %(num)s < Thank you for registering! You have successfully registered as a %(ctype)s at %(loc)s.
+        """ % { "num": ident, "name": name, "ctype": type_display, "loc": place_display}
         self.runScript(script)
 
 

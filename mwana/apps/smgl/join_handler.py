@@ -78,8 +78,8 @@ def join_generic(session, xform, prereg, router):
     logger.debug('Data from Pre Registration and Input XForm:: Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
                  (facility, reg_type, connection, '%s %s' % (fname, lname), uid))
 
-    location, error = get_location(session, facility)
-    if error:
+    location = get_location(session, facility)
+    if not location:
         _send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **session.template_vars)
         return True
     contactType, error = get_contacttype(session, reg_type)

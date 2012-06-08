@@ -152,6 +152,58 @@
     }
   }, 
   {
+    "pk": 192, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Siabunkululu", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804026"
+    }
+  }, 
+  {
+    "pk": 193, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Siachitema", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804013"
+    }
+  }, 
+  {
+    "pk": 194, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Siamafumba", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804015"
+    }
+  }, 
+  {
+    "pk": 195, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Simwatachela", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804012"
+    }
+  }, 
+  {
     "pk": 196, 
     "model": "locations.location", 
     "fields": {
@@ -594,55 +646,11 @@
     }
   }, 
   {
-    "pk": 192, 
-    "model": "locations.location", 
+    "pk": 9, 
+    "model": "smgl.xformkeywordhandler", 
     "fields": {
-      "send_live_results": false, 
-      "name": "Siabunkululu", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804026"
-    }
-  }, 
-  {
-    "pk": 193, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Siachitema", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804013"
-    }
-  }, 
-  {
-    "pk": 194, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Siamafumba", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804015"
-    }
-  }, 
-  {
-    "pk": 195, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Simwatachela", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804012"
+      "keyword": "refer", 
+      "function_path": "mwana.apps.smgl.keyword_handlers.refer"
     }
   }, 
   {
@@ -801,58 +809,6 @@
     }
   }, 
   {
-    "pk": 20, 
-    "model": "formplayer.xform", 
-    "fields": {
-      "uiversion": 1, 
-      "name": "Referral", 
-      "created": "2012-06-07T23:34:15", 
-      "checksum": "0384fc0487cce7a360c0bd0869b32f959b753a32", 
-      "namespace": "http://openrosa.org/formdesigner/6BFE6EC2-4553-4030-B67D-57C879492824", 
-      "version": 1, 
-      "file": "xforms/refer.xml"
-    }
-  }, 
-  {
-    "pk": 5, 
-    "model": "formplayer.xform", 
-    "fields": {
-      "uiversion": 1, 
-      "name": "JOIN", 
-      "created": "2012-04-20T08:03:13.092", 
-      "checksum": "f44f03ce2b8a1e021fa6115bacf6727ca5c9bcff", 
-      "namespace": "http://openrosa.org/formdesigner/CF78E56F-828D-45AC-B138-4140FE9496CD", 
-      "version": 1, 
-      "file": "xforms/join.xml"
-    }
-  }, 
-  {
-    "pk": 11, 
-    "model": "formplayer.xform", 
-    "fields": {
-      "uiversion": 1, 
-      "name": "Woman Registration", 
-      "created": "2012-04-22T20:19:30", 
-      "checksum": "d397a6c6b41e9dee200cdd3bcf33f7d376f9b673", 
-      "namespace": "http://openrosa.org/formdesigner/025EBA37-2EBA-4FA7-B189-BCF28F570A1F", 
-      "version": 1, 
-      "file": "xforms/woman_reg.xml"
-    }
-  }, 
-  {
-    "pk": 12, 
-    "model": "formplayer.xform", 
-    "fields": {
-      "uiversion": 1, 
-      "name": "AMB", 
-      "created": "2012-04-23T09:10:01.928", 
-      "checksum": "f0325162cc4362250c83a1b69d79578db1151cee", 
-      "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47", 
-      "version": 1, 
-      "file": "xforms/amb.xml"
-    }
-  }, 
-  {
     "pk": 13, 
     "model": "formplayer.xform", 
     "fields": {
@@ -928,6 +884,58 @@
       "namespace": "http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3", 
       "version": 1, 
       "file": "xforms/amb_request_conf.xml"
+    }
+  }, 
+  {
+    "pk": 20, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Referral", 
+      "created": "2012-06-07T23:34:15", 
+      "checksum": "0384fc0487cce7a360c0bd0869b32f959b753a32", 
+      "namespace": "http://openrosa.org/formdesigner/6BFE6EC2-4553-4030-B67D-57C879492824", 
+      "version": 1, 
+      "file": "xforms/refer.xml"
+    }
+  }, 
+  {
+    "pk": 5, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "JOIN", 
+      "created": "2012-04-20T08:03:13.092", 
+      "checksum": "f44f03ce2b8a1e021fa6115bacf6727ca5c9bcff", 
+      "namespace": "http://openrosa.org/formdesigner/CF78E56F-828D-45AC-B138-4140FE9496CD", 
+      "version": 1, 
+      "file": "xforms/join.xml"
+    }
+  }, 
+  {
+    "pk": 11, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Woman Registration", 
+      "created": "2012-04-22T20:19:30", 
+      "checksum": "d397a6c6b41e9dee200cdd3bcf33f7d376f9b673", 
+      "namespace": "http://openrosa.org/formdesigner/025EBA37-2EBA-4FA7-B189-BCF28F570A1F", 
+      "version": 1, 
+      "file": "xforms/woman_reg.xml"
+    }
+  }, 
+  {
+    "pk": 12, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "AMB", 
+      "created": "2012-04-23T09:10:01.928", 
+      "checksum": "f0325162cc4362250c83a1b69d79578db1151cee", 
+      "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47", 
+      "version": 1, 
+      "file": "xforms/amb.xml"
     }
   }
 ]

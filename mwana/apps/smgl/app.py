@@ -62,6 +62,10 @@ LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in
 DATE_NOT_OPTIONAL = _("This date is not optional!")
 ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
+
+# referrals
+REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
+CZ_TEST = _("Does this work? %(test)s!")
                      
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
@@ -99,10 +103,7 @@ def _send_msg(connection, txt, router, **kwargs):
     router.outgoing(omsg)
 
 def _get_value_for_command(command, xform):
-    try:
-        return xform.xpath('form/%s' % command)
-    except ObjectDoesNotExist:
-        return None
+    return xform.xpath('form/%s' % command)
 
 def _get_valid_model(model,slug=None,name=None, iexact=False):
     if not slug and not name:
@@ -136,14 +137,8 @@ def _get_or_create_zone(clinic, name):
                                 })
 
 def get_location(session, facility):
-    logger.debug('In get_location(), Session: %s, Facility: %s' % (session, facility))
-    location = _get_valid_model(Location, slug=facility, iexact=True)
-    error = False
-    if not location:
-        logger.debug('A valid location was not found for %s' % facility)
-        error = True
-    return location, error
-
+    return _get_valid_model(Location, slug=facility, iexact=True)
+    
 def get_contacttype(session, reg_type):
     contactType = _get_valid_model(ContactType, slug=reg_type, iexact=True)
     error = False
@@ -403,7 +398,7 @@ def handle_submission(sender, **args):
     xform.initiating_phone_number = session.connection.identity
 
     keyword = session.trigger.trigger_keyword
-
+    
     logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
 
     try:
@@ -411,7 +406,8 @@ def handle_submission(sender, **args):
     except ObjectDoesNotExist:
         logger.debug('No keyword handler found for the xform submission with keyword: %s' % keyword)
         return
-    func = to_function(kw_handler.function_path, True)
+    
+    func = to_function(str(kw_handler.function_path), True)
     session.template_vars = {} #legacy from using rapidsms-xforms
     for k,v in xform.top_level_tags().iteritems():
         session.template_vars[k] = v
