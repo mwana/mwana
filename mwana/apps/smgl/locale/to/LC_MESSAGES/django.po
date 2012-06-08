@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-27 15:18+0200\n"
+"POT-Creation-Date: 2012-06-08 10:41-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,7 +93,15 @@ msgid ""
 "number!"
 msgstr ""
 
-#: .\app.py:45 .\app.py:46 .\app.py:47
+#: .\app.py:45
+#, python-format
+msgid ""
+"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
+"%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if you "
+"see this"
+msgstr ""
+
+#: .\app.py:46 .\app.py:47
 #, python-format
 msgid ""
 "Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
@@ -120,7 +128,7 @@ msgid ""
 msgstr ""
 
 #: .\app.py:51
-msgid "Sorry. You are not registered as Triage Nurse, Ambulance of DMO"
+msgid "Sorry. You are not registered as Triage Nurse, Ambulance or DMO"
 msgstr ""
 
 #: .\app.py:52
@@ -174,9 +182,43 @@ msgid ""
 msgstr ""
 
 #: .\app.py:60
-msgid "Sorry, either the LMP or the EDD must be filled in!"
+#, python-format
+msgid ""
+"A patient outcome for an Emergency Response for Patient (%(unique_id)s) has "
+"been filed by %(name)s (%(contact_type)s)"
 msgstr ""
 
 #: .\app.py:61
+msgid "Sorry, either the LMP or the EDD must be filled in!"
+msgstr ""
+
+#: .\app.py:62
 msgid "This date is not optional!"
+msgstr ""
+
+#: .\app.py:63
+#, python-format
+msgid "This is an emergency message to the clinic. %(unique_id)s"
+msgstr ""
+
+#: .\app.py:64
+#, python-format
+msgid ""
+"The Emergency Request for Mother with Unique ID: %(unique_id)s has been "
+"marked %(status)s by %(name)s (%(confirm_type)s)"
+msgstr ""
+
+#: .\app.py:67
+#, python-format
+msgid "Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!"
+msgstr ""
+
+#: .\app.py:69
+#, python-format
+msgid "Thanks %(name)s! the Facility/Community birth has been registered."
+msgstr ""
+
+#: .\app.py:70
+#, python-format
+msgid "Thanks %(name)s! the Facility/Community death has been registered."
 msgstr ""

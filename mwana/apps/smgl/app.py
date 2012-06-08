@@ -65,7 +65,10 @@ ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_
 
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
-CZ_TEST = _("Does this work? %(test)s!")
+
+BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been registered.")
+DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
+
                      
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
