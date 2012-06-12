@@ -6,7 +6,6 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
-from mwana.apps.labresults.models import Result
 from mwana.apps.reminders import models as reminders
 from mwana.util import get_clinic_or_default, get_worker_type, get_location_type, LocationCode
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
@@ -266,6 +265,16 @@ class JoinHandler(KeywordHandler):
             clinic_slug = m.group('clinic').strip()
             zone_slug = m.group('zone').strip()
             name = m.group('name').strip().title()
+            lang_code = None
+
+            #optionally allow registration with language code
+            if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+                if not clinic_slug.isdigit() and len(zone_slug) == 6\
+                and zone_slug.isdigit() and name.strip():
+                    lang_code, clinic_slug, zone_slug, name = (clinic_slug,
+                    zone_slug, name.split()[0].lower(),
+                    " ".join(str for str in name.split()[1:]))
+
             # require the clinic to be pre-populated
             try:
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
@@ -303,11 +312,15 @@ class JoinHandler(KeywordHandler):
                 cba = self.msg.contact
                 cba.name = name
                 cba.location = zone
+                if lang_code: cba.language = lang_code
                 cba.save()
             else:
                 # lastly, if no contact exists, create one and save it in the
                 # connection
-                cba = Contact.objects.create(name=name, location=zone)
+                if lang_code:
+                    cba = Contact.objects.create(name=name, location=zone, language=lang_code)
+                else:
+                    cba = Contact.objects.create(name=name, location=zone)
                 self.msg.connection.contact = cba
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
