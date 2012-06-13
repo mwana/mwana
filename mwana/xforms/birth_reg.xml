@@ -1,116 +1,116 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
-	<h:head>
-		<h:title>Birth Registration</h:title>
-		<model>
-			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/592C2F2A-5CEB-492A-91ED-705AD027E421" uiVersion="1" version="1" name="Birth Registration">
-					<unique_id />
-					<birth_date_dd />
-					<date_of_birth_mm />
-					<date_of_birth_yy />
-					<gender />
-					<birth_place />
-					<complications />
-				</data>
-			</instance>
-			<bind nodeset="/data/unique_id" type="xsd:string" />
-			<bind nodeset="/data/birth_date_dd" type="xsd:string" />
-			<bind nodeset="/data/date_of_birth_mm" type="xsd:string" />
-			<bind nodeset="/data/date_of_birth_yy" type="xsd:string" constraint="length(.) = 4" />
-			<bind nodeset="/data/gender" />
-			<bind nodeset="/data/birth_place" />
-			<bind nodeset="/data/complications" />
-			<itext>
-				<translation lang="en" default="">
-					<text id="unique_id-label">
-						<value>Woman's Unique ID</value>
-					</text>
-					<text id="birth_date_dd-label">
-						<value>Date of Birth: Day (DD)</value>
-					</text>
-					<text id="date_of_birth_mm-label">
-						<value>Date of Birth: Month (MM)</value>
-					</text>
-					<text id="date_of_birth_yy-label">
-						<value>Date of Birth: Year (YYYY)</value>
-					</text>
-					<text id="gender-label">
-						<value>Gender</value>
-					</text>
-					<text id="gender-male-label">
-						<value>M</value>
-					</text>
-					<text id="gender-female-label">
-						<value>F</value>
-					</text>
-					<text id="birth_place-label">
-						<value>Place of Birth</value>
-					</text>
-					<text id="birth_place-home-label">
-						<value>H</value>
-					</text>
-					<text id="birth_place-facility-label">
-						<value>F</value>
-					</text>
-					<text id="complications-label">
-						<value>Complications</value>
-					</text>
-					<text id="complications-yes-label">
-						<value>Y</value>
-					</text>
-					<text id="complications-no-label">
-						<value>N</value>
-					</text>
-				</translation>
-			</itext>
-		</model>
-	</h:head>
-	<h:body>
-		<input ref="/data/unique_id">
-			<label ref="jr:itext('unique_id-label')" />
-		</input>
-		<input ref="/data/birth_date_dd">
-			<label ref="jr:itext('birth_date_dd-label')" />
-		</input>
-		<input ref="/data/date_of_birth_mm">
-			<label ref="jr:itext('date_of_birth_mm-label')" />
-		</input>
-		<input ref="/data/date_of_birth_yy">
-			<label ref="jr:itext('date_of_birth_yy-label')" />
-		</input>
-		<select1 ref="/data/gender">
-			<label ref="jr:itext('gender-label')" />
-			<item>
-				<label ref="jr:itext('gender-male-label')" />
-				<value>male</value>
-			</item>
-			<item>
-				<label ref="jr:itext('gender-female-label')" />
-				<value>female</value>
-			</item>
-		</select1>
-		<select1 ref="/data/birth_place">
-			<label ref="jr:itext('birth_place-label')" />
-			<item>
-				<label ref="jr:itext('birth_place-home-label')" />
-				<value>home</value>
-			</item>
-			<item>
-				<label ref="jr:itext('birth_place-facility-label')" />
-				<value>facility</value>
-			</item>
-		</select1>
-		<select1 ref="/data/complications">
-			<label ref="jr:itext('complications-label')" />
-			<item>
-				<label ref="jr:itext('complications-yes-label')" />
-				<value>yes</value>
-			</item>
-			<item>
-				<label ref="jr:itext('complications-no-label')" />
-				<value>no</value>
-			</item>
-		</select1>
-	</h:body>
+    <h:head>
+        <h:title>Birth Registration</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/592C2F2A-5CEB-492A-91ED-705AD027E421" uiVersion="1" version="1" name="Birth Registration">
+                    <unique_id />
+                    <birth_date_dd />
+                    <date_of_birth_mm />
+                    <date_of_birth_yyyy />
+                    <gender />
+                    <birth_place />
+                    <complications />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string" />
+            <bind nodeset="/data/birth_date_dd" type="xsd:string" />
+            <bind nodeset="/data/date_of_birth_mm" type="xsd:string" />
+            <bind nodeset="/data/date_of_birth_yyyy" type="xsd:string" />
+            <bind nodeset="/data/gender" />
+            <bind nodeset="/data/birth_place" />
+            <bind nodeset="/data/complications" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Woman's Unique ID</value>
+                    </text>
+                    <text id="birth_date_dd-label">
+                        <value>Date of Birth: Day (DD)</value>
+                    </text>
+                    <text id="date_of_birth_mm-label">
+                        <value>Date of Birth: Month (MM)</value>
+                    </text>
+                    <text id="date_of_birth_yyyy-label">
+                        <value>Date of Birth: Year (YYYY)</value>
+                    </text>
+                    <text id="gender-label">
+                        <value>Gender</value>
+                    </text>
+                    <text id="gender-male-label">
+                        <value>M</value>
+                    </text>
+                    <text id="gender-female-label">
+                        <value>F</value>
+                    </text>
+                    <text id="birth_place-label">
+                        <value>Place of Birth</value>
+                    </text>
+                    <text id="birth_place-home-label">
+                        <value>H</value>
+                    </text>
+                    <text id="birth_place-facility-label">
+                        <value>F</value>
+                    </text>
+                    <text id="complications-label">
+                        <value>Complications</value>
+                    </text>
+                    <text id="complications-yes-label">
+                        <value>Y</value>
+                    </text>
+                    <text id="complications-no-label">
+                        <value>N</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <input ref="/data/birth_date_dd">
+            <label ref="jr:itext('birth_date_dd-label')" />
+        </input>
+        <input ref="/data/date_of_birth_mm">
+            <label ref="jr:itext('date_of_birth_mm-label')" />
+        </input>
+        <input ref="/data/date_of_birth_yyyy">
+            <label ref="jr:itext('date_of_birth_yyyy-label')" />
+        </input>
+        <select1 ref="/data/gender">
+            <label ref="jr:itext('gender-label')" />
+            <item>
+                <label ref="jr:itext('gender-male-label')" />
+                <value>male</value>
+            </item>
+            <item>
+                <label ref="jr:itext('gender-female-label')" />
+                <value>female</value>
+            </item>
+        </select1>
+        <select1 ref="/data/birth_place">
+            <label ref="jr:itext('birth_place-label')" />
+            <item>
+                <label ref="jr:itext('birth_place-home-label')" />
+                <value>home</value>
+            </item>
+            <item>
+                <label ref="jr:itext('birth_place-facility-label')" />
+                <value>facility</value>
+            </item>
+        </select1>
+        <select1 ref="/data/complications">
+            <label ref="jr:itext('complications-label')" />
+            <item>
+                <label ref="jr:itext('complications-yes-label')" />
+                <value>yes</value>
+            </item>
+            <item>
+                <label ref="jr:itext('complications-no-label')" />
+                <value>no</value>
+            </item>
+        </select1>
+    </h:body>
 </h:html>

@@ -379,17 +379,26 @@ def follow_up(session, xform, router):
 def referral(submission, xform, router):
     pass
 
-def birth_registration(submission, xform, router):
+def birth_registration(session, xform, router):
     """
     Keyword: BIRTH
     """
-    print 'Got the xform and submission for the BIRTH Keyword!!'
-    print 'Submission: %s' % submission
-    print 'Xform: %s' % xform
-    logging.debug('-================================++!!!!!!!!!!!!!!!!!!!!+===========-')
+    # TODO: anything related to birth reg post processing goes here.
+    name = session.connection.contact.name if session.connection.contact else ""
+    resp = BIRTH_REG_RESPONSE % {"name": name}
+    router.outgoing(OutgoingMessage(session.connection, resp))
+    
 
-def death_registration(submission, xform, **args):
-    pass
+def death_registration(session, xform, router):
+    """
+    Keyword: DEATH
+    """
+    # TODO: anything related to birth reg post processing goes here.
+    name = session.connection.contact.name if session.connection.contact else ""
+    resp = DEATH_REG_RESPONSE % {"name": name}
+    router.outgoing(OutgoingMessage(session.connection, resp))
+    
+
 ###############################################################################
 
 
@@ -415,7 +424,7 @@ def handle_submission(sender, **args):
     for k,v in xform.top_level_tags().iteritems():
         session.template_vars[k] = v
 
-    #call the actual handling function
+    # call the actual handling function
     return func(session, xform, router)
 
 # then wire it to the xform_received signal

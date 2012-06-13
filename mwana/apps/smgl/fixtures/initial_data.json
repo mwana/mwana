@@ -152,6 +152,58 @@
     }
   }, 
   {
+    "pk": 188, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Naluja", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804022"
+    }
+  }, 
+  {
+    "pk": 189, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Nameto", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804033"
+    }
+  }, 
+  {
+    "pk": 190, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Namwianga", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804028"
+    }
+  }, 
+  {
+    "pk": 191, 
+    "model": "locations.location", 
+    "fields": {
+      "send_live_results": false, 
+      "name": "Nkandanzovu", 
+      "parent": 173, 
+      "point": null, 
+      "has_independent_printer": false, 
+      "type": 5, 
+      "slug": "804039"
+    }
+  }, 
+  {
     "pk": 192, 
     "model": "locations.location", 
     "fields": {
@@ -594,58 +646,6 @@
     }
   }, 
   {
-    "pk": 188, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Naluja", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804022"
-    }
-  }, 
-  {
-    "pk": 189, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Nameto", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804033"
-    }
-  }, 
-  {
-    "pk": 190, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Namwianga", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804028"
-    }
-  }, 
-  {
-    "pk": 191, 
-    "model": "locations.location", 
-    "fields": {
-      "send_live_results": false, 
-      "name": "Nkandanzovu", 
-      "parent": 173, 
-      "point": null, 
-      "has_independent_printer": false, 
-      "type": 5, 
-      "slug": "804039"
-    }
-  }, 
-  {
     "pk": 9, 
     "model": "smgl.xformkeywordhandler", 
     "fields": {
@@ -707,6 +707,14 @@
     "fields": {
       "keyword": "outc", 
       "function_path": "mwana.apps.smgl.ambulance_workflow.ambulance_outcome"
+    }
+  }, 
+  {
+    "pk": 9, 
+    "model": "smgl.xformkeywordhandler", 
+    "fields": {
+      "keyword": "death", 
+      "function_path": "mwana.apps.smgl.app.death_registration"
     }
   }, 
   {
@@ -782,24 +790,6 @@
     }
   }, 
   {
-    "pk": 16, 
-    "model": "smsforms.decisiontrigger", 
-    "fields": {
-      "trigger_keyword": "death", 
-      "final_response": "Thank you. Your submission has been registered.", 
-      "xform": 19
-    }
-  }, 
-  {
-    "pk": 17, 
-    "model": "smsforms.decisiontrigger", 
-    "fields": {
-      "trigger_keyword": "birth", 
-      "final_response": "Thank you for submitting this birth registration!", 
-      "xform": 18
-    }
-  }, 
-  {
     "pk": 19, 
     "model": "smsforms.decisiontrigger", 
     "fields": {
@@ -809,42 +799,21 @@
     }
   }, 
   {
-    "pk": 13, 
-    "model": "formplayer.xform", 
+    "pk": 17, 
+    "model": "smsforms.decisiontrigger", 
     "fields": {
-      "uiversion": 1, 
-      "name": "Follow Up Form", 
-      "created": "2012-04-23T11:46:06.232", 
-      "checksum": "25366de10b5e2f559fc942e79f8d6bb9fb7d181c", 
-      "namespace": "http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C", 
-      "version": 1, 
-      "file": "xforms/followup.xml"
-    }
-  }, 
-  {
-    "pk": 15, 
-    "model": "formplayer.xform", 
-    "fields": {
-      "uiversion": 1, 
-      "name": "Ambulance Resp", 
-      "created": "2012-04-23T16:34:35.059", 
-      "checksum": "60e84f209a390dbd26af2b93da7dc606d17f521f", 
-      "namespace": "http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A", 
-      "version": 1, 
-      "file": "xforms/amb_resp.xml"
+      "trigger_keyword": "birth", 
+      "final_response": "", 
+      "xform": 18
     }
   }, 
   {
     "pk": 16, 
-    "model": "formplayer.xform", 
+    "model": "smsforms.decisiontrigger", 
     "fields": {
-      "uiversion": 1, 
-      "name": "Ambulance Outcome", 
-      "created": "2012-04-23T16:52:04.172", 
-      "checksum": "0cb08c35f35deae9e6e71fd7ba4902a119d9a757", 
-      "namespace": "http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E", 
-      "version": 1, 
-      "file": "xforms/amb_outcome.xml"
+      "trigger_keyword": "death", 
+      "final_response": "", 
+      "xform": 19
     }
   }, 
   {
@@ -936,6 +905,45 @@
       "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47", 
       "version": 1, 
       "file": "xforms/amb.xml"
+    }
+  }, 
+  {
+    "pk": 13, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Follow Up Form", 
+      "created": "2012-04-23T11:46:06.232", 
+      "checksum": "25366de10b5e2f559fc942e79f8d6bb9fb7d181c", 
+      "namespace": "http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C", 
+      "version": 1, 
+      "file": "xforms/followup.xml"
+    }
+  }, 
+  {
+    "pk": 15, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Ambulance Resp", 
+      "created": "2012-04-23T16:34:35.059", 
+      "checksum": "60e84f209a390dbd26af2b93da7dc606d17f521f", 
+      "namespace": "http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A", 
+      "version": 1, 
+      "file": "xforms/amb_resp.xml"
+    }
+  }, 
+  {
+    "pk": 16, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Ambulance Outcome", 
+      "created": "2012-04-23T16:52:04.172", 
+      "checksum": "0cb08c35f35deae9e6e71fd7ba4902a119d9a757", 
+      "namespace": "http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E", 
+      "version": 1, 
+      "file": "xforms/amb_outcome.xml"
     }
   }
 ]

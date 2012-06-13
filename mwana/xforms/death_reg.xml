@@ -1,94 +1,94 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
-	<h:head>
-		<h:title>Death Registration</h:title>
-		<model>
-			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E9B35B44-9CB2-4D22-98BD-4454E9A050CD" uiVersion="1" version="1" name="Death Registration">
-					<unique_id />
-					<death_date_dd />
-					<death_date_mm />
-					<death_date_yy />
-					<death_type />
-					<death_location />
-				</data>
-			</instance>
-			<bind nodeset="/data/unique_id" type="xsd:string" />
-			<bind nodeset="/data/death_date_dd" type="xsd:string" />
-			<bind nodeset="/data/death_date_mm" type="xsd:string" />
-			<bind nodeset="/data/death_date_yy" type="xsd:string" />
-			<bind nodeset="/data/death_type" />
-			<bind nodeset="/data/death_location" />
-			<itext>
-				<translation lang="en" default="">
-					<text id="unique_id-label">
-						<value>Woman's Unique ID</value>
-					</text>
-					<text id="death_date_dd-label">
-						<value>Date of death: Day (DD)</value>
-					</text>
-					<text id="death_date_mm-label">
-						<value>Date of death: Month (MM)</value>
-					</text>
-					<text id="death_date_yy-label">
-						<value>Date of death: Year (YYYY)</value>
-					</text>
-					<text id="death_type-label">
-						<value>Maternal/Infant?</value>
-					</text>
-					<text id="death_type-maternal-label">
-						<value>Ma</value>
-					</text>
-					<text id="death_type-infant-label">
-						<value>Inf</value>
-					</text>
-					<text id="death_location-label">
-						<value>Place of death</value>
-					</text>
-					<text id="death_location-facility-label">
-						<value>F</value>
-					</text>
-					<text id="death_location-home-label">
-						<value>H</value>
-					</text>
-				</translation>
-			</itext>
-		</model>
-	</h:head>
-	<h:body>
-		<input ref="/data/unique_id">
-			<label ref="jr:itext('unique_id-label')" />
-		</input>
-		<input ref="/data/death_date_dd">
-			<label ref="jr:itext('death_date_dd-label')" />
-		</input>
-		<input ref="/data/death_date_mm">
-			<label ref="jr:itext('death_date_mm-label')" />
-		</input>
-		<input ref="/data/death_date_yy">
-			<label ref="jr:itext('death_date_yy-label')" />
-		</input>
-		<select1 ref="/data/death_type">
-			<label ref="jr:itext('death_type-label')" />
-			<item>
-				<label ref="jr:itext('death_type-maternal-label')" />
-				<value>maternal</value>
-			</item>
-			<item>
-				<label ref="jr:itext('death_type-infant-label')" />
-				<value>infant</value>
-			</item>
-		</select1>
-		<select1 ref="/data/death_location">
-			<label ref="jr:itext('death_location-label')" />
-			<item>
-				<label ref="jr:itext('death_location-facility-label')" />
-				<value>facility</value>
-			</item>
-			<item>
-				<label ref="jr:itext('death_location-home-label')" />
-				<value>home</value>
-			</item>
-		</select1>
-	</h:body>
+    <h:head>
+        <h:title>Death Registration</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/E9B35B44-9CB2-4D22-98BD-4454E9A050CD" uiVersion="1" version="1" name="Death Registration">
+                    <unique_id />
+                    <death_date_dd />
+                    <death_date_mm />
+                    <death_date_yyyy />
+                    <death_type />
+                    <death_location />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string" />
+            <bind nodeset="/data/death_date_dd" type="xsd:string" />
+            <bind nodeset="/data/death_date_mm" type="xsd:string" />
+            <bind nodeset="/data/death_date_yyyy" type="xsd:string" />
+            <bind nodeset="/data/death_type" />
+            <bind nodeset="/data/death_location" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Woman's Unique ID</value>
+                    </text>
+                    <text id="death_date_dd-label">
+                        <value>Date of death: Day (DD)</value>
+                    </text>
+                    <text id="death_date_mm-label">
+                        <value>Date of death: Month (MM)</value>
+                    </text>
+                    <text id="death_date_yyyy-label">
+                        <value>Date of death: Year (YYYY)</value>
+                    </text>
+                    <text id="death_type-label">
+                        <value>Maternal/Infant?</value>
+                    </text>
+                    <text id="death_type-maternal-label">
+                        <value>Ma</value>
+                    </text>
+                    <text id="death_type-infant-label">
+                        <value>Inf</value>
+                    </text>
+                    <text id="death_location-label">
+                        <value>Place of death</value>
+                    </text>
+                    <text id="death_location-facility-label">
+                        <value>F</value>
+                    </text>
+                    <text id="death_location-home-label">
+                        <value>H</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <input ref="/data/death_date_dd">
+            <label ref="jr:itext('death_date_dd-label')" />
+        </input>
+        <input ref="/data/death_date_mm">
+            <label ref="jr:itext('death_date_mm-label')" />
+        </input>
+        <input ref="/data/death_date_yyyy">
+            <label ref="jr:itext('death_date_yyyy-label')" />
+        </input>
+        <select1 ref="/data/death_type">
+            <label ref="jr:itext('death_type-label')" />
+            <item>
+                <label ref="jr:itext('death_type-maternal-label')" />
+                <value>maternal</value>
+            </item>
+            <item>
+                <label ref="jr:itext('death_type-infant-label')" />
+                <value>infant</value>
+            </item>
+        </select1>
+        <select1 ref="/data/death_location">
+            <label ref="jr:itext('death_location-label')" />
+            <item>
+                <label ref="jr:itext('death_location-facility-label')" />
+                <value>facility</value>
+            </item>
+            <item>
+                <label ref="jr:itext('death_location-home-label')" />
+                <value>home</value>
+            </item>
+        </select1>
+    </h:body>
 </h:html>
