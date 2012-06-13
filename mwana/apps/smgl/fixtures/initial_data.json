@@ -710,7 +710,7 @@
     }
   }, 
   {
-    "pk": 9, 
+    "pk": 10, 
     "model": "smgl.xformkeywordhandler", 
     "fields": {
       "keyword": "death", 
