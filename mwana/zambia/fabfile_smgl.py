@@ -30,6 +30,7 @@ env.project = 'mwana'
 env.code_repo = 'git@github.com:mwana/mwana.git'
 env.country = 'zambia'
 env.pip_requires_filename = 'from_www_libs.txt'
+env.apache_port = '80'
 
 def _setup_path():
     # using posixpath to ensure unix style slashes. See bug-ticket: http://code.fabfile.org/attachments/61/posixpath.patch
@@ -75,13 +76,15 @@ def staging():
 def production():
     """ use production environment on remote host"""
     env.code_branch = 'zhcard_dev'
+    env.user = 'mwana'
     env.sudo_user = 'mwana'
     env.environment = 'production'
+    env.apache_port = '9005'
     env.server_port = '9001'
     env.server_name = 'smgl-production'
 #    env.hosts = ['10.84.168.98']
 #    env.hosts = ['173.203.221.48']
-    env.hosts = ['smgl:9000']
+    env.hosts = ['41.191.116.75:9000']
     env.settings = '%(project)s.localsettings' % env
     env.remote_os = None # e.g. 'ubuntu' or 'redhat'.  Gets autopopulated by what_os() if you don't know what it is or don't want to specify.
     env.db = '%s_%s' % (env.project, env.environment)
