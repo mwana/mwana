@@ -1,5 +1,3 @@
-from rapidsms.tests.harness import MockBackend
-from threadless_router.router import Router
 from threadless_router.tests.scripted import TestScript
 from mwana.apps.smgl.models import PreRegistration
 import logging
@@ -27,15 +25,7 @@ class SMGLSetUp(TestScript):
         type_display = ContactType.objects.get(slug__iexact=ctype).name
         place_display = Location.objects.get(slug__iexact=location).name
         script = """
-            %(num)s > join %(name)s
+            %(num)s > join %(name)s en
             %(num)s < Thank you for registering! You have successfully registered as a %(ctype)s at %(loc)s.
         """ % { "num": ident, "name": name, "ctype": type_display, "loc": place_display}
         self.runScript(script)
-
-
-    def setUp(self):
-        # this call is required if you want to override setUp
-        super(SMGLSetUp, self).setUp()
-        backends = {'mockbackend': {"ENGINE": MockBackend}}
-        router = Router(backends=backends)
-

@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "rapidsms.contrib.ajax",
     "uni_form",
     "eav",
+    
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -67,20 +68,21 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "touchforms.formplayer",
+    
     "smsforms",
-    # the rapidsms contrib apps.
     "smscouchforms",
     "couchforms",
     "couchexport",
     "couchlog",
-
+    
+    # the rapidsms contrib apps.
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
     "mwana.apps.locations",
     "rapidsms.contrib.handlers",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-#    "rapidsms.contrib.registration",
+    #    "rapidsms.contrib.registration",
     "rapidsms.contrib.scheduler",
     "mwana.apps.smgl",
     "mwana.apps.echo",
@@ -90,17 +92,17 @@ INSTALLED_APPS = [
     "mwana.apps.broadcast",
 
     "mwana.apps.labresults",
-    "mwana.apps.reminders",
-#    "mwana.apps.birth_reminders",
+    # "mwana.apps.reminders",
+    # "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
-#    "mwana.apps.supply",
+    # "mwana.apps.supply",
     "mwana.apps.reports",
     "mwana.apps.training",
     "mwana.apps.help",
     "mwana.apps.alerts",
 
-    "mwana.apps.patienttracing",
-    "mwana.apps.hub_workflow",
+    # "mwana.apps.patienttracing",
+    # "mwana.apps.hub_workflow",
     "mwana.apps.stringcleaning",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "mwana.apps.default",
@@ -323,3 +325,5 @@ NO_LOGIN_REQUIRED_WHITELIST = [
 SITE_TITLE = "SMGL - Saving Mothers Giving Life"
 LOGO_LEFT_URL = ''
 LOGO_RIGHT_URL = ''
+
+EXCLUDED_HANDLERS = ["mwana.apps.labresults"]
