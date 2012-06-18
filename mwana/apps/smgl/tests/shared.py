@@ -29,3 +29,24 @@ class SMGLSetUp(TestScript):
             %(num)s < Thank you for registering! You have successfully registered as a %(ctype)s at %(loc)s.
         """ % { "num": ident, "name": name, "ctype": type_display, "loc": place_display}
         self.runScript(script)
+
+    def createDefaults(self):
+        create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
+        create_prereg_user("AntonAD", "804030", '12', 'AM', 'en')
+        create_prereg_user("AntonCW", "804030", '13', 'worker', 'en')
+        create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
+        create_prereg_user("AntonDA", "804024", "15", "DA", 'en')
+
+        create_users = """
+            11 > Join AntonTN EN
+            11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
+            12 > join ANTONAD en
+            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo District Hospital HAHC.
+            13 > join antonCW en
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo District Hospital HAHC.
+            14 > join antonOther en
+            14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
+            15 > join AntonDA en
+            15 < Thank you for registering! You have successfully registered as a Data Associate at Chilala.
+        """
+        self.runScript(create_users)

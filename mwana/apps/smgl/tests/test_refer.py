@@ -1,4 +1,4 @@
-from mwana.apps.smgl.tests.shared import SMGLSetUp, create_prereg_user
+from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import Referral
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED, REFERRAL_RESPONSE
 

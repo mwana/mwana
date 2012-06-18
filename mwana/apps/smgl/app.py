@@ -32,7 +32,7 @@ ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_use
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the User Type '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
 USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
-MOTHER_SUCCESS_REGISTERED = _("Thank you, mother has been registered succesfully!")
+MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!")
 NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
 DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
@@ -46,7 +46,7 @@ ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location
 ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
-FOLLOW_UP_COMPLETE = _("Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!.")
+FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
 NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance or DMO")
 THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
@@ -250,11 +250,10 @@ def pregnant_registration(session, xform, router):
     next_visit_mm = _get_value_for_command('next_visit_mm', xform)
     next_visit_yy = _get_value_for_command('next_visit_yy', xform)
     next_visit, error, error_msg = _make_date(next_visit_dd, next_visit_mm, next_visit_yy)
-    date_dict = {
+    session.template_vars.update({
         "date_name": "Next Visit",
         "error_msg": error_msg,
-        }
-    session.template_vars.update(date_dict)
+        })
     if error:
         _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
@@ -267,11 +266,10 @@ def pregnant_registration(session, xform, router):
     lmp_mm = _get_value_for_command('lmp_mm', xform)
     lmp_yy = _get_value_for_command('lmp_yy', xform)
     lmp_date, lmp_error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy, is_optional=True)
-    date_dict = {
+    session.template_vars.update({
         "date_name": "LMP",
         "error_msg": error_msg,
-        }
-    session.template_vars.update(date_dict)
+        })
     if lmp_error:
         _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
         return True
@@ -280,11 +278,10 @@ def pregnant_registration(session, xform, router):
     edd_mm = _get_value_for_command('edd_mm', xform)
     edd_yy = _get_value_for_command('edd_yy', xform)
     edd_date, edd_error, error_msg = _make_date(edd_dd, edd_mm, edd_yy, is_optional=True)
-    date_dict = {
+    session.template_vars.update({
         "date_name": "EDD",
         "error_msg": error_msg,
-        }
-    session.template_vars.update(date_dict)
+        })
     if edd_error:
         _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
         return True
@@ -314,7 +311,8 @@ def pregnant_registration(session, xform, router):
     visit.mother = mother
     visit.contact = data_associate
     visit.save()
-
+    session.template_vars["name"] = mother.contact.name
+    session.template_vars["unique_id"] = mother.uid
     _send_msg(connection, MOTHER_SUCCESS_REGISTERED, router,  **session.template_vars)
     #prevent default response
     return True
@@ -339,11 +337,10 @@ def follow_up(session, xform, router):
     edd_mm = _get_value_for_command('edd_mm', xform)
     edd_yy = _get_value_for_command('edd_yy', xform)
     edd_date, error, error_msg = _make_date(edd_dd, edd_mm, edd_yy)
-    date_dict = {
+    session.template_vars.update({
         "date_name": "EDD",
         "error_msg": error_msg,
-        }
-    session.template_vars.update(date_dict)
+        })
     if error:
         _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
@@ -354,11 +351,10 @@ def follow_up(session, xform, router):
     next_visit_mm = _get_value_for_command('next_visit_mm', xform)
     next_visit_yy = _get_value_for_command('next_visit_yy', xform)
     next_visit, error, error_msg = _make_date(next_visit_dd, next_visit_mm, next_visit_yy)
-    date_dict = {
+    session.template_vars.update({
         "date_name": "Next Visit",
         "error_msg": error_msg,
-        }
-    session.template_vars.update(date_dict)
+        })
     if error:
         _send_msg(connection, DATE_ERROR, router, **session.template_vars)
         return True
@@ -372,12 +368,9 @@ def follow_up(session, xform, router):
     visit.reason_for_visit = visit_reason
     visit.next_visit = next_visit
     visit.save()
+    
+    _send_msg(connection, FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
 
-    _send_msg(connection, FOLLOW_UP_COMPLETE, router, **session.template_vars)
-
-
-def referral(submission, xform, router):
-    pass
 
 def birth_registration(session, xform, router):
     """
