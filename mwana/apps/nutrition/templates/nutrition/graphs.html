@@ -159,7 +159,7 @@
         // Create and draw the visualization.
         new google.visualization.BarChart(document.getElementById(chart_id)).
             draw(data,
-                 {title:"Incidence of reports sent",
+                 {title:"",
                   width:'100%', height: {{ chart_height }},
                   colors: colors_list,
                   hAxis: {title: xaxis},
@@ -284,7 +284,7 @@
       <thead>
         <tr>
           <th>Location</th>
-          <th>Weight Captured</th>
+          <th>Number of Children Weighed</th>
           <th>Proportion of Children Weighed</th>
           <th>Obese</th>
           <th>Overweight</th>
@@ -333,8 +333,8 @@
       <thead>
         <tr>
           <th>Location</th>
-          <th>Height Captured</th>
-          <th>Height Efficiency</th>
+          <th>Number of Children Height Taken</th>
+          <th>Proportion of Children Height Measured</th>
          <th>Normal</th>
           <th>Mild</th>
           <th>Moderate</th>
@@ -382,9 +382,9 @@
       <thead>
         <tr>
           <th>Location</th>
-          <th>MUAC Captured</th>
-          <th>MUAC Efficiency</th>
-          <th>Height Captured</th>
+          <th>MUAC measurement taken</th>
+          <th>Proportion of MUAC measurements taken</th>
+          <th>Number of Children Height Measured</th>
          <th>Normal</th>
           <th>Mild</th>
           <th>Moderate</th>
