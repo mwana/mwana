@@ -38,29 +38,29 @@
                     <text id="gender-label">
                         <value>Gender</value>
                     </text>
-                    <text id="gender-male-label">
-                        <value>M</value>
+                    <text id="gender-boy-label">
+                        <value>bo</value>
                     </text>
-                    <text id="gender-female-label">
-                        <value>F</value>
+                    <text id="gender-girl-label">
+                        <value>gi</value>
                     </text>
                     <text id="birth_place-label">
                         <value>Place of Birth</value>
                     </text>
                     <text id="birth_place-home-label">
-                        <value>H</value>
+                        <value>h</value>
                     </text>
                     <text id="birth_place-facility-label">
-                        <value>F</value>
+                        <value>f</value>
                     </text>
                     <text id="complications-label">
                         <value>Complications</value>
                     </text>
                     <text id="complications-yes-label">
-                        <value>Y</value>
+                        <value>yes</value>
                     </text>
                     <text id="complications-no-label">
-                        <value>N</value>
+                        <value>no</value>
                     </text>
                 </translation>
             </itext>
@@ -82,12 +82,12 @@
         <select1 ref="/data/gender">
             <label ref="jr:itext('gender-label')" />
             <item>
-                <label ref="jr:itext('gender-male-label')" />
-                <value>male</value>
+                <label ref="jr:itext('gender-boy-label')" />
+                <value>boy</value>
             </item>
             <item>
-                <label ref="jr:itext('gender-female-label')" />
-                <value>female</value>
+                <label ref="jr:itext('gender-girl-label')" />
+                <value>girl</value>
             </item>
         </select1>
         <select1 ref="/data/birth_place">

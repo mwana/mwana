@@ -37,19 +37,19 @@
                         <value>Maternal/Infant?</value>
                     </text>
                     <text id="death_type-maternal-label">
-                        <value>Ma</value>
+                        <value>ma</value>
                     </text>
                     <text id="death_type-infant-label">
-                        <value>Inf</value>
+                        <value>inf</value>
                     </text>
                     <text id="death_location-label">
                         <value>Place of death</value>
                     </text>
                     <text id="death_location-facility-label">
-                        <value>F</value>
+                        <value>f</value>
                     </text>
                     <text id="death_location-home-label">
-                        <value>H</value>
+                        <value>h</value>
                     </text>
                 </translation>
             </itext>

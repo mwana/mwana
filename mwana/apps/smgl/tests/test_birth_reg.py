@@ -15,7 +15,7 @@ class SMGLBirthRegTest(SMGLSetUp):
     def testBasicDeathReg(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name }
         script = """
-            %(num)s > birth 1234 01 01 2012 1 1 1
+            %(num)s > birth 1234 01 01 2012 bo h yes
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
