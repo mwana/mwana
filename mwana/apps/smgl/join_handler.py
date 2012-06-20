@@ -50,14 +50,13 @@ def join_generic(session, xform, prereg, router):
     JOIN UniqueID NAME FACILITY TITLE(TN/DA/CBA) ZONE(IF COUNSELLOR)
     """
 
-    #Create a contact for this connection.  If it already exists,
-    #Verify that it is a contact of the specified type. If not,
-    #Add it.  If it does already have that type associated with it
+    # Create a contact for this connection.  If it already exists,
+    # Verify that it is a contact of the specified type. If not,
+    # Add it.  If it does already have that type associated with it
     # Return a message indicating that it is already registered.
-    #Same logic for facility.
+    # Same logic for facility.
     connection = session.connection
     reg_type = prereg.title.lower()
-    facility = prereg.facility_code
     fname = prereg.first_name #these provided in pre-reg info
     lname = prereg.last_name
     name = _get_value_for_command('name', xform) #this provided by user
@@ -67,7 +66,7 @@ def join_generic(session, xform, prereg, router):
 
     session.template_vars.update({
         'reg_type': reg_type,
-        'facility': facility,
+        'facility': prereg.location,
         'first_name': fname,
         'last_name': lname,
         'name': name,
@@ -75,15 +74,11 @@ def join_generic(session, xform, prereg, router):
         'unique_id': uid
     })
 
-    logger.debug('Data from Pre Registration and Input XForm:: Facility: %s, Registration type: %s, Connection: %s, Name:%s, UID:%s' % \
-                 (facility, reg_type, connection, '%s %s' % (fname, lname), uid))
-
-    location = get_location(session, facility)
-    if not location:
+    if not prereg.location:
         _send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **session.template_vars)
         return True
     contactType, error = get_contacttype(session, reg_type)
-    session.template_vars.update({"title": reg_type, "facility": location.name})
+    session.template_vars.update({"title": reg_type, "facility": prereg.location.name})
     if error:
         _send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router, **session.template_vars)
         return True
@@ -92,33 +87,34 @@ def join_generic(session, xform, prereg, router):
 
     zone = None
     if zone_name and reg_type == 'cba':
-        zone, error = _get_or_create_zone(location, zone_name)
+        zone, error = _get_or_create_zone(prereg.location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
         _send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **session.template_vars)
         return True
 
-    #UID constraints (like isnum and length) should be caught by the rapidsms_xforms constraint settings for the form.
-    #Name can't really be validated.
+    # UID constraints (like isnum and length) should be caught by the 
+    # rapidsms_xforms constraint settings for the form.
+    # Name can't really be validated.
 
     contact_name = '%s %s' % (fname, lname)
-    if name: #we prefer to use the user provided name in all communications. Lname and Fname saved in preRegistration data
+    if name: 
+        # we prefer to use the user provided name in all communications. 
+        # Lname and Fname saved in preRegistration data
         contact_name = name
-    contact, created = Contact.objects.get_or_create(name = contact_name,
-                                                location=(zone or location),
-                                                unique_id = uid,
-                                                language=language[:5]
-    )
+    contact, created = Contact.objects.get_or_create(name=contact_name,
+                                                     location=(zone or prereg.location),
+                                                     unique_id=uid,
+                                                     language=language[:5])
     session.connection.contact = contact
     session.connection.save()
     types = contact.types.all()
     if contactType not in types:
         contact.types.add(contactType)
     else: #Already registered
-        logger.debug('HERE ARE THE TEMPLATE_VARS: %s' % session.template_vars)
         _send_msg(connection, ALREADY_REGISTERED, router, **session.template_vars)
         return True
-    contact.location = location
+    contact.location = prereg.location
     contact.save()
 
     #lastly, link this contact to its owning pre-reg info

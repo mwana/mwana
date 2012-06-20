@@ -5,8 +5,8 @@ class XFormKeywordHandlerAdmin(admin.ModelAdmin):
     list_display = ['keyword', 'function_path']
 
 class PreRegsitrationAdmin(admin.ModelAdmin):
-    list_display = ['phone_number', 'has_confirmed', 'first_name', 'last_name', 'facility_name', 'facility_code', 'title', 'language']
-    exclude = ['contact', 'facility_name', 'has_confirmed']
+    list_display = ['phone_number', 'has_confirmed', 'first_name', 'last_name', 'location', 'title', 'language']
+    exclude = ['contact', 'has_confirmed']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
     list_display = ['uid', 'first_name', 'last_name', 'lmp', 'edd', 'next_visit']

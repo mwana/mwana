@@ -10,7 +10,7 @@ def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     logging.debug('Creating Prereg Object in DB: ident:%s, contact_type:%s, lang:%s' % (ident, ctype, lang))
     pre = PreRegistration()
     pre.first_name = fname
-    pre.facility_code = location_code
+    pre.location = Location.objects.get(slug__iexact=location_code)
     pre.phone_number = ident
     pre.unique_id = ident.strip().strip('+')
     pre.title = ctype
