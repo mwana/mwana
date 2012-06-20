@@ -12,10 +12,10 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.createUser("worker", self.user_number)
     
     # TODO: beef these up. Just testing the basic workflow
-    def testBasicDeathReg(self):
+    def testBasicBirthReg(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name }
         script = """
-            %(num)s > birth 1234 01 01 2012 bo h yes
+            %(num)s > birth 1234 01 01 2012 bo h yes 1
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)

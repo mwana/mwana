@@ -12,6 +12,7 @@
                     <gender />
                     <birth_place />
                     <complications />
+                    <num_children />
                 </data>
             </instance>
             <bind nodeset="/data/unique_id" type="xsd:string" />
@@ -21,6 +22,7 @@
             <bind nodeset="/data/gender" />
             <bind nodeset="/data/birth_place" />
             <bind nodeset="/data/complications" />
+            <bind nodeset="/data/num_children" type="xsd:int" constraint=". &gt; 0 and . &lt; 10" />
             <itext>
                 <translation lang="en" default="">
                     <text id="unique_id-label">
@@ -61,6 +63,9 @@
                     </text>
                     <text id="complications-no-label">
                         <value>no</value>
+                    </text>
+                    <text id="num_children-label">
+                        <value>Number of Children</value>
                     </text>
                 </translation>
             </itext>
@@ -112,5 +117,8 @@
                 <value>no</value>
             </item>
         </select1>
+        <input ref="/data/num_children">
+            <label ref="jr:itext('num_children-label')" />
+        </input>
     </h:body>
 </h:html>

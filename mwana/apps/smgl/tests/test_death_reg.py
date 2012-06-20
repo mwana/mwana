@@ -12,7 +12,7 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.createUser("worker", self.user_number)
         
     # TODO: beef these up. Just testing the basic workflow
-    def testBasicBirthReg(self):
+    def testBasicDeathReg(self):
         resp = DEATH_REG_RESPONSE % {"name": self.name }
         script = """
             %(num)s > death 1234 01 01 2012 ma h
