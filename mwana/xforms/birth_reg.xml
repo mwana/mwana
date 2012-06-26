@@ -6,7 +6,7 @@
             <instance>
                 <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/592C2F2A-5CEB-492A-91ED-705AD027E421" uiVersion="1" version="1" name="Birth Registration">
                     <unique_id />
-                    <birth_date_dd />
+                    <date_of_birth_dd />
                     <date_of_birth_mm />
                     <date_of_birth_yyyy />
                     <gender />
@@ -16,7 +16,7 @@
                 </data>
             </instance>
             <bind nodeset="/data/unique_id" type="xsd:string" />
-            <bind nodeset="/data/birth_date_dd" type="xsd:string" />
+            <bind nodeset="/data/date_of_birth_dd" type="xsd:string" />
             <bind nodeset="/data/date_of_birth_mm" type="xsd:string" />
             <bind nodeset="/data/date_of_birth_yyyy" type="xsd:string" />
             <bind nodeset="/data/gender" />
@@ -28,7 +28,7 @@
                     <text id="unique_id-label">
                         <value>Woman's Unique ID</value>
                     </text>
-                    <text id="birth_date_dd-label">
+                    <text id="date_of_birth_dd-label">
                         <value>Date of Birth: Day (DD)</value>
                     </text>
                     <text id="date_of_birth_mm-label">
@@ -75,8 +75,8 @@
         <input ref="/data/unique_id">
             <label ref="jr:itext('unique_id-label')" />
         </input>
-        <input ref="/data/birth_date_dd">
-            <label ref="jr:itext('birth_date_dd-label')" />
+        <input ref="/data/date_of_birth_dd">
+            <label ref="jr:itext('date_of_birth_dd-label')" />
         </input>
         <input ref="/data/date_of_birth_mm">
             <label ref="jr:itext('date_of_birth_mm-label')" />
