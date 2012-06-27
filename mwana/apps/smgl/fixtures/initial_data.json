@@ -658,7 +658,7 @@
     "model": "smgl.xformkeywordhandler", 
     "fields": {
       "keyword": "birth", 
-      "function_path": "mwana.apps.smgl.app.birth_registration"
+      "function_path": "mwana.apps.smgl.keyword_handlers.birth_registration"
     }
   }, 
   {
@@ -714,7 +714,7 @@
     "model": "smgl.xformkeywordhandler", 
     "fields": {
       "keyword": "death", 
-      "function_path": "mwana.apps.smgl.app.death_registration"
+      "function_path": "mwana.apps.smgl.keyword_handlers.death_registration"
     }
   }, 
   {

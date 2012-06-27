@@ -17,14 +17,12 @@ from dimagi.utils.modules import to_function
 
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
+from mwana.apps.smgl.utils import get_date
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
 # our text.
 _ = lambda s: s
-
-#Values that are used to indicate 'no answer' in fields of a form (especially in the case of optional values)
-NONE_VALUES = ['none', 'n', None]
 
 # Begin Translatable messages
 FACILITY_NOT_RECOGNIZED = _("Sorry, the facility '%(facility)s' is not recognized. Please try again.")
@@ -37,7 +35,7 @@ NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please 
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
 DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
                                        "DD MM YYYY. Please try again.")
-DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format"
+DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format "
                                     "YYYY (four digit year). Please try again.")
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
@@ -164,39 +162,27 @@ def _get_allowed_ambulance_workflow_contact(session):
     except ObjectDoesNotExist:
         return None
 
-def _make_date(dd, mm, yy, is_optional=False):
+def _make_date(form, dd, mm, yy, is_optional=False):
     """
     Returns a tuple: (datetime.date, ERROR_MSG)
-    ERROR_MSG will be False if datetime.date is sucesfully constructed.
+    ERROR_MSG will be empty if datetime.date is sucesfully constructed.
     Be sure to include the dictionary key-value "date_name": DATE_NAME
     when sending out the error message as an outgoing message.
     """
-    logger.debug('in _make_date(). Trying to make a date from %s %s %s' % (dd,mm,yy))
-    dd_is_none = dd.lower() in NONE_VALUES
-    mm_is_none = mm.lower() in NONE_VALUES
-    yy_is_none = yy.lower() in NONE_VALUES
-    if dd_is_none and mm_is_none and yy_is_none and is_optional:
-        return None, False, None
-    elif dd_is_none or mm_is_none or yy_is_none:
-        return None, True, DATE_NOT_OPTIONAL
+    # this method has been hacked together to preserve
+    # original functionality. should be considered deprecated, though.
     try:
-        dd = int(dd)
-        mm = int(mm)
-        yy = int(yy)
-    except ValueError as ve:
-        logger.debug('In Make Date: ve %s' % ve)
-        return None, True, DATE_INCORRECTLY_FORMATTED_GENERAL
+        date = get_date(form, dd, mm, yy)
+    except ValueError:
+        return None, DATE_INCORRECTLY_FORMATTED_GENERAL
+    
+    if not date and not is_optional:
+        return None, DATE_NOT_OPTIONAL
+    
+    if datetime.date(1900, 1, 1) > date:
+        return None, DATE_YEAR_INCORRECTLY_FORMATTED
 
-    if yy < 1900: #Make sure yy is a 4 digit date
-        return None, True, DATE_YEAR_INCORRECTLY_FORMATTED
-
-    try:
-        ret_date = datetime.date(yy,mm,dd)
-    except ValueError as msg:
-        logging.debug('Could not make a datetime. Exception: %s' % msg)
-        return None, True, str(msg) #<-- will send descriptive message of exact error (like month not in 1..12, etc)
-
-    return ret_date, False, None
+    return date, None
 
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
@@ -246,44 +232,35 @@ def pregnant_registration(session, xform, router):
 
 
 
-    next_visit_dd = _get_value_for_command('next_visit_dd', xform)
-    next_visit_mm = _get_value_for_command('next_visit_mm', xform)
-    next_visit_yy = _get_value_for_command('next_visit_yy', xform)
-    next_visit, error, error_msg = _make_date(next_visit_dd, next_visit_mm, next_visit_yy)
+    next_visit, error_msg = _make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     session.template_vars.update({
         "date_name": "Next Visit",
         "error_msg": error_msg,
         })
-    if error:
-        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
+    if error_msg:
+        _send_msg(connection, error_msg, router, **session.template_vars)
         return True
     mother.next_visit = next_visit
 
     mother.reason_for_visit = _get_value_for_command('visit_reason', xform)
     zone_name = _get_value_for_command('zone', xform)
 
-    lmp_dd = _get_value_for_command('lmp_dd', xform)
-    lmp_mm = _get_value_for_command('lmp_mm', xform)
-    lmp_yy = _get_value_for_command('lmp_yy', xform)
-    lmp_date, lmp_error, error_msg = _make_date(lmp_dd, lmp_mm, lmp_yy, is_optional=True)
+    lmp_date, error_msg = _make_date(xform, "lmp_dd", "lmp_mm", "lmp_yy", is_optional=True)
     session.template_vars.update({
         "date_name": "LMP",
         "error_msg": error_msg,
         })
-    if lmp_error:
-        _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
+    if error_msg:
+        _send_msg(connection, error_msg, router,  **session.template_vars)
         return True
 
-    edd_dd = _get_value_for_command('edd_dd', xform)
-    edd_mm = _get_value_for_command('edd_mm', xform)
-    edd_yy = _get_value_for_command('edd_yy', xform)
-    edd_date, edd_error, error_msg = _make_date(edd_dd, edd_mm, edd_yy, is_optional=True)
+    edd_date, error_msg = _make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
     session.template_vars.update({
         "date_name": "EDD",
         "error_msg": error_msg,
         })
-    if edd_error:
-        _send_msg(connection, DATE_ERROR, router,  **session.template_vars)
+    if error_msg:
+        _send_msg(connection, error_msg, router,  **session.template_vars)
         return True
 
     if lmp_date is None and edd_date is None:
@@ -333,33 +310,27 @@ def follow_up(session, xform, router):
         _send_msg(connection, FUP_MOTHER_DOES_NOT_EXIST, router, **session.template_vars)
         return True
 
-    edd_dd = _get_value_for_command('edd_dd', xform)
-    edd_mm = _get_value_for_command('edd_mm', xform)
-    edd_yy = _get_value_for_command('edd_yy', xform)
-    edd_date, error, error_msg = _make_date(edd_dd, edd_mm, edd_yy)
+    edd_date, error_msg = _make_date(xform, "edd_dd", "edd_mm", "edd_yy")
     session.template_vars.update({
         "date_name": "EDD",
         "error_msg": error_msg,
         })
-    if error:
-        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
+    if error_msg:
+        _send_msg(connection, error_msg, router, **session.template_vars)
         return True
 
     visit_reason = _get_value_for_command('visit_reason', xform)
 
-    next_visit_dd = _get_value_for_command('next_visit_dd', xform)
-    next_visit_mm = _get_value_for_command('next_visit_mm', xform)
-    next_visit_yy = _get_value_for_command('next_visit_yy', xform)
-    next_visit, error, error_msg = _make_date(next_visit_dd, next_visit_mm, next_visit_yy)
+    next_visit, error_msg = _make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     session.template_vars.update({
         "date_name": "Next Visit",
         "error_msg": error_msg,
         })
-    if error:
-        _send_msg(connection, DATE_ERROR, router, **session.template_vars)
+    if error_msg:
+        _send_msg(connection, error_msg, router, **session.template_vars)
         return True
 
-    #Make the follow up facility visit thinger.
+    # Make the follow up facility visit 
     visit = FacilityVisit()
     visit.mother = mother
     visit.contact = contact
@@ -372,15 +343,6 @@ def follow_up(session, xform, router):
     _send_msg(connection, FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
 
 
-def birth_registration(session, xform, router):
-    """
-    Keyword: BIRTH
-    """
-    # TODO: anything related to birth reg post processing goes here.
-    name = session.connection.contact.name if session.connection.contact else ""
-    resp = BIRTH_REG_RESPONSE % {"name": name}
-    router.outgoing(OutgoingMessage(session.connection, resp))
-    
 
 def death_registration(session, xform, router):
     """

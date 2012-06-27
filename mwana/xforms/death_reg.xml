@@ -36,19 +36,19 @@
                     <text id="death_type-label">
                         <value>Maternal/Infant?</value>
                     </text>
-                    <text id="death_type-maternal-label">
+                    <text id="death_type-ma-label">
                         <value>ma</value>
                     </text>
-                    <text id="death_type-infant-label">
+                    <text id="death_type-inf-label">
                         <value>inf</value>
                     </text>
                     <text id="death_location-label">
                         <value>Place of death</value>
                     </text>
-                    <text id="death_location-facility-label">
+                    <text id="death_location-f-label">
                         <value>f</value>
                     </text>
-                    <text id="death_location-home-label">
+                    <text id="death_location-h-label">
                         <value>h</value>
                     </text>
                 </translation>
@@ -71,23 +71,23 @@
         <select1 ref="/data/death_type">
             <label ref="jr:itext('death_type-label')" />
             <item>
-                <label ref="jr:itext('death_type-maternal-label')" />
-                <value>maternal</value>
+                <label ref="jr:itext('death_type-ma-label')" />
+                <value>ma</value>
             </item>
             <item>
-                <label ref="jr:itext('death_type-infant-label')" />
-                <value>infant</value>
+                <label ref="jr:itext('death_type-inf-label')" />
+                <value>inf</value>
             </item>
         </select1>
         <select1 ref="/data/death_location">
             <label ref="jr:itext('death_location-label')" />
             <item>
-                <label ref="jr:itext('death_location-facility-label')" />
-                <value>facility</value>
+                <label ref="jr:itext('death_location-f-label')" />
+                <value>f</value>
             </item>
             <item>
-                <label ref="jr:itext('death_location-home-label')" />
-                <value>home</value>
+                <label ref="jr:itext('death_location-h-label')" />
+                <value>h</value>
             </item>
         </select1>
     </h:body>

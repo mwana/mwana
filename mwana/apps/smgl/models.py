@@ -164,3 +164,35 @@ class PreRegistration(models.Model):
     zone = models.CharField(max_length=20, help_text="User Zone (optional)", blank=True, null=True)
     language = models.CharField(max_length=255, help_text="Preferred Language", default="english", choices=LANGUAGES_CHOICES)
     has_confirmed = models.BooleanField(default=False, help_text="Has this User confirmed their registration?")
+
+GENDER_CHOICES = (("bo", "boy"), ("gi", "girl"))
+PLACE_CHOICES = (("h", "home"), ("f", "facility"))
+
+class BirthRegistration(models.Model):
+    """
+    Database representation of a birth registration form
+    """
+    contact = models.ForeignKey(Contact, null=True)
+    connection = models.ForeignKey(Connection)
+    unique_id = models.CharField(max_length=255, null=True, blank=True)
+    date = models.DateField()
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
+    place = models.CharField(max_length=1, choices=PLACE_CHOICES)
+    complications = models.BooleanField(default=False)
+    number = models.IntegerField(default=1)
+
+PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
+
+class DeathRegistration(models.Model):
+    """
+    Database representation of a death registration form
+    """
+    contact = models.ForeignKey(Contact, null=True)
+    connection = models.ForeignKey(Connection)
+    unique_id = models.CharField(max_length=255, null=True, blank=True)
+    date = models.DateField()
+    person = models.CharField(max_length=3, choices=PERSON_CHOICES)
+    place = models.CharField(max_length=1, choices=PLACE_CHOICES)
+        
+    
+    

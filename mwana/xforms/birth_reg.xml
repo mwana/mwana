@@ -22,7 +22,7 @@
             <bind nodeset="/data/gender" />
             <bind nodeset="/data/birth_place" />
             <bind nodeset="/data/complications" />
-            <bind nodeset="/data/num_children" type="xsd:int" constraint=". &gt; 0 and . &lt; 10" />
+            <bind nodeset="/data/num_children" />
             <itext>
                 <translation lang="en" default="">
                     <text id="unique_id-label">
@@ -67,6 +67,24 @@
                     <text id="num_children-label">
                         <value>Number of Children</value>
                     </text>
+                    <text id="num_children-t1-label">
+                        <value>T1</value>
+                    </text>
+                    <text id="num_children-t3-label">
+                        <value>T3</value>
+                    </text>
+                    <text id="num_children-t4-label">
+                        <value>T4</value>
+                    </text>
+                    <text id="num_children-t5-label">
+                        <value>T5</value>
+                    </text>
+                    <text id="num_children-t6-label">
+                        <value>T6</value>
+                    </text>
+                    <text id="num_children-t2-label">
+                        <value>T2</value>
+                    </text>
                 </translation>
             </itext>
         </model>
@@ -88,22 +106,22 @@
             <label ref="jr:itext('gender-label')" />
             <item>
                 <label ref="jr:itext('gender-boy-label')" />
-                <value>boy</value>
+                <value>bo</value>
             </item>
             <item>
                 <label ref="jr:itext('gender-girl-label')" />
-                <value>girl</value>
+                <value>gi</value>
             </item>
         </select1>
         <select1 ref="/data/birth_place">
             <label ref="jr:itext('birth_place-label')" />
             <item>
                 <label ref="jr:itext('birth_place-home-label')" />
-                <value>home</value>
+                <value>h</value>
             </item>
             <item>
                 <label ref="jr:itext('birth_place-facility-label')" />
-                <value>facility</value>
+                <value>f</value>
             </item>
         </select1>
         <select1 ref="/data/complications">
@@ -117,8 +135,32 @@
                 <value>no</value>
             </item>
         </select1>
-        <input ref="/data/num_children">
+        <select1 ref="/data/num_children">
             <label ref="jr:itext('num_children-label')" />
-        </input>
+            <item>
+                <label ref="jr:itext('num_children-t1-label')" />
+                <value>t1</value>
+            </item>
+            <item>
+                <label ref="jr:itext('num_children-t2-label')" />
+                <value>t2</value>
+            </item>
+            <item>
+                <label ref="jr:itext('num_children-t3-label')" />
+                <value>t3</value>
+            </item>
+            <item>
+                <label ref="jr:itext('num_children-t4-label')" />
+                <value>t4</value>
+            </item>
+            <item>
+                <label ref="jr:itext('num_children-t5-label')" />
+                <value>t5</value>
+            </item>
+            <item>
+                <label ref="jr:itext('num_children-t6-label')" />
+                <value>t6</value>
+            </item>
+        </select1>
     </h:body>
 </h:html>
