@@ -30,7 +30,7 @@ env.project = 'mwana'
 env.code_repo = 'git@github.com:mwana/mwana.git'
 env.country = 'zambia'
 env.pip_requires_filename = 'from_www_libs.txt'
-env.apache_port = '80'
+env.apache_ports = ['80']
 
 def _setup_path():
     # using posixpath to ensure unix style slashes. See bug-ticket: http://code.fabfile.org/attachments/61/posixpath.patch
@@ -79,7 +79,7 @@ def production():
     env.user = 'mwana'
     env.sudo_user = 'mwana'
     env.environment = 'production'
-    env.apache_port = '9005'
+    env.apache_ports = ['80', '9005']
     env.server_port = '9001'
     env.server_name = 'smgl-production'
 #    env.hosts = ['10.84.168.98']
@@ -380,6 +380,8 @@ def upload_apache_conf():
     _set_apache_user()
     template = posixpath.join(os.path.dirname(__file__), 'services', 'templates', 'apache.conf')
     destination = '/var/tmp/apache.conf.temp'
+    port_string = " ".join(["*:%s" % p for p in env.apache_ports])
+    env.apache_port_string = port_string
     files.upload_template(template, destination, context=env, use_sudo=True)
     enabled =  posixpath.join(env.services, u'apache/%(environment)s.conf' % env)
     sudo('chown -R %s %s' % (env.sudo_user, destination))
