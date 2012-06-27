@@ -1558,7 +1558,7 @@
     "model": "smgl.xformkeywordhandler", 
     "fields": {
       "keyword": "reg", 
-      "function_path": "mwana.apps.smgl.app.pregnant_registration"
+      "function_path": "mwana.apps.smgl.keyword_handlers.pregnant_registration"
     }
   }, 
   {

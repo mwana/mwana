@@ -3,7 +3,7 @@ import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
 from mwana.apps.smgl.models import PreRegistration
-from mwana.apps.smgl.app import _send_msg, _get_value_for_command,NOT_PREREGISTERED, get_location, \
+from mwana.apps.smgl.app import send_msg, get_value_from_form,NOT_PREREGISTERED, \
     FACILITY_NOT_RECOGNIZED, get_contacttype, CONTACT_TYPE_NOT_RECOGNIZED, _get_or_create_zone, \
     ZONE_SPECIFIED_BUT_NOT_CBA, ALREADY_REGISTERED, USER_SUCCESS_REGISTERED
 
@@ -23,7 +23,7 @@ def join_secure(session, xform, router):
     except ObjectDoesNotExist:
         logger.debug('Could not find a PreRegistration Object corresponding to the identity:%s' % connection.identity)
         logger.debug('Prereg objects are: %s' % PreRegistration.objects.all())
-        _send_msg(connection, NOT_PREREGISTERED, router)
+        send_msg(connection, NOT_PREREGISTERED, router)
         return True
 
     if prereg.has_confirmed:
@@ -33,7 +33,7 @@ def join_secure(session, xform, router):
             "readable_user_type": contact.types.all()[0].name,
             "facility": contact.location.name
         })
-        _send_msg(session.connection, ALREADY_REGISTERED, router, **session.template_vars)
+        send_msg(session.connection, ALREADY_REGISTERED, router, **session.template_vars)
         return True
     else:
         return join_generic(session, xform, prereg, router)
@@ -59,10 +59,10 @@ def join_generic(session, xform, prereg, router):
     reg_type = prereg.title.lower()
     fname = prereg.first_name #these provided in pre-reg info
     lname = prereg.last_name
-    name = _get_value_for_command('name', xform) #this provided by user
+    name = get_value_from_form('name', xform) #this provided by user
     zone_name = prereg.zone
     uid = prereg.unique_id
-    language = (_get_value_for_command('language', xform) or prereg.language).lower()
+    language = (get_value_from_form('language', xform) or prereg.language).lower()
 
     session.template_vars.update({
         'reg_type': reg_type,
@@ -75,12 +75,12 @@ def join_generic(session, xform, prereg, router):
     })
 
     if not prereg.location:
-        _send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **session.template_vars)
+        send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **session.template_vars)
         return True
-    contactType, error = get_contacttype(session, reg_type)
+    contactType = get_contacttype(reg_type)
     session.template_vars.update({"title": reg_type, "facility": prereg.location.name})
-    if error:
-        _send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router, **session.template_vars)
+    if not contactType:
+        send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router, **session.template_vars)
         return True
     #update the template dict to have a human readable name of the type of contact we're registering
     session.template_vars.update({"readable_user_type": contactType.name})
@@ -90,7 +90,7 @@ def join_generic(session, xform, prereg, router):
         zone, error = _get_or_create_zone(prereg.location, zone_name)
     elif zone_name and reg_type != 'cba':
         logger.debug('Zone field was specified even though registering type is not CBA')
-        _send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **session.template_vars)
+        send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **session.template_vars)
         return True
 
     # UID constraints (like isnum and length) should be caught by the 
@@ -112,7 +112,7 @@ def join_generic(session, xform, prereg, router):
     if contactType not in types:
         contact.types.add(contactType)
     else: #Already registered
-        _send_msg(connection, ALREADY_REGISTERED, router, **session.template_vars)
+        send_msg(connection, ALREADY_REGISTERED, router, **session.template_vars)
         return True
     contact.location = prereg.location
     contact.save()
@@ -121,6 +121,6 @@ def join_generic(session, xform, prereg, router):
     prereg.contact = contact
     prereg.has_confirmed = True
     prereg.save()
-    _send_msg(connection, USER_SUCCESS_REGISTERED, router, **session.template_vars)
+    send_msg(connection, USER_SUCCESS_REGISTERED, router, **session.template_vars)
     return True
 

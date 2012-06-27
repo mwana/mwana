@@ -1,14 +1,15 @@
 from rapidsms.messages import OutgoingMessage
-from mwana.apps.smgl.app import REFERRAL_RESPONSE, get_location,\
+from mwana.apps.smgl.app import REFERRAL_RESPONSE, \
     FACILITY_NOT_RECOGNIZED
 from mwana.apps.smgl.models import Referral
+from mwana.apps.smgl.utils import get_location
 
 def refer(session, xform, router):
     name = session.connection.contact.name if session.connection.contact else ""
     
     mother_id = xform.xpath("form/unique_id")
     facility_id = xform.xpath("form/facility")
-    loc = get_location(session, facility_id)
+    loc = get_location(facility_id)
     if not loc:
         router.outgoing(OutgoingMessage(session.connection, 
                                         FACILITY_NOT_RECOGNIZED % { 

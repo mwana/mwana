@@ -6,9 +6,8 @@ from .models import XFormKeywordHandler, FacilityVisit
 
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
-from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
-from mwana import const
+from mwana import const as mwanaconst
 
 from rapidsms.models import Contact
 from rapidsms.messages import OutgoingMessage
@@ -17,7 +16,10 @@ from dimagi.utils.modules import to_function
 
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
-from mwana.apps.smgl.utils import get_date
+from mwana.apps.smgl.utils import get_contacttype, send_msg,\
+    get_value_from_form, make_date
+from mwana.apps.smgl import const
+from mwana.apps.contactsplus.models import ContactType
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -30,21 +32,14 @@ ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_use
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the User Type '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
 USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
-MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!")
 NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
-DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
-                                       "DD MM YYYY. Please try again.")
-DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format "
-                                    "YYYY (four digit year). Please try again.")
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
 INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
 ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if you see this")
 ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
 ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
-FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
-FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
 NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance or DMO")
 THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
@@ -56,8 +51,6 @@ AMB_OUTCOME_NO_OUTCOME = _("No OUTCOME Specified.  Please send an outcome!")
 AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
 AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
 AMB_OUTCOME_FILED = _("A patient outcome for an Emergency Response for Patient (%(unique_id)s) has been filed by %(name)s (%(contact_type)s)")
-LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
-DATE_NOT_OPTIONAL = _("This date is not optional!")
 ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
 
@@ -98,37 +91,13 @@ def _generate_uid_for_er():
 
     return uid
 
-def _send_msg(connection, txt, router, **kwargs):
-    logger.debug('Sending Message: Connection: %s, txt: %s, kwargs: %s' % (connection, txt, kwargs))
-    omsg = OutgoingMessage(connection, txt, **kwargs)
-    router.outgoing(omsg)
 
-def _get_value_for_command(command, xform):
-    return xform.xpath('form/%s' % command)
 
-def _get_valid_model(model,slug=None,name=None, iexact=False):
-    if not slug and not name:
-        logger.debug('No location name or slug specified while attempting to get valid model for %s' % model)
-        return None
-    try:
-        if slug:
-            if not iexact:
-                return model.objects.get(slug=slug)
-            else:
-                return model.objects.get(slug__iexact=slug)
-        else:
-            if not iexact:
-                return model.objects.get(name=name)
-            else:
-                return model.objects.get(name__iexact=name)
-    except ObjectDoesNotExist:
-        return None
-
- # Taken from mwana.apps.agents.handler.agrent.AgentHandler
+# Taken from mwana.apps.agents.handler.agrent.AgentHandler
 
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
-    zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
+    zone_type, _ = LocationType.objects.get_or_create(slug=mwanaconst.ZONE_SLUGS[0])
     return Location.objects.get_or_create(name__iexact=name,
                                 parent=clinic,
                                 type=zone_type,
@@ -137,197 +106,54 @@ def _get_or_create_zone(clinic, name):
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
 
-def get_location(session, facility):
-    return _get_valid_model(Location, slug=facility, iexact=True)
-    
-def get_contacttype(session, reg_type):
-    contactType = _get_valid_model(ContactType, slug=reg_type, iexact=True)
-    error = False
-    if not contactType:
-        error=True
-    return contactType, error
-
-
-
 def _get_allowed_ambulance_workflow_contact(session):
     connection = session.connection
-    tn_type, error = get_contacttype(session, 'tn')
-    amb_type, error = get_contacttype(session, 'am')
-    other_type, error = get_contacttype(session, 'dmo')
-    cw_type, error = get_contacttype(session, 'worker')
-    types = [tn_type, amb_type, other_type, cw_type]
+    legal_types = ['tn', 'am', 'dmo', 'worker']
     try:
-        contact = Contact.objects.get(connection=connection, types__in=types)
+        contact = Contact.objects.get(connection=connection, types__slug__in=legal_types)
         return contact
     except ObjectDoesNotExist:
         return None
 
-def _make_date(form, dd, mm, yy, is_optional=False):
-    """
-    Returns a tuple: (datetime.date, ERROR_MSG)
-    ERROR_MSG will be empty if datetime.date is sucesfully constructed.
-    Be sure to include the dictionary key-value "date_name": DATE_NAME
-    when sending out the error message as an outgoing message.
-    """
-    # this method has been hacked together to preserve
-    # original functionality. should be considered deprecated, though.
-    try:
-        date = get_date(form, dd, mm, yy)
-    except ValueError:
-        return None, DATE_INCORRECTLY_FORMATTED_GENERAL
-    
-    if not date and not is_optional:
-        return None, DATE_NOT_OPTIONAL
-    
-    if datetime.date(1900, 1, 1) > date:
-        return None, DATE_YEAR_INCORRECTLY_FORMATTED
-
-    return date, None
 
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
 ##===========================================================================##
-def pregnant_registration(session, xform, router):
-    """
-    Handler for REG keyword (registration of pregnant mothers).
-    Format:
-    REG Mother_UID FIRST_NAME LAST_NAME HIGH_RISK_HISTORY FOLLOW_UP_DATE_dd FOLLOW_UP_DATE_mm FOLLOW_UP_DATE_yyyy \
-        REASON_FOR_VISIT(ROUTINE/NON-ROUTINE) ZONE LMP_dd LMP_mm LMP_yyyy EDD_dd EDD_mm EDD_yyyy
-    """
-    logger.debug('Handling the REG keyword form')
-
-    #Create a contact for this connection.  If it already exists,
-    #Verify that it is a contact of the specified type. If not,
-    #Add it.  If it does already have that type associated with it
-    # Return a message indicating that it is already registered.
-    #Same logic for facility.
-    connection = session.connection
-
-    #We must get the location from the Contact (Data Associate) who should be registered with this
-    #phone number.  If the contact does not exist (unregistered) we throw an error.
-    contactType, error = get_contacttype(session, 'da') #da = Data Associate
-    if error:
-        _send_msg(connection, NOT_A_DATA_ASSOCIATE, router)
-        return True
-    logging.debug('Data associate:: Connection: %s, Type: %s' % (connection, contactType))
-    try:
-        data_associate = Contact.objects.get(connection=connection, types=contactType)
-    except ObjectDoesNotExist:
-        logger.info("Data Associate Contact not found.  Mother cannot be correctly registered!")
-        _send_msg(connection, NOT_REGISTERED_FOR_DATA_ASSOC, router)
-        return True
-
-
-    #get or create a new Mother Object without saving the object (and triggering premature errors)
-    uid = _get_value_for_command('unique_id', xform)
-    try:
-        mother = PregnantMother.objects.get(uid=uid)
-    except ObjectDoesNotExist:
-        mother = PregnantMother()
-
-    mother.first_name = _get_value_for_command('first_name', xform)
-    mother.last_name = _get_value_for_command('last_name', xform)
-    mother.uid = uid
-    mother.high_risk_history = _get_value_for_command('high_risk_factor', xform)
-
-
-
-    next_visit, error_msg = _make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
-    session.template_vars.update({
-        "date_name": "Next Visit",
-        "error_msg": error_msg,
-        })
-    if error_msg:
-        _send_msg(connection, error_msg, router, **session.template_vars)
-        return True
-    mother.next_visit = next_visit
-
-    mother.reason_for_visit = _get_value_for_command('visit_reason', xform)
-    zone_name = _get_value_for_command('zone', xform)
-
-    lmp_date, error_msg = _make_date(xform, "lmp_dd", "lmp_mm", "lmp_yy", is_optional=True)
-    session.template_vars.update({
-        "date_name": "LMP",
-        "error_msg": error_msg,
-        })
-    if error_msg:
-        _send_msg(connection, error_msg, router,  **session.template_vars)
-        return True
-
-    edd_date, error_msg = _make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
-    session.template_vars.update({
-        "date_name": "EDD",
-        "error_msg": error_msg,
-        })
-    if error_msg:
-        _send_msg(connection, error_msg, router,  **session.template_vars)
-        return True
-
-    if lmp_date is None and edd_date is None:
-        _send_msg(connection, LMP_OR_EDD_DATE_REQUIRED, router,  **session.template_vars)
-
-    mother.lmp = lmp_date
-    mother.edd = edd_date
-
-    logger.debug('Mother UID: %s' % mother.uid)
-
-    #Create the mother model obj if it doesn't exist
-    mother.location = data_associate.location
-    if zone_name:
-        mother.zone = _get_or_create_zone(mother.location, zone_name)
-
-    mother.contact = data_associate
-    mother.save()
-
-    #Create a facility visit object and link it to the mother
-    visit = FacilityVisit()
-    visit.location = mother.location
-    visit.visit_date = datetime.date.today()
-    visit.reason_for_visit = 'initial_registration'
-    visit.next_visit = mother.next_visit
-    visit.mother = mother
-    visit.contact = data_associate
-    visit.save()
-    session.template_vars["name"] = mother.contact.name
-    session.template_vars["unique_id"] = mother.uid
-    _send_msg(connection, MOTHER_SUCCESS_REGISTERED, router,  **session.template_vars)
-    #prevent default response
-    return True
 
 def follow_up(session, xform, router):
     connection = session.connection
+    da_type = ContactType.objects.get(slug__iexact='da')
     try:
-        da_type, error = get_contacttype(session, 'da')
         contact = Contact.objects.get(types=da_type, connection=connection)
     except ObjectDoesNotExist:
-        _send_msg(connection, NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
+        send_msg(connection, NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
         return True
-    unique_id = _get_value_for_command('unique_id', xform)
+    unique_id = get_value_from_form('unique_id', xform)
     session.template_vars.update({"unique_id": unique_id})
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        _send_msg(connection, FUP_MOTHER_DOES_NOT_EXIST, router, **session.template_vars)
+        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router, **session.template_vars)
         return True
 
-    edd_date, error_msg = _make_date(xform, "edd_dd", "edd_mm", "edd_yy")
+    edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy")
     session.template_vars.update({
         "date_name": "EDD",
         "error_msg": error_msg,
         })
     if error_msg:
-        _send_msg(connection, error_msg, router, **session.template_vars)
+        send_msg(connection, error_msg, router, **session.template_vars)
         return True
 
-    visit_reason = _get_value_for_command('visit_reason', xform)
+    visit_reason = get_value_from_form('visit_reason', xform)
 
-    next_visit, error_msg = _make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
+    next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     session.template_vars.update({
         "date_name": "Next Visit",
         "error_msg": error_msg,
         })
     if error_msg:
-        _send_msg(connection, error_msg, router, **session.template_vars)
+        send_msg(connection, error_msg, router, **session.template_vars)
         return True
 
     # Make the follow up facility visit 
@@ -340,7 +166,7 @@ def follow_up(session, xform, router):
     visit.next_visit = next_visit
     visit.save()
     
-    _send_msg(connection, FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
+    send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
 
 
 
