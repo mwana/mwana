@@ -23,7 +23,7 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 from mwana.util import get_clinic_or_default
-from rapidsms.contrib.scheduler.models import EventSchedule
+from scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Connection
 from rapidsms.models import Contact
@@ -244,7 +244,7 @@ class App (rapidsms.apps.base.AppBase):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
-                                      {'minutes': [0], 'hours': '*'})
+                                      {'minutes': [0], 'hours': ['*']})
         EventSchedule.objects.create(callback=callback, ** schedule)
 
     def schedule_send_results_to_printer_task(self):

@@ -2,7 +2,7 @@ import mwana.apps.alerts.tasks
 # vim: ai ts=4 sts=4 et sw=4
 import logging
 import rapidsms
-from rapidsms.contrib.scheduler.models import EventSchedule
+from scheduler.models import EventSchedule
 from mwana.apps.alerts.tasks import send_clinics_not_retrieving_results_alerts
 
 logger = logging.getLogger(__name__)

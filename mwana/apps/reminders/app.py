@@ -4,7 +4,7 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule
+from scheduler.models import EventSchedule
 
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility

@@ -2,7 +2,7 @@
 import logging
 import rapidsms
 from mwana.apps.labresults.messages import *
-from rapidsms.contrib.scheduler.models import EventSchedule
+from scheduler.models import EventSchedule
 
 logger = logging.getLogger(__name__)
 

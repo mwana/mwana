@@ -3,7 +3,7 @@ import logging
 
 from mwana.apps.userverification.models import UserVerification
 import rapidsms
-from rapidsms.contrib.scheduler.models import EventSchedule
+from scheduler.models import EventSchedule
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

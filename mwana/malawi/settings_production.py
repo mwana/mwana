@@ -31,7 +31,7 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
 #    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+#    ('scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
