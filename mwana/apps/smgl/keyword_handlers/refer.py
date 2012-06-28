@@ -19,6 +19,11 @@ def refer(session, xform, router):
         referral = Referral(facility=loc, form_id=xform.get_id,
                             session=session)
         referral.set_mother(mother_id)
+        reasons = xform.xpath("form/reason")
+        if reasons:
+            for r in reasons.split(" "):
+                referral.set_reason(r)
+        referral.status = xform.xpath("form/status")
         referral.save()
         resp = REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
         router.outgoing(OutgoingMessage(session.connection, resp))

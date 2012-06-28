@@ -138,10 +138,53 @@ class AmbulanceOutcome(models.Model):
     outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
 
 
+REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
+
 class Referral(FormReferenceBase, MotherReferenceBase):
+    REFERRAL_REASONS = {
+        "fd":    "Fetal Distress",
+        "pec":   "Pre-Eclampsia",
+        "ec":    "Eclampsia",
+        "hbp":   "High Blood Pressure",
+        "pph":   "Post-Partum Hemorrhage",
+        "aph":   "Antepartum Hemorrhage",
+        "pl":    "Prolonged Labor",
+        "cpd":   "Big Baby Small Pelvis",
+        "other": "Other",
+    }
     facility = models.ForeignKey(Location, 
                                  help_text="The referred facility")
+    
+    status = models.CharField(max_length=3, 
+                              choices=REFERRAL_STATUS_CHOICES,
+                              null=True, blank=True)
+    # TODO: clarity on time
+    # time = models.TimeField()
+    
+    # this will make reporting easier than dealing with another table
+    reason_fd = models.BooleanField(default=False)
+    reason_pec = models.BooleanField(default=False)
+    reason_ec = models.BooleanField(default=False)
+    reason_hbp = models.BooleanField(default=False)
+    reason_pph = models.BooleanField(default=False)
+    reason_aph = models.BooleanField(default=False)
+    reason_pl = models.BooleanField(default=False)
+    reason_cpd = models.BooleanField(default=False)
+    reason_other = models.BooleanField(default=False)
 
+    def set_reason(self, code, val=True):
+        assert code in self.REFERRAL_REASONS
+        setattr(self, "reason_%s" % code, val)
+    
+    def get_reason(self, code):
+        assert code in self.REFERRAL_REASONS
+        return getattr(self, "reason_%s" % code)
+    
+    def get_reasons(self):
+        for c in self.REFERRAL_REASONS:
+            if self.get_reason(c):
+                yield c
+        
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
         ('en', 'English'),

@@ -1,34 +1,135 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
-	<h:head>
-		<h:title>Referral</h:title>
-		<model>
-			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/6BFE6EC2-4553-4030-B67D-57C879492824" uiVersion="1" version="1" name="Referral">
-					<unique_id />
-					<facility />
-				</data>
-			</instance>
-			<bind nodeset="/data/unique_id" type="xsd:string" />
-			<bind nodeset="/data/facility" type="xsd:string" />
-			<itext>
-				<translation lang="en" default="">
-					<text id="unique_id-label">
-						<value>Safe Motherhood Number</value>
-					</text>
-					<text id="facility-label">
-						<value>Referral Facility</value>
-					</text>
-				</translation>
-			</itext>
-		</model>
-	</h:head>
-	<h:body>
-		<input ref="/data/unique_id">
-			<label ref="jr:itext('unique_id-label')" />
-		</input>
-		<input ref="/data/facility">
-			<label ref="jr:itext('facility-label')" />
-		</input>
-	</h:body>
+    <h:head>
+        <h:title>Referral</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/6BFE6EC2-4553-4030-B67D-57C879492824" uiVersion="1" version="1" name="Referral">
+                    <unique_id />
+                    <facility />
+                    <reason />
+                    <time />
+                    <status />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string" />
+            <bind nodeset="/data/facility" type="xsd:string" />
+            <bind nodeset="/data/reason" />
+            <bind nodeset="/data/time" type="xsd:string" />
+            <bind nodeset="/data/status" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Safe Motherhood Number</value>
+                    </text>
+                    <text id="facility-label">
+                        <value>Referral Facility</value>
+                    </text>
+                    <text id="reason-label">
+                        <value>Reason for referral</value>
+                    </text>
+                    <text id="time-label">
+                        <value>Time</value>
+                    </text>
+                    <text id="status-label">
+                        <value>Status</value>
+                    </text>
+                    <text id="status-em-label">
+                        <value>em</value>
+                    </text>
+                    <text id="status-nem-label">
+                        <value>nem</value>
+                    </text>
+                    <text id="reason-fd-label">
+                        <value>fd</value>
+                    </text>
+                    <text id="reason-pec-label">
+                        <value>pec</value>
+                    </text>
+                    <text id="reason-ec-label">
+                        <value>ec</value>
+                    </text>
+                    <text id="reason-hbp-label">
+                        <value>hbp</value>
+                    </text>
+                    <text id="reason-pph-label">
+                        <value>pph</value>
+                    </text>
+                    <text id="reason-ap-label">
+                        <value>aph</value>
+                    </text>
+                    <text id="reason-pl-label">
+                        <value>pl</value>
+                    </text>
+                    <text id="reason-cpd-label">
+                        <value>cpd</value>
+                    </text>
+                    <text id="reason-other-label">
+                        <value>other</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <input ref="/data/facility">
+            <label ref="jr:itext('facility-label')" />
+        </input>
+        <select ref="/data/reason">
+            <label ref="jr:itext('reason-label')" />
+            <item>
+                <label ref="jr:itext('reason-fd-label')" />
+                <value>fd</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-pec-label')" />
+                <value>pec</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-ec-label')" />
+                <value>ec</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-hbp-label')" />
+                <value>hbp</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-pph-label')" />
+                <value>pph</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-ap-label')" />
+                <value>ap</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-pl-label')" />
+                <value>pl</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-cpd-label')" />
+                <value>cpd</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-other-label')" />
+                <value>other</value>
+            </item>
+        </select>
+        <input ref="/data/time">
+            <label ref="jr:itext('time-label')" />
+        </input>
+        <select1 ref="/data/status">
+            <label ref="jr:itext('status-label')" />
+            <item>
+                <label ref="jr:itext('status-em-label')" />
+                <value>em</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-nem-label')" />
+                <value>nem</value>
+            </item>
+        </select1>
+    </h:body>
 </h:html>

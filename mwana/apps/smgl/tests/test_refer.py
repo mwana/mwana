@@ -1,6 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import Referral
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED, REFERRAL_RESPONSE
+from mwana.apps.locations.models import Location
 
 
 class SMGLReferTest(SMGLSetUp):
@@ -18,7 +19,7 @@ class SMGLReferTest(SMGLSetUp):
         # bad code
         bad_code_resp = FACILITY_NOT_RECOGNIZED % { "facility": "notaplace" }
         script = """
-            %(num)s > refer 1234 notaplace
+            %(num)s > refer 1234 notaplace hbp 1200 nem
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": bad_code_resp }
         self.runScript(script)
@@ -28,11 +29,16 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = REFERRAL_RESPONSE % {"name": self.name, 
                                             "unique_id": "1234"}
         script = """
-            %(num)s > refer 1234 804024
+            %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
         """ % { "num": self.user_number, "resp": success_resp }
         self.runScript(script)
         
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
+        self.assertEqual(Location.objects.get(slug__iexact="804024"), referral.facility)
+        self.assertTrue(referral.reason_hbp)
+        self.assertEqual(["hbp"], list(referral.get_reasons()))
+        self.assertEqual("nem", referral.status)
+        
         
