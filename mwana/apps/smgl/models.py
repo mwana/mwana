@@ -33,6 +33,10 @@ class PregnantMother(models.Model):
     reason_for_visit = models.CharField(max_length=160, choices=REASON_FOR_VISIT_CHOICES)
     zone = models.CharField(max_length=160, null=True, blank=True)
 
+    @property
+    def name(self):
+        return "%s %s" % (self.first_name, self.last_name)
+    
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
 

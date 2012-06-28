@@ -11,12 +11,13 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.createDefaults()
         self.user_number = "15"
         self.name = "AntonDA"
-        
-    def testRegister(self):
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
+        
+        
+    def testRegister(self):
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
-                                                  "unique_id": "80403000000112" }
+                                                   "unique_id": "80403000000112" }
         script = """
             %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R 80402404 12 02 2012 18 11 2012
             %(num)s < %(resp)s            
@@ -27,8 +28,6 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, FacilityVisit.objects.count())
     
     def testRegisterWithBadZone(self):
-        self.assertEqual(0, PregnantMother.objects.count())
-        self.assertEqual(0, FacilityVisit.objects.count())
         resp = const.UNKOWN_ZONE % { "zone": "notarealzone" }
         script = """
             %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R notarealzone 12 02 2012 18 11 2012
@@ -37,6 +36,25 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
+    
+    def testLayCounselorNotification(self):
+        lay_num = "555666"
+        lay_name = "lay_counselor"
+        self.createUser(const.CTYPE_LAYCOUNSELOR, lay_num, lay_name, "80402404")
+        resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,
+                                                  "unique_id": "80403000000112" }
+        lay_msg = const.NEW_MOTHER_NOTIFICATION % {"mother": "Mary SOKO",
+                                                   "unique_id": "80403000000112" }
+        script = """
+            %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s < %(resp)s
+            %(lay_num)s < %(lay_msg)s
+        """ % { "num": self.user_number, "resp": resp, 
+                "lay_num": lay_num, "lay_msg": lay_msg }
+        self.runScript(script)
+        self.assertEqual(1, PregnantMother.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
+    
     
     def testFollowUp(self):
         self.testRegister()
