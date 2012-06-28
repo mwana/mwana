@@ -1,7 +1,8 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import Referral
-from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED, REFERRAL_RESPONSE
+from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
 from mwana.apps.locations.models import Location
+from mwana.apps.smgl import const
 
 
 class SMGLReferTest(SMGLSetUp):
@@ -13,6 +14,8 @@ class SMGLReferTest(SMGLSetUp):
         self.user_number = "123"
         self.name = "Anton"
         self.createUser("worker", self.user_number)
+        self.createUser(const.CTYPE_DATAASSOCIATE, "666777")
+        self.createUser(const.CTYPE_TRIAGENURSE, "666888")
         
     def testRefer(self):
         self.assertEqual(0, Referral.objects.count())
@@ -26,12 +29,16 @@ class SMGLReferTest(SMGLSetUp):
         
         self.assertEqual(0, Referral.objects.count())
         
-        success_resp = REFERRAL_RESPONSE % {"name": self.name, 
-                                            "unique_id": "1234"}
+        success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
+                                                  "unique_id": "1234"}
+        notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234"}
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
-        """ % { "num": self.user_number, "resp": success_resp }
+            %(danum)s < %(notif)s
+            %(tnnum)s < %(notif)s
+        """ % {"num": self.user_number, "resp": success_resp, 
+               "danum": "666777", "tnnum": "666888", "notif": notif}
         self.runScript(script)
         
         [referral] = Referral.objects.all()

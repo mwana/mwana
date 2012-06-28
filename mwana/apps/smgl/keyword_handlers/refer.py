@@ -1,8 +1,10 @@
 from rapidsms.messages import OutgoingMessage
-from mwana.apps.smgl.app import REFERRAL_RESPONSE, \
-    FACILITY_NOT_RECOGNIZED
+from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
 from mwana.apps.smgl.models import Referral
 from mwana.apps.smgl.utils import get_location
+from mwana.apps.smgl import const
+from mwana.apps.contactsplus.models import ContactType
+from rapidsms.models import Contact
 
 def refer(session, xform, router):
     name = session.connection.contact.name if session.connection.contact else ""
@@ -25,6 +27,16 @@ def refer(session, xform, router):
                 referral.set_reason(r)
         referral.status = xform.xpath("form/status")
         referral.save()
-        resp = REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
+        resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
         router.outgoing(OutgoingMessage(session.connection, resp))
+        for c in _get_people_to_notify(referral):
+            if c.default_connection:
+                msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id}
+                router.outgoing(OutgoingMessage(c.default_connection, msg))
     return True
+
+def _get_people_to_notify(referral):
+    types = ContactType.objects.filter\
+        (slug__in=[const.CTYPE_DATAASSOCIATE,
+                   const.CTYPE_TRIAGENURSE]).all()
+    return Contact.objects.filter(types__in=types, location=referral.facility)

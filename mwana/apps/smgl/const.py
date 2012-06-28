@@ -10,6 +10,7 @@ LOCTYPE_ZONE = "zone"
 # contact type slugs
 CTYPE_LAYCOUNSELOR = "cba" # TODO: confirm / change if not correct
 CTYPE_DATAASSOCIATE = "da"
+CTYPE_TRIAGENURSE = 'tn'
 
 # shared messages
 DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
@@ -27,3 +28,7 @@ NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id
 # pregnancy follow up messages
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
+
+# referrals
+REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
+REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been made. Please expect the mother.")

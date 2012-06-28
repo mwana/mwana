@@ -54,8 +54,6 @@ AMB_OUTCOME_FILED = _("A patient outcome for an Emergency Response for Patient (
 ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
 
-# referrals
-REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 
 BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been registered.")
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
