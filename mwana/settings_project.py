@@ -104,7 +104,7 @@ INSTALLED_APPS = [
 
     # "mwana.apps.patienttracing",
     # "mwana.apps.hub_workflow",
-    "mwana.apps.stringcleaning",
+    # "mwana.apps.stringcleaning",
 # This app should always come last to prevent it from hijacking other apps that handle default messages
     "mwana.apps.default",
 ]
