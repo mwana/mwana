@@ -33,6 +33,8 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(date(2012, 2, 12), mom.lmp)
         self.assertEqual(date(2012, 11, 18), mom.edd)
         self.assertEqual(date(2012, 8, 4), mom.next_visit)
+        self.assertTrue(mom.risk_reason_none)
+        self.assertEqual(["none"], list(mom.get_risk_reasons()))
         self.assertEqual("r", mom.reason_for_visit)
         
         self.assertEqual(1, FacilityVisit.objects.count())
@@ -43,7 +45,24 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(date(2012, 11, 18), visit.edd)
         self.assertEqual(date(2012, 8, 4), visit.next_visit)
         
-    
+    def testRegisterMultipleReasons(self):
+        resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
+                                                   "unique_id": "80403000000112" }
+        reasons = "csec,cmp,gd,hbp"
+        script = """
+            %(num)s > REG 80403000000112 Mary Soko %(reasons)s 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp, "reasons": reasons }
+        self.runScript(script)
+        
+        mom = PregnantMother.objects.get(uid='80403000000112')
+        rback = list(mom.get_risk_reasons())
+        self.assertEqual(4, len(rback))
+        for r in reasons.split(","):
+            self.assertTrue(r in rback)
+            self.assertTrue(mom.get_risk_reason(r))
+            self.assertTrue(getattr(mom, "risk_reason_%s" % r))
+        
     def testRegisterWithBadZone(self):
         resp = const.UNKOWN_ZONE % { "zone": "notarealzone" }
         script = """

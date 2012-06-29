@@ -16,6 +16,16 @@ class XFormKeywordHandler(models.Model):
 
 
 class PregnantMother(models.Model):
+    HI_RISK_REASONS = {
+        "csec": "C-Section",
+        "cmp": "Complications during previous pregnancy",
+        "gd": "Gestational Diabetes",
+        "hbp": "High Blood Pressure",
+        "psb": "Previous still born",
+        "oth": "Other",
+        "none": "None"
+    }
+    
     contact = models.ForeignKey(Contact, help_text="The contact that registered this mother")
     location = models.ForeignKey(Location)
     first_name = models.CharField(max_length=160)
@@ -23,14 +33,34 @@ class PregnantMother(models.Model):
     uid = models.CharField(max_length=160, unique=True, help_text="The Unique Identifier associated with this mother")
     lmp = models.DateField(null=True, blank=True, help_text="Last Menstrual Period")
     edd = models.DateField(help_text="Estimated Date of Delivery", null=True, blank=True)
-    high_risk_history = models.CharField(max_length=160, help_text="The code indicating any high risk issues for this pregnant mother")
     next_visit = models.DateField(help_text="Date of next visit")
     reason_for_visit = models.CharField(max_length=160, choices=REASON_FOR_VISIT_CHOICES)
     zone = models.CharField(max_length=160, null=True, blank=True)
+    
+    risk_reason_csec = models.BooleanField(default=False)
+    risk_reason_cmp = models.BooleanField(default=False)
+    risk_reason_gd = models.BooleanField(default=False)
+    risk_reason_hbp = models.BooleanField(default=False)
+    risk_reason_psb = models.BooleanField(default=False)
+    risk_reason_oth = models.BooleanField(default=False)
+    risk_reason_none = models.BooleanField(default=False)
 
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
+    
+    def set_risk_reason(self, code, val=True):
+        assert code in self.HI_RISK_REASONS
+        setattr(self, "risk_reason_%s" % code, val)
+    
+    def get_risk_reason(self, code):
+        assert code in self.HI_RISK_REASONS
+        return getattr(self, "risk_reason_%s" % code)
+    
+    def get_risk_reasons(self):
+        for c in self.HI_RISK_REASONS:
+            if self.get_risk_reason(c):
+                yield c
     
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)

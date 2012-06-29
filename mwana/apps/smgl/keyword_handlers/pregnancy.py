@@ -57,8 +57,7 @@ def pregnant_registration(session, xform, router):
     
     mother.first_name = get_value_from_form('first_name', xform)
     mother.last_name = get_value_from_form('last_name', xform)
-    mother.high_risk_history = get_value_from_form('high_risk_factor', xform)
-
+    
     next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     if error_msg:
         send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
@@ -97,6 +96,11 @@ def pregnant_registration(session, xform, router):
             send_msg(connection, const.UNKOWN_ZONE, router, zone=zone_name)
             return True
 
+    reasons = xform.xpath("form/high_risk_factor")
+    if reasons:
+        for r in reasons.split(" "):
+            mother.set_risk_reason(r)
+    
     mother.contact = data_associate
     mother.save()
 
