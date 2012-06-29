@@ -1,6 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp 
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 from mwana.apps.smgl import const
+from datetime import date, datetime
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -19,18 +20,34 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
                                                    "unique_id": "80403000000112" }
         script = """
-            %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
         
         self.assertEqual(1, PregnantMother.objects.count())
+        mom = PregnantMother.objects.get(uid='80403000000112')
+        self.assertEqual(self.user_number, mom.contact.default_connection.identity)
+        self.assertEqual("Mary", mom.first_name)
+        self.assertEqual("Soko", mom.last_name)
+        self.assertEqual(date(2012, 2, 12), mom.lmp)
+        self.assertEqual(date(2012, 11, 18), mom.edd)
+        self.assertEqual(date(2012, 8, 4), mom.next_visit)
+        self.assertEqual("r", mom.reason_for_visit)
+        
         self.assertEqual(1, FacilityVisit.objects.count())
+        visit = FacilityVisit.objects.get(mother=mom)
+        self.assertEqual(self.user_number, visit.contact.default_connection.identity)
+        self.assertEqual("804024", visit.location.slug)
+        self.assertEqual("r", visit.reason_for_visit)
+        self.assertEqual(date(2012, 11, 18), visit.edd)
+        self.assertEqual(date(2012, 8, 4), visit.next_visit)
+        
     
     def testRegisterWithBadZone(self):
         resp = const.UNKOWN_ZONE % { "zone": "notarealzone" }
         script = """
-            %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R notarealzone 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R notarealzone 12 02 2012 18 11 2012
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
@@ -43,10 +60,10 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.createUser(const.CTYPE_LAYCOUNSELOR, lay_num, lay_name, "80402404")
         resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,
                                                   "unique_id": "80403000000112" }
-        lay_msg = const.NEW_MOTHER_NOTIFICATION % {"mother": "Mary SOKO",
+        lay_msg = const.NEW_MOTHER_NOTIFICATION % {"mother": "Mary Soko",
                                                    "unique_id": "80403000000112" }
         script = """
-            %(num)s > REG 80403000000112 Mary SOKO none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
             %(num)s < %(resp)s
             %(lay_num)s < %(lay_msg)s
         """ % { "num": self.user_number, "resp": resp, 

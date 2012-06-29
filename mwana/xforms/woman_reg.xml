@@ -29,7 +29,7 @@
             <bind nodeset="/data/next_visit_dd" type="xsd:string" />
             <bind nodeset="/data/next_visit_mm" type="xsd:string" />
             <bind nodeset="/data/next_visit_yy" type="xsd:string" />
-            <bind nodeset="/data/visit_reason" type="xsd:string" />
+            <bind nodeset="/data/visit_reason" />
             <bind nodeset="/data/zone" type="xsd:string" />
             <bind nodeset="/data/lmp_dd" type="xsd:string" />
             <bind nodeset="/data/lmp_mm" type="xsd:string" />
@@ -105,6 +105,12 @@
                     <text id="high_risk_factor-none-label">
                         <value>none</value>
                     </text>
+                    <text id="visit_reason-r-label">
+                        <value>R</value>
+                    </text>
+                    <text id="visit_reason-nr-label">
+                        <value>NR</value>
+                    </text>
                 </translation>
             </itext>
         </model>
@@ -159,9 +165,17 @@
         <input ref="/data/next_visit_yy">
             <label ref="jr:itext('next_visit_yy-label')" />
         </input>
-        <input ref="/data/visit_reason">
+        <select1 ref="/data/visit_reason">
             <label ref="jr:itext('visit_reason-label')" />
-        </input>
+            <item>
+                <label ref="jr:itext('visit_reason-r-label')" />
+                <value>r</value>
+            </item>
+            <item>
+                <label ref="jr:itext('visit_reason-nr-label')" />
+                <value>nr</value>
+            </item>
+        </select1>
         <input ref="/data/zone">
             <label ref="jr:itext('zone-label')" />
         </input>

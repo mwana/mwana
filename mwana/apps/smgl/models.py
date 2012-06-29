@@ -6,13 +6,8 @@ from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
 
 REASON_FOR_VISIT_CHOICES = (
-    ('initial_registration', 'Initial Registration'),
-    ('scheduled_checkup', 'Normal Scheduled Visit'),
-    ('referral', 'Referral from other Facility'),
-    ('emergency', 'Emergency visit from other Facility'),
-    ('routine', 'Routine Visit'),
-    ('non-routine', 'Non-Routine Visit'),
-    ('other', 'Other'),
+    ('r', 'Routine'),
+    ('nr', 'Non-Routine')
 )
 
 class XFormKeywordHandler(models.Model):
