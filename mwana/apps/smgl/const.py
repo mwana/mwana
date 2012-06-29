@@ -20,6 +20,9 @@ DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s
 DATE_NOT_OPTIONAL = _("This date is not optional!")
 UNKOWN_ZONE = _("There is no zone with code %(zone)s. Please check your code and try again.")
 
+NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
+NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
+
 # pregnancy messages
 LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
 MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!")

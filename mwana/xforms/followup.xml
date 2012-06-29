@@ -1,96 +1,96 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
-	<h:head>
-		<h:title>Follow Up Form</h:title>
-		<model>
-			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C" uiVersion="1" version="1" name="Follow Up Form">
-					<unique_id />
-					<edd_dd />
-					<edd_mm />
-					<edd_yy />
-					<visit_reason />
-					<next_visit_dd />
-					<next_visit_mm />
-					<next_visit_yy />
-				</data>
-			</instance>
-			<bind nodeset="/data/unique_id" type="xsd:string" />
-			<bind nodeset="/data/edd_dd" type="xsd:string" />
-			<bind nodeset="/data/edd_mm" type="xsd:string" />
-			<bind nodeset="/data/edd_yy" type="xsd:string" />
-			<bind nodeset="/data/visit_reason" />
-			<bind nodeset="/data/next_visit_dd" type="xsd:string" />
-			<bind nodeset="/data/next_visit_mm" type="xsd:string" />
-			<bind nodeset="/data/next_visit_yy" type="xsd:string" />
-			<itext>
-				<translation lang="en" default="">
-					<text id="unique_id-label">
-						<value>Woman's Unique ID</value>
-					</text>
-					<text id="edd_dd-label">
-						<value>Updated EDD Day (dd)</value>
-					</text>
-					<text id="edd_mm-label">
-						<value>Updated EDD Month (mm)</value>
-					</text>
-					<text id="edd_yy-label">
-						<value>Updated EDD Year (yyyy)</value>
-					</text>
-					<text id="visit_reason-label">
-						<value>Reason For Visit</value>
-					</text>
-					<text id="question5-r-label">
-						<value>R</value>
-					</text>
-					<text id="question5-nr-label">
-						<value>NR</value>
-					</text>
-					<text id="next_visit_dd-label">
-						<value>Next Visit Day (dd)</value>
-					</text>
-					<text id="next_visit_mm-label">
-						<value>Next Visit Month (mm)</value>
-					</text>
-					<text id="next_visit_yy-label">
-						<value>Next Visit Year (yyyy)</value>
-					</text>
-				</translation>
-			</itext>
-		</model>
-	</h:head>
-	<h:body>
-		<input ref="/data/unique_id">
-			<label ref="jr:itext('unique_id-label')" />
-		</input>
-		<input ref="/data/edd_dd">
-			<label ref="jr:itext('edd_dd-label')" />
-		</input>
-		<input ref="/data/edd_mm">
-			<label ref="jr:itext('edd_mm-label')" />
-		</input>
-		<input ref="/data/edd_yy">
-			<label ref="jr:itext('edd_yy-label')" />
-		</input>
-		<select1 ref="/data/visit_reason">
-			<label ref="jr:itext('visit_reason-label')" />
-			<item>
-				<label ref="jr:itext('question5-r-label')" />
-				<value>r</value>
-			</item>
-			<item>
-				<label ref="jr:itext('question5-nr-label')" />
-				<value>nr</value>
-			</item>
-		</select1>
-		<input ref="/data/next_visit_dd">
-			<label ref="jr:itext('next_visit_dd-label')" />
-		</input>
-		<input ref="/data/next_visit_mm">
-			<label ref="jr:itext('next_visit_mm-label')" />
-		</input>
-		<input ref="/data/next_visit_yy">
-			<label ref="jr:itext('next_visit_yy-label')" />
-		</input>
-	</h:body>
+    <h:head>
+        <h:title>Follow Up Form</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C" uiVersion="1" version="1" name="Follow Up Form">
+                    <unique_id />
+                    <visit_reason />
+                    <next_visit_dd />
+                    <next_visit_mm />
+                    <next_visit_yy />
+                    <edd_dd />
+                    <edd_mm />
+                    <edd_yy />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string" />
+            <bind nodeset="/data/visit_reason" />
+            <bind nodeset="/data/next_visit_dd" type="xsd:string" />
+            <bind nodeset="/data/next_visit_mm" type="xsd:string" />
+            <bind nodeset="/data/next_visit_yy" type="xsd:string" />
+            <bind nodeset="/data/edd_dd" type="xsd:string" />
+            <bind nodeset="/data/edd_mm" type="xsd:string" />
+            <bind nodeset="/data/edd_yy" type="xsd:string" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Woman's Unique ID</value>
+                    </text>
+                    <text id="edd_dd-label">
+                        <value>Updated EDD Day (dd)</value>
+                    </text>
+                    <text id="edd_mm-label">
+                        <value>Updated EDD Month (mm)</value>
+                    </text>
+                    <text id="edd_yy-label">
+                        <value>Updated EDD Year (yyyy)</value>
+                    </text>
+                    <text id="visit_reason-label">
+                        <value>Reason For Visit</value>
+                    </text>
+                    <text id="question5-r-label">
+                        <value>R</value>
+                    </text>
+                    <text id="question5-nr-label">
+                        <value>NR</value>
+                    </text>
+                    <text id="next_visit_dd-label">
+                        <value>Next Visit Day (dd)</value>
+                    </text>
+                    <text id="next_visit_mm-label">
+                        <value>Next Visit Month (mm)</value>
+                    </text>
+                    <text id="next_visit_yy-label">
+                        <value>Next Visit Year (yyyy)</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <select1 ref="/data/visit_reason">
+            <label ref="jr:itext('visit_reason-label')" />
+            <item>
+                <label ref="jr:itext('question5-r-label')" />
+                <value>r</value>
+            </item>
+            <item>
+                <label ref="jr:itext('question5-nr-label')" />
+                <value>nr</value>
+            </item>
+        </select1>
+        <input ref="/data/next_visit_dd">
+            <label ref="jr:itext('next_visit_dd-label')" />
+        </input>
+        <input ref="/data/next_visit_mm">
+            <label ref="jr:itext('next_visit_mm-label')" />
+        </input>
+        <input ref="/data/next_visit_yy">
+            <label ref="jr:itext('next_visit_yy-label')" />
+        </input>
+        <input ref="/data/edd_dd">
+            <label ref="jr:itext('edd_dd-label')" />
+        </input>
+        <input ref="/data/edd_mm">
+            <label ref="jr:itext('edd_mm-label')" />
+        </input>
+        <input ref="/data/edd_yy">
+            <label ref="jr:itext('edd_yy-label')" />
+        </input>
+    </h:body>
 </h:html>

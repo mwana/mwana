@@ -61,7 +61,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
                                             "unique_id": "80403000000112" }
         script = """
-            %(num)s > FUP 80403000000112 02 12 2012 R 18 11 2012
+            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012 
             %(num)s < %(resp)s            
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)

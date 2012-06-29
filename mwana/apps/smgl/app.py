@@ -32,8 +32,6 @@ ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_use
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the User Type '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
 USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
-NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
-NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
 INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
@@ -117,66 +115,6 @@ def _get_allowed_ambulance_workflow_contact(session):
 ###############################################################################
 ##              BEGIN RAPIDSMS_XFORMS KEYWORD HANDLERS                       ##
 ##===========================================================================##
-
-def follow_up(session, xform, router):
-    connection = session.connection
-    da_type = ContactType.objects.get(slug__iexact='da')
-    try:
-        contact = Contact.objects.get(types=da_type, connection=connection)
-    except ObjectDoesNotExist:
-        send_msg(connection, NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
-        return True
-    unique_id = get_value_from_form('unique_id', xform)
-    session.template_vars.update({"unique_id": unique_id})
-    try:
-        mother = PregnantMother.objects.get(uid=unique_id)
-    except ObjectDoesNotExist:
-        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router, **session.template_vars)
-        return True
-
-    edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy")
-    session.template_vars.update({
-        "date_name": "EDD",
-        "error_msg": error_msg,
-        })
-    if error_msg:
-        send_msg(connection, error_msg, router, **session.template_vars)
-        return True
-
-    visit_reason = get_value_from_form('visit_reason', xform)
-
-    next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
-    session.template_vars.update({
-        "date_name": "Next Visit",
-        "error_msg": error_msg,
-        })
-    if error_msg:
-        send_msg(connection, error_msg, router, **session.template_vars)
-        return True
-
-    # Make the follow up facility visit 
-    visit = FacilityVisit()
-    visit.mother = mother
-    visit.contact = contact
-    visit.location = contact.location
-    visit.edd = edd_date
-    visit.reason_for_visit = visit_reason
-    visit.next_visit = next_visit
-    visit.save()
-    
-    send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
-
-
-
-def death_registration(session, xform, router):
-    """
-    Keyword: DEATH
-    """
-    # TODO: anything related to birth reg post processing goes here.
-    name = session.connection.contact.name if session.connection.contact else ""
-    resp = DEATH_REG_RESPONSE % {"name": name}
-    router.outgoing(OutgoingMessage(session.connection, resp))
-    
 
 ###############################################################################
 

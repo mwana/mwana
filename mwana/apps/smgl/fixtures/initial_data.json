@@ -1566,7 +1566,7 @@
     "model": "smgl.xformkeywordhandler", 
     "fields": {
       "keyword": "fup", 
-      "function_path": "mwana.apps.smgl.app.follow_up"
+      "function_path": "mwana.apps.smgl.keyword_handlers.follow_up"
     }
   }, 
   {

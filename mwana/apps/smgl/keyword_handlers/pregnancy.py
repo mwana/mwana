@@ -4,13 +4,22 @@ from mwana.apps.smgl.utils import get_value_from_form, send_msg,\
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
-from mwana.apps.smgl.app import NOT_REGISTERED_FOR_DATA_ASSOC
 import datetime
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl import const
 from mwana.apps.locations.models import Location, LocationType
 
 logger = logging.getLogger(__name__)
+
+def get_laycounselors(mother):
+    """
+    Given a mother, get the lay counselors who should be notified about
+    her registration
+    """
+    # TODO: determine exactly how this should work.
+    return Contact.objects.filter\
+        (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
+         location=mother.zone)
 
 def pregnant_registration(session, xform, router):
     """
@@ -30,7 +39,7 @@ def pregnant_registration(session, xform, router):
     try:
         data_associate = Contact.objects.get(connection=connection, types=contactType)
     except ObjectDoesNotExist:
-        send_msg(connection, NOT_REGISTERED_FOR_DATA_ASSOC, router)
+        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router)
         return True
 
 
@@ -112,12 +121,49 @@ def pregnant_registration(session, xform, router):
 
     return True
 
-def get_laycounselors(mother):
+
+def follow_up(session, xform, router):
     """
-    Given a mother, get the lay counselors who should be notified about
-    her registration
+    Keyword handler for follow up visits.
     """
-    # TODO: determine exactly how this should work.
-    return Contact.objects.filter\
-        (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
-         location=mother.zone)
+    connection = session.connection
+    da_type = ContactType.objects.get(slug__iexact='da')
+    try:
+        contact = Contact.objects.get(types=da_type, connection=connection)
+    except ObjectDoesNotExist:
+        send_msg(connection, const.NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
+        return True
+    
+    unique_id = get_value_from_form('unique_id', xform)
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
+        return True
+
+    edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
+    if error_msg:
+        send_msg(connection, error_msg, router, **{"date_name": "EDD",
+                                                   "error_msg": error_msg})
+        return True
+
+    visit_reason = get_value_from_form('visit_reason', xform)
+    next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
+    session.template_vars.update()
+    if error_msg:
+        send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
+                                                   "error_msg": error_msg})
+        
+        return True
+
+    # Make the follow up facility visit 
+    visit = FacilityVisit()
+    visit.mother = mother
+    visit.contact = contact
+    visit.location = contact.location
+    visit.edd = edd_date
+    visit.reason_for_visit = visit_reason
+    visit.next_visit = next_visit
+    visit.save()
+    
+    send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
