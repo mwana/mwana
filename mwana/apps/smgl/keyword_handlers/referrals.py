@@ -46,6 +46,6 @@ def referral_outcome(session, xform, router):
 
 def _get_people_to_notify(referral):
     types = ContactType.objects.filter\
-        (slug__in=[const.CTYPE_DATAASSOCIATE,
+        (slug__in=[const.CTYPE_DATACLERK,
                    const.CTYPE_TRIAGENURSE]).all()
     return Contact.objects.filter(types__in=types, location=referral.facility)

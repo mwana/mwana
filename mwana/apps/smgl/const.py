@@ -9,7 +9,7 @@ LOCTYPE_ZONE = "zone"
 
 # contact type slugs
 CTYPE_LAYCOUNSELOR = "cba" # TODO: confirm / change if not correct
-CTYPE_DATAASSOCIATE = "da"
+CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
 
 # shared messages

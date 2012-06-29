@@ -27,8 +27,8 @@
     "pk": 5, 
     "model": "contactsplus.contacttype", 
     "fields": {
-      "name": "Data Associate", 
-      "slug": "da"
+      "name": "Data Clerk", 
+      "slug": "dc"
     }
   }, 
   {

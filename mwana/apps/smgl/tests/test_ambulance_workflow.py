@@ -1,5 +1,3 @@
-from rapidsms.models import Contact
-from rapidsms.tests.harness import MockBackend
 from threadless_router.router import Router
 from threadless_router.tests.scripted import TestScript
 from mwana.apps.smgl.app import ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER,\
@@ -8,6 +6,7 @@ import logging
 from mwana.apps.smgl.tests.shared import SMGLSetUp, create_prereg_user
 from mwana.apps.smgl.models import AmbulanceRequest, AmbulanceResponse,\
     AmbulanceOutcome
+from mwana.apps.smgl import const
 logging = logging.getLogger(__name__)
 
 
@@ -22,7 +21,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
         create_prereg_user("AntonAD", "804030", '12', 'AM', 'en')
         create_prereg_user("AntonCW", "804030", '13', 'worker', 'en')
         create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
-        create_prereg_user("AntonDA", "804024", "15", "DA", 'en')
+        create_prereg_user("AntonDA", "804024", "15", const.CTYPE_DATACLERK, 'en')
 
         create_users = """
             11 > Join AntonTN EN

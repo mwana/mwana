@@ -14,7 +14,7 @@ class SMGLReferTest(SMGLSetUp):
         self.user_number = "123"
         self.name = "Anton"
         self.createUser("worker", self.user_number)
-        self.createUser(const.CTYPE_DATAASSOCIATE, "666777")
+        self.createUser(const.CTYPE_DATACLERK, "666777")
         self.createUser(const.CTYPE_TRIAGENURSE, "666888")
         self.assertEqual(0, Referral.objects.count())
         

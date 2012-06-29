@@ -3,6 +3,7 @@ from mwana.apps.smgl.models import PreRegistration
 import logging
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
+from mwana.apps.smgl import const
 
 def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     if not lang:
@@ -35,7 +36,7 @@ class SMGLSetUp(TestScript):
         create_prereg_user("AntonAD", "804030", '12', 'AM', 'en')
         create_prereg_user("AntonCW", "804030", '13', 'worker', 'en')
         create_prereg_user("AntonOther", "kalomo_district", "14", 'dmho', 'en')
-        create_prereg_user("AntonDA", "804024", "15", "DA", 'en')
+        create_prereg_user("AntonDA", "804024", "15", const.CTYPE_DATACLERK, 'en')
 
         create_users = """
             11 > Join AntonTN EN
@@ -47,6 +48,6 @@ class SMGLSetUp(TestScript):
             14 > join antonOther en
             14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
             15 > join AntonDA en
-            15 < Thank you for registering! You have successfully registered as a Data Associate at Chilala.
+            15 < Thank you for registering! You have successfully registered as a Data Clerk at Chilala.
         """
         self.runScript(create_users)

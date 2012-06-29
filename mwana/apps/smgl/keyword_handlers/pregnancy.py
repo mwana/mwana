@@ -35,7 +35,7 @@ def pregnant_registration(session, xform, router):
     # We must get the location from the Contact (Data Associate) who 
     # should be registered with this phone number.  If the contact does 
     # not exist (unregistered) we throw an error.
-    contactType = ContactType.objects.get(slug__iexact=const.CTYPE_DATAASSOCIATE) #da = Data Associate
+    contactType = ContactType.objects.get(slug__iexact=const.CTYPE_DATACLERK) #da = Data Associate
     try:
         data_associate = Contact.objects.get(connection=connection, types=contactType)
     except ObjectDoesNotExist:
@@ -128,9 +128,9 @@ def follow_up(session, xform, router):
     Keyword handler for follow up visits.
     """
     connection = session.connection
-    da_type = ContactType.objects.get(slug__iexact='da')
+    dc_type = ContactType.objects.get(slug__iexact=const.CTYPE_DATACLERK)
     try:
-        contact = Contact.objects.get(types=da_type, connection=connection)
+        contact = Contact.objects.get(types=dc_type, connection=connection)
     except ObjectDoesNotExist:
         send_msg(connection, const.NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
         return True
