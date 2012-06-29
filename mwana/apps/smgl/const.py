@@ -35,3 +35,4 @@ FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s i
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been made. Please expect the mother.")
+REFERRAL_OUTCOME_RESPONSE = _("Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received.")

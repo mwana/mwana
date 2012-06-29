@@ -35,6 +35,15 @@ def refer(session, xform, router):
                 router.outgoing(OutgoingMessage(c.default_connection, msg))
     return True
 
+def referral_outcome(session, xform, router):
+    # TODO
+    name = session.connection.contact.name if session.connection.contact else ""
+    mother_id = xform.xpath("form/unique_id")
+    router.outgoing(OutgoingMessage(session.connection, 
+                                    const.REFERRAL_OUTCOME_RESPONSE % \
+                                        {'name': name, "unique_id": mother_id}))
+    return True
+
 def _get_people_to_notify(referral):
     types = ContactType.objects.filter\
         (slug__in=[const.CTYPE_DATAASSOCIATE,

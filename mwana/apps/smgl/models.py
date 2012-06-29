@@ -64,7 +64,7 @@ class FacilityVisit(models.Model):
     """
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(Location, help_text="The location of this visit")
-    visit_date = models.DateField(auto_now_add=True)
+    visit_date = models.DateField()
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")

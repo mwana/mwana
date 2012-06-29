@@ -73,4 +73,13 @@ class SMGLReferTest(SMGLSetUp):
         
         self.assertEqual(0, Referral.objects.count())
         
+    def testReferralOutcome(self):
+        resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
+                                                  "unique_id": "1234" }
+        script = """
+            %(num)s > refout 1234 stb stb vag
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        
     
