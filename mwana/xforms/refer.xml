@@ -64,8 +64,8 @@
                     <text id="reason-cpd-label">
                         <value>cpd</value>
                     </text>
-                    <text id="reason-other-label">
-                        <value>other</value>
+                    <text id="reason-oth-label">
+                        <value>oth</value>
                     </text>
                 </translation>
             </itext>
@@ -113,8 +113,8 @@
                 <value>cpd</value>
             </item>
             <item>
-                <label ref="jr:itext('reason-other-label')" />
-                <value>other</value>
+                <label ref="jr:itext('reason-oth-label')" />
+                <value>oth</value>
             </item>
         </select>
         <input ref="/data/time">

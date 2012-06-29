@@ -84,23 +84,23 @@
                     <text id="edd_yy-label">
                         <value>EDD (YY)</value>
                     </text>
-                    <text id="high_risk_factor-cesec-label">
-                        <value>cesec</value>
+                    <text id="high_risk_factor-csec-label">
+                        <value>csec</value>
                     </text>
-                    <text id="high_risk_factor-comp-label">
-                        <value>comp</value>
+                    <text id="high_risk_factor-cmp-label">
+                        <value>cmp</value>
                     </text>
-                    <text id="high_risk_factor-gestdia-label">
-                        <value>gestdia</value>
+                    <text id="high_risk_factor-gd-label">
+                        <value>gd</value>
                     </text>
                     <text id="high_risk_factor-hbp-label">
                         <value>hbp</value>
                     </text>
-                    <text id="high_risk_factor-stborn-label">
-                        <value>stborn</value>
+                    <text id="high_risk_factor-psb-label">
+                        <value>psb</value>
                     </text>
-                    <text id="high_risk_factor-other-label">
-                        <value>other</value>
+                    <text id="high_risk_factor-oth-label">
+                        <value>oth</value>
                     </text>
                     <text id="high_risk_factor-none-label">
                         <value>none</value>
@@ -128,28 +128,28 @@
         <select ref="/data/high_risk_factor">
             <label ref="jr:itext('high_risk_factor-label')" />
             <item>
-                <label ref="jr:itext('high_risk_factor-cesec-label')" />
-                <value>cesec</value>
+                <label ref="jr:itext('high_risk_factor-csec-label')" />
+                <value>csec</value>
             </item>
             <item>
-                <label ref="jr:itext('high_risk_factor-comp-label')" />
-                <value>comp</value>
+                <label ref="jr:itext('high_risk_factor-cmp-label')" />
+                <value>cmp</value>
             </item>
             <item>
-                <label ref="jr:itext('high_risk_factor-gestdia-label')" />
-                <value>gestdia</value>
+                <label ref="jr:itext('high_risk_factor-gd-label')" />
+                <value>gd</value>
             </item>
             <item>
                 <label ref="jr:itext('high_risk_factor-hbp-label')" />
                 <value>hbp</value>
             </item>
             <item>
-                <label ref="jr:itext('high_risk_factor-stborn-label')" />
-                <value>stborn</value>
+                <label ref="jr:itext('high_risk_factor-psb-label')" />
+                <value>psb</value>
             </item>
             <item>
-                <label ref="jr:itext('high_risk_factor-other-label')" />
-                <value>other</value>
+                <label ref="jr:itext('high_risk_factor-oth-label')" />
+                <value>oth</value>
             </item>
             <item>
                 <label ref="jr:itext('high_risk_factor-none-label')" />
