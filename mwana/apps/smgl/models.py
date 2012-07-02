@@ -246,7 +246,7 @@ class BirthRegistration(models.Model):
     """
     contact = models.ForeignKey(Contact, null=True)
     connection = models.ForeignKey(Connection)
-    unique_id = models.CharField(max_length=255, null=True, blank=True)
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     date = models.DateField()
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)

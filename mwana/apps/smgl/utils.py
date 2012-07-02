@@ -18,8 +18,8 @@ def get_date(form, day_field, month_field, year_field):
     try:
         intparts = [int(p) for p in parts]
     except ValueError:
-        raise DateFormatError("Not all date parts were valid numbers!")
-    
+        raise DateFormatError(const.DATE_NOT_NUMBERS)
+
     dd, mm, yy = intparts
     try:
         return datetime.date(yy,mm,dd)
@@ -34,7 +34,7 @@ def make_date(form, dd, mm, yy, is_optional=False):
     when sending out the error message as an outgoing message.
     """
     # this method has been hacked together to preserve
-    # original functionality. should be considered deprecated, though.
+    # original functionality. 
     try:
         date = get_date(form, dd, mm, yy)
     except ValueError:

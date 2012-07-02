@@ -154,7 +154,6 @@ def follow_up(session, xform, router):
 
     visit_reason = get_value_from_form('visit_reason', xform)
     next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
-    session.template_vars.update()
     if error_msg:
         send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
                                                    "error_msg": error_msg})
