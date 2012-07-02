@@ -33,7 +33,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
             14 > join antonOther en
             14 < Thank you for registering! You have successfully registered as a District mHealth Officer at Kalomo District.
             15 > join AntonDA en
-            15 < Thank you for registering! You have successfully registered as a Data Associate at Chilala.
+            15 < Thank you for registering! You have successfully registered as a Data Clerk at Chilala.
         """
         self.runScript(create_users)
 
