@@ -3,6 +3,7 @@ from mwana.apps.smgl.models import Referral
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
+import datetime
 
 
 class SMGLReferTest(SMGLSetUp):
@@ -21,7 +22,9 @@ class SMGLReferTest(SMGLSetUp):
     def testRefer(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
-        notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234"}
+        notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
+                                               "reason": "hbp",
+                                               "time": "12:00"}
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
@@ -37,11 +40,14 @@ class SMGLReferTest(SMGLSetUp):
         self.assertTrue(referral.reason_hbp)
         self.assertEqual(["hbp"], list(referral.get_reasons()))
         self.assertEqual("nem", referral.status)
+        self.assertEqual(datetime.time(12, 00), referral.time)
     
     def testMultipleResponses(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
-        notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234"}
+        notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
+                                               "reason": "ec, fd, hbp, pec",
+                                               "time": "12:00"}
         script = """
             %(num)s > refer 1234 804024 hbp,fd,pec,ec 1200 nem
             %(num)s < %(resp)s
@@ -60,7 +66,7 @@ class SMGLReferTest(SMGLSetUp):
         for r in "hbp,fd,pec,ec".split(","):
             self.assertTrue(referral.get_reason(r))
         self.assertEqual("nem", referral.status)
-    
+        
       
     def testReferBadLocation(self):
         # bad code
@@ -72,6 +78,17 @@ class SMGLReferTest(SMGLSetUp):
         self.runScript(script)
         
         self.assertEqual(0, Referral.objects.count())
+        
+    def testReferBadTimes(self):
+        for bad_time in ["foo", "123", "55555"]:
+            resp = const.TIME_INCORRECTLY_FORMATTED % {"time": bad_time}
+            script = """
+                %(num)s > refer 1234 804024 hbp %(time)s nem
+                %(num)s < %(resp)s            
+            """ % { "num": self.user_number, "time": bad_time, "resp": resp }
+            self.runScript(script)
+            self.assertEqual(0, Referral.objects.count())
+        
         
     def testReferralOutcome(self):
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,

@@ -183,8 +183,8 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     status = models.CharField(max_length=3, 
                               choices=REFERRAL_STATUS_CHOICES,
                               null=True, blank=True)
-    # TODO: clarity on time
-    # time = models.TimeField()
+    
+    time = models.TimeField(help_text="Time of referral", null=True)
     
     # this will make reporting easier than dealing with another table
     reason_fd = models.BooleanField(default=False)
@@ -206,7 +206,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         return getattr(self, "reason_%s" % code)
     
     def get_reasons(self):
-        for c in self.REFERRAL_REASONS:
+        for c in sorted(self.REFERRAL_REASONS.keys()):
             if self.get_reason(c):
                 yield c
         

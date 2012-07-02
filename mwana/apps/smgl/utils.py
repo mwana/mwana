@@ -5,6 +5,7 @@ from mwana.apps.locations.models import Location
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl import const 
+import string
 NONE_VALUES = ['none', 'n', None]
 
 class DateFormatError(ValueError):  pass
@@ -24,7 +25,7 @@ def get_date(form, day_field, month_field, year_field):
         return datetime.date(yy,mm,dd)
     except ValueError as e:
         raise DateFormatError(str(e))
-    
+
 def make_date(form, dd, mm, yy, is_optional=False):
     """
     Returns a tuple: (datetime.date, ERROR_MSG)
@@ -64,6 +65,27 @@ def get_contacttype(slug):
 def get_value_from_form(property_name, xform):
     return xform.xpath('form/%s' % property_name)
 
+def strip_punctuation(s):
+    # HT: http://stackoverflow.com/questions/265960/best-way-to-strip-punctuation-from-a-string-in-python
+    return str(s).translate(string.maketrans("",""), string.punctuation)
+
+def to_time(timestring):
+    """
+    Converts a time string to a time. Assumes that the timestring is a 4-digit
+    numeric string between 0000 and 2359 (although it will do a bit of work
+    to clean up the string)
+    """
+    timestring = strip_punctuation(timestring).strip()
+    if (len(timestring) != 4):
+        raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
+    hh = timestring[:2]
+    mm = timestring[2:]
+    try:
+        hh = int(hh)
+        mm = int(mm)
+    except ValueError:
+        raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
+    return datetime.time(hh, mm)
 
 def send_msg(connection, txt, router, **kwargs):
     router.outgoing(OutgoingMessage(connection, txt, **kwargs))
