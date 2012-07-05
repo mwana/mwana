@@ -104,6 +104,31 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(2, FacilityVisit.objects.count())
     
+    def testFollowUpOptionalEdd(self):
+        self.testRegister()
+        resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
+                                            "unique_id": "80403000000112" }
+        script = """
+            %(num)s > FUP 80403000000112 r 16 10 2012
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        
+        self.assertEqual(1, PregnantMother.objects.count())
+        self.assertEqual(2, FacilityVisit.objects.count())
+    
+    def testFollowUpBadEdd(self):
+        self.testRegister()
+        resp = const.DATE_INCORRECTLY_FORMATTED_GENERAL % { "date_name": "EDD" }
+        script = """
+            %(num)s > FUP 80403000000112 r 16 10 2012 not a date
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        
+        self.assertEqual(1, PregnantMother.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
+    
     def testTold(self):
         self.testRegister()
         resp = const.TOLD_COMPLETE % { "name": self.name }
