@@ -41,7 +41,9 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(["hbp"], list(referral.get_reasons()))
         self.assertEqual("nem", referral.status)
         self.assertEqual(datetime.time(12, 00), referral.time)
-    
+        self.assertFalse(referral.responded)
+        self.assertEqual(None, referral.mother_showed)
+        
     def testMultipleResponses(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
@@ -91,8 +93,36 @@ class SMGLReferTest(SMGLSetUp):
         
         
     def testReferralOutcome(self):
+        self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234" }
+        script = """
+            %(num)s > refout 1234 stb cri vag
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        [ref] = Referral.objects.all()
+        self.assertTrue(ref.responded)
+        self.assertTrue(ref.mother_showed)
+        self.assertEqual("stb", ref.mother_outcome)
+        self.assertEqual("cri", ref.baby_outcome)
+        self.assertEqual("vag", ref.mode_of_delivery)
+        
+    def testReferralOutcomeNoShow(self):
+        self.testRefer()
+        resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
+                                                  "unique_id": "1234" }
+        script = """
+            %(num)s > refout 1234 noshow
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        [ref] = Referral.objects.all()
+        self.assertTrue(ref.responded)
+        self.assertFalse(ref.mother_showed)
+        
+    def testReferralOutcomeNoRef(self):
+        resp = const.REFERRAL_NOT_FOUND % {"unique_id": "1234" }
         script = """
             %(num)s > refout 1234 stb stb vag
             %(num)s < %(resp)s            

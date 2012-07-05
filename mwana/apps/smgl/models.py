@@ -84,7 +84,7 @@ class MotherReferenceBase(models.Model):
             self.mother = PregnantMother.objects.get(uid__iexact=mother_id)
         except PregnantMother.DoesNotExist:
             pass
-        
+    
     class Meta:
         abstract = True
 
@@ -165,6 +165,9 @@ class AmbulanceOutcome(models.Model):
 
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
+REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
+                            ("dec", "deceased"))
+DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"))
 
 class Referral(FormReferenceBase, MotherReferenceBase):
     REFERRAL_REASONS = {
@@ -176,16 +179,31 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         "aph":   "Antepartum Hemorrhage",
         "pl":    "Prolonged Labor",
         "cpd":   "Big Baby Small Pelvis",
-        "other": "Other",
+        "oth":   "Other",
     }
+    date = models.DateTimeField()
     facility = models.ForeignKey(Location, 
                                  help_text="The referred facility")
+    
+    responded = models.BooleanField(default=False)
+    mother_showed = models.NullBooleanField(default=None)
     
     status = models.CharField(max_length=3, 
                               choices=REFERRAL_STATUS_CHOICES,
                               null=True, blank=True)
     
     time = models.TimeField(help_text="Time of referral", null=True)
+    
+    # outcomes
+    mother_outcome = models.CharField(max_length=3, 
+                                      choices=REFERRAL_OUTCOME_CHOICES,
+                                      null=True, blank=True)
+    baby_outcome = models.CharField(max_length=3, 
+                                    choices=REFERRAL_OUTCOME_CHOICES,
+                                    null=True, blank=True)
+    mode_of_delivery = models.CharField(max_length=3, 
+                                        choices=DELIVERY_MODE_CHOICES,
+                                        null=True, blank=True)
     
     # this will make reporting easier than dealing with another table
     reason_fd = models.BooleanField(default=False)
@@ -196,8 +214,9 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_aph = models.BooleanField(default=False)
     reason_pl = models.BooleanField(default=False)
     reason_cpd = models.BooleanField(default=False)
-    reason_other = models.BooleanField(default=False)
-
+    reason_oth = models.BooleanField(default=False)
+    
+    
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS
         setattr(self, "reason_%s" % code, val)

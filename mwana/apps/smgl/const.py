@@ -12,6 +12,10 @@ CTYPE_LAYCOUNSELOR = "cba" # TODO: confirm / change if not correct
 CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
 
+# from forms
+
+REFERRAL_OUTCOME_NOSHOW = "noshow"
+
 # shared messages
 DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s is incorrectly formatted.  Format should be "
                                        "DD MM YYYY. Please try again.")
@@ -42,3 +46,5 @@ TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been made. Please expect the mother. Reason: %(reason)s. Time: %(time)s")
 REFERRAL_OUTCOME_RESPONSE = _("Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received.")
+REFERRAL_NOT_FOUND = _("No referrals for Mother ID %(unique_id)s were found. Please check the mother's ID.")
+REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s was already responded to. Please check the mother's ID.")
