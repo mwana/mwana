@@ -2,7 +2,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
-import mwana.apps.labresults.views
 
 admin.autodiscover()
 
@@ -29,9 +28,9 @@ urlpatterns = patterns('',
     (r'^export/', include('rapidsms.contrib.export.urls')),
     (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
-    (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
-    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
-    (r'^registration/', include('rapidsms.contrib.registration.urls')),
+#    (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
+#    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
+#    (r'^registration/', include('rapidsms.contrib.registration.urls')),
     (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),

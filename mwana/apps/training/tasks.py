@@ -12,7 +12,7 @@ DELAYED_TRAINING_ADMIN_MSG = "A reminder was sent to %s, %s to state if training
 def send_endof_training_notification(router):
 
     logger.info('checking pending training sessions')
-    pending_trainings = TrainingSession.objects.filter(is_on=True)
+    pending_trainings = TrainingSession.objects.filter(is_on=True).exclude(trainer__is_active=False)
 
     for training in pending_trainings:
         OutgoingMessage(training.trainer.default_connection,

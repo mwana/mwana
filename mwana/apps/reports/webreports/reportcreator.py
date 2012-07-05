@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.models import PatientEvent
+from rapidsms.models import Contact
+from mwana.util import get_clinic_or_default
 from operator import itemgetter
 
 from datetime import date
@@ -12,13 +15,16 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class Results160Reports:
-    def __init__(self, current_user=None, group=None, province=None, district=None):
+    def __init__(self, current_user=None, group=None, province=None,
+                    district=None, facility=None):
         self.user = current_user
         self.reporting_group = group
         self.reporting_province = province
         self.reporting_district = district
+        self.reporting_facility = facility
 
     STATUS_CHOICES = ('in-transit', 'unprocessed', 'new', 'notified', 'sent', 'updated')
     # Arbitrary values
@@ -54,7 +60,9 @@ class Results160Reports:
                 facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)|Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
             
             
-            if self.reporting_district:
+            if self.reporting_facility:
+                facs = facs.filter(slug=self.reporting_facility)
+            elif self.reporting_district:
                 facs = facs.filter(slug__startswith=self.reporting_district[:4])
             elif self.reporting_province:
                 facs = facs.filter(slug__startswith=self.reporting_province[:2])
@@ -69,6 +77,10 @@ class Results160Reports:
     def get_rpt_districts(self, user):
         self.user = user
         return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
+
+    def get_rpt_facilities(self, user):
+        self.user = user
+        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
 
 
     def get_active_facilities(self):
@@ -535,6 +547,53 @@ class Results160Reports:
         return self.safe_rounding(min_days), self.safe_rounding(max_days), self.safe_rounding(tt_samples), locations.count(), \
             sorted(table, key=itemgetter(0, 1))
 
+    def facility_contacts_report(self, page):
+        """
+        Returns active contacts
+        """
+        table = []
+       
+
+        locations = self.user_facilities()
+        contacts = Contact.active.filter(Q(location__in=locations)|
+        Q(location__parent__in=locations)).exclude(connection=None).order_by('location__parent__name')
+
+        if not page:
+            page = 1
+
+
+        paginator = Paginator(contacts, 50)
+        try:
+            messages = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            messages = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            messages = paginator.page(paginator.num_pages)
+
+        messages_number=messages.number
+        messages_has_previous = messages.has_previous()
+        messages_has_next = messages.has_next()
+        messages_paginator_num_pages = messages.paginator.num_pages
+
+        counter = messages.start_index()
+        for contact in messages.object_list:
+            facility = get_clinic_or_default(contact)
+            district = facility.parent
+            name = contact.name
+            type = ", ".join(t.name for t in contact.types.all())
+            backed = contact.default_connection.backend.name
+            phone = contact.default_connection.identity
+
+            table.append([counter, ' ' + district.name, ' ' + facility.name,
+                         name, type, backed, phone])
+            counter = counter + 1
+
+        table.insert(0, ['  #', '  District', '  Clinic', 'User Name','Type', 'Backend', 'Phone'])
+
+        return table,  messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous
+
 
 #Reminders
     def reminders_patient_events_report(self, startdate=None, enddate=None):
@@ -575,6 +634,140 @@ class Results160Reports:
             else:
                 table.append([' Unknown', row[1]])
         table.append(['All listed clinics', total])
+        return sorted(table, key=itemgetter(0))
+
+    def rm_patient_events_report(self, startdate=None, enddate=None):
+        """
+        Returns report table showing births per facility per event location type
+        """
+
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+
+        table = []
+
+        table.append(['  District', '  Facility', 'Home/Community Births', 'Facility/Clinic Births', 'Location not Specified', 'Total Births'])
+
+        facility_dict = {}
+
+        events = PatientEvent.objects.filter(#Q(event__name='Birth'),
+                Q(date_logged__gte=self.dbsr_startdate) ,
+                Q(date_logged__lte=self.dbsr_enddate),
+#                Q(cba_conn__contact=None)|
+                Q(patient__location__parent__in=self.user_facilities()) |
+                Q(patient__location__in=self.user_facilities())
+                
+        ).distinct()
+
+        
+        for event in events:
+            location = "Unknown"
+            if event.cba_conn.contact:
+                location = event.cba_conn.contact.location
+                if location.type.slug == 'zone':
+                    location = location.parent
+
+            else:
+                location = event.cba_conn.identity
+
+
+            if location not in facility_dict.keys():
+                facility_dict[location] = [0, 0, 0, 0]
+                
+            facility_dict[location][3] = facility_dict[location][3] + 1
+            if event.event_location_type == 'hm':
+                facility_dict[location][0] = facility_dict[location][0] + 1
+            elif event.event_location_type == 'cl':
+                facility_dict[location][1] = facility_dict[location][1] + 1
+            else:
+                facility_dict[location][2] = facility_dict[location][2] + 1
+                    
+            
+
+        tt_home, tt_clinic, tt_unknown, tt_all = [0, 0, 0, 0]
+
+        for key, value in facility_dict.iteritems():
+            facility_name = key
+            district_name = "Unknown"
+            if not isinstance(key, (str, unicode)):                
+                facility_name = key.name
+                district_name = key.parent.name
+
+
+            home, clinic, unknown, all = value
+
+            tt_home  = tt_home + home
+            tt_clinic  = tt_clinic + clinic
+            tt_unknown  = tt_unknown + unknown
+            tt_all  = tt_all + all
+
+            table.append([" "+district_name, " "+facility_name, home, clinic, unknown, all])
+        table.append(['All listed districts', 'All listed clinics', tt_home, tt_clinic, tt_unknown, tt_all])
+        return sorted(table, key=itemgetter(0, 1))
+
+    def rm_patient_events_report_unknown_location(self, startdate=None, enddate=None):
+        """
+        Returns report table showing births per by unregistered users
+        """
+
+        if startdate:
+            self.dbsr_startdate = datetime(startdate.year, startdate.month,
+                                           startdate.day)
+        if enddate:
+            self.dbsr_enddate = \
+            datetime(enddate.year, enddate.month, enddate.day)\
+            + timedelta(days=1) - timedelta(seconds=0.01)
+
+        table = []
+
+        table.append(['  Phone', 'Home/Community Births', 'Facility/Clinic Births', 'Location not Specified', 'Total Births'])
+
+        facility_dict = {}
+
+        events = PatientEvent.objects.filter(#event__name='Birth',
+                date_logged__gte=self.dbsr_startdate ,
+                date_logged__lte=self.dbsr_enddate,
+                cba_conn__contact=None
+        ).distinct()
+
+
+        for event in events:
+            location = event.cba_conn.identity
+
+
+            if location not in facility_dict.keys():
+                facility_dict[location] = [0, 0, 0, 0]
+
+            facility_dict[location][3] = facility_dict[location][3] + 1
+            if event.event_location_type == 'hm':
+                facility_dict[location][0] = facility_dict[location][0] + 1
+            elif event.event_location_type == 'cl':
+                facility_dict[location][1] = facility_dict[location][1] + 1
+            else:
+                facility_dict[location][2] = facility_dict[location][2] + 1
+
+
+
+        tt_home, tt_clinic, tt_unknown, tt_all = [0, 0, 0, 0]
+
+        for key, value in facility_dict.iteritems():
+            facility_name = key
+
+
+            home, clinic, unknown, all = value
+
+            tt_home  = tt_home + home
+            tt_clinic  = tt_clinic + clinic
+            tt_unknown  = tt_unknown + unknown
+            tt_all  = tt_all + all
+
+            table.append([ " "+facility_name, home, clinic, unknown, all])
+        table.append(['All listed numbers', tt_home, tt_clinic, tt_unknown, tt_all])
         return sorted(table, key=itemgetter(0))
 
 #Graphing

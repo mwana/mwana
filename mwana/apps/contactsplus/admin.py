@@ -14,12 +14,12 @@ from mwana.apps.contactsplus import models as contactsplus
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
-                   # 'location', 
+                    'location', 
 		    'default_connection', 'types_list', 'date_of_first_sms',
                     'date_of_most_recent_sms', 'is_active',)
-    list_filter = ('types', 'is_active', 'language', 'location')
+    list_filter = ('types', 'is_active', 'is_help_admin', 'language', 'location')
     list_editable = ('is_active',)
-    search_fields = ('name', 'alias',)
+    search_fields = ('name', 'alias', 'location__name', 'location__parent__name',)
 
     
     def unicode(self, obj):
@@ -76,7 +76,8 @@ def create_action(backend):
 admin.site.unregister(Connection)
 class ConnectionAdmin(admin.ModelAdmin):
     list_display = ("identity", "backend", "contact",)
-    list_filter = ("backend",)
+    list_filter = ("backend", "contact",)
+    search_fields = ('identity',)
 
     def get_actions(self, request):
         return dict(create_action(b) for b in Backend.objects.all())

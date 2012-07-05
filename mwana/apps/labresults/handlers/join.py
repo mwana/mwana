@@ -6,7 +6,6 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
-from mwana.apps.labresults.models import Result
 from mwana.apps.reminders import models as reminders
 from mwana.util import get_clinic_or_default, get_worker_type, get_location_type, LocationCode
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
@@ -267,6 +266,16 @@ class JoinHandler(KeywordHandler):
             clinic_slug = m.group('clinic').strip()
             zone_slug = m.group('zone').strip()
             name = m.group('name').strip().title()
+            lang_code = None
+
+            #optionally allow registration with language code
+            if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+                if not clinic_slug.isdigit() and len(zone_slug) == 6\
+                and zone_slug.isdigit() and name.strip():
+                    lang_code, clinic_slug, zone_slug, name = (clinic_slug,
+                    zone_slug, name.split()[0].lower(),
+                    " ".join(str for str in name.split()[1:]))
+
             # require the clinic to be pre-populated
             try:
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
@@ -312,23 +321,32 @@ class JoinHandler(KeywordHandler):
                 cba.name = name
                 cba.interviewer_id = identity_id 
                 cba.location = zone
+                if lang_code: cba.language = lang_code
                 cba.save()
             else:
                 # lastly, if no contact exists, create one and save it in the
                 # connection
-                cba = Contact.objects.create(name=name, location=zone,
+
+                if lang_code:
+                    cba = Contact.objects.create(name=name, location=zone,
+                                          interviewer_id=identity_id, language=lang_code)
+                else:
+                    cba = Contact.objects.create(name=name, location=zone,
                                           interviewer_id=identity_id)
+
                 self.msg.connection.contact = cba
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
             msg = self.respond(_("Thank you %(name)s! You have successfully "
-                                 "registered as a Mobile Agent for zone "
+                                 "registered as a RemindMi Agent for zone "
                                  "%(zone)s of %(clinic)s."), name=cba.name,
                                  zone=zone.name, clinic=clinic.name)
             notify_text, kwargs = self._get_notify_text()
             if notify_text:
-                msg.append(notify_text, **kwargs)
+#                msg.append(notify_text, **kwargs)
+                msg.append(_("Please notify us next time there is a birth in your "
+                     "zone."))
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
             msg.append(HELP_TEXT)

@@ -19,14 +19,17 @@ from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
+from mwana.const import get_clinic_worker_type
 
 class Alerter:
-    def __init__(self, current_user=None, group=None, province=None, district=None):
+    def __init__(self, current_user=None, group=None, province=None,
+                    district=None, facility=None):
         self.today = date.today()
         self.user = current_user
         self.reporting_group = group
         self.reporting_province = province
         self.reporting_district = district
+        self.reporting_facility = facility
 
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
     district_transport_days = DEFAULT_DISTICT_TRANSPORT_DAYS
@@ -245,7 +248,8 @@ class Alerter:
     def last_used_check(self, location):
         try:
             return Message.objects.filter(contact__location=location ,
-                                                  text__iregex='\s*check\s*'
+                                                  direction='I',
+                                                  text__iregex='^check\s*'
                                                   ).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
@@ -435,13 +439,25 @@ class Alerter:
             return None
 
 
+    def get_complying_contacts(self):
+        """
+        quick and dirty fix.
+        """
+        #TODO: to better implementation of fix
+        days_back = 75
+        today = datetime.today()
+        date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
+
+
+        supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
+        location__supportedlocation__supported=True).distinct()
+
+        return supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
+
+
     def get_inactive_workers_alerts(self):
 
-        facilities = (self.get_facilities_for_reporting())
-
-        defaulters = UserVerification.objects.exclude(responded="True").\
-        filter(facility__in=facilities)
-
+        facilities = (self.get_facilities_for_reporting())      
 
         inactive_alerts = []
         
@@ -449,6 +465,8 @@ class Alerter:
             days_late = 75
             defaulters = UserVerification.objects.exclude(responded="True").\
             filter(facility=facility, contact__is_active=True).distinct()
+
+            defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
 
             if not defaulters:
                 continue
@@ -582,7 +600,9 @@ class Alerter:
         if self.reporting_group:
             facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
-        if self.reporting_district:
+        if self.reporting_facility:
+            facs = facs.filter(slug=self.reporting_facility)
+        elif self.reporting_district:
             facs = facs.filter(slug__startswith=self.reporting_district[:4])
         elif self.reporting_province:
             facs = facs.filter(slug__startswith=self.reporting_province[:2])
@@ -604,6 +624,10 @@ class Alerter:
             parents.append(location.parent)
         return list(set(parents))
     
+    def get_rpt_facilities(self, user):
+        self.user = user
+        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+
     def get_rpt_districts(self, user):
         self.user = user
         return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))

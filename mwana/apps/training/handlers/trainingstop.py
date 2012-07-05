@@ -1,10 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.messages import HUB_TRAINING_STOP_NOTIFICATION
 from datetime import datetime
 from mwana.apps.training.models import TrainingSession
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
+from mwana.const import get_hub_worker_type
 
 
 class TrainingStopHandler(KeywordHandler):
@@ -51,7 +53,20 @@ class TrainingStopHandler(KeywordHandler):
                             ". Notification was sent by %s, %s" %
                             (location.name, location.slug, contact.name,
                             contact.default_connection.identity)).send()
-        
+
+        hub_workers = Contact.active.filter(location__parent=location.parent,
+                                                types=get_hub_worker_type())
+
+
+        for hub_worker in hub_workers:
+            hw_msg = OutgoingMessage(hub_worker.default_connection,
+                                    HUB_TRAINING_STOP_NOTIFICATION % {
+                                    'hub_worker':hub_worker.name,
+                                    'clinic':location.name,
+                                    'slug':location.slug})
+            hw_msg.send()
+
+
             
         self.respond("Thanks %(name)s for your message that training has "
                      "stopped for %(clinic)s.",

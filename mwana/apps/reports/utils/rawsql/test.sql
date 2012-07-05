@@ -1,0 +1,1 @@
+select split('hello people 203',' ')

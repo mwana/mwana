@@ -1,9 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
-from datetime import datetime, timedelta, date
+from mwana.apps.contactsplus.models import ContactType
+from datetime import date
 
-from django.views.decorators.http import require_GET
-from django.template import RequestContext
-from django.shortcuts import render_to_response
 from mwana.apps.reports.webreports.models import ReportingGroup
 
 def get_groups_name(id):
@@ -23,23 +21,45 @@ def text_date(text):
         return date(int(c), int(b), int(a))
 
 
-def get_contacttype_dropdown_html(id, worker_types, selected_worker_type):
-    #TODO: move this implemention to templates
+def get_contacttype_dropdown_html(id, selected_worker_type=None):
     code ='<select name="%s" size="1">\n'%id
     code +='<option value="All">All</option>\n'
-    for fac in worker_types:
-        if fac.slug == selected_worker_type:
+    for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]):
+        if type.slug == selected_worker_type:
+            code = code + '<option selected value="%s">%s</option>\n'%(type.slug,type.name)
+        else:
+            code = code + '<option value="%s">%s</option>\n'%(type.slug,type.name)
+
+    code = code +'</select>'
+    return code
+
+def get_contacttypes(slug):
+    if slug is None:
+        return ContactType.objects.exclude(name__in=["Patient", "DBS Printer"])
+    else:
+        return ContactType.objects.filter(slug=slug).exclude(name__in=["Patient", "DBS Printer"])
+
+def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
+    if not facilities:
+        return '<select name="%s" size="1"></select>\n'%id
+    code ='<select name="%s"" onchange="fire%sChange()" id="%s" size="1">\n' % (id, id, id)
+    if selected_facility and get_only_select:
+        pass
+    else:
+        code +='<option value="All">All</option>\n'
+    for fac in facilities:
+        if fac.slug == selected_facility:
             code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+        elif get_only_select:
+            pass
         else:
             code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
 
     code = code +'</select>'
     return code
 
-def get_facilities_dropdown_html(id, facilities, selected_facility):
-    #TODO: move this implemention to templates
+def get_facilities_dropdown_htmlb(id, facilities, selected_facility):
     code ='<select name="%s" size="1">\n'%id
-    code +='<option value="All">All</option>\n'
     for fac in facilities:
         if fac.slug == selected_facility:
             code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)

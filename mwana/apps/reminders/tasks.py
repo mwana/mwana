@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.translator.util import Translator
 import datetime
 import logging
 
@@ -14,6 +15,8 @@ from mwana.apps.patienttracing import models as patienttracing
 # to attempt the real translation here.  Use _ so that makemessages finds
 # our text.
 _ = lambda s: s
+
+translator = Translator()
 
 NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
 
@@ -50,7 +53,9 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                       'reminders')
 
     for connection in connections:
+        lang_code = None
         if connection.contact:
+            lang_code = connection.contact.language
             cba_name = ' %s' % connection.contact.name
         else:
             cba_name = ''
@@ -70,7 +75,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                               "reply with TOLD %(patient)s"),
                               cba=cba_name, patient=patient.name,
                               date=appt_date.strftime('%d/%m/%Y'),
-                              clinic=clinic_name, type=type)
+                              clinic=clinic_name, type=translator.translate(lang_code, type))
         
         msg.send()
         

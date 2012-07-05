@@ -1,0 +1,81 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Issues - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+
+
+    <div class="left">
+        <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Issues</h2>
+            <br>
+            {{ message }}
+            {{ errors }}
+                <p>
+                <h3>Create New Issue</h3>
+                    {{issue.as_p}}
+                    <input type="submit" value="Submit" />
+                 <hr>
+           <div>
+              
+
+              
+
+                <h3>Existing Issues</h3>
+
+                {% for issue in issues %}
+
+                        
+                        <p><h4>
+                        {{ issue.id }} {{ issue.title }} - {{ issue.status }}
+                        </h4>
+                        
+                        <br>Priority: {{ issue.priority }}
+                        <br>Type: {{ issue.type }}
+                        <br>Assinged to: {{ issue.assigned_to }}
+                        <br>Desired Start Date: {{ issue.desired_start_date }}
+                        <p>Text: {{ issue.body }}
+                        
+                <hr>
+                   
+
+                {% endfor %}
+
+
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+        
+        <div class="pagination">
+    <span class="step-links">
+        {% if has_previous %}
+            <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
+
+        <span class="current">
+            Page {{ number }} of {{ num_pages }}.
+        </span>
+
+        {% if has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ number }}>
+    </span>
+
+</div>
+        </form>
+
+</div>
+{% endblock %}

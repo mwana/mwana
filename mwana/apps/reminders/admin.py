@@ -29,7 +29,7 @@ admin.site.register(reminders.Appointment, AppointmentAdmin)
 class PatientEventAdmin(admin.ModelAdmin):
     list_display = ('clinic','patient', 'event', 'date','date_logged','cba',
     'cba_conn','notification_status','notification_sent_date',)
-    list_filter = ('event','date_logged','notification_status',)
+    list_filter = ('event', 'event_location_type', 'date_logged','notification_status',)
     date_hierarchy = 'date_logged'
     search_fields = ('patient__name', 'patient__location__parent__name',)
 
@@ -37,7 +37,7 @@ class PatientEventAdmin(admin.ModelAdmin):
         try:
             return obj.patient.location.parent.name
         except:
-            return ""
+            return "Unknown"
         
     def cba(self, obj):        
         try:

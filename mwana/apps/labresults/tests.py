@@ -171,6 +171,13 @@ class TestApp(LabresultsSetUp):
         """
         self.runScript(script)
 
+    def testTooBigSampleNumber(self):
+        script = """
+            clinic_worker > SENT 302010
+            clinic_worker < To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
+        """
+        self.runScript(script)
+
     def testBadReportFormat(self):
         script = """
             clinic_worker > SENT some samples yo!
@@ -262,8 +269,8 @@ class TestApp(LabresultsSetUp):
             clinic_worker > 55555
             clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > Help
-            support_contact < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
-            support_contact2 < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
+            support_contact < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker.
+            support_contact2 < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker.
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more

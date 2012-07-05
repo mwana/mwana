@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_GET
 from mwana.apps.alerts.labresultsalerts.alerter import Alerter
-from mwana.apps.reports.views import get_facilities_dropdown_html
+from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
 from mwana.apps.reports.views import read_request
 
@@ -38,9 +38,11 @@ def mwana_alerts (request):
     rpt_group = read_request(request, "rpt_group")
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
 
 
-    alerter = Alerter(request.user,rpt_group,rpt_provinces,rpt_districts)
+    alerter = Alerter(request.user, rpt_group, rpt_provinces,rpt_districts,
+                        rpt_facilities)
 
     transport_time, not_sending_dbs_alerts = \
         alerter.get_districts_not_sending_dbs_alerts(transport_time)
@@ -87,5 +89,6 @@ def mwana_alerts (request):
                               'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
                               'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", alerter.get_rpt_provinces(request.user), rpt_provinces) ,
                               'rpt_districts': get_facilities_dropdown_html("rpt_districts", alerter.get_rpt_districts(request.user), rpt_districts) ,
+                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", alerter.get_rpt_facilities(request.user), rpt_facilities) ,
                               }, context_instance=RequestContext(request)
                               )
