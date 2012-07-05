@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-08 10:40-0400\n"
+"POT-Creation-Date: 2012-07-05 11:36-0400\n"
 "PO-Revision-Date: 2012-05-17 11:11\n"
 "Last-Translator:   <adewinter@dimagi.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -47,54 +47,24 @@ msgid ""
 msgstr ""
 
 #: .\app.py:35
-msgid "Thank you, mother has been registered succesfully!"
-msgstr ""
-
-#: .\app.py:36
-msgid ""
-"Sorry, this number is not registered. Please register with the JOIN keyword "
-"and try again"
-msgstr ""
-
-#: .\app.py:37
-msgid ""
-"You are not registered as a Data Associate and are not allowed to register "
-"mothers!"
-msgstr ""
-
-#: .\app.py:38
-#, python-format
-msgid ""
-"The date you entered for %(date_name)s is incorrectly formatted.  Format "
-"should be DD MM YYYY. Please try again."
-msgstr ""
-
-#: .\app.py:40
-#, python-format
-msgid ""
-"The year you entered for date %(date_name)s is incorrectly formatted.  "
-"Should be in the formatYYYY (four digit year). Please try again."
-msgstr ""
-
-#: .\app.py:42
 msgid ""
 "Sorry, you are not on the pre-registered users list. Please contact ZCAHRD "
 "for assistance"
 msgstr ""
 
-#: .\app.py:43
+#: .\app.py:36
 #, python-format
 msgid "%(error_msg)s for %(date_name)s"
 msgstr ""
 
-#: .\app.py:44
+#: .\app.py:37
 msgid ""
 "Thank you.Your request for an ambulance has been received. Someone will be "
 "in touch with you shortly.If no one contacts you,please call the emergency "
 "number!"
 msgstr ""
 
-#: .\app.py:45
+#: .\app.py:38
 #, python-format
 msgid ""
 "Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
@@ -102,124 +72,197 @@ msgid ""
 "see this"
 msgstr ""
 
-#: .\app.py:46 .\app.py:47
+#: .\app.py:39 .\app.py:40
 #, python-format
 msgid ""
 "Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
 "%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this"
 msgstr ""
 
-#: .\app.py:48
-msgid ""
-"Sorry, the mother you are trying to Follow Up is not registered in the "
-"system. Please check the UID and try again or register her first."
-msgstr ""
-
-#: .\app.py:49
-#, python-format
-msgid ""
-"Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!."
-msgstr ""
-
-#: .\app.py:50
+#: .\app.py:41
 #, python-format
 msgid ""
 "The Emergency with ID:%(unique_id)s can not be found! Please try again or "
 "contact your DMO immediately."
 msgstr ""
 
-#: .\app.py:51
+#: .\app.py:42
 msgid "Sorry. You are not registered as Triage Nurse, Ambulance or DMO"
 msgstr ""
 
-#: .\app.py:52
+#: .\app.py:43
 msgid ""
 "Thank you for confirming. When you know the status of the Ambulance, please "
 "send RESP <RESPONSE_TYPE>!"
 msgstr ""
 
-#: .\app.py:53
+#: .\app.py:44
 msgid ""
 "Sorry, your registration type is not allowed to send Emergency Response type "
 "messages"
 msgstr ""
 
-#: .\app.py:54
+#: .\app.py:45
 #, python-format
 msgid ""
 "Thank you. The ambulance for this request has been marked as %(response)s. "
 "We will notify the Rural Facility."
 msgstr ""
 
-#: .\app.py:55
+#: .\app.py:46
 msgid ""
 "Sorry. We cannot find the Mother's Unique ID you specified. Please try again "
 "or contact the DMO"
 msgstr ""
 
-#: .\app.py:56
+#: .\app.py:47
 #, python-format
 msgid ""
 "Emergency Response: The ambulance for the Unique ID: %(unique_id)s has been "
 "marked %(response)s"
 msgstr ""
 
-#: .\app.py:57
+#: .\app.py:48
 msgid "No OUTCOME Specified.  Please send an outcome!"
 msgstr ""
 
-#: .\app.py:58
+#: .\app.py:49
 #, python-format
 msgid ""
 "Thanks for your message! We have marked the patient with unique_id %"
 "(unique_id)s as outcome: %(outcome)s"
 msgstr ""
 
-#: .\app.py:59
+#: .\app.py:50
 #, python-format
 msgid ""
 "We have been notified of the patient outcome for patient with unique_id: %"
 "(unique_id)s. Outcome: %(outcome)s"
 msgstr ""
 
-#: .\app.py:60
+#: .\app.py:51
 #, python-format
 msgid ""
 "A patient outcome for an Emergency Response for Patient (%(unique_id)s) has "
 "been filed by %(name)s (%(contact_type)s)"
 msgstr ""
 
-#: .\app.py:61
-msgid "Sorry, either the LMP or the EDD must be filled in!"
-msgstr ""
-
-#: .\app.py:62
-msgid "This date is not optional!"
-msgstr ""
-
-#: .\app.py:63
+#: .\app.py:52
 #, python-format
 msgid "This is an emergency message to the clinic. %(unique_id)s"
 msgstr ""
 
-#: .\app.py:64
+#: .\app.py:53
 #, python-format
 msgid ""
 "The Emergency Request for Mother with Unique ID: %(unique_id)s has been "
 "marked %(status)s by %(name)s (%(confirm_type)s)"
 msgstr ""
 
-#: .\app.py:67
-#, python-format
-msgid "Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!"
-msgstr ""
-
-#: .\app.py:69
+#: .\app.py:56
 #, python-format
 msgid "Thanks %(name)s! the Facility/Community birth has been registered."
 msgstr ""
 
-#: .\app.py:70
+#: .\app.py:57
 #, python-format
 msgid "Thanks %(name)s! the Facility/Community death has been registered."
+msgstr ""
+
+#: .\const.py:16
+#, python-format
+msgid ""
+"The date you entered for %(date_name)s is incorrectly formatted.  Format "
+"should be DD MM YYYY. Please try again."
+msgstr ""
+
+#: .\const.py:18
+#, python-format
+msgid ""
+"The year you entered for date %(date_name)s is incorrectly formatted.  "
+"Should be in the format YYYY (four digit year). Please try again."
+msgstr ""
+
+#: .\const.py:20
+msgid "This date is not optional!"
+msgstr ""
+
+#: .\const.py:21
+msgid "Not all date parts were valid numbers!"
+msgstr ""
+
+#: .\const.py:22
+#, python-format
+msgid ""
+"The time you entered (%(time)s) is not valid. Time should be a four-digit "
+"number, like 1500."
+msgstr ""
+
+#: .\const.py:23
+#, python-format
+msgid ""
+"There is no zone with code %(zone)s. Please check your code and try again."
+msgstr ""
+
+#: .\const.py:25
+msgid ""
+"Sorry, this number is not registered. Please register with the JOIN keyword "
+"and try again"
+msgstr ""
+
+#: .\const.py:26
+msgid ""
+"You are not registered as a Data Associate and are not allowed to register "
+"mothers!"
+msgstr ""
+
+#: .\const.py:27
+msgid ""
+"The mother's ID was not recognized, please check and send again. If the "
+"mother was not registered enter 'none' in the place of the ID."
+msgstr ""
+
+#: .\const.py:30
+msgid "Sorry, either the LMP or the EDD must be filled in!"
+msgstr ""
+
+#: .\const.py:31
+#, python-format
+msgid "Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!"
+msgstr ""
+
+#: .\const.py:32
+#, python-format
+msgid ""
+"A new mother named %(mother)s with ID # %(unique_id)s was registered in your "
+"zone. Please take note in your register."
+msgstr ""
+
+#: .\const.py:35
+msgid ""
+"Sorry, the mother you are trying to Follow Up is not registered in the "
+"system. Please check the UID and try again or register her first."
+msgstr ""
+
+#: .\const.py:36
+#, python-format
+msgid "Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!"
+msgstr ""
+
+#: .\const.py:39
+#, python-format
+msgid "Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!"
+msgstr ""
+
+#: .\const.py:40
+#, python-format
+msgid ""
+"A referral for Mother ID %(unique_id)s has been made. Please expect the "
+"mother. Reason: %(reason)s. Time: %(time)s"
+msgstr ""
+
+#: .\const.py:41
+#, python-format
+msgid ""
+"Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received."
 msgstr ""

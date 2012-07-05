@@ -19,13 +19,21 @@ The fixture file contains:
 
 smgl/locale/*
 -------------
-Ready made django translation datafiles used by Rosetta.  May need to be updated,
-see django's `compilemessages` and `makemessages` admin commands.
+Ready made django translation datafiles used by Rosetta.  May need to be 
+updated, see django's `compilemessages` and `makemessages` admin commands.
+
+To regenerate message files run:
+
+cd mwana/apps/smgl
+django-admin.py makemessages -l en
+django-admin.py makemessages -l to
 
 smgl/admin.py
 --------------
 
-Sets up the admin views to make it more user friendly.  The Zambia SMGL staff will have (permission limited) access to the admin view.  They are comfortable with using the admin interface per their experience with the mwana project.
+Sets up the admin views to make it more user friendly.  The Zambia SMGL staff 
+will have (permission limited) access to the admin view.  They are comfortable 
+with using the admin interface per their experience with the mwana project.
 
 
 smgl/ambulance_workflow.py

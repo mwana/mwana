@@ -2,13 +2,13 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-08 10:41-0400\n"
+"POT-Creation-Date: 2012-07-05 11:36-0400\n"
 "PO-Revision-Date: 2012-06-18 09:59\n"
 "Last-Translator: Daniel Bhadurkhan <daniel.sz.bhadurkhan@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,16 +19,15 @@ msgstr ""
 
 #: .\app.py:30
 #, python-format
-msgid ""
-"Sorry, the facility '%(facility)s' is not recognized. Please try again."
+msgid "Sorry, the facility '%(facility)s' is not recognized. Please try again."
 msgstr ""
 "Amutujatile, cibbadela '%(facility)s' tacizibidwe. Twabomba amusole alimwi"
 
 #: .\app.py:31
 #, python-format
 msgid ""
-"%(name)s, you are already registered as a %(readable_user_type)s at "
-"%(facility)s but your details have been updated"
+"%(name)s, you are already registered as a %(readable_user_type)s at %"
+"(facility)s but your details have been updated"
 msgstr ""
 "%(name)s, muli lembedwe kale %(readable_user_type)s ku %(facility)s peele "
 "twaambo twanu twajizigwa"
@@ -43,58 +42,18 @@ msgstr ""
 #: .\app.py:33
 #, python-format
 msgid "You can not specify a zone when registering as a %(reg_type)s!"
-msgstr ""
-"Tamukonzya kutonkomana cinkoso ciindi nomulilembya mbuli %(reg_type)s!"
+msgstr "Tamukonzya kutonkomana cinkoso ciindi nomulilembya mbuli %(reg_type)s!"
 
 #: .\app.py:34
 #, python-format
 msgid ""
-"Thank you for registering! You have successfully registered as a "
-"%(readable_user_type)s at %(facility)s."
+"Thank you for registering! You have successfully registered as a %"
+"(readable_user_type)s at %(facility)s."
 msgstr ""
-"Twaalumba kulilembya! Mwazwidilila mukulilembya %(readable_user_type)s mbuli"
-" %(facility)s."
+"Twaalumba kulilembya! Mwazwidilila mukulilembya %(readable_user_type)s mbuli "
+"%(facility)s."
 
 #: .\app.py:35
-msgid "Thank you, mother has been registered succesfully!"
-msgstr "Twaalumba, batumbu mwazwidilila mukulilembya!"
-
-#: .\app.py:36
-msgid ""
-"Sorry, this number is not registered. Please register with the JOIN keyword "
-"and try again"
-msgstr ""
-"Amutujatile, eeyi nambala tailembedwe. Twakomba amulilembye abbala lipati "
-"lya sangana mpoonya musole aliimwi "
-
-#: .\app.py:37
-msgid ""
-"You are not registered as a Data Associate and are not allowed to register "
-"mothers!"
-msgstr ""
-"Tamulembedwe mbuli mugwasyi sikubungika twaambo mpoonya tamuzumizidwe "
-"kulemba bamatumbu!"
-
-#: .\app.py:38
-#, python-format
-msgid ""
-"The date you entered for %(date_name)s is incorrectly formatted.  Format "
-"should be DD MM YYYY. Please try again."
-msgstr ""
-"Mwezi ngomwakalembya %(date_name)s taubikkidwe kabotu. Weelede kuba munzila "
-"eeyi DD MM YYYY. Twakomba amusole alimwi."
-
-#: .\app.py:40
-#, python-format
-msgid ""
-"The year you entered for date %(date_name)s is incorrectly formatted.  "
-"Should be in the formatYYYY (four digit year). Please try again."
-msgstr ""
-"Mwaka ngomwakanjizya %(date_name)s aciliwo taulembedwe munzila iili kabotu."
-"  Weelede kuba munzila eeyi YYYY (mumwaka wama nambala). Twakomba amusole "
-"alimwi."
-
-#: .\app.py:42
 msgid ""
 "Sorry, you are not on the pre-registered users list. Please contact ZCAHRD "
 "for assistance"
@@ -102,12 +61,12 @@ msgstr ""
 "Amutujatile, tamulembedwe mumulongolongo wasikubelesya. Twakomba mutuma ku "
 "ZCAHRD kutegwa mujane lugwasyo"
 
-#: .\app.py:43
+#: .\app.py:36
 #, python-format
 msgid "%(error_msg)s for %(date_name)s"
 msgstr "%(error_msg)s kutegwa %(date_name)s"
 
-#: .\app.py:44
+#: .\app.py:37
 msgid ""
 "Thank you.Your request for an ambulance has been received. Someone will be "
 "in touch with you shortly.If no one contacts you,please call the emergency "
@@ -117,47 +76,28 @@ msgstr ""
 "ulakalanganya aaka kaambo cakufwambaana kuti naa kunyina uumutumina, "
 "twakomba amutume ku nambala yacibukila mbuta!"
 
-#: .\app.py:45
+#: .\app.py:38
 #, python-format
 msgid ""
-"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact "
-"num:%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if "
-"you see this"
+"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
+"%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if you "
+"see this"
 msgstr ""
-"Mutumbu uujisi ka ID yandeene:%(unique_id)s uyanda luwaile. "
-"Busena:%(from_location)s lwanambala yacibukila "
-"mbuta:%(sender_phone_number)s. Twakomba amutume kuti inzya naa %(unique_id)s"
-" [status]' mwacibona eeci"
+"Mutumbu uujisi ka ID yandeene:%(unique_id)s uyanda luwaile. Busena:%"
+"(from_location)s lwanambala yacibukila mbuta:%(sender_phone_number)s. "
+"Twakomba amutume kuti inzya naa %(unique_id)s [status]' mwacibona eeci"
 
-#: .\app.py:46 .\app.py:47
+#: .\app.py:39 .\app.py:40
 #, python-format
 msgid ""
-"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact "
-"num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see "
-"this"
+"Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:"
+"%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this"
 msgstr ""
-"Mutumbu uujisi ka ID yandeene:%(unique_id)s uyanda luwaile. "
-"Busena:%(from_location)s lwanambala yacibukila "
-"mbuta:%(sender_phone_number)s. Twakomba amutume kuti inzya naa "
-"%(unique_id)s' mwacibona eeci"
+"Mutumbu uujisi ka ID yandeene:%(unique_id)s uyanda luwaile. Busena:%"
+"(from_location)s lwanambala yacibukila mbuta:%(sender_phone_number)s. "
+"Twakomba amutume kuti inzya naa %(unique_id)s' mwacibona eeci"
 
-#: .\app.py:48
-msgid ""
-"Sorry, the mother you are trying to Follow Up is not registered in the "
-"system. Please check the UID and try again or register her first."
-msgstr ""
-"Amutujatile, mutumbu ngomusola kuccilila talembedwe munzila eeyi. Twakomba "
-"amulange ID yandeene mpoonya musole alimwi antela musaangune kumulembya."
-
-#: .\app.py:49
-#, python-format
-msgid ""
-"Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!."
-msgstr ""
-"Twalumba! Kutobezya kulilembya kwa mutumbu uujisi ID yandeene: %(unique_id)s"
-" kwamanizigwa!."
-
-#: .\app.py:50
+#: .\app.py:41
 #, python-format
 msgid ""
 "The Emergency with ID:%(unique_id)s can not be found! Please try again or "
@@ -166,12 +106,12 @@ msgstr ""
 "Cibukila mbuta calo cijisi ID yandeene :%(unique_id)s inga tacijanwi! "
 "Twakomba amusole alimwi antela mutumine DMO cakufwambaana."
 
-#: .\app.py:51
+#: .\app.py:42
 msgid "Sorry. You are not registered as Triage Nurse, Ambulance or DMO"
 msgstr ""
 "Amutujatile. Tamulilembezyede mbuli as Triage Nurse, Ambulance antela DMO"
 
-#: .\app.py:52
+#: .\app.py:43
 msgid ""
 "Thank you for confirming. When you know the status of the Ambulance, please "
 "send RESP <RESPONSE_TYPE>!"
@@ -179,15 +119,15 @@ msgstr ""
 "Twalumba kutobezya. Mwaziba ciimo ca Ambulance, twakomba amutume bwinguzi "
 "RESP <RESPONSE_TYPE>!"
 
-#: .\app.py:53
+#: .\app.py:44
 msgid ""
-"Sorry, your registration type is not allowed to send Emergency Response type"
-" messages"
+"Sorry, your registration type is not allowed to send Emergency Response type "
+"messages"
 msgstr ""
-"Amutujatile, kulilembya kwanu takuzumizidwe kutumizya cibukila mbuta kwiinda"
-" mubwinguzi mukati kamulumbe"
+"Amutujatile, kulilembya kwanu takuzumizidwe kutumizya cibukila mbuta kwiinda "
+"mubwinguzi mukati kamulumbe"
 
-#: .\app.py:54
+#: .\app.py:45
 #, python-format
 msgid ""
 "Thank you. The ambulance for this request has been marked as %(response)s. "
@@ -196,15 +136,15 @@ msgstr ""
 "Twalumba. Ambulance yalombwa yapegwa %(response)s. Tulazibya cibbadela "
 "camumunzi."
 
-#: .\app.py:55
+#: .\app.py:46
 msgid ""
-"Sorry. We cannot find the Mother's Unique ID you specified. Please try again"
-" or contact the DMO"
+"Sorry. We cannot find the Mother's Unique ID you specified. Please try again "
+"or contact the DMO"
 msgstr ""
 "Amutujatile. Tatukonzi kwijana ID yandeene yamutumbu yalo njomwaanza. "
 "Twakomba amusole alimwi antela mutumine DMO"
 
-#: .\app.py:56
+#: .\app.py:47
 #, python-format
 msgid ""
 "Emergency Response: The ambulance for the Unique ID: %(unique_id)s has been "
@@ -213,69 +153,177 @@ msgstr ""
 "Bwiinguzi bwacibukila mbuta: Ambulance ya ID yandeene  eeyi:%(unique_id)s "
 "yapegwa %(response)s"
 
-#: .\app.py:57
+#: .\app.py:48
 msgid "No OUTCOME Specified.  Please send an outcome!"
 msgstr "Taakwe ZYALIBONYA. Twakomba amutume Zyalibonya!"
 
-#: .\app.py:58
+#: .\app.py:49
 #, python-format
 msgid ""
-"Thanks for your message! We have marked the patient with unique_id "
-"%(unique_id)s as outcome: %(outcome)s"
+"Thanks for your message! We have marked the patient with unique_id %"
+"(unique_id)s as outcome: %(outcome)s"
 msgstr ""
-"Twalumba kumulumbe wanu! Tuyanda mulwaze walo uujisi with ID yandeene "
-"%(unique_id)s yande mbuli zyalibonya: %(outcome)s"
+"Twalumba kumulumbe wanu! Tuyanda mulwaze walo uujisi with ID yandeene %"
+"(unique_id)s yande mbuli zyalibonya: %(outcome)s"
 
-#: .\app.py:59
+#: .\app.py:50
 #, python-format
 msgid ""
-"We have been notified of the patient outcome for patient with unique_id: "
-"%(unique_id)s. Outcome: %(outcome)s"
+"We have been notified of the patient outcome for patient with unique_id: %"
+"(unique_id)s. Outcome: %(outcome)s"
 msgstr ""
 "Twazibizigwa amakani aamululwazi walo uujisi ID yandeene: %(unique_id)s. "
-"zyalibonya: %(outcome"
+"zyalibonya: %(outcome)s"
 
-#: .\app.py:60
+#: .\app.py:51
 #, python-format
 msgid ""
 "A patient outcome for an Emergency Response for Patient (%(unique_id)s) has "
 "been filed by %(name)s (%(contact_type)s)"
 msgstr ""
 
-#: .\app.py:61
-msgid "Sorry, either the LMP or the EDD must be filled in!"
-msgstr "Amutujatile, inga mwabika LMP antela EDD!"
-
-#: .\app.py:62
-msgid "This date is not optional!"
-msgstr "Oobu buzuba tabuli bwakusala!"
-
-#: .\app.py:63
+#: .\app.py:52
 #, python-format
 msgid "This is an emergency message to the clinic. %(unique_id)s"
 msgstr ""
 
-#: .\app.py:64
+#: .\app.py:53
 #, python-format
 msgid ""
 "The Emergency Request for Mother with Unique ID: %(unique_id)s has been "
 "marked %(status)s by %(name)s (%(confirm_type)s)"
 msgstr ""
-"Kulomba kwacibukila mbuta kwa mutumbu walo uujisi ID yandeene: %(unique_id)s"
-" kwaandwa %(status)s aa %(name)s (%(confirm_type)s)"
+"Kulomba kwacibukila mbuta kwa mutumbu walo uujisi ID yandeene: %(unique_id)s "
+"kwaandwa %(status)s aa %(name)s (%(confirm_type)s)"
 
-#: .\app.py:67
+#: .\app.py:56
+#, python-format
+msgid "Thanks %(name)s! the Facility/Community birth has been registered."
+msgstr "Twalumba %(name)s! cibbadela/kuzyalwa mumunzi kwalembwa."
+
+#: .\app.py:57
+#, python-format
+msgid "Thanks %(name)s! the Facility/Community death has been registered."
+msgstr "Twalumba %(name)s! cibbadela/ lufwu mumunzi lwalembwa."
+
+#: .\const.py:16
+#, python-format
+msgid ""
+"The date you entered for %(date_name)s is incorrectly formatted.  Format "
+"should be DD MM YYYY. Please try again."
+msgstr ""
+"Mwezi ngomwakalembya %(date_name)s taubikkidwe kabotu. Weelede kuba munzila "
+"eeyi DD MM YYYY. Twakomba amusole alimwi."
+
+#: .\const.py:18
+#, fuzzy, python-format
+msgid ""
+"The year you entered for date %(date_name)s is incorrectly formatted.  "
+"Should be in the format YYYY (four digit year). Please try again."
+msgstr ""
+"Mwaka ngomwakanjizya %(date_name)s aciliwo taulembedwe munzila iili kabotu.  "
+"Weelede kuba munzila eeyi YYYY (mumwaka wama nambala). Twakomba amusole "
+"alimwi."
+
+#: .\const.py:20
+msgid "This date is not optional!"
+msgstr "Oobu buzuba tabuli bwakusala!"
+
+#: .\const.py:21
+msgid "Not all date parts were valid numbers!"
+msgstr ""
+
+#: .\const.py:22
+#, python-format
+msgid ""
+"The time you entered (%(time)s) is not valid. Time should be a four-digit "
+"number, like 1500."
+msgstr ""
+
+#: .\const.py:23
+#, python-format
+msgid ""
+"There is no zone with code %(zone)s. Please check your code and try again."
+msgstr ""
+
+#: .\const.py:25
+msgid ""
+"Sorry, this number is not registered. Please register with the JOIN keyword "
+"and try again"
+msgstr ""
+"Amutujatile, eeyi nambala tailembedwe. Twakomba amulilembye abbala lipati "
+"lya sangana mpoonya musole aliimwi "
+
+#: .\const.py:26
+msgid ""
+"You are not registered as a Data Associate and are not allowed to register "
+"mothers!"
+msgstr ""
+"Tamulembedwe mbuli mugwasyi sikubungika twaambo mpoonya tamuzumizidwe "
+"kulemba bamatumbu!"
+
+#: .\const.py:27
+msgid ""
+"The mother's ID was not recognized, please check and send again. If the "
+"mother was not registered enter 'none' in the place of the ID."
+msgstr ""
+
+#: .\const.py:30
+msgid "Sorry, either the LMP or the EDD must be filled in!"
+msgstr "Amutujatile, inga mwabika LMP antela EDD!"
+
+#: .\const.py:31
+#, fuzzy, python-format
+msgid "Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!"
+msgstr ""
+"Twalumba %(name)s! Kutolwa kwa ID yandeene yamutumbu %(unique_id)s kwamana!"
+
+#: .\const.py:32
+#, python-format
+msgid ""
+"A new mother named %(mother)s with ID # %(unique_id)s was registered in your "
+"zone. Please take note in your register."
+msgstr ""
+
+#: .\const.py:35
+msgid ""
+"Sorry, the mother you are trying to Follow Up is not registered in the "
+"system. Please check the UID and try again or register her first."
+msgstr ""
+"Amutujatile, mutumbu ngomusola kuccilila talembedwe munzila eeyi. Twakomba "
+"amulange ID yandeene mpoonya musole alimwi antela musaangune kumulembya."
+
+#: .\const.py:36
+#, fuzzy, python-format
+msgid "Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!"
+msgstr ""
+"Twalumba %(name)s! Kutolwa kwa ID yandeene yamutumbu %(unique_id)s kwamana!"
+
+#: .\const.py:39
 #, python-format
 msgid "Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!"
 msgstr ""
 "Twalumba %(name)s! Kutolwa kwa ID yandeene yamutumbu %(unique_id)s kwamana!"
 
-#: .\app.py:69
+#: .\const.py:40
 #, python-format
-msgid "Thanks %(name)s! the Facility/Community birth has been registered."
-msgstr "Twalumba %(name)s! cibbadela/kuzyalwa mumunzi kwalembwa."
+msgid ""
+"A referral for Mother ID %(unique_id)s has been made. Please expect the "
+"mother. Reason: %(reason)s. Time: %(time)s"
+msgstr ""
 
-#: .\app.py:70
-#, python-format
-msgid "Thanks %(name)s! the Facility/Community death has been registered."
-msgstr "Twalumba %(name)s! cibbadela/ lufwu mumunzi lwalembwa."
+#: .\const.py:41
+#, fuzzy, python-format
+msgid ""
+"Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received."
+msgstr ""
+"Twalumba %(name)s! Kutolwa kwa ID yandeene yamutumbu %(unique_id)s kwamana!"
+
+#~ msgid "Thank you, mother has been registered succesfully!"
+#~ msgstr "Twaalumba, batumbu mwazwidilila mukulilembya!"
+
+#~ msgid ""
+#~ "Thanks! Follow up registration for Mother ID: %(unique_id)s is complete!."
+#~ msgstr ""
+#~ "Twalumba! Kutobezya kulilembya kwa mutumbu uujisi ID yandeene: %"
+#~ "(unique_id)s kwamanizigwa!."
