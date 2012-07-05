@@ -4,6 +4,7 @@ from django.db import models
 # Create your models here.
 from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
+from mwana.apps.smgl import const
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
@@ -213,13 +214,13 @@ class Referral(FormReferenceBase, MotherReferenceBase):
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
         ('en', 'English'),
-        ('ton', 'Tonga'),
+        ('to', 'Tonga'),
     )
 
     PRE_REG_TITLE_CHOICES = (
-        ('CBA', 'Community Based Agent'),
-        ('TN', 'Triage Nurse'),
-        ('DA', 'Data Associate'),
+        (const.CTYPE_LAYCOUNSELOR, 'Community Based Agent'),
+        (const.CTYPE_TRIAGENURSE, 'Triage Nurse'),
+        (const.CTYPE_DATACLERK, 'Data Clerk'),
         ('worker', 'Clinic Worker'),
         ('DHO', 'District Health Officer'),
         ('DMHO', 'District mHealth Officer'),
