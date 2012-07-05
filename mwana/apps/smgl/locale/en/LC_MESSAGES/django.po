@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-05 11:36-0400\n"
+"POT-Creation-Date: 2012-07-05 16:46-0400\n"
 "PO-Revision-Date: 2012-05-17 11:11\n"
 "Last-Translator:   <adewinter@dimagi.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -169,100 +169,119 @@ msgstr ""
 msgid "Thanks %(name)s! the Facility/Community death has been registered."
 msgstr ""
 
-#: .\const.py:16
+#: .\const.py:20
 #, python-format
 msgid ""
 "The date you entered for %(date_name)s is incorrectly formatted.  Format "
 "should be DD MM YYYY. Please try again."
 msgstr ""
 
-#: .\const.py:18
+#: .\const.py:22
 #, python-format
 msgid ""
 "The year you entered for date %(date_name)s is incorrectly formatted.  "
 "Should be in the format YYYY (four digit year). Please try again."
 msgstr ""
 
-#: .\const.py:20
+#: .\const.py:24
 msgid "This date is not optional!"
 msgstr ""
 
-#: .\const.py:21
+#: .\const.py:25
 msgid "Not all date parts were valid numbers!"
 msgstr ""
 
-#: .\const.py:22
+#: .\const.py:26
 #, python-format
 msgid ""
 "The time you entered (%(time)s) is not valid. Time should be a four-digit "
 "number, like 1500."
 msgstr ""
 
-#: .\const.py:23
+#: .\const.py:27
 #, python-format
 msgid ""
 "There is no zone with code %(zone)s. Please check your code and try again."
 msgstr ""
 
-#: .\const.py:25
+#: .\const.py:29
 msgid ""
 "Sorry, this number is not registered. Please register with the JOIN keyword "
 "and try again"
 msgstr ""
 
-#: .\const.py:26
+#: .\const.py:30
 msgid ""
 "You are not registered as a Data Associate and are not allowed to register "
 "mothers!"
 msgstr ""
 
-#: .\const.py:27
+#: .\const.py:31
 msgid ""
 "The mother's ID was not recognized, please check and send again. If the "
 "mother was not registered enter 'none' in the place of the ID."
 msgstr ""
 
-#: .\const.py:30
+#: .\const.py:34
 msgid "Sorry, either the LMP or the EDD must be filled in!"
 msgstr ""
 
-#: .\const.py:31
+#: .\const.py:35
 #, python-format
 msgid "Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!"
 msgstr ""
 
-#: .\const.py:32
+#: .\const.py:36
 #, python-format
 msgid ""
 "A new mother named %(mother)s with ID # %(unique_id)s was registered in your "
 "zone. Please take note in your register."
 msgstr ""
 
-#: .\const.py:35
+#: .\const.py:39
 msgid ""
 "Sorry, the mother you are trying to Follow Up is not registered in the "
 "system. Please check the UID and try again or register her first."
 msgstr ""
 
-#: .\const.py:36
+#: .\const.py:40
 #, python-format
 msgid "Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!"
 msgstr ""
 
-#: .\const.py:39
+#: .\const.py:43
+#, python-format
+msgid "Thanks %(name)s for reminding mother."
+msgstr ""
+
+#: .\const.py:46
 #, python-format
 msgid "Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!"
 msgstr ""
 
-#: .\const.py:40
+#: .\const.py:47
 #, python-format
 msgid ""
 "A referral for Mother ID %(unique_id)s has been made. Please expect the "
 "mother. Reason: %(reason)s. Time: %(time)s"
 msgstr ""
 
-#: .\const.py:41
+#: .\const.py:48
 #, python-format
 msgid ""
 "Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received."
+msgstr ""
+
+#: .\const.py:49
+#, python-format
+msgid ""
+"No referrals for Mother ID %(unique_id)s were found. Please check the "
+"mother's ID."
+msgstr ""
+
+#: .\const.py:50
+#, python-format
+msgid ""
+"The latest referral for Mother ID %(unique_id)s was already responded to. "
+"Please check the mother's ID."
 msgstr ""
