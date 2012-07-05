@@ -27,6 +27,7 @@ To regenerate message files run:
 cd mwana/apps/smgl
 django-admin.py makemessages -l en
 django-admin.py makemessages -l to
+django-admin.py compilemessages
 
 smgl/admin.py
 --------------
