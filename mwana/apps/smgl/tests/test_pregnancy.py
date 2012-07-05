@@ -91,7 +91,6 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
     
-    
     def testFollowUp(self):
         self.testRegister()
         resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
@@ -104,4 +103,16 @@ class SMGLPregnancyTest(SMGLSetUp):
         
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(2, FacilityVisit.objects.count())
+    
+    def testTold(self):
+        self.testRegister()
+        resp = const.TOLD_COMPLETE % { "name": self.name }
+        script = """
+            %(num)s > told 80403000000112 edd
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        
+        
+        
     

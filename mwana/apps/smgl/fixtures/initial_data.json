@@ -1611,6 +1611,14 @@
   }, 
   {
     "pk": 12, 
+    "model": "smgl.xformkeywordhandler", 
+    "fields": {
+      "keyword": "told", 
+      "function_path": "mwana.apps.smgl.keyword_handlers.told"
+    }
+  }, 
+  {
+    "pk": 12, 
     "model": "smsforms.decisiontrigger", 
     "fields": {
       "trigger_keyword": "confirm", 
@@ -1715,6 +1723,28 @@
       "trigger_keyword": "refout", 
       "final_response": "", 
       "xform": 21
+    }
+  }, 
+  {
+    "pk": 21, 
+    "model": "smsforms.decisiontrigger", 
+    "fields": {
+      "trigger_keyword": "told", 
+      "final_response": "", 
+      "xform": 23
+    }
+  }, 
+  {
+    "pk": 23, 
+    "model": "formplayer.xform", 
+    "fields": {
+      "uiversion": 1, 
+      "name": "Told Reminder", 
+      "created": "2012-07-05T16:45:58.599", 
+      "checksum": "734f589135e401611b8c1f4f8046df3bfb27ea19", 
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B", 
+      "version": 1, 
+      "file": "xforms/told.xml"
     }
   }, 
   {

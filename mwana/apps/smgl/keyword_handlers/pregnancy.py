@@ -172,3 +172,14 @@ def follow_up(session, xform, router):
     visit.save()
     
     send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
+
+def told(session, xform, router):
+    # TODO: processing, if necessary
+    if not session.connection.contact:
+        send_msg(session.connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router, 
+                 name=session.connection.contact.name)
+        return True
+    
+    send_msg(session.connection, const.TOLD_COMPLETE, router, 
+             name=session.connection.contact.name)
+    return True

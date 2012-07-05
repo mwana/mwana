@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Told Reminder</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B" uiVersion="1" version="1" name="Told Reminder">
+					<unique_id />
+					<reminder_type />
+				</data>
+			</instance>
+			<bind nodeset="/data/unique_id" type="xsd:string" required="true()" />
+			<bind nodeset="/data/reminder_type" required="true()" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="unique_id-label">
+						<value>Safe Motherhood Number</value>
+					</text>
+					<text id="reminder_type-label">
+						<value>Type of reminder</value>
+					</text>
+					<text id="reminder_type-edd-label">
+						<value>edd</value>
+					</text>
+					<text id="reminder_type-nvd-label">
+						<value>nvd</value>
+					</text>
+					<text id="reminder_type-ref-label">
+						<value>ref</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/unique_id">
+			<label ref="jr:itext('unique_id-label')" />
+		</input>
+		<select1 ref="/data/reminder_type">
+			<label ref="jr:itext('reminder_type-label')" />
+			<item>
+				<label ref="jr:itext('reminder_type-edd-label')" />
+				<value>edd</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reminder_type-nvd-label')" />
+				<value>nvd</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reminder_type-ref-label')" />
+				<value>ref</value>
+			</item>
+		</select1>
+	</h:body>
+</h:html>
