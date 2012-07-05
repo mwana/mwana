@@ -5,6 +5,7 @@ from mwana.apps.smgl.utils import get_location, to_time, mom_or_none
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
+from datetime import datetime
 
 def refer(session, xform, router):
     name = session.connection.contact.name if session.connection.contact else ""
@@ -19,7 +20,7 @@ def refer(session, xform, router):
                                         }))
     else:
         referral = Referral(facility=loc, form_id=xform.get_id,
-                            session=session)
+                            session=session, date=datetime.utcnow())
         referral.set_mother(mother_id)
         reasons = xform.xpath("form/reason")
         if reasons:
