@@ -11,6 +11,7 @@ from mwana.util import get_clinic_or_default, get_worker_type, get_location_type
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
 _ = lambda s: s
 
+#TODO Consider spliting up this handler into, joincba, joinClinic, JoinHUb, etc
 class JoinHandler(KeywordHandler):
     """
     """
@@ -319,7 +320,10 @@ class JoinHandler(KeywordHandler):
                 # level, update the record and save it
                 cba = self.msg.contact
                 cba.name = name
-                cba.interviewer_id = identity_id 
+                try:
+                    cba.interviewer_id = identity_id
+                except AttributeError:
+                    pass
                 cba.location = zone
                 if lang_code: cba.language = lang_code
                 cba.save()
@@ -329,10 +333,15 @@ class JoinHandler(KeywordHandler):
 
                 if lang_code:
                     cba = Contact.objects.create(name=name, location=zone,
-                                          interviewer_id=identity_id, language=lang_code)
+                                                    language=lang_code)
                 else:
-                    cba = Contact.objects.create(name=name, location=zone,
-                                          interviewer_id=identity_id)
+                    cba = Contact.objects.create(name=name, location=zone)
+
+                try:
+                    cba.interviewer_id = identity_id
+                    cba.save()
+                except AttributeError:
+                    pass
 
                 self.msg.connection.contact = cba
                 self.msg.connection.save()
