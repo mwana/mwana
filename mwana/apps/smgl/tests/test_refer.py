@@ -69,6 +69,17 @@ class SMGLReferTest(SMGLSetUp):
             self.assertTrue(referral.get_reason(r))
         self.assertEqual("nem", referral.status)
         
+    def testReferBadCode(self):
+        # bad code
+        bad_code_resp = 'Answer must be one of the choices for "Reason for referral, choices: fd, pec, ec, hbp, pph, aph, pl, cpd, oth"'
+        script = """
+            %(num)s > refer 1234 804024 foo 1200 nem
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": bad_code_resp }
+        self.runScript(script)
+        
+        self.assertEqual(0, Referral.objects.count())
+    
       
     def testReferBadLocation(self):
         # bad code
