@@ -27,8 +27,9 @@ def main():
                          virtualenv])
     file_path = os.path.dirname(__file__)
     os.chdir(os.path.join(file_path, 'requirements'))
+    pip = os.path.join(virtualenv, 'bin', 'pip')
     for file_name in ['libs.txt', 'pygsm.txt']:
-        subprocess.call(["pip", "install", "-E", virtualenv, "--no-deps",
+        subprocess.call([pip, "install", "--no-deps",
                          "--requirement", file_name])
 
 
