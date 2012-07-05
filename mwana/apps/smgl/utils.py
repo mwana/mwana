@@ -6,7 +6,7 @@ from mwana.apps.contactsplus.models import ContactType
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl import const 
 import string
-NONE_VALUES = ['none', 'n', None]
+NONE_VALUES = ['none', 'n', None, '']
 
 class DateFormatError(ValueError):  pass
     
@@ -43,7 +43,7 @@ def make_date(form, dd, mm, yy, is_optional=False):
     if not date and not is_optional:
         return None, const.DATE_NOT_OPTIONAL
     
-    if datetime.date(1900, 1, 1) > date:
+    if date and datetime.date(1900, 1, 1) > date:
         return None, const.DATE_YEAR_INCORRECTLY_FORMATTED
 
     return date, None
@@ -60,6 +60,18 @@ def get_contacttype(slug):
         return ContactType.objects.get(slug__iexact=slug)
     except ObjectDoesNotExist:
         return None
+    
+def mom_or_none(val):
+    """
+    Returns None if the string is explicitly empty, otherwise looks up
+    a mother based on the ID, and raises a DoesNotExist exception if 
+    that's not found.
+    """
+    from mwana.apps.smgl.models import PregnantMother
+    if val.lower() == "none":
+        return None
+    else:
+        return PregnantMother.objects.get(uid=val)
     
 
 def get_value_from_form(property_name, xform):

@@ -1,6 +1,7 @@
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from rapidsms.messages.outgoing import OutgoingMessage
-from mwana.apps.smgl.utils import get_date, DateFormatError, make_date
+from mwana.apps.smgl.utils import get_date, DateFormatError, make_date,\
+    mom_or_none
 from mwana.apps.smgl.models import BirthRegistration, PregnantMother
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
@@ -21,14 +22,13 @@ def birth_registration(session, xform, router):
     num_kids = xform.xpath("form/num_children") or "t1"
     assert num_kids and num_kids[0] == "t"
     num_kids = int(num_kids[1:])
-    mom = None
+    
     try:
-        mom = PregnantMother.objects.get(uid=xform.xpath("form/unique_id"))
+        mom = mom_or_none(xform.xpath("form/unique_id").lower())
     except PregnantMother.DoesNotExist:
-        if xform.xpath("form/unique_id").lower() != "none":
-            router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
-            return True
-        
+        router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
+        return True
+            
     reg = BirthRegistration(contact=session.connection.contact,
                             connection=session.connection,
                             date=date,
