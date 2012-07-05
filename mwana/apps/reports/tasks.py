@@ -146,11 +146,24 @@ def send_cba_birth_report(router):
 
         births = PatientEvent.objects.filter(event__name__iexact='birth',
                                              cba_conn__contact=worker,
-                                             date__year=last_year,
-                                             date__month=last_month).distinct().count()
+                                             date_logged__year=last_year,
+                                             date_logged__month=last_month).distinct().count()
 
-        traces = PatientTrace.objects.exclude(initiator_contact=None).filter(messenger=worker).distinct().count()
-        helps = births + traces
+        tolds = PatientTrace.objects.exclude\
+        (initiator_contact=None).filter(
+                                        messenger=worker,
+                                        reminded_date__year=last_year,
+                                        reminded_date__month=last_month
+                                        ).distinct().count()
+
+        confirms = PatientTrace.objects.exclude\
+        (initiator_contact=None).filter(
+                                        messenger=worker,
+                                        confirmed_date__year=last_year,
+                                        confirmed_date__month=last_month
+                                        ).distinct().count()
+
+        helps = births + tolds + confirms
         if helps == 0:
             continue
 

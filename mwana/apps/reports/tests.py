@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reports.models import CbaEncouragement
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reports.models import CbaThanksNotification
@@ -6,6 +7,7 @@ import time
 
 import mwana.const as const
 from datetime import date
+from datetime import datetime as dt
 from datetime import timedelta
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.testdata.reports import *
@@ -107,7 +109,7 @@ Births registered: 0""" % month_ago.strftime("%B")]
 
         script = """
             cba > birth 2 %(last_month)s %(last_month_year)s unicef innovation
-            cba > birth 4 %(last_month)s %(last_month_year)s unicef innovation
+            cba > birth 4 %(last_month)s %(last_month_year)s unicef phiri
             cba > told unicef mwana
             cba2 > birth 6 %(last_month)s %(last_month_year)s unicef baby
         """ % {"last_month":month_ago.month, "last_month_year":month_ago.year}
@@ -115,6 +117,26 @@ Births registered: 0""" % month_ago.strftime("%B")]
 
         time.sleep(0.1)
 
+        # fake that the events happened the previous month
+        for pe in PatientEvent.objects.all():
+            pe.date_logged = dt(today.year, today.month, 1) - timedelta(days=1)
+            pe.save()
+            
+        for pt in PatientTrace.objects.exclude(reminded_date=None):
+            pt.reminded_date = dt(today.year, today.month, 1)-timedelta(days=1)
+            pt.save()
+
+        # help more mother this month. this should not count on report
+        script = """
+            cba > birth 2 %(last_month)s %(last_month_year)s peter
+            cba > birth 4 %(last_month)s %(last_month_year)s joyce phiri
+            cba > told teddy mwana
+            cba > confirm peter mwana
+            cba2 > birth 6 %(last_month)s %(last_month_year)s maria banda
+        """ % {"last_month":month_ago.month, "last_month_year":month_ago.year}
+        self.runScript(script)
+
+        time.sleep(0.1)
         self.startRouter()
         # even if task is called twice a day only send once
         tasks.send_cba_birth_report(self.router)
@@ -136,7 +158,7 @@ Births registered: 0""" % month_ago.strftime("%B")]
             self.assertTrue(msg.text in expected_msgs,"%s not in %s"%(msg.text,"\n".join(msg for msg in expected_msgs)))
 
         self.assertTrue(CbaThanksNotification.objects.count()==2)
-        self.assertTrue(PatientTrace.objects.count()==1)
+        self.assertTrue(PatientTrace.objects.count()==3)
 
     def testCbaReminderReport(self):
         self.assertEqual(0, CbaEncouragement.objects.count())
