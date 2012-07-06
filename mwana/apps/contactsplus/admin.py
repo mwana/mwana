@@ -14,8 +14,8 @@ from mwana.apps.contactsplus import models as contactsplus
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
-                   # 'location', 
-		    'default_connection', 'types_list', 'date_of_first_sms',
+                    'location', 
+		            'default_connection', 'types_list', 'date_of_first_sms',
                     'date_of_most_recent_sms', 'is_active',)
     list_filter = ('types', 'is_active', 'language', 'location')
     list_editable = ('is_active',)
