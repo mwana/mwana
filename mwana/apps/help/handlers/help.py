@@ -49,7 +49,8 @@ class HelpHandler(KeywordHandler):
             params["message"] = text
 
         for help_admin in Contact.active.filter(is_help_admin=True):
-            OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
+            self.router.outgoing(OutgoingMessage(help_admin.default_connection, 
+                                                 resp_template, **params))
         
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
         self.respond(RESPONSE, person=person_arg)
