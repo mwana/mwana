@@ -19,9 +19,9 @@ class App(AppBase):
             lang = contact.language
             if not lang:
                 lang = "EN"
-            response_message = DefaultResponse.objects.filter(language=lang)[0]
-            if response_message:
-                msg.error(response_message)
+            msgs = DefaultResponse.objects.filter(language=lang)
+            if msgs.count() > 0:
+                msg.error(msgs[0])
             else:
                 raise ObjectDoesNotExist("We couldn't find a defaut response message for the language specified: %s" % lang)
         except ObjectDoesNotExist:
