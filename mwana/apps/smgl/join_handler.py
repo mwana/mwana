@@ -116,6 +116,6 @@ def join_generic(session, xform, prereg, router):
     prereg.has_confirmed = True
     prereg.save()
     send_msg(connection, USER_SUCCESS_REGISTERED, router, **{"readable_user_type": contactType.name,
-                                                             'facility': prereg.location})
+                                                             'facility': prereg.location.name})
     return True
 
