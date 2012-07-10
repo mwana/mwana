@@ -118,7 +118,9 @@ XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
 #RAPIDSMS_TABS = []    # SET ME IN COUNTRY/LOCALSETTINGS!
 # this dynamic?
 
-DEFAULT_RESPONSE = "Invalid Keyword."
+# for translations
+_ = lambda x: x
+DEFAULT_RESPONSE = _("Invalid keyword. Submit a form with a valid keyword: AMB, RESP, OUTC, REFER, REG, FUP, BIRTH, DEATH, REFOUT, or text HELP for assistance.")
 
 
 # -------------------------------------------------------------------- #
