@@ -248,7 +248,8 @@ class PreRegistration(models.Model):
     )
     contact = models.ForeignKey(Contact, null=True, blank=True)
     phone_number = models.CharField(max_length=255, help_text="User phone number", unique=True)
-    unique_id = models.CharField(max_length=255, help_text="The user's Unique ID")
+    unique_id = models.CharField(max_length=255, unique=True,
+                                 help_text="The user's Unique ID")
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     location = models.ForeignKey(Location)
