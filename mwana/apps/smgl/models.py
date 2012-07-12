@@ -201,7 +201,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     baby_outcome = models.CharField(max_length=3, 
                                     choices=REFERRAL_OUTCOME_CHOICES,
                                     null=True, blank=True)
-    mode_of_delivery = models.CharField(max_length=3, 
+    mode_of_delivery = models.CharField(max_length=4, 
                                         choices=DELIVERY_MODE_CHOICES,
                                         null=True, blank=True)
     
