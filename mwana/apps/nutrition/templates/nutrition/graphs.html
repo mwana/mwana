@@ -6,7 +6,16 @@
 {{ block.super }}
 <link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
 <!-- <link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/tables.css" type="text/css" media="screen" /> -->
+<style type="text/css" media="print">
+    div.pagebreak {
+        display: block;
+        page-break-after: always;
+    }
+</style>
 <style type="text/css" media="screen">
+    div.pagebreak {
+       display: none;
+    }
     #options {
         padding:0 1em 20px;
     }
@@ -265,7 +274,7 @@
     </table>
   </form>
 </div> 
-
+<div class="pagebreak"></div>
 <div class="module">
   <h2>Underweight</h2>
   <div class="toolbar" style="whitespace:nowrap;"> 
@@ -278,7 +287,7 @@
   </div>
   <div id="underweight_chart" style="width:700px; height:{{ chart_height }}px;">
   </div>
-  
+  <div class="pagebreak"></div>
   <div id="underweight_table" class="table-container" style="width:700px;">
     <table width="700px" cellspacing="" cellpadding="" border="">
       <thead>
@@ -315,6 +324,8 @@
   <p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}&gender={{selected_gender}}&startage={{startage}}&endage={{endage}}">Export supporting data to Excel.</a></p>
 </div>
 
+<div class="pagebreak"></div>
+
 <div class="module">
   <h2>Stunting</h2>
   <div class="toolbar" style="whitespace:nowrap;">
@@ -327,6 +338,7 @@
 </div>
 <div id="stunting_chart" style="width:700px; height:{{ chart_height }}px;">
 </div>
+<div class="pagebreak"></div>
 <div id="stunting_table" class="table-container" style="width:700px;">
 
     <table width="700px" cellspacing="" cellpadding="" border="">
@@ -363,7 +375,7 @@
 </div>
 <p><a href="/growth/csv/assessments/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}&gender={{selected_gender}}&startage={{startage}}&endage={{endage}}">Export supporting data to Excel.</a></p>
 </div>
-
+<div class="pagebreak"></div>
 <div class="module">
   <h2>Wasting</h2>
   <div class="toolbar" style="whitespace:nowrap;">
@@ -376,6 +388,7 @@
   </div>
   <div id="wasting_chart" style="width:700px; height:{{ chart_height }}px;">
   </div>
+  <div class="pagebreak"></div>
   <div id="wasting_table" class="table-container" style="width:700px">
 
     <table width="700px" cellspacing="" cellpadding="" border="">
