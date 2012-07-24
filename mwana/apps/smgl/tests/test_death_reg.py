@@ -1,7 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
-from mwana.apps.smgl.app import DEATH_REG_RESPONSE
 from mwana.apps.smgl.models import DeathRegistration
 from datetime import date
+from mwana.apps.smgl import const
 
 class SMGLDeathRegTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
@@ -15,7 +15,7 @@ class SMGLDeathRegTest(SMGLSetUp):
         
     # TODO: beef these up. Just testing the basic workflow
     def testBasicDeathReg(self):
-        resp = DEATH_REG_RESPONSE % {"name": self.name }
+        resp = const.DEATH_REG_RESPONSE % {"name": self.name }
         script = """
             %(num)s > death 1234 01 01 2012 ma h
             %(num)s < %(resp)s            
@@ -27,4 +27,13 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.assertEqual("ma", reg.person)
         self.assertEqual("h", reg.place)
         
+    
+    def testBadDate(self):
+        resp = const.DATE_NOT_NUMBERS 
+        script = """
+            %(num)s > Death 999999 rh dr rrrr inf f
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        self.assertEqual(0, DeathRegistration.objects.count())
         
