@@ -54,7 +54,6 @@ ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_
 
 
 BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been registered.")
-DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
 
                      
 logger = logging.getLogger(__name__)
@@ -136,13 +135,23 @@ def handle_submission(sender, **args):
         logger.debug('No keyword handler found for the xform submission with keyword: %s' % keyword)
         return
     
-    func = to_function(str(kw_handler.function_path), True)
-    session.template_vars = {} #legacy from using rapidsms-xforms
-    for k,v in xform.top_level_tags().iteritems():
-        session.template_vars[k] = v
-
-    # call the actual handling function
-    return func(session, xform, router)
-
+    try:
+        func = to_function(str(kw_handler.function_path), True)
+        session.template_vars = {} #legacy from using rapidsms-xforms
+        for k,v in xform.top_level_tags().iteritems():
+            session.template_vars[k] = v
+    
+        # call the actual handling function
+        return func(session, xform, router)
+    except Exception:
+        # assume that we were supposed to deal with this but something 
+        # unexpected went wrong. Respond with a general default
+        # TODO: should we also mark the form somehow as errored out?
+        logging.exception("Problem processing message in session %s from %s." % \
+                          (session, session.connection))
+        router.outgoing(OutgoingMessage(session.connection, 
+                                        const.GENERAL_ERROR))
+        return True
+        
 # then wire it to the xform_received signal
 xform_saved_with_session.connect(handle_submission)
