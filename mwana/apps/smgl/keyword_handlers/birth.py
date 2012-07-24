@@ -1,7 +1,6 @@
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from rapidsms.messages.outgoing import OutgoingMessage
-from mwana.apps.smgl.utils import get_date, DateFormatError, make_date,\
-    mom_or_none
+from mwana.apps.smgl.utils import make_date, mom_or_none
 from mwana.apps.smgl.models import BirthRegistration, PregnantMother
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
