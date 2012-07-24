@@ -5,6 +5,8 @@ from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
 import datetime
 
+def _verbose_reasons(reasonstring):
+    return ", ".join([Referral.REFERRAL_REASONS[r] for r in reasonstring.split(", ")])
 
 class SMGLReferTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
@@ -23,7 +25,8 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "reason": "hbp",
+                                               "facility": "Chilala",
+                                               "reason": _verbose_reasons("hbp"),
                                                "time": "12:00"}
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
@@ -44,11 +47,20 @@ class SMGLReferTest(SMGLSetUp):
         self.assertFalse(referral.responded)
         self.assertEqual(None, referral.mother_showed)
         
+    def testReferNotRegistered(self):
+        script = """
+            %(num)s > refer 1234 804024 hbp 1200 nem
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+        
+    
     def testMultipleResponses(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "reason": "ec, fd, hbp, pec",
+                                               "facility": "Chilala",
+                                               "reason": _verbose_reasons("ec, fd, hbp, pec"),
                                                "time": "12:00"}
         script = """
             %(num)s > refer 1234 804024 hbp,fd,pec,ec 1200 nem

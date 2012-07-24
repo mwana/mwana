@@ -4,7 +4,9 @@ from mwana.apps.smgl.utils import make_date, mom_or_none
 from mwana.apps.smgl.models import BirthRegistration, PregnantMother
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
+from mwana.apps.smgl.decorators import registration_required
 
+@registration_required
 def birth_registration(session, xform, router):
     """
     Keyword: BIRTH

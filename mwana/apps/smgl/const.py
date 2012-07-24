@@ -26,6 +26,7 @@ DATE_NOT_NUMBERS = _("Date format should include only numbers: 'dd mm yyyy'")
 TIME_INCORRECTLY_FORMATTED = _("The time you entered (%(time)s) is not valid. Time should be a four-digit number, like 1500.")
 UNKOWN_ZONE = _("There is no zone with code %(zone)s. Please check your code and try again.")
 
+NOT_REGISTERED=_("This phone number is not registered in the system.")
 NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
 MOTHER_NOT_FOUND = _("The mother's ID was not recognized, please check and send again. If the mother was not registered enter 'none' in the place of the ID.")
@@ -45,7 +46,8 @@ TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
  
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
-REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been made. Please expect the mother. Reason: %(reason)s. Time: %(time)s")
+
+REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been sent from %(facility)s. Please expect the mother. Reason: %(reason)s. Time: %(time)s")
 REFERRAL_OUTCOME_RESPONSE = _("Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received.")
 REFERRAL_NOT_FOUND = _("No referrals for Mother ID %(unique_id)s were found. Please check the mother's ID.")
 REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s was already responded to. Please check the mother's ID.")

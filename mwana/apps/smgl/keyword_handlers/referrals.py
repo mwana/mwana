@@ -6,7 +6,9 @@ from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
 from datetime import datetime
+from mwana.apps.smgl.decorators import registration_required
 
+@registration_required
 def refer(session, xform, router):
     name = session.connection.contact.name if session.connection.contact else ""
     
@@ -38,12 +40,15 @@ def refer(session, xform, router):
         router.outgoing(OutgoingMessage(session.connection, resp))
         for c in _get_people_to_notify(referral):
             if c.default_connection:
+                verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
                 msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
-                                                     "reason": ", ".join(referral.get_reasons()),
+                                                     "facility": loc.name,
+                                                     "reason": ", ".join(verbose_reasons),
                                                      "time": referral.time.strftime("%H:%M")}
                 router.outgoing(OutgoingMessage(c.default_connection, msg))
     return True
 
+@registration_required
 def referral_outcome(session, xform, router):
     name = session.connection.contact.name if session.connection.contact else ""
     mother_id = xform.xpath("form/unique_id")

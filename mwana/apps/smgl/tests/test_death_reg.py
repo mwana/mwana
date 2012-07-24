@@ -27,7 +27,13 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.assertEqual("ma", reg.person)
         self.assertEqual("h", reg.place)
         
-    
+    def testDeathNotRegistered(self):
+        script = """
+            %(num)s > death 1234 01 01 2012 ma h
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+        
     def testBadDate(self):
         resp = const.DATE_NOT_NUMBERS 
         script = """

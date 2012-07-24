@@ -45,6 +45,13 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(date(2012, 11, 18), visit.edd)
         self.assertEqual(date(2012, 8, 4), visit.next_visit)
         
+    def testRegisterNotRegistered(self):
+        script = """
+            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+    
     def testRegisterMultipleReasons(self):
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
                                                    "unique_id": "80403000000112" }
@@ -104,6 +111,13 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(2, FacilityVisit.objects.count())
     
+    def testFollowUpNotRegistered(self):
+        script = """
+            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012 
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+    
     def testFollowUpOptionalEdd(self):
         self.testRegister()
         resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
@@ -138,6 +152,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
         
-        
+    def testToldNotRegistered(self):
+        script = """
+            %(num)s > told 80403000000112 edd
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+    
         
     

@@ -8,6 +8,7 @@ import datetime
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl import const
 from mwana.apps.locations.models import Location, LocationType
+from mwana.apps.smgl.decorators import registration_required
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ def get_laycounselors(mother):
         (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
          location=mother.zone)
 
+@registration_required
 def pregnant_registration(session, xform, router):
     """
     Handler for REG keyword (registration of pregnant mothers).
@@ -126,7 +128,7 @@ def pregnant_registration(session, xform, router):
 
     return True
 
-
+@registration_required
 def follow_up(session, xform, router):
     """
     Keyword handler for follow up visits.
@@ -173,6 +175,7 @@ def follow_up(session, xform, router):
     
     send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
 
+@registration_required
 def told(session, xform, router):
     # TODO: processing, if necessary
     if not session.connection.contact:

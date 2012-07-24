@@ -44,6 +44,14 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertEqual(True, reg.complications)
         self.assertEqual(2, reg.number)
         
+    def testBirthNotRegistered(self):
+        script = """
+            %(num)s > birth 1234 01 01 2012 bo h yes t2
+            %(num)s < %(resp)s
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        self.runScript(script)
+        
+    
     def testOptionalLastQuestion(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name }
         script = """
