@@ -16,7 +16,7 @@ class SMGLReferTest(SMGLSetUp):
         Referral.objects.all().delete()
         self.user_number = "123"
         self.name = "Anton"
-        self.createUser("worker", self.user_number)
+        self.createUser("worker", self.user_number, location="804034")
         self.createUser(const.CTYPE_DATACLERK, "666777")
         self.createUser(const.CTYPE_TRIAGENURSE, "666888")
         self.assertEqual(0, Referral.objects.count())
@@ -25,7 +25,7 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Chilala",
+                                               "facility": "Mawaya",
                                                "reason": _verbose_reasons("hbp"),
                                                "time": "12:00"}
         script = """
@@ -59,7 +59,7 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Chilala",
+                                               "facility": "Mawaya",
                                                "reason": _verbose_reasons("ec, fd, hbp, pec"),
                                                "time": "12:00"}
         script = """

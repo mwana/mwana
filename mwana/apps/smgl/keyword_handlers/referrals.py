@@ -10,7 +10,11 @@ from mwana.apps.smgl.decorators import registration_required
 
 @registration_required
 def refer(session, xform, router):
-    name = session.connection.contact.name if session.connection.contact else ""
+    assert session.connection.contact is not None, \
+        "Must be a registered contact to refer"
+    assert session.connection.contact.location is not None, \
+        "Contact must have a location to refer"
+    name = session.connection.contact.name 
     
     mother_id = xform.xpath("form/unique_id")
     facility_id = xform.xpath("form/facility")
@@ -38,11 +42,12 @@ def refer(session, xform, router):
         referral.save()
         resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
         router.outgoing(OutgoingMessage(session.connection, resp))
+        from_facility = session.connection.contact.location.name 
         for c in _get_people_to_notify(referral):
             if c.default_connection:
                 verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
                 msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
-                                                     "facility": loc.name,
+                                                     "facility": from_facility,
                                                      "reason": ", ".join(verbose_reasons),
                                                      "time": referral.time.strftime("%H:%M")}
                 router.outgoing(OutgoingMessage(c.default_connection, msg))
