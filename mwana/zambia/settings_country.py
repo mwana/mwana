@@ -26,6 +26,7 @@ INSTALLED_APPS.append("mwana.apps.monitor")
 INSTALLED_APPS.append("mwana.apps.websmssender")
 INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
+INSTALLED_APPS.append("mwana.apps.birthcertification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 
 
