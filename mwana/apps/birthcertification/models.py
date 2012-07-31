@@ -1,11 +1,20 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.reminders.models import PatientEvent
 from datetime import datetime
+from mwana.apps.locations.models import Location
 
 from django.db import models
 from rapidsms.models import Contact
 
+class SupportedLocation(models.Model):
+    """
+    Clinics where the birth certication should function
+    """
 
+    location = models.ForeignKey(Location, limit_choices_to={'send_live_results':
+                              True},
+    related_name='cert_supportedlocation')
+    supported = models.BooleanField(default=True)
 
 class Agent(models.Model):
     """
@@ -46,7 +55,7 @@ class Certification(models.Model):
     reg_notification_date = models.DateTimeField(blank=True, null=True, editable=False)
     registration_date = models.DateField(blank=True, null=True)
     certificate_sent_to_clinic = models.DateField(blank=True, null=True)
-    certificate_notification_date = models.DateField(blank=True, null=True, editable=False)
+    certificate_notification_date = models.DateField(blank=True, null=True, editable=False, verbose_name='cert. notification date')
     parents_got_certificate = models.DateField(blank=True, null=True)
     certificate_number = models.CharField(max_length=20, blank=True, null=True, unique=True)
     status = models.CharField(max_length=15, default='nb', choices=STATUS_CHOICES, editable=False)

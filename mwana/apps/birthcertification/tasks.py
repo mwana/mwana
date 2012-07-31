@@ -1,13 +1,14 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.birthcertification.models import CertificateNotification
-from mwana.apps.birthcertification.models import RegistrationReminder
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
 import logging
+from django.db.models import Q
 
 from mwana.apps.birthcertification.models import Agent
+from mwana.apps.birthcertification.models import CertificateNotification
 from mwana.apps.birthcertification.models import Certification
+from mwana.apps.birthcertification.models import RegistrationReminder
 from mwana.apps.reminders.models import PatientEvent
 from mwana.util import get_clinic_or_default
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -23,7 +24,7 @@ REG_MESSAGE = _(("Hello %(agent)s, please remind %(patient)s to register"
 
 
 CERT_MESSAGE = _(("Hello %(agent)s, please tell %(patient)s to collect"
-                " the birth certicate for the child at %(location)s"))
+                 " the birth certicate for the child at %(location)s"))
 
 def send_birth_registration_reminder(router):
     """
@@ -37,7 +38,13 @@ def send_birth_registration_reminder(router):
 
     # create certifications for new births, later may apply other filters such us
     # location.
-    for pe in PatientEvent.objects.filter(certification=None, date__gt=date_back):
+    patient_events = PatientEvent.objects.filter(Q(certification=None),
+                                                 Q(date__gt=date_back),
+                                                 Q(patient__location__cert_supportedlocation__supported=True) |
+                                                 Q(patient__location__parent__cert_supportedlocation__supported=True))
+
+    
+    for pe in patient_events:
         Certification(birth=pe).save() # not so worried about records being commited immediately
 
 
@@ -45,7 +52,7 @@ def send_birth_registration_reminder(router):
         recipients = Agent.active.filter(
                                          contact__location=\
                                          certification.birth.patient.location)\
-                                         .distinct()
+            .distinct()
         patient = certification.birth.patient
 
         
@@ -77,7 +84,7 @@ def send_certicate_ready_notification(router):
         recipients = Agent.active.filter(
                                          contact__location=\
                                          certification.birth.patient.location)\
-                                         .distinct()
+            .distinct()
         patient = certification.birth.patient
 
 
