@@ -14,8 +14,7 @@ REASON_FOR_VISIT_CHOICES = (
 class XFormKeywordHandler(models.Model):
     keyword = models.CharField(max_length=255, help_text="The keyword that you want to associate with this handler.")
     function_path = models.CharField(max_length=255, help_text="The full path to the handler function. E.g: 'mwana.apps.smgl.app.birth_registration'")
-
-
+    
 class PregnantMother(models.Model):
     HI_RISK_REASONS = {
         "csec": "C-Section",
@@ -218,7 +217,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     
     
     def set_reason(self, code, val=True):
-        assert code in self.REFERRAL_REASONS
+        assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
         setattr(self, "reason_%s" % code, val)
     
     def get_reason(self, code):
