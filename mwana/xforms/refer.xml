@@ -55,7 +55,7 @@
                     <text id="reason-pph-label">
                         <value>pph</value>
                     </text>
-                    <text id="reason-ap-label">
+                    <text id="reason-aph-label">
                         <value>aph</value>
                     </text>
                     <text id="reason-pl-label">
@@ -101,8 +101,8 @@
                 <value>pph</value>
             </item>
             <item>
-                <label ref="jr:itext('reason-ap-label')" />
-                <value>ap</value>
+                <label ref="jr:itext('reason-aph-label')" />
+                <value>aph</value>
             </item>
             <item>
                 <label ref="jr:itext('reason-pl-label')" />
