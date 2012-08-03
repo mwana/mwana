@@ -31,7 +31,7 @@ class PatientEventAdmin(admin.ModelAdmin):
     'cba_conn','notification_status','notification_sent_date',)
     list_filter = ('event', 'event_location_type', 'date_logged','notification_status',)
     date_hierarchy = 'date_logged'
-    search_fields = ('patient__name', 'patient__location__parent__name',)
+    search_fields = ('patient__name', 'cba_conn__identity','patient__location__parent__name',)
 
     def clinic(self, obj):
         try:
