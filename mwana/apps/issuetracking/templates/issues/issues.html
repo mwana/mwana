@@ -33,21 +33,21 @@
 
               
 
-                <h3>Existing Issues</h3>
+                <h2>Existing Issues</h2>
 
                 {% for issue in issues %}
 
-                        
-                        <p><h4>
-                        {{ issue.id }} {{ issue.title }} - {{ issue.status }}
-                        </h4>
+                       
+                        <p><details>  
+                            <summary><h3>{{ issue.id }} {{ issue.title }} - {{ issue.status }}</h3></summary>
+                           
                         
                         <br>Priority: {{ issue.priority }}
                         <br>Type: {{ issue.type }}
                         <br>Assinged to: {{ issue.assigned_to }}
                         <br>Desired Start Date: {{ issue.desired_start_date }}
                         <p>Text: {{ issue.body }}
-                        
+                        </details>
                 <hr>
                    
 
