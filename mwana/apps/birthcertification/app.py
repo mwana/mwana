@@ -18,11 +18,11 @@ class App (rapidsms.apps.base.AppBase):
     def schedule_birth_registration_reminder_task(self):
         callback = 'mwana.apps.birthcertification.tasks.send_birth_registration_reminder'
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[14, 15, 16, 17, 21], minutes=range(60),
+        EventSchedule.objects.create(callback=callback, hours=[14], minutes=[8],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])
                                      
     def schedule_send_certicate_ready_notification_task(self):
         callback = 'mwana.apps.birthcertification.tasks.send_certicate_ready_notification'
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[14, 15, 16, 17, 21], minutes=range(60),
+        EventSchedule.objects.create(callback=callback, hours=[9, 14], minutes=[17],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])
