@@ -14,7 +14,7 @@ class UserVerificationAdmin(admin.ModelAdmin):
     list_filter = ("responded", "facility", )
 
     def is_active(self, obj):
-        return obj.contact.is_active
+        return "Yes" if obj.contact.is_active else "No"
     
     def date_of_most_recent_sms(self, obj):
         latest = Message.objects.filter(
