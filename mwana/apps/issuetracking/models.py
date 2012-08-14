@@ -49,11 +49,16 @@ class Issue(models.Model):
     desired_start_date = models.DateField(null=True, blank=True)
     desired_completion_date = models.DateField(null=True, blank=True,  verbose_name='Desired End Date')
     open = models.NullBooleanField(null=True, blank=True, editable=False)
+    dev_time = models.CharField(max_length=160, blank=True, null=True, verbose_name="Development time")
 
     def __unicode__(self):
         return self.title
 
-        
+    def assigned_to_full_name(self):
+        f_name = self.assigned_to.first_name if self.assigned_to.first_name else ""
+        l_name = self.assigned_to.last_name if self.assigned_to.last_name else ""
+        return ("%s %s" % (f_name, l_name)).strip()
+
 class Comment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     edited_on = models.DateTimeField(auto_now=True)
