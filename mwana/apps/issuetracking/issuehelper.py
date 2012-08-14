@@ -16,7 +16,7 @@ class IssueHelper:
             page = 1
         
             
-        paginator = Paginator(issues, 10)
+        paginator = Paginator(issues, 30)
         try:
             p_issues = paginator.page(page)
         except PageNotAnInteger:
