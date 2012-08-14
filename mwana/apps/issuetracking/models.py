@@ -55,8 +55,13 @@ class Issue(models.Model):
         return self.title
 
     def assigned_to_full_name(self):
-        f_name = self.assigned_to.first_name if self.assigned_to.first_name else ""
-        l_name = self.assigned_to.last_name if self.assigned_to.last_name else ""
+        f_name = ""
+        if self.assigned_to and self.assigned_to.first_name:
+            f_name = self.assigned_to.first_name
+        l_name = ""
+        if self.assigned_to and self.assigned_to.last_name:
+            l_name = self.assigned_to.last_name
+            
         return ("%s %s" % (f_name, l_name)).strip()
 
 class Comment(models.Model):
