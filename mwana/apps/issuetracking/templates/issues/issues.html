@@ -41,12 +41,12 @@
                     <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.status }}</h4></summary>
 
 
-                    <br>Priority: {{ issue.get_priority_display }}
-                    <br>Type: {{ issue.get_type_display }}
-                    <br>Assigned to: {{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}
-                    <br>Desired Start Date: {{ issue.desired_start_date }} Desired End Date: {{ issue.desired_completion_date }}
-                    <br>Development time: {{ issue.dev_time }}
-                    <p>Description:
+                    <br>Priority: <b>{{ issue.get_priority_display }}</b>
+                    <br>Type: <b>{{ issue.get_type_display }}</b>
+                    <br>Assigned to: <b>{{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}</b>
+                    <br>Desired Start Date: <b>{{ issue.desired_start_date }}</b> Desired End Date: <b>{{ issue.desired_completion_date }}</b>
+                    <br>Development time: <b>{{ issue.dev_time }}</b>
+                    <p><u>Description:</u>
                         <br><span style="white-space: pre-wrap;">{{ issue.body }}</span>
                 </details>
                 <hr>
