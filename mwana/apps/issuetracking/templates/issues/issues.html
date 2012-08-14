@@ -16,66 +16,66 @@
 {% block content %}
 
 
-    <div class="left">
-        <form name="getValues" action="" method="POST">
+<div class="left">
+    <form name="getValues" action="" method="POST">
         <div class="module">
             <h2>Issues</h2>
+            <p><details>
+                    <summary><h3>Create New Issue</h3></summary>
+            
             <br>
             {{ message }}
             {{ errors }}
-                <p>
-                <h3>Create New Issue</h3>
-                    {{issue.as_p}}
-                    <input type="submit" value="Submit" />
-                 <hr>
-           <div>
-              
+            {{issue.as_p}}
+            <input type="submit" value="Submit" />
+            </details>
+            <hr>
+            <div>
 
-              
-
-                <h2>Existing Issues</h2>
+                <h3>Open Issues</h3>
 
                 {% for issue in issues %}
 
-                       
-                        <p><details>  
-                            <summary><h3>{{ issue.id }} {{ issue.title }} - {{ issue.status }}</h3></summary>
-                           
-                        
-                        <br>Priority: {{ issue.priority }}
-                        <br>Type: {{ issue.type }}
-                        <br>Assinged to: {{ issue.assigned_to }}
-                        <br>Desired Start Date: {{ issue.desired_start_date }}
-                        <p>Text: {{ issue.body }}
-                        </details>
+
+                <p><details>
+                    <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.status }}</h4></summary>
+
+
+                    <br>Priority: {{ issue.get_priority_display }}
+                    <br>Type: {{ issue.get_type_display }}
+                    <br>Assigned to: {{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}
+                    <br>Desired Start Date: {{ issue.desired_start_date }} Desired End Date: {{ issue.desired_completion_date }}
+                    <br>Development time: {{ issue.dev_time }}
+                    <p>Text: {{ issue.body }}
+                </details>
                 <hr>
-                   
+
 
                 {% endfor %}
 
 
+            </div>
+            <div class="clear-hack"></div>
         </div>
-        <div class="clear-hack"></div>
-    </div>
-        
+
         <div class="pagination">
-    <span class="step-links">
-        {% if has_previous %}
-            <input type="submit" value="Previous" name="navigate" />
-        {% endif %}
+            <span class="step-links">
+                {% if has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
 
-        <span class="current">
-            Page {{ number }} of {{ num_pages }}.
-        </span>
+                <span class="current">
+                    Page {{ number }} of {{ num_pages }}.
+                </span>
 
-        {% if has_next %}
-        <input type="submit" value="Next" name="navigate" size="8" />
-        {% endif %}
-        <input type="hidden" name="page" value={{ number }}>
-    </span>
+                {% if has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ number }}>
+            </span>
 
-</div>
-        </form>
+        </div>
+    </form>
 
 </div>
 {% endblock %}

@@ -7,10 +7,10 @@ class IssueHelper:
 
     def get_issues(self, page=1):
         """
-        Returns issues with pagination
+        Returns open issues with pagination
         """
         
-        issues = Issue.objects.all()
+        issues = Issue.objects.filter(open=True).order_by('pk')
         
         if not page:
             page = 1
@@ -26,7 +26,7 @@ class IssueHelper:
             # If page is out of range (e.g. 9999), deliver last page of results.
             p_issues = paginator.page(paginator.num_pages)
 
-        counter = p_issues.start_index()
+#        counter = p_issues.start_index()
         
         number=p_issues.number
         has_previous = p_issues.has_previous()
