@@ -46,7 +46,8 @@
                     <br>Assigned to: {{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}
                     <br>Desired Start Date: {{ issue.desired_start_date }} Desired End Date: {{ issue.desired_completion_date }}
                     <br>Development time: {{ issue.dev_time }}
-                    <p>Text: {{ issue.body }}
+                    <p>Description:
+                        <br><span style="white-space: pre-wrap;">{{ issue.body }}</span>
                 </details>
                 <hr>
 
