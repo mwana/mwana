@@ -19,7 +19,8 @@ class IssueForm(ModelForm):
 
     class Meta:
         model = Issue
-        exclude = ('assigned_to', 'start_date', 'end_date',)
+        exclude = ('assigned_to', 'start_date', 'end_date', 'percentage_complete'
+        ,'status',)
 
 class CommentForm(ModelForm):
     class Meta:

@@ -65,7 +65,6 @@ def list_issues(request):
         form = IssueForm(request.POST) # A form bound to the POST data
         if form.is_valid():
             type = form.cleaned_data['type']
-            status = form.cleaned_data['status']
             priority = form.cleaned_data['priority']
             title = form.cleaned_data['title']
             body = form.cleaned_data['body']
@@ -73,14 +72,10 @@ def list_issues(request):
             desired_completion_date = form.cleaned_data['desired_completion_date']
 
             web_author = request.user
-            open = None
-            if status in ['new', 'ongoing', 'resurfaced', 'future']:
-                open = True
-            elif instance.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
-                open = False
-
-            issue = Issue(type=type, status=status, priority=priority, title=title,
-            body=body, desired_start_date=desired_start_date, open=open,
+           
+            
+            issue = Issue(type=type, priority=priority, title=title,
+            body=body, desired_start_date=desired_start_date, 
             desired_completion_date=desired_completion_date, web_author=web_author)
 
             issue.save()

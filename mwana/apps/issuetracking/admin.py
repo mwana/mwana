@@ -40,6 +40,9 @@ class IssueAdmin(admin.ModelAdmin):
         elif instance.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
             instance.open = False
 
+        if instance.status in ['completed', 'bugfixed']:
+            instance.percentage_complete = 100
+
         instance.save()
         if instance.web_author and request.user:    
             try:

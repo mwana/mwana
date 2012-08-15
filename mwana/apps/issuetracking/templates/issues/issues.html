@@ -43,7 +43,7 @@
 
 
                 <p><details>
-                    <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.status }}</h4></summary>
+                    <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.get_status_display }}</h4></summary>
 
 
                     <br>Priority: <b>{{ issue.get_priority_display }}</b>
@@ -51,6 +51,7 @@
                     <br>Assigned to: <b>{{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}</b>
                     <br>Desired Start Date: <b>{{ issue.desired_start_date }}</b> Desired End Date: <b>{{ issue.desired_completion_date }}</b>
                     <br>Development time: <b>{{ issue.dev_time }}</b>
+                    <br>% Complete: <b>{{ issue.get_percentage_complete_display }}</b>
                     <p><u>Description:</u>
                         <br><span style="white-space: pre-wrap;">{{ issue.body }}</span>
                 </details>
