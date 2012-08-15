@@ -20,14 +20,19 @@
     <form name="getValues" action="" method="POST">
         <div class="module">
             <h2>Issues</h2>
-            <p><details>
-                    <summary><h3>Create New Issue</h3></summary>
-            
-            <br>
-            {{ message }}
-            {{ errors }}
-            {{issue.as_p}}
-            <input type="submit" value="Submit" />
+            <p>{{ message }}<details>
+                <summary><h3>Create New Issue</h3></summary>
+                <br>
+                
+                <table border="0">
+                    {% for field in issue %}
+                    <tr>
+                        <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
+                        <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <p><input type="submit" value="Submit" /></p>
             </details>
             <hr>
             <div>

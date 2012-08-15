@@ -49,7 +49,7 @@ class Issue(models.Model):
     desired_start_date = models.DateField(null=True, blank=True)
     desired_completion_date = models.DateField(null=True, blank=True,  verbose_name='Desired End Date')
     open = models.NullBooleanField(null=True, blank=True, editable=False)
-    dev_time = models.CharField(max_length=160, blank=True, null=True, verbose_name="Development time")
+    dev_time = models.CharField(max_length=160, blank=True, null=True, verbose_name="Development time", help_text='e.g. 2days')
 
     def __unicode__(self):
         return self.title

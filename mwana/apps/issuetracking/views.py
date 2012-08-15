@@ -46,7 +46,7 @@ def get_next_navigation(text):
 #                              "formset": formset,
 #                              })
 
-
+    
 @csrf_response_exempt
 @csrf_view_exempt
 def list_issues(request):
@@ -59,7 +59,8 @@ def list_issues(request):
 
     page = get_default_int(page)
     page = page + get_next_navigation(navigation)
-
+    
+    form = IssueForm() # An unbound form
     if request.method == 'POST': # If the form has been submitted...
         form = IssueForm(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -93,11 +94,12 @@ def list_issues(request):
                     logger = logging.getLogger(__name__)
                     logger.error(e)
 
+            form = IssueForm() # An unbound form
         else:
             errors = form.errors
-    form = IssueForm() # An unbound form
+
     
-        
+    
     issueHelper = IssueHelper()
 
     (issues, num_pages, number, has_next, has_previous) = issueHelper.get_issues(page)
