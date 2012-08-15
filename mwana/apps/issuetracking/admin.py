@@ -9,7 +9,7 @@ class CommentInline(admin.TabularInline):
     extra = 0
 
 class IssueAdmin(admin.ModelAdmin):
-    list_display = ('id','title', 'snippet' , 'type', 'status', 'priority',
+    list_display = ('id','title', 'snippet' , 'type', 'status', 'dev_time',
     'assigned_to','author','desired_start_date', 'desired_completion_date','start_date','end_date',)
     inlines = (CommentInline,)
     date_hierarchy = 'date_created'
@@ -18,8 +18,9 @@ class IssueAdmin(admin.ModelAdmin):
 
 
     def snippet(self, obj):
+        x = 500
         if obj.body:
-            return obj.body[0:50] + "..."
+            return obj.body[0:x] + ("..." if len(obj.body) > x else "")
 
     def author(self, obj):
         if obj.sms_author:
