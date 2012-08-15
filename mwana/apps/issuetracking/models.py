@@ -38,7 +38,7 @@ class Issue(models.Model):
     status = models.CharField(choices=STATUS_CHOICES, max_length=15, default='new')
     priority = models.CharField(choices=PRIORITY_CHOICES, max_length=7, default='medium')
     title = models.CharField(max_length=160)
-    body = models.TextField()
+    body = models.TextField(verbose_name='Description')
     sms_author = models.ForeignKey(Contact, null=True, blank=True, editable=False) #author
     web_author = models.ForeignKey(User, null=True, blank=True, editable=False) # author
     assigned_to = models.ForeignKey(User, null=True, blank=True,
