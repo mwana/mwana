@@ -341,7 +341,7 @@ class Alerter:
         return self.clinic_notification_days, sorted(my_alerts, key=itemgetter(5))
 
     def set_district_last_received_dbs(self):
-        results = Result.objects.exclude(entered_on=None)
+        results = Result.objects.exclude(entered_on=None).exclude(clinic=None)
         for result in results:
             district = result.clinic.parent
             if district in  self.last_received_dbs.keys():
