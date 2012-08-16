@@ -70,12 +70,13 @@ def list_issues(request):
             body = form.cleaned_data['body']
             desired_start_date = form.cleaned_data['desired_start_date']
             desired_completion_date = form.cleaned_data['desired_completion_date']
+            dev_time = form.cleaned_data['dev_time']
 
             web_author = request.user
            
             
             issue = Issue(type=type, priority=priority, title=title,
-            body=body, desired_start_date=desired_start_date, 
+            body=body, desired_start_date=desired_start_date, dev_time=dev_time,
             desired_completion_date=desired_completion_date, web_author=web_author)
 
             issue.save()
