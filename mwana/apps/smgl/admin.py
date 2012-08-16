@@ -9,7 +9,9 @@ class PreRegsitrationAdmin(admin.ModelAdmin):
     exclude = ['contact', 'has_confirmed']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
-    list_display = ['uid', 'first_name', 'last_name', 'lmp', 'edd', 'next_visit']
+    list_display = ['uid', 'contact', 'location', 'first_name', 
+                    'last_name', 'lmp', 'edd', 'next_visit']
+    list_filter = ['contact', 'location']
 
 class FacilityVisitAdmin(admin.ModelAdmin):
     list_display = ['location', 'mother', 'visit_date', 'next_visit', 'reason_for_visit']
@@ -23,6 +25,19 @@ class AmbulanceResponseAdmin(admin.ModelAdmin):
 class AmbulanceOutcomeAdmin(admin.ModelAdmin):
     list_display = ['ambulance_request', 'mother', 'mother_uid', 'outcome']
 
+class ReferralAdmin(admin.ModelAdmin):
+    list_display = ['date', 'facility', 'mother', 'mother_uid', 'responded', 'status', 
+                    'mother_outcome', 'baby_outcome', 'mode_of_delivery']
+
+class BirthRegistrationAdmin(admin.ModelAdmin):
+    list_display = ['contact', 'date', 'mother', 'gender', 'place', 'complications', 'number']
+    list_filter = ['contact']
+
+class DeathRegistrationAdmin(admin.ModelAdmin):
+    list_display = ['contact', 'date', 'unique_id', 'person', 'place']
+    list_filter = ['contact']
+    
+    
 admin.site.register(XFormKeywordHandler, XFormKeywordHandlerAdmin)
 admin.site.register(PreRegistration, PreRegsitrationAdmin)
 admin.site.register(PregnantMother, PregnantMotherAdmin)
@@ -30,3 +45,6 @@ admin.site.register(FacilityVisit, FacilityVisitAdmin)
 admin.site.register(AmbulanceRequest, AmbulanceRequestAdmin)
 admin.site.register(AmbulanceResponse, AmbulanceResponseAdmin)
 admin.site.register(AmbulanceOutcome, AmbulanceOutcomeAdmin)
+admin.site.register(Referral, ReferralAdmin)
+admin.site.register(BirthRegistration, BirthRegistrationAdmin)
+admin.site.register(DeathRegistration, DeathRegistrationAdmin)
