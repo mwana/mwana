@@ -111,7 +111,7 @@ def join_generic(session, xform, prereg, router):
     contact.location = prereg.location
     contact.save()
 
-    #lastly, link this contact to its owning pre-reg info
+    # lastly, link this contact to its owning pre-reg info
     prereg.contact = contact
     prereg.has_confirmed = True
     prereg.save()
