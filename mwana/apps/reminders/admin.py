@@ -38,10 +38,10 @@ class PatientEventAdmin(admin.ModelAdmin):
             return obj.patient.location.parent.name
         except:
             return "Unknown"
-        
+
     def cba(self, obj):        
-        try:
-            return Contact.active.filter(connection__identity__icontains=obj.cba_conn.identity)[0].name
+        try:           
+            return obj.cba_conn.contact.name
         except:
             return "Unknown"
         
