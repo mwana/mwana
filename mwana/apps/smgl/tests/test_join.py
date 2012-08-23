@@ -15,7 +15,7 @@ class SMGLJoinTest(SMGLSetUp):
         self.runScript(script)
 
         script = """
-            11 > join Anton en
+            11 > join Anton sw
             11 < Anton, you are already registered as a Triage Nurse at Chilala but your details have been updated
         """
         self.runScript(script)
