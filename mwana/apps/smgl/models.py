@@ -40,7 +40,8 @@ class PregnantMother(models.Model):
     location = models.ForeignKey(Location)
     first_name = models.CharField(max_length=160)
     last_name = models.CharField(max_length=160)
-    uid = models.CharField(max_length=160, unique=True, help_text="The Unique Identifier associated with this mother")
+    uid = models.CharField(max_length=160, unique=True, 
+                           help_text="The Unique Identifier associated with this mother")
     lmp = models.DateField(null=True, blank=True, help_text="Last Menstrual Period")
     edd = models.DateField(help_text="Estimated Date of Delivery", null=True, blank=True)
     next_visit = models.DateField(help_text="Date of next visit")
