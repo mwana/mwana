@@ -1,6 +1,16 @@
 Code Description Doc
 ====================
 
+Getting Setup:
+
+External apps: CouchDB
+
+install dependencies
+$ cd requirements
+$ pip install -r bu_reqs.txt
+$ pip install -r libs.txt
+
+
 General.  
 The SMGL app (mwana/apps/smgl) contains migrations, *fixtures* and rapidsms-extensions.
 
