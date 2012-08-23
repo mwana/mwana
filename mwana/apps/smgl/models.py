@@ -5,6 +5,7 @@ from django.db import models
 from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
 from mwana.apps.smgl import const
+from mwana.apps.contactsplus.models import ContactType
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
@@ -12,10 +13,19 @@ REASON_FOR_VISIT_CHOICES = (
 )
 
 class XFormKeywordHandler(models.Model):
+    """
+    System configuration that links xform keywords to functions for post 
+    processing. 
+    """
     keyword = models.CharField(max_length=255, help_text="The keyword that you want to associate with this handler.")
     function_path = models.CharField(max_length=255, help_text="The full path to the handler function. E.g: 'mwana.apps.smgl.app.birth_registration'")
     
 class PregnantMother(models.Model):
+    """
+    Representation of a pregnant mother in SMGL.
+    """
+    
+    
     HI_RISK_REASONS = {
         "csec": "C-Section",
         "cmp": "Complications during previous pregnancy",
@@ -62,12 +72,22 @@ class PregnantMother(models.Model):
             if self.get_risk_reason(c):
                 yield c
     
+    def get_laycounselors(self):
+        """
+        Given a mother, get the lay counselors who should be notified about
+        her registration / reminded for followups
+        """
+        # TODO: determine exactly how this should work.
+        return Contact.objects.filter\
+            (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
+             location=self.zone)
+
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
 
 class MotherReferenceBase(models.Model):
     """
-    An abstract base class to hold mothers. Provides some shared functionalityn
+    An abstract base class to hold mothers. Provides some shared functionality
     and consistent field naming.
     """
     # Note: we capture both the mom UID and try to match it to a pregnant 
@@ -100,7 +120,8 @@ class FacilityVisit(models.Model):
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
     next_visit = models.DateField()
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
-
+    
+    
 class AmbulanceRequest(models.Model):
     """
     Bucket for ambulance request info
@@ -286,5 +307,3 @@ class DeathRegistration(models.Model):
     person = models.CharField(max_length=3, choices=PERSON_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
         
-    
-    

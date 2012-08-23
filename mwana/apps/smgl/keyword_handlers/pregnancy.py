@@ -12,16 +12,6 @@ from mwana.apps.smgl.decorators import registration_required
 
 logger = logging.getLogger(__name__)
 
-def get_laycounselors(mother):
-    """
-    Given a mother, get the lay counselors who should be notified about
-    her registration
-    """
-    # TODO: determine exactly how this should work.
-    return Contact.objects.filter\
-        (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
-         location=mother.zone)
-
 @registration_required
 def pregnant_registration(session, xform, router):
     """
@@ -118,8 +108,8 @@ def pregnant_registration(session, xform, router):
     send_msg(connection, const.MOTHER_SUCCESS_REGISTERED, router, 
              **{"name": mother.contact.name, "unique_id": mother.uid})
     
-    # if there is a lay counselor registered, also notify them
-    for contact in get_laycounselors(mother):
+    # if there is a lay counselor(s) registered, also notify them
+    for contact in mother.get_laycounselors():
         if contact.default_connection:
             send_msg(contact.default_connection, 
                      const.NEW_MOTHER_NOTIFICATION, router, 
