@@ -25,7 +25,8 @@ SUBMODULE_NAMES = [
     "couchexport",
     "couchlog",
     "django-soil",
-    "django-scheduler"
+    "django-scheduler",
+    "rapidsms-dupe-checker"
 ]
 if __name__ == "__main__":
     # all imports should begin with the full Python package ('mwana.'):
