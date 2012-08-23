@@ -1,7 +1,7 @@
 from rapidsms.messages import OutgoingMessage
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
-from mwana.apps.smgl.models import Referral, PregnantMother
-from mwana.apps.smgl.utils import get_location, to_time, mom_or_none
+from mwana.apps.smgl.models import Referral
+from mwana.apps.smgl.utils import get_location, to_time
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
