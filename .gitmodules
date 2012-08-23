@@ -25,3 +25,6 @@
 [submodule "submodules/django-scheduler"]
 	path = submodules/django-scheduler
 	url = git://github.com/dimagi/django-scheduler.git
+[submodule "submodules/rapidsms-dupe-checker"]
+	path = submodules/rapidsms-dupe-checker
+	url = git://github.com/dimagi/rapidsms-dupe-checker.git
