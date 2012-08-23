@@ -3,12 +3,11 @@
 # our text.
 _ = lambda s: s
 
-
 # location type slugs
 LOCTYPE_ZONE = "zone"
 
 # contact type slugs
-CTYPE_LAYCOUNSELOR = "cba" # TODO: confirm / change if not correct
+CTYPE_LAYCOUNSELOR = "cba" 
 CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
 
@@ -38,7 +37,7 @@ MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(uni
 NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id)s was registered in your zone. Please visit this mother and take note in your register.") 
 
 # pregnancy follow up messages
-FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to Follow Up is not registered in the system. Please check the UID and try again or register her first.")
+FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 
 # "told" messages
@@ -55,3 +54,5 @@ REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s 
 
 # death registration
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
+
+
