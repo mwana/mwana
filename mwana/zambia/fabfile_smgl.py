@@ -45,7 +45,7 @@ def _setup_path():
 
 def _set_apache_user():
     if what_os() == 'ubuntu':
-       env.apache_user = 'www-data'
+        env.apache_user = 'www-data'
     elif what_os() == 'redhat':
         env.apache_user = 'apache'
 
