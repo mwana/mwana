@@ -60,19 +60,6 @@ def setup_dirs():
     sudo('mkdir -p %(services)s/supervisor' % env, user=env.sudo_user)
     sudo('mkdir -p %(services)s/touchforms' % env, user=env.sudo_user)
 
-def staging():
-    """ use staging environment on remote host"""
-    env.code_branch = 'develop'
-    env.sudo_user = 'aremind'
-    env.environment = 'staging'
-    env.server_port = '9002'
-    env.server_name = 'noneset'
-    env.hosts = ['204.232.206.181']
-    env.settings = '%(project)s.localsettings' % env
-    env.remote_os = None
-    env.db = '%s_%s' % (env.project, env.environment)
-    _setup_path()
-
 def production():
     """ use production environment on remote host"""
     env.code_branch = 'zhcard_dev'
@@ -82,9 +69,8 @@ def production():
     env.apache_ports = ['80', '9005']
     env.server_port = '9001'
     env.server_name = 'smgl-production'
-#    env.hosts = ['10.84.168.98']
-#    env.hosts = ['173.203.221.48']
-    env.hosts = ['41.191.116.75:9000']
+    env.hosts = ['41.191.116.75:9000'] # external
+    #env.hosts = ['192.168.1.66'] # internal
     env.settings = '%(project)s.localsettings' % env
     env.remote_os = None # e.g. 'ubuntu' or 'redhat'.  Gets autopopulated by what_os() if you don't know what it is or don't want to specify.
     env.db = '%s_%s' % (env.project, env.environment)
