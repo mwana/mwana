@@ -8,24 +8,14 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
-        # Renaming column for 'PregnantMother.zone' to match new field type.
-        db.rename_column('smgl_pregnantmother', 'zone', 'zone_id')
-        # Changing field 'PregnantMother.zone'
-        db.alter_column('smgl_pregnantmother', 'zone_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['locations.Location']))
-
-        # Adding index on 'PregnantMother', fields ['zone']
-        db.create_index('smgl_pregnantmother', ['zone_id'])
+        # Adding field 'PregnantMother.tmp_zone'
+        db.add_column('smgl_pregnantmother', 'tmp_zone', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='pregnant_mother_zones', null=True, to=orm['locations.Location']), keep_default=False)
 
 
     def backwards(self, orm):
         
-        # Removing index on 'PregnantMother', fields ['zone']
-        db.delete_index('smgl_pregnantmother', ['zone_id'])
-
-        # Renaming column for 'PregnantMother.zone' to match new field type.
-        db.rename_column('smgl_pregnantmother', 'zone_id', 'zone')
-        # Changing field 'PregnantMother.zone'
-        db.alter_column('smgl_pregnantmother', 'zone', self.gf('django.db.models.fields.CharField')(max_length=160, null=True))
+        # Deleting field 'PregnantMother.tmp_zone'
+        db.delete_column('smgl_pregnantmother', 'tmp_zone_id')
 
 
     models = {
@@ -185,8 +175,9 @@ class Migration(SchemaMigration):
             'risk_reason_none': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'risk_reason_oth': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'risk_reason_psb': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'tmp_zone': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'pregnant_mother_zones'", 'null': 'True', 'to': "orm['locations.Location']"}),
             'uid': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '160'}),
-            'zone': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'pregnant_mother_zones'", 'null': 'True', 'to': "orm['locations.Location']"})
+            'zone': ('django.db.models.fields.CharField', [], {'max_length': '160', 'null': 'True', 'blank': 'True'})
         },
         'smgl.preregistration': {
             'Meta': {'object_name': 'PreRegistration'},
