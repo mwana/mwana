@@ -46,7 +46,9 @@ class PregnantMother(models.Model):
     edd = models.DateField(help_text="Estimated Date of Delivery", null=True, blank=True)
     next_visit = models.DateField(help_text="Date of next visit")
     reason_for_visit = models.CharField(max_length=160, choices=REASON_FOR_VISIT_CHOICES)
-    zone = models.CharField(max_length=160, null=True, blank=True)
+    zone = models.ForeignKey(Location, null=True, blank=True,
+                             related_name="pregnant_mother_zones")
+    
     
     risk_reason_csec = models.BooleanField(default=False)
     risk_reason_cmp = models.BooleanField(default=False)
@@ -55,7 +57,9 @@ class PregnantMother(models.Model):
     risk_reason_psb = models.BooleanField(default=False)
     risk_reason_oth = models.BooleanField(default=False)
     risk_reason_none = models.BooleanField(default=False)
-
+    
+    reminded = models.BooleanField(default=False)
+    
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
@@ -121,6 +125,7 @@ class FacilityVisit(models.Model):
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
     next_visit = models.DateField()
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
+    reminded = models.BooleanField(default=False)
     
     
 class AmbulanceRequest(models.Model):
@@ -237,6 +242,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_cpd = models.BooleanField(default=False)
     reason_oth = models.BooleanField(default=False)
     
+    reminded = models.BooleanField(default=False)
     
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
@@ -250,7 +256,31 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         for c in sorted(self.REFERRAL_REASONS.keys()):
             if self.get_reason(c):
                 yield c
-        
+    
+    @classmethod
+    def non_emergencies(cls):
+        return cls.objects.filter(status="nem")
+    
+    @classmethod
+    def emergencies(cls):
+        return cls.objects.filter(status="em")
+    
+    @property
+    def is_emergency(self):
+        return self.status == "em"
+    
+    @property
+    def referring_facility(self):
+        try:
+            return self.session.connection.contact.location
+        except AttributeError:
+            return None
+    
+    def get_receiving_data_clerks(self):
+        # people who need to be reminded to collect the outcome
+        return Contact.objects.filter(types__slug=const.CTYPE_DATACLERK, 
+                                      location=self.facility)
+
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
         ('en', 'English'),
@@ -308,3 +338,23 @@ class DeathRegistration(models.Model):
     person = models.CharField(max_length=3, choices=PERSON_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
         
+    
+REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"), 
+                         ("em_ref", "Emergency Referral"),
+                         ("nem_ref", "Non-Emergency Referral"),
+                         ("edd_14", "Expected Delivery, 14 days before"))
+
+class ReminderNotification(MotherReferenceBase):
+    """
+    Any notifications sent to user
+    """
+    type = models.CharField(max_length=10, choices=REMINDER_TYPE_CHOICES)
+    recipient = models.ForeignKey(Contact,
+                                  related_name='sent_notifications')
+    date = models.DateTimeField()
+    
+    def __unicode__(self):
+        return '%s sent to %s on %s' % (self.type,
+                                        self.recipient,
+                                        self.date)
+    

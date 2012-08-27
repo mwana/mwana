@@ -1,9 +1,12 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
-from mwana.apps.smgl.models import Referral
+from mwana.apps.smgl.models import Referral, PregnantMother,\
+    ReminderNotification
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
 import datetime
+from mwana.apps.smgl.reminders import send_non_emergency_referral_reminders,\
+    send_emergency_referral_reminders
 
 def _verbose_reasons(reasonstring):
     return ", ".join([Referral.REFERRAL_REASONS[r] for r in reasonstring.split(", ")])
@@ -14,10 +17,13 @@ class SMGLReferTest(SMGLSetUp):
     def setUp(self):
         super(SMGLReferTest, self).setUp()
         Referral.objects.all().delete()
+        ReminderNotification.objects.all().delete()
         self.user_number = "123"
+        self.cba_number = "456"
         self.name = "Anton"
         self.createUser("worker", self.user_number, location="804034")
-        self.createUser(const.CTYPE_DATACLERK, "666777")
+        self.cba = self.createUser("cba", self.cba_number, location="80402404")
+        self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
         self.createUser(const.CTYPE_TRIAGENURSE, "666888")
         self.assertEqual(0, Referral.objects.count())
         
@@ -152,4 +158,83 @@ class SMGLReferTest(SMGLSetUp):
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
         
+    def testReferWithMother(self):
+        resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
+                                                   "unique_id": "1234" }
+        script = """
+            %(num)s > REG 1234 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s < %(resp)s            
+        """ % { "num": "666777", "resp": resp }
+        self.runScript(script)
+        mom = PregnantMother.objects.get(uid='1234')
+        self.testRefer()
+        [ref] = Referral.objects.all()
+        self.assertEqual(mom.uid, ref.mother_uid)
+        self.assertEqual(mom, ref.mother)
     
+    def testNonEmergencyReminders(self):
+        self.testReferWithMother()
+        [ref] = Referral.objects.all()
+        self.assertEqual(False, ref.reminded)
+        self.assertEqual(1, Referral.non_emergencies().count())
+        
+        # this should do nothing because it's not in range
+        send_non_emergency_referral_reminders()
+        ref = Referral.objects.get(pk=ref.pk)
+        self.assertEqual(False, ref.reminded)
+        
+        # set the date back so it triggers a reminder
+        ref.date = ref.date - datetime.timedelta(days=7)
+        ref.save()
+        send_non_emergency_referral_reminders()
+        reminder = const.REMINDER_NON_EMERGENCY_REFERRAL % {"name": "Mary Soko",
+                                                            "unique_id": "1234",
+                                                            "loc": "Chilala"}
+        script = """ 
+            %(num)s < %(msg)s
+        """ % {"num": self.cba_number, 
+               "msg": reminder}
+        self.runScript(script)
+        
+        ref = Referral.objects.get(pk=ref.pk)
+        self.assertEqual(True, ref.reminded)
+        [notif] = ReminderNotification.objects.all()
+        self.assertEqual(ref.mother, notif.mother)
+        self.assertEqual(ref.mother_uid, notif.mother_uid)
+        self.assertEqual(self.cba, notif.recipient)
+        self.assertEqual("nem_ref", notif.type)
+        
+    def testEmergencyReminders(self):
+        self.testReferWithMother()
+        [ref] = Referral.objects.all()
+        ref.status = 'em'
+        ref.save()
+        self.assertEqual(False, ref.reminded)
+        self.assertEqual(1, Referral.emergencies().count())
+        
+        # this should do nothing because it's not in range
+        send_emergency_referral_reminders()
+        ref = Referral.objects.get(pk=ref.pk)
+        self.assertEqual(False, ref.reminded)
+        
+        # set the date back so it triggers a reminder
+        ref.date = ref.date - datetime.timedelta(days=3)
+        ref.save()
+        send_emergency_referral_reminders()
+        reminder = const.REMINDER_EMERGENCY_REFERRAL % {"unique_id": "1234",
+                                                        "date": ref.date.date(),
+                                                        "loc": "Mawaya"}
+        script = """ 
+            %(num)s < %(msg)s
+        """ % {"num": "666777", 
+               "msg": reminder}
+        self.runScript(script)
+        
+        ref = Referral.objects.get(pk=ref.pk)
+        self.assertEqual(True, ref.reminded)
+        [notif] = ReminderNotification.objects.all()
+        self.assertEqual(ref.mother, notif.mother)
+        self.assertEqual(ref.mother_uid, notif.mother_uid)
+        self.assertEqual(self.dc, notif.recipient)
+        self.assertEqual("em_ref", notif.type)
+        

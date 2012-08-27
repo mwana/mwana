@@ -4,6 +4,7 @@ import logging
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
+from rapidsms.models import Connection
 
 def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     if not lang:
@@ -30,6 +31,7 @@ class SMGLSetUp(TestScript):
             %(num)s < Thank you for registering! You have successfully registered as a %(ctype)s at %(loc)s.
         """ % { "num": ident, "name": name, "ctype": type_display, "loc": place_display}
         self.runScript(script)
+        return Connection.objects.get(identity=ident).contact
 
     def createDefaults(self):
         create_prereg_user("AntonTN", "kalomo_district", '11', 'TN', 'en')
