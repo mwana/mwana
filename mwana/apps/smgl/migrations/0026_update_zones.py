@@ -13,8 +13,8 @@ class Migration(DataMigration):
         for mom in orm.PregnantMother.objects.all():
             if mom.zone:
                 try:
-                    mom.tmp_zone = orm.Location.objects.get(
-                        type=orm.LocationType.objects.get(slug__iexact=const.LOCTYPE_ZONE),
+                    mom.tmp_zone = orm['locations.Location'].objects.get(
+                        type=orm['locations.Location'].objects.get(slug__iexact=const.LOCTYPE_ZONE),
                         slug__iexact=mom.zone
                     )
                     mom.save()
