@@ -56,3 +56,8 @@ REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s 
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
 
 
+# reminders
+REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
+REMINDER_NON_EMERGENCY_REFERRAL = _("Mother named %(name)s with ID # %(unique_id)s should visit hospital %(loc)s as referred.")
+REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother with ID %(unique_id)s referred on %(date)s from %(loc)s")
+REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."    

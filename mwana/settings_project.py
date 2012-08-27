@@ -59,6 +59,8 @@ INSTALLED_APPS = [
     "rapidsms.contrib.ajax",
     "uni_form",
     "eav",
+    'djcelery',   
+    'djkombu',     
     
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that

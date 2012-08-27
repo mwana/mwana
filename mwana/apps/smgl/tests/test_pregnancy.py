@@ -1,7 +1,10 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp 
-from mwana.apps.smgl.models import PregnantMother, FacilityVisit
+from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
+    ReminderNotification
 from mwana.apps.smgl import const
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from mwana.apps.smgl.reminders import send_followup_reminders,\
+    send_upcoming_delivery_reminders
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -9,9 +12,13 @@ class SMGLPregnancyTest(SMGLSetUp):
     
     def setUp(self):
         super(SMGLPregnancyTest, self).setUp()
+        ReminderNotification.objects.all().delete()
+        
         self.createDefaults()
         self.user_number = "15"
         self.name = "AntonDA"
+        self.cba = self.createUser("cba", "456", location="80402404")
+        
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
         
@@ -160,4 +167,75 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
     
         
-    
+    def testVisitReminders(self):
+        self.testRegister()
+        [mom] = PregnantMother.objects.all()
+        visit = FacilityVisit.objects.get(mother=mom)
+        self.assertEqual(False, visit.reminded)
+        
+        # set 10 days in the future, no reminder
+        visit.next_visit = datetime.utcnow() + timedelta(days=10)
+        visit.save()
+        send_followup_reminders()
+        visit = FacilityVisit.objects.get(pk=visit.pk)
+        self.assertEqual(False, visit.reminded)
+        
+        # set to 7 days, should now fall in threshold
+        visit.next_visit = datetime.utcnow() + timedelta(days=7)
+        visit.save()
+        send_followup_reminders()
+        
+        reminder = const.REMINDER_FU_DUE % {"name": "Mary Soko",
+                                            "unique_id": "80403000000112",
+                                            "loc": "Chilala"}
+        script = """ 
+            %(num)s < %(msg)s
+        """ % {"num": "456", 
+               "msg": reminder}
+        self.runScript(script)
+        
+        visit = FacilityVisit.objects.get(pk=visit.pk)
+        self.assertEqual(True, visit.reminded)
+        
+        [notif] = ReminderNotification.objects.all()
+        self.assertEqual(visit.mother, notif.mother)
+        self.assertEqual(visit.mother.uid, notif.mother_uid)
+        self.assertEqual(self.cba, notif.recipient)
+        self.assertEqual("nvd", notif.type)
+        
+    def testEDDReminders(self):
+        self.testRegister()
+        [mom] = PregnantMother.objects.all()
+        self.assertEqual(False, mom.reminded)
+        
+        # set 15 days in the future, no reminder
+        mom.edd = datetime.utcnow().date() + timedelta(days=15)
+        mom.save()
+        send_upcoming_delivery_reminders()
+        mom = PregnantMother.objects.get(pk=mom.pk)
+        self.assertEqual(False, mom.reminded)
+        
+        # set to 14 days, should now fall in threshold
+        mom.edd = datetime.utcnow().date() + timedelta(days=14)
+        mom.save()
+        send_upcoming_delivery_reminders()
+        mom = PregnantMother.objects.get(pk=mom.pk)
+        self.assertEqual(True, mom.reminded)
+        
+        reminder = const.REMINDER_UPCOMING_DELIVERY % {"name": "Mary Soko",
+                                                       "unique_id": "80403000000112",
+                                                       "date": mom.edd}
+        script = """ 
+            %(num)s < %(msg)s
+        """ % {"num": "456", 
+               "msg": reminder}
+        self.runScript(script)
+        
+        
+        [notif] = ReminderNotification.objects.all()
+        self.assertEqual(mom, notif.mother)
+        self.assertEqual(mom.uid, notif.mother_uid)
+        self.assertEqual(self.cba, notif.recipient)
+        self.assertEqual("edd_14", notif.type)
+        
+        

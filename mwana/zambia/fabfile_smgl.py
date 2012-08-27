@@ -192,6 +192,7 @@ def deploy():
 #        update_requirements()
 #        update_services()
         migrate()
+        init_data()
         collectstatic()
         stop()
         upload_supervisor_conf()
@@ -284,6 +285,12 @@ def migrate():
     with cd(env.project_root):
         run('%(virtualenv_root)s/bin/python manage.py syncdb --noinput --settings=%(settings)s' % env)
         run('%(virtualenv_root)s/bin/python manage.py migrate --noinput --settings=%(settings)s' % env)
+
+def init_data():
+    """ run smgl_init on remote environment """
+    require('project_root', provided_by=('production', 'demo', 'staging'))
+    with cd(env.project_root):
+        sudo('%(virtualenv_root)s/bin/python manage.py smgl_init --settings=%(settings)s' % env, user=env.sudo_user)
 
 def collectstatic():
     """ run collectstatic on remote environment """
