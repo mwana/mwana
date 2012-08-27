@@ -3,7 +3,7 @@ import os
 from ... import loader 
 
 class Command(BaseCommand):
-    help = "Initialize static data for malawi"
+    help = "load zones from a csv file."
 
     def handle(self, *args, **options):
         path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "fixtures", "kalomo_district_zones.csv")
