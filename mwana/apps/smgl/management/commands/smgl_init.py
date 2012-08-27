@@ -6,7 +6,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # currently just the schedules
-        _update_schedules(log_to_console=True)
+        _update_schedules()
         
 
 def _update_schedules():
