@@ -11,6 +11,8 @@ django-tastypie==0.9.11
 openpyxl==1.5.8
 Unidecode==0.04.9
 celery==2.5.1
+django-celery
+django-kombu
  
 # these are busted on windows so put them last
 lxml==2.2.4
