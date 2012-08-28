@@ -20,6 +20,7 @@ class Issue(models.Model):
     STATUS_CHOICES = (
         ('new', 'Not Started'),
         ('ongoing', 'In Progress'),
+        ('waiting', 'Waiting on Something'),
         ('completed', 'Completed'),
         ('bugfixed', 'Bug Fixed'),
         ('obsolete', 'Obsolete'),
