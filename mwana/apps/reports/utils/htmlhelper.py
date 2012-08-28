@@ -42,7 +42,7 @@ def get_contacttypes(slug):
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
     if not facilities:
         return '<select name="%s" size="1"></select>\n'%id
-    code ='<select name="%s"" onchange="fire%sChange()" id="%s" size="1">\n' % (id, id, id)
+    code ='<select name="%s"" onchange="fire%sChange()" id="%s" class="drop-down" size="1">\n' % (id, id, id)
     if selected_facility and get_only_select:
         pass
     else:
