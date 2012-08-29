@@ -10,11 +10,13 @@ class PreRegsitrationAdmin(admin.ModelAdmin):
 
 class PregnantMotherAdmin(admin.ModelAdmin):
     list_display = ['uid', 'contact', 'location', 'first_name', 
-                    'last_name', 'lmp', 'edd', 'next_visit']
-    list_filter = ['contact', 'location']
+                    'last_name', 'lmp', 'edd', 'next_visit', 'reminded']
+    list_filter = ['contact', 'location', 'reminded']
 
 class FacilityVisitAdmin(admin.ModelAdmin):
-    list_display = ['location', 'mother', 'visit_date', 'next_visit', 'reason_for_visit']
+    list_display = ['location', 'mother', 'visit_date', 'next_visit', 'reason_for_visit',
+                    'reminded']
+    list_filter = ['reminded']
 
 class AmbulanceRequestAdmin(admin.ModelAdmin):
     list_display = ['requested_on', 'from_location', 'receiving_facility', 'mother', 'mother_uid', 'danger_sign']
@@ -27,7 +29,8 @@ class AmbulanceOutcomeAdmin(admin.ModelAdmin):
 
 class ReferralAdmin(admin.ModelAdmin):
     list_display = ['date', 'facility', 'mother', 'mother_uid', 'responded', 'status', 
-                    'mother_outcome', 'baby_outcome', 'mode_of_delivery']
+                    'mother_outcome', 'baby_outcome', 'mode_of_delivery', 'reminded']
+    list_filter = ['reminded']
 
 class BirthRegistrationAdmin(admin.ModelAdmin):
     list_display = ['contact', 'date', 'mother', 'gender', 'place', 'complications', 'number']
@@ -37,7 +40,10 @@ class DeathRegistrationAdmin(admin.ModelAdmin):
     list_display = ['contact', 'date', 'unique_id', 'person', 'place']
     list_filter = ['contact']
     
-    
+class ReminderNotificationAdmin(admin.ModelAdmin):
+    list_display = ['mother', 'mother_uid', 'type', 'recipient', 'date']
+    list_filter = ['type']
+
 admin.site.register(XFormKeywordHandler, XFormKeywordHandlerAdmin)
 admin.site.register(PreRegistration, PreRegsitrationAdmin)
 admin.site.register(PregnantMother, PregnantMotherAdmin)
@@ -48,3 +54,4 @@ admin.site.register(AmbulanceOutcome, AmbulanceOutcomeAdmin)
 admin.site.register(Referral, ReferralAdmin)
 admin.site.register(BirthRegistration, BirthRegistrationAdmin)
 admin.site.register(DeathRegistration, DeathRegistrationAdmin)
+admin.site.register(ReminderNotification, ReminderNotificationAdmin)
