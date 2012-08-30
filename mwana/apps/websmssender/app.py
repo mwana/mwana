@@ -15,7 +15,5 @@ class App (rapidsms.apps.base.AppBase):
     def schedule_webblaster_report_task(self):
         callback = 'mwana.apps.websmssender.tasks.send_webblaster_report'
         EventSchedule.objects.filter(callback=callback).delete()
-#        EventSchedule.objects.create(callback=callback, hours=[8, 13, 16], minutes=[25],
-#                                     days_of_week=[0, 1, 2, 3, 4, 5, 6])
-        EventSchedule.objects.create(callback=callback, hours=range(24), minutes=range(60),
+        EventSchedule.objects.create(callback=callback, hours=[8, 13, 16], minutes=[25],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])
