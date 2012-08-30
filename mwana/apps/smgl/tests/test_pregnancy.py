@@ -22,14 +22,22 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
         
+        self.earlier = (datetime.now() - timedelta(days=30)).date()
+        self.yesterday = (datetime.now() - timedelta(days=1)).date()
+        self.tomorrow = (datetime.now() + timedelta(days=1)).date()
+        self.later = (datetime.now() + timedelta(days=30)).date()
         
     def testRegister(self):
+        
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
                                                    "unique_id": "80403000000112" }
         script = """
-            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none %(tomorrow)s R 80402404 %(earlier)s %(later)s
             %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp }
+        """ % {"num": self.user_number, "resp": resp, 
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y") }
         self.runScript(script)
         
         self.assertEqual(1, PregnantMother.objects.count())
@@ -37,9 +45,9 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(self.user_number, mom.contact.default_connection.identity)
         self.assertEqual("Mary", mom.first_name)
         self.assertEqual("Soko", mom.last_name)
-        self.assertEqual(date(2012, 2, 12), mom.lmp)
-        self.assertEqual(date(2012, 11, 18), mom.edd)
-        self.assertEqual(date(2012, 8, 4), mom.next_visit)
+        self.assertEqual(self.earlier, mom.lmp)
+        self.assertEqual(self.later, mom.edd)
+        self.assertEqual(self.tomorrow, mom.next_visit)
         self.assertTrue(mom.risk_reason_none)
         self.assertEqual(["none"], list(mom.get_risk_reasons()))
         self.assertEqual("r", mom.reason_for_visit)
@@ -49,8 +57,8 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(self.user_number, visit.contact.default_connection.identity)
         self.assertEqual("804024", visit.location.slug)
         self.assertEqual("r", visit.reason_for_visit)
-        self.assertEqual(date(2012, 11, 18), visit.edd)
-        self.assertEqual(date(2012, 8, 4), visit.next_visit)
+        self.assertEqual(self.later, visit.edd)
+        self.assertEqual(self.tomorrow, visit.next_visit)
         
     def testRegisterNotRegistered(self):
         script = """
@@ -64,9 +72,12 @@ class SMGLPregnancyTest(SMGLSetUp):
                                                    "unique_id": "80403000000112" }
         reasons = "csec,cmp,gd,hbp"
         script = """
-            %(num)s > REG 80403000000112 Mary Soko %(reasons)s 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko %(reasons)s %(tomorrow)s R 80402404 %(earlier)s %(later)s
             %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp, "reasons": reasons }
+        """ % {"num": self.user_number, "resp": resp, "reasons": reasons,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
         
         mom = PregnantMother.objects.get(uid='80403000000112')
@@ -80,9 +91,12 @@ class SMGLPregnancyTest(SMGLSetUp):
     def testRegisterWithBadZone(self):
         resp = const.UNKOWN_ZONE % { "zone": "notarealzone" }
         script = """
-            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R notarealzone 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none %(tomorrow)s R notarealzone %(earlier)s %(later)s
             %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp }
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y") } 
         self.runScript(script)
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
@@ -96,11 +110,14 @@ class SMGLPregnancyTest(SMGLSetUp):
         lay_msg = const.NEW_MOTHER_NOTIFICATION % {"mother": "Mary Soko",
                                                    "unique_id": "80403000000112" }
         script = """
-            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none %(tomorrow)s R 80402404 %(earlier)s %(later)s
             %(num)s < %(resp)s
             %(lay_num)s < %(lay_msg)s
         """ % { "num": self.user_number, "resp": resp, 
-                "lay_num": lay_num, "lay_msg": lay_msg }
+                "lay_num": lay_num, "lay_msg": lay_msg,
+                "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+                "earlier": self.earlier.strftime("%d %m %Y"),
+                "later": self.later.strftime("%d %m %Y") } 
         self.runScript(script)
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
