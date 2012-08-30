@@ -73,9 +73,6 @@ def pregnant_registration(session, xform, router):
                                                    "error_msg": error_msg})
         return True
 
-    if lmp_date is None and edd_date is None:
-        send_msg(connection, const.LMP_OR_EDD_DATE_REQUIRED, router)
-
     mother.lmp = lmp_date
     mother.edd = edd_date
 
