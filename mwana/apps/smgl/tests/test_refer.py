@@ -159,12 +159,16 @@ class SMGLReferTest(SMGLSetUp):
         self.runScript(script)
         
     def testReferWithMother(self):
+        yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
+        tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
                                                    "unique_id": "1234" }
         script = """
-            %(num)s > REG 1234 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 1234 Mary Soko none %(future)s R 80402404 %(past)s %(future)s
             %(num)s < %(resp)s            
-        """ % { "num": "666777", "resp": resp }
+        """ % {"num": "666777", "resp": resp,
+               "past": yesterday.strftime("%d %m %Y"), 
+               "future": tomorrow.strftime("%d %m %Y")}
         self.runScript(script)
         mom = PregnantMother.objects.get(uid='1234')
         self.testRefer()
