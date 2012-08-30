@@ -20,6 +20,9 @@ DATE_INCORRECTLY_FORMATTED_GENERAL = _("The date you entered for %(date_name)s i
                                        "DD MM YYYY. Please try again.")
 DATE_YEAR_INCORRECTLY_FORMATTED = _("The year you entered for date %(date_name)s is incorrectly formatted.  Should be in the format "
                                     "YYYY (four digit year). Please try again.")
+DATE_MUST_BE_IN_PAST = _("The date for %(date_name)s must be in the past. Please enter a date earlier than today. You entered %(date)s")
+DATE_MUST_BE_IN_FUTURE = _("The date for %(date_name)s must be in the future. Please enter a date after today. You entered %(date)s")
+
 DATE_NOT_OPTIONAL = _("This date is not optional!")
 DATE_NOT_NUMBERS = _("Date format should include only numbers: 'dd mm yyyy'")
 TIME_INCORRECTLY_FORMATTED = _("The time you entered (%(time)s) is not valid. Time should be a four-digit number, like 1500.")

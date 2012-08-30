@@ -56,6 +56,11 @@ def pregnant_registration(session, xform, router):
                                                    "error_msg": error_msg})
         return True
     
+    if next_visit < datetime.datetime.now().date():
+        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,  
+                 **{"date_name": "Next Visit", "date": next_visit})
+        return True
+
     mother.next_visit = next_visit
     mother.reason_for_visit = get_value_from_form('visit_reason', xform)
     zone_name = get_value_from_form('zone', xform)
@@ -66,11 +71,21 @@ def pregnant_registration(session, xform, router):
                                                     "error_msg": error_msg})
         return True
 
+    if lmp_date and lmp_date > datetime.datetime.now().date():
+        send_msg(connection, const.DATE_MUST_BE_IN_PAST, router,  
+                 **{"date_name": "LMP", "date": lmp_date})
+        return True
+
     edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
     session.template_vars.update()
     if error_msg:
         send_msg(connection, error_msg, router, **{"date_name": "EDD",
                                                    "error_msg": error_msg})
+        return True
+    
+    if edd_date and edd_date < datetime.datetime.now().date():
+        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,  
+                 **{"date_name": "EDD", "date": edd_date})
         return True
 
     mother.lmp = lmp_date
@@ -140,13 +155,24 @@ def follow_up(session, xform, router):
         send_msg(connection, error_msg, router, **{"date_name": "EDD",
                                                    "error_msg": error_msg})
         return True
+    
+    if edd_date and edd_date < datetime.datetime.now().date():
+        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,  
+                 **{"date_name": "EDD", "date": edd_date})
+        return True
 
+    
     visit_reason = get_value_from_form('visit_reason', xform)
     next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     if error_msg:
         send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
                                                    "error_msg": error_msg})
         
+        return True
+    
+    if next_visit < datetime.datetime.now().date():
+        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,  
+                 **{"date_name": "Next Visit", "date": next_visit})
         return True
 
     # Make the follow up facility visit 

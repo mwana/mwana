@@ -150,6 +150,39 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
     
+    def testDatesInPastOrFuture(self):
+        yesterday = (datetime.now() - timedelta(days=1)).date()
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        
+        # next visit in past
+        script = """
+            %(num)s > REG 80403000000112 Mary Soko none %(past)s R 80402404 %(past)s %(future)s
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "past": yesterday.strftime("%d %m %Y"), 
+                "future": tomorrow.strftime("%d %m %Y"), 
+                "resp": const.DATE_MUST_BE_IN_FUTURE % {"date_name": "Next Visit", 
+                                                       "date": yesterday}}
+        self.runScript(script)
+        
+        # lmp in future
+        script = """
+            %(num)s > REG 80403000000112 Mary Soko none %(future)s R 80402404 %(future)s %(future)s
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "past": yesterday.strftime("%d %m %Y"), 
+                "future": tomorrow.strftime("%d %m %Y"), 
+                "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "LMP", 
+                                                       "date": yesterday}}
+        # edd in past
+        script = """
+            %(num)s > REG 80403000000112 Mary Soko none %(future)s R 80402404 %(past)s %(past)s
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "past": yesterday.strftime("%d %m %Y"), 
+                "future": tomorrow.strftime("%d %m %Y"), 
+                "resp": const.DATE_MUST_BE_IN_FUTURE % {"date_name": "EDD", 
+                                                        "date": yesterday}}
+        self.runScript(script)
+        
+        
     def testTold(self):
         self.testRegister()
         resp = const.TOLD_COMPLETE % { "name": self.name }
