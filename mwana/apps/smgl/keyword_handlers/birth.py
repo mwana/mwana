@@ -5,6 +5,7 @@ from mwana.apps.smgl.models import BirthRegistration, PregnantMother
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
+import datetime
 
 @registration_required
 def birth_registration(session, xform, router):
@@ -20,6 +21,11 @@ def birth_registration(session, xform, router):
                                            "error_msg": error}))
         return True
     
+    if date > datetime.datetime.now().date():
+        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST, 
+                 **{"date_name": "Date of Birth", "date": date}))
+        return True
+
     num_kids = xform.xpath("form/num_children") or "t1"
     assert num_kids and num_kids[0] == "t"
     num_kids = int(num_kids[1:])

@@ -1,7 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from mwana.apps.smgl.models import BirthRegistration
-from datetime import date
+from datetime import date, datetime, timedelta
 from mwana.apps.smgl import const
 
 
@@ -19,10 +19,13 @@ class SMGLBirthRegTest(SMGLSetUp):
         # also create a default mom to use
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": "AntonDA",
                                                    "unique_id": "1234" }
+        yesterday = (datetime.now() - timedelta(days=1)).date()
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
         script = """
-            %(num)s > REG 1234 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 1234 Mary Soko none %(future)s R 80402404 %(past)s %(future)s
             %(num)s < %(resp)s            
-        """ % { "num": "15", "resp": resp }
+        """ % { "num": "15", "past": yesterday.strftime("%d %m %Y"), 
+                "future": tomorrow.strftime("%d %m %Y"), "resp": resp }
         self.runScript(script)
         
     
@@ -51,7 +54,16 @@ class SMGLBirthRegTest(SMGLSetUp):
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
         
-    
+    def testDOBInPast(self):
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        script = """
+            %(num)s > birth 1234 %(date)s bo h yes t2
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "date": tomorrow.strftime("%d %m %Y"), 
+                "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "Date of Birth", 
+                                                      "date": tomorrow}}
+        self.runScript(script)
+        
     def testOptionalLastQuestion(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name }
         script = """

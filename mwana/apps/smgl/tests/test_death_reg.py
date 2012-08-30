@@ -1,6 +1,6 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import DeathRegistration
-from datetime import date
+from datetime import date, datetime, timedelta
 from mwana.apps.smgl import const
 
 class SMGLDeathRegTest(SMGLSetUp):
@@ -26,6 +26,16 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.assertEqual(date(2012, 1, 1), reg.date)
         self.assertEqual("ma", reg.person)
         self.assertEqual("h", reg.place)
+        
+    def testDODInPast(self):
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
+        script = """
+            %(num)s > death 1234 %(date)s ma h
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "date": tomorrow.strftime("%d %m %Y"), 
+                "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "Date of Death", 
+                                                      "date": tomorrow}}
+        self.runScript(script)
         
     def testDeathNotRegistered(self):
         script = """

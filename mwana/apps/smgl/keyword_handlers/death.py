@@ -4,6 +4,7 @@ from mwana.apps.smgl.models import DeathRegistration
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
+import datetime
 
 @registration_required
 def death_registration(session, xform, router):
@@ -17,6 +18,12 @@ def death_registration(session, xform, router):
     except DateFormatError, e:
         router.outgoing(OutgoingMessage(session.connection, str(e)))
         return True
+    
+    if date > datetime.datetime.now().date():
+        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST, 
+                 **{"date_name": "Date of Death", "date": date}))
+        return True
+
     reg = DeathRegistration(contact=session.connection.contact,
                             connection=session.connection,
                             date=date,
