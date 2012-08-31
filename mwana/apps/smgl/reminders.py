@@ -3,11 +3,18 @@ from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral
     PregnantMother
 from mwana.apps.smgl import const
 from django.db.models import Q
+from threadless_router.router import Router
+from rapidsms import router
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
 
+def _set_router():
+    # this hack sets the global router to threadless router.
+    # should maybe be cleaned up.
+    router.router = Router()
+    
 def send_followup_reminders():
     """
     Next visit date from Pregnancy registration or Follow-up visit should
@@ -16,6 +23,7 @@ def send_followup_reminders():
     To: CBA
     On: 7 days before visit date
     """
+    _set_router()
     now = datetime.utcnow().date()
     reminder_threshold = now + timedelta(days=7) 
     visits_to_remind = FacilityVisit.objects.filter(
@@ -47,6 +55,7 @@ def send_non_emergency_referral_reminders():
     Also If we don't have the mother details (safe motherhood ID, Zone...) 
     then the server does nothing.
     """
+    _set_router()
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=7)
     referrals_to_remind = Referral.non_emergencies().filter(
@@ -76,6 +85,7 @@ def send_emergency_referral_reminders():
     To: Data Clerk operating at the referral facility
     On: 3 days after referral had been entered
     """
+    _set_router()
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=3)
     referrals_to_remind = Referral.emergencies().filter(
@@ -107,6 +117,7 @@ def send_upcoming_delivery_reminders():
     
     Cancel reminders after notification of birth. 
     """
+    _set_router()
     now = datetime.utcnow().date()
     reminder_threshold = now + timedelta(days=14)
     moms_to_remind = PregnantMother.objects.filter(
