@@ -1,6 +1,6 @@
 # the set of requirements that are unique to the BU ZCHARD deployment
 Django==1.4
--e git+http://github.com/caktus/rapidsms-threadless-router.git@d3ecbd7c031c91b5ca0bc97f263cbc050d46675e#egg=threadless_router-dev
+-e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=threadless_router-dev
 django-rosetta==0.6.6
 couchdbkit==0.5.4
 -e git+http://github.com/dimagi/dimagi-utils.git#egg=dimagi_utils-dev
