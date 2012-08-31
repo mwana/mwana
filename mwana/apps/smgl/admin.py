@@ -9,7 +9,7 @@ class PreRegsitrationAdmin(admin.ModelAdmin):
     exclude = ['contact', 'has_confirmed']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
-    list_display = ['uid', 'contact', 'location', 'first_name', 
+    list_display = ['uid', 'contact', 'location', 'zone', 'first_name', 
                     'last_name', 'lmp', 'edd', 'next_visit', 'reminded']
     list_filter = ['contact', 'location', 'reminded']
 
