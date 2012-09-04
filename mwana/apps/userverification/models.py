@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.db import models
 from mwana.apps.locations.models import Location
-from rapidsms.models import Contact
+from rapidsms.models import Contact, Connection
 
 class UserVerification(models.Model):
     """
@@ -37,3 +37,12 @@ class UserVerification(models.Model):
                                                             self.request_date,
                                                             self.response_date,
                                                             self.response)
+
+class DeactivatedUser(models.Model):
+    contact = models.ForeignKey(Contact)
+    connection = models.ForeignKey(Connection, null=True, blank=True)
+    deactivation_date = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.contact, self.connection)
+

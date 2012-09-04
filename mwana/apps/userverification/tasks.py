@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.userverification.models import DeactivatedUser
 from mwana.apps.userverification.messages import VERICATION_MSG
 from datetime import datetime
 from datetime import timedelta
@@ -110,11 +111,17 @@ def inactivate_lost_users(router):
 
 
     defaulting_contacts = set(supported_contacts) - set(complying_contacts)
-    
 
+    
     for contact in defaulting_contacts:
         contact.is_active = False
         contact.save()
-        conn= Connection.objects.get(contact=contact)
-        conn.contact = None
-        conn.save()
+        conn = None
+        try:
+            conn= Connection.objects.get(contact=contact)
+            conn.contact = None
+            conn.save()
+        except Connection.DoesNotExist:
+            pass
+
+        DeactivatedUser(contact=contact, connection=conn).save()

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.userverification.models import DeactivatedUser
 from mwana.apps.userverification.models import UserVerification
 from django.contrib import admin
 from django.db.models import Max
@@ -27,3 +28,14 @@ class UserVerificationAdmin(admin.ModelAdmin):
             return 'None'
 
 admin.site.register(UserVerification, UserVerificationAdmin)
+
+class DeactivatedUserAdmin(admin.ModelAdmin):
+    list_display = ("district", "clinic", "contact", "connection", "deactivation_date",)
+
+    def clinic(self, obj):
+        return obj.contact.clinic
+
+    def district(self, obj):
+        return obj.contact.district
+
+admin.site.register(DeactivatedUser, DeactivatedUserAdmin)
