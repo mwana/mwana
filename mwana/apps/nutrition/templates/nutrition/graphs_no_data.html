@@ -1,0 +1,286 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}Nutrition Reports{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+<!-- <link rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/tables.css" type="text/css" media="screen" /> -->
+<style type="text/css" media="print">
+    div.pagebreak {
+        display: block;
+        page-break-after: always;
+    }
+</style>
+<style type="text/css" media="screen">
+    div.pagebreak {
+       display: none;
+    }
+    #options {
+        padding:0 1em 20px;
+    }
+
+    #options table {
+        border:0;
+    }
+
+    #options td {
+        border:0;
+        white-space:nowrap;
+    }
+
+    p {
+        width:700px;
+        text-align:right;
+        margin-left:auto;
+        margin-right:auto;
+        padding:20px 0 30px;
+    }
+
+    label,input[type=text] {
+        float:left;
+        display:block;
+    }
+
+    label {
+        font-weight:700;
+    }
+
+    #underweight_chart,#underweight_table,#stunting_chart,#stunting_table,
+    #wasting_chart,#wasting_table {
+        margin-left:auto;
+        margin-right:auto;
+    }
+
+    td,th {
+        border:1px solid #aaa;
+        font-weight:400;
+        text-align:left;
+        padding:.5em;
+    }
+
+    tbody th,tbody td {
+        border-color:#aaa;
+    }
+
+    tbody tr:first-child th,tbody tr:first-child td {
+        border-top-color:#aaa;
+    }
+
+    tbody th:first-child,tbody td:first-child {
+        border-left-color:#aaa;
+    }
+
+    tbody th:last-child,tbody td:last-child {
+        border-right-color:#aaa;
+    }
+
+    tbody tr:last-child th,tbody tr:last-child td {
+        border-bottom-color:#aaa;
+    }
+</style>
+{% endblock stylesheets %}
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load('visualization', '1', {packages: ['corechart','table']});
+</script>
+<script type="text/javascript">
+    // variables for ids
+        var weight = "underweight_chart";
+        var stunt = "stunting_chart";
+        var wasting = "wasting_chart";
+
+
+    function drawPercentCharts() {
+        var weight_data_percent = {{weight_data_percent|safe}};
+        var xaxis = "Percentage % of reported values";
+        var stunt_data_percent = {{stunt_data_percent|safe}};
+        var wasting_data_percent = {{wasting_data_percent|safe}};
+        var chart_type = "percent";
+
+        drawChart(weight_data_percent, xaxis, weight, chart_type);
+        drawChart(stunt_data_percent, xaxis, stunt, chart_type);
+        drawChart(wasting_data_percent, xaxis, wasting, chart_type);
+    }
+
+    function drawValueCharts(){
+        var weight_data = {{weight_data|safe}};
+        var xaxis = "Number of reported values";
+        var stunt_data = {{stunt_data|safe}};
+        var wasting_data = {{wasting_data|safe}};
+        var chart_type = "values"
+
+        drawChart(weight_data, xaxis, weight, chart_type);
+        drawChart(stunt_data, xaxis, stunt, chart_type);
+        drawChart(wasting_data, xaxis, wasting, chart_type);
+    }
+    
+    function drawChart(weight_data, xaxis, chart_id, chart_type) {
+        // Create and populate the data table.
+        var data = new google.visualization.DataTable();
+        var raw_data = weight_data;
+        
+        var districts = {{locations|safe}};
+        
+        var chart_height = districts.length * 100;
+
+        data.addColumn('string', 'Locations');
+        for (var i = 0; i  < raw_data.length; ++i) {
+            data.addColumn('number', raw_data[i][0]);    
+        }
+        
+        data.addRows(districts.length);
+        
+        for (var j = 0; j < districts.length; ++j) {    
+            data.setValue(j, 0, districts[j].toString());    
+        }
+        for (var i = 0; i  < raw_data.length; ++i) {
+            for (var j = 1; j  < raw_data[i].length; ++j) {
+                data.setValue(j-1, i+1, raw_data[i][j]);    
+            }
+        }
+
+
+        if (chart_type == "percent") {
+        
+            // Format the data.
+            var formatter = new google.visualization.NumberFormat({
+                fractionDigits: 1,
+                suffix: '%'
+            });
+    
+            for (var i = 0; i <= raw_data.length; ++i) {
+                 formatter.format(data, i);
+            }
+    
+        }
+
+        // Give appropriate colors to chart types
+        if (chart_id == "underweight_chart") {
+            var colors_list = ['#9c8aa5', '#0077bb', '#00cd00','#fee01e', '#dd7500', '#cd0000'];
+        }else {
+            var colors_list = ['#00cd00','#fee01e', '#dd7500', '#cd0000'];
+        }
+
+        // Create and draw the visualization.
+        new google.visualization.BarChart(document.getElementById(chart_id)).
+            draw(data,
+                 {title:"",
+                  width:'100%', height: {{ chart_height }},
+                  colors: colors_list,
+                  hAxis: {title: xaxis},
+                  vAxis: {title: "Location"}}
+                );
+    }
+
+    google.setOnLoadCallback(drawPercentCharts);
+
+</script>
+
+<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
+{% endblock javascripts %}
+
+{% block content %}
+	<div class="module">
+	  
+	<div id="graphs" class="module">
+	  <h2>Report Options</h2>
+	  <form method="GET" id="options" action="">
+	    <table width="700px" cellspacing="0" cellpadding="0" border="0">
+	      <tr>
+	        <td><label for="startdate">From:</label></td>
+	        <td><input type="textbox" name="startdate" value='{{startdate}}' id="startdate" class="dateformat-Y-ds-m-ds-d" /></td>
+	        <td><label for="enddate">To:</label></td>
+	        <td><input type="textbox" name="enddate" value='{{enddate}}' id="enddate" class="dateformat-Y-ds-m-ds-d" /></td>
+	        <td><label for="location">District:</label></td>
+	        <td>
+	          <select name="location" id="location" value="{{location}}">
+	            <option value="All Districts"  
+	                    {% ifequal selected_location "All Districts" %}
+	                    selected="selected" 
+	                    {% endifequal %}>All Districts</option>
+	            {% for location in districts %}
+	            <option value="{{ location }}"
+			    {% ifequal selected_location location %} 
+			    selected="selected" 
+			    {% endifequal %}>{{ location }}</option>
+		    {% endfor %}
+	          </select>
+	        </td>
+	      </tr>
+	      <tr>
+	          <td><label for="gender">Gender:</label></td>
+	          <td>
+	              <select name="gender" id="gender" value="">
+	                  {% for key, value in gender_opts.items %}
+	                  <option value="{{ value }}"
+	                          {% ifequal selected_gender value %}
+	                          selected="selected"
+	                          {% endifequal %}>{{ key }}</option>
+	                  {% endfor %}
+	              </select>
+	          </td>
+	          <td><label for="startage">Age from:</label></td>
+	          <td><input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" /></td>
+	          <td><label for="endage">Age to:</label></td>
+	          <td><input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" /></td>
+	      </tr>
+	     <tr>
+	        <td>&nbsp;</td>
+	        <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
+	      </tr>
+	      
+	    </table>
+	  </form>
+	</div> 
+	<div class="pagebreak"></div>
+
+	<div class="module">
+		<h2>No data available</h2>
+		<p>There is currently no data (growth monitoring reports) available from this district.</p>
+	</div>
+
+	<p>Categorization is according to <a href="http://www.who.int/childgrowth/en/">WHO Child Growth Standards</a></p>
+	</div>
+{% endblock content %}

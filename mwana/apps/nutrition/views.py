@@ -41,6 +41,7 @@ def index(req):
 
 def graphs(request):
     template_name = "nutrition/graphs.html"
+    template_name_no_data = "nutrition/graphs_no_data.html"
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     gender_opts = {'Both': "Both", 'Male': "M", 'Female': "F"}
@@ -57,19 +58,28 @@ def graphs(request):
     else:
         r = NutritionGraphs(asses)
         data = r.get_districts_data()
-    context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
-        'selected_gender': selected_gender,
-        'enddate': enddate, 'selected_location': selected_location,
-        'startdate': startdate, 'selected_percent': request.GET.get('percent', "checked"),
-        'startage': startage, 'endage': endage,
-        'weight_table': data['weight_table'], 'stunt_table': data['stunt_table'],
-        'wasting_table': data['wasting_table'], 'weight_data': data['weight_data'],
-        'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
-        'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'],
-        'stunt_data_percent': data['stunt_data_percent'],
-        'wasting_data_percent': data['wasting_data_percent'],
-        'chart_height': max((len(data['locations']) * 100), 700)}
-    return render_to_response(template_name, context,
+    if data:
+        context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
+            'selected_gender': selected_gender,
+            'enddate': enddate, 'selected_location': selected_location,
+            'startdate': startdate, 'selected_percent': request.GET.get('percent', "checked"),
+            'startage': startage, 'endage': endage,
+            'weight_table': data['weight_table'], 'stunt_table': data['stunt_table'],
+            'wasting_table': data['wasting_table'], 'weight_data': data['weight_data'],
+            'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
+            'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'],
+            'stunt_data_percent': data['stunt_data_percent'],
+            'wasting_data_percent': data['wasting_data_percent'],
+            'chart_height': max((len(data['locations']) * 100), 700)}
+        return render_to_response(template_name, context,
+                              context_instance=RequestContext(request))
+    else:
+        context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
+            'selected_gender': selected_gender,
+            'enddate': enddate, 'selected_location': selected_location,
+            'startdate': startdate, 'selected_percent': request.GET.get('percent', "checked"),
+            'startage': startage, 'endage': endage}
+        return render_to_response(template_name_no_data, context,
                               context_instance=RequestContext(request))
 
 
@@ -215,7 +225,7 @@ def export(headers, keys, objects, file_name):
                     row.append(getattr(obj.healthworker, list[1]))
             else:
                 row.append("None")
-        writer.writerow(row)
+        writer.writerow([unicode(s).encode("utf-8") for s in row])
 
     return response
 
