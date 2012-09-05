@@ -85,6 +85,21 @@ def referral_outcome(session, xform, router):
     router.outgoing(OutgoingMessage(session.connection, 
                                     const.REFERRAL_OUTCOME_RESPONSE % \
                                         {'name': name, "unique_id": mother_id}))
+    
+    # also notify the referrer about the outcome
+    if ref.mother_showed:
+        router.outgoing(OutgoingMessage(ref.get_connection(),
+                                        const.REFERRAL_OUTCOME_NOTIFICATION % \
+                                            {"unique_id": ref.mother_uid,
+                                             "date": ref.date.date(), 
+                                             "mother_outcome": ref.get_mother_outcome_display(), 
+                                             "baby_outcome": ref.get_baby_outcome_display(),
+                                             "delivery_mode": ref.get_mode_of_delivery_display()}))
+    else:
+        router.outgoing(OutgoingMessage(ref.get_connection(),
+                                        const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % \
+                                            {"unique_id": ref.mother_uid,
+                                             "date": ref.date.date()}))
     return True
 
 def _get_people_to_notify(referral):

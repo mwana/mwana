@@ -125,10 +125,18 @@ class SMGLReferTest(SMGLSetUp):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234" }
+        notify = const.REFERRAL_OUTCOME_NOTIFICATION % {
+            "unique_id": "1234",
+            "date": datetime.datetime.now().date(), 
+            "mother_outcome": "stable", 
+            "baby_outcome": "critical",
+            "delivery_mode": "vaginal"
+        }
         script = """
             %(num)s > refout 1234 stb cri vag
-            %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp }
+            %(num)s < %(resp)s
+            %(num)s < %(notify)s
+        """ % { "num": self.user_number, "resp": resp, "notify": notify }
         self.runScript(script)
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
@@ -141,10 +149,15 @@ class SMGLReferTest(SMGLSetUp):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234" }
+        notify = const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % {
+            "unique_id": "1234",
+            "date": datetime.datetime.now().date(), 
+        }
         script = """
             %(num)s > refout 1234 noshow
-            %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp }
+            %(num)s < %(resp)s
+            %(num)s < %(notify)s    
+        """ % { "num": self.user_number, "resp": resp, "notify": notify }
         self.runScript(script)
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
