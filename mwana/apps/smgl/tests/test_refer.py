@@ -33,7 +33,8 @@ class SMGLReferTest(SMGLSetUp):
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
                                                "facility": "Mawaya",
                                                "reason": _verbose_reasons("hbp"),
-                                               "time": "12:00"}
+                                               "time": "12:00", 
+                                               "is_emergency": "no"}
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
@@ -67,7 +68,8 @@ class SMGLReferTest(SMGLSetUp):
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
                                                "facility": "Mawaya",
                                                "reason": _verbose_reasons("ec, fd, hbp, pec"),
-                                               "time": "12:00"}
+                                               "time": "12:00",
+                                               "is_emergency": "no"}
         script = """
             %(num)s > refer 1234 804024 hbp,fd,pec,ec 1200 nem
             %(num)s < %(resp)s

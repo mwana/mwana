@@ -49,7 +49,7 @@ TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 
-REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been sent from %(facility)s. Please expect the mother. Reason: %(reason)s. Time: %(time)s")
+REFERRAL_NOTIFICATION = _("A referral for Mother ID %(unique_id)s has been sent from %(facility)s. Please expect the mother. Reason: %(reason)s. Time: %(time)s. Emergency: %(is_emergency)s")
 REFERRAL_OUTCOME_RESPONSE = _("Thanks %(name)s! Referral outcome for Mother ID %(unique_id)s was received.")
 REFERRAL_OUTCOME_NOTIFICATION = _("This is outcome for Mother ID %(unique_id)s sent on %(date)s: mother is %(mother_outcome)s, Baby is %(baby_outcome)s, Mode of delivery was %(delivery_mode)s.")
 REFERRAL_OUTCOME_NOTIFICATION_NOSHOW = _("This is outcome for Mother ID %(unique_id)s sent on %(date)s: mother did not show up.")

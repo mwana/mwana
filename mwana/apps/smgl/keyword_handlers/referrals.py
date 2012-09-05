@@ -7,6 +7,7 @@ from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
 from datetime import datetime
 from mwana.apps.smgl.decorators import registration_required
+from django.template.defaultfilters import yesno
 
 @registration_required
 def refer(session, xform, router):
@@ -49,7 +50,8 @@ def refer(session, xform, router):
                 msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
                                                      "facility": from_facility,
                                                      "reason": ", ".join(verbose_reasons),
-                                                     "time": referral.time.strftime("%H:%M")}
+                                                     "time": referral.time.strftime("%H:%M"),
+                                                     "is_emergency": yesno(referral.is_emergency)}
                 router.outgoing(OutgoingMessage(c.default_connection, msg))
     return True
 
