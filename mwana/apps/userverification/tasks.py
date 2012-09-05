@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_verification_request(router):
-    logger.info('sending verification request to clinic workers')
+    logger.info('sending initial verification request to clinic workers')
 
     days_back = 75
     today = datetime.today()
@@ -57,7 +57,7 @@ def send_verification_request(router):
 
 def send_final_verification_request(router):
     #TODO Consider refactoring this method and above one into one
-    logger.info('sending 6 month verification request to clinic workers')
+    logger.info('sending final verification request to clinic workers')
 
     days_back = 120
     today = datetime.today()
@@ -97,6 +97,7 @@ def send_final_verification_request(router):
             break
 
 def inactivate_lost_users(router):
+    logger.debug('in inactivate_lost_users')
 
     days_back = 127
     today = datetime.today()
@@ -106,11 +107,13 @@ def inactivate_lost_users(router):
     supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
     location__supportedlocation__supported=True).distinct()
 
+    warned_contacts = supported_contacts.filter(userverification__request=2).distinct()
+
     complying_contacts = supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
 
 
 
-    defaulting_contacts = set(supported_contacts) - set(complying_contacts)
+    defaulting_contacts = set(warned_contacts) - set(complying_contacts)
 
     
     for contact in defaulting_contacts:
