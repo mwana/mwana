@@ -334,3 +334,6 @@ LOGO_LEFT_URL = ''
 LOGO_RIGHT_URL = ''
 
 EXCLUDED_HANDLERS = ["mwana.apps.labresults"]
+
+# multiple "empty" births can be registered with the same message
+DUPECHECKER_IGNORE = "birth none" 
