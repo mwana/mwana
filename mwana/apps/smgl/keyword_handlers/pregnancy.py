@@ -23,7 +23,7 @@ def pregnant_registration(session, xform, router):
     logger.debug('Handling the REG keyword form')
 
     connection = session.connection
-
+    
     # We must get the location from the Contact (Data Associate) who 
     # should be registered with this phone number.  If the contact does 
     # not exist (unregistered) we throw an error.
@@ -45,6 +45,7 @@ def pregnant_registration(session, xform, router):
         mother = PregnantMother.objects.get(uid=uid)
     except ObjectDoesNotExist:
         mother = PregnantMother(uid=uid)
+        mother.created_date = session.modified_time
     
     
     mother.first_name = get_value_from_form('first_name', xform)
@@ -111,6 +112,7 @@ def pregnant_registration(session, xform, router):
     # Create a facility visit object and link it to the mother
     visit = FacilityVisit(location = mother.location,
                           visit_date = datetime.datetime.utcnow().date(),
+                          created_date = session.modified_time,
                           reason_for_visit = mother.reason_for_visit,
                           next_visit = mother.next_visit,
                           mother = mother,
@@ -184,6 +186,7 @@ def follow_up(session, xform, router):
     visit.reason_for_visit = visit_reason
     visit.next_visit = next_visit
     visit.visit_date = datetime.datetime.utcnow().date()
+    visit.created_date = session.modified_time
     visit.save()
     
     send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)

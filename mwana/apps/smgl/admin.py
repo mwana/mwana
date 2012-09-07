@@ -9,14 +9,14 @@ class PreRegsitrationAdmin(admin.ModelAdmin):
     exclude = ['contact', 'has_confirmed']
 
 class PregnantMotherAdmin(admin.ModelAdmin):
-    list_display = ['uid', 'contact', 'location', 'zone', 'first_name', 
+    list_display = ['uid', 'contact', 'created_date', 'location', 'zone', 'first_name', 
                     'last_name', 'lmp', 'edd', 'next_visit', 'reminded']
-    list_filter = ['contact', 'location', 'reminded']
+    list_filter = ['contact', 'location', 'reminded', 'created_date']
 
 class FacilityVisitAdmin(admin.ModelAdmin):
-    list_display = ['location', 'mother', 'visit_date', 'next_visit', 'reason_for_visit',
+    list_display = ['location', 'mother', 'created_date', 'visit_date', 'next_visit', 'reason_for_visit',
                     'reminded']
-    list_filter = ['reminded']
+    list_filter = ['reminded', 'created_date']
 
 class AmbulanceRequestAdmin(admin.ModelAdmin):
     list_display = ['requested_on', 'from_location', 'receiving_facility', 'mother', 'mother_uid', 'danger_sign']

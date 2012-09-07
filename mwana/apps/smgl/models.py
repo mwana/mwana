@@ -36,6 +36,7 @@ class PregnantMother(models.Model):
         "none": "None"
     }
     
+    created_date = models.DateTimeField(null=True, blank=True)
     contact = models.ForeignKey(Contact, help_text="The contact that registered this mother")
     location = models.ForeignKey(Location)
     first_name = models.CharField(max_length=160)
@@ -117,6 +118,8 @@ class FacilityVisit(models.Model):
     This is a store used to indicate the visit activity of the mother
     (Which facility she went to, when she did so, etc)
     """
+    created_date = models.DateTimeField(null=True, blank=True)
+    
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(Location, help_text="The location of this visit")
     visit_date = models.DateField()
