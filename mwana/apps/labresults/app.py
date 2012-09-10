@@ -10,6 +10,7 @@ import mwana.apps.labresults.config as config
 import mwana.const as const
 import rapidsms
 import re
+import time
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -180,6 +181,7 @@ class App (rapidsms.apps.base.AppBase):
             for resp in responses:
                 msg = msgcls(connection, resp)
                 msg.send()
+                time.sleep(2)
 
         for r in results:
             r.notification_status = 'sent'
@@ -447,5 +449,3 @@ class App (rapidsms.apps.base.AppBase):
 
 def days_ago (d):
     return (date.today() - d).days
-
-    
