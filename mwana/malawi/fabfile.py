@@ -69,7 +69,7 @@ def production():
     env.hosts = ['10.3.1.20']
     env.user = 'mwana'
     env.home = '/home/mwana'
-    env.repos['mwana']['branch'] = 'feature/nutritionreports'
+    env.repos['mwana']['branch'] = 'malawi/release'
     setup_path()
 
 
