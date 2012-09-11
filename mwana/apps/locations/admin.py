@@ -10,6 +10,7 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ("name", "type", "full_name", "send_live_results",
                     "has_independent_printer")
     list_filter = ("type", "send_live_results", "has_independent_printer")
+    list_editable = ("send_live_results", "has_independent_printer")
     search_fields = ("name","parent__name", "slug")
 
 
