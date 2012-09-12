@@ -9,6 +9,7 @@ from django.db import transaction
 from django.conf import settings
 
 from mwana import const
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.views import process_payload
 from mwana.apps.labresults.messages import TEST_TYPE
@@ -103,7 +104,6 @@ def clean_up_unconfirmed_results():
 
 def send_results_to_printer(router):
     logger.debug('in tasks.send_results_to_printer')
-    from locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
     if settings.SEND_LIVE_LABRESULTS:
         if SYSTEM_LOCALE == LOCALE_ZAMBIA:
             clean_up_unconfirmed_results()
