@@ -24,6 +24,7 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 from mwana.util import get_clinic_or_default
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Connection
@@ -181,7 +182,8 @@ class App (rapidsms.apps.base.AppBase):
             for resp in responses:
                 msg = msgcls(connection, resp)
                 msg.send()
-                time.sleep(2)
+                if SYSTEM_LOCALE == LOCALE_MALAWI:
+                    time.sleep(2)
 
         for r in results:
             r.notification_status = 'sent'
@@ -260,7 +262,10 @@ class App (rapidsms.apps.base.AppBase):
         ready via sms.
         """
         printers = self.printers_for_clinic(clinic)
-        results = self._pending_results(clinic)
+        if SYSTEM_LOCALE == LOCALE_MALAWI and printers.exists():
+            results = self._pending_results(clinic, to_printer=True)
+        else:
+            results = self._pending_results(clinic)
         if not results:
             logger.info("0 results to send for %s" % clinic.name)
             return
@@ -290,7 +295,7 @@ class App (rapidsms.apps.base.AppBase):
         """
         return Q(verified__isnull=True) | Q(verified=True)
 
-    def _pending_results(self, clinic, check=False):
+    def _pending_results(self, clinic, check=False, to_printer=False):
         """
         Returns the pending results for a clinic. This is limited to 9 results
         (about 3 SMSes) at a time, so clinics aren't overwhelmed with new
@@ -301,7 +306,10 @@ class App (rapidsms.apps.base.AppBase):
                                             clinic__send_live_results=True,
                                             notification_status__in=['new', 'notified'])
             results = self.filterout(results, check)
-            return results.filter(self._result_verified())[:9]
+            if SYSTEM_LOCALE == LOCALE_MALAWI and to_printer:
+                return results.filter(self._result_verified())
+            else:
+                return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
 
@@ -311,10 +319,10 @@ class App (rapidsms.apps.base.AppBase):
         If clinic has not been retrieving results despite being notified, then
         send them only once a week
         """
-        from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
+
         today = datetime.today()
         ago = today - timedelta(days=7)
-        if SYSTEM_LOCALE==LOCALE_ZAMBIA and not check:
+        if SYSTEM_LOCALE == LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
                 arrival_date__lte=ago)

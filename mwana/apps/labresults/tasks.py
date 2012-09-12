@@ -85,7 +85,7 @@ def clean_up_unconfirmed_results():
                                                   text__icontains=TEST_TYPE)
     for msg in messages:
         req_id = msg.text.split(".")[1].split(":")[-1].strip()
-        
+
         clinic = msg.connection.contact.location
 
         try:
@@ -103,10 +103,12 @@ def clean_up_unconfirmed_results():
 
 def send_results_to_printer(router):
     logger.debug('in tasks.send_results_to_printer')
+    from locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
     if settings.SEND_LIVE_LABRESULTS:
-        clean_up_unconfirmed_results()
-        new_notified = Q(lab_results__notification_status__in=
-                         ['new', 'notified'])
+        if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+            clean_up_unconfirmed_results()
+        new_notified = \
+            Q(lab_results__notification_status__in=['new', 'notified'])
 
         clinics_with_results = \
             Location.objects.filter(Q(has_independent_printer=True)
