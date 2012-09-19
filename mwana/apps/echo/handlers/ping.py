@@ -34,7 +34,7 @@ class PingHandler(KeywordHandler):
             if hasattr(b[i], 'status'):
                 text += str(i) +':'+str(b[i].status())+', '
             else:
-                text += str(i)
+                text += str(i) + ', '
         text +=']'
         self.respond(text)
         return True
