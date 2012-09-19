@@ -44,7 +44,7 @@ class SentHandler(KeywordHandler):
         try:
             text = b.remove_dash_plus(text)
             count = int(b.try_replace_oil_with_011(text))
-        except ValueError:
+        except (ValueError, TypeError):
             if text.split()[0].isdigit():
                 text = text.split()[0]
             text = b.words_to_digits(text)
