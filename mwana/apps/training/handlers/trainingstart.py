@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.messages import DHO_TRAINING_START_NOTIFICATION
 from mwana.apps.labresults.messages import HUB_TRAINING_START_NOTIFICATION
 from mwana.apps.training.models import TrainingSession
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
@@ -6,6 +7,7 @@ from mwana.apps.locations.models import Location
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
+from mwana.const import get_district_worker_type
 
 
 class TrainingStartHandler(KeywordHandler):
@@ -57,6 +59,18 @@ class TrainingStartHandler(KeywordHandler):
                                     HUB_TRAINING_START_NOTIFICATION % {
                                     'hub_worker':hub_worker.name,
                                     'clinic':location.name,
+                                    'slug':location.slug})
+            hw_msg.send()
+
+        dhos = Contact.active.filter(location=location.parent,
+                                                types=get_district_worker_type())
+
+
+        for contact in dhos:
+            hw_msg = OutgoingMessage(contact.default_connection,
+                                    DHO_TRAINING_START_NOTIFICATION % {
+                                    'worker':contact.name,
+                                    'location':location.name,
                                     'slug':location.slug})
             hw_msg.send()
 
