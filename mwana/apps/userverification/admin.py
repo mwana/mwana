@@ -8,12 +8,14 @@ from rapidsms.contrib.messagelog.models import Message
 
 
 class UserVerificationAdmin(admin.ModelAdmin):
-    list_display = ("facility", "contact", "verification_freq", "request",
+    list_display = ("facility", "contact", "is_active", "verification_freq", "request",
     "response",  "responded", "request_date", "response_date",
     'date_of_most_recent_sms',)
     list_filter = ("responded", "facility", )
 
-
+    def is_active(self, obj):
+        return obj.contact.is_active
+    
     def date_of_most_recent_sms(self, obj):
         latest = Message.objects.filter(
             contact=obj.contact.id,

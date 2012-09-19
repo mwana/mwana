@@ -180,6 +180,8 @@ msgid ""
 "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
 "optional and is logged as TODAY if left out."
 msgstr ""
+"Poongeza %(event_lower)s, tumizani %(event_upper)s <DATE> <NAME>."
+"DATE siliri kanthu koma mungalembe TODAY ngati palibe DATE"
 
 #: .\apps\reminders\app.py:148
 msgid ""
@@ -192,7 +194,7 @@ msgstr ""
 #, python-format
 msgid "Sorry, you can not register a %s with a date after today's."
 msgstr ""
-"Pepani simungathe kulembetsa kubadwa ndi %s tsiku kuposa pa la lelo"
+"Pepani simungathe kulembetsa %s ndi tsiku kuposa pa la lelo"
 
 #: .\apps\reminders\app.py:187 .\apps\reminders\app.py:216
 #, python-format
@@ -201,7 +203,7 @@ msgid ""
 "on %(date)s. You will be notified when it is time for %(gender)s next clinic "
 "appointment."
 msgstr ""
-"Zikomo %(cba)s! Mwalembetsa kubadwa %(event)s kwamwana %(location_type)s wa %(name)s pa %(date)s."
+"Zikomo %(cba)s! Mwalembetsa %(event)s kwamwana %(location_type)s wa %(name)s pa %(date)s."
 "Mudzaziwitsidwa pamene nthawi  %(gender)s yopita ku kiliniki."
 
 #: .\apps\reminders\app.py:196 .\apps\reminders\app.py:225
@@ -219,7 +221,7 @@ msgid ""
 " %(event_upper)s <DATE> <NAME>. The date is optional and is logged as TODAY if "
 "left out."
 msgstr ""
-"Pepani sindinamvere icho. Poongeza kubadwa %(event_lower)s, tumizani %"
+"Pepani sindinamvere icho. Poongeza %(event_lower)s, tumizani %"
 "%(event_upper)s <DATE> <NAME>."
 "DATE siliri kanthu koma mungalembe TODAY ngati palibe DATE."
 
@@ -230,7 +232,7 @@ msgid ""
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
 "Mooni %(cba)s. %(patient)s afunika kupita ku kiliniki pambuyo pa"
- "mbuyo %(type)s tsiku la  %(date)s. Chonde akumbukiritseni kupita ku %(clinic)s,"
+ "mbuyo tsiku la %(type)s pa %(date)s. Chonde akumbukiritseni kupita ku %(clinic)s,"
  "ndipo yankhulani ndi liwu la TOLD %(patient)s."
 
 #: .\apps\reminders\tasks.py:67

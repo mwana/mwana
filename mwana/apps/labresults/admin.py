@@ -17,9 +17,13 @@ admin.site.register(Result, ResultAdmin)
 
 
 class LabLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'message', 'level', 'line')
+    list_display = ('timestamp', 'message', 'level', 'line','source',)
     list_filter = ('timestamp', 'level')
     search_fields = ('message', 'level')
+
+    def source(self, obj):
+        return obj.payload.source
+        
 admin.site.register(LabLog, LabLogAdmin)
 
 

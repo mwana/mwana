@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import Login
 from datetime import datetime, timedelta, date
 
 from django.views.decorators.http import require_GET
@@ -6,6 +7,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
+from django.shortcuts import redirect
+from django.contrib.auth.models import User
 
 
 
@@ -165,8 +168,19 @@ def get_admin_email_address():
 
 @require_GET
 def zambia_reports(request):
-#    , startdate=datetime.today().date()-timedelta(days=30),
-#                    enddate=datetime.today().date(
+
+    if request.user and "dont_check_first_login" \
+            not in request.session:
+        request.session["dont_check_first_login"] = True
+
+        login = Login.objects.get_or_create(user=request.user)[0]
+        if not login.ever_logged_in:
+            login.ever_logged_in = True
+            login.save()
+#            return redirect('/admin/password_change/?post_change_redirect=/')
+            return redirect('/admin/password_change')
+
+
     from webreports.reportcreator import Results160Reports
 
     today = datetime.today().date()

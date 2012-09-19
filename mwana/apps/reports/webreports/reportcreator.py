@@ -651,7 +651,7 @@ class Results160Reports:
 
         table = []
 
-        table.append(['  District', '  Facility', 'Community<br>Births', 'Clinic Births', 'Total Births'])
+        table.append(['  District', '  Facility', 'Home/Community Births', 'Facility/Clinic Births', 'Location not Specified', 'Total Births'])
 
         facility_dict = {}
 
@@ -677,34 +677,37 @@ class Results160Reports:
 
 
             if location not in facility_dict.keys():
-                facility_dict[location] = [0, 0, 0]
+                facility_dict[location] = [0, 0, 0, 0]
                 
-            facility_dict[location][2] = facility_dict[location][2] + 1
+            facility_dict[location][3] = facility_dict[location][3] + 1
             if event.event_location_type == 'hm':
                 facility_dict[location][0] = facility_dict[location][0] + 1
             elif event.event_location_type == 'cl':
                 facility_dict[location][1] = facility_dict[location][1] + 1
+            else:
+                facility_dict[location][2] = facility_dict[location][2] + 1
                     
             
 
-        tt_home, tt_clinic, tt_all = [0, 0, 0]
+        tt_home, tt_clinic, tt_unknown, tt_all = [0, 0, 0, 0]
 
         for key, value in facility_dict.iteritems():
             facility_name = key
-            distict_name = "Unknown"
+            district_name = "Unknown"
             if not isinstance(key, (str, unicode)):                
                 facility_name = key.name
-                distict_name = key.parent.name
+                district_name = key.parent.name
 
 
-            home, clinic, all = value
+            home, clinic, unknown, all = value
 
             tt_home  = tt_home + home
             tt_clinic  = tt_clinic + clinic
+            tt_unknown  = tt_unknown + unknown
             tt_all  = tt_all + all
 
-            table.append([" "+distict_name, " "+facility_name, home, clinic, all])
-        table.append(['All listed districts', 'All listed clinics', tt_home, tt_clinic, tt_all])
+            table.append([" "+district_name, " "+facility_name, home, clinic, unknown, all])
+        table.append(['All listed districts', 'All listed clinics', tt_home, tt_clinic, tt_unknown, tt_all])
         return sorted(table, key=itemgetter(0, 1))
 
     def rm_patient_events_report_unknown_location(self, startdate=None, enddate=None):
@@ -722,7 +725,7 @@ class Results160Reports:
 
         table = []
 
-        table.append(['  Phone', 'Community<br>Births', 'Clinic Births', 'Total Births'])
+        table.append(['  Phone', 'Home/Community Births', 'Facility/Clinic Births', 'Location not Specified', 'Total Births'])
 
         facility_dict = {}
 
@@ -738,30 +741,33 @@ class Results160Reports:
 
 
             if location not in facility_dict.keys():
-                facility_dict[location] = [0, 0, 0]
+                facility_dict[location] = [0, 0, 0, 0]
 
-            facility_dict[location][2] = facility_dict[location][2] + 1
+            facility_dict[location][3] = facility_dict[location][3] + 1
             if event.event_location_type == 'hm':
                 facility_dict[location][0] = facility_dict[location][0] + 1
             elif event.event_location_type == 'cl':
                 facility_dict[location][1] = facility_dict[location][1] + 1
+            else:
+                facility_dict[location][2] = facility_dict[location][2] + 1
 
 
 
-        tt_home, tt_clinic, tt_all = [0, 0, 0]
+        tt_home, tt_clinic, tt_unknown, tt_all = [0, 0, 0, 0]
 
         for key, value in facility_dict.iteritems():
             facility_name = key
 
 
-            home, clinic, all = value
+            home, clinic, unknown, all = value
 
             tt_home  = tt_home + home
             tt_clinic  = tt_clinic + clinic
+            tt_unknown  = tt_unknown + unknown
             tt_all  = tt_all + all
 
-            table.append([ " "+facility_name, home, clinic, all])
-        table.append(['All listed numbers', tt_home, tt_clinic, tt_all])
+            table.append([ " "+facility_name, home, clinic, unknown, all])
+        table.append(['All listed numbers', tt_home, tt_clinic, tt_unknown, tt_all])
         return sorted(table, key=itemgetter(0))
 
 #Graphing

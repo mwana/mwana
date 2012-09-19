@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import Login
 from mwana.apps.reports.models import CbaEncouragement
 from mwana.apps.reports.models import CbaThanksNotification
 from django.contrib import admin
@@ -54,4 +55,12 @@ class CbaEncouragementAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_sent'
     search_fields = ('contact__name', )
 admin.site.register(CbaEncouragement, CbaEncouragementAdmin)
+
+class LoginAdmin(admin.ModelAdmin):
+    list_display = ('user', 'ever_logged_in',)
+    list_filter = ('ever_logged_in',)
+    search_fields = ('user__username', )
+    list_editable = ('ever_logged_in',)
+
+admin.site.register(Login, LoginAdmin)
 
