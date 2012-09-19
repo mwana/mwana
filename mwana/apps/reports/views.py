@@ -10,7 +10,7 @@ from django.db.models import Q
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.labresults.models import Result
 from mwana.apps.reports.webreports.reportcreator import MalawiReports
-
+from mwana.localsettings import DISTRICTS
 
 
 def text_date(text):
@@ -53,7 +53,7 @@ def malawi_reports(request, location=None):
 
     pending = r.dbsr_pending_results_report(startdate, enddate, district)
 
-    districts = r.get_live_districts()
+    districts = DISTRICTS
 
     births = r.reminders_patient_events_report(startdate, enddate)
 
@@ -61,7 +61,7 @@ def malawi_reports(request, location=None):
     graph = r.dbsr_graph_data(startdate, enddate, district)
 
     total_dbs, percent_positive_district, percent_negative_district, \
-    percent_rejected_district= r.dbsr_positivity_data(startdate, enddate, district)
+    percent_rejected_district = r.dbsr_positivity_data(startdate, enddate, district)
 
     return render_to_response('reports/malawi.html',
         {'startdate': startdate,
@@ -92,15 +92,14 @@ def malawi_reports(request, location=None):
 @require_GET
 def malawi_home(request):
     apps = ['results160', 'remindme', 'growth monitor']
-    return render_to_response('reports/malawi_home.html', {'apps':apps,},
+    return render_to_response('reports/malawi_home.html', {'apps': apps, },
                               context_instance=RequestContext(request))
-                              
 
 
 def get_facilities_dropdown_html(id, facilities, selected_facility):
     #TODO: move this implemention to templates
-    code ='<select name="%s" size="1">\n'%id
-    code +='<option value="All">All</option>\n'
+    code = '<select name="%s" size="1">\n'%id
+    code += '<option value="All">All</option>\n'
     for fac in facilities:
         if fac.slug == selected_facility:
             code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
@@ -123,20 +122,23 @@ def get_groups_dropdown_html(id, selected_group):
     code = code +'</select>'
     return code
 
-def read_request(request,param):
+
+def read_request(request, param):
     try:
         value = request.REQUEST[param]
-        if value =='All':
+        if value == 'All':
             value = None
     except:
         value = None
     return value
+
 
 def try_format(date):
     try:
         return date.strftime("%Y-%m-%d")
     except:
         return date
+
 
 @require_GET
 def zambia_reports(request):
