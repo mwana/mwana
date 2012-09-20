@@ -95,7 +95,7 @@ class Result(models.Model):
         ('f', 'Female'),
     )
 
-    sample_id = models.CharField(max_length=10)    #lab-assigned sample id
+    sample_id = models.CharField(max_length=20)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)   #non-standardized format varying by clinic; could be patient
                                                        #id, clinic-assigned sample id, or even patient name
     requisition_id_search = models.CharField(max_length=50, db_index=True) # requisition ID with punctuation removed, for search purposes

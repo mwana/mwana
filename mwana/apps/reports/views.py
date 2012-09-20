@@ -133,7 +133,7 @@ def malawi_reports(request, location=None):
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
-    code ='<select name="%s" size="1">\n'%id
+    code ='<select name="%s" id="%s" class="drop-down" size="1">\n'%(id, id)
     code +='<option value="All">All</option>\n'
     for group in ReportingGroup.objects.all():
         if str(group.id) == selected_group:

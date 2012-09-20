@@ -28,6 +28,7 @@ DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and 
 PHO_DEFAULT_RESPONSE = _("Sorry %s. Respond with keyword HELP for assistance.")
 UNREGISTERED_DEFAULT_RESPONSE = _("Invalid Keyword. Please send the keyword HELP if you need to be assisted.")
 HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as training data"
+DHO_TRAINING_START_NOTIFICATION = "Hi %(contact)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic today as training data"
 HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as live data"
 
 TEST_TYPE = "HIV-DNAPCR Result"

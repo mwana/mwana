@@ -12,6 +12,7 @@ class WebSMSLog(models.Model):
     workertype = models.CharField(max_length=160)
     location = models.CharField(max_length=100)
     recipients_count = models.IntegerField()
+    admins_notified = models.NullBooleanField(null=True, blank=True, editable=False, default=True)
 
     def __unicode__(self):
         return "%s sent a message on '%s' to %s people (%s)"  % (self.sender, self.date_sent, self.recipients_count, self.workertype)

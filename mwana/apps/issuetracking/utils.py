@@ -14,7 +14,13 @@ def send_issue_email(issue, user):
     message = """
 Issue %(id)s-%(title)s- has been %(edit_mode)s by %(user_name)s (%(first_name)s %(last_name)s)
 
+Priority: %(priority)s
+Type: %(type)s
+Status: %(status)s
 Assigned to: %(assigned_to)s
+Desired Start Date: %(desired_start_date)s. Desired End Date: %(desired_completion_date)s
+Development time: %(dev_time)s
+Percent Complete: %(perc_complete)s
 Description:
 %(body)s
 
@@ -40,6 +46,13 @@ Thank you,
         issue.assigned_to.username if issue.assigned_to else "",
         issue.assigned_to.first_name if issue.assigned_to else "",
         issue.assigned_to.last_name if issue.assigned_to else ""),
+        'status':issue.get_status_display(),
+        'priority':issue.get_priority_display(),
+        'type':issue.get_type_display(),
+        'perc_complete':issue.get_percentage_complete_display(),
+        'dev_time':issue.dev_time,
+        'desired_start_date':issue.desired_start_date,
+        'desired_completion_date':issue.desired_completion_date,
         'body':issue.body,
         'admin':get_admin_email_address(),
         'comments': ('-' * 80).join( "\nComment on %s\n%s\n" % (comment.edited_on,

@@ -26,6 +26,7 @@ INSTALLED_APPS.append("mwana.apps.monitor")
 INSTALLED_APPS.append("mwana.apps.websmssender")
 INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
+INSTALLED_APPS.append("mwana.apps.birthcertification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 
 
@@ -77,6 +78,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
     ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
+    ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

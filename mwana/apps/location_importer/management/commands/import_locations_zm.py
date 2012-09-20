@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 """ This script imports locations from a csv file into the database.
 The csv file should have columns in the order:
-Province, District, Facility_Name, Code, Facility Type, Latitude,	Longitude
+Province, District, Facility_Name, Code, Facility Type, Latitude, Longitude
 """
 import os.path
 
@@ -73,11 +73,26 @@ def load_locations(file_path):
             facility = Location.objects.get(slug=code)
         except Location.DoesNotExist:
             facility = Location(slug=code)
-        facility.name = facility_name
-        facility.parent = district
-        facility.point = Point.objects.get_or_create(latitude=latitude, longitude=longitude)[0]
+
+        if not facility.name or facility.name.strip() == '':
+            facility.name = facility_name
+
+        if not facility.parent:
+            facility.parent = district
+
+        if not facility.point:
+            facility.point = Point.objects.get_or_create(latitude=latitude, longitude=longitude)[0]
+
         facility.type = type
         facility.save()
+
+        if district.slug.isalpha():
+            district.slug = facility.slug[:4] + '00'
+            district.save()
+
+        if province.slug.isalpha():
+            province.slug = facility.slug[:2] + '0000'
+            province.save()
         count += 1
 
 

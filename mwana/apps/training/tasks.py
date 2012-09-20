@@ -15,6 +15,16 @@ def send_endof_training_notification(router):
     pending_trainings = TrainingSession.objects.filter(is_on=True).exclude(trainer__is_active=False)
 
     for training in pending_trainings:
+        if not training.trainer:
+            training.is_on = False
+            training.end_date = datetime.utcnow()
+            training.save()
+            msg = "Training has been stopped at %s: %s" %s (training.location.name, training.location.slug)
+            for help_admin in Contact.active.filter(is_help_admin=True):
+                OutgoingMessage(help_admin.default_connection, msg).send()
+
+            continue
+            
         OutgoingMessage(training.trainer.default_connection,
                         DELAYED_TRAINING_TRAINER_MSG %
                         (training.trainer.name, training.location.name)
