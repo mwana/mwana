@@ -1,15 +1,25 @@
 {% extends "layout.html" %}
 {% load forms_tags %}
 
-{% block title %}Issues - {{ block.super }}{% endblock %}
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+
 
 {% block javascripts %}
 {{ block.super }}
 
-{% endblock %}
-
-{% block stylesheets %}
-{{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
 
 {% endblock %}
 
@@ -19,13 +29,13 @@
 <div class="left">
     <form name="getValues" action="" method="POST">
         <div class="module">
-            <h2>Issues</h2>
-            <p>{{ message }}<details>
-                <summary><h3>Create New Issue</h3></summary>
+            <h2>Group Facility Mappings</h2>
+            <details>
+                <summary><h3>Create New {{ model }}</h3></summary>
                 <br>
-
+                
                 <table border="0">
-                    {% for field in issue %}
+                    {% for field in form %}
                     <tr>
                         <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
                         <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
@@ -37,25 +47,12 @@
             <hr>
             <div>
 
-                <h3>Open Issues</h3>
+                <h3>Existing {{ model }}</h3>
 
-                {% for issue in issues %}
+                {% for record in query_set %}
+{{ record }}<br>
 
-
-                <p><details>
-                    <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.get_status_display }}</h4></summary>
-
-
-                    <br>Priority: <b>{{ issue.get_priority_display }}</b>
-                    <br>Type: <b>{{ issue.get_type_display }}</b>
-                    <br>Assigned to: <b>{{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}</b>
-                    <br>Desired Start Date: <b>{{ issue.desired_start_date }}</b> Desired End Date: <b>{{ issue.desired_completion_date }}</b>
-                    <br>Development time: <b>{{ issue.dev_time }}</b>
-                    <br>% Complete: <b>{{ issue.get_percentage_complete_display }}</b>
-                    <p><u>Description:</u>
-                        <br><span style="white-space: pre-wrap;">{{ issue.body }}</span>
-                </details>
-                <hr>
+               
 
 
                 {% endfor %}
@@ -85,4 +82,8 @@
     </form>
 
 </div>
+<script type="text/javascript">
+  $("select").chosen();
+  </script>
+
 {% endblock %}

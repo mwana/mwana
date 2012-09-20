@@ -1,22 +1,17 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class IssueHelper:   
 
-    def get_issues(self, page=1):
-        """
-        Returns open issues with pagination
-        """
-        
-        issues = Issue.objects.filter(open=True).order_by('pk')
-        
+    def get_paginated(self, query_set, page=1, num_pay_page=30):
         if not page:
             page = 1
         
             
-        paginator = Paginator(issues, 30)
+        paginator = Paginator(query_set, num_pay_page)
         try:
             p_issues = paginator.page(page)
         except PageNotAnInteger:
@@ -33,4 +28,21 @@ class IssueHelper:
         has_next = p_issues.has_next()
         paginator_num_pages = p_issues.paginator.num_pages
         return p_issues.object_list, paginator_num_pages, number, has_next, has_previous
+
+    def get_issues(self, page=1):
+        """
+        Returns open issues with pagination
+        """
+        
+        issues = Issue.objects.filter(open=True).order_by('pk')
+        return self.get_paginated(issues, page, 30)
+
+    def get_group_facilty_mappings(self, page=1):
+        """
+        Returns open group_facilty_mappings with pagination
+        """
+
+        issues = GroupFacilityMapping.objects.all().order_by('pk')
+        return self.get_paginated(issues, page, 400)
+        
     

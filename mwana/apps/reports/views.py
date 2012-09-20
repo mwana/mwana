@@ -1,6 +1,10 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import GroupFacilityMapping
+from mwana.apps.issuetracking.issuehelper import IssueHelper
+from mwana.apps.reports.webreports.forms import GroupFacilityMappingForm
 from mwana.apps.reports.models import Login
 from datetime import datetime, timedelta, date
+from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
 
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
@@ -165,6 +169,55 @@ def get_admin_email_address():
         return settings.ADMINS[0][1]
     except:
         return "Admin's email address"
+
+
+@csrf_response_exempt
+@csrf_view_exempt
+def group_facility_mapping(request):
+
+
+    navigation = read_request(request, "navigate")
+    page = read_request(request, "page")
+
+    page = get_default_int(page)
+    page = page + get_next_navigation(navigation)
+
+    form =  GroupFacilityMappingForm() # An unbound form
+    if request.method == 'POST': # If the form has been submitted...
+        form = GroupFacilityMappingForm(request.POST) # A form bound to the POST data
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            facility = form.cleaned_data['facility']
+
+
+            model = GroupFacilityMapping(group=group, facility=facility)
+            
+
+            model.save()
+
+
+            form = GroupFacilityMappingForm() # An unbound form
+        
+
+
+
+    issueHelper = IssueHelper()
+
+    (query_set, num_pages, number, has_next, has_previous) = issueHelper.get_group_facilty_mappings(page)
+
+
+    return render_to_response('issues/group_facilty_mappings.html',
+                              {
+                              'form': form,
+                              'model': 'Group Facility Mapping',
+                              'query_set': query_set,
+                              'num_pages': num_pages,
+                              'number': number,
+                              'has_next': has_next,
+                              'has_previous': has_previous,
+                              }, context_instance=RequestContext(request)
+                              )
+
 
 @require_GET
 def zambia_reports(request):
