@@ -6,6 +6,7 @@ from datetime import datetime
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
+_ = lambda s: s
 
 class ToldHandler(KeywordHandler):
     '''
@@ -30,7 +31,7 @@ class ToldHandler(KeywordHandler):
     
     help_txt = "To tell that someone has been to the clinic send: TOLD <PATIENT_NAME>, e.g TOLD Bana Malama"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_told_thanks_txt = "Thank you %s! After you confirm %s has visited the clinic, please send: CONFIRM %s."
+    response_told_thanks_txt = _("Thank you %s! After you confirm %s has visited the clinic, please send: CONFIRM %s.")
     
     clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
                                

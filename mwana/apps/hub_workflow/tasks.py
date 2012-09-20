@@ -17,7 +17,7 @@ def get_lab_name(district):
     try:
         return Payload.objects.filter(lab_results__clinic__parent\
                                       =district)[0].source.title()
-    except Payload.DoesNotExist:
+    except IndexError:
         return "(Unkown lab)"
 
 def send_new_dbs_at_lab_notification(router):

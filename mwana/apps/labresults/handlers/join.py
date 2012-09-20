@@ -116,7 +116,7 @@ class JoinHandler(KeywordHandler):
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
             return False
         elif len(name) < self.MIN_NAME_LENGTH:
-            self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
+            self.respond(_("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT))
             return False
         
         return tuple(tokens)
@@ -207,7 +207,7 @@ class JoinHandler(KeywordHandler):
             
             self.respond(self.get_response_message(worker_type, name, clinic.name, pin))
         except Location.DoesNotExist:
-            self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
+            self.respond(_("Sorry, I don't know about a location with code %(code)s. Please check your code and try again."),
                          code=slug)
     def _get_notify_text(self):
         events = reminders.Event.objects.values_list('name', flat=True)

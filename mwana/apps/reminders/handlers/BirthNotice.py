@@ -13,6 +13,7 @@ from django.db import transaction
 from django.conf import settings
 
 from mwana import const
+_ = lambda s: s
 
 
 class BirthRecordHandler(KeywordHandler):
@@ -34,9 +35,9 @@ class BirthRecordHandler(KeywordHandler):
         self.respond(self.HELP_TEXT)
 
     def mulformed_msg_help(self):
-        self.respond("Sorry, I didn't understand that. "
+        self.respond(_("Sorry, I didn't understand that. "
                      "Make sure you send your location, name and pin "
-                     "like: JOIN <CLINIC CODE> <NAME> <PIN CODE>.")
+                     "like: JOIN <CLINIC CODE> <NAME> <PIN CODE>."))
 
     def get_locations_with_births(self):
         locs=[]

@@ -19,6 +19,7 @@ from mwana.util import get_clinic_or_default
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
+_ = lambda s: s
 
 _ = lambda s: s
 

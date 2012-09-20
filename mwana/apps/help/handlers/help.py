@@ -5,8 +5,9 @@ from mwana.util import get_contact_type_slug
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
+_ = lambda s: s
 
-RESPONSE           = "Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon."
+RESPONSE           = _("Sorry you're having trouble%(person)s. Your help request has been forwarded to a support team member and they will call you soon.")
 ANONYMOUS_FORWARD  = "Someone has requested help. Please call them at %(phone)s."
 CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s."
 CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s."

@@ -14,7 +14,6 @@ from mwana import const
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
-from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class Results160Reports:
@@ -667,8 +666,8 @@ class Results160Reports:
         
         for event in events:
             location = "Unknown"
-            if event.cba_conn.contact:
-                location = event.cba_conn.contact.location
+            if event.patient.location:
+                location = event.patient.location
                 if location.type.slug == 'zone':
                     location = location.parent
 
