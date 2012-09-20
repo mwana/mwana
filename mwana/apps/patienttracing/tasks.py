@@ -18,7 +18,7 @@ _ = lambda s: s
 
 def send_confirmation_reminder(router):
     logger.info("Retrieving PatientTraces for confirmation reminder messages")
-    confirmation_reminder_txt = _("Hi %(name)s! If you know that %(mother)s has been to the clinic, please send: CONFIRM %(mother)s")
+    confirmation_reminder_txt = _("Hi %s! If you know that %s has been to the clinic, please send: CONFIRM %s")
     DAYS_AFTER_TOLD = 3
     confirm_window_date = (datetime.now() - timedelta(days=DAYS_AFTER_TOLD))
     traces = PatientTrace.objects.filter(status=patienttracing.get_status_told())\

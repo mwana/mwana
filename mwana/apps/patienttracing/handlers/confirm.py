@@ -37,7 +37,7 @@ class ConfirmHandler(KeywordHandler):
     
     help_txt = "To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_confirmed_thanks_txt = _("Thank you %()s! You have confirmed that %()s has been to the clinic!")
+    response_confirmed_thanks_txt = _("Thank you %s! You have confirmed that %s has been to the clinic!")
                                
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
     
