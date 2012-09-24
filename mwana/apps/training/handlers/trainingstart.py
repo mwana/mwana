@@ -69,7 +69,7 @@ class TrainingStartHandler(KeywordHandler):
         for contact in dhos:
             hw_msg = OutgoingMessage(contact.default_connection,
                                     DHO_TRAINING_START_NOTIFICATION % {
-                                    'worker':contact.name,
+                                    'contact':contact.name,
                                     'location':location.name,
                                     'slug':location.slug})
             hw_msg.send()
