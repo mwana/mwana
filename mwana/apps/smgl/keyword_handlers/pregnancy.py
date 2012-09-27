@@ -38,14 +38,14 @@ def pregnant_registration(session, xform, router):
     # get or create a new Mother Object without saving the object 
     # (and triggering premature errors)
     
-    # NOTE: this will currently overwrite whatever's there. 
-    # confirm this is desired
     uid = get_value_from_form('unique_id', xform)
-    try:
-        mother = PregnantMother.objects.get(uid=uid)
-    except ObjectDoesNotExist:
-        mother = PregnantMother(uid=uid)
-        mother.created_date = session.modified_time
+    if PregnantMother.objects.filter(uid=uid).count():
+        send_msg(connection, const.DUPLICATE_REGISTRATION, router,  
+                 **{"unique_id": uid})
+        return True
+
+    mother = PregnantMother(uid=uid)
+    mother.created_date = session.modified_time
     
     
     mother.first_name = get_value_from_form('first_name', xform)

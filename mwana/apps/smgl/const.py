@@ -38,6 +38,7 @@ GENERAL_ERROR = _("Your message is either incomplete or incorrect. Please check 
 LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
 MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!")
 NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id)s was registered in your zone. Please visit this mother and take note in your register.") 
+DUPLICATE_REGISTRATION = _("A mother with ID %(unique_id)s is already registered. Please check the ID and try again.")
 
 # pregnancy follow up messages
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number and try again or register her first.")

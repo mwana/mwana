@@ -122,6 +122,24 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
     
+    def testDuplicateRegister(self):
+        self.testRegister()
+        resp = const.DUPLICATE_REGISTRATION % { "unique_id": "80403000000112" }
+        script = """
+            %(num)s > REG 80403000000112 Mary Someoneelse none %(tomorrow)s R 80402404 %(earlier)s %(later)s
+            %(num)s < %(resp)s            
+        """ % {"num": self.user_number, "resp": resp, 
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y") }
+        self.runScript(script)
+        
+        # make sure we didn't create a new one
+        self.assertEqual(1, PregnantMother.objects.count())
+        mom = PregnantMother.objects.get(uid='80403000000112')
+        self.assertEqual("Soko", mom.last_name)
+        
+        
     def testFollowUp(self):
         self.testRegister()
         resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
