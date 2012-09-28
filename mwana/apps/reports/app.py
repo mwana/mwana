@@ -10,10 +10,11 @@ class App (rapidsms.apps.base.AppBase):
 
 
     def start (self):
-        self.schedule_eid_and_birth_dho_report_task()
-        self.schedule_eid_and_birth_pho_report_task()
-        self.schedule_send_cba_birth_report_task()
-        self.schedule_send_cba_encouragement_task()
+        pass
+        # self.schedule_eid_and_birth_dho_report_task()
+        # self.schedule_eid_and_birth_pho_report_task()
+        # self.schedule_send_cba_birth_report_task()
+        # self.schedule_send_cba_encouragement_task()
 
     def handle(self, message):
         mocker = MockSMSReportsUtility()
