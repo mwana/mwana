@@ -213,6 +213,11 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     date = models.DateTimeField()
     facility = models.ForeignKey(Location, 
                                  help_text="The referred facility")
+    from_facility = models.ForeignKey(Location,
+                                      null=True, blank=True, 
+                                      help_text="The referring facility",
+                                      related_name="referrals_made")
+    
     
     responded = models.BooleanField(default=False)
     mother_showed = models.NullBooleanField(default=None)
@@ -274,9 +279,18 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     
     @property
     def referring_facility(self):
+        if self.from_facility:
+            return self.from_facility
         try:
-            return self.session.connection.contact.location
+            # hack: pre 9/28 this property was not set, so 
+            # set it on access and return it
+            loc = self.session.connection.contact.location
+            self.from_facility = loc
+            self.save()
+            return loc
         except AttributeError:
+            # looks like the contact disappeared or no longer
+            # has a location set. not much to be done. 
             return None
     
     def get_receiving_data_clerks(self):

@@ -25,6 +25,10 @@ class SMGLReferTest(SMGLSetUp):
         self.cba = self.createUser("cba", self.cba_number, location="80402404")
         self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
         self.createUser(const.CTYPE_TRIAGENURSE, "666888")
+        self.refferring_dc = self.createUser(const.CTYPE_DATACLERK, "666999",
+                                             location="804034")
+        self.refferring_ic = self.createUser(const.CTYPE_INCHARGE, "666000",
+                                             location="804034")
         self.assertEqual(0, Referral.objects.count())
         
     def testRefer(self):
@@ -47,6 +51,7 @@ class SMGLReferTest(SMGLSetUp):
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
         self.assertEqual(Location.objects.get(slug__iexact="804024"), referral.facility)
+        self.assertEqual(Location.objects.get(slug__iexact="804034"), referral.from_facility)
         self.assertTrue(referral.reason_hbp)
         self.assertEqual(["hbp"], list(referral.get_reasons()))
         self.assertEqual("nem", referral.status)
@@ -138,7 +143,10 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s > refout 1234 stb cri vag
             %(num)s < %(resp)s
             %(num)s < %(notify)s
-        """ % { "num": self.user_number, "resp": resp, "notify": notify }
+            %(dc_num)s < %(notify)s
+            %(ic_num)s < %(notify)s
+        """ % {"num": self.user_number, "resp": resp, "notify": notify,
+               "dc_num": "666999", "ic_num": "666000"}
         self.runScript(script)
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
@@ -158,8 +166,11 @@ class SMGLReferTest(SMGLSetUp):
         script = """
             %(num)s > refout 1234 noshow
             %(num)s < %(resp)s
-            %(num)s < %(notify)s    
-        """ % { "num": self.user_number, "resp": resp, "notify": notify }
+            %(num)s < %(notify)s
+            %(dc_num)s < %(notify)s
+            %(ic_num)s < %(notify)s
+        """ % { "num": self.user_number, "resp": resp, "notify": notify,
+                "dc_num": "666999", "ic_num": "666000"}
         self.runScript(script)
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)

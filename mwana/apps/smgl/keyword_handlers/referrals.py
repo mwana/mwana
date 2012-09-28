@@ -40,6 +40,7 @@ def refer(session, xform, router):
             router.outgoing(OutgoingMessage(session.connection, str(e)))
             return True
         
+        referral.from_facility = session.connection.contact.location
         referral.save()
         resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
         router.outgoing(OutgoingMessage(session.connection, resp))
@@ -88,24 +89,45 @@ def referral_outcome(session, xform, router):
                                     const.REFERRAL_OUTCOME_RESPONSE % \
                                         {'name': name, "unique_id": mother_id}))
     
-    # also notify the referrer about the outcome
-    if ref.mother_showed:
-        router.outgoing(OutgoingMessage(ref.get_connection(),
-                                        const.REFERRAL_OUTCOME_NOTIFICATION % \
-                                            {"unique_id": ref.mother_uid,
-                                             "date": ref.date.date(), 
-                                             "mother_outcome": ref.get_mother_outcome_display(), 
-                                             "baby_outcome": ref.get_baby_outcome_display(),
-                                             "delivery_mode": ref.get_mode_of_delivery_display()}))
-    else:
-        router.outgoing(OutgoingMessage(ref.get_connection(),
-                                        const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % \
-                                            {"unique_id": ref.mother_uid,
-                                             "date": ref.date.date()}))
+    # also notify folks at the referring facility about the outcome
+    for c in _get_people_to_notify_outcome(ref):
+        if c.default_connection:
+            if ref.mother_showed:
+                router.outgoing(OutgoingMessage(c.default_connection,
+                                                const.REFERRAL_OUTCOME_NOTIFICATION % \
+                                                    {"unique_id": ref.mother_uid,
+                                                     "date": ref.date.date(), 
+                                                     "mother_outcome": ref.get_mother_outcome_display(), 
+                                                     "baby_outcome": ref.get_baby_outcome_display(),
+                                                     "delivery_mode": ref.get_mode_of_delivery_display()}))
+            else:
+                router.outgoing(OutgoingMessage(c.default_connection,
+                                                const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % \
+                                                    {"unique_id": ref.mother_uid,
+                                                     "date": ref.date.date()}))
     return True
 
 def _get_people_to_notify(referral):
+    # who to notifiy on an initial referral
+    # this should be the people who are being referred to
     types = ContactType.objects.filter\
         (slug__in=[const.CTYPE_DATACLERK,
                    const.CTYPE_TRIAGENURSE]).all()
     return Contact.objects.filter(types__in=types, location=referral.facility)
+
+def _get_people_to_notify_outcome(referral):
+    # who to notifiy when we've collected a referral outcome
+    # this should be the people who made the referral
+    # (more specifically, the person who sent it in + all
+    # data clerks and in-charges at their facility)
+    types = ContactType.objects.filter\
+            (slug__in=[const.CTYPE_DATACLERK,
+                       const.CTYPE_INCHARGE]).all()
+    from_facility = referral.referring_facility
+    facility_contacts = list(Contact.objects.filter\
+        (types__in=types, location=from_facility)) \
+        if from_facility else []
+    if referral.get_connection().contact and \
+       referral.get_connection().contact not in facility_contacts:
+        facility_contacts.append(referral.get_connection().contact)
+    return facility_contacts
