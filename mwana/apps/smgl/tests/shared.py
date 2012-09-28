@@ -5,6 +5,7 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
 from rapidsms.models import Connection
+from datetime import datetime, timedelta
 
 def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     if not lang:
@@ -22,6 +23,14 @@ def create_prereg_user(fname, location_code, ident, ctype, lang=None):
 
 class SMGLSetUp(TestScript):
 
+    def setUp(self):
+        # set some static dates that are useful for message generation.
+        self.earlier = (datetime.now() - timedelta(days=30)).date()
+        self.yesterday = (datetime.now() - timedelta(days=1)).date()
+        self.tomorrow = (datetime.now() + timedelta(days=1)).date()
+        self.later = (datetime.now() + timedelta(days=30)).date()
+        super(SMGLSetUp, self).setUp()
+        
     def createUser(self, ctype, ident, name="Anton", location="804024"):
         create_prereg_user(name, location, ident, ctype, "en")
         type_display = ContactType.objects.get(slug__iexact=ctype).name

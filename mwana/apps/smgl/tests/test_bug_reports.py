@@ -17,9 +17,13 @@ class SMGLBirthRegTest(SMGLSetUp):
         resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
                                                    "unique_id": "804024222" }
         script = """
-            %(num)s > REG 804024222 FEBBY MALAMBO OTH 12 09 2012 R 80402402 15 02 2012 22 11 2012
+            %(num)s > REG 804024222 FEBBY MALAMBO OTH %(tomorrow)s R 80402402 %(earlier)s %(later)s
             %(num)s < %(resp)s            
-        """ % { "num": self.user_number, "resp": resp }
+        """ % {"num": self.user_number, "resp": resp, 
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")  }
+        
         self.runScript(script)
         self.assertEqual(1, PregnantMother.objects.count())
         
