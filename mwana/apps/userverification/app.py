@@ -12,7 +12,8 @@ class App (rapidsms.apps.base.AppBase):
 
 
     def start (self):
-        self.schedule_send_verification_request_task()
+        #self.schedule_send_verification_request_task()
+        pass
 
     def schedule_send_verification_request_task(self):
         callback = 'mwana.apps.userverification.tasks.send_verification_request'

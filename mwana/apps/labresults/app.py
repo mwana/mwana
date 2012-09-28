@@ -53,10 +53,11 @@ class App (rapidsms.apps.base.AppBase):
     
     def start (self):
         """Configure your app in the start phase."""
-        self.schedule_change_notification_task()
-        self.schedule_notification_task()
-        self.schedule_process_payloads_tasks()
-        self.schedule_send_results_to_printer_task()
+        pass
+        #self.schedule_change_notification_task()
+        #self.schedule_notification_task()
+        #self.schedule_process_payloads_tasks()
+        #self.schedule_send_results_to_printer_task()
 
     def pop_pending_connection(self,connection):
         self.waiting_for_pin.pop(connection)

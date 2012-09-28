@@ -9,7 +9,8 @@ class App (rapidsms.apps.base.AppBase):
 
 
     def start (self):
-        self.schedule_monitor_task()
+        #self.schedule_monitor_task()
+        pass
 
     def schedule_monitor_task(self):
         callback = 'mwana.apps.monitor.tasks.send_monitor_report'

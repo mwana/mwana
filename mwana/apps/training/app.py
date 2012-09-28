@@ -10,7 +10,9 @@ class App (rapidsms.apps.base.AppBase):
 
 
     def start (self):
-        self.schedule_endof_training_notification_task()
+        #self.schedule_endof_training_notification_task()
+        pass
+        
 
 
     def schedule_endof_training_notification_task(self):

@@ -12,9 +12,9 @@ class App (rapidsms.apps.base.AppBase):
 
     def start (self):
         # TODO: uncomment next line to enable the tasks
-        self.schedule_clinics_not_retrieving_results_alerts_task()
-        self.schedule_clinics_not_sending_dbs_alerts_task()
-        self.schedule_hubs_not_sending_dbs_alerts_task()
+        #self.schedule_clinics_not_retrieving_results_alerts_task()
+        #self.schedule_clinics_not_sending_dbs_alerts_task()
+        #self.schedule_hubs_not_sending_dbs_alerts_task()
         pass
 
     def schedule_clinics_not_retrieving_results_alerts_task(self):
