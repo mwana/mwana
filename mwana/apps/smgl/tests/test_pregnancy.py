@@ -52,13 +52,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(["none"], list(mom.get_risk_reasons()))
         self.assertEqual("r", mom.reason_for_visit)
         
-        self.assertEqual(1, FacilityVisit.objects.count())
-        visit = FacilityVisit.objects.get(mother=mom)
-        self.assertEqual(self.user_number, visit.contact.default_connection.identity)
-        self.assertEqual("804024", visit.location.slug)
-        self.assertEqual("r", visit.reason_for_visit)
-        self.assertEqual(self.later, visit.edd)
-        self.assertEqual(self.tomorrow, visit.next_visit)
+        self.assertEqual(0, FacilityVisit.objects.count())
         
     def testRegisterNotRegistered(self):
         script = """
@@ -120,7 +114,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                 "later": self.later.strftime("%d %m %Y") } 
         self.runScript(script)
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(1, FacilityVisit.objects.count())
+        self.assertEqual(0, FacilityVisit.objects.count())
     
     def testDuplicateRegister(self):
         self.testRegister()
@@ -151,7 +145,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(2, FacilityVisit.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
     
     def testFollowUpNotRegistered(self):
         script = """
@@ -171,7 +165,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(2, FacilityVisit.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
     
     def testFollowUpBadEdd(self):
         self.testRegister()
@@ -183,7 +177,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(1, FacilityVisit.objects.count())
+        self.assertEqual(0, FacilityVisit.objects.count())
     
     def testDatesInPastOrFuture(self):
         yesterday = (datetime.now() - timedelta(days=1)).date()
@@ -236,7 +230,7 @@ class SMGLPregnancyTest(SMGLSetUp):
     
         
     def testVisitReminders(self):
-        self.testRegister()
+        self.testFollowUp()
         [mom] = PregnantMother.objects.all()
         visit = FacilityVisit.objects.get(mother=mom)
         self.assertEqual(False, visit.reminded)

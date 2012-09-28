@@ -109,16 +109,6 @@ def pregnant_registration(session, xform, router):
     mother.contact = data_associate
     mother.save()
 
-    # Create a facility visit object and link it to the mother
-    visit = FacilityVisit(location = mother.location,
-                          visit_date = datetime.datetime.utcnow().date(),
-                          created_date = session.modified_time,
-                          reason_for_visit = mother.reason_for_visit,
-                          next_visit = mother.next_visit,
-                          mother = mother,
-                          contact = data_associate, 
-                          edd = mother.edd)
-    visit.save()
     send_msg(connection, const.MOTHER_SUCCESS_REGISTERED, router, 
              **{"name": mother.contact.name, "unique_id": mother.uid})
     
