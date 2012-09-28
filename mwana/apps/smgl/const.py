@@ -10,6 +10,7 @@ LOCTYPE_ZONE = "zone"
 CTYPE_LAYCOUNSELOR = "cba" 
 CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
+CTYPE_INCHARGE = 'incharge'
 
 # from forms
 

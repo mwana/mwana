@@ -72,6 +72,14 @@
     }
   }, 
   {
+    "pk": 15, 
+    "model": "contactsplus.contacttype", 
+    "fields": {
+      "name": "In Charge", 
+      "slug": "incharge"
+    }
+  }, 
+  {
     "pk": 1, 
     "model": "locations.locationtype", 
     "fields": {
