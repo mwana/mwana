@@ -11,8 +11,27 @@ $ pip install -r bu_reqs.txt
 $ pip install -r libs.txt
 
 
-General.  
-The SMGL app (mwana/apps/smgl) contains migrations, *fixtures* and rapidsms-extensions.
+High Level Tech Overview
+------------------------
+
+This application started with the mwana repo and was repurposed for this project. There is a ton of cruft floating around that is not doing anything because of that. Almost all of the functionality lives in this app's folder.
+ 
+The core functionality currently is a bunch of forms that are made in xforms, as well as an xforms editor and an xform survey player which supports two different modes - one question at a time and the entire form at once.
+
+This is handled by the rapidsms-smsforms app. That app uses a jython process and java lib (touchforms)to actually play the forms. Both projects have decent docs:
+ - https://github.com/dimagi/rapidsms-smsforms
+ - https://github.com/dimagi/touchforms
+
+Once the xforms are received, we dump them to Couch DB using the same libs used in CommCare HQ (couchforms), plus a little glue app called rapidsms-smscouchforms. Once in couch the forms can be exported in various formats using couchexport
+ - https://github.com/dimagi/rapidsms-smscouchforms
+ - https://github.com/dimagi/couchforms
+ - https://github.com/dimagi/couchexport
+
+The project forms live in mwana/xforms, and are automatically loaded on syncdb.
+
+The SMGL app has an infrastructure that hooks into a signal to receive new forms, and then routes the message to a post-processing function to create project-specific data models. Most of these live in mwana.apps.smgl.keyword_handlers.
+ - The mapping for those is stored in the database, and in the initial_data.json fixture (see below).
+
 
 smgl/fixtures/initial_data.json
 -------------------------------
