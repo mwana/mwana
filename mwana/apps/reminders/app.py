@@ -215,7 +215,11 @@ class App(rapidsms.apps.base.AppBase):
                                 "Please enter the date like so: "
                                 "DDMMYY, for example: 271011"))
                     return True
-
+            else:
+                msg.respond(_("Sorry, a date is required to register a mother."
+                              "Please calculate the expected date of delivery "
+                              "using the mothers LMP."))
+                return True
             # fetch or create the patient
             if msg.contact and msg.contact.location:
                 patient, created = Contact.objects.get_or_create(
