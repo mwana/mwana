@@ -15,12 +15,14 @@ def send_endof_training_notification(router):
     pending_trainings = TrainingSession.objects.filter(is_on=True)
 
     for training in pending_trainings:
-        OutgoingMessage(training.trainer.default_connection,
+        if training.trainer.default_connection is not None:
+            OutgoingMessage(training.trainer.default_connection,
                         DELAYED_TRAINING_TRAINER_MSG %
                         (training.trainer.name, training.location.name)
                         ).send()
         for help_admin in Contact.active.filter(is_help_admin=True):
-            OutgoingMessage(help_admin.default_connection,
+            if help_admin.default_connection is not None:
+                OutgoingMessage(help_admin.default_connection,
                             DELAYED_TRAINING_ADMIN_MSG %
                             (training.trainer.name,
                             training.trainer.default_connection.identity,
