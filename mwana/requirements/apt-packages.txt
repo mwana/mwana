@@ -14,4 +14,3 @@ git-core
 build-essential
 couchdb
 jython
-couchdb

@@ -85,6 +85,10 @@ Developer Setup
 #. Open http://localhost:8000 in your web browser and you should see an
    **Installation Successful!** screen.
 
+#. To run SMGL tests::
+
+    ./manage.py test smgl
+
 
 General Information
 ===================
