@@ -5,6 +5,7 @@ from mwana.apps.smgl import const
 from datetime import date, datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
+from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -260,7 +261,30 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(visit.mother.uid, notif.mother_uid)
         self.assertEqual(self.cba, notif.recipient)
         self.assertEqual("nvd", notif.type)
+    
+    def testBirthCancelsVisitReminder(self):
+        self.testFollowUp()
+        [mom] = PregnantMother.objects.all()
+        visit = FacilityVisit.objects.get(mother=mom)
+        self.assertEqual(False, visit.reminded)
         
+        # set to 7 days, should fall in threshold
+        visit.next_visit = datetime.utcnow() + timedelta(days=7)
+        visit.save()
+        
+        # but report a birth which should prevent the need
+        resp = BIRTH_REG_RESPONSE % {"name": self.name }
+        script = """
+            %(num)s > birth %(id)s 01 01 2012 bo h yes t2
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "id": mom.uid, "resp": resp }
+        self.runScript(script)
+        
+        # send reminders and make sure they didn't actually fire on this one
+        send_followup_reminders()
+        visit = FacilityVisit.objects.get(pk=visit.pk)
+        self.assertFalse(visit.reminded)
+    
     def testEDDReminders(self):
         self.testRegister()
         [mom] = PregnantMother.objects.all()
