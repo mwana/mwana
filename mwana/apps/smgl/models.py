@@ -130,7 +130,10 @@ class FacilityVisit(models.Model):
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
     
-    
+    def is_latest_for_mother(self):
+        return FacilityVisit.objects.filter(mother=self.mother)\
+            .order_by("-created_date")[0] == self
+        
 class AmbulanceRequest(models.Model):
     """
     Bucket for ambulance request info
