@@ -262,7 +262,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(self.cba, notif.recipient)
         self.assertEqual("nvd", notif.type)
     
-    def testBithCancelsVisitReminder(self):
+    def testBirthCancelsVisitReminder(self):
         self.testFollowUp()
         [mom] = PregnantMother.objects.all()
         visit = FacilityVisit.objects.get(mother=mom)
