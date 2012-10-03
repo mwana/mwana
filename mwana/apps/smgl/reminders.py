@@ -24,13 +24,18 @@ def send_followup_reminders():
     On: 7 days before visit date
     """
     _set_router()
-    now = datetime.utcnow().date()
-    reminder_threshold = now + timedelta(days=7) 
-    visits_to_remind = FacilityVisit.objects.filter(
-        next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
-        next_visit__lte=reminder_threshold,
-        reminded=False)
-    for v in visits_to_remind:
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        reminder_threshold = now + timedelta(days=7)
+        visits_to_remind = FacilityVisit.objects.filter(
+            next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+            next_visit__lte=reminder_threshold,
+            reminded=False)
+        for v in visits_to_remind:
+            if v.mother.birthregistration_set.count() == 0:
+                yield v
+            
+    for v in _visits_to_remind():
         found_someone = False
         for c in v.mother.get_laycounselors():
             if c.default_connection:
