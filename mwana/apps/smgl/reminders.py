@@ -31,8 +31,10 @@ def send_followup_reminders():
             next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
             next_visit__lte=reminder_threshold,
             reminded=False)
+        
         for v in visits_to_remind:
-            if v.mother.birthregistration_set.count() == 0:
+            if v.mother.birthregistration_set.count() == 0 and \
+               v.is_latest_for_mother():
                 yield v
             
     for v in _visits_to_remind():
