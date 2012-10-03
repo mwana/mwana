@@ -285,6 +285,39 @@ class SMGLPregnancyTest(SMGLSetUp):
         visit = FacilityVisit.objects.get(pk=visit.pk)
         self.assertFalse(visit.reminded)
     
+    def testFollowUpCancelsVisitReminder(self):
+        self.testFollowUp()
+        [mom] = PregnantMother.objects.all()
+        visit = FacilityVisit.objects.get(mother=mom)
+        self.assertEqual(False, visit.reminded)
+        
+        # set to 7 days, should fall in threshold
+        visit.next_visit = datetime.utcnow() + timedelta(days=7)
+        visit.save()
+        
+        # but report a follow up which should prevent the need
+        resp = const.FOLLOW_UP_COMPLETE % { "name": self.name,
+                                            "unique_id": "80403000000112" }
+        script = """
+            %(num)s > FUP 80403000000112 R 19 11 2012 03 12 2012 
+            %(num)s < %(resp)s            
+        """ % { "num": self.user_number, "resp": resp }
+        self.runScript(script)
+        
+        
+        [second_visit] = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)
+        self.assertTrue(second_visit.created_date > visit.created_date)
+        # leave this one outside the reminder threshold
+        second_visit.next_visit = datetime.utcnow() + timedelta(days=10)
+        second_visit.save()
+        
+        # send reminders and make sure they didn't actually fire on either one
+        send_followup_reminders()
+        visit = FacilityVisit.objects.get(pk=visit.pk)
+        self.assertFalse(visit.reminded)
+        second_visit = FacilityVisit.objects.get(pk=visit.pk)
+        self.assertFalse(second_visit.reminded)
+    
     def testEDDReminders(self):
         self.testRegister()
         [mom] = PregnantMother.objects.all()
