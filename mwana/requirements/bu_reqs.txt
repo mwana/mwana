@@ -2,6 +2,7 @@
 Django==1.4
 -e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=threadless_router-dev
 django-rosetta==0.6.6
+django-taggit==0.9.3
 couchdbkit==0.5.4
 -e git+http://github.com/dimagi/dimagi-utils.git#egg=dimagi_utils-dev
 -e git+http://github.com/dimagi/rapidsms.git#egg=rapidsms-dev
@@ -10,10 +11,10 @@ requests==0.7.5
 django-tastypie==0.9.11
 openpyxl==1.5.8
 Unidecode==0.04.9
-celery==2.5.1
+celery==3.0.7
 django-celery
 django-kombu
- 
+
 # these are busted on windows so put them last
 lxml==2.2.4
 psycopg2==2.2.1

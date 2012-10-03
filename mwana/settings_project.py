@@ -38,8 +38,8 @@ INSTALLED_BACKENDS = {
 # to help you get started quickly, many django/rapidsms apps are enabled
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
-    "dupechecker", # needs to go near the front 
-    
+    "dupechecker", # needs to go near the front
+
     "threadless_router.backends.httptester",
     "threadless_router.backends.kannel",
     "rosetta",
@@ -53,15 +53,16 @@ INSTALLED_APPS = [
     "soil",
     "djtables",
     "rapidsms",
+    'taggit',
 
     # common dependencies (which don't clutter up the ui).
 
     "rapidsms.contrib.ajax",
     "uni_form",
     "eav",
-    'djcelery',   
-    'djkombu',     
-    
+    'djcelery',
+    'djkombu',
+
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -72,13 +73,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "touchforms.formplayer",
-    
+
     "smsforms",
     "smscouchforms",
     "couchforms",
     "couchexport",
     "couchlog",
-    
+
     # the rapidsms contrib apps.
     "rapidsms.contrib.export",
     "rapidsms.contrib.httptester",
@@ -336,4 +337,4 @@ LOGO_RIGHT_URL = ''
 EXCLUDED_HANDLERS = ["mwana.apps.labresults"]
 
 # multiple "empty" births can be registered with the same message
-DUPECHECKER_IGNORE = "birth none" 
+DUPECHECKER_IGNORE = "birth none"
