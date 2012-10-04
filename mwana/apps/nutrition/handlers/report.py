@@ -118,7 +118,7 @@ class ReportGMHandler(KeywordHandler):
                 elif potential_bool[0].upper() in ["N", "NO", "NON"]:
                     return "N", 0
                 else:
-                    return None
+                    return None, 0
             else:
                 return None, 0
         except Exception, e:
@@ -181,10 +181,6 @@ class ReportGMHandler(KeywordHandler):
 
         except ObjectDoesNotExist, MultipleObjectsReturned:
             return self.respond("No active survey at this date")
-
-        # debug crash on future date
-        # import pdb
-        # pdb.set_trace()
 
         self.debug("initialising separate childgrowth instance..")
         cg = childgrowth(False, False)
@@ -338,29 +334,7 @@ class ReportGMHandler(KeywordHandler):
 
             ass.save()
             self.debug("saved assessment")
-        except Exception, e:
-            self.exception("problem making assessment")
-            self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))
-
-        try:
-            data = [
-                    "ChildID=%s" % (patient.code or "??"),
-                    "Gender=%s" % (patient.gender or "??"),
-                    "DOB=%s" % (patient.date_of_birth or "??"),
-                    "Age=%sm" % (patient.age_in_months or "??"),
-                    "Weight=%skg" % (measurements['weight'] or "??"),
-                    "Height=%scm" % (measurements['height'] or "??"),
-                    "Oedema=%s" % (human_oedema or "??"),
-                    "MUAC=%scm" % (measurements['muac'] or "??")]
-
-            self.debug('constructing confirmation')
-            confirmation = REPORT_CONFIRM %\
-                (healthworker.name, " ".join(data))
-            self.debug('confirmation constructed')
-        except Exception, e:
-            self.exception('problem constructing confirmation')
-
-        try:
+            # process assessment
             # perform analysis based on cg instance from start()
             # TODO add to Assessment save method?
             if ass is not None:
@@ -423,46 +397,69 @@ class ReportGMHandler(KeywordHandler):
                         ass.wasting = 'S'
                 ass.save()
 
+            try:
+                #response_map = {
+                #    'weight4age'    : 'Oops. I think weight or age is incorrect',
+                #    'height4age'    : 'Oops. I think height or age is incorrect',
+                #    'weight4height' : 'Oops. I think weight or height is incorrect'
+                #}
+                self.debug('updating averages...')
+                average_zscores = survey.update_avg_zscores()
+                self.debug(average_zscores)
+                context = decimal.getcontext()
+                for ind, z in results.iteritems():
+                    self.debug(str(ind) + " " + str(z))
+                    if z is not None:
+                        survey_avg = average_zscores[ind]
+                        # TODO plus or minus!
+                        survey_avg_limit = survey.average_limit
+                        if survey_avg is not None:
+                            survey_avg_limit = context.add(survey.average_limit, abs(survey_avg))
+                        if abs(z) > survey_avg_limit:
+                            self.debug('BIG Z: ' + ind)
+                            self.debug('sample z: ' + str(z))
+                            self.debug('avg z: ' + str(survey_avg_limit))
+                            # add one to healthworker's error tally
+                            healthworker.errors = healthworker.errors + 1
+                            healthworker.save()
+                            # mark both the entry and the assessment as 'suspect'
+                            survey_entry.flag = 'S'
+                            survey_entry.save()
+                            ass.status = 'S'
+                            ass.save()
+                            #message.respond(response_map[ind])
+                            return self.respond(INVALID_MEASUREMENT %\
+                                (patient.code))
+            except Exception, e:
+                self.exception('problem with analysis')
+
             else:
                 self.debug('there is no assessment saved to analyse')
-            #response_map = {
-            #    'weight4age'    : 'Oops. I think weight or age is incorrect',
-            #    'height4age'    : 'Oops. I think height or age is incorrect',
-            #    'weight4height' : 'Oops. I think weight or height is incorrect'
-            #}
-            self.debug('updating averages...')
-            average_zscores = survey.update_avg_zscores()
-            self.debug(average_zscores)
-            context = decimal.getcontext()
-            for ind, z in results.iteritems():
-                self.debug(str(ind) + " " + str(z))
-                if z is not None:
-                    survey_avg = average_zscores[ind]
-                    # TODO plus or minus!
-                    survey_avg_limit = survey.average_limit
-                    if survey_avg is not None:
-                        survey_avg_limit = context.add(survey.average_limit, abs(survey_avg))
-                    if abs(z) > survey_avg_limit:
-                        self.debug('BIG Z: ' + ind)
-                        self.debug('sample z: ' + str(z))
-                        self.debug('avg z: ' + str(survey_avg_limit))
-                        # add one to healthworker's error tally
-                        healthworker.errors = healthworker.errors + 1
-                        healthworker.save()
-                        # mark both the entry and the assessment as 'suspect'
-                        survey_entry.flag = 'S'
-                        survey_entry.save()
-                        ass.status = 'S'
-                        ass.save()
-                        #message.respond(response_map[ind])
-                        return self.respond(INVALID_MEASUREMENT %\
-                            (patient.code))
-        except Exception, e:
-            self.exception('problem with analysis')
 
-        # send confirmation AFTER any error messages
-        if confirmation is not None:
-            self.respond(confirmation)
-            self.debug('sent confirmation')
-        else:
-            self.debug('there was a problem building the confirmation message')
+        except Exception, e:
+            self.exception("problem making assessment")
+            self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))
+
+        try:
+            data = [
+                    "ChildID=%s" % (patient.code or "??"),
+                    "Gender=%s" % (patient.gender or "??"),
+                    "DOB=%s" % (patient.date_of_birth or "??"),
+                    "Age=%sm" % (patient.age_in_months or "??"),
+                    "Weight=%skg" % (measurements['weight'] or "??"),
+                    "Height=%scm" % (measurements['height'] or "??"),
+                    "Oedema=%s" % (human_oedema or "??"),
+                    "MUAC=%scm" % (measurements['muac'] or "??")]
+
+            self.debug('constructing confirmation')
+            confirmation = REPORT_CONFIRM %\
+                (healthworker.name, " ".join(data))
+            self.debug('confirmation constructed')
+                    # send confirmation AFTER any error messages
+            if confirmation is not None:
+                self.respond(confirmation)
+                self.debug('sent confirmation')
+            else:
+                self.debug('there was a problem building the confirmation message')
+        except Exception, e:
+            self.exception('problem constructing confirmation')
