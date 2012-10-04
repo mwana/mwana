@@ -19,6 +19,10 @@ from rapidsms.contrib.messagelog.models import Message
 class TestApp(TestScript):
 #    apps = (cleaner_App, handler_app, )
     
+    def testCBARegistrationWithLanguage(self):
+        # TODO : Implement test
+        pass
+    
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])

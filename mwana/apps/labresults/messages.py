@@ -2,7 +2,7 @@
 from datetime import date
 from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
-from mwana.apps.labresults.models import Result
+_ = lambda s: s
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
 NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you know as soon as more results are available."
@@ -14,6 +14,7 @@ RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
 NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
+PRINTER_DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: PRINTERDEMO <CLINIC_CODE>"
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
 DHO_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: DHODEMO <LOCATION_CODE>"
 PHO_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: PHODEMO <LOCATION_CODE>"
@@ -22,10 +23,13 @@ PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\
 CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CLINIC_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are CHECK, RESULT, SENT, TRACE, MSG CBA, MSG CLINIC, MSG ALL and MSG DHO. Respond with any keyword or HELP for more information"
 HUB_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are RECEIVED and SENT. Respond with any keyword or HELP for more information"
-CBA_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
+CBA_DEFAULT_RESPONSE = _("Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information.")
 DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
-PHO_DEFAULT_RESPONSE = "Sorry %s. Respond with keyword HELP for assistance."
-UNREGISTERED_DEFAULT_RESPONSE = "Invalid Keyword. Please send the keyword HELP if you need to be assisted."
+PHO_DEFAULT_RESPONSE = _("Sorry %s. Respond with keyword HELP for assistance.")
+UNREGISTERED_DEFAULT_RESPONSE = _("Invalid Keyword. Please send the keyword HELP if you need to be assisted.")
+HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as training data"
+DHO_TRAINING_START_NOTIFICATION = "Hi %(contact)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic today as training data"
+HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as live data"
 
 TEST_TYPE = "HIV-DNAPCR Result"
 

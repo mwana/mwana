@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Issues - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="left">
+    <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Issues</h2>
+            <p>{{ message }}<details>
+                <summary><h3>Create New Issue</h3></summary>
+                <br>
+
+                <table border="0">
+                    {% for field in issue %}
+                    <tr>
+                        <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
+                        <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                <p><input type="submit" value="Submit" /></p>
+            </details>
+            <hr>
+            <div>
+
+                <h3>Open Issues</h3>
+
+                {% for issue in issues %}
+
+
+                <p><details>
+                    <summary><h4>{{ issue.id }} {{ issue.title }} - {{ issue.get_status_display }}</h4></summary>
+
+
+                    <br>Priority: <b>{{ issue.get_priority_display }}</b>
+                    <br>Type: <b>{{ issue.get_type_display }}</b>
+                    <br>Assigned to: <b>{{ issue.assigned_to }} {% if issue.assigned_to_full_name %}({{ issue.assigned_to_full_name }}) {% endif %}</b>
+                    <br>Desired Start Date: <b>{{ issue.desired_start_date }}</b> Desired End Date: <b>{{ issue.desired_completion_date }}</b>
+                    <br>Development time: <b>{{ issue.dev_time }}</b>
+                    <br>% Complete: <b>{{ issue.get_percentage_complete_display }}</b>
+                    <p><u>Description:</u>
+                        <br><span style="white-space: pre-wrap;">{{ issue.body }}</span>
+                </details>
+                <hr>
+
+
+                {% endfor %}
+
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
+
+                <span class="current">
+                    Page {{ number }} of {{ num_pages }}.
+                </span>
+
+                {% if has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ number }}>
+            </span>
+
+        </div>
+    </form>
+
+</div>
+{% endblock %}

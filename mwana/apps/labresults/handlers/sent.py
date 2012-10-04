@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 import re
+
 from django.conf import settings
+from mwana.apps.hub_workflow.models import HubSampleNotification
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from mwana.const import get_hub_worker_type
@@ -9,7 +11,6 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Connection
 from rapidsms.models import Contact
-from mwana.apps.hub_workflow.models import HubSampleNotification
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'"
 SENT          = "Hello %(name)s! We received your notification that %(count)s DBS samples were sent to us today from %(clinic)s. We will notify you when the results are ready."
@@ -43,7 +44,7 @@ class SentHandler(KeywordHandler):
         try:
             text = b.remove_dash_plus(text)
             count = int(b.try_replace_oil_with_011(text))
-        except ValueError:
+        except (ValueError, TypeError):
             if text.split()[0].isdigit():
                 text = text.split()[0]
             text = b.words_to_digits(text)
@@ -53,7 +54,7 @@ class SentHandler(KeywordHandler):
                     count = int(text)
                 else:
                     self.respond("%s %s" % (SORRY, HELP))
-                    return
+                    return True
             else:
                 self.info("Converted %s to %s" % (original_text, text))
                 count = int(text)
@@ -61,15 +62,19 @@ class SentHandler(KeywordHandler):
         
         if count < 1:
             self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
-            return
+            return True
+
+        if count > 100000:
+            self.help()
+            return True
         
         max_len = settings.MAX_SMS_LENGTH
 
         if self.msg.contact.types.all()[0] == get_hub_worker_type():
             HubSampleNotification.objects.create(contact=self.msg.contact,
-                                              lab=self.msg.contact.location,
-                                              count=count, count_in_text=
-                                              original_text[0:max_len])
+                                                 lab=self.msg.contact.location,
+                                                 count=count, count_in_text=
+                                                 original_text[0:max_len])
             clinic = get_clinic_or_default(self.msg.contact)
             self.respond(HUB_SENT, name=self.msg.contact.name, count=count,
                          clinic=clinic)

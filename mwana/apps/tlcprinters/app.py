@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 import logging
 import rapidsms
 import re
@@ -26,7 +27,8 @@ class App (rapidsms.apps.base.AppBase):
             try:
                 msg_conf = MessageConfirmation.objects.filter(
                                                               seq_num=seq_num,
-                                                              connection=message.connection,
+                                                              connection__backend=message.connection.backend,
+                                                              connection__identity__contains=message.connection.identity[-10:-1],
                                                               confirmed=False,
                                                               ).order_by('-sent_at')[0]
             except IndexError: #DoesNotExist never happens with filter()

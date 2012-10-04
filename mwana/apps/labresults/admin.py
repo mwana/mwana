@@ -19,9 +19,13 @@ admin.site.register(Result, ResultAdmin)
 
 
 class LabLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'message', 'level', 'line')
+    list_display = ('timestamp', 'message', 'level', 'line','source',)
     list_filter = ('timestamp', 'level')
     search_fields = ('message', 'level')
+
+    def source(self, obj):
+        return obj.payload.source
+        
 admin.site.register(LabLog, LabLogAdmin)
 
 
@@ -38,3 +42,9 @@ class SampleNotificationAdmin(admin.ModelAdmin):
     list_filter =('contact', 'location', 'count', 'count_in_text', 'date')
     date_hierarchy = 'date'
 admin.site.register(SampleNotification, SampleNotificationAdmin)
+
+class PendingPinConnectionsAdmin(admin.ModelAdmin):
+    list_display =('connection', 'result', 'timestamp')
+    date_hierarchy = 'timestamp'
+admin.site.register(PendingPinConnections, PendingPinConnectionsAdmin)
+

@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.userverification.models import UserVerification
+from django.db.models import Max
+
 from operator import itemgetter
 
 import mwana.const as const
@@ -16,14 +19,17 @@ from mwana.apps.locations.models import Location
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
+from mwana.const import get_clinic_worker_type
 
 class Alerter:
-    def __init__(self, current_user=None, group=None, province=None, district=None):
+    def __init__(self, current_user=None, group=None, province=None,
+                    district=None, facility=None):
         self.today = date.today()
         self.user = current_user
         self.reporting_group = group
         self.reporting_province = province
         self.reporting_district = district
+        self.reporting_facility = facility
 
     DEFAULT_DISTICT_TRANSPORT_DAYS = 12 # days
     district_transport_days = DEFAULT_DISTICT_TRANSPORT_DAYS
@@ -216,28 +222,14 @@ class Alerter:
         return max(notification, actual)
 
     def last_retrieved_or_checked(self, location):
-        try:
-            notification = SampleNotification.objects.filter(location=location).order_by('-date')[0].date.date()
-        except IndexError:
-            notification = date(1900, 1, 1)
-        try:
-            last_retreived = Result.objects.filter(clinic=location, notification_status='sent').order_by('-result_sent_date')[0].result_sent_date.date()
-        except IndexError:
-            last_retreived = date(1900, 1, 1)
-        try:
-            last_checked = Message.objects.filter(Q(contact__location=location) |
-                                                  Q(contact__location__parent=location),
-                                                  Q(text__iregex='\s*check\s*')
-                                                  ).order_by('-date')[0].date.date()
-        except IndexError:
-            last_checked = date(1900, 1, 1)
-        try:
-            last_tried_result = Message.objects.filter(Q(contact__location=location) |
-                                                       Q(contact__location__parent=location),
-                                                       Q(text__istartswith='The results for sample') |
-                                                       Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
-        except IndexError:
-            last_tried_result = date(1900, 1, 1)
+        notification = self.last_used_sent(location)
+        notification = date(1900, 1, 1)
+        last_retreived = self.last_retreived_results(location)
+        last_retreived = date(1900, 1, 1)
+        last_checked = self.last_used_check(location)
+        last_checked = date(1900, 1, 1)
+        last_tried_result = self.last_used_result(location)
+        
         return max(notification, last_retreived, last_checked, last_tried_result)
     
     def last_used_sent(self, location):
@@ -256,7 +248,8 @@ class Alerter:
     def last_used_check(self, location):
         try:
             return Message.objects.filter(contact__location=location ,
-                                                  text__iregex='\s*check\s*'
+                                                  direction='I',
+                                                  text__iregex='^check\s*'
                                                   ).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
@@ -321,15 +314,23 @@ class Alerter:
         distinct().order_by('pk')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
-            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
-                             "Clinic "
+            alert_msg = ("Clinic "
                              "has no record of sending DBS samples in  the last"
                              " %s days. Please check "
                              "that they have supplies by calling (%s)."
                              "" % (days_late,
                              ", ".join(contact.name + ":"
                              + contact.default_connection.identity
-                             for contact in contacts)),
+                             for contact in contacts)))
+            if days_late > 40000:
+                alert_msg = ("Clinic has no record of sending DBS samples "
+                             "since it was added to the SMS system. "
+                             "Please check that they have supplies by calling (%s)."
+                             "" % ( ", ".join(contact.name + ":"
+                             + contact.default_connection.identity
+                             for contact in contacts)))
+            my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
+                             alert_msg,
                              clinic.name,
                              days_late,
                              -days_late,
@@ -340,7 +341,7 @@ class Alerter:
         return self.clinic_notification_days, sorted(my_alerts, key=itemgetter(5))
 
     def set_district_last_received_dbs(self):
-        results = Result.objects.exclude(entered_on=None)
+        results = Result.objects.exclude(entered_on=None).exclude(clinic=None)
         for result in results:
             district = result.clinic.parent
             if district in  self.last_received_dbs.keys():
@@ -427,6 +428,72 @@ class Alerter:
                                                 -999,
                                                 Alert.HIGH_LEVEL,
                                                 "")
+    def last_used_system(self, contact):
+        latest = Message.objects.filter(
+            contact=contact.id,
+            direction='I',
+        ).aggregate(date=Max('date'))
+        if latest['date']:
+            return (datetime.today() - latest['date']).days
+        else:
+            return None
+
+
+    def get_complying_contacts(self):
+        """
+        quick and dirty fix.
+        """
+        #TODO: to better implementation of fix
+        days_back = 75
+        today = datetime.today()
+        date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
+
+
+        supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
+        location__supportedlocation__supported=True).distinct()
+
+        return supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
+
+
+    def get_inactive_workers_alerts(self):
+
+        facilities = (self.get_facilities_for_reporting())      
+
+        inactive_alerts = []
+        
+        for facility in facilities:
+            days_late = 75
+            defaulters = UserVerification.objects.exclude(responded="True").\
+            filter(facility=facility, contact__is_active=True).distinct()
+
+            defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
+
+            if not defaulters:
+                continue
+
+            msg = ("The following staff registered at %s have not been using "
+             "Results160 for too long and have been unresponsive. "
+             "The last time they used the system is "
+            "as shown. Please call and enquire. " % (facility.name))
+
+            contacts  = []
+            temp = []
+            for defaulter in defaulters:
+                contacts.append(defaulter.contact)
+            for contact in set(contacts):
+                last_used = self.last_used_system(contact)
+                last_used_msg = "%s days ago" % last_used if last_used else "Never"
+                temp.append("%s (%s) %s" % (contact.name,
+                contact.default_connection.identity, last_used_msg
+                ))
+                if last_used: days_late = max(days_late, last_used)
+
+            msg = msg + "; ".join(msg for msg in temp) + "."
+
+            inactive_alerts.append(Alert(Alert.WORKER_NOT_USING_SYSTEM, msg, defaulter.facility.name,
+            days_late, -days_late, Alert.HIGH_LEVEL, ""))
+        return sorted(inactive_alerts, key=itemgetter(5))
+
 
     def add_to_district_dbs_elerts(self, type, message, culprit=None, days_late=None, sort_field=None, level=None, extra=None):
         self.not_sending_dbs_alerts.append(Alert(type, message, culprit,
@@ -442,7 +509,7 @@ class Alerter:
                 return "(Unkown hub)"
 
     def get_hub_number(self, location):
-        pipo=Contact.objects.filter(types=get_hub_worker_type(),location__parent=location)
+        pipo=Contact.active.filter(types=get_hub_worker_type(),location__parent=location)
         if pipo:
             return ", ".join(c.name+": "+c.default_connection.identity for c in pipo)
         try:
@@ -533,7 +600,9 @@ class Alerter:
         if self.reporting_group:
             facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
-        if self.reporting_district:
+        if self.reporting_facility:
+            facs = facs.filter(slug=self.reporting_facility)
+        elif self.reporting_district:
             facs = facs.filter(slug__startswith=self.reporting_district[:4])
         elif self.reporting_province:
             facs = facs.filter(slug__startswith=self.reporting_province[:2])
@@ -555,6 +624,10 @@ class Alerter:
             parents.append(location.parent)
         return list(set(parents))
     
+    def get_rpt_facilities(self, user):
+        self.user = user
+        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+
     def get_rpt_districts(self, user):
         self.user = user
         return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))

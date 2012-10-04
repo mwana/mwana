@@ -103,7 +103,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
     def testSendingOnlyOnceInAPeriod(self):
@@ -116,6 +115,7 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
         time.sleep(.1)
 
         self.startRouter()
+        tasks.send_verification_request(self.router)
         tasks.send_verification_request(self.router)
         msgs = self.receiveAllMessages()
 
@@ -131,7 +131,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
     def testSendingOnlyToDefautingClinicWorkers(self):
@@ -143,7 +142,7 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
         central_worker > i use the system
         """
         self.runScript(script)
-        self.assertEqual(UserVerification.objects.count(), 0, "User verication model is not empty")
+        self.assertEqual(UserVerification.objects.count(), 0, "User verification model is not empty")
         time.sleep(.1)
 
         self.startRouter()
@@ -163,7 +162,7 @@ Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Resul
         self.assertEqual(len(msgs), 3)
         self.stopRouter()
 
-        # let's face that central_worker used the system a very long time ago
+        # let's fake that central_worker used the system a very long time ago
         msg = Message.objects.get(direction="I", contact__name="Central Man", connection__identity="central_worker")
         msg.date = today - timedelta(days = 100)
         msg.save()
@@ -188,7 +187,7 @@ Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Resul
 
     def testUserVerificationWorkflow(self):
 
-        self.assertEqual(UserVerification.objects.count(), 0, "User verication model is not empty")
+        self.assertEqual(UserVerification.objects.count(), 0, "User verification model is not empty")
         time.sleep(.1)
 
         self.startRouter()
@@ -207,7 +206,6 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
 
 
         self.assertEqual(len(msgs), 4)
-#        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
         self.stopRouter()
 
         script = """
@@ -228,4 +226,62 @@ Hello Central Man. Are you still working at Central Clinic and still using Resul
         self.assertEqual(UserVerification.objects.filter(response="some message").count(), 1, "User verications not equal to 1")
 
 
-        
+
+    def testFinalUserVerificationWorkflow(self):
+
+        self.assertEqual(UserVerification.objects.count(), 0, "User verification model is not empty")
+        time.sleep(.1)
+
+        self.startRouter()
+        tasks.send_verification_request(self.router)
+        msgs = self.receiveAllMessages()
+
+        expected_recipients = ["salanga_worker", "mibenge_worker", "kashitu_worker", "central_worker"]
+        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
+Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
+Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
+Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No
+        """
+        for msg in msgs:
+            self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
+            self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
+
+
+        self.assertEqual(len(msgs), 4)
+        self.stopRouter()
+
+        script = """
+        salanga_worker > yes
+        mibenge_worker > no
+        """
+
+        self.runScript(script)
+
+        self.assertTrue(0==len(self.receiveAllMessages()))
+
+        self.assertEqual(UserVerification.objects.count(), 4, "User verications not equal to 4")
+        self.assertEqual(UserVerification.objects.filter(response="yes").count(), 1, "User verications not equal to 1")
+        self.assertEqual(UserVerification.objects.filter(response="no").count(), 1, "User verications not equal to 1")
+
+        time.sleep(.1)
+        self.startRouter()
+        tasks.send_final_verification_request(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(UserVerification.objects.count(), 6, "User verications not equal to 6")
+        for msg in msgs:
+            self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
+            self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
+
+
+        self.assertEqual(len(msgs), 2)
+
+        time.sleep(.1)
+        self.startRouter()
+
+
+        self.assertEqual(Contact.objects.filter(is_active=False).count(), 1)
+        tasks.inactivate_lost_users(self.router)
+
+        self.assertEqual(Contact.objects.filter(is_active=False).count(), 3)

@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.settings_project import *
 
+_ = lambda s:s
+
 # Zambia:
 RESULTS160_SLUGS = {
     'CBA_SLUG': 'cba',
@@ -19,12 +21,36 @@ RESULTS160_SLUGS = {
 }
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
-INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.filteredlogs")
+INSTALLED_APPS.append("mwana.apps.monitor")
+INSTALLED_APPS.append("mwana.apps.websmssender")
+INSTALLED_APPS.append("mwana.apps.issuetracking")
+INSTALLED_APPS.append("mwana.apps.email")
+INSTALLED_APPS.append("mwana.apps.birthcertification")
+INSTALLED_APPS.append("mwana.apps.errorhandling")
+
+
+ADMINS = (
+    ('Trevor Sinkala', 'sinkalation@gmail.com'),
+)
+
+MANAGERS = ADMINS
+
+EMAIL_SUBJECT_PREFIX = '[Mwana] '
+EMAIL_HOST = 'localhost'
+DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
+
+
 
 TIME_ZONE = 'Africa/Lusaka'
 
-LANGUAGE_CODE = 'bem-zm'
+LANGUAGE_CODE = 'en'
+LANGUAGES = (
+    ('bem', _('Bemba')),
+    ('tn', _('Tonga')),
+    ('en', _('English')),
+    ('nya', _('Nyanja')),
+)
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
@@ -50,6 +76,9 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
+    ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
+    ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
+    ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

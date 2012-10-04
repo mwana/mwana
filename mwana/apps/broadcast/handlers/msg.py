@@ -112,7 +112,7 @@ class MessageHandler(BroadcastHandler):
         if contacts:
             return self.broadcast(msg_part, contacts)
         else:
-            self.help()
+            self.respond("There is no one in the group '%s' to send a message to." % group_name)
         
 
 

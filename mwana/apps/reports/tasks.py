@@ -19,10 +19,13 @@ from mwana.util import get_clinic_or_default
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
+_ = lambda s: s
+
+_ = lambda s: s
 
 EID_BIRTH_SUMMARY = "%(name)s, %(month)s %(location_name)s EID & Birth Totals\nDBS Samples sent: %(samples)s ***\nDBS Results received: %(results)s ***\nBirths registered: %(births)s"
-CBA_THANKS_MSG = "Thank you, %(name)s. You have helped about %(helps)s mothers in your community in %(month)s %(year)s. Keep up the good work, reminding mothers saves lives."
-CBA_REMINDER_MSG = "Hello %(name)s. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives."
+CBA_THANKS_MSG = _("Thank you, %(name)s. You have helped about %(helps)s mothers in your community in %(month)s %(year)s. Keep up the good work, reminding mothers saves lives.")
+CBA_REMINDER_MSG = _("Hello %(name)s. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives.")
 
 def send_dho_eid_and_birth_report(router):
     logger.info('notifying district workers of monthly EID and Births summary')
@@ -144,14 +147,27 @@ def send_cba_birth_report(router):
 
         births = PatientEvent.objects.filter(event__name__iexact='birth',
                                              cba_conn__contact=worker,
-                                             date__year=last_year,
-                                             date__month=last_month).distinct().count()
+                                             date_logged__year=last_year,
+                                             date_logged__month=last_month).distinct().count()
 
-        traces = PatientTrace.objects.exclude(initiator_contact=None).filter(messenger=worker).distinct().count()
-        helps = births + traces
+        tolds = PatientTrace.objects.exclude\
+        (initiator_contact=None).filter(
+                                        messenger=worker,
+                                        reminded_date__year=last_year,
+                                        reminded_date__month=last_month
+                                        ).distinct().count()
+
+        confirms = PatientTrace.objects.exclude\
+        (initiator_contact=None).filter(
+                                        messenger=worker,
+                                        confirmed_date__year=last_year,
+                                        confirmed_date__month=last_month
+                                        ).distinct().count()
+
+        helps = births + tolds + confirms
         if helps == 0:
             continue
-        
+
         msg = (CBA_THANKS_MSG % {'name':name, 'month':month,
                'year':last_year, 'helps':helps})
 

@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Issues - {{ block.super }}{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+
+
+    <div class="left">
+        <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Issues</h2>
+            <br>
+            
+                <p>
+                <h3>Edit Issue</h3>
+                    {{issue.as_p}}
+                    <input type="submit" value="Submit" />
+                 <hr>
+           <div>
+              
+
+       
+
+
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+       
+        </form>
+
+</div>
+{% endblock %}

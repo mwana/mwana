@@ -6,12 +6,13 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
-from mwana.apps.labresults.models import Result
 from mwana.apps.reminders import models as reminders
 from mwana.util import get_clinic_or_default, get_worker_type, get_location_type, LocationCode
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI, LOCALE_ZAMBIA
 _ = lambda s: s
 
+
+#TODO Consider spliting up this handler into, joincba, joinClinic, JoinHUb, etc
 class JoinHandler(KeywordHandler):
     """
     """
@@ -27,7 +28,7 @@ class JoinHandler(KeywordHandler):
     INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <LOCATION CODE> <YOUR NAME> <PIN CODE>."
 
     ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or location first reply with keyword 'LEAVE' and try again."
-        
+
     def help(self):
         self.respond(self.HELP_TEXT)
 
@@ -41,12 +42,12 @@ class JoinHandler(KeywordHandler):
         '''
         Checks the message for general validity (correct pin length, number of keywords, etc) and
         returns False if message is somehow invalid (after firing off a useful response message)
-        
+
         Returns cleaned message in tokenized format (tuple)
         '''
-       
+
         cleaner = InputCleaner()
-   
+
         text = text.strip()
         text = cleaner.remove_dash_plus(text)
         text = cleaner.remove_double_spaces(text)
@@ -90,24 +91,22 @@ class JoinHandler(KeywordHandler):
             self.mulformed_msg_help()
             return False
         #sanitize!
-            
+
         group = self.PATTERN.search(text)
 
         tokens = group.groups()
         tokens = list(tokens)
 
-
         if self.include_type:
-            type = tokens[0].strip() # type
-            location_code = tokens[2].strip() #location code
-            name = tokens[4].title().strip() #name
-            pin = tokens[6].strip() #pin
+            type = tokens[0].strip()  # type
+            location_code = tokens[2].strip()  # location code
+            name = tokens[4].title().strip()  # name
+            pin = tokens[6].strip()  # pin
         else:
-            location_code = tokens[0].strip() #location code
-            name = tokens[2].title().strip() #name
-            pin = tokens[4].strip() #pin
-        
-        
+            location_code = tokens[0].strip()  # location code
+            name = tokens[2].title().strip()  # name
+            pin = tokens[4].strip()  # pin
+
         #more error checking
         if len(pin) != self.PIN_LENGTH:
             self.invalid_pin(pin)
@@ -116,31 +115,30 @@ class JoinHandler(KeywordHandler):
             self.respond("Sorry, you must provide a name to register. %s" % self.HELP_TEXT)
             return False
         elif len(name) < self.MIN_NAME_LENGTH:
-            self.respond("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT)
+            self.respond(_("Sorry, you must provide a valid name to register. %s" % self.HELP_TEXT))
             return False
-        
+
         return tuple(tokens)
 
     def set_pattern_to_use(self, text):
         new_pattern = re.compile(r"^(clinic|agent|dho|hub|pho)(\s+)(\w+)(\s+)(.{1,})(\s+)(\d+)$", re.IGNORECASE)
         if new_pattern.findall(text) or text.strip().split()[0].lower() in \
-        ('clinic','dho','hub','pho'):
+        ('clinic', 'dho', 'hub', 'pho'):
             self.include_type = True
-            self.PATTERN = new_pattern            
+            self.PATTERN = new_pattern
             self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>."
-
 
     def get_response_message(self, worker_type, name, location, pin):
         response = ("Hi %(name)s, thanks for registering for Results160 from"
-                         " %(location)s. Your PIN is %(pin)s. " 
-                         "Reply with keyword 'HELP' if this is " 
-                         "incorrect" % {'name':name, 'location':location, 'pin':pin})
+                         " %(location)s. Your PIN is %(pin)s. "
+                         "Reply with keyword 'HELP' if this is "
+                         "incorrect" % {'name': name, 'location': location, 'pin': pin})
         if worker_type == const.get_hub_worker_type():
             response = response.replace("for Results160 from", "for Results160 from hub at")
         elif worker_type == const.get_district_worker_type():
             response = response.replace(". Your PIN is ", " DHO. Your PIN is ")
         elif worker_type == const.get_province_worker_type():
-            response = response.replace(". Your PIN is ", " PHO. Your PIN is ")        
+            response = response.replace(". Your PIN is ", " PHO. Your PIN is ")
         return response
 
     def handle(self, text):
@@ -151,14 +149,14 @@ class JoinHandler(KeywordHandler):
             try:
                 words = text.split()
                 self.handle_zone(text[text.index(' '):])
-                return  
+                return
             except (ValueError):
                 self.respond("To register as a Mobile agent, send JOIN <HSA> <CLINIC CODE> "\
                              "<ZONE #> <YOUR NAME>")
                 return
 
         tokens = self.check_message_valid_and_clean(text)
-        
+
         if not tokens:
             return
         if self.include_type:
@@ -175,33 +173,33 @@ class JoinHandler(KeywordHandler):
             worker_type = clinic_code.get_worker_type()
             location_type = clinic_code.get_location_type()
             slug = clinic_code.slug
-        
+
         if is_already_valid_connection_type(self.msg.connection, worker_type):
             # refuse re-registration if they're still active and eligible
-            self.respond(self.ALREADY_REGISTERED, 
+            self.respond(self.ALREADY_REGISTERED,
                          name=self.msg.connection.contact.name,
                          location=self.msg.connection.contact.location)
-            return False        
+            return False
         try:
             location = Location.objects.get(slug__iexact=slug,
                                             type__slug__in=location_type)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
-                # this means they were already registered and active, but not yet 
+                # this means they were already registered and active, but not yet
                 # receiving results.
-                clinic = get_clinic_or_default(self.msg.connection.contact) 
+                clinic = get_clinic_or_default(self.msg.connection.contact)
                 if clinic != location:
                     self.respond(self.ALREADY_REGISTERED,
                                  name=self.msg.connection.contact.name,
                                  location=clinic)
                     return True
-                else: 
+                else:
                     contact = self.msg.contact
             else:
                 contact = Contact(location=location)
                 clinic = get_clinic_or_default(contact)
             contact.name = name
-            contact.pin = pin            
+            contact.pin = pin
             contact.save()
             contact.types.add(worker_type)
             if SYSTEM_LOCALE == LOCALE_MALAWI:
@@ -210,11 +208,12 @@ class JoinHandler(KeywordHandler):
 
             self.msg.connection.contact = contact
             self.msg.connection.save()
-            
+
             self.respond(self.get_response_message(worker_type, name, clinic.name, pin))
         except Location.DoesNotExist:
-            self.respond("Sorry, I don't know about a location with code %(code)s. Please check your code and try again.",
+            self.respond(_("Sorry, I don't know about a location with code %(code)s. Please check your code and try again."),
                          code=slug)
+
     def _get_notify_text(self):
         events = reminders.Event.objects.values_list('name', flat=True)
         events = [event_name.lower() for event_name in events]
@@ -229,7 +228,7 @@ class JoinHandler(KeywordHandler):
                      "zone."), {'event': events}
         else:
             return "", {}
-        
+
     def _get_clinic_and_zone(self, contact):
         """
         Determines the contact's current clinic and zone, if any.
@@ -246,7 +245,7 @@ class JoinHandler(KeywordHandler):
             contact_clinic = None
             contact_zone = None
         return contact_clinic, contact_zone
-    
+
     def _get_or_create_zone(self, clinic, name):
             # create the zone if it doesn't already exist
             zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
@@ -267,12 +266,22 @@ class JoinHandler(KeywordHandler):
         HELP_TEXT = _("To register as a Mobile agent, send JOIN <CBA> <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
         MAX_IDENTITY_ID = 10
-        
+
         m = PATTERN.search(text)
         if m is not None:
             clinic_slug = m.group('clinic').strip()
             zone_slug = m.group('zone').strip()
             name = m.group('name').strip().title()
+            lang_code = None
+
+            #optionally allow registration with language code
+            if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+                if not clinic_slug.isdigit() and len(zone_slug) == 6\
+                and zone_slug.isdigit() and name.strip():
+                    lang_code, clinic_slug, zone_slug, name = (clinic_slug,
+                    zone_slug, name.split()[0].lower(),
+                    " ".join(str for str in name.split()[1:]))
+
             # require the clinic to be pre-populated
             try:
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
@@ -289,9 +298,9 @@ class JoinHandler(KeywordHandler):
             #prepare identity id for interviewer_id
             identity_id = str(self.msg.connection.identity)
             if len(identity_id) > MAX_IDENTITY_ID:
-                identity_id = int(identity_id[-9:])
+                identity_id = identity_id[-9:]
             else:
-                identity_id = int(identity_id)
+                identity_id = identity_id
 
             if contact_zone == zone:
                 # don't let agents register twice for the same zone
@@ -316,29 +325,49 @@ class JoinHandler(KeywordHandler):
                 # level, update the record and save it
                 cba = self.msg.contact
                 cba.name = name
-                cba.interviewer_id = identity_id 
+                try:
+                    cba.interviewer_id = identity_id
+                except AttributeError:
+                    pass
                 cba.location = zone
+                if lang_code: cba.language = lang_code
                 cba.save()
             else:
                 # lastly, if no contact exists, create one and save it in the
                 # connection
-                cba = Contact.objects.create(name=name, location=zone,
-                                          interviewer_id=identity_id)
+
+                if lang_code:
+                    cba = Contact.objects.create(name=name, location=zone,
+                                                    language=lang_code)
+                else:
+                    cba = Contact.objects.create(name=name, location=zone)
+
+                try:
+                    cba.interviewer_id = identity_id
+                    cba.save()
+                except AttributeError:
+                    pass
+
                 self.msg.connection.contact = cba
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
             msg = self.respond(_("Thank you %(name)s! You have successfully "
-                                 "registered as a Mobile Agent for zone "
+                                 "registered as a RemindMi Agent for zone "
                                  "%(zone)s of %(clinic)s."), name=cba.name,
                                  zone=zone.name, clinic=clinic.name)
+
             if SYSTEM_LOCALE == LOCALE_ZAMBIA:
                 notify_text, kwargs = self._get_notify_text()
                 if notify_text:
-                    msg.append(notify_text, **kwargs)
+                    #msg.append(notify_text, **kwargs)
+                    msg.append(_("Please notify us next time there is a birth in your "
+                                 "zone."))
+
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
             msg.append(HELP_TEXT)
+
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular
@@ -355,5 +384,3 @@ def get_unique_value(query_set, field_name, value, sep="_"):
         column_count = query_set.filter(**{field_name: value}).count()
         to_append = to_append + 1
     return value
-
-    

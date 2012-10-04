@@ -7,6 +7,7 @@ from django.db.models import Q
 from mwana.apps.locations.models import Location
 from mwana.util import get_clinic_or_default
 from rapidsms.contrib.messagelog.models import Message
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MessageFilter:
     def __init__(self, current_user=None, group=None, province=None, district=None, facility=None):
@@ -106,28 +107,63 @@ class MessageFilter:
                 break
         return text_copy
 
-    def get_filtered_message_logs(self, startdate=None, enddate=None):
+    def get_filtered_message_logs(self, startdate=None, enddate=None, search_key=None, page=1):
+        """
+        Returns censored message logs, albeit with useful associated information
+        """
         self.set_reporting_period(startdate, enddate)
-        msgs = Message.objects.filter(Q(contact__location__in=self.get_facilities_for_reporting()) |
-                               Q(contact__location__parent__in=self.get_facilities_for_reporting()))\
-            .filter(date__gte=self.dbsr_startdate,
-                    date__lte=self.dbsr_enddate
-                    ).order_by('-date')[:200]
+
+        locations = Q(contact__location__in=self.get_facilities_for_reporting()) |\
+                               Q(contact__location__parent__in=self.get_facilities_for_reporting())
+        daterange = Q(date__gte=self.dbsr_startdate) & Q(date__lte=self.dbsr_enddate)
+
+        msgs = Message.objects.filter(locations).filter(daterange).order_by('-date')
+
+        
+
+        if search_key and search_key.strip():
+            stripped = search_key.strip();
+            search = Q(text__icontains=stripped) |\
+            Q(connection__identity__icontains=stripped) |\
+            Q(contact__name__icontains=stripped)
+            msgs = Message.objects.filter(locations).filter(daterange).filter(search).order_by('-date')
 
         table = []
 
-        table.append(['  Date', '  Clinic', 'Direction', 'Who', 'Phone number',
-                     'Text'])
 
-        for msg in msgs:
+        if not page:
+            page = 1
+        
+            
+        paginator = Paginator(msgs, 200)
+        try:
+            messages = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            messages = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            messages = paginator.page(paginator.num_pages)
+
+        counter = messages.start_index()
+        for msg in messages.object_list:
             date = str(msg.date)[:-4]
             clinic = get_clinic_or_default(msg.contact)
             direction = msg.direction
             name = msg.contact.name if msg.contact else None
             phone = msg.connection.identity
+            type = ",".join(type.name for type in msg.contact.types.all())
             text = msg.text
             text =self.get_filtered_message(text)
-            table.append([date,clinic, direction,\
-                      name, phone, text])
-        return table
-#        return sorted(table, key=itemgetter(0, 1))
+            table.append([counter,date,clinic, direction,\
+                      name, type, phone, text])
+            counter = counter + 1
+     
+        table.insert(0, ['  #', '  Date', '  Clinic', 'Direction', 'Who', 'Worker type','Phone number',
+                     'Text'])
+        messages_number=messages.number
+        messages_has_previous = messages.has_previous()
+        messages_has_next = messages.has_next()
+        messages_paginator_num_pages = messages.paginator.num_pages
+        return table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous
+    

@@ -10,8 +10,9 @@ class LocationAdmin(admin.ModelAdmin):
     list_display = ("name", "type", "full_name", "send_live_results",
                     "has_independent_printer")
     list_filter = ("type", "send_live_results", "has_independent_printer")
-    search_fields = ("name", "slug")
+    search_fields = ("name", "parent__name", "slug")
     actions = ['toggle_live_results']
+    list_editable = ("send_live_results", "has_independent_printer")
 
     def toggle_live_results(self, request, queryset):
         rows_updated = queryset.count()

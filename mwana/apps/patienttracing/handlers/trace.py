@@ -11,6 +11,7 @@ from mwana.const import get_cba_type
 from mwana.apps.patienttracing import models as patienttracing
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
+_ = lambda s: s
 
 
 class TraceHandler(KeywordHandler):
@@ -42,7 +43,12 @@ class TraceHandler(KeywordHandler):
         if not self.contact_valid():
             return
         #pass it off to trace() for processing.
-        self.man_trace(text)
+        mytext = text.lower().replace("&", ",").replace(" and", ",").replace(".", ",")
+        for name in mytext.split(","):
+            if len(name) > 50:
+                self.respond("%s is too long for a name." % name)
+            elif name:
+                self.man_trace(name.title())
         return True
         
     def contact_valid(self):

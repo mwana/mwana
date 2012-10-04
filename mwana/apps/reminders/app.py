@@ -1,12 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.translator.util import Translator
 import re
 import rapidsms
 import datetime
 
 from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule, ALL
+from rapidsms.contrib.scheduler.models import EventSchedule
 
-from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
 from mwana.malawi.lib import py_cupom
@@ -17,9 +17,16 @@ from mwana import const
 # finds our text.
 _ = lambda s: s
 
+translator = Translator()
+
+
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
-    
+
+    #TODO move this to database
+    LOCATION_TYPES = {'f': 'cl', 'h': 'hm', 'clinic': 'cl', 'cl': 'cl',
+                        'hm': 'hm', 'fa': 'cl', 'home': 'hm', 'facility': 'cl'}
+
     DATE_RE = re.compile(r"[\d/.-]+")
     HELP_TEXT = _("To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."\
                 " The date is optional and is logged as TODAY if left out.")
@@ -34,14 +41,14 @@ class App(rapidsms.apps.base.AppBase):
 
     def start(self):
         self.schedule_notification_task()
-    
+
     def schedule_notification_task (self):
         """
         Resets (removes and re-creates) the task in the scheduler app that is
         used to send notifications to CBAs.
         """
         callback = 'mwana.apps.reminders.tasks.send_notifications'
-        
+
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[12],
@@ -77,9 +84,25 @@ class App(rapidsms.apps.base.AppBase):
         up generating messages like "You have successfully registered a birth
         for 24. 06. 2010" (since the date is optional).
         """
-        parts = msg.text.split()[1:] # exclude the keyword (e.g., "birth")
+
+        keyword = msg.text.strip().split()[0].lower()
+        rest = msg.text.strip().split()[1:]
+
+        #TODO This is a quick way of implementing registration of
+        #facility and/or home births. Use a longer term solution later
+        if 'mwana' in keyword and len('mwana') < len(keyword):
+            keyword = keyword.replace("mwana", "mwana ", True)
+
+        to_parse = keyword.split() + rest
+        parts = to_parse[1:]  # exclude the keyword (e.g., "birth")
         date_str = ''
         name = ''
+        location_type = None
+
+        if parts and parts[0].lower() in self.LOCATION_TYPES:
+            location_type = self.LOCATION_TYPES[parts[0].lower()]
+            parts = parts[1:]
+
         for part in parts:
             if self.DATE_RE.match(part):
                 if date_str: date_str += ' '
@@ -87,7 +110,7 @@ class App(rapidsms.apps.base.AppBase):
             else:
                 if name: name += ' '
                 name += part
-        return date_str, name
+        return date_str, name, location_type
 
     def _get_event(self, slug):
         """
@@ -103,13 +126,13 @@ class App(rapidsms.apps.base.AppBase):
         """
         Handles the actual adding of events.  Other simpler commands are done
         through handlers.
-        
+
         This needs to be an app because the "keywords" for this command are
         dynamic (i.e., in the database) and, while it's possible to make a
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
-        
+
         mocker = MockRemindMiUtility()
 
         if mocker.handle(msg):
@@ -121,13 +144,24 @@ class App(rapidsms.apps.base.AppBase):
         event = self._get_event(event_slug)
         if not event:
             return False
+
         # handle mayi messages differently.
         if event_slug == "mayi":
             self.handle_mayi(msg, event)
             return True
 
-        date_str, patient_name = self._parse_message(msg)
-        if patient_name: # the date is optional
+        lang_code = None
+        if msg.contact:
+            cba_name = ' %s' % msg.contact.name
+            lang_code = msg.contact.language
+        else:
+            cba_name = ''
+
+        event_name = translator.translate(lang_code, event.name)
+
+        date_str, patient_name, event_location_type = self._parse_message(msg)
+        # if patient name is too long it's most likely the message sent was wrong
+        if patient_name and len(patient_name) < 50:  # the date is optional
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
@@ -157,36 +191,68 @@ class App(rapidsms.apps.base.AppBase):
             if not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
 
-            # make sure we don't create a duplicate patient event
-            if msg.contact:
-                cba_name = ' %s' % msg.contact.name
-            else:
-                cba_name = ''
+            location_type = {"cl": "facility", "hm": "home"}\
+                        [event_location_type] if event_location_type else ""
+
+            descriptive_event = "%(location_type)s %(event)s" % {'event': event,
+            'location_type': location_type}
+
+            descriptive_event = translator.translate(lang_code, descriptive_event)
+            gender = translator.translate(lang_code, event.possessive_pronoun)
+
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+
+                # TODO: This is temporal. In future responses will be same save for
+                # the words facilty/home. Malawi/Zambia will have to agree on
+                # the words to use
+                if event_location_type:
+                    msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
                         "%(name)s on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next appointment at the "
-                        "clinic."), cba=cba_name, gender=event.possessive_pronoun,
-                        event=event.name.lower(),
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
-                return True
-            patient.patient_events.create(event=event, date=date,
-                                          cba_conn=msg.connection, notification_status="new")
-            gender = event.possessive_pronoun
-            msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                        "it is time for %(gender)s next clinic appointment."),
+                        cba=cba_name, gender=gender,
+                        date=date.strftime('%d/%m/%Y'), name=patient.name,
+                        descriptive_event=descriptive_event.lower())
+                else:
+                    msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
                         "%(name)s on %(date)s. You will be notified when "
                         "it is time for %(gender)s next appointment at the "
                         "clinic."), cba=cba_name, gender=gender,
-                        event=event.name.lower(),
+                        event=event_name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
+                return True
+
+            patient.patient_events.create(event=event, date=date,
+                                          cba_conn=msg.connection,
+                                          notification_status="new",
+                                          event_location_type=event_location_type)
+
+            # TODO: This is temporal. In future responses will be same save for
+            # the words facilty/home. Malawi/Zambia will have to agree on
+            # the words to use
+            if event_location_type:
+                msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
+                    "%(name)s on %(date)s. You will be notified when "
+                    "it is time for %(gender)s next clinic appointment."),
+                    cba=cba_name, gender=gender,
+                    date=date.strftime('%d/%m/%Y'), name=patient.name,
+                    descriptive_event=descriptive_event.lower())
+            else:
+                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
+                    "%(name)s on %(date)s. You will be notified when "
+                    "it is time for %(gender)s next appointment at the "
+                        "clinic."), cba=cba_name, gender=gender,
+                    event=event_name.lower(),
+                    date=date.strftime('%d/%m/%Y'), name=patient.name)
         else:
             if event_slug == "mwana":
                 self.HELP_TEXT = _("To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>.")
-            msg.respond(_("Sorry, I didn't understand that.") + " " +
-                        self.HELP_TEXT % {'event_lower': event.name.lower(),
-                                          'event_upper': event_slug.upper()})
+            msg.respond(_("Sorry, I didn't understand that. "
+                "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."
+                " The date is optional and is logged as TODAY if left out."),
+                event_lower=event_name.lower(),
+                event_upper=translator.translate(lang_code, event.name, 1).upper())
         return True
 
     def handle_mayi(self, msg, event):

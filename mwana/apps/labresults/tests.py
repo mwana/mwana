@@ -171,6 +171,13 @@ class TestApp(LabresultsSetUp):
         """
         self.runScript(script)
 
+    def testTooBigSampleNumber(self):
+        script = """
+            clinic_worker > SENT 302010
+            clinic_worker < To report DBS samples sent, send SENT <NUMBER OF SAMPLES>
+        """
+        self.runScript(script)
+
     def testBadReportFormat(self):
         script = """
             clinic_worker > SENT some samples yo!
@@ -262,8 +269,8 @@ class TestApp(LabresultsSetUp):
             clinic_worker > 55555
             clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > Help
-            support_contact < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
-            support_contact2 < John Banda at Mibenge Clinic has requested help. Please call them at clinic_worker as soon as you can!
+            support_contact < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker.
+            support_contact2 < John Banda (worker) at Mibenge Clinic has requested help. Please call them at clinic_worker.
             clinic_worker < Sorry you're having trouble %(name)s. Your help request has been forwarded to a support team member and they will call you soon.
             clinic_worker > RESULT 12345
             clinic_worker < There are currently no results available for 12345. Please check if the SampleID is correct or sms HELP if you have been waiting for 2 months or more
@@ -374,7 +381,56 @@ class TestApp(LabresultsSetUp):
         results = get_fake_results(3, self.clinic, notification_status_choices=("new", ))
         for res in results:  res.save()
         return results
-    
+
+
+    def testSend_demo_results_to_printer(self):
+        self.assertEqual(0, MessageConfirmation.objects.count())
+
+        # register printer
+        self.clinic.has_independent_printer = True
+        self.clinic.save()
+        script = """
+            support_contact > PRINTER ADD {clinic} mockbackend 1234
+            1234 < 00You have successfully registered this printer at Mibenge Clinic. You will receive results as soon as they are available.
+            support_contact < Printer added successfully.
+        """.format(clinic=self.clinic.slug)
+        self.runScript(script)
+
+        time.sleep(.2)
+
+        self.startRouter()
+
+        script = """
+            clinic_worker > printerdemo {clinic}            
+        """.format(clinic=self.clinic.slug)
+
+        self.runScript(script)
+        msgs = self.receiveAllMessages()
+       
+        expected_msgs = []
+        msg1 = "John Banda:Hello John Banda, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
+        msg2 = "Mary Phiri:Hello Mary Phiri, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
+        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg5 = "Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992.\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by ADH DNA-PCR LAB."
+       
+        expected_msgs.append(msg1)
+        expected_msgs.append(msg2)
+        expected_msgs.append(msg3)
+        expected_msgs.append(msg4)
+        expected_msgs.append(msg5)
+        
+
+        self.assertEqual(5, len(msgs))
+        for msg in msgs:
+            my_msg= "{recipient}:{message}".format(recipient=msg.contact.name, message=msg.text)
+            self.assertTrue(my_msg in expected_msgs,"'\n{msg}' not in expected messages".format(msg=my_msg))
+        
+
+        self.assertEqual(0, Result.objects.count())
+
+
+
     def testSend_results_to_printer_task(self):
         self.assertEqual(0, MessageConfirmation.objects.count())
 

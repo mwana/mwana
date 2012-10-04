@@ -11,7 +11,7 @@ SENT          = "Hello %(name)s! We received your notification that you received
 HELP          = "To report DBS samples received, send RECEIVED <NUMBER OF SAMPLES> <CLINIC-CODE>"
 SORRY         = "Sorry, we didn't understand that message."
 
-class SentHandler(KeywordHandler):
+class ReceivedHandler(KeywordHandler):
     """
     """
 
@@ -56,7 +56,7 @@ class SentHandler(KeywordHandler):
         try:
             raw_count = b.remove_dash_plus(raw_count)
             count = int(b.try_replace_oil_with_011(raw_count))
-        except ValueError:
+        except (ValueError, TypeError):
             count = b.words_to_digits(raw_count)
             if not raw_count:
                 raw_count = self.get_only_number(original_text_count)
@@ -71,7 +71,7 @@ class SentHandler(KeywordHandler):
                 count = abs(count) #just in case we change our general cleaning routine
 
         if count < 1:
-            self.respond("Sorry, the number of DBS samples sent must be greater than 0 (zero).")
+            self.respond("Sorry, the number of DBS samples received must be greater than 0 (zero).")
             return
 
         max_len = settings.MAX_SMS_LENGTH
