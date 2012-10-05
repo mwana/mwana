@@ -1,10 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class IssueHelper:   
+#    TODO take out generic methods here to a util/general 
 
     def get_paginated(self, query_set, page=1, num_pay_page=30):
         if not page:
@@ -43,6 +45,14 @@ class IssueHelper:
         """
 
         issues = GroupFacilityMapping.objects.all().order_by('pk')
+        return self.get_paginated(issues, page, 400)
+
+    def get_group_user_mappings(self, page=1):
+        """
+        Returns open group_facilty_mappings with pagination
+        """
+
+        issues = GroupUserMapping.objects.all().order_by('pk')
         return self.get_paginated(issues, page, 400)
         
     

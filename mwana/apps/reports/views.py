@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import GroupUserMapping
+from mwana.apps.reports.webreports.forms import GroupUserMappingForm
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.reports.webreports.forms import GroupFacilityMappingForm
@@ -173,6 +175,53 @@ def get_admin_email_address():
 
 @csrf_response_exempt
 @csrf_view_exempt
+def group_user_mapping(request):
+
+
+    navigation = read_request(request, "navigate")
+    page = read_request(request, "page")
+
+    page = get_default_int(page)
+    page = page + get_next_navigation(navigation)
+
+    form =  GroupUserMappingForm() # An unbound form
+    if request.method == 'POST': # If the form has been submitted...
+        form = GroupUserMappingForm(request.POST) # A form bound to the POST data
+        if form.is_valid():
+            group = form.cleaned_data['group']
+            user = form.cleaned_data['user']
+
+
+            model = GroupUserMapping(group=group, user=user)
+            
+
+            model.save()
+
+
+            form = GroupUserMappingForm() # An unbound form
+        
+
+
+
+    issueHelper = IssueHelper()
+
+    (query_set, num_pages, number, has_next, has_previous) = issueHelper.get_group_user_mappings(page)
+
+
+    return render_to_response('issues/group_user_mappings.html',
+                              {
+                              'form': form,
+                              'model': 'Group User Mapping',
+                              'query_set': query_set,
+                              'num_pages': num_pages,
+                              'number': number,
+                              'has_next': has_next,
+                              'has_previous': has_previous,
+                              }, context_instance=RequestContext(request)
+                              )
+
+@csrf_response_exempt
+@csrf_view_exempt
 def group_facility_mapping(request):
 
 
@@ -191,13 +240,13 @@ def group_facility_mapping(request):
 
 
             model = GroupFacilityMapping(group=group, facility=facility)
-            
+
 
             model.save()
 
 
             form = GroupFacilityMappingForm() # An unbound form
-        
+
 
 
 
