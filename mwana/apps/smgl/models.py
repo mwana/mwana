@@ -12,20 +12,21 @@ REASON_FOR_VISIT_CHOICES = (
     ('nr', 'Non-Routine')
 )
 
+
 class XFormKeywordHandler(models.Model):
     """
-    System configuration that links xform keywords to functions for post 
-    processing. 
+    System configuration that links xform keywords to functions for post
+    processing.
     """
     keyword = models.CharField(max_length=255, help_text="The keyword that you want to associate with this handler.")
     function_path = models.CharField(max_length=255, help_text="The full path to the handler function. E.g: 'mwana.apps.smgl.app.birth_registration'")
-    
+
+
 class PregnantMother(models.Model):
     """
     Representation of a pregnant mother in SMGL.
     """
-    
-    
+
     HI_RISK_REASONS = {
         "csec": "C-Section",
         "cmp": "Complications during previous pregnancy",
@@ -35,13 +36,13 @@ class PregnantMother(models.Model):
         "oth": "Other",
         "none": "None"
     }
-    
+
     created_date = models.DateTimeField(null=True, blank=True)
     contact = models.ForeignKey(Contact, help_text="The contact that registered this mother")
     location = models.ForeignKey(Location)
     first_name = models.CharField(max_length=160)
     last_name = models.CharField(max_length=160)
-    uid = models.CharField(max_length=160, unique=True, 
+    uid = models.CharField(max_length=160, unique=True,
                            help_text="The Unique Identifier associated with this mother")
     lmp = models.DateField(null=True, blank=True, help_text="Last Menstrual Period")
     edd = models.DateField(help_text="Estimated Date of Delivery", null=True, blank=True)
@@ -49,8 +50,7 @@ class PregnantMother(models.Model):
     reason_for_visit = models.CharField(max_length=160, choices=REASON_FOR_VISIT_CHOICES)
     zone = models.ForeignKey(Location, null=True, blank=True,
                              related_name="pregnant_mother_zones")
-    
-    
+
     risk_reason_csec = models.BooleanField(default=False)
     risk_reason_cmp = models.BooleanField(default=False)
     risk_reason_gd = models.BooleanField(default=False)
@@ -58,60 +58,64 @@ class PregnantMother(models.Model):
     risk_reason_psb = models.BooleanField(default=False)
     risk_reason_oth = models.BooleanField(default=False)
     risk_reason_none = models.BooleanField(default=False)
-    
+
     reminded = models.BooleanField(default=False)
-    
+
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
-    
+
     def set_risk_reason(self, code, val=True):
         assert code in self.HI_RISK_REASONS
         setattr(self, "risk_reason_%s" % code, val)
-    
+
     def get_risk_reason(self, code):
         assert code in self.HI_RISK_REASONS
         return getattr(self, "risk_reason_%s" % code)
-    
+
     def get_risk_reasons(self):
         for c in self.HI_RISK_REASONS:
             if self.get_risk_reason(c):
                 yield c
-    
+
     def get_laycounselors(self):
         """
         Given a mother, get the lay counselors who should be notified about
         her registration / reminded for followups
         """
         # TODO: determine exactly how this should work.
-        return Contact.objects.filter\
-            (types=ContactType.objects.get(slug__iexact=const.CTYPE_LAYCOUNSELOR),
-             location=self.zone)
+        return Contact.objects.filter(
+                types=ContactType.objects.get(
+                            slug__iexact=const.CTYPE_LAYCOUNSELOR
+                            ),
+                location=self.zone)
 
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
+
 
 class MotherReferenceBase(models.Model):
     """
     An abstract base class to hold mothers. Provides some shared functionality
     and consistent field naming.
     """
-    # Note: we capture both the mom UID and try to match it to a pregnant 
+    # Note: we capture both the mom UID and try to match it to a pregnant
     # mother foreignkey. In the event that an ER is started for NOT a mother or
     # the UID is garbled/unmatcheable we still want to capture it for analysis.
     mother_uid = models.CharField(max_length=255, null=True, blank=True,
                                   help_text="Unique ID of mother")
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
-    
+
     def set_mother(self, mother_id):
         self.mother_uid = mother_id
         try:
             self.mother = PregnantMother.objects.get(uid__iexact=mother_id)
         except PregnantMother.DoesNotExist:
             pass
-    
+
     class Meta:
         abstract = True
+
 
 class FacilityVisit(models.Model):
     """
@@ -119,7 +123,7 @@ class FacilityVisit(models.Model):
     (Which facility she went to, when she did so, etc)
     """
     created_date = models.DateTimeField(null=True, blank=True)
-    
+
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(Location, help_text="The location of this visit")
     visit_date = models.DateField()
@@ -129,11 +133,12 @@ class FacilityVisit(models.Model):
     next_visit = models.DateField()
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
-    
+
     def is_latest_for_mother(self):
         return FacilityVisit.objects.filter(mother=self.mother)\
             .order_by("-created_date")[0] == self
-        
+
+
 class AmbulanceRequest(models.Model):
     """
     Bucket for ambulance request info
@@ -148,20 +153,21 @@ class AmbulanceRequest(models.Model):
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     #Similarly it shouldn't matter if this field is filled in or not.
-    danger_sign = models.CharField(max_length=255, null=True, blank=True,help_text="Danger signs that prompted the ER")
-    from_location = models.ForeignKey(Location, null=True, blank=True,help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
+    danger_sign = models.CharField(max_length=255, null=True, blank=True, help_text="Danger signs that prompted the ER")
+    from_location = models.ForeignKey(Location, null=True, blank=True, help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
 
-    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted",related_name="ambulance_driver")
+    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted", related_name="ambulance_driver")
 
-    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted",related_name="triage_nurse")
+    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted", related_name="triage_nurse")
 
-    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER",related_name="other_recipient")
+    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER", related_name="other_recipient")
 
-    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER",related_name="receiving_facility_recipient")
-    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility",related_name="receiving_facility")
+    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER", related_name="receiving_facility_recipient")
+    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility", related_name="receiving_facility")
 
     requested_on = models.DateTimeField(auto_now_add=True)
     received_response = models.BooleanField(default=False)
+
 
 class AmbulanceResponse(models.Model):
     ER_RESPONSE_CHOICES = (
@@ -186,10 +192,10 @@ class AmbulanceOutcome(models.Model):
         ('treated_discharged', 'Treated and Discharged'),
         ('deceased', 'Deceased'),
     )
-    # Note: we capture both the mom UID and try to match it to a pregnant 
-    # mother foreignkey. In the event that an ER is started for NOT a mother 
+    # Note: we capture both the mom UID and try to match it to a pregnant
+    # mother foreignkey. In the event that an ER is started for NOT a mother
     # or the UID is garbled/unmatcheable we still want to capture it for analysis.
-    outcome_on = models.DateTimeField(auto_now_add=True, help_text = "Date and Time this outcome was provided")
+    outcome_on = models.DateTimeField(auto_now_add=True, help_text="Date and Time this outcome was provided")
     mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
     mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
@@ -200,6 +206,7 @@ REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
                             ("dec", "deceased"))
 DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"))
+
 
 class Referral(FormReferenceBase, MotherReferenceBase):
     REFERRAL_REASONS = {
@@ -214,34 +221,33 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         "oth":   "Other",
     }
     date = models.DateTimeField()
-    facility = models.ForeignKey(Location, 
+    facility = models.ForeignKey(Location,
                                  help_text="The referred facility")
     from_facility = models.ForeignKey(Location,
-                                      null=True, blank=True, 
+                                      null=True, blank=True,
                                       help_text="The referring facility",
                                       related_name="referrals_made")
-    
-    
+
     responded = models.BooleanField(default=False)
     mother_showed = models.NullBooleanField(default=None)
-    
-    status = models.CharField(max_length=3, 
+
+    status = models.CharField(max_length=3,
                               choices=REFERRAL_STATUS_CHOICES,
                               null=True, blank=True)
-    
+
     time = models.TimeField(help_text="Time of referral", null=True)
-    
+
     # outcomes
-    mother_outcome = models.CharField(max_length=3, 
+    mother_outcome = models.CharField(max_length=3,
                                       choices=REFERRAL_OUTCOME_CHOICES,
                                       null=True, blank=True)
-    baby_outcome = models.CharField(max_length=3, 
+    baby_outcome = models.CharField(max_length=3,
                                     choices=REFERRAL_OUTCOME_CHOICES,
                                     null=True, blank=True)
-    mode_of_delivery = models.CharField(max_length=4, 
+    mode_of_delivery = models.CharField(max_length=4,
                                         choices=DELIVERY_MODE_CHOICES,
                                         null=True, blank=True)
-    
+
     # this will make reporting easier than dealing with another table
     reason_fd = models.BooleanField(default=False)
     reason_pec = models.BooleanField(default=False)
@@ -252,40 +258,40 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_pl = models.BooleanField(default=False)
     reason_cpd = models.BooleanField(default=False)
     reason_oth = models.BooleanField(default=False)
-    
+
     reminded = models.BooleanField(default=False)
-    
+
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
         setattr(self, "reason_%s" % code, val)
-    
+
     def get_reason(self, code):
         assert code in self.REFERRAL_REASONS
         return getattr(self, "reason_%s" % code)
-    
+
     def get_reasons(self):
         for c in sorted(self.REFERRAL_REASONS.keys()):
             if self.get_reason(c):
                 yield c
-    
+
     @classmethod
     def non_emergencies(cls):
         return cls.objects.filter(status="nem")
-    
+
     @classmethod
     def emergencies(cls):
         return cls.objects.filter(status="em")
-    
+
     @property
     def is_emergency(self):
         return self.status == "em"
-    
+
     @property
     def referring_facility(self):
         if self.from_facility:
             return self.from_facility
         try:
-            # hack: pre 9/28 this property was not set, so 
+            # hack: pre 9/28 this property was not set, so
             # set it on access and return it
             loc = self.session.connection.contact.location
             self.from_facility = loc
@@ -293,13 +299,14 @@ class Referral(FormReferenceBase, MotherReferenceBase):
             return loc
         except AttributeError:
             # looks like the contact disappeared or no longer
-            # has a location set. not much to be done. 
+            # has a location set. not much to be done.
             return None
-    
+
     def get_receiving_data_clerks(self):
         # people who need to be reminded to collect the outcome
-        return Contact.objects.filter(types__slug=const.CTYPE_DATACLERK, 
+        return Contact.objects.filter(types__slug=const.CTYPE_DATACLERK,
                                       location=self.facility)
+
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
@@ -332,6 +339,7 @@ class PreRegistration(models.Model):
 GENDER_CHOICES = (("bo", "boy"), ("gi", "girl"))
 PLACE_CHOICES = (("h", "home"), ("f", "facility"))
 
+
 class BirthRegistration(models.Model):
     """
     Database representation of a birth registration form
@@ -347,6 +355,7 @@ class BirthRegistration(models.Model):
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
+
 class DeathRegistration(models.Model):
     """
     Database representation of a death registration form
@@ -357,12 +366,13 @@ class DeathRegistration(models.Model):
     date = models.DateField()
     person = models.CharField(max_length=3, choices=PERSON_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
-        
-    
-REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"), 
+
+
+REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("em_ref", "Emergency Referral"),
                          ("nem_ref", "Non-Emergency Referral"),
                          ("edd_14", "Expected Delivery, 14 days before"))
+
 
 class ReminderNotification(MotherReferenceBase):
     """
@@ -372,9 +382,8 @@ class ReminderNotification(MotherReferenceBase):
     recipient = models.ForeignKey(Contact,
                                   related_name='sent_notifications')
     date = models.DateTimeField()
-    
+
     def __unicode__(self):
         return '%s sent to %s on %s' % (self.type,
                                         self.recipient,
                                         self.date)
-    
