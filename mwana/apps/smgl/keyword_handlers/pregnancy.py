@@ -1,14 +1,16 @@
-import logging
-from mwana.apps.smgl.utils import get_value_from_form, send_msg,\
-    make_date
-from rapidsms.models import Contact
-from django.core.exceptions import ObjectDoesNotExist
-from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 import datetime
+import logging
+
+from django.core.exceptions import ObjectDoesNotExist
+
+from rapidsms.models import Contact
+
 from mwana.apps.contactsplus.models import ContactType
-from mwana.apps.smgl import const
 from mwana.apps.locations.models import Location, LocationType
+from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.models import PregnantMother, FacilityVisit, ToldReminder
+from mwana.apps.smgl.utils import get_value_from_form, send_msg, make_date
 
 logger = logging.getLogger(__name__)
 
@@ -180,12 +182,37 @@ def follow_up(session, xform, router):
 
 @registration_required
 def told(session, xform, router):
-    # TODO: processing, if necessary
-    if not session.connection.contact:
-        send_msg(session.connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
-                 name=session.connection.contact.name)
+    """
+    Handler for TOLD keyword (Used to notify the system when a mother is reminded).
+
+    Format:
+    TOLD Mother_UID EDD/NVD/REF
+    """
+    logger.debug('Handling the TOLD keyword form')
+
+    connection = session.connection
+
+    if not connection.contact:
+        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
+                 name=connection.contact.name)
         return True
 
-    send_msg(session.connection, const.TOLD_COMPLETE, router,
-             name=session.connection.contact.name)
+    unique_id = get_value_from_form('unique_id', xform)
+    reminder_type = get_value_from_form('reminder_type', xform)
+    try:
+        mother = PregnantMother.objects.get(uid=unique_id)
+    except ObjectDoesNotExist:
+        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
+        return True
+    else:
+        # Generate the TOLD Reminder database entry
+        ToldReminder.objects.create(
+                            contact=connection.contact,
+                            mother=mother,
+                            connection=connection,
+                            date=session.modified_time,
+                            type=reminder_type,
+                            )
+        send_msg(connection, const.TOLD_COMPLETE, router,
+                 name=connection.contact.name)
     return True

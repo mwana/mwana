@@ -387,3 +387,19 @@ class ReminderNotification(MotherReferenceBase):
         return '%s sent to %s on %s' % (self.type,
                                         self.recipient,
                                         self.date)
+
+
+TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
+                     ("nvd", "Next Visit Date"),
+                     ("ref", "Referral"))
+
+
+class ToldReminder(models.Model):
+    """
+    Database representation of a told reminder form
+    """
+    contact = models.ForeignKey(Contact, null=True)
+    connection = models.ForeignKey(Connection)
+    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
+    date = models.DateTimeField()
+    type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)
