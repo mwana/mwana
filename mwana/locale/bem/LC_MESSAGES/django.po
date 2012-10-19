@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-05 19:50+0200\n"
+"POT-Creation-Date: 2012-06-05 20:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,20 +61,68 @@ msgid ""
 "Thank you %(name)s! You have successfully registered as a RemindMi Agent for "
 "zone %(zone)s of %(clinic)s."
 msgstr ""
+"Natoteela %(name)s! Mwakwanisha ukulembesha nga Kafwa wa RemindMi "
+ "wa zone %(zone)s iya %(clinic)s."
 
 #: .\apps\agents\handlers\agent.py:136 .\apps\labresults\handlers\join.py:325
 msgid "Sorry, I didn't understand that."
+msgstr "Njeleleeniko, nshacumfwa iyo imbila"
+
+#: .\apps\help\handlers\help.py:10
+#, python-format
+msgid ""
+"Sorry you're having trouble%(person)s. Your help request has been forwarded "
+"to a support team member and they will call you soon."
 msgstr ""
+"Njeleleeniko, mulekwata ubwafya ba %(person)s. Ubwafya bwenu bwapeelwa kuli umo"
+" uwa mwibumba lya bakafwa kabili balamitumina lamya nomba line"
+
+#: .\apps\labresults\messages.py:26
+msgid ""
+"Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, "
+"MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more "
+"information."
+msgstr ""
+"Ishiwi ilya lubana. Amashiwi yeneyene ni aya: BIRTH, MWANA, TOLD, CONFIRM."
+" Asukeeni ne shiwi ilikankala ilili lyonse nangula HELP pakuti mupokelele imbila imbi."
+
+#: .\apps\labresults\messages.py:28
+#, python-format
+msgid "Sorry %s. Respond with keyword HELP for assistance."
+msgstr ""
+
+#: .\apps\labresults\messages.py:29
+msgid ""
+"Invalid Keyword. Please send the keyword HELP if you need to be assisted."
+msgstr ""
+"Ishiwi ilya lubana. Napapata tumeeni ishiwi ilya HELP nga mulefwaya ukwafwilishiwa."
+
+#: .\apps\labresults\handlers\join.py:119
+#, python-format
+msgid "Sorry, you must provide a valid name to register. %s"
+msgstr ""
+"Njeleleeniko, mufwile ukupeela ishina lya ciine pa kulembesha. %s"
+
+
+#: .\apps\labresults\handlers\join.py:210
+#, python-format
+msgid ""
+"Sorry, I don't know about a location with code %(code)s. Please check your "
+"code and try again."
+msgstr ""
+"Njeleleeniko, nshishibe pa lwa ncende iya cishibilo %(code)s. "
+" Napapata ceceteni icishibilo cenu nokwesha nakabili."
 
 #: .\apps\labresults\handlers\join.py:261
 msgid ""
 "To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> "
 "<YOUR NAME>"
 msgstr ""
+"Pa kulembesha, tumeeni: JOIN <CBA> <CLINIC CODE> <ZONE #> <YOUR NAME>"
 
 #: .\apps\labresults\handlers\join.py:322
 msgid "Please notify us next time there is a birth in your zone."
-msgstr "Mukawayi mukatwebe elyo umuntu akapaapa muchende yenu."
+msgstr "Mukwayi mukatwebe elyo umuntu akapaapa muchende yenu."
 
 #: .\apps\labresults\handlers\leave.py:9
 #, python-format
@@ -102,7 +150,31 @@ msgstr ""
 msgid "Enter a valid longitude."
 msgstr ""
 
-#: .\apps\reminders\app.py:29
+#: .\apps\patienttracing\tasks.py:21
+#, python-format
+msgid ""
+"Hi %(name)s! If you know that %(mother)s has been to the clinic, please "
+"send: CONFIRM %(mother)s"
+msgstr ""
+"Mwapoleeni %(name)s! Nga mwashininkisha ukuti %(mother)s aliya ku kiliniki,"
+" napapata tumeeni ishiwi lya : CONFIRM %(mother)s"
+
+#: .\apps\patienttracing\handlers\confirm.py:40
+#, python-format
+msgid "Thank you %()s! You have confirmed that %()s has been to the clinic!"
+msgstr ""
+"Natoteela %()s! Mwashininkisha ukuti %()s aliya ku kiliniki"
+
+#: .\apps\patienttracing\handlers\told.py:39
+#, python-format
+msgid ""
+"Thank you %(name)s! After you confirm %(mother)s has visited the clinic, "
+"please send: CONFIRM %(mother)s."
+msgstr ""
+"Natoteela %(name)s! Panuma ya kushininksha %(mother)s aliya ku kiliniki,"
+" napapata tumeeni ishiwi lya : CONFIRM %(mother)s."
+
+#: .\apps\reminders\app.py:26
 #, python-format
 msgid ""
 "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is "
@@ -111,7 +183,7 @@ msgstr ""
 "Pakulembesha %(event_lower)s, tumeni %(event_upper)s <INSHIKU> <ISHINA "
 "LYABANINA>.Ichilangililo, MWANA 12 3 2012 Bana Kalaba."
 
-#: .\apps\reminders\app.py:161
+#: .\apps\reminders\app.py:148
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
 "MONTH YEAR, for example: 23 04 2010"
@@ -119,32 +191,34 @@ msgstr ""
 "Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI "
 "UMWAKA - 23 04 2010."
 
-#: .\apps\reminders\app.py:170
+#: .\apps\reminders\app.py:157
 #, python-format
 msgid "Sorry, you can not register a %s with a date after today's."
 msgstr "Munjeleleko, teti mulembeshe ukupaapa(%s) pa nshiku iyishilafika"
 
-#: .\apps\reminders\app.py:207 .\apps\reminders\app.py:233
+#: .\apps\reminders\app.py:187 .\apps\reminders\app.py:216
 #, python-format
 msgid ""
-"Thank you%(cba)s! You registered a %(descriptive_event)s for %(name)s on %"
-"(date)s. You will be notified when it is time for %(gender)s next clinic "
+"Thank you%(cba)s! You registered a%(location_type)s %(event)s for %(name)s "
+"on %(date)s. You will be notified when it is time for %(gender)s next clinic "
 "appointment."
 msgstr ""
-"Natoteela ba%(cba)s!, Mwalembesha  %(descriptive_event)s ukwaba %(name)s pa %"
-"(date)s. Mukebwa inshita %(gender)s ngayafika iyakuya ku chipatala."
+"Twatotela ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)s) kwa "
+"ba %(name)s pa %(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika "
+"iyakuya ku chipatala."
 
-#: .\apps\reminders\app.py:214 .\apps\reminders\app.py:240
+#: .\apps\reminders\app.py:196 .\apps\reminders\app.py:225
 #, python-format
 msgid ""
-"Thank you%(cba)s! You have successfully registered a %(event)s for %(name)s "
-"on %(date)s. You will be notified when it is time for %(gender)s next "
-"appointment at the clinic."
+"Thank you%(cba)s! You have successfully registered a%(location_type)s %"
+"(event)s for %(name)s on %(date)s. You will be notified when it is time for %"
+"(gender)s next appointment at the clinic."
 msgstr ""
-"Twatotela ba%(cba)s, mwalembesha %(event)s kwa ba %(name)s pa %(date)s. "
-"Tukamyeba inshita %(gender)s ngayafika iyakuya ku chipatala."
+"Twatotela ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)s) kwa "
+"ba %(name)s pa %(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika "
+"iyakuya ku chipatala."
 
-#: .\apps\reminders\app.py:247
+#: .\apps\reminders\app.py:234
 #, python-format
 msgid ""
 "Sorry, I didn't understand that. To add a %(event_lower)s, send %"
@@ -155,13 +229,13 @@ msgstr ""
 "(event_upper)s <INSHIKU> <ISHINA LYABANINA>.Ichilangililo, MWANA 12 3 2012 "
 "Bana Kalaba."
 
-#: .\apps\reminders\mocking.py:43
-#, python-format
+#: .\apps\reminders\mocking.py:42
+#, fuzzy, python-format
 msgid ""
 "Hi %(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Ba %(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)"
+"Ba%(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)"
 "s naifika. Bebukisheni ukuya ku %(clinic)s, elyo mutume ati TOLD %(patient)s"
 
 #: .\apps\reminders\tasks.py:67
@@ -173,101 +247,44 @@ msgstr ""
 "Ba%(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)"
 "s naifika. Bebukisheni ukuya ku %(clinic)s, elyo mutume ati TOLD %(patient)s"
 
-#: .\build\psycopg2\doc\src\tools\lib\dbapi_extension.py:34
-msgid "DB API extension"
+#: .\apps\reminders\handlers\BirthNotice.py:38
+msgid ""
+"Sorry, I didn't understand that. Make sure you send your location, name and "
+"pin like: JOIN <CLINIC CODE> <NAME> <PIN CODE>."
 msgstr ""
+"Njeleleeniko nshumfwile. Shininkisheeni ukuti mwatuma umusango, incede ne shina muli uyu musango:"
+"JOIN <TYPE><LOCATION CODE> <NAME>"
+
+#: .\apps\reports\tasks.py:25
+#, python-format
+msgid ""
+"Thank you, %(name)s. You have helped about %(helps)s mothers in your "
+"community in %(month)s %(year)s. Keep up the good work, reminding mothers "
+"saves lives."
+msgstr ""
+"Twatotela %(name)s. Mwapususha abafyashi ukufika pali %(helps)s mumushi wenu mu %(month)s %(year)s"
+"Mutwalilile imilimo isuma. Ukwibukisha abafyashi kulapususha imyeo"
+
+#: .\apps\reports\tasks.py:26
+#, python-format
+msgid ""
+"Hello %(name)s. Remember to register births in your community and to remind "
+"mothers go to the clinic. Reminding mothers saves lives."
+msgstr ""
+"Mwapoleeni %(name)s. Ibukisheeni ukulembesha ukufyalwa kwa baana nokwibukisha"
+"abafyashi ukuya ku kiliniki. Ukwibukisha abafyashi kulapususha imyeo"
 
 #: .\zambia\settings_country.py:48
 msgid "Bemba"
 msgstr ""
 
 #: .\zambia\settings_country.py:49
-msgid "Tonga"
-msgstr ""
-
-#: .\zambia\settings_country.py:50
 msgid "English"
 msgstr ""
 
-#~ msgid ""
-#~ "Thank you%(cba)s! You registered a %(decriptive_event)s for %(name)s on %"
-#~ "(date)s. You will be notified when it is time for %(gender)s next clinic "
-#~ "appointment."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha  kwa ba %(name)s pa %(date)s. Tukamyeba "
-#~ "inshita %(gender)s ngayafika iyakuya ku chipatala."
-
-#~ msgid ""
-#~ "Thank you%(cba)s! You registered a%(descriptive_event)s %(event)s for %"
-#~ "(name)s on %(date)s. You will be notified when it is time for %(gender)s "
-#~ "next clinic appointment."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha  a%(descriptive_event)s kwa ba %(event)s "
-#~ "%(name)s pa %(date)s. Tukamyeba inshita %(gender)s ngayafika iyakuya ku "
-#~ "chipatala."
-
-#~ msgid ""
-#~ "Thank you%(cba)s! You have successfully registered a%(location_type)s %"
-#~ "(event)s for %(name)s on %(date)s. You will be notified when it is time "
-#~ "for %(gender)s next appointment at the clinic."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)s) "
-#~ "kwa ba %(name)s pa %(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika "
-#~ "iyakuya ku chipatala."
-
-#~ msgid "Thank you  You registered a %(descriptive_event)s h  for "
-#~ msgstr "Twatotela  "
-
-#~ msgid ""
-#~ "Thank you sir %(cba)s! You registered a %(descriptive_event)s %(event)s "
-#~ "for %(name)s"
-#~ msgstr "Twatotela %(cba)s"
-
-#~ msgid ""
-#~ "Thank you%(cba)s! You registered a%(location_type)s %(event)s for %(name)"
-#~ "s on %(date)s. You will be notified when it is time for %(gender)s next "
-#~ "clinic appointment."
-#~ msgstr ""
-#~ "Twatotela sana ba%(cba)s, mwalembesha %(event)s kwa %(location_type)s ba %"
-#~ "(name)s pa %(date)s. Tukamyeba inshita yabo(%(gender)s) ngayafika iyakuya "
-#~ "ku chipatala."
-
-#, fuzzy
-#~ msgid ""
-#~ "Thank you very much%(cba)s! You registered a%(location_type)s %(event)s "
-#~ "for %(name)s on %(date)s. You will be notified when it is time for %"
-#~ "(gender)s next clinic appointment."
-#~ msgstr ""
-#~ "Twatotela sana ba%(cba)s, mwalembesha ukupaapa(%(location_type)s %(event)"
-#~ "s) kwa ba %(name)s pa %(date)s. Tukamyeba inshita yabo(%(gender)s) "
-#~ "ngayafika iyakuya ku chipatala."
-
-#, fuzzy
-#~ msgid ""
-#~ "Thank you%(cba)s! You registered a nice birth called %(descriptive_event)"
-#~ "s for %(name)s on %(date)s. You will be notified when it is time for %"
-#~ "(gender)s next clinic appointment."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha %(descriptive_event)s kwa ba %(name)s pa "
-#~ "%(date)s. Tukamyeba inshita %(gender)s ngayafika iyakuya ku chipatala."
-
-#, fuzzy
-#~ msgid ""
-#~ "Thank you%(cba)s! You have successfully registered a %(description)s for %"
-#~ "(name)s on %(date)s. You will be notified when it is time for %(gender)s "
-#~ "next appointment at the clinic."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha %(description)s kwa ba %(name)s pa %"
-#~ "(date)s. Tukamyeba inshita %(gender)s ngayafika iyakuya ku chipatala."
-
-#, fuzzy
-#~ msgid ""
-#~ "Thank you%(cba)s! You registered a %(event)s for %(name)s on %(date)s. "
-#~ "You will be notified when it is time for %(gender)s next clinic "
-#~ "appointment."
-#~ msgstr ""
-#~ "Twatotela ba%(cba)s, mwalembesha %(descriptive_event)s kwa ba %(name)s pa "
-#~ "%(date)s. Tukamyeba inshita %(gender)s ngayafika iyakuya ku chipatala."
+#: .\zambia\settings_country.py:50
+msgid "Nyanja"
+msgstr ""
 
 #~ msgid "facility"
 #~ msgstr "kwa mu chipatala"
