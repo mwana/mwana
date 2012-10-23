@@ -14,7 +14,7 @@ RESULTS160_SLUGS = {
     'LAB_WORKER_SLUG': 'lab',
     # location types:
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
-                     'rural_health_centre', 'health_post'),
+                     'rural_health_centre', 'health_post', 'clinic'),
     'ZONE_SLUGS': ('zone', ),
     'DISTRICT_SLUGS': ('districts', ), # XXX verify me
     'PROVINCE_SLUGS': ('provinces', ), # XXX verify me
