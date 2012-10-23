@@ -14,10 +14,10 @@ RESULTS160_SLUGS = {
     'LAB_WORKER_SLUG': 'lab',
     # location types:
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
-                    'rural_health_centre', 'health_post'),
-    'ZONE_SLUGS': ('zone',),
-    'DISTRICT_SLUGS': ('districts',), # XXX verify me
-    'PROVINCE_SLUGS': ('provinces',), # XXX verify me
+                     'rural_health_centre', 'health_post'),
+    'ZONE_SLUGS': ('zone', ),
+    'DISTRICT_SLUGS': ('districts', ), # XXX verify me
+    'PROVINCE_SLUGS': ('provinces', ), # XXX verify me
 }
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
@@ -31,8 +31,8 @@ INSTALLED_APPS.append("mwana.apps.errorhandling")
 
 
 ADMINS = (
-    ('Trevor Sinkala', 'sinkalation@gmail.com'),
-)
+          ('Trevor Sinkala', 'sinkalation@gmail.com'),
+          )
 
 MANAGERS = ADMINS
 
@@ -46,11 +46,11 @@ TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'en'
 LANGUAGES = (
-    ('bem', _('Bemba')),
-    ('tn', _('Tonga')),
-    ('en', _('English')),
-    ('nya', _('Nyanja')),
-)
+             ('bem', _('Bemba')),
+             ('ton', _('Tonga')),
+             ('en', _('English')),
+             ('nya', _('Nyanja')),
+             )
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
