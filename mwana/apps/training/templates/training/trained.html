@@ -34,7 +34,11 @@
             <h3>Create New {{ model }}</h3>
 
             <br>
-
+            {%if confirm_message%}
+            <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
+                {{confirm_message}}
+            </div>
+            {% endif %}
             <table border="0">
                 {% for field in form %}
                 <tr>
@@ -47,10 +51,10 @@
             <hr>
 
             <div>
-            <h3>Existing {{ model }}</h3>
+                <h3>Existing {{ model }}</h3>
 
-            <table width="100%">
-                
+                <table width="100%">
+
                     <tr>
                         <th>
                             <a href="?ot=asc&amp;o=1">
@@ -78,7 +82,7 @@
                                 Additional text
                             </a></th>
                     </tr>
-                
+
                     {% for record in query_set %}
                     <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
                         <td>{{ record.name }}</td>
@@ -92,11 +96,11 @@
                     </tr>
 
                     {% endfor %}
-                
-            </table>
+
+                </table>
 
             </div>
-<div class="clear-hack"></div>
+            <div class="clear-hack"></div>
         </div>
         <div class="pagination">
             <span class="step-links">

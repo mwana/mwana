@@ -105,6 +105,7 @@ def trained(request):
 
     page = get_default_int(page)
     page = page + get_next_navigation(navigation)
+    confirm_message = ""
 
     form =  TrainedForm() # An unbound form
     if request.method == 'POST': # If the form has been submitted...
@@ -117,17 +118,21 @@ def trained(request):
             type = form.cleaned_data['type']
             date = form.cleaned_data['date']
             location = form.cleaned_data['location']
+            additional_text = form.cleaned_data['additional_text']
             if not email:email=None
+            if not additional_text:additional_text=None
 
 
             model = Trained(name=name, phone=phone, email=email,
-            trained_by=trained_by, type=type, date=date, location=location)
+            trained_by=trained_by, type=type, date=date, location=location,
+            additional_text=additional_text)
 
 
             model.save()
 
 
             form = TrainedForm() # An unbound form
+            confirm_message = "%s has been succesfully saved" % model
 
 
 
@@ -142,6 +147,7 @@ def trained(request):
                               'form': form,
                               'model': 'Trained people',
                               'query_set': query_set,
+                              'confirm_message': confirm_message,
                               'num_pages': num_pages,
                               'number': number,
                               'has_next': has_next,
