@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^usergroups/', views.group_user_mapping, name='group_user_mapping'),
     (r'^logs/', include('mwana.apps.filteredlogs.urls')),
     (r'^issues/', include('mwana.apps.issuetracking.urls')),
+    (r'^trained/', include('mwana.apps.training.urls')),
 )

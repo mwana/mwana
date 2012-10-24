@@ -1,0 +1,126 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+
+
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="left">
+    <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Trained People</h2>
+            <p/>
+            <h3>Create New {{ model }}</h3>
+
+            <br>
+
+            <table border="0">
+                {% for field in form %}
+                <tr>
+                    <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
+                    <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <p><input type="submit" value="Submit" /></p>
+            <hr>
+
+            <div>
+            <h3>Existing {{ model }}</h3>
+
+            <table width="100%">
+                
+                    <tr>
+                        <th>
+                            <a href="?ot=asc&amp;o=1">
+                                Name
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=2">
+                                Location
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=3">
+                                Type
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=4">
+                                Email
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=5">
+                                Phone
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=6">
+                                Date
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=7">
+                                Trained by
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=8">
+                                Additional text
+                            </a></th>
+                    </tr>
+                
+                    {% for record in query_set %}
+                    <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.location }}</td>
+                        <td>{{ record.type }}</td>
+                        <td>{{ record.email }}</td>
+                        <td>{{ record.phone }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.trained_by }}</td>
+                        <td>{{ record.additional_text }}</td>
+                    </tr>
+
+                    {% endfor %}
+                
+            </table>
+
+            </div>
+<div class="clear-hack"></div>
+        </div>
+        <div class="pagination">
+            <span class="step-links">
+                {% if has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
+
+                <span class="current">
+                    Page {{ number }} of {{ num_pages }}.
+                </span>
+
+                {% if has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ number }}>
+            </span>
+
+        </div>
+    </form>
+
+</div>
+
+<script type="text/javascript">
+    $("select").chosen();
+</script>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.training.models import Trained
 from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
@@ -53,6 +54,14 @@ class IssueHelper:
         """
 
         issues = GroupUserMapping.objects.all().order_by('pk')
+        return self.get_paginated(issues, page, 400)
+
+    def get_trained_people(self, order='pk', page=1):
+        """
+        Returns trained people
+        """
+
+        issues = Trained.objects.all().order_by(order)
         return self.get_paginated(issues, page, 400)
         
     

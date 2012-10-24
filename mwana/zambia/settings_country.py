@@ -79,6 +79,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
     ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
+    ('mwana.apps.training.views.trained', 'Trained People'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

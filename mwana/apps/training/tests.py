@@ -6,6 +6,7 @@ unittest). These will both pass when you run "manage.py test".
 Replace these with more appropriate tests for your application.
 """
 
+from mwana.apps.training.models import Trained
 from mwana import const
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
@@ -83,6 +84,7 @@ class TestApp(TestScript):
             tz > training start kdh
             ha < Training is starting at Kafue District Hospital, kdh. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Kafue District Hospital, kdh. Treat notifications you receive from this clinic as training data
+            tz < When the trainees finish the course remind them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>
             tz < Thanks Trainer Zulu for your message that training is starting for Kafue District Hospital. At end of training please send TRAINING STOP
             """
         self.runScript(script)
@@ -102,6 +104,7 @@ class TestApp(TestScript):
             tz > training start 403012
             ha < Training is starting at Central Clinic, 403012. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Central Clinic, 403012. Treat notifications you receive from this clinic as training data
+            tz < When the trainees finish the course remind them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>
             tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP
             """
         self.runScript(script)
@@ -133,3 +136,16 @@ class TestApp(TestScript):
         self.runScript(script)
 
         self.assertEqual(0, TrainingSession.objects.filter(is_on=True).count())
+
+    def testTrainedRegistration(self):
+
+        # Incomplete command
+        script = """
+            tz > trained unicef cba
+            tz < Thanks Trainer Zulu. You have been trained as Clinic Worker at Kafue District Hospital
+            tz > trained any text
+            tz < Thanks Trainer Zulu. You have been trained as Clinic Worker at Kafue District Hospital
+            """
+        self.runScript(script)
+
+        self.assertEqual(1, Trained.objects.all().count())
