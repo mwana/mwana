@@ -25,8 +25,8 @@ class Trained(models.Model):
     phone = models.CharField(max_length=15, null=True, blank=True, unique=True)
     email = models.CharField(max_length=50, null=True, blank=True, unique=True)
     location = models.ForeignKey(Location)
-    type = models.ForeignKey(ContactType, 
-    limit_choices_to={'slug__in':(type.slug for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]))})
+    type = models.ForeignKey(ContactType)#,
+#    limit_choices_to={'slug__in':(type.slug for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]))})
     trained_by = models.ForeignKey(ReportingGroup, blank=True, null=True)
     date = models.DateField(default=datetime.date.today(), blank=True, null=True)
     additional_text = models.TextField(null=True, blank=True)
