@@ -150,7 +150,23 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         {% if forloop.parentloop.last %}
                         <td width="20"><b>{{ column }}</b></td>
                         {% else %}
-                        <td width="20">{{ column }}</td>
+                        <td width="20">
+                            {% ifequal forloop.counter 3 %}
+
+                            <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
+                     width="{% widthratio column single_bar_length 100 %}" />
+                           {% endifequal %}
+                            {% ifequal forloop.counter 5 %}
+                            <img src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
+                     width="{% widthratio column single_bar_length 100 %}" />
+                           {% endifequal %}
+                            {% ifequal forloop.counter 4 %}
+
+                            <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
+                     width="{% widthratio column single_bar_length 100 %}" /> 
+                           {% endifequal %} {{ column }}
+
+                        </td>
                         {% endif %}
                         {% endif %}
                         {% else %}
