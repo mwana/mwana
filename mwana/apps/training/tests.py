@@ -84,7 +84,7 @@ class TestApp(TestScript):
             tz > training start kdh
             ha < Training is starting at Kafue District Hospital, kdh. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Kafue District Hospital, kdh. Treat notifications you receive from this clinic as training data
-            tz < When the trainees finish the course remind them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>
+            tz < When the trainees finish the course tell them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba
             tz < Thanks Trainer Zulu for your message that training is starting for Kafue District Hospital. At end of training please send TRAINING STOP
             """
         self.runScript(script)
@@ -104,7 +104,7 @@ class TestApp(TestScript):
             tz > training start 403012
             ha < Training is starting at Central Clinic, 403012. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Central Clinic, 403012. Treat notifications you receive from this clinic as training data
-            tz < When the trainees finish the course remind them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>
+            tz < When the trainees finish the course tell them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba
             tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP
             """
         self.runScript(script)

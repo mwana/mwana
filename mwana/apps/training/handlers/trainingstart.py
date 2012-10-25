@@ -76,8 +76,8 @@ class TrainingStartHandler(KeywordHandler):
 
 
 
-        self.respond("When the trainees finish the course remind them to state "
-                     "that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>"
+        self.respond("When the trainees finish the course tell them to state "
+                     "that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba"
                      )
 
         self.respond("Thanks %(name)s for your message that training is "
