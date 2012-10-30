@@ -1,0 +1,12 @@
+{% extends  "layout.html" %}
+
+{% block title %}Mothers - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<div class="messages module">
+<h2>Mothers</h2>
+{{ mothers_table.as_html }}
+</div>
+
+{% endblock %}

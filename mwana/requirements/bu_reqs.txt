@@ -14,7 +14,6 @@ Unidecode==0.04.9
 celery==3.0.7
 django-celery
 django-kombu
-
 # these are busted on windows so put them last
 lxml==2.2.4
 psycopg2==2.2.1

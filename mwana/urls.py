@@ -40,6 +40,7 @@ urlpatterns = patterns('',
     (r'^couchforms/', include('couchforms.urls')),
     (r'^couchlog/', include('couchlog.urls')),
     (r'^touchforms/', include('touchforms.urls')),
+    (r'^smgl/', include('mwana.apps.smgl.urls')),
 )
 
 # Contrib Auth Password Management

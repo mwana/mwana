@@ -14,8 +14,8 @@ RESULTS160_SLUGS = {
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
                     'rural_health_centre', 'health_post'),
     'ZONE_SLUGS': ('zone',),
-    'DISTRICT_SLUGS': ('districts',), # XXX verify me
-    'PROVINCE_SLUGS': ('provinces',), # XXX verify me
+    'DISTRICT_SLUGS': ('districts',),  # XXX verify me
+    'PROVINCE_SLUGS': ('provinces',),  # XXX verify me
 }
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
@@ -36,8 +36,6 @@ EMAIL_SUBJECT_PREFIX = '[Mwana] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
-
-
 TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'to-zm'
@@ -47,7 +45,7 @@ LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 ROOT_URLCONF = 'mwana.zambia.urls'
 
 # LOG_FORMAT override to include time
-LOG_FORMAT  = "[%(asctime)s] [%(name)s]: %(message)s"
+LOG_FORMAT = "[%(asctime)s] [%(name)s]: %(message)s"
 
 #--------------Zambia Tab overrides---------------
 # this rapidsms-specific setting defines which views are linked by the
@@ -58,6 +56,7 @@ RAPIDSMS_TABS = [
     ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
     ("smscouchforms.views.download",       "View Data"),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    ("mwana.apps.smgl.views.mothers",  "Mothers"),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
