@@ -18,17 +18,16 @@ class Command(LabelCommand):
     def handle(self, * args, ** options):
 
 
-        if len(args) < 2:
+        if len(args) < 1:
             raise CommandError('Please specify district followed by slug.')
 
-        district_name = args[0]
-        slug = args[1]
+        slug = args[0]
 
-        district = Location.objects.get(name__iexact=district_name, slug=slug)
-
+        district = Location.objects.get(slug=slug)
+        district_name = district.name
         print "Province is %s"%district.parent.name
-        dho = ReportingGroup.objects.get(name__iexact="DHO %s" %district_name )
-        pho = ReportingGroup.objects.get(name__iexact="PHO %s" %district.parent.name.split()[0] )
+        dho, _ = ReportingGroup.objects.get_or_create(name__iexact="DHO %s" %district_name )
+        pho, _ = ReportingGroup.objects.get_or_create(name__iexact="PHO %s" %district.parent.name.split()[0] )
 
         facilities = Location.objects.filter(parent=district, send_live_results=True, supportedlocation__supported=True)
         self.try_assign(dho, facilities)
