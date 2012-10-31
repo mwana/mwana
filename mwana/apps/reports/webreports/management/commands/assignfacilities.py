@@ -25,9 +25,12 @@ class Command(LabelCommand):
 
         district = Location.objects.get(slug=slug)
         district_name = district.name
+        print "District is %s"%district.name
         print "Province is %s"%district.parent.name
-        dho, _ = ReportingGroup.objects.get_or_create(name__iexact="DHO %s" %district_name )
-        pho, _ = ReportingGroup.objects.get_or_create(name__iexact="PHO %s" %district.parent.name.split()[0] )
+        dho= ReportingGroup.objects.get_or_create(name="DHO %s" %district_name )[0]
+        pho = ReportingGroup.objects.get_or_create(name="PHO %s" %district.parent.name.split()[0] )[0]
+
+        
 
         facilities = Location.objects.filter(parent=district, send_live_results=True, supportedlocation__supported=True)
         self.try_assign(dho, facilities)
