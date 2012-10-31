@@ -275,7 +275,7 @@ class JoinHandler(KeywordHandler):
                     zone_slug, name.split()[0].lower(),
                     " ".join(str for str in name.split()[1:]))
 
-                if lang_code:lang_code = lang_code.lower()
+                if lang_code:lang_code = lang_code.lower()[:5]
                 if lang_code and lang_code == 'eng': lang_code = ''
 
             # require the clinic to be pre-populated
