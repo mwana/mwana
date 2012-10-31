@@ -30,7 +30,7 @@ class Command(LabelCommand):
         dho = ReportingGroup.objects.get(name__iexact="DHO %s" %district_name )
         pho = ReportingGroup.objects.get(name__iexact="PHO %s" %district.parent.name.split()[0] )
 
-        facilities = Location.objects.filter(parent=district, send_live_results=True)
+        facilities = Location.objects.filter(parent=district, send_live_results=True, supportedlocation__supported=True)
         self.try_assign(dho, facilities)
         self.try_assign(pho, facilities)
        
