@@ -28,6 +28,8 @@ admin.site.register(MessageGroup, MessageGroupAdmin)
 
 class SupportedLocationAdmin(admin.ModelAdmin):
     list_display = ('location', 'supported')
+    list_filter = ('supported',)
+    search_fields = ('location__name', 'location__slug',)
 admin.site.register(SupportedLocation, SupportedLocationAdmin)
 
 class PhoReportNotificationAdmin(admin.ModelAdmin):
