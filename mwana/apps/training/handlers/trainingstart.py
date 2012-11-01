@@ -75,11 +75,12 @@ class TrainingStartHandler(KeywordHandler):
             hw_msg.send()
 
 
+        self.respond("Thanks %(name)s for your message that training is "
+                     "starting for %(clinic)s. At end of training please send TRAINING STOP",
+                     name=contact.name, clinic=location.name)
 
         self.respond("When the trainees finish the course tell them to state "
                      "that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba"
                      )
 
-        self.respond("Thanks %(name)s for your message that training is "
-                     "starting for %(clinic)s. At end of training please send TRAINING STOP",
-                     name=contact.name, clinic=location.name)
+        
