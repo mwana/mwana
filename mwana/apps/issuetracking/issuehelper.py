@@ -60,8 +60,8 @@ class IssueHelper:
         """
         Returns trained people
         """
-
+        max_per_page = 400
         issues = Trained.objects.all().order_by(order)
-        return self.get_paginated(issues, page, 400)
+        return self.get_paginated(issues, page, max_per_page), max_per_page
         
     

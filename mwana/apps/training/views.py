@@ -139,9 +139,9 @@ def trained(request):
 
     issueHelper = IssueHelper()
 
-    (query_set, num_pages, number, has_next, has_previous) = issueHelper.get_trained_people("%s%s"% (direction, sort), page)
+    (query_set, num_pages, number, has_next, has_previous), max_per_page = issueHelper.get_trained_people("%s%s"% (direction, sort), page)
 
-
+    offset = max_per_page * (number - 1)
     return render_to_response('training/trained.html',
                               {
                               'form': form,
@@ -150,6 +150,7 @@ def trained(request):
                               'confirm_message': confirm_message,
                               'num_pages': num_pages,
                               'number': number,
+                              'offset': offset,
                               'has_next': has_next,
                               'has_previous': has_previous,
                               }, context_instance=RequestContext(request)
