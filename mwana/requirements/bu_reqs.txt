@@ -1,5 +1,5 @@
 # the set of requirements that are unique to the BU ZCHARD deployment
-Django==1.4
+Django==1.4.2
 -e git+http://github.com/caktus/rapidsms-threadless-router.git#egg=threadless_router-dev
 django-rosetta==0.6.6
 django-taggit==0.9.3
