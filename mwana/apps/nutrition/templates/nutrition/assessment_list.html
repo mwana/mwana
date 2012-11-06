@@ -12,6 +12,7 @@
       href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
 <link type="text/css" rel="stylesheet"
       href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
 <style type="text/css" media="screen">
     span.x {
     color:#bbbbbb;
@@ -22,6 +23,50 @@
 </style>
 {% endblock %}
 
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
+{% endblock javascripts %}
+
 {% block content %}
 
 <div class="module">
@@ -30,9 +75,9 @@
 <br />
 <form name="getValues" method="GET" action="">
     <p>Select Period:
-    <input type="text" name="startdate" value="{{ startdate }}" size="12" />
+    <input type="text" name="startdate" value="{{ startdate }}" size="12"  class="dateformat-Y-ds-m-ds-d" />
     To
-    <input type="text" name="enddate" value="{{ enddate }}" size="12" />
+    <input type="text" name="enddate" value="{{ enddate }}" size="12"  class="dateformat-Y-ds-m-ds-d" />
     Location:
     <select name="location" value="{{ location }}">
         <option value="All Districts"

@@ -55,8 +55,8 @@ def malawi_reports(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     locations = sorted(DISTRICTS)
-    remindmis = PatientEvent.objects.filter(Q(date__gte=startdate),
-                                        Q(date__lte=enddate)).order_by('-date')
+    remindmis = PatientEvent.objects.filter(Q(date_logged__gte=startdate),
+                                        Q(date_logged__lte=enddate)).order_by('-date')
     mothers = remindmis.filter(event__name="Care program")
     children = remindmis.filter(event__name="Birth")
     if selected_location == "All Districts":
@@ -77,8 +77,8 @@ def csv_mother_count(request):
     headers = ['Clinic', 'Patient', 'Event', 'Date']
     keys = ['cba_conn.contact.clinic', 'patient', 'event', 'date']
     location, startdate, enddate = get_report_criteria(request)
-    mother_count = PatientEvent.objects.filter(Q(date__gte=startdate),\
-                            Q(date__lte=enddate), Q(event__name="Care program"))
+    mother_count = PatientEvent.objects.filter(Q(date_logged__gte=startdate),\
+                            Q(date_logged__lte=enddate), Q(event__name="Care program"))
     if location != "All Districts":
         mother_count = mother_count.filter(\
                 Q(cba_conn__contact__location__parent__name=location) |\
@@ -90,8 +90,8 @@ def csv_child_count(request):
     headers = ['Clinic', 'Patient', 'Event', 'Date']
     keys = ['cba_conn.contact.clinic', 'patient', 'event', 'date']
     location, startdate, enddate = get_report_criteria(request)
-    child_count = PatientEvent.objects.filter(Q(date__gte=startdate),\
-                                Q(date__lte=enddate), Q(event__name="Birth"))
+    child_count = PatientEvent.objects.filter(Q(date_logged__gte=startdate),\
+                                Q(date_logged__lte=enddate), Q(event__name="Birth"))
     if location != "All Districts":
         child_count = child_count.filter(\
                 Q(cba_conn__contact__location__parent__name=location) |\
