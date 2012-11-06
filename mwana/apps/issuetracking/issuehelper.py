@@ -81,6 +81,10 @@ class IssueHelper:
             .exclude(text__istartswith='check')\
             .exclude(text__istartswith='leave')\
             .exclude(text__istartswith='join')\
+            .exclude(text__istartswith='trace')\
+            .exclude(text__istartswith='received')\
+            .exclude(text__istartswith='send')\
+            .exclude(text__icontains='demo')\
             .exclude(text__istartswith='sent')
         return self.get_paginated(messages, page, max_per_page), max_per_page
         
