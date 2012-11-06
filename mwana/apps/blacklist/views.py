@@ -94,19 +94,17 @@ def blacklisted(request):
     dir = read_request(request, "ot")
     navigation = read_request(request, "navigate")
     page = read_request(request, "page")
-    sort = "location"
+    sort = "contact"
     direction = ""
     try:
-        sort = {'1':'name', '2':'location', '3':'type', '4':'email', '5':'phone', '6':'date', '7':'trained_by', '8':'additional_text'}[order]
+        sort = {'1':'contact', '6':'date', '8':'text'}[order]
         direction = {'asc':'', 'desc':'-'}[dir]
     except:
         pass
-
+    
 
     page = get_default_int(page)
     page = page + get_next_navigation(navigation)
-    confirm_message = ""
-
     
 
 

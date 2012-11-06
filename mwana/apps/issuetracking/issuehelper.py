@@ -73,7 +73,15 @@ class IssueHelper:
         """
         max_per_page = 400
         blacklist = (bl.phone for bl in BlacklistedPeople.objects.filter(valid=True))
-        messages = Message.objects.filter(direction='I', connection__identity__in=blacklist).order_by('id')
+        messages = Message.objects.filter(
+        direction='I', connection__identity__in=blacklist).order_by(order)\
+            .exclude(text__istartswith='help')\
+            .exclude(text__istartswith='training')\
+            .exclude(text__istartswith='result')\
+            .exclude(text__istartswith='check')\
+            .exclude(text__istartswith='leave')\
+            .exclude(text__istartswith='join')\
+            .exclude(text__istartswith='sent')
         return self.get_paginated(messages, page, max_per_page), max_per_page
         
     
