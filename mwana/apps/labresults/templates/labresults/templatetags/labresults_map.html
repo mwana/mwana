@@ -1,8 +1,9 @@
+{% load labresults_tags %}
 <div style="overflow: hidden;">
 <h3>{{ location.name }}</h3>
-<ul style="height: 75px; overflow: hidden;">
-    <li style="border: 0; margin: 0;">4 registered clinic staff</li>
-    <li style="border: 0; margin: 0;">12 DBS cards sent this month</li>
-    <li style="border: 0; margin: 0;">8 DBS results received this month</li>
+<ul style="height: 75px; overflow-y: scroll; overflow-x: hidden;">
+    <li style="border: 0; margin: 0;">{% render_anthrowatch %}</li>
+    <li style="border: 0; margin: 0;">{% render_dbs_results %}</li>
+{% render_remindmis %}
 </ul>
 </div>
