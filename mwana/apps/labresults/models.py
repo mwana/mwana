@@ -100,6 +100,8 @@ class Result(models.Model):
                                                        #id, clinic-assigned sample id, or even patient name
     requisition_id_search = models.CharField(max_length=50, db_index=True) # requisition ID with punctuation removed, for search purposes
 
+    clinic_care_no = models.CharField(max_length=50)   # could potentially be handled by requisition_id
+
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,

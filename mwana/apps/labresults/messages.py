@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
 from django.conf import settings
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
 from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
 
@@ -46,31 +47,52 @@ def urgent_requisitionid_update(result):
 
 def build_printer_results_messages(results):
     """
-    From a list of lab results, build a list of messages reporting 
+    From a list of lab results, build a list of messages reporting
     their status
     """
     result_strings = []
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "old_req_id":res.old_value.split(":")[0],
-                   "old_result":res.get_old_result_text(),
-                   "new_req_id":res.requisition_id,
-                   "new_result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                msg = (CHANGED_PRINTER_RESULTS_MW % {"clinic": res.clinic.name,
+                            "old_req_id": res.old_value.split(":")[0],
+                            "old_result": res.get_old_result_text(),
+                            "new_req_id": res.requisition_id,
+                            "new_result": res.get_result_text(),
+                            "clinic_care_no": res.clinic_care_no,
+                            "test_type": TEST_TYPE,
+                            "lab_name": settings.ADH_LAB_NAME,
+                            "sms_date": date.isoformat(date.today())})
+            else:
+                msg = (CHANGED_PRINTER_RESULTS % {"clinic": res.clinic.name,
+                    "old_req_id": res.old_value.split(":")[0],
+                    "old_result": res.get_old_result_text(),
+                    "new_req_id": res.requisition_id,
+                    "new_result": res.get_result_text(),
+                    "test_type": TEST_TYPE,
+                    "lab_name": settings.ADH_LAB_NAME,
+                    "sms_date": date.isoformat(date.today())})
         else:
-            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "req_id":res.requisition_id,
-                   "result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                msg = (PRINTER_RESULTS_MW % {"clinic": res.clinic.name,
+                        "req_id": res.requisition_id,
+                        "clinic_care_no": res.clinic_care_no,
+                        "result": res.get_result_text(),
+                        "test_type": TEST_TYPE,
+                        "lab_name": settings.ADH_LAB_NAME,
+                        "sms_date": date.isoformat(date.today())})
+            else:
+                msg = (PRINTER_RESULTS % {"clinic": res.clinic.name,
+                   "req_id": res.requisition_id,
+                   "result": res.get_result_text(),
+                   "test_type": TEST_TYPE,
+                   "lab_name": settings.ADH_LAB_NAME,
+                   "sms_date": date.isoformat(date.today())})
         result_strings.append(msg)
-               
+
     return result_strings
+
 
 def build_results_messages(results):
     """
@@ -82,17 +104,33 @@ def build_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            result_strings.append("**** %s;%s changed to %s;%s" % (
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                if len(res.old_value.split(":")[0]) > 10:
+                    result_strings.append("**** %s;%s changed to %s;%s" % (
                                   res.old_value.split(":")[0],
                                   res.get_old_result_text(),
                                   res.requisition_id,
                                   res.get_result_text()))
+                else:
+                    result_strings.append("**** %s;%s changed to %s;%s" % (
+                        res.old_value.split(":")[0],
+                        res.get_old_result_text(),
+                        res.clinic_care_no,
+                        res.get_result_text()))
         else:
-            result_strings.append("**** %s;%s" % (res.requisition_id,
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                if len(res.requisition_id) > 10:
+                    result_strings.append("**** %s;%s" % (res.requisition_id,
+                                                      res.get_result_text()))
+                else:
+                    result_strings.append("**** %s;%s" % (res.clinic_care_no,
+                                                          res.get_result_text()))
+            else:
+                result_strings.append("**** %s;%s" % (res.requisition_id,
                                   res.get_result_text()))
 
     result_text, remainder = combine_to_length(result_strings,
-                                               length=max_len-len(RESULTS))
+                                               length=max_len - len(RESULTS))
     first_msg = RESULTS + result_text
     responses = [first_msg]
     while remainder:
@@ -103,8 +141,8 @@ def build_results_messages(results):
 
 def combine_to_length(list, delimiter=". ", length=None):
     """
-    Combine a list of strings to a maximum of a specified length, using the 
-    delimiter to separate them.  Returns the combined strings and the 
+    Combine a list of strings to a maximum of a specified length, using the
+    delimiter to separate them.  Returns the combined strings and the
     remainder as a tuple.
     """
     if length is None:
@@ -112,7 +150,7 @@ def combine_to_length(list, delimiter=". ", length=None):
     if not list:  return ("", [])
     if len(list[0]) > length:
         raise Exception("None of the messages will fit in the specified length of %s" % length)
-    
+
     msg = ""
     for i in range(len(list)):
         item = list[i]
@@ -122,4 +160,4 @@ def combine_to_length(list, delimiter=". ", length=None):
         else:
             return (msg, list[i:])
     return (msg, [])
- 
+

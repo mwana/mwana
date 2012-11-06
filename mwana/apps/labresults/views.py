@@ -242,6 +242,7 @@ def accept_record (record, payload):
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
+        'clinic_care_no': dictval(record, 'clinic_care_no'),
     }
 
     #need to keep old record 'pristine' so we can check which fields have changed
