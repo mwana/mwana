@@ -13,4 +13,5 @@ urlpatterns = patterns('',
     (r'^logs/', include('mwana.apps.filteredlogs.urls')),
     (r'^issues/', include('mwana.apps.issuetracking.urls')),
     (r'^trained/', include('mwana.apps.training.urls')),
+    (r'^blacklist/', include('mwana.apps.blacklist.urls')),
 )

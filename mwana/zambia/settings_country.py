@@ -29,6 +29,7 @@ INSTALLED_APPS.append("mwana.apps.email")
 INSTALLED_APPS.append("mwana.apps.birthcertification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 
+INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
 ADMINS = (
           ('Trevor Sinkala', 'sinkalation@gmail.com'),
@@ -80,6 +81,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
     ('mwana.apps.training.views.trained', 'Trained People'),
+    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

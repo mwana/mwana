@@ -1,6 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.blacklist.models import BlacklistedPeople
 from mwana.apps.training.models import Trained
+
+from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
@@ -63,5 +66,14 @@ class IssueHelper:
         max_per_page = 400
         issues = Trained.objects.all().order_by(order)
         return self.get_paginated(issues, page, max_per_page), max_per_page
+
+    def get_blacklisted_people(self, order='pk', page=1):
+        """
+        Returns blacklisted people
+        """
+        max_per_page = 400
+        blacklist = (bl.phone for bl in BlacklistedPeople.objects.filter(valid=True))
+        messages = Message.objects.filter(direction='I', connection__identity__in=blacklist).order_by('id')
+        return self.get_paginated(messages, page, max_per_page), max_per_page
         
     
