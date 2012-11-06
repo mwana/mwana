@@ -67,7 +67,7 @@ class TrainingStartHandler(KeywordHandler):
 
 
         for dho in dhos:
-            hw_msg = OutgoingMessage(contact.default_connection,
+            hw_msg = OutgoingMessage(dho.default_connection,
                                      DHO_TRAINING_START_NOTIFICATION % {
                                      'contact':dho.name,
                                      'location':location.name,
