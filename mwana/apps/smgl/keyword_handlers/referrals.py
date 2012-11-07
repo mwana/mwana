@@ -1,7 +1,7 @@
 from rapidsms.messages import OutgoingMessage
 from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
 from mwana.apps.smgl.models import Referral
-from mwana.apps.smgl.utils import get_location, to_time
+from mwana.apps.smgl.utils import get_location, to_time, get_session_message
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
@@ -16,6 +16,9 @@ def refer(session, xform, router):
         "Must be a registered contact to refer"
     assert session.connection.contact.location is not None, \
         "Contact must have a location to refer"
+
+    get_session_message(session)
+
     name = session.connection.contact.name
 
     mother_id = xform.xpath("form/unique_id")
@@ -39,6 +42,7 @@ def refer(session, xform, router):
             referral.time = to_time(xform.xpath("form/time"))
         except ValueError, e:
             router.outgoing(OutgoingMessage(session.connection, str(e)))
+            get_session_message(session, direction='O')
             return True
 
         referral.from_facility = session.connection.contact.location
@@ -55,11 +59,14 @@ def refer(session, xform, router):
                                                      "time": referral.time.strftime("%H:%M"),
                                                      "is_emergency": yesno(referral.is_emergency)}
                 router.outgoing(OutgoingMessage(c.default_connection, msg))
+    get_session_message(session, direction='O')
     return True
 
 
 @registration_required
 def referral_outcome(session, xform, router):
+    get_session_message(session)
+
     name = session.connection.contact.name if session.connection.contact else ""
     mother_id = xform.xpath("form/unique_id")
 
@@ -68,6 +75,7 @@ def referral_outcome(session, xform, router):
         router.outgoing(OutgoingMessage(session.connection,
                                         const.REFERRAL_NOT_FOUND % \
                                         {"unique_id": mother_id}))
+        get_session_message(session, direction='O')
         return True
 
     ref = refs[0]
@@ -75,6 +83,7 @@ def referral_outcome(session, xform, router):
         router.outgoing(OutgoingMessage(session.connection,
                                         const.REFERRAL_ALREADY_RESPONDED % \
                                         {"unique_id": mother_id}))
+        get_session_message(session, direction='O')
         return True
 
     ref.responded = True
@@ -90,6 +99,7 @@ def referral_outcome(session, xform, router):
     router.outgoing(OutgoingMessage(session.connection,
                                     const.REFERRAL_OUTCOME_RESPONSE % \
                                         {'name': name, "unique_id": mother_id}))
+    get_session_message(session, direction='O')
 
     # also notify folks at the referring facility about the outcome
     for c in _get_people_to_notify_outcome(ref):

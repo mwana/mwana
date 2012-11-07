@@ -1,10 +1,10 @@
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl.utils import get_date, DateFormatError
 from mwana.apps.smgl.models import DeathRegistration
-from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
 import datetime
+
 
 @registration_required
 def death_registration(session, xform, router):
@@ -12,15 +12,15 @@ def death_registration(session, xform, router):
     Keyword: death
     """
     name = session.connection.contact.name if session.connection.contact else ""
-    
+
     try:
         date = get_date(xform, "death_date_dd", "death_date_mm", "death_date_yyyy")
     except DateFormatError, e:
         router.outgoing(OutgoingMessage(session.connection, str(e)))
         return True
-    
+
     if date > datetime.datetime.now().date():
-        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST, 
+        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST,
                  **{"date_name": "Date of Death", "date": date}))
         return True
 
@@ -29,8 +29,9 @@ def death_registration(session, xform, router):
                             date=date,
                             unique_id=xform.xpath("form/unique_id"),
                             person=xform.xpath("form/death_type"),
-                            place=xform.xpath("form/death_location"))
-    reg.save()      
+                            place=xform.xpath("form/death_location"),
+                            district=session.connection.contact.get_current_district()
+                            )
+    reg.save()
     resp = const.DEATH_REG_RESPONSE % {"name": name}
     router.outgoing(OutgoingMessage(session.connection, resp))
-    

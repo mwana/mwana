@@ -10,7 +10,8 @@ from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit, ToldReminder
-from mwana.apps.smgl.utils import get_value_from_form, send_msg, make_date
+from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
+                get_session_message)
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,6 @@ def pregnant_registration(session, xform, router):
         REASON_FOR_VISIT(ROUTINE/NON-ROUTINE) ZONE LMP_dd LMP_mm LMP_yyyy EDD_dd EDD_mm EDD_yyyy
     """
     logger.debug('Handling the REG keyword form')
-
     connection = session.connection
 
     # We must get the location from the Contact (Data Associate) who
@@ -189,12 +189,15 @@ def told(session, xform, router):
     TOLD Mother_UID EDD/NVD/REF
     """
     logger.debug('Handling the TOLD keyword form')
-
     connection = session.connection
+
+    get_session_message(session)
 
     if not connection.contact:
         send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
                  name=connection.contact.name)
+        get_session_message(session, direction='O')
+
         return True
 
     unique_id = get_value_from_form('unique_id', xform)
@@ -203,16 +206,20 @@ def told(session, xform, router):
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
         send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
+        get_session_message(session, direction='O')
+
         return True
     else:
         # Generate the TOLD Reminder database entry
         ToldReminder.objects.create(
                             contact=connection.contact,
                             mother=mother,
-                            connection=connection,
+                            session=session,
                             date=session.modified_time,
                             type=reminder_type,
                             )
         send_msg(connection, const.TOLD_COMPLETE, router,
                  name=connection.contact.name)
+        get_session_message(session, direction='O')
+
     return True

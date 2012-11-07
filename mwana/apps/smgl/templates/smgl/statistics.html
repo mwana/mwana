@@ -1,0 +1,99 @@
+{% extends  "layout.html" %}
+{% load djtables_tags %}
+
+{% block title %}Statistics - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+{{ form.media.css }}
+
+{% endblock %}
+
+
+{% block javascripts %}
+  <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
+  <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
+  <script>
+      $(function() {
+        $( "#id_start_date" ).datepicker();
+        $( "#id_end_date" ).datepicker();
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="statistics module">
+
+<h2>Filtering</h2>
+<form action="" method="GET" >
+  <table>
+    <thead>
+      <tr>
+        <th colspan="2">Period</th>
+        <th colspan="2">Location</th>
+      </tr>
+      <tr>
+        <th>Start</th>
+        <th>End</th>
+        <th>Province</th>
+        <th>District</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          {{ form.start_date.errors}}
+          {{ form.start_date }}
+        </td>
+        <td>
+          {{ form.end_date.errors}}
+          {{ form.end_date }}
+        </td>
+        <td>
+          {{ form.province.errors}}
+          {{ form.province }}
+        </td>
+        <td>
+          {{ form.district.errors}}
+          {{ form.district }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+    <input type="submit" class="btn" name="filter" value="Filter" />
+    <input type="submit" class="btn" name="export" value="Export" />
+</form>
+{{ form.media.js }}
+<h3>National Statistics</h3>
+
+<table id="records">
+    {% table_cols statistics_table %}
+    <thead>
+      <tr>
+       <th></th>
+       <th style="text-align: center" colspan="3">Births</th>
+       <th style="text-align: center" colspan="3">Infant Deaths</th>
+       <th style="text-align: center" colspan="3">Mother Deaths</th>
+       <th style="text-align: center" colspan="4">ANC</th>
+       <th style="text-align: center" colspan="3">POS</th>
+      </tr>
+    </thead>
+    {% table_head statistics_table %}
+    {% table_body statistics_table %}
+    {% table_foot statistics_table %}
+</table>
+
+</div>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+        function newParameters(query) {
+            query.province = $('#id_province').val();
+        }
+        $('#id_district_0').djselectable('option', 'prepareQuery', newParameters);
+    });
+</script>
+
+{% endblock %}

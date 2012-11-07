@@ -95,6 +95,7 @@ class PregnantMother(models.Model):
         Returns a reverse time-ordered list of all messages related to
         the mother.
         """
+        messages = []
         referrals = self.referral_set.all()
         reminders = self.remindernotification_set.all()
         birth_regs = self.birthregistration_set.all()
@@ -102,6 +103,11 @@ class PregnantMother(models.Model):
         amb_outcomes = self.ambulanceoutcome_set.all()
         amb_requests = self.ambulancerequest_set.all()
         amb_responses = self.ambulanceresponse_set.all()
+
+        # if data types are similar, chain then loop through to generate the
+        # list of dicts. If dissimilar, generate dicts for each type first,
+        # is a values_list possible directly from the queryset?
+
         return [{'date': 1, 'type': 2, 'sender': 3, 'facility': 4, 'message': 'Test'}, ]
 
 #        return sorted(chain(posts, videos, polls, photos, questions),
@@ -143,6 +149,10 @@ class FacilityVisit(models.Model):
 
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(Location, help_text="The location of this visit")
+    district = models.ForeignKey(Location, help_text="The district for this location",
+                                 null=True, blank=True,
+                                 related_name="district_location")
+
     visit_date = models.DateField()
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
@@ -154,6 +164,18 @@ class FacilityVisit(models.Model):
     def is_latest_for_mother(self):
         return FacilityVisit.objects.filter(mother=self.mother)\
             .order_by("-created_date")[0] == self
+
+    def save(self, *args, **kwargs):
+        """
+        Sets the district associated with the current location
+        """
+        location = self.location
+        loc_type = location.type.singular.lower()
+        while loc_type != 'district':
+            location = location.parent
+            loc_type = location.type.singular.lower()
+        self.district = location
+        super(FacilityVisit, self).save(*args, **kwargs)
 
 
 class AmbulanceRequest(models.Model):
@@ -357,7 +379,7 @@ GENDER_CHOICES = (("bo", "boy"), ("gi", "girl"))
 PLACE_CHOICES = (("h", "home"), ("f", "facility"))
 
 
-class BirthRegistration(models.Model):
+class BirthRegistration(FormReferenceBase):
     """
     Database representation of a birth registration form
     """
@@ -369,11 +391,12 @@ class BirthRegistration(models.Model):
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
     complications = models.BooleanField(default=False)
     number = models.IntegerField(default=1)
+    district = models.ForeignKey(Location, null=True)
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
 
-class DeathRegistration(models.Model):
+class DeathRegistration(FormReferenceBase):
     """
     Database representation of a death registration form
     """
@@ -383,6 +406,7 @@ class DeathRegistration(models.Model):
     date = models.DateField()
     person = models.CharField(max_length=3, choices=PERSON_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
+    district = models.ForeignKey(Location, null=True)
 
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
@@ -391,7 +415,7 @@ REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("edd_14", "Expected Delivery, 14 days before"))
 
 
-class ReminderNotification(MotherReferenceBase):
+class ReminderNotification(FormReferenceBase, MotherReferenceBase):
     """
     Any notifications sent to user
     """
@@ -411,12 +435,10 @@ TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
                      ("ref", "Referral"))
 
 
-class ToldReminder(models.Model):
+class ToldReminder(FormReferenceBase, MotherReferenceBase):
     """
     Database representation of a told reminder form
     """
     contact = models.ForeignKey(Contact, null=True)
-    connection = models.ForeignKey(Connection)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     date = models.DateTimeField()
     type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)

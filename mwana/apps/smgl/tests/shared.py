@@ -1,11 +1,16 @@
-from threadless_router.tests.scripted import TestScript
-from mwana.apps.smgl.models import PreRegistration
 import logging
+
+from datetime import datetime, timedelta
+
+from rapidsms.models import Connection
+
+from threadless_router.tests.scripted import TestScript
+
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
-from rapidsms.models import Connection
-from datetime import datetime, timedelta
+from mwana.apps.smgl.models import PreRegistration
+
 
 def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     if not lang:
@@ -17,9 +22,10 @@ def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     pre.phone_number = ident
     pre.unique_id = ident.strip().strip('+')
     pre.title = ctype
-    pre.language=lang
+    pre.language = lang
     pre.save()
     return pre
+
 
 class SMGLSetUp(TestScript):
 
@@ -30,7 +36,7 @@ class SMGLSetUp(TestScript):
         self.tomorrow = (datetime.now() + timedelta(days=1)).date()
         self.later = (datetime.now() + timedelta(days=30)).date()
         super(SMGLSetUp, self).setUp()
-        
+
     def createUser(self, ctype, ident, name="Anton", location="804024"):
         create_prereg_user(name, location, ident, ctype, "en")
         type_display = ContactType.objects.get(slug__iexact=ctype).name
@@ -38,7 +44,7 @@ class SMGLSetUp(TestScript):
         script = """
             %(num)s > join %(name)s en
             %(num)s < Thank you for registering! You have successfully registered as a %(ctype)s at %(loc)s.
-        """ % { "num": ident, "name": name, "ctype": type_display, "loc": place_display}
+        """ % {"num": ident, "name": name, "ctype": type_display, "loc": place_display}
         self.runScript(script)
         return Connection.objects.get(identity=ident).contact
 

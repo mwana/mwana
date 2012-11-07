@@ -57,8 +57,14 @@ class ReminderNotificationAdmin(admin.ModelAdmin):
 
 
 class ToldReminderAdmin(admin.ModelAdmin):
-    list_display = ['mother', 'type', 'contact', 'date']
+    list_display = ['mother', 'type', '_session_connection', 'date']
     list_filter = ['type']
+
+    def _session_connection(self, obj):
+        return obj.session.contact
+    _session_connection.short_description = 'Session Connection'
+    _session_connection.admin_order_field = 'session__connection'
+
 
 admin.site.register(XFormKeywordHandler, XFormKeywordHandlerAdmin)
 admin.site.register(PreRegistration, PreRegsitrationAdmin)

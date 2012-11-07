@@ -1,0 +1,24 @@
+/* vim:set et ts=4 sw=4 */
+
+.statistics table {
+    width: 100%;
+}
+
+.statistics th,
+.statistics td {
+    white-space: nowrap;
+}
+.statistics .upper {
+    text-transform: uppercase
+}
+
+.statistics #records tr:nth-child(2n) {
+    background-color: #CCC;
+}
+
+.statistics #records tr:hover {
+    background-color: #999;
+}
+
+.statistics col { width: 1%; }
+.statistics col:first-child { width: auto; }

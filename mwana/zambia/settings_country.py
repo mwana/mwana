@@ -52,10 +52,8 @@ LOG_FORMAT = "[%(asctime)s] [%(name)s]: %(message)s"
 # tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
-    ('smsforms.views.list_forms', 'Decision Tree XForms'),
-    ('smsforms.views.view_triggers', 'Decision Tree Triggers'),
-    ("smscouchforms.views.download",       "View Data"),
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    ("mwana.apps.smgl.views.statistics",  "Statistics"),
+#    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
     ("mwana.apps.smgl.views.mothers",  "Mothers"),
 ]
 

@@ -38,7 +38,7 @@ INSTALLED_BACKENDS = {
 # to help you get started quickly, many django/rapidsms apps are enabled
 # by default. you may wish to remove some and/or add your own.
 INSTALLED_APPS = [
-    "dupechecker", # needs to go near the front
+    "dupechecker",  # needs to go near the front
 
     "threadless_router.backends.httptester",
     "threadless_router.backends.kannel",
@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'taggit',
 
     # common dependencies (which don't clutter up the ui).
-
+    "selectable",
     "rapidsms.contrib.ajax",
     "uni_form",
     "eav",

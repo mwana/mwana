@@ -7,5 +7,5 @@ from mwana.apps.smgl import views
 urlpatterns = patterns('',
     url(r"^mothers/$", views.mothers, name="mothers"),
     url(r"^mother/(?P<id>[\d]+)/$", views.mother_history, name="mother-history"),
-
+    url(r"^statistics/$", views.statistics, name="statistics"),
 )
