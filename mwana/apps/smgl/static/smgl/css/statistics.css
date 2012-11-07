@@ -1,9 +1,17 @@
 /* vim:set et ts=4 sw=4 */
 
 button.ui-button-icon-only {
-    height: 1.4em;
+    height: 19px;
     top: 6px;
     width: 2.4em;
+}
+
+.hasDatepicker {
+    font-family: Verdana,Arial,sans-serif;
+    font-size: 1.1em;
+    height: 12px;
+    margin-top: 0.4em;
+    width: 80px;
 }
 
 .statistics table {
