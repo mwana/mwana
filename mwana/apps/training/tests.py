@@ -17,6 +17,7 @@ from mwana.apps.training import tasks
 from mwana.apps.training.models import TrainingSession
 import time
 
+#TODO : add tests to carter for the modification to notify hyb workers and dho's
 
 class TestApp(TestScript):
     def setUp(self):

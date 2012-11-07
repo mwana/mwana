@@ -121,7 +121,7 @@ msgstr "Pa kulembesha, tumeeni: JOIN <CBA> <CLINIC CODE> <ZONE #> <YOUR NAME>"
 
 #: .\apps\labresults\handlers\join.py:338
 msgid "Please notify us next time there is a birth in your zone."
-msgstr "Mukwayi mukatwebe elyo umuntu akapaapa muchende yenu."
+msgstr "Mukwayi mukatwebe elyo umuntu akapaapa munchende yenu."
 
 #: .\apps\labresults\handlers\leave.py:9
 #, python-format
