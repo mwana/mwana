@@ -4,7 +4,7 @@ import selectable.forms as selectable
 
 from mwana.apps.locations.models import Location
 
-from .lookups import DistrictLookup
+from .lookups import DistrictLookup, ProvinceLookup
 
 
 class NationalStatisticsFilterForm(forms.Form):
@@ -15,11 +15,12 @@ class NationalStatisticsFilterForm(forms.Form):
     start_date = forms.DateField(required=False)
     end_date = forms.DateField(required=False)
 
-    province = forms.ModelChoiceField(queryset=Location.objects.filter(
-                                                    type__singular='Province'
-                                                    ),
-                                     empty_label='All Provinces',
-                                     required=False,)
+    province = selectable.AutoCompleteSelectField(
+        lookup_class=ProvinceLookup,
+        label='Select a Province',
+        required=False,
+        widget=selectable.AutoComboboxSelectWidget
+    )
 
     district = selectable.AutoCompleteSelectField(
         lookup_class=DistrictLookup,

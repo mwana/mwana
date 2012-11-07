@@ -4,13 +4,16 @@ from selectable.registry import registry
 from mwana.apps.locations.models import Location
 
 
+class ProvinceLookup(ModelLookup):
+    model = Location
+    filters = {'type__singular': 'Province'}
+    search_fields = ('name__icontains', )
 
 
 class DistrictLookup(ModelLookup):
     model = Location
     filters = {'type__singular': 'district'}
     search_fields = ('name__icontains', )
-
 
     def get_query(self, request, term):
         results = super(DistrictLookup, self).get_query(request, term)
@@ -21,6 +24,7 @@ class DistrictLookup(ModelLookup):
 
     def get_item_label(self, item):
         return u"%s, %s" % (item.name, item.parent)
+
 
 class FacilityLookup(ModelLookup):
     model = Location
@@ -41,6 +45,7 @@ class FacilityLookup(ModelLookup):
         if district:
             district_facilities = []
             for x in results:
+                # TODO --> Need this utility when this lookup is implemented
                 if get_location_district(x) == district:
                     district_facilities.append(x)
             return district_facilities
@@ -49,5 +54,6 @@ class FacilityLookup(ModelLookup):
     def get_item_label(self, item):
         return u"%s, %s" % (item.name, item.parent)
 
+registry.register(ProvinceLookup)
 registry.register(DistrictLookup)
 registry.register(FacilityLookup)

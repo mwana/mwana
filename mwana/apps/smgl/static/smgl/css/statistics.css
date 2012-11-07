@@ -1,5 +1,11 @@
 /* vim:set et ts=4 sw=4 */
 
+button.ui-button-icon-only {
+    height: 1.4em;
+    top: 6px;
+    width: 2.4em;
+}
+
 .statistics table {
     width: 100%;
 }
@@ -16,7 +22,7 @@
     background-color: #CCC;
 }
 
-.statistics #records tr:hover {
+.statistics #records tbody tr:hover {
     background-color: #999;
 }
 
