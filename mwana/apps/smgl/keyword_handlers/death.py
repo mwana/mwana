@@ -24,13 +24,15 @@ def death_registration(session, xform, router):
                  **{"date_name": "Date of Death", "date": date}))
         return True
 
-    reg = DeathRegistration(contact=session.connection.contact,
+    contact = session.connection.contact
+    reg = DeathRegistration(contact=contact,
                             connection=session.connection,
                             date=date,
                             unique_id=xform.xpath("form/unique_id"),
                             person=xform.xpath("form/death_type"),
                             place=xform.xpath("form/death_location"),
-                            district=session.connection.contact.get_current_district()
+                            district=contact.get_current_district(),
+                            facility=contact.get_current_facility()
                             )
     reg.save()
     resp = const.DEATH_REG_RESPONSE % {"name": name}

@@ -18,3 +18,12 @@ class ContactLocation(models.Model):
             location = location.parent
             loc_type = location.type.singular.lower()
         return location
+
+    def get_current_facility(self):
+        """
+        Returns the facility associated with the user's current location
+        """
+        location = self.location
+        while location.parent.type.singular.lower() != 'district':
+            location = location.parent
+        return location

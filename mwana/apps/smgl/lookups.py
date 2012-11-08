@@ -28,27 +28,14 @@ class DistrictLookup(ModelLookup):
 
 class FacilityLookup(ModelLookup):
     model = Location
-    excludes = {'type__singular__in': ['district', 'Province']}
+    filters = {'parent__type__singular': 'district'}
     search_fields = ('name__icontains', )
-
-    def get_queryset(self):
-        qs = self.model._default_manager.get_query_set()
-        if self.filters:
-            qs = qs.filter(**self.filters)
-        if self.excludes:
-            qs = qs.exclude(**self.excludes)
-        return qs
 
     def get_query(self, request, term):
         results = super(FacilityLookup, self).get_query(request, term)
         district = request.GET.get('district', '')
         if district:
-            district_facilities = []
-            for x in results:
-                # TODO --> Need this utility when this lookup is implemented
-                if get_location_district(x) == district:
-                    district_facilities.append(x)
-            return district_facilities
+            results = results.filter(parent=district)
         return results
 
     def get_item_label(self, item):

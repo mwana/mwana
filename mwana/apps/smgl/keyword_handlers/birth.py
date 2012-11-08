@@ -36,8 +36,8 @@ def birth_registration(session, xform, router):
     except PregnantMother.DoesNotExist:
         router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
         return True
-
-    reg = BirthRegistration(contact=session.connection.contact,
+    contact = session.connection.contact
+    reg = BirthRegistration(contact=contact,
                             connection=session.connection,
                             date=date,
                             mother=mom,
@@ -45,7 +45,8 @@ def birth_registration(session, xform, router):
                             place=xform.xpath("form/birth_place"),
                             complications=string_to_boolean(xform.xpath("form/complications")),
                             number=num_kids,
-                            district=session.connection.contact.get_current_district())
+                            district=contact.get_current_district(),
+                            facility=contact.get_current_facility())
     reg.save()
     resp = BIRTH_REG_RESPONSE % {"name": name}
     router.outgoing(OutgoingMessage(session.connection, resp))

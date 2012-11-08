@@ -2,16 +2,13 @@ from django import forms
 
 import selectable.forms as selectable
 
-from mwana.apps.locations.models import Location
-
-from .lookups import DistrictLookup, ProvinceLookup
+from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup
 
 
-class NationalStatisticsFilterForm(forms.Form):
+class StatisticsFilterForm(forms.Form):
     """
     A form to filter National Statistics
     """
-
     start_date = forms.DateField(required=False)
     end_date = forms.DateField(required=False)
 
@@ -29,20 +26,12 @@ class NationalStatisticsFilterForm(forms.Form):
         widget=selectable.AutoComboboxSelectWidget
     )
 
+    facility = selectable.AutoCompleteSelectField(
+        lookup_class=FacilityLookup,
+        label='Select a Facility',
+        required=False,
+        widget=selectable.AutoComboboxSelectWidget
+    )
+
     def save(self, *args, **kwargs):
         return self.cleaned_data
-
-
-class DistrictStatisticsFilterForm(NationalStatisticsFilterForm):
-    """
-    A form to filter District Statistics
-    """
-    def __init__(self, *args, **kwargs):
-        super(DistrictStatisticsFilterForm, self).__init__(*args, **kwargs)
-        self.facilties = Location.objects.exclude(type)
-
-    facility = forms.ModelChoiceField(queryset=Location.objects.filter(
-                                            type__singular__in='district'
-                                                    ),
-                                     empty_label='All Facilities',
-                                     required=False,)

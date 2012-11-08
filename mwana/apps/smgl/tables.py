@@ -42,7 +42,7 @@ class HistoryTable(Table):
 
 
 class StatisticsTable(Table):
-    district = Column()
+    location = Column()
     births_com = NamedColumn(col_name="COM")
     births_fac = NamedColumn(col_name="FAC")
     births_total = NamedColumn(col_name="Total")
@@ -61,4 +61,29 @@ class StatisticsTable(Table):
     pos3 = NamedColumn(col_name="3 POS")
 
     class Meta:
-        order_by = "-date"
+        order_by = "location"
+
+
+class StatisticsLinkTable(StatisticsTable):
+
+    location = Column(link=lambda cell:
+                    reverse("statistics", args=[cell.object['location'].id]))
+    births_com = NamedColumn(col_name="COM")
+    births_fac = NamedColumn(col_name="FAC")
+    births_total = NamedColumn(col_name="Total")
+    infant_deaths_com = NamedColumn(col_name="COM")
+    infant_deaths_fac = NamedColumn(col_name="FAC")
+    infant_deaths_total = NamedColumn(col_name="Total")
+    mother_deaths_com = NamedColumn(col_name="COM")
+    mother_deaths_fac = NamedColumn(col_name="FAC")
+    mother_deaths_total = NamedColumn(col_name="Total")
+    anc1 = NamedColumn(col_name="1 ANC")
+    anc2 = NamedColumn(col_name="2 ANCs")
+    anc3 = NamedColumn(col_name="3 ANCs")
+    anc4 = NamedColumn(col_name="4 ANCs")
+    pos1 = NamedColumn(col_name="1 POS")
+    pos2 = NamedColumn(col_name="2 POS")
+    pos3 = NamedColumn(col_name="3 POS")
+
+    class Meta:
+        order_by = "location"

@@ -1,34 +1,28 @@
 # encoding: utf-8
 import datetime
 from south.db import db
-from south.v2 import DataMigration
+from south.v2 import SchemaMigration
 from django.db import models
 
-from rapidsms.models import Contact
-
-
-class Migration(DataMigration):
+class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        "Extract District from Contact field and assign to district field"
-        for reg in orm.BirthRegistration.objects.all():
-            if reg.contact:
-                contact = Contact.objects.get(pk=reg.contact.id)
-                district = contact.get_current_district()
-                if district:
-                    reg.district_id = district.id
-                    reg.save()
-        for reg in orm.DeathRegistration.objects.all():
-            if reg.contact:
-                contact = Contact.objects.get(pk=reg.contact.id)
-                district = contact.get_current_district()
-                if district:
-                    reg.district_id = district.id
-                    reg.save()
+        
+        # Adding field 'DeathRegistration.facility'
+        db.add_column('smgl_deathregistration', 'facility', self.gf('django.db.models.fields.related.ForeignKey')(related_name='death_facility', null=True, to=orm['locations.Location']), keep_default=False)
+
+        # Adding field 'BirthRegistration.facility'
+        db.add_column('smgl_birthregistration', 'facility', self.gf('django.db.models.fields.related.ForeignKey')(related_name='birth_facility', null=True, to=orm['locations.Location']), keep_default=False)
+
 
     def backwards(self, orm):
-        "Write your backwards methods here."
-        raise RuntimeError("Cannot reverse this migration.")
+        
+        # Deleting field 'DeathRegistration.facility'
+        db.delete_column('smgl_deathregistration', 'facility_id')
+
+        # Deleting field 'BirthRegistration.facility'
+        db.delete_column('smgl_birthregistration', 'facility_id')
+
 
     models = {
         'contactsplus.contacttype': {
@@ -156,7 +150,8 @@ class Migration(DataMigration):
             'connection': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Connection']"}),
             'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {}),
-            'district': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['locations.Location']", 'null': 'True', 'blank': 'True'}),
+            'district': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'birth_district'", 'null': 'True', 'to': "orm['locations.Location']"}),
+            'facility': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'birth_facility'", 'null': 'True', 'to': "orm['locations.Location']"}),
             'form_id': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'gender': ('django.db.models.fields.CharField', [], {'max_length': '2'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -170,7 +165,8 @@ class Migration(DataMigration):
             'connection': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Connection']"}),
             'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']", 'null': 'True'}),
             'date': ('django.db.models.fields.DateField', [], {}),
-            'district': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['locations.Location']", 'null': 'True', 'blank': 'True'}),
+            'district': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'death_district'", 'null': 'True', 'to': "orm['locations.Location']"}),
+            'facility': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'death_facility'", 'null': 'True', 'to': "orm['locations.Location']"}),
             'form_id': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'person': ('django.db.models.fields.CharField', [], {'max_length': '3'}),
@@ -182,6 +178,7 @@ class Migration(DataMigration):
             'Meta': {'object_name': 'FacilityVisit'},
             'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['rapidsms.Contact']"}),
             'created_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'district': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'district_location'", 'null': 'True', 'to': "orm['locations.Location']"}),
             'edd': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'location': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['locations.Location']"}),

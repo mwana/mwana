@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from datetime import datetime
 from operator import itemgetter
 
 from django.db.models import Count
@@ -8,10 +7,11 @@ from django.template.context import RequestContext
 
 from mwana.apps.locations.models import Location
 
-from .forms import NationalStatisticsFilterForm
+from .forms import StatisticsFilterForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit)
-from .tables import PregnantMotherTable, HistoryTable, StatisticsTable
+from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
+                        StatisticsLinkTable)
 from .utils import export_as_csv, filter_by_dates
 
 
@@ -38,33 +38,46 @@ def mother_history(request, id):
         context_instance=RequestContext(request))
 
 
-def statistics(request):
+def statistics(request, id=None):
     records = []
-    province = district = start_date = end_date = None
+    facility_parent = None
+    province = district = facility = start_date = end_date = None
 
     visits = FacilityVisit.objects.all()
+    records_for = Location.objects.filter(type__singular='district')
+
+    if id:
+        facility_parent = get_object_or_404(Location, id=id)
+        records_for = Location.objects.filter(parent=facility_parent)
+    else:
+        records_for = Location.objects.filter(type__singular='district')
 
     if request.GET:
-        form = NationalStatisticsFilterForm(request.GET)
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+        # determine what location(s) to include in the report
+        if province:
+            records_for = Location.objects.filter(parent=province)
+        elif district:
+            records_for = [district]
+        elif facility:
+            records_for = [facility]
     else:
-        form = NationalStatisticsFilterForm()
+        form = StatisticsFilterForm()
 
-    if form.is_valid():
-        province = form.cleaned_data.get('province')
-        district = form.cleaned_data.get('district')
-        start_date = form.cleaned_data.get('start_date')
-        end_date = form.cleaned_data.get('end_date')
-    # determine what district(s) to include in the report
-    if province:
-        districts = Location.objects.filter(parent=province)
-    elif district:
-        districts = [district]
-    else:
-        districts = Location.objects.filter(type__singular='district')
-
-    for district in districts:
-        r = {'district': district}
-        births = BirthRegistration.objects.filter(district=district)
+    for place in records_for:
+        reg_filter = {'district': place}
+        visit_filter = {'district': place}
+        if id:
+            reg_filter = {'facility': place}
+            visit_filter = {'location': place}
+        r = {'location': place}
+        births = BirthRegistration.objects.filter(**reg_filter)
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
                                  start=start_date, end=end_date)
@@ -72,7 +85,7 @@ def statistics(request):
         r['births_fac'] = births.filter(place='f').count()
         r['births_total'] = r['births_com'] + r['births_fac']
 
-        deaths = DeathRegistration.objects.filter(district=district)
+        deaths = DeathRegistration.objects.filter(**reg_filter)
         deaths = filter_by_dates(deaths, 'date',
                                  start=start_date, end=end_date)
 
@@ -91,18 +104,18 @@ def statistics(request):
                                     + r['mother_deaths_fac']
 
         # Aggregate ANC visits by Mother and # of visits
-        district_visits = visits.filter(district=district)
-        district_visits = filter_by_dates(district_visits, 'visit_date',
+        place_visits = visits.filter(**visit_filter)
+        place_visits = filter_by_dates(place_visits, 'visit_date',
                                   start=start_date, end=end_date)
 
-        mother_ids = district_visits.distinct('mother') \
+        mother_ids = place_visits.distinct('mother') \
                         .values_list('mother', flat=True)
         num_visits = {}
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
         mother_visits = mothers.annotate(Count('facility_visits')).values_list('facility_visits__count', flat=True)
 
-        r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = None
+        r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
 
         for num in mother_visits:
             if num in num_visits:
@@ -115,9 +128,7 @@ def statistics(request):
                 r[key] = num_visits[i]
 
         # TO DO when POS keyword handler is in place
-        r['pos1'] = None
-        r['pos2'] = None
-        r['pos3'] = None
+        r['pos1'] = r['pos2'] = r['pos3'] = 0
         records.append(r)
 
     # handle sorting, since djtables won't sort on non-Model based tables.
@@ -137,12 +148,12 @@ def statistics(request):
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
-        keys = ['district', 'births_com', 'births_fac', 'births_total',
+        keys = ['location', 'births_com', 'births_fac', 'births_total',
                 'infant_deaths_com', 'infant_deaths_fac',
                 'infant_deaths_total', 'mother_deaths_com',
                 'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
                 'anc3', 'anc4', 'pos1', 'pos2', 'pos3']
-        filename = 'national_statistics'
+        filename = 'national_statistics' if not id else 'district_statistics'
         date_range = ''
         if start_date:
             date_range = '_from{0}'.format(start_date)
@@ -151,11 +162,16 @@ def statistics(request):
         filename = '{0}{1}'.format(filename, date_range)
         return export_as_csv(records, keys, filename)
 
-    statistics_table = StatisticsTable(records,
-                                       request=request)
+    statistics_table = StatisticsLinkTable(records,
+                                           request=request)
+    # disable the link column if on district stats view
+    if id:
+        statistics_table = StatisticsTable(records,
+                                           request=request)
     return render_to_response(
         "smgl/statistics.html",
         {"statistics_table": statistics_table,
+         "district": facility_parent,
          "form": form
         },
         context_instance=RequestContext(request))

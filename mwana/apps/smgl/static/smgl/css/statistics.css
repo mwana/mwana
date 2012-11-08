@@ -14,6 +14,10 @@ button.ui-button-icon-only {
     width: 80px;
 }
 
+.statistics form {
+    margin-bottom: 2em;
+}
+
 .statistics table {
     width: 100%;
 }

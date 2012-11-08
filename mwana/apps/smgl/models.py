@@ -391,7 +391,10 @@ class BirthRegistration(FormReferenceBase):
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
     complications = models.BooleanField(default=False)
     number = models.IntegerField(default=1)
-    district = models.ForeignKey(Location, null=True)
+    district = models.ForeignKey(Location, null=True,
+                                 related_name='birth_district')
+    facility = models.ForeignKey(Location, null=True,
+                                 related_name='birth_facility')
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
@@ -406,7 +409,10 @@ class DeathRegistration(FormReferenceBase):
     date = models.DateField()
     person = models.CharField(max_length=3, choices=PERSON_CHOICES)
     place = models.CharField(max_length=1, choices=PLACE_CHOICES)
-    district = models.ForeignKey(Location, null=True)
+    district = models.ForeignKey(Location, null=True,
+                                 related_name='death_district')
+    facility = models.ForeignKey(Location, null=True,
+                                 related_name='death_facility')
 
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
