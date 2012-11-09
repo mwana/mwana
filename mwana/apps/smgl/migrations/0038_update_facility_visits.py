@@ -7,16 +7,11 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-
-        # Adding field 'FacilityVisit.district'
-        db.add_column('smgl_facilityvisit', 'district', self.gf('django.db.models.fields.related.ForeignKey')(related_name='district_location', null=True, to=orm['locations.Location']), keep_default=False)
+        [x.save() for x in orm.FacilityVisit.objects.all()]
 
 
     def backwards(self, orm):
-
-        # Deleting field 'FacilityVisit.district'
-        db.delete_column('smgl_facilityvisit', 'district_id')
-
+        pass
 
     models = {
         'contactsplus.contacttype': {
