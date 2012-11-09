@@ -11,6 +11,14 @@ Developer Setup
   later is recommended.  At present, Windows-based environments are not
   actively supported.
 
+* Install Python development tools::
+
+    sudo apt-get install python-setuptools python-dev build-essential
+
+* Install version control & other tools::
+
+    sudo apt-get install git-core curl
+
 * PostgreSQL and the appropriate Python bindings (``psycopg2``).  In
   Debian-based distributions, you can install these using ``apt-get``, e.g.::
 
@@ -34,19 +42,28 @@ Developer Setup
 
 * Install pip and virtualenv, and make sure virtualenv is up to date, e.g.::
 
-    easy_install pip
-    pip install -U virtualenv
-    pip install -U virtualenvwrapper
+    sudo apt-get install python-pip python-dev build-essential
+    sudo pip install -U pip
+    sudo pip install -U virtualenv
+    sudo pip install -U virtualenvwrapper
 
+* Add the following line to your .bashrc file::
+
+    source /usr/local/bin/virtualenvwrapper.sh
+
+* source your .bashrc file beforce continuing::
+
+    source .bashrc
 
 **To setup a local development environment, follow these steps:**
 
-#. Clone the code from Github:
+#. Clone the code from Github. If you have not setup a public key on github, do that first.::
 
     git clone git@github.com:mwana/mwana.git
 
 #. Checkout the **zhcard_dev** branch::
 
+    cd mwana
     git checkout zhcard_dev
 
 #. Create a Python virtual environment for this project::
@@ -56,22 +73,32 @@ Developer Setup
 
 #. Install the project dependencies into the virtual environment::
 
-    cd requirements
+    cd mwana/requirements
     pip install -r libs.txt
     pip install -r bu_reqs.txt
-
-#. Create local settings file and initialize a development database::
-
-    cp localsettings.py.example localsettings.py
-    createdb mwana
-    ./manage.py syncdb
-    ./manage.py migrate
-
 
 #. Update the submodules::
 
     git submodule init
     git submodule update
+
+#. Create local settings file and initialize a development database::
+
+    cd ../
+    cp localsettings.py.curl -X PUT http://127.0.0.1:5984/baseballexample localsettings.py
+
+#. Create the Postgres database and run the initial syncdb/migrate::
+
+    createdb -E UTF-8 mwana
+    createdb -E UTF-8 mwana_test
+    ./manage.py syncdb
+    ./manage.py migrate
+
+#. Create a CouchDB database::
+
+    curl -X PUT http://127.0.0.1:5984/mwana
+
+#. Modify localsettings.py with the appropriate database configuration.
 
 #. In a terminal, start the Django development server::
 
