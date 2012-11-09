@@ -23,88 +23,99 @@
   </script>
 {% endblock %}
 
+{% block page_tabs %}
+ {% include "smgl/includes/statistics_subnav.html" %}
+{% endblock %}
+
+
 {% block content %}
 <div class="statistics module">
+  <h2>Filtering</h2>
+  <form action="" method="GET" >
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">Period</th>
+          <th colspan="2">Location</th>
+        </tr>
+        <tr>
+          <th>Start</th>
+          <th>End</th>
+          {% if not district %}
+          <th>Province</th>
+          {% endif %}
+          <th>District</th>
+          {% if district %}
+          <th>Facility</th>
+          {% endif %}
 
-<h2>Filtering</h2>
-<form action="" method="GET" >
-  <table>
-    <thead>
-      <tr>
-        <th colspan="2">Period</th>
-        <th colspan="3">Location</th>
-      </tr>
-      <tr>
-        <th>Start</th>
-        <th>End</th>
-        <th>Province</th>
-        <th {% if not district %}colspan="2"{% endif %}>District</th>
-        {% if district %}
-        <th>Facility</th>
-        {% endif %}
-
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          {{ form.start_date.errors}}
-          {{ form.start_date }}
-        </td>
-        <td>
-          {{ form.end_date.errors}}
-          {{ form.end_date }}
-        </td>
-        <td>
-          {{ form.province.errors}}
-          {{ form.province }}
-        </td>
-        <td {% if not district %}colspan="2"{% endif %}>
-          {{ form.district.errors}}
-          {{ form.district }}
-        </td>
-        {% if district %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
           <td>
-            {{ form.facility.errors}}
-            {{ form.facility }}
+            {{ form.start_date.errors}}
+            {{ form.start_date }}
           </td>
-        {% endif %}
-      </tr>
-    </tbody>
-  </table>
-    <input type="submit" class="btn" name="filter" value="Filter" />
-    <input type="submit" class="btn" name="export" value="Export" />
-</form>
-{{ form.media.js }}
-<h3>{% if district %}District{% else %}National{% endif %} Statistics</h3>
+          <td>
+            {{ form.end_date.errors}}
+            {{ form.end_date }}
+          </td>
+          {% if not district %}
+          <td>
+            {{ form.province.errors}}
+            {{ form.province }}
+          </td>
+          {% endif %}
+          <td>
+            {{ form.district.errors}}
+            {{ form.district }}
+          </td>
+          {% if district %}
+            <td>
+              {{ form.facility.errors}}
+              {{ form.facility }}
+            </td>
+          {% endif %}
+        </tr>
+      </tbody>
+    </table>
+      <input type="submit" class="btn" name="filter" value="Filter" />
+      <input type="submit" class="btn" name="export" value="Export" />
+  </form>
+  {{ form.media.js }}
+  {% if district %}
+  <p><a href="{% url statistics %}"> &larr; Back to National</a></p>
+  {% endif %}
+  <h3>{% if district %}District{% else %}National{% endif %} Statistics</h3>
 
-<table id="records">
-    {% table_cols statistics_table %}
-    <thead>
-      <tr>
-       <th></th>
-       <th style="text-align: center" colspan="3">Births</th>
-       <th style="text-align: center" colspan="3">Infant Deaths</th>
-       <th style="text-align: center" colspan="3">Mother Deaths</th>
-       <th style="text-align: center" colspan="4">ANC</th>
-       <th style="text-align: center" colspan="3">POS</th>
-      </tr>
-    </thead>
-    {% table_head statistics_table %}
-    {% table_body statistics_table %}
-    {% table_foot statistics_table %}
-</table>
+  <table id="records">
+      {% table_cols statistics_table %}
+      <thead>
+        <tr>
+         <th></th>
+         <th style="text-align: center" colspan="3">Births</th>
+         <th style="text-align: center" colspan="3">Infant Deaths</th>
+         <th style="text-align: center" colspan="3">Mother Deaths</th>
+         <th style="text-align: center" colspan="4">ANC</th>
+         <th style="text-align: center" colspan="3">POS</th>
+        </tr>
+      </thead>
+      {% table_head statistics_table %}
+      {% table_body statistics_table %}
+      {% table_foot statistics_table %}
+  </table>
 
 </div>
 
   <script type="text/javascript">
     $(document).ready(function() {
+        {% if not district %}
         function newDistrictParameters(query) {
             query.province = $('#id_province_1').val();
         }
         $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
-
-        {% if district %}
+        {% else %}
         function newFacilityParameters(query) {
             query.district = $('#id_district_1').val();
         }

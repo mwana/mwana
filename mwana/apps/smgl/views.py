@@ -1,7 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
+import urllib
+
 from operator import itemgetter
 
 from django.db.models import Count
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
@@ -48,9 +52,12 @@ def statistics(request, id=None):
 
     if id:
         facility_parent = get_object_or_404(Location, id=id)
-        records_for = Location.objects.filter(parent=facility_parent)
-    else:
-        records_for = Location.objects.filter(type__singular='district')
+        # Prepopulate the district
+        if not request.GET:
+            update = {u'district_0': facility_parent.name,
+                      u'district_1': facility_parent.id}
+            request.GET = request.GET.copy()
+            request.GET.update(update)
 
     if request.GET:
         form = StatisticsFilterForm(request.GET)
@@ -61,12 +68,24 @@ def statistics(request, id=None):
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
         # determine what location(s) to include in the report
-        if province:
-            records_for = Location.objects.filter(parent=province)
-        elif district:
-            records_for = [district]
-        elif facility:
-            records_for = [facility]
+        if id:
+            # get district facilities
+            records_for = Location.objects.filter(parent=facility_parent)
+            if district:
+                records_for = Location.objects.filter(parent=district)
+                if facility_parent != district:
+                    redirect_url = reverse('district-stats',
+                                            args=[district.id])
+                    params = urllib.urlencode(request.GET)
+                    full_redirect_url = '%s?%s' % (redirect_url, params)
+                    return HttpResponseRedirect(full_redirect_url)
+            if facility:
+                records_for = [facility]
+        else:
+            if province:
+                records_for = Location.objects.filter(parent=province)
+            if district:
+                records_for = [district]
     else:
         form = StatisticsFilterForm()
 
@@ -133,16 +152,16 @@ def statistics(request, id=None):
 
     # handle sorting, since djtables won't sort on non-Model based tables.
     if request.GET.get('order_by'):
-        reverse = False
+        sort = False
         attr = request.GET.get('order_by')
         if attr.startswith('-'):
-            reverse = True
+            sort = True
         attr = attr.strip('-')
         try:
             records = sorted(records, key=itemgetter(attr))
         except KeyError:
             pass
-        if reverse:
+        if sort:
             records.reverse()
 
     # render as CSV if export

@@ -1,5 +1,9 @@
 /* vim:set et ts=4 sw=4 */
 
+#wrapper {
+    min-width: 1024px;
+}
+
 button.ui-button-icon-only {
     height: 19px;
     top: 6px;

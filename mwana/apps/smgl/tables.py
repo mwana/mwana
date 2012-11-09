@@ -67,7 +67,10 @@ class StatisticsTable(Table):
 class StatisticsLinkTable(StatisticsTable):
 
     location = Column(link=lambda cell:
-                    reverse("statistics", args=[cell.object['location'].id]))
+                                reverse("district-stats",
+                                    args=[cell.object['location'].id]
+                                )
+                    )
     births_com = NamedColumn(col_name="COM")
     births_fac = NamedColumn(col_name="FAC")
     births_total = NamedColumn(col_name="Total")
