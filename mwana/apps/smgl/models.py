@@ -12,6 +12,11 @@ REASON_FOR_VISIT_CHOICES = (
     ('nr', 'Non-Routine')
 )
 
+VISIT_TYPE_CHOICES = (
+    ('anc', 'ANC'),
+    ('pos', 'POS')
+)
+
 
 class XFormKeywordHandler(models.Model):
     """
@@ -154,6 +159,8 @@ class FacilityVisit(models.Model):
                                  related_name="district_location")
 
     visit_date = models.DateField()
+    visit_type = models.CharField(max_length=255, help_text="ANC or POS visit",
+                                  choices=VISIT_TYPE_CHOICES)
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
