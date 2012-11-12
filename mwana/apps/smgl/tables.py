@@ -42,7 +42,8 @@ class HistoryTable(Table):
 
 
 class StatisticsTable(Table):
-    location = Column()
+    location = Column(header_class="location")
+    pregnancies = Column()
     births_com = NamedColumn(col_name="COM")
     births_fac = NamedColumn(col_name="FAC")
     births_total = NamedColumn(col_name="Total")
@@ -69,8 +70,10 @@ class StatisticsLinkTable(StatisticsTable):
     location = Column(link=lambda cell:
                                 reverse("district-stats",
                                     args=[cell.object['location'].id]
-                                )
+                                ),
+                      header_class="location"
                     )
+    pregnancies = Column()
     births_com = NamedColumn(col_name="COM")
     births_fac = NamedColumn(col_name="FAC")
     births_total = NamedColumn(col_name="Total")

@@ -16,7 +16,7 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit)
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable)
-from .utils import export_as_csv, filter_by_dates
+from .utils import export_as_csv, filter_by_dates, get_current_district
 
 
 def mothers(request):
@@ -132,7 +132,8 @@ def statistics(request, id=None):
         num_visits = {}
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
-        mother_visits = mothers.annotate(Count('facility_visits')).values_list('facility_visits__count', flat=True)
+        mother_visits = mothers.annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
 
         r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
 
@@ -145,6 +146,19 @@ def statistics(request, id=None):
             key = 'anc{0}'.format(i)
             if i in num_visits:
                 r[key] = num_visits[i]
+
+        # Get PregnantMother count for each place
+        if not id:
+            locations = Location.objects.all()
+            district_facilities = [x for x in locations \
+                                if get_current_district(x) == place]
+            pregnancies = PregnantMother.objects \
+                            .filter(location__in=district_facilities).count()
+        else:
+            pregnancies = PregnantMother.objects.filter(location=place) \
+                        .count()
+
+        r['pregnancies'] = pregnancies
 
         # TO DO when POS keyword handler is in place
         r['pos1'] = r['pos2'] = r['pos3'] = 0

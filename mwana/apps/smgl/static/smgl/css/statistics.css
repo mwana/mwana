@@ -26,8 +26,7 @@ button.ui-button-icon-only {
     width: 100%;
 }
 
-.statistics th,
-.statistics td {
+.statistics th {
     white-space: nowrap;
 }
 .statistics .upper {
@@ -44,3 +43,5 @@ button.ui-button-icon-only {
 
 .statistics col { width: 1%; }
 .statistics col:first-child { width: auto; }
+
+.statistics col.location { width: 75px;}
