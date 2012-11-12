@@ -1,4 +1,6 @@
 import logging
+import random
+import string
 
 from datetime import datetime, timedelta
 
@@ -7,7 +9,7 @@ from rapidsms.models import Connection
 from threadless_router.tests.scripted import TestScript
 
 from mwana.apps.contactsplus.models import ContactType
-from mwana.apps.locations.models import Location
+from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import PreRegistration
 
@@ -25,6 +27,33 @@ def create_prereg_user(fname, location_code, ident, ctype, lang=None):
     pre.language = lang
     pre.save()
     return pre
+
+
+def create_instance(model, defaults, data):
+    """
+    Given model, defaults, data return a model instance of type 'model'
+    with defaults 'defaults' overidden with data in 'data'.
+    """
+    defaults.update(data)
+    instance = model(**defaults)
+    instance.clean()
+    instance.save()
+    return instance
+
+
+def create_location(data={}):
+    name = get_random_string()
+    type = LocationType.objects.get(singular="Province")
+    defaults = {
+        'name': name,
+        'slug': name,
+        'type': type,
+    }
+    return create_instance(Location, defaults, data)
+
+
+def get_random_string(length=10, choices=string.ascii_letters):
+    return u''.join(random.choice(choices) for x in xrange(length))
 
 
 class SMGLSetUp(TestScript):
