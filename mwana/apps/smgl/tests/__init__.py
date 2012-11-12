@@ -8,3 +8,4 @@ from .test_models import *
 from .test_pregnancy import *
 from .test_refer import *
 from .test_utils import *
+#from .test_views import *

@@ -121,12 +121,14 @@ def get_session_message(session, direction='I'):
     Saves the Inbound or Outbound message to an XFormsSession object
     """
     if direction in [x[0] for x in DIRECTION_CHOICES]:
-        msg = Message.objects.get(connection=session.connection,
-                                  direction=direction)
+        msg_set = Message.objects.filter(connection=session.connection,
+                                         direction=direction
+                              ).order_by('id')
         if direction == 'I':
-            session.message_incoming = msg
-        elif direction == 'O':
-            session.message_outgoing = msg
+            msg_set = msg_set.filter(
+                            text__icontains=session.trigger.trigger_keyword
+                            )
+        session.message_outgoing = msg_set.reverse()[0]
         session.save()
 
 

@@ -4,12 +4,14 @@ import string
 
 from datetime import datetime, timedelta
 
-from rapidsms.models import Connection
+from rapidsms.models import Connection, Contact, Backend
 
 from threadless_router.tests.scripted import TestScript
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
+from mwana.apps.smgl.models import (FacilityVisit, PregnantMother,
+         BirthRegistration, DeathRegistration)
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import PreRegistration
 
@@ -50,6 +52,83 @@ def create_location(data={}):
         'type': type,
     }
     return create_instance(Location, defaults, data)
+
+
+def create_connection(data={}):
+    defaults = {
+        'backend': Backend.get_or_create(name='mockbackend'),
+        'identity': get_random_string(choices=string.digits),
+    }
+
+
+def create_contact(data={}):
+    name = get_random_string()
+    cnx = create_connection()
+    defaults = {
+        'name': name,
+    }
+    contact = create_instance(Contact, defaults, data)
+    contact.connections.add(cnx)
+    contact.save()
+    return contact
+
+
+def create_mother(data={}):
+    contact = create_contact()
+    name = get_random_string()
+    location = LocationType.objects.get(fullname="804030")
+    defaults = {
+        'first_name': name,
+        'last_name': name,
+        'contact': contact,
+        'location': location,
+        'uid': name,
+        'next_visit': (datetime.now() + timedelta(days=7)).date(),
+        'reason_for_visit': 'r'
+    }
+    return create_instance(PregnantMother, defaults, data)
+
+
+def create_birth_registration(data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+    defaults = {
+        'contact': contact,
+        'connection': contact.connection,
+        'mother': mother,
+        'date': datetime.now().date(),
+        'gender': 'bo',
+        'place': 'fac',
+    }
+    return create_instance(BirthRegistration, defaults, data)
+
+
+def create_death_registration(data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+    defaults = {
+        'contact': contact,
+        'connection': contact.default_connection,
+        'unique_id': mother.uid,
+        'date': datetime.now().date(),
+        'person': 'inf',
+        'place': 'fac',
+    }
+    return create_instance(DeathRegistration, defaults, data)
+
+
+def create_facility_visit(data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+    defaults = {
+        'contact': contact,
+        'mother': mother,
+        'date': datetime.now().date(),
+        'visit_type': 'anc',
+        'next_visit': (datetime.now() + timedelta(days=30)).date(),
+        'reason_for_visit': 'r'
+    }
+    return create_instance(FacilityVisit, defaults, data)
 
 
 def get_random_string(length=10, choices=string.ascii_letters):

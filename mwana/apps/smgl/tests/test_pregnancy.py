@@ -151,12 +151,15 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testFollowUpOptionalEdd(self):
         self.testRegister()
+        tomorrow = (datetime.now() + timedelta(days=1)).date()
         resp = const.FOLLOW_UP_COMPLETE % {"name": self.name,
                                            "unique_id": "80403000000112"}
         script = """
-            %(num)s > FUP 80403000000112 r 16 10 2012
+            %(num)s > FUP 80403000000112 r %(future)s
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "future": tomorrow.strftime("%d %m %Y"),
+              }
         self.runScript(script)
 
         self.assertEqual(1, PregnantMother.objects.count())
@@ -255,14 +258,14 @@ class SMGLPregnancyTest(SMGLSetUp):
         # set 10 days in the future, no reminder
         visit.next_visit = datetime.utcnow() + timedelta(days=10)
         visit.save()
-        send_followup_reminders()
+        send_followup_reminders(router_obj=self.router)
         visit = FacilityVisit.objects.get(pk=visit.pk)
         self.assertEqual(False, visit.reminded)
 
         # set to 7 days, should now fall in threshold
         visit.next_visit = datetime.utcnow() + timedelta(days=7)
         visit.save()
-        send_followup_reminders()
+        send_followup_reminders(router_obj=self.router)
 
         reminder = const.REMINDER_FU_DUE % {"name": "Mary Soko",
                                             "unique_id": "80403000000112",
@@ -301,7 +304,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
 
         # send reminders and make sure they didn't actually fire on this one
-        send_followup_reminders()
+        send_followup_reminders(router_obj=self.router)
         visit = FacilityVisit.objects.get(pk=visit.pk)
         self.assertFalse(visit.reminded)
 
@@ -331,7 +334,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         second_visit.save()
 
         # send reminders and make sure they didn't actually fire on either one
-        send_followup_reminders()
+        send_followup_reminders(router_obj=self.router)
         visit = FacilityVisit.objects.get(pk=visit.pk)
         self.assertFalse(visit.reminded)
         second_visit = FacilityVisit.objects.get(pk=visit.pk)
@@ -345,14 +348,14 @@ class SMGLPregnancyTest(SMGLSetUp):
         # set 15 days in the future, no reminder
         mom.edd = datetime.utcnow().date() + timedelta(days=15)
         mom.save()
-        send_upcoming_delivery_reminders()
+        send_upcoming_delivery_reminders(router_obj=self.router)
         mom = PregnantMother.objects.get(pk=mom.pk)
         self.assertEqual(False, mom.reminded)
 
         # set to 14 days, should now fall in threshold
         mom.edd = datetime.utcnow().date() + timedelta(days=14)
         mom.save()
-        send_upcoming_delivery_reminders()
+        send_upcoming_delivery_reminders(router_obj=self.router)
         mom = PregnantMother.objects.get(pk=mom.pk)
         self.assertEqual(True, mom.reminded)
 

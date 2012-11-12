@@ -10,20 +10,26 @@ from rapidsms import router
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
 
+
 def _set_router():
     # this hack sets the global router to threadless router.
     # should maybe be cleaned up.
     router.router = Router()
-    
-def send_followup_reminders():
+
+
+def send_followup_reminders(router_obj=None):
     """
     Next visit date from Pregnancy registration or Follow-up visit should
     be used to generate reminder for the next appointment.
-    
+
     To: CBA
     On: 7 days before visit date
     """
-    _set_router()
+    if not router_obj:
+        _set_router()
+    else:
+        router.router = router_obj
+
     def _visits_to_remind():
         now = datetime.utcnow().date()
         reminder_threshold = now + timedelta(days=7)
@@ -31,12 +37,12 @@ def send_followup_reminders():
             next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
             next_visit__lte=reminder_threshold,
             reminded=False)
-        
+
         for v in visits_to_remind:
             if v.mother.birthregistration_set.count() == 0 and \
                v.is_latest_for_mother():
                 yield v
-            
+
     for v in _visits_to_remind():
         found_someone = False
         for c in v.mother.get_laycounselors():
@@ -50,29 +56,32 @@ def send_followup_reminders():
         if found_someone:
             v.reminded = True
             v.save()
-    
 
-def send_non_emergency_referral_reminders():
+
+def send_non_emergency_referral_reminders(router_obj=None):
     """
     Reminder for non-emergency referral.
-    
+
     To: CBA
     On: 7 days after referral is registered in the system
-    
-    Reminder is not necessary if mother shows up in the referral center. 
-    Also If we don't have the mother details (safe motherhood ID, Zone...) 
+
+    Reminder is not necessary if mother shows up in the referral center.
+    Also If we don't have the mother details (safe motherhood ID, Zone...)
     then the server does nothing.
     """
-    _set_router()
+    if not router_obj:
+        _set_router()
+    else:
+        router.router = router_obj
+
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=7)
     referrals_to_remind = Referral.non_emergencies().filter(
         reminded=False,
         date__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
-        date__lte = reminder_threshold
+        date__lte=reminder_threshold
     ).filter(Q(mother_showed=None) | Q(mother_showed=False))
     referrals_to_remind = referrals_to_remind.exclude(mother=None)
-        
     for ref in referrals_to_remind:
         found_someone = False
         for c in ref.mother.get_laycounselors():
@@ -86,22 +95,26 @@ def send_non_emergency_referral_reminders():
         if found_someone:
             ref.reminded = True
             ref.save()
-    
-def send_emergency_referral_reminders():
+
+
+def send_emergency_referral_reminders(router_obj=None):
     """
     Reminder to collect outcomes for emergency referrals.
-    
+
     To: Data Clerk operating at the referral facility
     On: 3 days after referral had been entered
     """
-    _set_router()
+    if not router_obj:
+        _set_router()
+    else:
+        router.router = router_obj
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=3)
     referrals_to_remind = Referral.emergencies().filter(
         reminded=False,
         responded=False,
         date__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
-        date__lte = reminder_threshold
+        date__lte=reminder_threshold
     ).exclude(mother_uid=None)
     for ref in referrals_to_remind:
         found_someone = False
@@ -118,16 +131,19 @@ def send_emergency_referral_reminders():
             ref.save()
 
 
-def send_upcoming_delivery_reminders():
+def send_upcoming_delivery_reminders(router_obj=None):
     """
-    Reminders for upcoming delivery     
-    
+    Reminders for upcoming delivery
+
     To: CBA
-    On: 14 days prior expected delivery day    
-    
-    Cancel reminders after notification of birth. 
+    On: 14 days prior expected delivery day
+
+    Cancel reminders after notification of birth.
     """
-    _set_router()
+    if not router_obj:
+        _set_router()
+    else:
+        router.router = router_obj
     now = datetime.utcnow().date()
     reminder_threshold = now + timedelta(days=14)
     moms_to_remind = PregnantMother.objects.filter(
@@ -150,12 +166,11 @@ def send_upcoming_delivery_reminders():
             mom.reminded = True
             mom.save()
 
-    
+
 def _create_notification(type, contact, mother_id):
-    notif = ReminderNotification(type=type, 
+    notif = ReminderNotification(type=type,
                                  recipient=contact,
                                  date=datetime.utcnow())
     notif.set_mother(mother_id)
     notif.save()
     return notif
-    

@@ -13,7 +13,7 @@ def _verbose_reasons(reasonstring):
 
 class SMGLReferTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
-    
+
     def setUp(self):
         super(SMGLReferTest, self).setUp()
         Referral.objects.all().delete()
@@ -30,24 +30,24 @@ class SMGLReferTest(SMGLSetUp):
         self.refferring_ic = self.createUser(const.CTYPE_INCHARGE, "666000",
                                              location="804034")
         self.assertEqual(0, Referral.objects.count())
-        
+
     def testRefer(self):
-        success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
+        success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
                                                "facility": "Mawaya",
                                                "reason": _verbose_reasons("hbp"),
-                                               "time": "12:00", 
+                                               "time": "12:00",
                                                "is_emergency": "no"}
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
             %(danum)s < %(notif)s
             %(tnnum)s < %(notif)s
-        """ % {"num": self.user_number, "resp": success_resp, 
+        """ % {"num": self.user_number, "resp": success_resp,
                "danum": "666777", "tnnum": "666888", "notif": notif}
         self.runScript(script)
-        
+
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
         self.assertEqual(Location.objects.get(slug__iexact="804024"), referral.facility)
@@ -58,17 +58,17 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(datetime.time(12, 00), referral.time)
         self.assertFalse(referral.responded)
         self.assertEqual(None, referral.mother_showed)
-        
+
     def testReferNotRegistered(self):
         script = """
             %(num)s > refer 1234 804024 hbp 1200 nem
             %(num)s < %(resp)s
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
-        
-    
+
+
     def testMultipleResponses(self):
-        success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
+        success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
                                                "facility": "Mawaya",
@@ -80,10 +80,10 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s < %(resp)s
             %(danum)s < %(notif)s
             %(tnnum)s < %(notif)s
-        """ % {"num": self.user_number, "resp": success_resp, 
+        """ % {"num": self.user_number, "resp": success_resp,
                "danum": "666777", "tnnum": "666888", "notif": notif}
         self.runScript(script)
-        
+
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
         self.assertEqual(Location.objects.get(slug__iexact="804024"), referral.facility)
@@ -93,49 +93,49 @@ class SMGLReferTest(SMGLSetUp):
         for r in "hbp,fd,pec,ec".split(","):
             self.assertTrue(referral.get_reason(r))
         self.assertEqual("nem", referral.status)
-        
+
     def testReferBadCode(self):
         # bad code
         bad_code_resp = 'Answer must be one of the choices for "Reason for referral, choices: fd, pec, ec, hbp, pph, aph, pl, cpd, oth"'
         script = """
             %(num)s > refer 1234 804024 foo 1200 nem
-            %(num)s < %(resp)s            
+            %(num)s < %(resp)s
         """ % { "num": self.user_number, "resp": bad_code_resp }
         self.runScript(script)
-        
+
         self.assertEqual(0, Referral.objects.count())
-    
-      
+
+
     def testReferBadLocation(self):
         # bad code
         bad_code_resp = FACILITY_NOT_RECOGNIZED % { "facility": "notaplace" }
         script = """
             %(num)s > refer 1234 notaplace hbp 1200 nem
-            %(num)s < %(resp)s            
+            %(num)s < %(resp)s
         """ % { "num": self.user_number, "resp": bad_code_resp }
         self.runScript(script)
-        
+
         self.assertEqual(0, Referral.objects.count())
-        
+
     def testReferBadTimes(self):
         for bad_time in ["foo", "123", "55555"]:
             resp = const.TIME_INCORRECTLY_FORMATTED % {"time": bad_time}
             script = """
                 %(num)s > refer 1234 804024 hbp %(time)s nem
-                %(num)s < %(resp)s            
+                %(num)s < %(resp)s
             """ % { "num": self.user_number, "time": bad_time, "resp": resp }
             self.runScript(script)
             self.assertEqual(0, Referral.objects.count())
-        
-        
+
+
     def testReferralOutcome(self):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234" }
         notify = const.REFERRAL_OUTCOME_NOTIFICATION % {
             "unique_id": "1234",
-            "date": datetime.datetime.now().date(), 
-            "mother_outcome": "stable", 
+            "date": datetime.datetime.now().date(),
+            "mother_outcome": "stable",
             "baby_outcome": "critical",
             "delivery_mode": "vaginal"
         }
@@ -154,14 +154,14 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual("stb", ref.mother_outcome)
         self.assertEqual("cri", ref.baby_outcome)
         self.assertEqual("vag", ref.mode_of_delivery)
-        
+
     def testReferralOutcomeNoShow(self):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234" }
         notify = const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % {
             "unique_id": "1234",
-            "date": datetime.datetime.now().date(), 
+            "date": datetime.datetime.now().date(),
         }
         script = """
             %(num)s > refout 1234 noshow
@@ -175,15 +175,15 @@ class SMGLReferTest(SMGLSetUp):
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
         self.assertFalse(ref.mother_showed)
-        
+
     def testReferralOutcomeNoRef(self):
         resp = const.REFERRAL_NOT_FOUND % {"unique_id": "1234" }
         script = """
             %(num)s > refout 1234 stb stb vag
-            %(num)s < %(resp)s            
+            %(num)s < %(resp)s
         """ % { "num": self.user_number, "resp": resp }
         self.runScript(script)
-        
+
     def testReferWithMother(self):
         yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
         tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
@@ -191,9 +191,9 @@ class SMGLReferTest(SMGLSetUp):
                                                    "unique_id": "1234" }
         script = """
             %(num)s > REG 1234 Mary Soko none %(future)s R 80402404 %(past)s %(future)s
-            %(num)s < %(resp)s            
+            %(num)s < %(resp)s
         """ % {"num": "666777", "resp": resp,
-               "past": yesterday.strftime("%d %m %Y"), 
+               "past": yesterday.strftime("%d %m %Y"),
                "future": tomorrow.strftime("%d %m %Y")}
         self.runScript(script)
         mom = PregnantMother.objects.get(uid='1234')
@@ -201,31 +201,32 @@ class SMGLReferTest(SMGLSetUp):
         [ref] = Referral.objects.all()
         self.assertEqual(mom.uid, ref.mother_uid)
         self.assertEqual(mom, ref.mother)
-    
+
     def testNonEmergencyReminders(self):
         self.testReferWithMother()
         [ref] = Referral.objects.all()
         self.assertEqual(False, ref.reminded)
         self.assertEqual(1, Referral.non_emergencies().count())
-        
+
         # this should do nothing because it's not in range
-        send_non_emergency_referral_reminders()
+
+        send_non_emergency_referral_reminders(router_obj=self.router)
         ref = Referral.objects.get(pk=ref.pk)
         self.assertEqual(False, ref.reminded)
-        
+
         # set the date back so it triggers a reminder
         ref.date = ref.date - datetime.timedelta(days=7)
         ref.save()
-        send_non_emergency_referral_reminders()
+        send_non_emergency_referral_reminders(router_obj=self.router)
         reminder = const.REMINDER_NON_EMERGENCY_REFERRAL % {"name": "Mary Soko",
                                                             "unique_id": "1234",
                                                             "loc": "Chilala"}
-        script = """ 
+        script = """
             %(num)s < %(msg)s
-        """ % {"num": self.cba_number, 
+        """ % {"num": self.cba_number,
                "msg": reminder}
         self.runScript(script)
-        
+
         ref = Referral.objects.get(pk=ref.pk)
         self.assertEqual(True, ref.reminded)
         [notif] = ReminderNotification.objects.all()
@@ -233,7 +234,7 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(ref.mother_uid, notif.mother_uid)
         self.assertEqual(self.cba, notif.recipient)
         self.assertEqual("nem_ref", notif.type)
-        
+
     def testEmergencyReminders(self):
         self.testReferWithMother()
         [ref] = Referral.objects.all()
@@ -241,25 +242,25 @@ class SMGLReferTest(SMGLSetUp):
         ref.save()
         self.assertEqual(False, ref.reminded)
         self.assertEqual(1, Referral.emergencies().count())
-        
+
         # this should do nothing because it's not in range
-        send_emergency_referral_reminders()
+        send_emergency_referral_reminders(router_obj=self.router)
         ref = Referral.objects.get(pk=ref.pk)
         self.assertEqual(False, ref.reminded)
-        
+
         # set the date back so it triggers a reminder
         ref.date = ref.date - datetime.timedelta(days=3)
         ref.save()
-        send_emergency_referral_reminders()
+        send_emergency_referral_reminders(router_obj=self.router)
         reminder = const.REMINDER_EMERGENCY_REFERRAL % {"unique_id": "1234",
                                                         "date": ref.date.date(),
                                                         "loc": "Mawaya"}
-        script = """ 
+        script = """
             %(num)s < %(msg)s
-        """ % {"num": "666777", 
+        """ % {"num": "666777",
                "msg": reminder}
         self.runScript(script)
-        
+
         ref = Referral.objects.get(pk=ref.pk)
         self.assertEqual(True, ref.reminded)
         [notif] = ReminderNotification.objects.all()
@@ -267,4 +268,4 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(ref.mother_uid, notif.mother_uid)
         self.assertEqual(self.dc, notif.recipient)
         self.assertEqual("em_ref", notif.type)
-        
+

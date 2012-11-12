@@ -5,7 +5,7 @@ from mwana.apps.smgl import const
 
 class SMGLBirthRegTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
-    
+
     def setUp(self):
         super(SMGLBirthRegTest, self).setUp()
         self.createDefaults()
@@ -18,23 +18,23 @@ class SMGLBirthRegTest(SMGLSetUp):
                                                    "unique_id": "804024222" }
         script = """
             %(num)s > REG 804024222 FEBBY MALAMBO OTH %(tomorrow)s R 80402402 %(earlier)s %(later)s
-            %(num)s < %(resp)s            
-        """ % {"num": self.user_number, "resp": resp, 
+            %(num)s < %(resp)s
+        """ % {"num": self.user_number, "resp": resp,
                "tomorrow": self.tomorrow.strftime("%d %m %Y"),
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")  }
-        
+
         self.runScript(script)
         self.assertEqual(1, PregnantMother.objects.count())
-        
+
     def testRefer1(self):
-        success_resp = const.REFERRAL_RESPONSE % {"name": self.name, 
+        success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "8040120143"}
         script = """
             %(num)s > REFER 8040120143 804030 APH 1100 NEM
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": success_resp} 
-               
+        """ % {"num": self.user_number, "resp": success_resp}
+
         self.runScript(script)
         [referral] = Referral.objects.all()
-        
+

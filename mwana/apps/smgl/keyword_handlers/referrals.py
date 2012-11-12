@@ -16,7 +16,6 @@ def refer(session, xform, router):
         "Must be a registered contact to refer"
     assert session.connection.contact.location is not None, \
         "Contact must have a location to refer"
-
     get_session_message(session)
 
     name = session.connection.contact.name
@@ -66,7 +65,6 @@ def refer(session, xform, router):
 @registration_required
 def referral_outcome(session, xform, router):
     get_session_message(session)
-
     name = session.connection.contact.name if session.connection.contact else ""
     mother_id = xform.xpath("form/unique_id")
 

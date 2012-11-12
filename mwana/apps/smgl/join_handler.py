@@ -3,9 +3,10 @@ import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
 from mwana.apps.smgl.models import PreRegistration
-from mwana.apps.smgl.app import send_msg, get_value_from_form,NOT_PREREGISTERED, \
-    FACILITY_NOT_RECOGNIZED, get_contacttype, CONTACT_TYPE_NOT_RECOGNIZED, _get_or_create_zone, \
-    ZONE_SPECIFIED_BUT_NOT_CBA, ALREADY_REGISTERED, USER_SUCCESS_REGISTERED
+from mwana.apps.smgl.app import (send_msg, get_value_from_form,
+        NOT_PREREGISTERED, FACILITY_NOT_RECOGNIZED, get_contacttype,
+        CONTACT_TYPE_NOT_RECOGNIZED, _get_or_create_zone, ALREADY_REGISTERED,
+        ZONE_SPECIFIED_BUT_NOT_CBA,  USER_SUCCESS_REGISTERED)
 
 logger = logging.getLogger(__name__)
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -28,7 +29,7 @@ def join_secure(session, xform, router):
 
     if prereg.has_confirmed:
         contact = Contact.objects.get(connection__identity__icontains=prereg.phone_number)
-        language = get_value_from_form('language', xform) 
+        language = get_value_from_form('language', xform)
         if language:
             contact.language = language
             contact.save()
@@ -40,7 +41,6 @@ def join_secure(session, xform, router):
         return True
     else:
         return join_generic(session, xform, prereg, router)
-
 
 
 def join_generic(session, xform, prereg, router):
@@ -60,9 +60,9 @@ def join_generic(session, xform, prereg, router):
     # Same logic for facility.
     connection = session.connection
     reg_type = prereg.title.lower()
-    fname = prereg.first_name #these provided in pre-reg info
+    fname = prereg.first_name  # these provided in pre-reg info
     lname = prereg.last_name
-    name = get_value_from_form('name', xform) #this provided by user
+    name = get_value_from_form('name', xform)  # this provided by user
     zone_name = prereg.zone
     uid = prereg.unique_id
     language = (get_value_from_form('language', xform) or prereg.language).lower()
@@ -70,13 +70,13 @@ def join_generic(session, xform, prereg, router):
     if not prereg.location:
         send_msg(connection, FACILITY_NOT_RECOGNIZED, router, **{'facility': prereg.location})
         return True
-    
+
     contactType = get_contacttype(reg_type)
     if not contactType:
-        send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router, 
+        send_msg(connection, CONTACT_TYPE_NOT_RECOGNIZED, router,
                  **{"title": reg_type})
         return True
-    
+
     zone = None
     if zone_name and reg_type == 'cba':
         zone, error = _get_or_create_zone(prereg.location, zone_name)
@@ -85,13 +85,13 @@ def join_generic(session, xform, prereg, router):
         send_msg(connection, ZONE_SPECIFIED_BUT_NOT_CBA, router, **{'reg_type': reg_type})
         return True
 
-    # UID constraints (like isnum and length) should be caught by the 
+    # UID constraints (like isnum and length) should be caught by the
     # rapidsms_xforms constraint settings for the form.
     # Name can't really be validated.
 
     contact_name = '%s %s' % (fname, lname)
-    if name: 
-        # we prefer to use the user provided name in all communications. 
+    if name:
+        # we prefer to use the user provided name in all communications.
         # Lname and Fname saved in preRegistration data
         contact_name = name
     contact, created = Contact.objects.get_or_create(name=contact_name,
@@ -103,7 +103,7 @@ def join_generic(session, xform, prereg, router):
     types = contact.types.all()
     if contactType not in types:
         contact.types.add(contactType)
-    else: #Already registered
+    else:  # Already registered
         send_msg(connection, ALREADY_REGISTERED, router, **{"readable_user_type": contactType.name,
                                                             'name': name,
                                                             'facility': prereg.location})
@@ -118,4 +118,3 @@ def join_generic(session, xform, prereg, router):
     send_msg(connection, USER_SUCCESS_REGISTERED, router, **{"readable_user_type": contactType.name,
                                                              'facility': prereg.location.name})
     return True
-

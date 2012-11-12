@@ -428,7 +428,7 @@ REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("edd_14", "Expected Delivery, 14 days before"))
 
 
-class ReminderNotification(FormReferenceBase, MotherReferenceBase):
+class ReminderNotification(MotherReferenceBase):
     """
     Any notifications sent to user
     """
