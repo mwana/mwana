@@ -156,3 +156,17 @@ def export_as_csv(records, keys, filename):
     dict_writer.writer.writerow(keys)
     dict_writer.writerows(records)
     return response
+
+
+def get_current_district(location):
+    """
+    Returns the district associated location
+    """
+    loc_type = location.type.singular.lower()
+    while loc_type != 'district':
+        location = location.parent
+        try:
+            loc_type = location.type.singular.lower()
+        except AttributeError:
+            return None
+    return location
