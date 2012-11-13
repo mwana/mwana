@@ -17,7 +17,7 @@ Developer Setup
 
 * Install version control & other tools::
 
-    sudo apt-get install git-core curl
+    sudo apt-get install git-core curl openjdk-6-jdk
 
 * PostgreSQL and the appropriate Python bindings (``psycopg2``).  In
   Debian-based distributions, you can install these using ``apt-get``, e.g.::
