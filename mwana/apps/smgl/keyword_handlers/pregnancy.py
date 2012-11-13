@@ -175,7 +175,7 @@ def follow_up(session, xform, router):
     visit.next_visit = next_visit
     visit.visit_date = datetime.datetime.utcnow().date()
     visit.created_date = session.modified_time
-    visit_type = 'anc'
+    visit.visit_type = 'anc'
     visit.save()
 
     send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
