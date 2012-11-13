@@ -7,7 +7,7 @@ _ = lambda s: s
 LOCTYPE_ZONE = "zone"
 
 # contact type slugs
-CTYPE_LAYCOUNSELOR = "cba" 
+CTYPE_LAYCOUNSELOR = "cba"
 CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
 CTYPE_INCHARGE = 'incharge'
@@ -38,7 +38,7 @@ GENERAL_ERROR = _("Your message is either incomplete or incorrect. Please check 
 # pregnancy messages
 LMP_OR_EDD_DATE_REQUIRED = _("Sorry, either the LMP or the EDD must be filled in!")
 MOTHER_SUCCESS_REGISTERED = _("Thanks %(name)s! Registration for Mother ID %(unique_id)s is complete!")
-NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id)s was registered in your zone. Please visit this mother and take note in your register.") 
+NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id)s was registered in your zone. Please visit this mother and take note in your register.")
 DUPLICATE_REGISTRATION = _("A mother with ID %(unique_id)s is already registered. Please check the ID and try again.")
 
 # pregnancy follow up messages
@@ -47,7 +47,7 @@ FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s i
 
 # "told" messages
 TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
- 
+
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 
@@ -67,4 +67,4 @@ DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been r
 REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
 REMINDER_NON_EMERGENCY_REFERRAL = _("Mother named %(name)s with ID # %(unique_id)s should visit hospital %(loc)s as referred.")
 REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother with ID %(unique_id)s referred on %(date)s from %(loc)s")
-REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."    
+REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."

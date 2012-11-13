@@ -450,7 +450,8 @@ TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
 
 class ToldReminder(FormReferenceBase, MotherReferenceBase):
     """
-    Database representation of a told reminder form
+    Database representation of a told reminder form. Tracks records
+    of users telling/reminder Mothers of important data.
     """
     contact = models.ForeignKey(Contact, null=True)
     date = models.DateTimeField()

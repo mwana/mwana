@@ -85,7 +85,7 @@ Developer Setup
 #. Create local settings file and initialize a development database::
 
     cd ../
-    cp localsettings.py.curl -X PUT http://127.0.0.1:5984/baseballexample localsettings.py
+    cp localsettings.py localsettings.py
 
 #. Create the Postgres database and run the initial syncdb/migrate::
 

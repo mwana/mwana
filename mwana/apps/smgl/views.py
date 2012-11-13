@@ -13,9 +13,10 @@ from mwana.apps.locations.models import Location
 
 from .forms import StatisticsFilterForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
-                        FacilityVisit)
+                        FacilityVisit, Referral, ToldReminder,
+                        ReminderNotification)
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
-                        StatisticsLinkTable)
+                        StatisticsLinkTable, ReminderStatsTable)
 from .utils import export_as_csv, filter_by_dates, get_current_district
 
 
@@ -205,6 +206,50 @@ def statistics(request, id=None):
         "smgl/statistics.html",
         {"statistics_table": statistics_table,
          "district": facility_parent,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def reminder_stats(request):
+    records = []
+    record_types = ['edd', 'nvd', 'ref']
+    for key in record_types:
+        reminders = ReminderNotification.objects.filter(type__icontains=key)
+        mothers = reminders.values_list('mother', flat=True)
+        tolds = ToldReminder.objects.filter(type=key, mother__in=mothers)
+        if key == 'edd':
+            showed_up = BirthRegistration.objects.filter(mother__in=mothers)
+        elif key == 'ref':
+            showed_up = Referral.objects.filter(mother__in=mothers,
+                                                mother_showed=True)
+        else:
+            showed_up = FacilityVisit.objects.filter(mother__in=mothers)
+        records.append({
+                'reminder_type': key,
+                'reminders': reminders.count(),
+                'told': tolds.count(),
+                'showed_up': showed_up.count()
+            })
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            # filter the records_for output
+    else:
+        form = StatisticsFilterForm()
+
+    reminder_stats_table = ReminderStatsTable(records,
+                                           request=request)
+
+    return render_to_response(
+        "smgl/reminder_stats.html",
+        {"reminder_stats_table": reminder_stats_table,
          "form": form
         },
         context_instance=RequestContext(request))

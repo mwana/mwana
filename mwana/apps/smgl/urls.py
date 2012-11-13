@@ -10,4 +10,5 @@ urlpatterns = patterns('',
     url(r"^statistics/$", views.statistics, name="statistics"),
     url(r"^statistics/(?P<id>[\d]+)/$", views.statistics,
             name="district-stats"),
+    url(r"^reminder-stats/$", views.reminder_stats, name="reminder-stats"),
 )

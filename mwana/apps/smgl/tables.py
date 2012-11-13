@@ -93,3 +93,10 @@ class StatisticsLinkTable(StatisticsTable):
 
     class Meta:
         order_by = "location"
+
+
+class ReminderStatsTable(Table):
+    reminder_type = Column()
+    reminders = Column()
+    told = Column()
+    showed_up = Column()
