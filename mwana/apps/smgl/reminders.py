@@ -11,10 +11,12 @@ from rapidsms import router
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
 
 
-def _set_router():
-    # this hack sets the global router to threadless router.
-    # should maybe be cleaned up.
-    router.router = Router()
+def _set_router(router_obj=None):
+    # Set the router to the global router it one is not provided
+    if not router_obj:
+        router.router = Router()
+    else:
+        router.router = router_obj
 
 
 def send_followup_reminders(router_obj=None):
@@ -25,10 +27,7 @@ def send_followup_reminders(router_obj=None):
     To: CBA
     On: 7 days before visit date
     """
-    if not router_obj:
-        _set_router()
-    else:
-        router.router = router_obj
+    _set_router(router_obj)
 
     def _visits_to_remind():
         now = datetime.utcnow().date()
@@ -69,10 +68,7 @@ def send_non_emergency_referral_reminders(router_obj=None):
     Also If we don't have the mother details (safe motherhood ID, Zone...)
     then the server does nothing.
     """
-    if not router_obj:
-        _set_router()
-    else:
-        router.router = router_obj
+    _set_router(router_obj)
 
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=7)
@@ -104,10 +100,7 @@ def send_emergency_referral_reminders(router_obj=None):
     To: Data Clerk operating at the referral facility
     On: 3 days after referral had been entered
     """
-    if not router_obj:
-        _set_router()
-    else:
-        router.router = router_obj
+    _set_router(router_obj)
     now = datetime.utcnow()
     reminder_threshold = now - timedelta(days=3)
     referrals_to_remind = Referral.emergencies().filter(
@@ -140,10 +133,7 @@ def send_upcoming_delivery_reminders(router_obj=None):
 
     Cancel reminders after notification of birth.
     """
-    if not router_obj:
-        _set_router()
-    else:
-        router.router = router_obj
+    _set_router(router_obj)
     now = datetime.utcnow().date()
     reminder_threshold = now + timedelta(days=14)
     moms_to_remind = PregnantMother.objects.filter(
