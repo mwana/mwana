@@ -9,10 +9,10 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
-from mwana.apps.smgl.models import PregnantMother, FacilityVisit, ToldReminder
+from mwana.apps.smgl.models import (PregnantMother, FacilityVisit,
+    ToldReminder, BirthRegistration, Referral)
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
                 get_session_message)
-
 logger = logging.getLogger(__name__)
 
 
@@ -191,7 +191,6 @@ def told(session, xform, router):
     """
     logger.debug('Handling the TOLD keyword form')
     connection = session.connection
-
     get_session_message(session)
 
     if not connection.contact:
@@ -211,6 +210,31 @@ def told(session, xform, router):
 
         return True
     else:
+        now = datetime.datetime.now()
+        if reminder_type == 'edd':
+            reg = BirthRegistration.objects.filter(mother=mother)
+            if reg:
+                msg = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {
+                                                        'unique_id': unique_id
+                                                        }
+                send_msg(connection, msg, router)
+                get_session_message(session, direction='O')
+                return True
+        elif reminder_type == 'nvd':
+            visits = FacilityVisit.objects.filter(next_visit__gte=now.date(),
+                                                  mother=mother)
+            if not visits:
+                msg = const.TOLD_MOTHER_HAS_NO_NVD % {'unique_id': unique_id}
+                send_msg(connection, msg, router)
+                get_session_message(session, direction='O')
+                return True
+        elif reminder_type == 'ref':
+            refs = Referral.objects.filter(date__gte=now, mother=mother)
+            if not refs:
+                msg = const.TOLD_MOTHER_HAS_NO_REF % {'unique_id': unique_id}
+                send_msg(connection, msg, router)
+                get_session_message(session, direction='O')
+                return True
         # Generate the TOLD Reminder database entry
         ToldReminder.objects.create(
                             contact=connection.contact,

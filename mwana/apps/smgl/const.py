@@ -47,6 +47,9 @@ FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s i
 
 # "told" messages
 TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
+TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already delivered')
+TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
+TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
 
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
