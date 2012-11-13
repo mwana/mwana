@@ -137,10 +137,12 @@ def create_death_registration(data={}):
 def create_facility_visit(data={}):
     contact = create_contact()
     mother = create_mother(data={'contact': contact})
+    location = Location.objects.get(slug="804030")
     defaults = {
+        'location': location,
         'contact': contact,
         'mother': mother,
-        'date': datetime.now().date(),
+        'visit_date': datetime.now().date(),
         'visit_type': 'anc',
         'next_visit': (datetime.now() + timedelta(days=30)).date(),
         'reason_for_visit': 'r'

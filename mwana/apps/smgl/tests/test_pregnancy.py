@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
-from mwana.apps.smgl.tests.shared import create_birth_registration
+from mwana.apps.smgl.tests.shared import create_birth_registration, \
+    create_facility_visit
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -235,6 +236,22 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {"unique_id": mom.uid}
         script = """
             %(num)s > told 80403000000112 EDD
+            %(num)s < %(resp)s
+        """ % {"num": self.user_number, "resp": resp}
+        self.runScript(script)
+        told_reminders = ToldReminder.objects.filter(mother=mom)
+        self.assertEqual(0, told_reminders.count())
+
+    def testInvalidToldNVD(self):
+        self.testRegister()
+        [mom] = PregnantMother.objects.all()
+        create_facility_visit(data={'mother': mom,
+            'next_visit': (datetime.now() - timedelta(days=30)).date(),
+                })
+
+        resp = const.TOLD_MOTHER_HAS_NO_NVD % {"unique_id": mom.uid}
+        script = """
+            %(num)s > told 80403000000112 NVD
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
