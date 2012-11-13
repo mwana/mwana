@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 
 from rapidsms.models import Connection, Contact, Backend
 
+from smsforms.models import XFormsSession, DecisionTrigger
+
 from threadless_router.tests.scripted import TestScript
 
 from mwana.apps.contactsplus.models import ContactType
@@ -56,9 +58,10 @@ def create_location(data={}):
 
 def create_connection(data={}):
     defaults = {
-        'backend': Backend.get_or_create(name='mockbackend'),
+        'backend': Backend.objects.get_or_create(name='mockbackend')[0],
         'identity': get_random_string(choices=string.digits),
     }
+    return create_instance(Connection, defaults, data)
 
 
 def create_contact(data={}):
@@ -68,15 +71,24 @@ def create_contact(data={}):
         'name': name,
     }
     contact = create_instance(Contact, defaults, data)
-    contact.connections.add(cnx)
+    contact.connection_set.add(cnx)
     contact.save()
     return contact
+
+
+def create_session(trigger, data={}):
+    defaults = {
+        'session_id': get_random_string(),
+        'connection': create_connection(),
+        'trigger': trigger,
+    }
+    return create_instance(XFormsSession, defaults, data)
 
 
 def create_mother(data={}):
     contact = create_contact()
     name = get_random_string()
-    location = LocationType.objects.get(fullname="804030")
+    location = Location.objects.get(slug="804030")
     defaults = {
         'first_name': name,
         'last_name': name,
@@ -92,13 +104,18 @@ def create_mother(data={}):
 def create_birth_registration(data={}):
     contact = create_contact()
     mother = create_mother(data={'contact': contact})
+    trigger = DecisionTrigger.objects.get(trigger_keyword='birth')
+    session = create_session(trigger=trigger,
+                             data={'connection': contact.default_connection}
+                             )
     defaults = {
         'contact': contact,
-        'connection': contact.connection,
+        'connection': contact.default_connection,
+        'session': session,
         'mother': mother,
         'date': datetime.now().date(),
         'gender': 'bo',
-        'place': 'fac',
+        'place': 'f',
     }
     return create_instance(BirthRegistration, defaults, data)
 

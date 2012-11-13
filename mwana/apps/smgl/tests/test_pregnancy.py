@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
+from mwana.apps.smgl.tests.shared import create_birth_registration
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -225,6 +226,20 @@ class SMGLPregnancyTest(SMGLSetUp):
 
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(3, told_reminders.count())
+
+    def testInvalidToldEDD(self):
+        self.testRegister()
+        [mom] = PregnantMother.objects.all()
+        create_birth_registration(data={'mother': mom})
+
+        resp = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {"unique_id": mom.uid}
+        script = """
+            %(num)s > told 80403000000112 EDD
+            %(num)s < %(resp)s
+        """ % {"num": self.user_number, "resp": resp}
+        self.runScript(script)
+        told_reminders = ToldReminder.objects.filter(mother=mom)
+        self.assertEqual(0, told_reminders.count())
 
     def testBadTold(self):
         bad_code_resp = 'Answer must be one of the choices for "Type of reminder, choices: edd, nvd, ref"'
