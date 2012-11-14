@@ -281,7 +281,6 @@ def reminder_stats(request):
         filename = '{0}{1}'.format(filename, date_range)
         return export_as_csv(records, keys, filename)
 
-
     reminder_stats_table = ReminderStatsTable(records,
                                            request=request)
 

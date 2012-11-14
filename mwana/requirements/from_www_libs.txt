@@ -1,4 +1,4 @@
-Django==1.4
+Django==1.4.2
 RapidSMS==0.9.6a
 South==0.7.3
 Unidecode==0.04.9
@@ -45,3 +45,5 @@ restkit==3.3.1
 -e git+https://github.com/dimagi/rapidsms-tropo.git@ca0c13d2c15e9c057262d86ee35f4c877c499b88#egg=rtropo-dev
 six==1.1.0
 -e git+http://github.com/caktus/rapidsms-threadless-router.git@d3ecbd7c031c91b5ca0bc97f263cbc050d46675e#egg=threadless_router-dev
+django-selectable==0.6.2
+
