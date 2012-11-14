@@ -7,7 +7,8 @@ from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
-from mwana.apps.smgl.tests.shared import create_birth_registration
+from mwana.apps.smgl.tests.shared import create_birth_registration,\
+    create_referral
 
 
 class SMGLPregnancyTest(SMGLSetUp):

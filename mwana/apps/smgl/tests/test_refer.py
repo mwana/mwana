@@ -268,4 +268,3 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(ref.mother_uid, notif.mother_uid)
         self.assertEqual(self.dc, notif.recipient)
         self.assertEqual("em_ref", notif.type)
-

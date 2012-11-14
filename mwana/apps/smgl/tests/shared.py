@@ -13,7 +13,7 @@ from threadless_router.tests.scripted import TestScript
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl.models import (FacilityVisit, PregnantMother,
-         BirthRegistration, DeathRegistration)
+         BirthRegistration, DeathRegistration, Referral)
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import PreRegistration
 
@@ -146,6 +146,27 @@ def create_facility_visit(data={}):
         'reason_for_visit': 'r'
     }
     return create_instance(FacilityVisit, defaults, data)
+
+
+def create_referral(data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+    trigger = DecisionTrigger.objects.get(trigger_keyword='refer')
+    session = create_session(trigger=trigger,
+                             data={'connection': contact.default_connection}
+                             )
+    loc_type = LocationType.objects.get(singular='Rural Health Centre')
+    facility = create_location(data={'name': 'foo',
+                                     'type': loc_type,
+                                     }
+                              )
+    defaults = {
+        'session': session,
+        'facility': facility,
+        'mother': mother,
+        'date': datetime.now().date(),
+    }
+    return create_instance(Referral, defaults, data)
 
 
 def get_random_string(length=10, choices=string.ascii_letters):
