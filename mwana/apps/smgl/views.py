@@ -268,6 +268,20 @@ def reminder_stats(request):
                 'showed_up': showed_up.count()
             })
 
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['reminder_type', 'reminders', 'told', 'showed_up']
+        filename = 'reminder_statistics'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+        return export_as_csv(records, keys, filename)
+
+
     reminder_stats_table = ReminderStatsTable(records,
                                            request=request)
 
