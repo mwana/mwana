@@ -56,7 +56,7 @@ def load_users(file_path):
             print "%s is not a valid email" % email
             continue
 
-        username = first_name[0].lower() + last_name.lower()
+        username = first_name[0].lower() + last_name.split()[0].lower()
 
         password = "%s%s" % (username, date.today().day)
 
