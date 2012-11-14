@@ -15,6 +15,9 @@ from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
+from mwana.apps.locations.models import Location
+from rapidsms.models import Contact
+
 
 
 
@@ -469,6 +472,67 @@ def contacts_report(request):
          'is_report_admin': is_report_admin,
          'region_selectable': True,
          'facility_contacts': facility_contacts,
+         'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
+         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
+         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
+         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
+     }, context_instance=RequestContext(request))
+
+class Site:
+    pass
+
+@require_GET
+def supported_sites(request):
+
+    from webreports.reportcreator import Results160Reports
+
+    today = datetime.today().date()
+
+
+    is_report_admin = False
+    try:
+        user_group_name = request.user.groupusermapping_set.all()[0].group.name
+        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
+        and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
+            is_report_admin = True
+    except:
+        pass
+
+    rpt_group = read_request(request, "rpt_group")
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+
+    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
+    records = r.user_facilities()
+    sites = []
+    for record in records:
+        if not record.point:
+            continue
+        site = Site()
+        site.point = record.point
+        site.name = record.name
+        site.parent = record.parent.name
+        site.workers = record.contact_set.filter(types__slug='worker', is_active=True).count()
+        site.cbas = Contact.active.filter(types__slug='cba', is_active=True, location__parent=record).count()
+        site.results = record.lab_results.exclude(result_sent_date=None).count()
+        sites.append(site)
+
+
+
+    return render_to_response('reports/supported_sites.html',
+        {
+         'today': today,
+         'adminEmail': get_admin_email_address(),
+         'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
+         'formattedtoday': today.strftime("%d %b %Y"),
+         'formattedtime': datetime.today().strftime("%I:%M %p"),
+         'implementer': get_groups_name(rpt_group),
+          'province': get_facility_name(rpt_provinces),
+          'district': get_facility_name(rpt_districts),
+         'is_report_admin': is_report_admin,
+         'region_selectable': True,
+         'sites': sites,
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
