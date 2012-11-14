@@ -162,7 +162,7 @@ def export_as_csv(records, keys, filename):
 
 def get_current_district(location):
     """
-    Returns the district associated location
+    Returns the district associated with the current location
     """
     loc_type = location.type.singular.lower()
     while loc_type != 'district':
@@ -172,3 +172,16 @@ def get_current_district(location):
         except AttributeError:
             return None
     return location
+
+
+def get_location_tree_nodes(location, locations=None):
+    """
+    Returns the children of a given province
+    """
+    if not locations:
+        locations = []
+    for child in location.location_set.all():
+        if child.type.singular != 'Zone':
+            locations.append(child)
+            get_location_tree_nodes(child, locations)
+    return locations

@@ -17,7 +17,8 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         ReminderNotification)
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable)
-from .utils import export_as_csv, filter_by_dates, get_current_district
+from .utils import (export_as_csv, filter_by_dates, get_current_district,
+    get_location_tree_nodes)
 
 
 def mothers(request):
@@ -71,9 +72,9 @@ def statistics(request, id=None):
         # determine what location(s) to include in the report
         if id:
             # get district facilities
-            records_for = Location.objects.filter(parent=facility_parent)
+            records_for = get_location_tree_nodes(facility_parent)
             if district:
-                records_for = Location.objects.filter(parent=district)
+                records_for = get_location_tree_nodes(district)
                 if facility_parent != district:
                     redirect_url = reverse('district-stats',
                                             args=[district.id])
@@ -213,10 +214,36 @@ def statistics(request, id=None):
 
 def reminder_stats(request):
     records = []
+    province = district = facility = start_date = end_date = None
     record_types = ['edd', 'nvd', 'ref']
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            # filter the records_for output
+    else:
+        form = StatisticsFilterForm()
+
     for key in record_types:
-        reminders = ReminderNotification.objects.filter(type__icontains=key)
-        mothers = reminders.values_list('mother', flat=True)
+        mothers = PregnantMother.objects.all()
+        # filter by location if needed...
+        locations = Location.objects.all()
+        if province:
+            locations = get_location_tree_nodes(province)
+        if district:
+            locations = get_location_tree_nodes(district)
+        if facility:
+            locations = [facility]
+        mothers = mothers.filter(location__in=locations)
+        reminders = ReminderNotification.objects.filter(type__icontains=key,
+                                                        mother__in=mothers)
+        # utilize start/end date if supplied
+        reminders = filter_by_dates(reminders, 'date',
+                                 start=start_date, end=end_date)
         tolds = ToldReminder.objects.filter(type=key, mother__in=mothers)
         if key == 'edd':
             showed_up = BirthRegistration.objects.filter(mother__in=mothers)
@@ -231,18 +258,6 @@ def reminder_stats(request):
                 'told': tolds.count(),
                 'showed_up': showed_up.count()
             })
-
-    if request.GET:
-        form = StatisticsFilterForm(request.GET)
-        if form.is_valid():
-            province = form.cleaned_data.get('province')
-            district = form.cleaned_data.get('district')
-            facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
-            # filter the records_for output
-    else:
-        form = StatisticsFilterForm()
 
     reminder_stats_table = ReminderStatsTable(records,
                                            request=request)

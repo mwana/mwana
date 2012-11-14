@@ -3,6 +3,8 @@ from selectable.registry import registry
 
 from mwana.apps.locations.models import Location
 
+from .utils import get_location_tree_nodes
+
 
 class ProvinceLookup(ModelLookup):
     model = Location
@@ -35,7 +37,8 @@ class FacilityLookup(ModelLookup):
         results = super(FacilityLookup, self).get_query(request, term)
         district = request.GET.get('district', '')
         if district:
-            results = results.filter(parent=district)
+            loc = Location.objects.get(pk=district)
+            results = get_location_tree_nodes(loc)
         return results
 
     def get_item_label(self, item):
