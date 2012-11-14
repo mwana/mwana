@@ -166,7 +166,7 @@ def create_referral(data={}):
         'session': session,
         'facility': facility,
         'mother': mother,
-        'date': datetime.now().date(),
+        'date': (datetime.now() + timedelta(days=30)).date(),
     }
     return create_instance(Referral, defaults, data)
 

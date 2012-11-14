@@ -216,6 +216,8 @@ class SMGLPregnancyTest(SMGLSetUp):
         [mom] = PregnantMother.objects.all()
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
+        create_facility_visit(data={'mother': mom})
+        create_referral(data={'mother': mom})
 
         resp = const.TOLD_COMPLETE % {"name": self.name}
         for told_type in TOLD_TYPE_CHOICES:
