@@ -258,6 +258,21 @@ class SMGLPregnancyTest(SMGLSetUp):
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
 
+    def testInvalidToldREF(self):
+        mom = create_mother()
+        create_referral(data={'mother': mom,
+            'date': (datetime.now() - timedelta(days=30)).date(),
+                })
+
+        resp = const.TOLD_MOTHER_HAS_NO_REF % {"unique_id": mom.uid}
+        script = """
+            %(num)s > told %(muid)s REF
+            %(num)s < %(resp)s
+        """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
+        self.runScript(script)
+        told_reminders = ToldReminder.objects.filter(mother=mom)
+        self.assertEqual(0, told_reminders.count())
+
     def testBadTold(self):
         bad_code_resp = 'Answer must be one of the choices for "Type of reminder, choices: edd, nvd, ref"'
         mom = create_mother()
