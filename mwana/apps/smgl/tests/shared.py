@@ -13,7 +13,8 @@ from threadless_router.tests.scripted import TestScript
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl.models import (FacilityVisit, PregnantMother,
-         BirthRegistration, DeathRegistration, Referral)
+         BirthRegistration, DeathRegistration, Referral, ReminderNotification,
+         ToldReminder)
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import PreRegistration
 
@@ -169,6 +170,36 @@ def create_referral(data={}):
         'date': (datetime.now() + timedelta(days=30)).date(),
     }
     return create_instance(Referral, defaults, data)
+
+
+def create_reminder_notification(reminder_type, data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+
+    defaults = {
+        'recipient': contact,
+        'mother': mother,
+        'date': datetime.now(),
+        'type': reminder_type
+    }
+    return create_instance(ReminderNotification, defaults, data)
+
+
+def create_told_reminder(told_type, data={}):
+    contact = create_contact()
+    mother = create_mother(data={'contact': contact})
+    trigger = DecisionTrigger.objects.get(trigger_keyword='told')
+    session = create_session(trigger=trigger,
+                             data={'connection': contact.default_connection}
+                             )
+    defaults = {
+        'contact': contact,
+        'session': session,
+        'mother': mother,
+        'date': datetime.now(),
+        'type': told_type
+    }
+    return create_instance(ToldReminder, defaults, data)
 
 
 def get_random_string(length=10, choices=string.ascii_letters):
