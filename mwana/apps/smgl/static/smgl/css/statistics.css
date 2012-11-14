@@ -1,9 +1,5 @@
 /* vim:set et ts=4 sw=4 */
 
-#wrapper {
-    min-width: 1024px;
-}
-
 button.ui-button-icon-only {
     height: 19px;
     top: 6px;
@@ -44,4 +40,4 @@ button.ui-button-icon-only {
 .statistics col { width: 1%; }
 .statistics col:first-child { width: auto; }
 
-.statistics col.location { width: 75px;}
+.statistics col.location, .statistics col.reminder-type { width: 75px;}

@@ -245,14 +245,22 @@ def reminder_stats(request):
         # utilize start/end date if supplied
         reminders = filter_by_dates(reminders, 'date',
                                  start=start_date, end=end_date)
-        tolds = ToldReminder.objects.filter(type=key, mother__in=mothers)
+        reminded_mothers = reminders.values_list('mother', flat=True)
+        tolds = ToldReminder.objects.filter(type=key,
+                                            mother__in=reminded_mothers
+                                            )
         if key == 'edd':
-            showed_up = BirthRegistration.objects.filter(mother__in=mothers)
+            showed_up = BirthRegistration.objects.filter(
+                                                mother__in=reminded_mothers
+                                                )
         elif key == 'ref':
-            showed_up = Referral.objects.filter(mother__in=mothers,
-                                                mother_showed=True)
+            showed_up = Referral.objects.filter(mother_showed=True,
+                                                mother__in=reminded_mothers
+                                                )
         else:
-            showed_up = FacilityVisit.objects.filter(mother__in=mothers)
+            showed_up = FacilityVisit.objects.filter(
+                                                    mother__in=reminded_mothers
+                                                    )
         records.append({
                 'reminder_type': key,
                 'reminders': reminders.count(),

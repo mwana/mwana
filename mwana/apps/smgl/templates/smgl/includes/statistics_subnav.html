@@ -1,11 +1,21 @@
+<ul id="tabs">{% for tab in tabs %}{% if tab.visible %}
+        <li class="app-{{ tab.caption_slug }}{% if tab.is_active %} active{% endif %}">
+                <a href="{{ tab.url }}"><span>{{ tab.caption }}</span></a>
+        </li>{% endif %}{% endfor %}
+</ul>
+
+
+
 <ul id="page-tabs">
-    <li class="">
+    {% with current_url=request.get_full_path %}
+    <li class="{% if current_url == "/smgl/statistics/" %}active{% endif %}">
       <a href="{% url statistics %}"><span>National</span></a>
     </li>
-    <li class="">
+    <li class="{% if current_url == "/smgl/reminder-stats/" %}active{% endif %}">
       <a href="{% url reminder-stats %}"><span>Reminder Stats</span></a>
     </li>
-    <li class="">
+    <li class="{% if current_url == "/smgl/report/" %}active{% endif %}">
       <a href="{% url statistics %}"><span>Report</span></a>
     </li>
+    {% endwith %}
 </ul>

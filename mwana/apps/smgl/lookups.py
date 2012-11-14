@@ -30,8 +30,16 @@ class DistrictLookup(ModelLookup):
 
 class FacilityLookup(ModelLookup):
     model = Location
-    filters = {'parent__type__singular': 'district'}
+    exclude = {'type__singular__in': ['district', 'Province', 'Zone']}
     search_fields = ('name__icontains', )
+
+    def get_queryset(self):
+        qs = self.model._default_manager.get_query_set()
+        if self.filters:
+            qs = qs.filter(**self.filters)
+        if self.exclude:
+            qs = qs.exclude(**self.exclude)
+        return qs.order_by('name')
 
     def get_query(self, request, term):
         results = super(FacilityLookup, self).get_query(request, term)
