@@ -165,6 +165,17 @@ class ReportGMHandler(KeywordHandler):
         except Exception, e:
             self.exception('problem validating measurements')
 
+    def _validate_action_taken(self, action_taken):
+        self.debug("validate action taken ...")
+        self.debug(action_taken)
+        if action_taken is not None:
+            if action_taken[:2].upper() in ['NR', 'OF', 'OT', 'RG', 'SF']:
+                return action_taken[:2]
+            else:
+                self.respond(INVALID_ACTION_TAKEN)
+        else:
+            return None
+
     def __identify_healthworker(self):
         # if healthworker is already registered on this connection, return him/her
         try:
@@ -194,7 +205,7 @@ class ReportGMHandler(KeywordHandler):
 
         PATTERN = re.compile(r'(?P<child_id>\d+)\s+(?P<gender>[M|F])\s+(?P<date_of_birth>\d{6})\D*(?P<weight>\d{2}\.\d{1})\D*(?P<height>\d{2}\.\d{1})\D*(?P<oedema>[Y|N])\D*(?P<muac>\d{2}\.\d{1})', re.IGNORECASE)
 
-        token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac']
+        token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac', 'action_taken']
 
         token_data = text.split()
 
@@ -205,7 +216,7 @@ class ReportGMHandler(KeywordHandler):
                 return self.respond(INVALID_GM)
 
         try:
-            if len(token_data) > 7:
+            if len(token_data) > 8:
                 self.debug("too much data")
                 self.respond(TOO_MANY_TOKENS)
 
@@ -234,7 +245,7 @@ class ReportGMHandler(KeywordHandler):
         # check that id codes are numbers
         valid_ids, invalid_ids = self._validate_ids(
             {'child': survey_entry.child_id})
-        # send responses for each invalid id, if any
+        # send responses for each invalid id,i if any
         if len(invalid_ids) > 0:
             for k, v in invalid_ids.iteritems():
                 self.respond(INVALID_ID % (v, k))
@@ -274,6 +285,15 @@ class ReportGMHandler(KeywordHandler):
             # this can't be unknown. check in their pants if you arent sure
             return self.respond(INVALID_GENDER % (survey_entry.gender))
 
+        # check if action taken is valid
+        action_taken = self._validate_action_taken(survey.action_taken)
+        if action_taken is not None:
+            self.debug(action_taken)
+            patient_kwargs.update({'action_taken': action_taken})
+        else:
+            patient_kwargs.update({'action_taken': ''})
+            self.respond(INVALID_ACTION_TAKEN % (survey_entry.action_taken))
+
         try:
             # find patient or create a new one
             self.debug(patient_kwargs)
@@ -301,7 +321,7 @@ class ReportGMHandler(KeywordHandler):
         # by more than 3 months TODO make this configurable
         #self.debug("getting sloppy age...")
         #sloppy_age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
-        #self.debug(sloppy_age_in_months)
+        #self.debug(sloppy_age_in_months)i
         #if (abs(int(sloppy_age_in_months) - int(patient.age_in_months)) > 3):
         #    message.respond("Date of birth indicates Child ID %s's age (in months) is %s, which does not match the reported age (in months) of %s" % (patient.code, sloppy_age_in_months, patient.age_in_months))
 

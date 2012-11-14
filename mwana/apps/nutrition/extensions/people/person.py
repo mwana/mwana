@@ -4,6 +4,16 @@
 from pygrowup.pygrowup import helpers
 from django.db import models
 
+
+ACTION_TAKEN_CHOICES = (
+    ('NR', 'R-NRU'),
+    ('OF', 'C-OFP'),
+    ('OT', 'R-OTP'),
+    ('RG', 'C-R'),
+    ('SF', 'R-SFP'),
+)
+
+
 class Patient(models.Model):
     PATIENT_STATUS = (
 		 ("NA","NA"),
@@ -17,6 +27,7 @@ class Patient(models.Model):
     household_id    = models.PositiveIntegerField(max_length=10, blank=True, null=True)
     cluster_id      = models.PositiveIntegerField(max_length=10, blank=True, null=True)
     age_in_months   = models.PositiveIntegerField(max_length=10, blank=True, null=True)
+    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='RG')
 
     @property
     def assessments(self):

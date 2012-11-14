@@ -7,14 +7,24 @@ from decimal import Decimal as D
 
 from django.db import models
 from django.db.models.aggregates import Avg
-from django.core.exceptions import ObjectDoesNotExist 
+from django.core.exceptions import ObjectDoesNotExist
 
 from pygrowup.pygrowup import helpers
 
 from rapidsms.models import Contact
 from people.models import Person
 
-class Assessment(models.Model): 
+
+ACTION_TAKEN_CHOICES = (
+    ('NR', 'R-NRU'),
+    ('OF', 'C-OFP'),
+    ('OT', 'R-OTP'),
+    ('RG', 'C-R'),
+    ('SF', 'R-SFP'),
+)
+
+
+class Assessment(models.Model):
     ASS_STATUS_CHOICES = (
         ('C', 'Cancelled'),
         ('G', 'Good'),
@@ -56,7 +66,7 @@ class Assessment(models.Model):
     )
 
     # who what where when why
-    healthworker        = models.ForeignKey(Contact,null=True)
+    healthworker        = models.ForeignKey(Contact, null=True)
     patient             = models.ForeignKey(Person)
     survey              = models.ForeignKey('Survey')
     date                = models.DateTimeField(auto_now_add=True)
@@ -73,10 +83,11 @@ class Assessment(models.Model):
     height4age          = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
     weight4height       = models.DecimalField(max_digits=4,decimal_places=2,null=True,blank=True)
 
-    underweight = models.CharField(max_length=1,choices=UNDERWEIGHT_CHOICES, default='N')
-    stunting = models.CharField(max_length=1,choices=STUNTING_CHOICES, default='N')
-    wasting = models.CharField(max_length=1,choices=WASTING_CHOICES, default='N')
+    underweight = models.CharField(max_length=1, choices=UNDERWEIGHT_CHOICES, default='N')
+    stunting = models.CharField(max_length=1, choices=STUNTING_CHOICES, default='N')
+    wasting = models.CharField(max_length=1, choices=WASTING_CHOICES, default='N')
 
+    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='RG')
 
     class Meta:
         # define a permission for this app to use the @permission_required
@@ -91,7 +102,7 @@ class Assessment(models.Model):
 
     def __unicode__(self):
         return "%s" % self.id
-    
+
     @property
     def human_oedema(self):
         if self.oedema == True:
@@ -103,9 +114,9 @@ class Assessment(models.Model):
         results = {}
         #self.nutritional_status()
         self.zscores(childgrowth)
-        results.update({'weight4age' : self.weight4age,\
-                        'height4age' : self.height4age,\
-                        'weight4height' : self.weight4height})
+        results.update({'weight4age': self.weight4age,\
+                        'height4age': self.height4age,\
+                        'weight4height': self.weight4height})
         return results
 
     def zscores(self, childgrowth):
@@ -140,18 +151,18 @@ class Assessment(models.Model):
     #not pretty
 #    def nutritional_status(self):
         #stunts = StuntingTable.objects.all()
-        #for stunt in stunts:
+        #for stunt in stunts:kk
             # convert to int to get floor, then to string
             # so django will save as decimal
         #    new_age = str(float(int(stunt.age)))
         #    stunt.age = new_age
         #    stunt.save()
-#        try: 
+#        try:
 #            s_calc = StuntingTable.objects.get(gender=self.patient.gender,age=self.patient.age_in_months)
 #            self.stunting = self.height < s_calc.height
             #print "STUNTING: " + str(self.stunting)
 #            malnurished = WastingTable.objects.get(height=self.height)
-#            self.sam = self.weight <= malnurished.weight_70 
+#            self.sam = self.weight <= malnurished.weight_70
             #print "SAM: " + str(self.sam)
 #            self.mam = (self.weight <= malnurished.weight_80) and (not self.sam)
             #print "MAM: " + str(self.mam)
@@ -166,18 +177,19 @@ class Assessment(models.Model):
 #        if stunt_from_table:
 #            self.stunting = float(stunt_from_table) > float(self.height)
 
-#    def verify(self): 
+#    def verify(self):
 #        resp = {}
         #if self.patient.assessments.count() > 0:
         #    last_assessment = self.patient.assessments[0]
         #    if last_assessment.height > self.height: return {"ERROR":"last height is %s and this height is %s" % (last_assessment.height,self.height)}
 #        return resp
-        
+
     def cancel(self):
         self.status = 'C'
         self.save()
 
-class SurveyEntry(models.Model): 
+
+class SurveyEntry(models.Model):
     FLAG_CHOICES = (
         ('C', 'Cancelled'),
         ('G', 'Good'),
@@ -185,7 +197,8 @@ class SurveyEntry(models.Model):
         ('S', 'Suspect'),
     )
 
-    flag = models.CharField(max_length=1,choices=FLAG_CHOICES,default='G')
+
+    flag = models.CharField(max_length=1, choices=FLAG_CHOICES, default='G')
 
     # who what where when why
     survey_date         = models.DateTimeField(auto_now_add=True)
@@ -204,6 +217,9 @@ class SurveyEntry(models.Model):
     oedema              = models.CharField(max_length=15,blank=True,null=True)
     muac                = models.CharField(max_length=15,blank=True,null=True)
 
+    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='RG')
+
+
 class Survey(models.Model):
     begin_date              = models.DateField(blank=True,null=True)
     end_date                = models.DateField(blank=True,null=True)
@@ -214,11 +230,11 @@ class Survey(models.Model):
     normal_muac             = models.DecimalField('Normal MUAC Cutoff', max_digits=4, decimal_places=2, default=13.50)
     mild_muac               = models.DecimalField('Mild MUAC Cutoff', max_digits=4, decimal_places=2, default=12.50)
     severe_muac             = models.DecimalField('Severe MUAC Cutoff', max_digits=4, decimal_places=2, default=11.50)
-    
+
 
     # survey average limit for determination of suspect cases.
     average_limit           = models.DecimalField('Survey Average Limit', max_digits=4, decimal_places=2, default=3.0)
-    
+
     # these should come from the latest survey completed in the
     # same season
     # -1.27
@@ -246,10 +262,10 @@ class Survey(models.Model):
         # these averages are seeded with a baseline z-score given the
         # weight of 30 entries
         if survey_assessments.count() > 0:
-            if self.baseline_weight4age is not None: 
+            if self.baseline_weight4age is not None:
                 # (baseline z-score * 30) + avg z-score of survey's assessments
                 weighted_avg_weight4age_numerator = context.add(context.multiply(\
-                    self.baseline_weight4age, D(30)), D(str(sample_avg_weight4age))) 
+                    self.baseline_weight4age, D(30)), D(str(sample_avg_weight4age)))
                 # 30 + number of survey's assessments that are not none
                 weighted_avg_weight4age_denomenator = context.add(D(30),\
                     D(survey_assessments.exclude(weight4age=None).count()))
@@ -259,7 +275,7 @@ class Survey(models.Model):
 
             if self.baseline_height4age is not None:
                 weighted_avg_height4age_numerator = context.add(context.multiply(\
-                    self.baseline_height4age, D(30)), D(str(sample_avg_height4age))) 
+                    self.baseline_height4age, D(30)), D(str(sample_avg_height4age)))
                 weighted_avg_height4age_denomenator = context.add(D(30),\
                     D(survey_assessments.exclude(height4age=None).count()))
                 self.avg_height4age = context.divide(weighted_avg_height4age_numerator,\
@@ -267,7 +283,7 @@ class Survey(models.Model):
 
             if self.baseline_weight4height is not None:
                 weighted_avg_weight4height_numerator = context.add(context.multiply(\
-                    self.baseline_weight4height, D(30)), D(str(sample_avg_weight4height))) 
+                    self.baseline_weight4height, D(30)), D(str(sample_avg_weight4height)))
                 weighted_avg_weight4height_denomenator = context.add(D(30),\
                     D(survey_assessments.exclude(weight4height=None).count()))
                 self.avg_weight4height = context.divide(weighted_avg_weight4height_numerator,\

@@ -94,6 +94,24 @@
         </option>
         {% endfor %}
     </select>
+    Status:
+    <select name="status" value="{{ status }}" id="">
+        {% for option in  stat_options %}
+            <option value="{{ option }}"
+            {% ifequal option selected_status %}
+                selected="selected"
+            {% endifequal %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+    Action taken:
+    <select name="action_taken" id="" value="{{ action_taken }}">
+        {% for action in action_options %}
+            <option value="{{ action }}"
+            {% ifequal action selected_action %}
+                 selected="selected"
+             {% endifequal %}>{{ action }}</option>
+        {% endfor %}
+    </select>
     <input type="submit" name="SubmitValues" value="Ok" />
     </p>
 </form>

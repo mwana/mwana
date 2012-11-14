@@ -101,12 +101,29 @@ def assessments(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     locations = sorted(DISTRICTS)
+    status = request.GET.get('status', 'All')
+    selected_status = str(status)
+    stat_options = {"All": "All", "Cancelled": "C", "Good": "G",
+                    "Baseline": "B", "Suspect": "S"}
+    action_taken = request.GET.get('action_taken', 'All')
+    selected_action = str(action_taken)
+    action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
+                      "All": "All"}
     context = {'selected_location': selected_location,
-               'startdate': startdate, 'enddate': enddate, 'locations': locations}
+               'startdate': startdate, 'enddate': enddate,
+               'locations': locations, 'status': status,
+               'selected_status': selected_status,
+               'stat_options': sorted(stat_options.keys()),
+               'action_options': sorted(action_options.keys()),
+               'selected_action': selected_action}
     asses = Assessment.objects.filter(Q(date__gte=startdate),
                                       Q(date__lte=enddate)).order_by('-date')
     if location != "All Districts":
         asses = asses.filter(healthworker__location__parent__parent__name=location)
+    if status != "All":
+        asses = asses.filter(status=stat_options[status])
+    if action_taken != "All":
+        asses = asses.filter(action_taken=action_options[action_taken])
     return list_detail.object_list(
         request,
         queryset=asses,
