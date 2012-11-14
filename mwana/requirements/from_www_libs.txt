@@ -15,7 +15,6 @@ django-digest==1.13
 -e git+http://github.com/mvpdev/django-eav.git@24be357a3044a7d5aa0a3ae482766c158fd59dce#egg=django_eav-dev
 django-nose==0.1.2
 django-rosetta==0.6.6
--e hg+https://bitbucket.org/mlavin/django-selectable@33e4e93b3fb3ce3a747c57fb73ae6faa1588e5a6#egg=django_selectable-dev
 django-tastypie==0.9.11
 django-timezones==0.2
 django-uni-form==0.8.0
