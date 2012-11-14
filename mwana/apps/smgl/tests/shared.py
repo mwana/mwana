@@ -58,8 +58,9 @@ def create_location(data={}):
 
 
 def create_connection(data={}):
+    backend = Backend.objects.get_or_create(name='mockbackend')[0]
     defaults = {
-        'backend': Backend.objects.get_or_create(name='mockbackend')[0],
+        'backend': backend,
         'identity': get_random_string(choices=string.digits),
     }
     return create_instance(Connection, defaults, data)
