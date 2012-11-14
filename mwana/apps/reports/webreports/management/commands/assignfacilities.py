@@ -13,13 +13,13 @@ from django.core.management.base import LabelCommand
 
 
 class Command(LabelCommand):
-    help = ("assign facilities ro reporing group\nUsage: assignfacilities DISTRICT_NAME")
+    help = ("assign facilities to reporing group\nUsage: assignfacilities DISTRICT_CODE")
 
     def handle(self, * args, ** options):
 
 
         if len(args) < 1:
-            raise CommandError('Please specify district followed by slug.')
+            raise CommandError('Please specify district slug.')
 
         slug = args[0]
 
