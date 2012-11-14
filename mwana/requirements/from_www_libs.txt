@@ -19,7 +19,7 @@ django-tastypie==0.9.11
 django-timezones==0.2
 django-uni-form==0.8.0
 djappsettings==0.1.0
-djtables==0.1.2
+-e git+https://github.com/adammck/djtables.git#egg=djtables-dev
 gunicorn==0.12.2
 http-parser==0.7.1
 importlib==1.0.2
