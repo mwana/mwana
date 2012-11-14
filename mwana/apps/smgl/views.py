@@ -97,7 +97,7 @@ def statistics(request, id=None):
         if id:
             reg_filter = {'facility': place}
             visit_filter = {'location': place}
-        r = {'location': place}
+        r = {'location': place.name}
         births = BirthRegistration.objects.filter(**reg_filter)
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
@@ -167,6 +167,7 @@ def statistics(request, id=None):
         records.append(r)
 
     # handle sorting, since djtables won't sort on non-Model based tables.
+    records = sorted(records, key=itemgetter('location'))
     if request.GET.get('order_by'):
         sort = False
         attr = request.GET.get('order_by')

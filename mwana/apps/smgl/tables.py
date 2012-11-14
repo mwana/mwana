@@ -61,9 +61,6 @@ class StatisticsTable(Table):
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
 
-    class Meta:
-        order_by = "location"
-
 
 class StatisticsLinkTable(StatisticsTable):
 
@@ -91,12 +88,9 @@ class StatisticsLinkTable(StatisticsTable):
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
 
-    class Meta:
-        order_by = "location"
-
 
 class ReminderStatsTable(Table):
-    reminder_type = Column()
-    reminders = Column()
-    told = Column()
-    showed_up = Column()
+    reminder_type = Column(sortable=False)
+    reminders = Column(sortable=False)
+    told = Column(sortable=False)
+    showed_up = Column(sortable=False)
