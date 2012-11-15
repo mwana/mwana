@@ -185,3 +185,7 @@ def get_location_tree_nodes(location, locations=None):
             locations.append(child)
             get_location_tree_nodes(child, locations)
     return locations
+
+
+def percentage(part, whole):
+    return 100 * float(part) / float(whole)

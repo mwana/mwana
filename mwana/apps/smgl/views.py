@@ -22,7 +22,7 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes)
+    get_location_tree_nodes, percentage)
 
 
 def mothers(request):
@@ -316,7 +316,7 @@ def report(request):
     deaths = DeathRegistration.objects.filter(date__gte=start_date,
                                               date__lte=end_date,
                                               person='ma')
-    mortality_rate = (deaths.count() / float(100000)) * 100
+    mortality_rate = percentage(deaths.count(), 100000)
     cbas = ContactType.objects.get(slug='cba').contacts.all().count()
     data_clerks = ContactType.objects.get(slug='dc').contacts.all().count()
     clinic_worker = ContactType.objects.get(slug='worker').contacts.all().count()
@@ -335,25 +335,25 @@ def report(request):
     outcomes = Q(mother_outcome__isnull=False) | Q(baby_outcome__isnull=False)
     positive_outcomes = Q(mother_outcome='stb') | Q(baby_outcome='stb')
     non_ems_wro = non_ems_refs.filter(outcomes, responded=True).count()
-    non_ems_wro = (non_ems_wro / float(non_ems_refs.count())) * 100
+    non_ems_wro = percentage(non_ems_wro, non_ems_refs.count())
     ems_wro = ems_refs.filter(outcomes, responded=True).count()
-    ems_wro = (ems_wro / float(ems_refs.count())) * 100
+    ems_wro = percentage(ems_wro, ems_refs.count())
     positive_ems_wro = ems_refs.filter(positive_outcomes, responded=True).count()
-    positive_ems_wro = (ems_wro / float(ems_refs.count())) * 100
+    positive_ems_wro = percentage(positive_ems_wro, ems_refs.count())
 
     # computing birth and death percentages
     births = BirthRegistration.objects.all()
-    f_births = (births.filter(place='f').count() / float(births.count())) * 100
-    c_births = (births.filter(place='h').count() / float(births.count())) * 100
+    f_births = percentage(births.filter(place='f').count(), births.count())
+    c_births = percentage(births.filter(place='h').count(), births.count())
     deaths = DeathRegistration.objects.filter(person='inf')
-    f_deaths = (deaths.filter(place='f').count() / float(deaths.count())) * 100
-    c_deaths = (deaths.filter(place='h').count() / float(deaths.count())) * 100
+    f_deaths = percentage(deaths.filter(place='f').count(), deaths.count())
+    c_deaths = percentage(deaths.filter(place='h').count(), deaths.count())
 
     #anc reminders
     reminders = ReminderNotification.objects.filter(type='nvd')
     reminded_mothers = reminders.values_list('mother', flat=True)
     visits = FacilityVisit.objects.filter(mother__in=reminded_mothers)
-    returned = (visits.count() / float(reminded_mothers.count())) * 100
+    returned = percentage(visits.count(), reminded_mothers.count())
 
     return render_to_response(
         "smgl/report.html",
