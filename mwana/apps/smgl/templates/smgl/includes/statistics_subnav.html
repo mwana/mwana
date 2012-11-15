@@ -14,10 +14,9 @@
     <li class="{% if current_url == "/smgl/reminder-stats/" %}active{% endif %}">
       <a href="{% url reminder-stats %}"><span>Reminder Stats</span></a>
     </li>
-    {% comment %}
+
     <li class="{% if current_url == "/smgl/report/" %}active{% endif %}">
-      <a href="{% url report-stats %}"><span>Report</span></a>
+      <a href="{% url report %}"><span>Report</span></a>
     </li>
-    {% endcomment %}
     {% endwith %}
 </ul>

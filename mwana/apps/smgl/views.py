@@ -1,13 +1,17 @@
 # vim: ai ts=4 sts=4 et sw=4
 import urllib
 
+from datetime import date
+
 from operator import itemgetter
 
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
+
+from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
 
@@ -275,5 +279,83 @@ def reminder_stats(request):
         "smgl/reminder_stats.html",
         {"reminder_stats_table": reminder_stats_table,
          "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def report(request):
+    province = district = facility = start_date = end_date = None
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            # filter the records_for output
+    else:
+        form = StatisticsFilterForm()
+    start_date = date(date.today().year, 1, 1)
+    end_date = date(date.today().year, 12, 31)
+    deaths = DeathRegistration.objects.filter(date__gte=start_date,
+                                              date__lte=end_date,
+                                              person='ma')
+    mortality_rate = (deaths.count() / float(100000)) * 100
+    cbas = ContactType.objects.get(slug='cba').contacts.all().count()
+    data_clerks = ContactType.objects.get(slug='dc').contacts.all().count()
+    clinic_worker = ContactType.objects.get(slug='worker').contacts.all().count()
+
+    # agregating ANC numbers
+    visits = FacilityVisit.objects.all()
+    mother_ids = visits.distinct('mother').values_list('mother', flat=True)
+    mothers = PregnantMother.objects.filter(id__in=mother_ids)
+    mother_visits = mothers.annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
+    gte_four_ancs = sum(i >= 4 for i in mother_visits)
+
+    # agregating referral information
+    non_ems_refs = Referral.non_emergencies()
+    ems_refs = Referral.emergencies()
+    outcomes = Q(mother_outcome__isnull=False) | Q(baby_outcome__isnull=False)
+    positive_outcomes = Q(mother_outcome='stb') | Q(baby_outcome='stb')
+    non_ems_wro = non_ems_refs.filter(outcomes, responded=True).count()
+    non_ems_wro = (non_ems_wro / float(non_ems_refs.count())) * 100
+    ems_wro = ems_refs.filter(outcomes, responded=True).count()
+    ems_wro = (ems_wro / float(ems_refs.count())) * 100
+    positive_ems_wro = ems_refs.filter(positive_outcomes, responded=True).count()
+    positive_ems_wro = (ems_wro / float(ems_refs.count())) * 100
+
+    # computing birth and death percentages
+    births = BirthRegistration.objects.all()
+    f_births = (births.filter(place='f').count() / float(births.count())) * 100
+    c_births = (births.filter(place='h').count() / float(births.count())) * 100
+    deaths = DeathRegistration.objects.filter(person='inf')
+    f_deaths = (deaths.filter(place='f').count() / float(deaths.count())) * 100
+    c_deaths = (deaths.filter(place='h').count() / float(deaths.count())) * 100
+
+    #anc reminders
+    reminders = ReminderNotification.objects.filter(type='nvd')
+    reminded_mothers = reminders.values_list('mother', flat=True)
+    visits = FacilityVisit.objects.filter(mother__in=reminded_mothers)
+    returned = (visits.count() / float(reminded_mothers.count())) * 100
+
+    return render_to_response(
+        "smgl/report.html",
+        {"form": form,
+        "mortality_rate": mortality_rate,
+        "cbas": cbas,
+        "data_clerks": data_clerks,
+        "clinic_worker": clinic_worker,
+        "gte_four_ancs": gte_four_ancs,
+        "non_ems_wro": non_ems_wro,
+        "ems_wro": ems_wro,
+        "positive_ems_wro": positive_ems_wro,
+        "f_births": f_births,
+        "c_births": c_births,
+        "f_deaths": f_deaths,
+        "c_deaths": c_deaths,
+        "returned": returned,
+
         },
         context_instance=RequestContext(request))
