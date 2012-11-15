@@ -232,7 +232,6 @@ def reminder_stats(request):
             facility = form.cleaned_data.get('facility')
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
-            # filter the records_for output
     else:
         form = StatisticsFilterForm()
 
@@ -312,7 +311,6 @@ def report(request):
             facility = form.cleaned_data.get('facility')
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
-            # filter the records_for output
     else:
         form = StatisticsFilterForm()
     deaths = DeathRegistration.objects.filter(date__gte=start_date,
@@ -360,19 +358,20 @@ def report(request):
     return render_to_response(
         "smgl/report.html",
         {"form": form,
-        "mortality_rate": mortality_rate,
-        "cbas": cbas,
-        "data_clerks": data_clerks,
-        "clinic_worker": clinic_worker,
-        "gte_four_ancs": gte_four_ancs,
-        "non_ems_wro": non_ems_wro,
-        "ems_wro": ems_wro,
-        "positive_ems_wro": positive_ems_wro,
-        "f_births": f_births,
-        "c_births": c_births,
-        "f_deaths": f_deaths,
-        "c_deaths": c_deaths,
-        "returned": returned,
-
+         "mortality_rate": mortality_rate,
+         "cbas": cbas,
+         "data_clerks": data_clerks,
+         "clinic_worker": clinic_worker,
+         "gte_four_ancs": gte_four_ancs,
+         "non_ems_wro": non_ems_wro,
+         "ems_wro": ems_wro,
+         "positive_ems_wro": positive_ems_wro,
+         "f_births": f_births,
+         "c_births": c_births,
+         "f_deaths": f_deaths,
+         "c_deaths": c_deaths,
+         "returned": returned,
+         "start_date": start_date,
+         "end_date": end_date,
         },
         context_instance=RequestContext(request))

@@ -1,7 +1,7 @@
 {% extends  "layout.html" %}
 {% load djtables_tags %}
 
-{% block title %}Reminder Stats- {{ block.super }}{% endblock %}
+{% block title %}Summary Report- {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -60,22 +60,14 @@
             {{ form.end_date.errors}}
             {{ form.end_date }}
           </td>
-          {% if not district %}
           <td>
             {{ form.province.errors}}
             {{ form.province }}
           </td>
-          {% endif %}
           <td>
             {{ form.district.errors}}
             {{ form.district }}
           </td>
-          {% if district %}
-            <td>
-              {{ form.facility.errors}}
-              {{ form.facility }}
-            </td>
-          {% endif %}
         </tr>
       </tbody>
     </table>
@@ -83,7 +75,7 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   {{ form.media.js }}
-  <h2>Reporting</h2>
+  <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
   <div> Mortality Rate: {{ mortality_rate|floatformat:5 }}% </div>
   <div> CBAs: {{ cbas }} </div>
   <div> Data Clerks: {{ data_clerks }} </div>
@@ -102,17 +94,11 @@
 
   <script type="text/javascript">
     $(document).ready(function() {
-        {% if not district %}
         function newDistrictParameters(query) {
             query.province = $('#id_province_1').val();
         }
         $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
-        {% else %}
-        function newFacilityParameters(query) {
-            query.district = $('#id_district_1').val();
-        }
-        $('#id_facility_0').djselectable('option', 'prepareQuery', newFacilityParameters);
-        {% endif %}
+
     });
 </script>
 
