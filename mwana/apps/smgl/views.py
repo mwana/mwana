@@ -102,6 +102,7 @@ def statistics(request, id=None):
             reg_filter = {'facility': place}
             visit_filter = {'location': place}
         r = {'location': place.name}
+        r['location_id'] = place.id
         births = BirthRegistration.objects.filter(**reg_filter)
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
@@ -134,7 +135,7 @@ def statistics(request, id=None):
                                   start=start_date, end=end_date)
 
         mother_ids = place_visits.distinct('mother') \
-                        .values_list('mother', flat=True)
+                            .values_list('mother', flat=True)
         num_visits = {}
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
@@ -159,12 +160,14 @@ def statistics(request, id=None):
             district_facilities = [x for x in locations \
                                 if get_current_district(x) == place]
             pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities).count()
+                            .filter(location__in=district_facilities)
         else:
-            pregnancies = PregnantMother.objects.filter(location=place) \
-                        .count()
+            pregnancies = PregnantMother.objects.filter(location=place)
 
-        r['pregnancies'] = pregnancies
+        pregnancies = filter_by_dates(pregnancies, 'created_date',
+                                 start=start_date, end=end_date)
+
+        r['pregnancies'] = pregnancies.count()
 
         # TO DO when POS keyword handler is in place
         r['pos1'] = r['pos2'] = r['pos3'] = 0
@@ -271,6 +274,19 @@ def reminder_stats(request):
                 'told': tolds.count(),
                 'showed_up': showed_up.count()
             })
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['reminder_type', 'reminders', 'told', 'showed_up']
+        filename = 'reminder_statistics'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+        return export_as_csv(records, keys, filename)
 
     reminder_stats_table = ReminderStatsTable(records,
                                            request=request)
