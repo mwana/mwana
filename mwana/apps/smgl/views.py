@@ -155,12 +155,14 @@ def statistics(request, id=None):
             district_facilities = [x for x in locations \
                                 if get_current_district(x) == place]
             pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities).count()
+                            .filter(location__in=district_facilities)
         else:
-            pregnancies = PregnantMother.objects.filter(location=place) \
-                        .count()
+            pregnancies = PregnantMother.objects.filter(location=place)
 
-        r['pregnancies'] = pregnancies
+        pregnancies = filter_by_dates(pregnancies, 'created_date',
+                                 start=start_date, end=end_date)
+
+        r['pregnancies'] = pregnancies.count()
 
         # TO DO when POS keyword handler is in place
         r['pos1'] = r['pos2'] = r['pos3'] = 0
