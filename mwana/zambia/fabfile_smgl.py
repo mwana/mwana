@@ -189,7 +189,7 @@ def deploy():
             sudo('git submodule update', user=env.sudo_user)
 #            sudo('git push origin %(code_branch)s' % env, user=env.sudo_user) #get any translations commits back up to
                                                                             #server. MAKE SURE ORIGIN IS WRITE ENABLED
-#        update_requirements()
+        #update_requirements()
 #        update_services()
         migrate()
         init_data()
