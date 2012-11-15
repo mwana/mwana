@@ -504,7 +504,7 @@ def supported_sites(request):
     rpt_facilities = read_request(request, "rpt_facilities")
 
     r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
-    records = r.user_facilities()
+    records = r.user_facilities().filter(supportedlocation__supported=True)
     sites = []
     for record in records:
         if not record.point:
