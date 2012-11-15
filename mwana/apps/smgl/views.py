@@ -20,7 +20,8 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification)
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
-                        StatisticsLinkTable, ReminderStatsTable)
+                        StatisticsLinkTable, ReminderStatsTable,
+                        SummaryReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage)
 
@@ -299,6 +300,7 @@ def reminder_stats(request):
 
 
 def report(request):
+    records = []
     province = district = locations = None
     start_date = date(date.today().year, 1, 1)
     end_date = date(date.today().year, 12, 31)
@@ -327,7 +329,7 @@ def report(request):
     deaths = filter_by_dates(deaths, 'date', start=start_date, end=end_date)
     if locations:
         deaths = DeathRegistration.objects.filter(district__in=locations)
-    mortality_rate = percentage(deaths.count(), 100000)
+    mortality_rate = percentage(deaths.count(), 100000, extended=True)
 
     cbas = ContactType.objects.get(slug='cba').contacts.all()
     cbas = filter_by_dates(cbas, 'created_date',
@@ -342,6 +344,15 @@ def report(request):
         cbas = [x for x in cbas if x.get_current_district() in locations]
         clerks = [x for x in clerks if x.get_current_district() in locations]
         workers = [x for x in workers if x.get_current_district() in locations]
+
+    try:
+        cbas = cbas.count()
+        clerks = clerks.count()
+        workers = workers.count()
+    except TypeError:
+        cbas = len(cbas)
+        clerks = len(clerks)
+        workers = len(workers)
 
     # agregating ANC numbers
     visits = filter_by_dates(FacilityVisit.objects.all(), 'created_date',
@@ -395,23 +406,55 @@ def report(request):
 
     returned = percentage(visits.count(), reminded_mothers.count())
 
+    records = [
+         {'data': "Maternal Mortality Rate", 'value': mortality_rate},
+         {'data': "Number of Clinical Workers Registered",
+          'value': workers},
+         {'data': "Number of CBAs Registered",
+          'value': cbas},
+         {'data': "Number of Date Clerks Registered",
+          'value': clerks},
+         {'data': 'Number of Women who attended at least 4 ANC visits',
+          'value': gte_four_ancs},
+         {'data': "Percentage of women who returned for ANCs after being reminded",
+          'value': returned},
+         {'data': "Percentage of non emergency obstetric referral with response and outcome",
+          'value': non_ems_wro},
+         {'data': "Percentage of emergency obstetric referral with response and outcome",
+          'value': ems_wro},
+         {'data': "Percentage of positive emergency obstetric referral with response and outcome",
+          'value': positive_ems_wro},
+         {'data': "Percentage of facility births",
+          'value': f_births},
+         {'data': "Percentage of community births",
+          'value': c_births},
+         {'data': "Percentage of facility deaths",
+          'value': f_deaths},
+         {'data': "Percentage of community deaths",
+          'value': c_deaths},
+        ]
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['data', 'value']
+        filename = 'summary_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+        return export_as_csv(records, keys, filename)
+
+    summary_report_table = SummaryReportTable(records,
+                                       request=request)
+
     return render_to_response(
         "smgl/report.html",
         {"form": form,
-         "mortality_rate": mortality_rate,
-         "cbas": cbas,
-         "clerks": clerks,
-         "workers": workers,
-         "gte_four_ancs": gte_four_ancs,
-         "non_ems_wro": non_ems_wro,
-         "ems_wro": ems_wro,
-         "positive_ems_wro": positive_ems_wro,
-         "f_births": f_births,
-         "c_births": c_births,
-         "f_deaths": f_deaths,
-         "c_deaths": c_deaths,
-         "returned": returned,
          "start_date": start_date,
          "end_date": end_date,
+         "summary_report_table": summary_report_table
         },
         context_instance=RequestContext(request))

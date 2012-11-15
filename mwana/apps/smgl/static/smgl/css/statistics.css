@@ -29,11 +29,11 @@ button.ui-button-icon-only {
     text-transform: uppercase
 }
 
-.statistics #records tr:nth-child(2n) {
+.statistics #records table tr:nth-child(2n) {
     background-color: #CCC;
 }
 
-.statistics #records tbody tr:hover {
+.statistics #records table tbody tr:hover {
     background-color: #999;
 }
 

@@ -94,3 +94,8 @@ class ReminderStatsTable(Table):
     reminders = Column(sortable=False)
     told = Column(sortable=False)
     showed_up = Column(sortable=False)
+
+
+class SummaryReportTable(Table):
+    data = Column(sortable=False)
+    value = Column(sortable=False)

@@ -76,20 +76,9 @@
   </form>
   {{ form.media.js }}
   <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
-  <div> Mortality Rate: {{ mortality_rate|floatformat:5 }}% </div>
-  <div> CBAs: {{ cbas|length }} </div>
-  <div> Data Clerks: {{ clerks|length }} </div>
-  <div> Clinic Worker: {{ workers|length }} </div>
-  <div> Number of Women with over 4 ANC vists: {{ gte_four_ancs }} </div>
-  <div> Percentage of women who returned for ANCs after being reminded: {{ returned|floatformat:3 }}% </div>
-  <div> Percentage of non emergency obstetric referral with response and outcome: {{ non_ems_wro|floatformat:3}}% </div>
-  <div> Percentage of emergency obstetric referral with response and outcome: {{ ems_wro|floatformat:3 }}% </div>
-  <div> Percentage of positive emergency obstetric referral with response and outcome: {{ positive_ems_wro|floatformat:3 }}% </div>
-  <div> Percentage of facility births: {{ f_births|floatformat:3 }}% </div>
-  <div> Percentage of community births: {{ c_births|floatformat:3 }}% </div>
-  <div> Percentage of facility deaths: {{ f_deaths|floatformat:3 }}% </div>
-  <div> Percentage of community deaths: {{ c_deaths|floatformat:3 }}% </div>
-
+  <div id="records">
+    {{ summary_report_table.as_html }}
+  </div>
 </div>
 
   <script type="text/javascript">

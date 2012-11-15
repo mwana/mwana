@@ -89,23 +89,24 @@
   {% endif %}
   <h3>{% if district %}District{% else %}National{% endif %} Statistics</h3>
 
-  <table id="records">
-      {% table_cols statistics_table %}
-      <thead>
-        <tr>
-         <th colspan="2"></th>
-         <th style="text-align: center" colspan="3">Births</th>
-         <th style="text-align: center" colspan="3">Infant Deaths</th>
-         <th style="text-align: center" colspan="3">Mother Deaths</th>
-         <th style="text-align: center" colspan="4">ANC</th>
-         <th style="text-align: center" colspan="3">POS</th>
-        </tr>
-      </thead>
-      {% table_head statistics_table %}
-      {% table_body statistics_table %}
-      {% table_foot statistics_table %}
-  </table>
-
+  <div id="records">
+    <table>
+        {% table_cols statistics_table %}
+        <thead>
+          <tr>
+           <th colspan="2"></th>
+           <th style="text-align: center" colspan="3">Births</th>
+           <th style="text-align: center" colspan="3">Infant Deaths</th>
+           <th style="text-align: center" colspan="3">Mother Deaths</th>
+           <th style="text-align: center" colspan="4">ANC</th>
+           <th style="text-align: center" colspan="3">POS</th>
+          </tr>
+        </thead>
+        {% table_head statistics_table %}
+        {% table_body statistics_table %}
+        {% table_foot statistics_table %}
+    </table>
+  </div>
 </div>
 
   <script type="text/javascript">

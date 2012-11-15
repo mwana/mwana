@@ -75,7 +75,9 @@
   </form>
   {{ form.media.js }}
   <h2>Reminder Statistics</h2>
-  {{ reminder_stats_table.as_html }}
+  <div id="records">
+    {{ reminder_stats_table.as_html }}
+  <div>
 </div>
 
   <script type="text/javascript">
