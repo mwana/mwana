@@ -188,4 +188,6 @@ def get_location_tree_nodes(location, locations=None):
 
 
 def percentage(part, whole):
-    return 100 * float(part) / float(whole)
+    if whole != 0:
+        return 100 * float(part) / float(whole)
+    return 0

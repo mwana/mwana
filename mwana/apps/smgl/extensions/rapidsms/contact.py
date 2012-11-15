@@ -5,6 +5,8 @@ class ContactLocation(models.Model):
     unique_id = models.CharField(max_length=255, blank=True, null=True, unique=True,
                                  help_text="An optional Unique Identifier for this contact")
 
+    created_date = models.DateField(auto_now_add=True)
+
     class Meta:
         abstract = True
 

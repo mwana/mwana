@@ -77,9 +77,9 @@
   {{ form.media.js }}
   <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
   <div> Mortality Rate: {{ mortality_rate|floatformat:5 }}% </div>
-  <div> CBAs: {{ cbas }} </div>
-  <div> Data Clerks: {{ data_clerks }} </div>
-  <div> Clinic Worker: {{ clinic_worker }} </div>
+  <div> CBAs: {{ cbas|length }} </div>
+  <div> Data Clerks: {{ clerks|length }} </div>
+  <div> Clinic Worker: {{ workers|length }} </div>
   <div> Number of Women with over 4 ANC vists: {{ gte_four_ancs }} </div>
   <div> Percentage of women who returned for ANCs after being reminded: {{ returned|floatformat:3 }}% </div>
   <div> Percentage of non emergency obstetric referral with response and outcome: {{ non_ems_wro|floatformat:3}}% </div>

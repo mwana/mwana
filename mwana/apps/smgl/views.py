@@ -299,7 +299,7 @@ def reminder_stats(request):
 
 
 def report(request):
-    province = district = facility = None
+    province = district = locations = None
     start_date = date(date.today().year, 1, 1)
     end_date = date(date.today().year, 12, 31)
 
@@ -308,21 +308,47 @@ def report(request):
         if form.is_valid():
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
-            facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            form_start_date = form.cleaned_data.get('start_date')
+            form_end_date = form.cleaned_data.get('end_date')
+            if form_start_date:
+                start_date = form_start_date
+            if form_end_date:
+                end_date = form_end_date
     else:
         form = StatisticsFilterForm()
-    deaths = DeathRegistration.objects.filter(date__gte=start_date,
-                                              date__lte=end_date,
-                                              person='ma')
+
+    if province:
+        # districts are direct children
+        locations = province.location_set.all()
+    if district:
+        locations = [district]
+
+    deaths = DeathRegistration.objects.filter(person='ma')
+    deaths = filter_by_dates(deaths, 'date', start=start_date, end=end_date)
+    if locations:
+        deaths = DeathRegistration.objects.filter(district__in=locations)
     mortality_rate = percentage(deaths.count(), 100000)
-    cbas = ContactType.objects.get(slug='cba').contacts.all().count()
-    data_clerks = ContactType.objects.get(slug='dc').contacts.all().count()
-    clinic_worker = ContactType.objects.get(slug='worker').contacts.all().count()
+
+    cbas = ContactType.objects.get(slug='cba').contacts.all()
+    cbas = filter_by_dates(cbas, 'created_date',
+                           start=start_date, end=end_date)
+    clerks = ContactType.objects.get(slug='dc').contacts.all()
+    clerks = filter_by_dates(clerks, 'created_date',
+                             start=start_date, end=end_date)
+    workers = ContactType.objects.get(slug='worker').contacts.all()
+    workers = filter_by_dates(workers, 'created_date',
+                              start=start_date, end=end_date)
+    if locations:
+        cbas = [x for x in cbas if x.get_current_district() in locations]
+        clerks = [x for x in clerks if x.get_current_district() in locations]
+        workers = [x for x in workers if x.get_current_district() in locations]
 
     # agregating ANC numbers
-    visits = FacilityVisit.objects.all()
+    visits = filter_by_dates(FacilityVisit.objects.all(), 'created_date',
+                             start=start_date, end=end_date)
+    if locations:
+        visits = visits.filter(district__in=locations)
+
     mother_ids = visits.distinct('mother').values_list('mother', flat=True)
     mothers = PregnantMother.objects.filter(id__in=mother_ids)
     mother_visits = mothers.annotate(Count('facility_visits')) \
@@ -330,8 +356,11 @@ def report(request):
     gte_four_ancs = sum(i >= 4 for i in mother_visits)
 
     # agregating referral information
-    non_ems_refs = Referral.non_emergencies()
-    ems_refs = Referral.emergencies()
+    non_ems_refs = filter_by_dates(Referral.non_emergencies(), 'date',
+                                   start=start_date, end=end_date)
+    ems_refs = filter_by_dates(Referral.emergencies(), 'date',
+                                   start=start_date, end=end_date)
+
     outcomes = Q(mother_outcome__isnull=False) | Q(baby_outcome__isnull=False)
     positive_outcomes = Q(mother_outcome='stb') | Q(baby_outcome='stb')
     non_ems_wro = non_ems_refs.filter(outcomes, responded=True).count()
@@ -342,17 +371,28 @@ def report(request):
     positive_ems_wro = percentage(positive_ems_wro, ems_refs.count())
 
     # computing birth and death percentages
-    births = BirthRegistration.objects.all()
+    births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+                               start=start_date, end=end_date)
+    if locations:
+        births = births.filter(district__in=locations)
+
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
-    deaths = DeathRegistration.objects.filter(person='inf')
+
+    deaths = filter_by_dates(DeathRegistration.objects.filter(person='inf'),
+                              'date', start=start_date, end=end_date)
+    if locations:
+        deaths = deaths.filter(district__in=locations)
+
     f_deaths = percentage(deaths.filter(place='f').count(), deaths.count())
     c_deaths = percentage(deaths.filter(place='h').count(), deaths.count())
 
     #anc reminders
-    reminders = ReminderNotification.objects.filter(type='nvd')
+    reminders = filter_by_dates(ReminderNotification.objects.filter(type='nvd'),
+                               'date', start=start_date, end=end_date)
     reminded_mothers = reminders.values_list('mother', flat=True)
-    visits = FacilityVisit.objects.filter(mother__in=reminded_mothers)
+    visits = visits.filter(mother__in=reminded_mothers)
+
     returned = percentage(visits.count(), reminded_mothers.count())
 
     return render_to_response(
@@ -360,8 +400,8 @@ def report(request):
         {"form": form,
          "mortality_rate": mortality_rate,
          "cbas": cbas,
-         "data_clerks": data_clerks,
-         "clinic_worker": clinic_worker,
+         "clerks": clerks,
+         "workers": workers,
          "gte_four_ancs": gte_four_ancs,
          "non_ems_wro": non_ems_wro,
          "ems_wro": ems_wro,
