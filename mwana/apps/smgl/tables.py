@@ -66,7 +66,7 @@ class StatisticsLinkTable(StatisticsTable):
 
     location = Column(link=lambda cell:
                                 reverse("district-stats",
-                                    args=[cell.object['location'].id]
+                                    args=[cell.object['location_id']]
                                 ),
                       header_class="location"
                     )

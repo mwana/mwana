@@ -98,6 +98,7 @@ def statistics(request, id=None):
             reg_filter = {'facility': place}
             visit_filter = {'location': place}
         r = {'location': place.name}
+        r['location_id'] = place.id
         births = BirthRegistration.objects.filter(**reg_filter)
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
@@ -130,7 +131,7 @@ def statistics(request, id=None):
                                   start=start_date, end=end_date)
 
         mother_ids = place_visits.distinct('mother') \
-                        .values_list('mother', flat=True)
+                            .values_list('mother', flat=True)
         num_visits = {}
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
