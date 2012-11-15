@@ -300,7 +300,10 @@ def reminder_stats(request):
 
 
 def report(request):
-    province = district = facility = start_date = end_date = None
+    province = district = facility = None
+    start_date = date(date.today().year, 1, 1)
+    end_date = date(date.today().year, 12, 31)
+
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
@@ -312,8 +315,6 @@ def report(request):
             # filter the records_for output
     else:
         form = StatisticsFilterForm()
-    start_date = date(date.today().year, 1, 1)
-    end_date = date(date.today().year, 12, 31)
     deaths = DeathRegistration.objects.filter(date__gte=start_date,
                                               date__lte=end_date,
                                               person='ma')

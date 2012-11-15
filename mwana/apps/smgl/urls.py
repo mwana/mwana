@@ -8,9 +8,9 @@ urlpatterns = patterns('',
     url(r"^mothers/$", views.mothers, name="mothers"),
     url(r"^mother/(?P<id>[\d]+)/$", views.mother_history, name="mother-history"),
     url(r"^statistics/$", views.statistics, name="statistics"),
+    url(r"^statistics/report/$", views.report, name="report"),
     url(r"^statistics/(?P<id>[\d]+)/$", views.statistics,
             name="district-stats"),
-    url(r"^reminder-stats/$", views.reminder_stats, name="reminder-stats"),
-    url(r"^report/$", views.report, name="report"),
+    url(r"^statistics/reminder-stats/$", views.reminder_stats, name="reminder-stats"),
 
 )

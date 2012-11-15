@@ -11,11 +11,11 @@
     <li class="{% if current_url == "/smgl/statistics/" %}active{% endif %}">
       <a href="{% url statistics %}"><span>National</span></a>
     </li>
-    <li class="{% if current_url == "/smgl/reminder-stats/" %}active{% endif %}">
+    <li class="{% if current_url == "/smgl/statistics/reminder-stats/" %}active{% endif %}">
       <a href="{% url reminder-stats %}"><span>Reminder Stats</span></a>
     </li>
 
-    <li class="{% if current_url == "/smgl/report/" %}active{% endif %}">
+    <li class="{% if current_url == "/smgl/statistics/report/" %}active{% endif %}">
       <a href="{% url report %}"><span>Report</span></a>
     </li>
     {% endwith %}
