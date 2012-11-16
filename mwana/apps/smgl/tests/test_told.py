@@ -8,7 +8,7 @@ from mwana.apps.smgl.tests.shared import create_birth_registration, \
     create_facility_visit, create_referral, create_mother
 
 
-class SMGLPregnancyTest(SMGLSetUp):
+class SMGLToldTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
 
     def setUp(self):
