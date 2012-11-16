@@ -51,6 +51,10 @@ TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already deliv
 TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
 TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
 
+# lookup messages
+LOOK_MOTHER_DOES_NOT_EXIST = _('Sorry, the mother you are trying to lookup does not exist. Please check the supplied zone id, first and last name values.')
+LOOK_COMPLETE = _("The Mother ID is %(unique_id)s.")
+
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
 

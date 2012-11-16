@@ -55,7 +55,7 @@ ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_
 
 BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been registered.")
 
-                     
+
 logger = logging.getLogger(__name__)
 class SMGL(AppBase):
     #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
@@ -124,9 +124,8 @@ def handle_submission(sender, **args):
     xform = args['xform']
     router = args['router']
     xform.initiating_phone_number = session.connection.identity
-
     keyword = session.trigger.trigger_keyword
-    
+
     logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
 
     try:
@@ -134,24 +133,24 @@ def handle_submission(sender, **args):
     except ObjectDoesNotExist:
         logger.debug('No keyword handler found for the xform submission with keyword: %s' % keyword)
         return
-    
+
     try:
         func = to_function(str(kw_handler.function_path), True)
         session.template_vars = {} #legacy from using rapidsms-xforms
         for k,v in xform.top_level_tags().iteritems():
             session.template_vars[k] = v
-    
+
         # call the actual handling function
         return func(session, xform, router)
     except Exception:
-        # assume that we were supposed to deal with this but something 
+        # assume that we were supposed to deal with this but something
         # unexpected went wrong. Respond with a general default
         # TODO: should we also mark the form somehow as errored out?
         logging.exception("Problem processing message in session %s from %s." % \
                           (session, session.connection))
-        router.outgoing(OutgoingMessage(session.connection, 
+        router.outgoing(OutgoingMessage(session.connection,
                                         const.GENERAL_ERROR))
         return True
-        
+
 # then wire it to the xform_received signal
 xform_saved_with_session.connect(handle_submission)
