@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+    <h:head>
+        <h:title>Post-Partum Visit Form</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C" uiVersion="1" version="1" name="Follow Up Form">
+                    <unique_id />
+                    <mother_status />
+                    <baby_status />
+                    <referred />
+                    <next_visit_dd />
+                    <next_visit_mm />
+                    <next_visit_yy />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string"  required="true()"/>
+            <bind nodeset="/data/mother_status"  required="true()"/>
+            <bind nodeset="/data/baby_status"  required="true()"/>
+            <bind nodeset="/data/referred"  required="true()"/>
+            <bind nodeset="/data/next_visit_dd" type="xsd:string" />
+            <bind nodeset="/data/next_visit_mm" type="xsd:string" />
+            <bind nodeset="/data/next_visit_yy" type="xsd:string" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Woman's Unique ID</value>
+                    </text>
+                    <text id="mother_status-label">
+                        <value>Mother's Status</value>
+                    </text>
+                    <text id="mother_status-well-label">
+                        <value>WELL</value>
+                    </text>
+                    <text id="mother_status-sick-label">
+                        <value>SICK</value>
+                    </text>
+                    <text id="baby_status-label">
+                        <value>Baby Status</value>
+                    </text>
+                    <text id="baby_status-well-label">
+                        <value>WELL</value>
+                    </text>
+                    <text id="baby_status-sick-label">
+                        <value>SICK</value>
+                    </text>
+                    <text id="referred-label">
+                        <value>Referred?</value>
+                    </text>
+                    <text id="referred-yes-label">
+                        <value>YES</value>
+                    </text>
+                    <text id="referred-no-label">
+                        <value>NO</value>
+                    </text>
+                    <text id="next_visit_dd-label">
+                        <value>Next Visit Day (dd)</value>
+                    </text>
+                    <text id="next_visit_mm-label">
+                        <value>Next Visit Month (mm)</value>
+                    </text>
+                    <text id="next_visit_yy-label">
+                        <value>Next Visit Year (yyyy)</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <select1 ref="/data/mother_status">
+            <label ref="jr:itext('mother_status-label')" />
+            <item>
+                <label ref="jr:itext('mother_status-well-label')" />
+                <value>well</value>
+            </item>
+            <item>
+                <label ref="jr:itext('mother_status-sick-label')" />
+                <value>sick</value>
+            </item>
+        </select1>
+        <select1 ref="/data/baby_status">
+            <label ref="jr:itext('baby_status-label')" />
+            <item>
+                <label ref="jr:itext('baby_status-well-label')" />
+                <value>well</value>
+            </item>
+            <item>
+                <label ref="jr:itext('baby_status-sick-label')" />
+                <value>sick</value>
+            </item>
+        </select1>
+        <select1 ref="/data/referred">
+            <label ref="jr:itext('referred-label')" />
+            <item>
+                <label ref="jr:itext('referred-yes-label')" />
+                <value>yes</value>
+            </item>
+            <item>
+                <label ref="jr:itext('referred-no-label')" />
+                <value>no</value>
+            </item>
+        </select1>
+        <input ref="/data/next_visit_dd">
+            <label ref="jr:itext('next_visit_dd-label')" />
+        </input>
+        <input ref="/data/next_visit_mm">
+            <label ref="jr:itext('next_visit_mm-label')" />
+        </input>
+        <input ref="/data/next_visit_yy">
+            <label ref="jr:itext('next_visit_yy-label')" />
+        </input>
+    </h:body>
+</h:html>

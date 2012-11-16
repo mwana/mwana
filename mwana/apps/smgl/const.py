@@ -45,6 +45,11 @@ DUPLICATE_REGISTRATION = _("A mother with ID %(unique_id)s is already registered
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 
+# pregnancy postpartum visit messages
+PP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to provide post partum data for is not registered in the system. Check the safe motherhood number and try again or register her first.")
+PP_MOTHER_HAS_NOT_DELIVERED = _("Sorry, the mother you are trying to provide post partum data for has no birth registered.")
+PP_COMPLETE = _("Thanks %(name)s! Post Partum visit for Mother ID %(unique_id)s is complete!")
+
 # "told" messages
 TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
 TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already delivered')
