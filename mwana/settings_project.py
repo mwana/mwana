@@ -52,8 +52,6 @@ INSTALLED_APPS = [
     "django_nose",
     "soil",
     "djtables",
-    # moving above rapidsms to tweak stylesheets
-    "mwana.apps.smgl",
     "rapidsms",
     'taggit',
 
@@ -93,6 +91,7 @@ INSTALLED_APPS = [
     #    "rapidsms.contrib.registration",
     "scheduler",
     # "scheduler",
+    "mwana.apps.smgl",
     "mwana.apps.echo",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
