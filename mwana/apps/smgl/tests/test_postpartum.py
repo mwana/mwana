@@ -24,11 +24,6 @@ class SMGLPostPartumTest(SMGLSetUp):
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
 
-        self.earlier = (datetime.now() - timedelta(days=30)).date()
-        self.yesterday = (datetime.now() - timedelta(days=1)).date()
-        self.tomorrow = (datetime.now() + timedelta(days=1)).date()
-        self.later = (datetime.now() + timedelta(days=30)).date()
-
 
     def testRegister(self):
         resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,

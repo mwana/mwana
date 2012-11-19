@@ -51,9 +51,13 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testRegisterNotRegistered(self):
         script = """
-            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none %(tomorrow)s R 80402404  %(earlier)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+        }
         self.runScript(script)
 
     def testRegisterMultipleReasons(self):
@@ -133,9 +137,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.FOLLOW_UP_COMPLETE % {"name": self.name,
                                            "unique_id": "80403000000112"}
         script = """
-            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+        }
         self.runScript(script)
 
         self.assertEqual(1, PregnantMother.objects.count())
@@ -143,9 +150,12 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testFollowUpNotRegistered(self):
         script = """
-            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+              }
         self.runScript(script)
 
     def testFollowUpOptionalEdd(self):
@@ -168,9 +178,11 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.testRegister()
         resp = const.DATE_INCORRECTLY_FORMATTED_GENERAL % {"date_name": "EDD"}
         script = """
-            %(num)s > FUP 80403000000112 r 16 10 2012 not a date
+            %(num)s > FUP 80403000000112 r %(tomorrow)s not a date
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               }
         self.runScript(script)
 
         self.assertEqual(1, PregnantMother.objects.count())
@@ -257,9 +269,11 @@ class SMGLPregnancyTest(SMGLSetUp):
         # but report a birth which should prevent the need
         resp = BIRTH_REG_RESPONSE % {"name": self.name}
         script = """
-            %(num)s > birth %(id)s 01 01 2012 bo h yes t2
+            %(num)s > birth %(id)s %(earlier)s bo h yes t2
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "id": mom.uid, "resp": resp}
+        """ % {"num": self.user_number, "id": mom.uid, "resp": resp,
+               "earlier": self.earlier.strftime("%d %m %Y"),
+              }
         self.runScript(script)
 
         # send reminders and make sure they didn't actually fire on this one
@@ -281,9 +295,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.FOLLOW_UP_COMPLETE % {"name": self.name,
                                            "unique_id": "80403000000112"}
         script = """
-            %(num)s > FUP 80403000000112 R 19 11 2012 03 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": (self.tomorrow + timedelta(days=7)).strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+               }
         self.runScript(script)
 
         [second_visit] = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)
