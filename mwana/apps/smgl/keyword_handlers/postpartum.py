@@ -49,16 +49,26 @@ def postpartum_visit(session, xform, router):
         send_msg(connection, const.PP_MOTHER_HAS_NOT_DELIVERED)
         return True
 
-    next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
+    next_visit, error_msg = make_date(xform,
+                        "next_visit_dd", "next_visit_mm", "next_visit_yy",
+                        is_optional=True,
+                        )
     if error_msg:
         send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
                                                    "error_msg": error_msg})
         return True
 
-    if next_visit < datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                 **{"date_name": "Next Visit", "date": next_visit})
-        return True
+    if next_visit:
+        if next_visit < datetime.datetime.now().date():
+            send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
+                     **{"date_name": "Next Visit", "date": next_visit})
+            return True
+    else:
+        pos_visits = FacilityVisit.objects.filter(mother=mother, visit_type="pos")
+        if pos_visits.count() < 2:
+            send_msg(connection, const.PP_NVD_REQUIRED, router,
+                     **{"num": pos_visits.count()})
+            return True
 
     mother_status = get_value_from_form('mother_status', xform)
     baby_status = get_value_from_form('baby_status', xform)
@@ -69,7 +79,6 @@ def postpartum_visit(session, xform, router):
     visit.mother = mother
     visit.contact = contact
     visit.location = contact.location
-    visit.next_visit = next_visit
     visit.visit_date = datetime.datetime.utcnow().date()
     visit.created_date = session.modified_time
     visit.visit_type = 'pos'
@@ -77,6 +86,8 @@ def postpartum_visit(session, xform, router):
     visit.baby_status = baby_status
     if referred == 'yes':
         visit.referred = True
+    if next_visit:
+        visit.next_visit = next_visit
     visit.save()
 
     send_msg(connection, const.PP_COMPLETE, router, name=contact.name, unique_id=mother.uid)

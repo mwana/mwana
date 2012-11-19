@@ -169,7 +169,7 @@ class FacilityVisit(models.Model):
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
-    next_visit = models.DateField()
+    next_visit = models.DateField(null=True, blank=True)
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
     mother_status = models.CharField(max_length=4, help_text="Mother's Status",
