@@ -35,7 +35,8 @@ def send_followup_reminders(router_obj=None):
         visits_to_remind = FacilityVisit.objects.filter(
             next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
             next_visit__lte=reminder_threshold,
-            reminded=False)
+            reminded=False,
+            visit_type='anc')
 
         for v in visits_to_remind:
             if v.mother.birthregistration_set.count() == 0 and \
@@ -155,6 +156,127 @@ def send_upcoming_delivery_reminders(router_obj=None):
         if found_someone:
             mom.reminded = True
             mom.save()
+
+
+def send_first_postpartum_reminders(router_obj=None):
+    """
+    To: CBA
+    On: 3 Days before first postpartum visit
+    """
+    _set_router(router_obj)
+
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        # Get visits 3 days from now for 1st visit
+        reminder_threshold = now + timedelta(days=3)
+        visits_to_remind = FacilityVisit.objects.filter(
+            next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+            next_visit__lte=reminder_threshold,
+            reminded=False,
+            visit_type='pos'
+            )
+        # Check if first visit for mother
+
+        for v in visits_to_remind:
+            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 0 and \
+               v.is_latest_for_mother():
+                yield v
+
+    for v in _visits_to_remind():
+        found_someone = False
+        for c in v.mother.get_laycounselors():
+            if c.default_connection:
+                found_someone = True
+                c.message(const.REMINDER_PP_DUE,
+                          **{"name": v.mother.name,
+                             "unique_id": v.mother.uid,
+                             "loc": v.location.name,
+                             "num": 3})
+                _create_notification("nvd", c, v.mother.uid)
+        if found_someone:
+            v.reminded = True
+            v.save()
+
+
+def send_second_postpartum_reminders(router_obj=None):
+    """
+    To: CBA
+    On: 7 days before second postpartum visit
+    """
+    _set_router(router_obj)
+
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        # Get visits 7 days from now for 2nd visit
+        reminder_threshold = now + timedelta(days=7)
+        visits_to_remind = FacilityVisit.objects.filter(
+            next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+            next_visit__lte=reminder_threshold,
+            reminded=False,
+            visit_type='pos'
+            )
+        # Check if second visit
+
+        for v in visits_to_remind:
+            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 1 and \
+               v.is_latest_for_mother():
+                yield v
+
+    for v in _visits_to_remind():
+        found_someone = False
+        for c in v.mother.get_laycounselors():
+            if c.default_connection:
+                found_someone = True
+                c.message(const.REMINDER_SECOND__PP_DUE,
+                          **{"name": v.mother.name,
+                             "unique_id": v.mother.uid,
+                             "loc": v.location.name,
+                             "num": 7})
+                _create_notification("nvd", c, v.mother.uid)
+        if found_someone:
+            v.reminded = True
+            v.save()
+
+
+def send_missed_postpartum_reminders(router_obj=None):
+    """
+    To: CBA
+    On: 2 Days after a missing postpartum visit
+    """
+    _set_router(router_obj)
+
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        # Get visits -2 days from now if no POS registered
+        reminder_threshold = now - timedelta(days=2)
+        visits_to_remind = FacilityVisit.objects.filter(
+            next_visit__gte=reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+            next_visit__lte=reminder_threshold,
+            reminded=False,
+            visit_type='pos'
+            )
+        # Check if missed
+
+        for v in visits_to_remind:
+            if v.mother.facilityvisit_set.filter(visit_type='pos',
+                                        visit_date=reminder_threshold)\
+                        .count() == 1 and \
+               v.is_latest_for_mother():
+                yield v
+
+    for v in _visits_to_remind():
+        found_someone = False
+        for c in v.mother.get_laycounselors():
+            if c.default_connection:
+                found_someone = True
+                c.message(const.REMINDER_PP_MISSED,
+                          **{"name": v.mother.name,
+                             "unique_id": v.mother.uid,
+                             "loc": v.location.name})
+                _create_notification("nvd", c, v.mother.uid)
+        if found_someone:
+            v.reminded = True
+            v.save()
 
 
 def _create_notification(type, contact, mother_id):
