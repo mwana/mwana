@@ -1,14 +1,13 @@
+from mwana.apps.locations.models import LocationType
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
-    ReminderNotification, ToldReminder
-from mwana.apps.smgl.models import TOLD_TYPE_CHOICES
+    ReminderNotification
 from mwana.apps.smgl import const
 from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
-from mwana.apps.smgl.tests.shared import create_birth_registration, \
-    create_facility_visit, create_referral, create_mother
+from mwana.apps.smgl.tests.shared import create_mother, create_location
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -54,9 +53,13 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testRegisterNotRegistered(self):
         script = """
-            %(num)s > REG 80403000000112 Mary Soko none 04 08 2012 R 80402404 12 02 2012 18 11 2012
+            %(num)s > REG 80403000000112 Mary Soko none %(tomorrow)s R 80402404  %(earlier)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "earlier": self.earlier.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+        }
         self.runScript(script)
 
     def testRegisterMultipleReasons(self):
@@ -136,9 +139,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.FOLLOW_UP_COMPLETE % {"name": self.name,
                                            "unique_id": "80403000000112"}
         script = """
-            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+        }
         self.runScript(script)
 
         self.assertEqual(1, PregnantMother.objects.count())
@@ -146,9 +152,12 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testFollowUpNotRegistered(self):
         script = """
-            %(num)s > FUP 80403000000112 R 18 11 2012 02 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
+        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+              }
         self.runScript(script)
 
     def testFollowUpOptionalEdd(self):
@@ -171,9 +180,11 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.testRegister()
         resp = const.DATE_INCORRECTLY_FORMATTED_GENERAL % {"date_name": "EDD"}
         script = """
-            %(num)s > FUP 80403000000112 r 16 10 2012 not a date
+            %(num)s > FUP 80403000000112 r %(tomorrow)s not a date
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": self.tomorrow.strftime("%d %m %Y"),
+               }
         self.runScript(script)
 
         self.assertEqual(1, PregnantMother.objects.count())
@@ -209,90 +220,6 @@ class SMGLPregnancyTest(SMGLSetUp):
                "future": tomorrow.strftime("%d %m %Y"),
                "resp": const.DATE_MUST_BE_IN_FUTURE % {"date_name": "EDD",
                                                        "date": yesterday}}
-        self.runScript(script)
-
-    def testValidTold(self):
-        mom = create_mother()
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-        create_facility_visit(data={'mother': mom})
-        create_referral(data={'mother': mom})
-
-        resp = const.TOLD_COMPLETE % {"name": self.name}
-        for told_type in TOLD_TYPE_CHOICES:
-            script = """
-                %(num)s > told %(muid)s %(type)s
-                %(num)s < %(resp)s
-            """ % {"num": self.user_number, "muid": mom.uid,
-                   "resp": resp, "type": told_type[0]}
-            self.runScript(script)
-
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(3, told_reminders.count())
-
-    def testInvalidToldEDD(self):
-        mom = create_mother()
-        create_birth_registration(data={'mother': mom})
-
-        resp = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {"unique_id": mom.uid}
-        script = """
-            %(num)s > told %(muid)s EDD
-            %(num)s < %(resp)s
-        """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
-        self.runScript(script)
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-
-    def testInvalidToldNVD(self):
-        mom = create_mother()
-        create_facility_visit(data={'mother': mom,
-            'next_visit': (datetime.now() - timedelta(days=30)).date(),
-                })
-
-        resp = const.TOLD_MOTHER_HAS_NO_NVD % {"unique_id": mom.uid}
-        script = """
-            %(num)s > told %(muid)s NVD
-            %(num)s < %(resp)s
-        """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
-        self.runScript(script)
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-
-    def testInvalidToldREF(self):
-        mom = create_mother()
-        create_referral(data={'mother': mom,
-            'date': (datetime.now() - timedelta(days=30)).date(),
-                })
-
-        resp = const.TOLD_MOTHER_HAS_NO_REF % {"unique_id": mom.uid}
-        script = """
-            %(num)s > told %(muid)s REF
-            %(num)s < %(resp)s
-        """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
-        self.runScript(script)
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-
-    def testBadTold(self):
-        bad_code_resp = 'Answer must be one of the choices for "Type of reminder, choices: edd, nvd, ref"'
-        mom = create_mother()
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-
-        script = """
-            %(num)s > told %(muid)s invalidcode
-            %(num)s < %(resp)s
-        """ % {"num": self.user_number, "muid": mom.uid, "resp": bad_code_resp}
-        self.runScript(script)
-
-        told_reminders = ToldReminder.objects.filter(mother=mom)
-        self.assertEqual(0, told_reminders.count())
-
-    def testToldNotRegistered(self):
-        script = """
-            %(num)s > told mothernotregistered edd
-            %(num)s < %(resp)s
-        """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
 
     def testVisitReminders(self):
@@ -344,9 +271,11 @@ class SMGLPregnancyTest(SMGLSetUp):
         # but report a birth which should prevent the need
         resp = BIRTH_REG_RESPONSE % {"name": self.name}
         script = """
-            %(num)s > birth %(id)s 01 01 2012 bo h yes t2
+            %(num)s > birth %(id)s %(earlier)s bo h yes t2
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "id": mom.uid, "resp": resp}
+        """ % {"num": self.user_number, "id": mom.uid, "resp": resp,
+               "earlier": self.earlier.strftime("%d %m %Y"),
+              }
         self.runScript(script)
 
         # send reminders and make sure they didn't actually fire on this one
@@ -368,9 +297,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         resp = const.FOLLOW_UP_COMPLETE % {"name": self.name,
                                            "unique_id": "80403000000112"}
         script = """
-            %(num)s > FUP 80403000000112 R 19 11 2012 03 12 2012
+            %(num)s > FUP 80403000000112 R %(tomorrow)s %(later)s
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": resp}
+        """ % {"num": self.user_number, "resp": resp,
+               "tomorrow": (self.tomorrow + timedelta(days=7)).strftime("%d %m %Y"),
+               "later": self.later.strftime("%d %m %Y")
+               }
         self.runScript(script)
 
         [second_visit] = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)
@@ -419,3 +351,30 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(mom.uid, notif.mother_uid)
         self.assertEqual(self.cba, notif.recipient)
         self.assertEqual("edd_14", notif.type)
+
+    def testValidLookUpMother(self):
+        loc_type = LocationType.objects.get(singular='Zone')
+        zone = create_location(data={'name': 'foo',
+                                     'slug': '123456',
+                                     'type': loc_type,
+                                     }
+                              )
+        mom = create_mother(data={'first_name': 'Jane',
+                                  'last_name': 'Doe',
+                                  'uid': '333333',
+                                  'zone': zone})
+        resp = const.LOOK_COMPLETE % {"unique_id": mom.uid}
+        script = """
+            %(num)s > look %(f_name)s %(l_name)s %(zone_id)s
+            %(num)s < %(resp)s
+        """ % {"f_name": mom.first_name, "l_name": mom.last_name,
+               "zone_id": zone.slug, "resp": resp, "num": self.user_number}
+        self.runScript(script)
+
+    def testInvalidLookUpMother(self):
+        resp = const.LOOK_MOTHER_DOES_NOT_EXIST
+        script = """
+            %(num)s > look does not exist
+            %(num)s < %(resp)s
+        """ % {"resp": resp, "num": self.user_number}
+        self.runScript(script)

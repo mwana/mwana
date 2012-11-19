@@ -122,7 +122,6 @@ def statistics(request, id=None):
                                                person='inf').count()
         r['infant_deaths_total'] = r['infant_deaths_com'] \
                                     + r['infant_deaths_fac']
-
         r['mother_deaths_com'] = deaths.filter(place='h',
                                                person='ma').count()
         r['mother_deaths_fac'] = deaths.filter(place='f',
@@ -137,21 +136,37 @@ def statistics(request, id=None):
 
         mother_ids = place_visits.distinct('mother') \
                             .values_list('mother', flat=True)
-        num_visits = {}
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
-        mother_visits = mothers.annotate(Count('facility_visits')) \
+        anc_visits = mothers.filter(facility_visits__visit_type='anc') \
+                            .annotate(Count('facility_visits')) \
                             .values_list('facility_visits__count', flat=True)
 
         r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
-
-        for num in mother_visits:
+        num_visits = {}
+        for num in anc_visits:
             if num in num_visits:
                 num_visits[num] += 1
             else:
                 num_visits[num] = 1
         for i in range(1, 5):
             key = 'anc{0}'.format(i)
+            if i in num_visits:
+                r[key] = num_visits[i]
+
+        pos_visits = mothers.filter(facility_visits__visit_type='pos') \
+                            .annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
+
+        r['pos1'] = r['pos2'] = r['pos3'] = 0
+        num_visits = {}
+        for num in pos_visits:
+            if num in num_visits:
+                num_visits[num] += 1
+            else:
+                num_visits[num] = 1
+        for i in range(1, 4):
+            key = 'pos{0}'.format(i)
             if i in num_visits:
                 r[key] = num_visits[i]
 
@@ -170,8 +185,6 @@ def statistics(request, id=None):
 
         r['pregnancies'] = pregnancies.count()
 
-        # TO DO when POS keyword handler is in place
-        r['pos1'] = r['pos2'] = r['pos3'] = 0
         records.append(r)
 
     # handle sorting, since djtables won't sort on non-Model based tables.
@@ -325,12 +338,6 @@ def report(request):
     if district:
         locations = [district]
 
-    deaths = DeathRegistration.objects.filter(person='ma')
-    deaths = filter_by_dates(deaths, 'date', start=start_date, end=end_date)
-    if locations:
-        deaths = DeathRegistration.objects.filter(district__in=locations)
-    mortality_rate = percentage(deaths.count(), 100000, extended=True)
-
     cbas = ContactType.objects.get(slug='cba').contacts.all()
     cbas = filter_by_dates(cbas, 'created_date',
                            start=start_date, end=end_date)
@@ -362,9 +369,14 @@ def report(request):
 
     mother_ids = visits.distinct('mother').values_list('mother', flat=True)
     mothers = PregnantMother.objects.filter(id__in=mother_ids)
-    mother_visits = mothers.annotate(Count('facility_visits')) \
-                            .values_list('facility_visits__count', flat=True)
-    gte_four_ancs = sum(i >= 4 for i in mother_visits)
+    anc_visits = mothers.filter(facility_visits__visit_type='anc') \
+                        .annotate(Count('facility_visits')) \
+                        .values_list('facility_visits__count', flat=True)
+    gte_four_ancs = sum(i >= 4 for i in anc_visits)
+    pos_visits = mothers.filter(facility_visits__visit_type='pos') \
+                        .annotate(Count('facility_visits')) \
+                        .values_list('facility_visits__count', flat=True)
+    gte_three_pos = sum(i >= 3 for i in pos_visits)
 
     # agregating referral information
     non_ems_refs = filter_by_dates(Referral.non_emergencies(), 'date',
@@ -386,6 +398,12 @@ def report(request):
                                start=start_date, end=end_date)
     if locations:
         births = births.filter(district__in=locations)
+
+    m_deaths = DeathRegistration.objects.filter(person='ma')
+    m_deaths = filter_by_dates(m_deaths, 'date', start=start_date, end=end_date)
+    if locations:
+        m_deaths = m_deaths.filter(district__in=locations)
+    mortality_rate = percentage(m_deaths.count(), births.count(), extended=True)
 
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
@@ -418,6 +436,8 @@ def report(request):
           'value': gte_four_ancs},
          {'data': "Percentage of women who returned for ANCs after being reminded",
           'value': returned},
+         {'data': 'Number of Women who attended at least 3 POS visits',
+          'value': gte_three_pos},
          {'data': "Percentage of non emergency obstetric referral with response and outcome",
           'value': non_ems_wro},
          {'data': "Percentage of emergency obstetric referral with response and outcome",

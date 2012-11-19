@@ -17,6 +17,11 @@ VISIT_TYPE_CHOICES = (
     ('pos', 'POS')
 )
 
+POS_STATUS_CHOICES = (
+    ('well', 'Well'),
+    ('sick', 'Sick')
+)
+
 
 class XFormKeywordHandler(models.Model):
     """
@@ -164,9 +169,16 @@ class FacilityVisit(models.Model):
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
-    next_visit = models.DateField()
+    next_visit = models.DateField(null=True, blank=True)
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
+    mother_status = models.CharField(max_length=4, help_text="Mother's Status",
+                                     choices=POS_STATUS_CHOICES,
+                                     null=True, blank=True)
+    baby_status = models.CharField(max_length=4, help_text="Baby's Status",
+                                     choices=POS_STATUS_CHOICES,
+                                     null=True, blank=True)
+    referred = models.BooleanField(default=False)
 
     def is_latest_for_mother(self):
         return FacilityVisit.objects.filter(mother=self.mother)\
