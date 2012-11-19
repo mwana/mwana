@@ -126,7 +126,7 @@ XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
 
 # for translations
 _ = lambda x: x
-DEFAULT_RESPONSE = _("Invalid keyword. Submit a form with a valid keyword: AMB, RESP, OUTC, REFER, REG, FUP, BIRTH, DEATH, REFOUT, TOLD, or text HELP for assistance.")
+DEFAULT_RESPONSE = _("Invalid keyword. Submit a form with a valid keyword: AMB, RESP, OUTC, REFER, REG, FUP, BIRTH, DEATH, REFOUT, TOLD, LOOK, or text HELP for assistance.")
 
 
 # -------------------------------------------------------------------- #
@@ -338,4 +338,6 @@ LOGO_RIGHT_URL = ''
 EXCLUDED_HANDLERS = ["mwana.apps.labresults"]
 
 # multiple "empty" births can be registered with the same message
-DUPECHECKER_IGNORE = "birth none"
+DUPECHECKER_IGNORE = ["birth none",
+                      "look",
+                     ]

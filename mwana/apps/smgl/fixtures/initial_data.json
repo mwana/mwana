@@ -1634,6 +1634,14 @@
     }
   },
   {
+    "pk": 13,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "look",
+      "function_path": "mwana.apps.smgl.keyword_handlers.motherid_lookup"
+    }
+  },
+  {
     "pk": 12,
     "model": "smsforms.decisiontrigger",
     "fields": {
@@ -1760,6 +1768,15 @@
     }
   },
   {
+    "pk": 22,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "trigger_keyword": "look",
+      "final_response": "",
+      "xform": 24
+    }
+  },
+  {
     "pk": 23,
     "model": "formplayer.xform",
     "fields": {
@@ -1782,6 +1799,19 @@
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
       "file": "xforms/postpartum_visit.xml"
+    }
+  },
+  {
+    "pk": 24,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Lookup Safe Mother ID",
+      "created": "2012-11-15T16:45:58.599",
+      "checksum": "734f589135e401611b8c1f4f8046df3bfb27ea19",
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
+      "version": 1,
+      "file": "xforms/look.xml"
     }
   },
   {

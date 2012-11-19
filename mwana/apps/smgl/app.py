@@ -124,7 +124,6 @@ def handle_submission(sender, **args):
     xform = args['xform']
     router = args['router']
     xform.initiating_phone_number = session.connection.identity
-
     keyword = session.trigger.trigger_keyword
 
     logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))

@@ -8,11 +8,11 @@ from mwana.apps.smgl.tests.shared import create_birth_registration, \
     create_facility_visit, create_referral, create_mother
 
 
-class SMGLToldTest(SMGLSetUp):
+class SMGLToldTestCase(SMGLSetUp):
     fixtures = ["initial_data.json"]
 
     def setUp(self):
-        super(SMGLPregnancyTest, self).setUp()
+        super(SMGLToldTestCase, self).setUp()
         ReminderNotification.objects.all().delete()
 
         self.createDefaults()

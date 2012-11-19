@@ -10,7 +10,9 @@ from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
-from mwana.apps.smgl.utils import get_value_from_form, send_msg, make_date
+from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
+    get_session_message)
+
 logger = logging.getLogger(__name__)
 
 
@@ -177,3 +179,44 @@ def follow_up(session, xform, router):
     visit.save()
 
     send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
+
+
+@registration_required
+def motherid_lookup(session, xform, router):
+    """
+    Handler for LOOK keyword
+    Used to query the database to obtain safe motherhood number
+
+    Format:
+    LOOK F_NAME L_NAME ZONE_ID
+    """
+    logger.debug('Handling the LOOK keyword form')
+    connection = session.connection
+    get_session_message(session)
+
+    if not connection.contact:
+        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
+                 name=connection.contact.name)
+        get_session_message(session, direction='O')
+
+        return True
+
+    f_name = get_value_from_form('f_name', xform)
+    l_name = get_value_from_form('l_name', xform)
+    zone_id = get_value_from_form('zone_id', xform)
+    try:
+        mother = PregnantMother.objects.get(first_name=f_name,
+                                            last_name=l_name,
+                                            zone__slug=zone_id)
+    except ObjectDoesNotExist:
+        send_msg(connection, const.LOOK_MOTHER_DOES_NOT_EXIST, router)
+        get_session_message(session, direction='O')
+
+        return True
+    else:
+        msg = const.LOOK_COMPLETE % {'unique_id': mother.uid}
+        send_msg(connection, msg, router,
+                 name=connection.contact.name)
+        get_session_message(session, direction='O')
+
+    return True

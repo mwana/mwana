@@ -1,3 +1,4 @@
+from mwana.apps.locations.models import LocationType
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
     ReminderNotification
@@ -6,6 +7,7 @@ from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
+from mwana.apps.smgl.tests.shared import create_mother, create_location
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -349,3 +351,30 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(mom.uid, notif.mother_uid)
         self.assertEqual(self.cba, notif.recipient)
         self.assertEqual("edd_14", notif.type)
+
+    def testValidLookUpMother(self):
+        loc_type = LocationType.objects.get(singular='Zone')
+        zone = create_location(data={'name': 'foo',
+                                     'slug': '123456',
+                                     'type': loc_type,
+                                     }
+                              )
+        mom = create_mother(data={'first_name': 'Jane',
+                                  'last_name': 'Doe',
+                                  'uid': '333333',
+                                  'zone': zone})
+        resp = const.LOOK_COMPLETE % {"unique_id": mom.uid}
+        script = """
+            %(num)s > look %(f_name)s %(l_name)s %(zone_id)s
+            %(num)s < %(resp)s
+        """ % {"f_name": mom.first_name, "l_name": mom.last_name,
+               "zone_id": zone.slug, "resp": resp, "num": self.user_number}
+        self.runScript(script)
+
+    def testInvalidLookUpMother(self):
+        resp = const.LOOK_MOTHER_DOES_NOT_EXIST
+        script = """
+            %(num)s > look does not exist
+            %(num)s < %(resp)s
+        """ % {"resp": resp, "num": self.user_number}
+        self.runScript(script)
