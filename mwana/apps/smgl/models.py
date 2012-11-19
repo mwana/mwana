@@ -442,7 +442,6 @@ class ReminderNotification(MotherReferenceBase):
                                         self.recipient,
                                         self.date)
 
-
 TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
                      ("nvd", "Next Visit Date"),
                      ("ref", "Referral"))

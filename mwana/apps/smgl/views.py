@@ -407,7 +407,7 @@ def report(request):
     returned = percentage(visits.count(), reminded_mothers.count())
 
     records = [
-         {'data': "Maternal Mortality Rate", 'value': mortality_rate},
+         {'data': "Maternal Mortality Ratio", 'value': mortality_rate},
          {'data': "Number of Clinical Workers Registered",
           'value': workers},
          {'data': "Number of CBAs Registered",
