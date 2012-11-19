@@ -122,7 +122,6 @@ def statistics(request, id=None):
                                                person='inf').count()
         r['infant_deaths_total'] = r['infant_deaths_com'] \
                                     + r['infant_deaths_fac']
-
         r['mother_deaths_com'] = deaths.filter(place='h',
                                                person='ma').count()
         r['mother_deaths_fac'] = deaths.filter(place='f',
@@ -339,12 +338,6 @@ def report(request):
     if district:
         locations = [district]
 
-    deaths = DeathRegistration.objects.filter(person='ma')
-    deaths = filter_by_dates(deaths, 'date', start=start_date, end=end_date)
-    if locations:
-        deaths = DeathRegistration.objects.filter(district__in=locations)
-    mortality_rate = percentage(deaths.count(), 100000, extended=True)
-
     cbas = ContactType.objects.get(slug='cba').contacts.all()
     cbas = filter_by_dates(cbas, 'created_date',
                            start=start_date, end=end_date)
@@ -405,6 +398,12 @@ def report(request):
                                start=start_date, end=end_date)
     if locations:
         births = births.filter(district__in=locations)
+
+    m_deaths = DeathRegistration.objects.filter(person='ma')
+    m_deaths = filter_by_dates(m_deaths, 'date', start=start_date, end=end_date)
+    if locations:
+        m_deaths = m_deaths.filter(district__in=locations)
+    mortality_rate = percentage(m_deaths.count(), births.count(), extended=True)
 
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
