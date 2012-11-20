@@ -128,8 +128,6 @@ def handle_submission(sender, **args):
 
     logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
 
-    #import ipdb; ipdb.set_trace()
-
     try:
         kw_handler = XFormKeywordHandler.objects.get(keyword=keyword)
     except ObjectDoesNotExist:

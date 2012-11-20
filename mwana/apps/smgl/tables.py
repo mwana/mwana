@@ -92,8 +92,9 @@ class StatisticsLinkTable(StatisticsTable):
 class ReminderStatsTable(Table):
     reminder_type = Column(sortable=False, header_class="reminder-type")
     reminders = Column(sortable=False)
-    told = Column(sortable=False)
     showed_up = Column(sortable=False)
+    told = Column(sortable=False)
+    told_and_showed = Column(sortable=False)
 
 
 class SummaryReportTable(Table):

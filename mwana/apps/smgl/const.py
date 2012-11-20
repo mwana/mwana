@@ -83,3 +83,13 @@ REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother w
 REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."
 REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a postpartum visit in %(num)s days.")
 REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue to visit health center %(loc)s for a postpartum visit.")
+
+# LEAVE
+LEAVE_COMPLETE = _("Thanks %(name)s. You have deactivated your account.")
+DEACTIVATED = _("This phone number has been deactivated.")
+
+# IN
+IN_COMPLETE = _("Thanks %(name)s. Welcome back!")
+
+# IN
+OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s.")

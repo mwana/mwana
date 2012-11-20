@@ -237,7 +237,7 @@ def statistics(request, id=None):
 def reminder_stats(request):
     records = []
     province = district = facility = start_date = end_date = None
-    record_types = ['edd', 'nvd', 'ref']
+    record_types = ['edd', 'nvd', 'pos', 'ref']
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
@@ -269,29 +269,38 @@ def reminder_stats(request):
         tolds = ToldReminder.objects.filter(type=key,
                                             mother__in=reminded_mothers
                                             )
+        told_mothers = tolds.values_list('mother', flat=True)
+
         if key == 'edd':
             showed_up = BirthRegistration.objects.filter(
                                                 mother__in=reminded_mothers
                                                 )
+            told_and_showed = showed_up.filter(mother__in=told_mothers)
         elif key == 'ref':
             showed_up = Referral.objects.filter(mother_showed=True,
-                                                mother__in=reminded_mothers
+                                                mother__in=told_mothers
                                                 )
+            told_and_showed = showed_up.filter(mother__in=told_mothers)
+
         else:
             showed_up = FacilityVisit.objects.filter(
-                                                    mother__in=reminded_mothers
+                                                    mother__in=told_mothers,
+                                                    visit_type=key
                                                     )
+            told_and_showed = showed_up.filter(mother__in=told_mothers)
+
         records.append({
                 'reminder_type': key,
                 'reminders': reminders.count(),
+                'showed_up': showed_up.count(),
                 'told': tolds.count(),
-                'showed_up': showed_up.count()
+                'told_and_showed': told_and_showed.count()
             })
 
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
-        keys = ['reminder_type', 'reminders', 'told', 'showed_up']
+        keys = ['reminder_type', 'reminders', 'showed_up', 'told', 'told_and_showed' ]
         filename = 'reminder_statistics'
         date_range = ''
         if start_date:

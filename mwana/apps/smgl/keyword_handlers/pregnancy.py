@@ -8,7 +8,7 @@ from rapidsms.models import Contact
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
     get_session_message)
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @registration_required
+@is_active
 def pregnant_registration(session, xform, router):
     """
     Handler for REG keyword (registration of pregnant mothers).
@@ -123,6 +124,7 @@ def pregnant_registration(session, xform, router):
 
 
 @registration_required
+@is_active
 def follow_up(session, xform, router):
     """
     Keyword handler for follow up visits.
@@ -182,6 +184,7 @@ def follow_up(session, xform, router):
 
 
 @registration_required
+@is_active
 def motherid_lookup(session, xform, router):
     """
     Handler for LOOK keyword

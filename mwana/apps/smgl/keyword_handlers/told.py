@@ -4,7 +4,7 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import (PregnantMother, FacilityVisit,
     ToldReminder, BirthRegistration, Referral)
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg,
@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @registration_required
+@is_active
 def told(session, xform, router):
     """
     Handler for TOLD keyword (Used to notify the system when a mother is reminded).

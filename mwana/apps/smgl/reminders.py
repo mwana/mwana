@@ -192,7 +192,7 @@ def send_first_postpartum_reminders(router_obj=None):
                              "unique_id": v.mother.uid,
                              "loc": v.location.name,
                              "num": 3})
-                _create_notification("nvd", c, v.mother.uid)
+                _create_notification("pos", c, v.mother.uid)
         if found_someone:
             v.reminded = True
             v.save()
@@ -232,7 +232,7 @@ def send_second_postpartum_reminders(router_obj=None):
                              "unique_id": v.mother.uid,
                              "loc": v.location.name,
                              "num": 7})
-                _create_notification("nvd", c, v.mother.uid)
+                _create_notification("pos", c, v.mother.uid)
         if found_someone:
             v.reminded = True
             v.save()
@@ -273,7 +273,7 @@ def send_missed_postpartum_reminders(router_obj=None):
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
                              "loc": v.location.name})
-                _create_notification("nvd", c, v.mother.uid)
+                _create_notification("pos", c, v.mother.uid)
         if found_someone:
             v.reminded = True
             v.save()

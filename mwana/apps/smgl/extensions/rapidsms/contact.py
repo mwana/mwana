@@ -6,6 +6,8 @@ class ContactLocation(models.Model):
                                  help_text="An optional Unique Identifier for this contact")
 
     created_date = models.DateField(auto_now_add=True)
+    return_date = models.DateField(null=True, blank=True,
+                                  help_text="The Date a user will return to being active")
 
     class Meta:
         abstract = True
