@@ -1649,7 +1649,22 @@
       "function_path": "mwana.apps.smgl.keyword_handlers.leave"
     }
   },
-
+  {
+    "pk": 16,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "out",
+      "function_path": "mwana.apps.smgl.keyword_handlers.out"
+    }
+  },
+  {
+    "pk": 17,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "in",
+      "function_path": "mwana.apps.smgl.keyword_handlers.make_active"
+    }
+  },
   {
     "pk": 12,
     "model": "smsforms.decisiontrigger",
@@ -1795,6 +1810,24 @@
     }
   },
   {
+    "pk": 25,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "trigger_keyword": "in",
+      "final_response": "",
+      "xform": 27
+    }
+  },
+  {
+    "pk": 26,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "trigger_keyword": "out",
+      "final_response": "",
+      "xform": 28
+    }
+  },
+  {
     "pk": 23,
     "model": "formplayer.xform",
     "fields": {
@@ -1842,6 +1875,30 @@
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
       "file": "xforms/leave.xml"
+    }
+  },
+  {
+    "pk": 27,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Leave",
+      "created": "2012-11-20T16:45:58.599",
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
+      "version": 1,
+      "file": "xforms/in.xml"
+    }
+  },
+  {
+    "pk": 28,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Leave",
+      "created": "2012-11-20T16:45:58.599",
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
+      "version": 1,
+      "file": "xforms/out.xml"
     }
   },
   {

@@ -87,3 +87,9 @@ REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue
 # LEAVE
 LEAVE_COMPLETE = _("Thanks %(name)s. You have deactivated your account.")
 DEACTIVATED = _("This phone number has been deactivated.")
+
+# IN
+IN_COMPLETE = _("Thanks %(name)s. Welcome back!")
+
+# IN
+OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s.")

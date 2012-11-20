@@ -341,4 +341,6 @@ EXCLUDED_HANDLERS = ["mwana.apps.labresults"]
 DUPECHECKER_IGNORE = ["birth none",
                       "look",
                       "help",
+                      'in',
+                      'out'
                      ]
