@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% load i18n %}
-{% load paginating_tags %}
 {% block title %}Nutrition Assessments{% endblock %}
 {% block stylesheets %}
 {{ block.super }}
@@ -20,6 +19,64 @@
     display:block;
     text-align: center;
     }
+
+    ul{
+        border:0; margin:0; padding:0;
+    }
+
+    #pagination-clean li{
+        border:0; margin:0; padding:0;
+        font-size:11px;
+        list-style:none;
+    }
+    #pagination-clean li, #pagination-clean a{
+        border:solid 1px #DEDEDE
+        margin-right:2px;
+    }
+
+    #pagination-clean .next a,
+    #pagination-clean .previous a {
+        font-weight:bold;
+        font-size: 13px;
+        border:solid 1px #FFFFFF;
+    }
+    #pagination-clean .active{
+        color:#00000
+        font-weight:bold;
+        display:block;
+       float:left;
+        padding:0px 5px;
+    }
+    #pagination-clean a:link,
+    #pagination-clean a:visited {
+        color:#0033CC
+        display:block;
+        float:left;
+        padding:3px 5px;
+        text-decoration:none;
+    }
+    #pagination-clean a:hover{
+        text-decoration:none;
+    }
+
+    /* style the current page */
+    #pagination-clean .active a:link,
+   #pagination-clean .active a:visited {
+        color:#0033CC
+        display:block;
+        float:left;
+        padding:3px 5px;
+        text-decoration:none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    #pagination-clean .active a:hover{
+        text-decoration:none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+ </style>  
 </style>
 {% endblock %}
 
@@ -123,8 +180,7 @@
             </tr>
         </thead>
         <tbody>
-	    {% autopaginate object_list %}
-            {% for ass in object_list %}
+            {% for ass in ass_list.object_list %}
             <tr>
                 <td>{{ ass.date|date:"Y-m-d" }}</td>
                 <td>{{ ass.healthworker.clinic }}</td>
@@ -145,7 +201,7 @@
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.height4age|default:"<span class='x'>X</span>" }}</td>
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display|default:"<span class='x'>X</span>" }}</td>
                 <td>{{ ass.get_status_display }}</td>
-                <td></td>
+                <td>{{ ass.action_taken }}</td>
             </tr>
             {% endfor %}
             <tr>
@@ -153,7 +209,23 @@
             </tr>
         </tbody>
     </table>
-    <div id="paginator">{% paginate %}</div>
+    <div>
+        <ul id="pagination-clean">
+        {% if ass_list.has_previous %}
+            <li class="previous"><a href="?page={{ass_list.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        {% for pg in ass_list.paginator.page_range %}
+            {% if ass_list.number == pg %}
+              <li class="active"><a href="?page={{ pg }}">{{ pg }}</a></li>
+            {% else %}
+              <li><a href="?page={{ pg }}">{{ pg }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if ass_list.has_next %}
+            <li class="next"><a href="?page={{ass_list.previous_page_number }}">Next</a></li>
+        {% endif %}
+        </ul>
+    </div>    
 </div>
 <div class="toolbar">
     <a href="/growth/csv/assessments/?location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}" class="export">Export Analyzed Surveys</a>

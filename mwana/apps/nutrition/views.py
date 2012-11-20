@@ -13,9 +13,9 @@ from django.db.models import Q
 from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.views.generic import list_detail
+from django.core.paginator import Paginator
 
 from .models import *
-from .table import AssessmentTable
 from .graphs import NutritionGraphs
 
 
@@ -109,6 +109,26 @@ def assessments(request):
     selected_action = str(action_taken)
     action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
                       "All": "All"}
+    ass_list = Assessment.objects.filter(Q(date__gte=startdate),
+                                      Q(date__lte=enddate)).order_by('-date')
+    if location != "All Districts":
+        ass_list = ass_list.filter(healthworker__location__parent__parent__name=location)
+    if status != "All":
+        ass_list = ass_list.filter(status=stat_options[status])
+    if action_taken != "All":
+        ass_list = ass_list.filter(action_taken=action_options[action_taken])
+
+    paginator = Paginator(ass_list, 50)
+    try:
+        page = int(request.GET.get('page', '1'))
+    except:
+        page = 1
+
+    try:
+        ass_list = paginator.page(page)
+    except(EmptyPage, InvalidPage):
+        ass_list = paginator.page(paginator.num_pages)
+
     context = {'selected_location': selected_location,
                'startdate': startdate, 'enddate': enddate,
                'locations': locations, 'status': status,
@@ -116,19 +136,9 @@ def assessments(request):
                'stat_options': sorted(stat_options.keys()),
                'action_options': sorted(action_options.keys()),
                'selected_action': selected_action}
-    asses = Assessment.objects.filter(Q(date__gte=startdate),
-                                      Q(date__lte=enddate)).order_by('-date')
-    if location != "All Districts":
-        asses = asses.filter(healthworker__location__parent__parent__name=location)
-    if status != "All":
-        asses = asses.filter(status=stat_options[status])
-    if action_taken != "All":
-        asses = asses.filter(action_taken=action_options[action_taken])
-    return list_detail.object_list(
-        request,
-        queryset=asses,
-        template_name="nutrition/assessment_list.html",
-        extra_context=context)
+
+    return render_to_response("nutrition/assessment_list.html", context,
+                                                             context_instance=RequestContext(request))
 
 
 def instance_to_dict(instance):
@@ -193,6 +203,10 @@ def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage)
         asses = asses.filter(healthworker__location__parent__parent__name=location)
     if gender != "Both":
         asses = asses.filter(patient__gender=gender)
+    if status != "All":
+            asses = asses.filter(status=stat_options[status])
+    if action_taken != "All":
+        asses = asses.filter(action_taken=action_options[action_taken])
     asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate),
     Q(patient__age_in_months__gte=startage), Q(patient__age_in_months__lte=endage))
     for ass in asses:
@@ -215,6 +229,7 @@ def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage)
         ass_dict.update({'wasting_status': ass.get_wasting_display()})
         ass_dict.update(**instance_to_dict(ass))
         ass_dict.update({'oedema': get_human_oedema(ass.oedema)})
+        ass_dict.update({'action_taken': ass.action_taken})
         dicts_for_export.append(ass_dict)
     return dicts_for_export
 
@@ -252,12 +267,12 @@ def csv_assessments(req):
                'Child ID', 'Sex', 'Date of Birth', 'Age in months', 'Height',
                'Weight', 'Oedema', 'MUAC', 'Weight for height Z', 'Wasting',
                'Weight for age Z', 'Underweight', 'Height for age Z',
-               'Stunting', 'Data Quality']
+               'Stunting', 'Data Quality', 'Action Taken',]
     keys = ['date', 'location', 'district', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'weight4height',
             'wasting_status', 'weight4age', 'underweight_status', 'height4age',
-            'stunting_status', 'human_status']
+            'stunting_status', 'human_status', 'action_taken']
 
     location, startdate, enddate = get_report_criteria(req)
     gender = req.GET.get('gender', 'Both')
