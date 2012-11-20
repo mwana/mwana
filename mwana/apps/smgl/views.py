@@ -237,7 +237,7 @@ def statistics(request, id=None):
 def reminder_stats(request):
     records = []
     province = district = facility = start_date = end_date = None
-    record_types = ['edd', 'nvd', 'ref']
+    record_types = ['edd', 'nvd', 'pos', 'ref']
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
@@ -284,7 +284,8 @@ def reminder_stats(request):
 
         else:
             showed_up = FacilityVisit.objects.filter(
-                                                    mother__in=told_mothers
+                                                    mother__in=told_mothers,
+                                                    visit_type=key
                                                     )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 

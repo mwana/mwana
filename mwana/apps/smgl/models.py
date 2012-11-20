@@ -435,6 +435,7 @@ class DeathRegistration(FormReferenceBase):
 
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
+                         ("pos", "POS Next Visit Date"),
                          ("em_ref", "Emergency Referral"),
                          ("nem_ref", "Non-Emergency Referral"),
                          ("edd_14", "Expected Delivery, 14 days before"))
