@@ -1,12 +1,11 @@
-import datetime
 import logging
 from rapidsms.apps.base import AppBase
 
-from .models import XFormKeywordHandler, FacilityVisit
+from .models import XFormKeywordHandler
 
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
-from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
+from mwana.apps.smgl.models import AmbulanceRequest
 from mwana import const as mwanaconst
 
 from rapidsms.models import Contact
@@ -31,7 +30,7 @@ FACILITY_NOT_RECOGNIZED = _("Sorry, the facility '%(facility)s' is not recognize
 ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_user_type)s at %(facility)s but your details have been updated")
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the User Type '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
-USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
+USER_SUCCESS_REGISTERED = _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
 INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
