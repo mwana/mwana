@@ -45,11 +45,21 @@ DUPLICATE_REGISTRATION = _("A mother with ID %(unique_id)s is already registered
 FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 
+# pregnancy postpartum visit messages
+PP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to provide post partum data for is not registered in the system. Check the safe motherhood number and try again or register her first.")
+PP_MOTHER_HAS_NOT_DELIVERED = _("Sorry, the mother you are trying to provide post partum data for has no birth registered.")
+PP_NVD_REQUIRED = _("Sorry, the mother has had only %(num)s post partum followup(s). 3 are required and the NVD is missing.")
+PP_COMPLETE = _("Thanks %(name)s! Post Partum visit for Mother ID %(unique_id)s is complete!")
+
 # "told" messages
 TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
 TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already delivered')
 TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
 TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
+
+# lookup messages
+LOOK_MOTHER_DOES_NOT_EXIST = _('Sorry, the mother you are trying to lookup does not exist. Please check the supplied zone id, first and last name values.')
+LOOK_COMPLETE = _("The Mother ID is %(unique_id)s.")
 
 # referrals
 REFERRAL_RESPONSE = _("Thanks %(name)s! Referral for Mother ID %(unique_id)s is complete!")
@@ -64,10 +74,23 @@ REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s 
 
 # death registration
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
-
+DEATH_ALREADY_REGISTERED = ("Death for mother with ID  %(unique_id)s and type  %(person)s has already been registered")
 
 # reminders
 REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
 REMINDER_NON_EMERGENCY_REFERRAL = _("Mother named %(name)s with ID # %(unique_id)s should visit hospital %(loc)s as referred.")
 REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother with ID %(unique_id)s referred on %(date)s from %(loc)s")
 REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."
+REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a postpartum visit in %(num)s days.")
+REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue to visit health center %(loc)s for a postpartum visit.")
+
+# LEAVE
+LEAVE_COMPLETE = _("Thanks %(name)s. You have deactivated your account.")
+DEACTIVATED = _("This phone number has been deactivated.")
+
+# IN
+IN_COMPLETE = _("Thanks %(name)s. Welcome back!")
+IN_REACTIVATE = _("Your account has been reactivated. Welcome back!")
+
+# OUT
+OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s.")

@@ -7,7 +7,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
         # Adding model 'XFormKeywordHandler'
         db.create_table('smgl_xformkeywordhandler', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -63,7 +62,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Deleting model 'XFormKeywordHandler'
         db.delete_table('smgl_xformkeywordhandler')
 

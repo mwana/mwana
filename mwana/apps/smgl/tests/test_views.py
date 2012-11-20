@@ -46,6 +46,9 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
         create_reminder_notification('nvd',
                                     data={'mother': self.mom}
                                     )
+        create_reminder_notification('pos',
+                                    data={'mother': self.mom}
+                                    )
         create_reminder_notification('em_ref',
                                     data={'mother': self.mom}
                                     )
@@ -55,10 +58,13 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
         create_told_reminder('nvd',
                             data={'mother': self.mom}
                             )
+        create_told_reminder('pos',
+                            data={'mother': self.mom}
+                            )
         create_told_reminder('ref',
                             data={'mother': self.mom}
                             )
-        response = self.client.get('/smgl/reminder-stats/')
+        response = self.client.get('/smgl/statistics/reminder-stats/')
         self.assertEqual(200, response.status_code)
         table = response.context['reminder_stats_table']
         for row in table.object_list:
@@ -66,7 +72,7 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
             self.assertEqual(1, row['told'])
 
     def test_no_reminders(self):
-        response = self.client.get('/smgl/reminder-stats/')
+        response = self.client.get('/smgl/statistics/reminder-stats/')
         self.assertEqual(200, response.status_code)
         table = response.context['reminder_stats_table']
         for row in table.object_list:
@@ -81,10 +87,13 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
         create_reminder_notification('nvd',
                                     data={'mother': self.mom}
                                     )
+        create_reminder_notification('pos',
+                                    data={'mother': self.mom}
+                                    )
         create_reminder_notification('em_ref',
                                     data={'mother': self.mom}
                                     )
-        response = self.client.get('/smgl/reminder-stats/')
+        response = self.client.get('/smgl/statistics/reminder-stats/')
         self.assertEqual(200, response.status_code)
         table = response.context['reminder_stats_table']
         for row in table.object_list:

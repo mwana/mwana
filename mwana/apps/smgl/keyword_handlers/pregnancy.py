@@ -8,15 +8,16 @@ from rapidsms.models import Contact
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
-from mwana.apps.smgl.models import (PregnantMother, FacilityVisit,
-    ToldReminder, BirthRegistration, Referral)
+from mwana.apps.smgl.decorators import registration_required, is_active
+from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
-                get_session_message)
+    get_session_message)
+
 logger = logging.getLogger(__name__)
 
 
 @registration_required
+@is_active
 def pregnant_registration(session, xform, router):
     """
     Handler for REG keyword (registration of pregnant mothers).
@@ -123,6 +124,7 @@ def pregnant_registration(session, xform, router):
 
 
 @registration_required
+@is_active
 def follow_up(session, xform, router):
     """
     Keyword handler for follow up visits.
@@ -182,14 +184,16 @@ def follow_up(session, xform, router):
 
 
 @registration_required
-def told(session, xform, router):
+@is_active
+def motherid_lookup(session, xform, router):
     """
-    Handler for TOLD keyword (Used to notify the system when a mother is reminded).
+    Handler for LOOK keyword
+    Used to query the database to obtain safe motherhood number
 
     Format:
-    TOLD Mother_UID EDD/NVD/REF
+    LOOK F_NAME L_NAME ZONE_ID
     """
-    logger.debug('Handling the TOLD keyword form')
+    logger.debug('Handling the LOOK keyword form')
     connection = session.connection
     get_session_message(session)
 
@@ -200,50 +204,21 @@ def told(session, xform, router):
 
         return True
 
-    unique_id = get_value_from_form('unique_id', xform)
-    reminder_type = get_value_from_form('reminder_type', xform)
+    f_name = get_value_from_form('f_name', xform)
+    l_name = get_value_from_form('l_name', xform)
+    zone_id = get_value_from_form('zone_id', xform)
     try:
-        mother = PregnantMother.objects.get(uid=unique_id)
+        mother = PregnantMother.objects.get(first_name=f_name,
+                                            last_name=l_name,
+                                            zone__slug=zone_id)
     except ObjectDoesNotExist:
-        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
+        send_msg(connection, const.LOOK_MOTHER_DOES_NOT_EXIST, router)
         get_session_message(session, direction='O')
 
         return True
     else:
-        now = datetime.datetime.now()
-        if reminder_type == 'edd':
-            reg = BirthRegistration.objects.filter(mother=mother)
-            if reg:
-                msg = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {
-                                                        'unique_id': unique_id
-                                                        }
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
-        elif reminder_type == 'nvd':
-            visits = FacilityVisit.objects.filter(next_visit__gte=now.date(),
-                                                  mother=mother)
-            if not visits:
-                msg = const.TOLD_MOTHER_HAS_NO_NVD % {'unique_id': unique_id}
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
-        elif reminder_type == 'ref':
-            refs = Referral.objects.filter(date__gte=now, mother=mother)
-            if not refs:
-                msg = const.TOLD_MOTHER_HAS_NO_REF % {'unique_id': unique_id}
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
-        # Generate the TOLD Reminder database entry
-        ToldReminder.objects.create(
-                            contact=connection.contact,
-                            mother=mother,
-                            session=session,
-                            date=session.modified_time,
-                            type=reminder_type,
-                            )
-        send_msg(connection, const.TOLD_COMPLETE, router,
+        msg = const.LOOK_COMPLETE % {'unique_id': mother.uid}
+        send_msg(connection, msg, router,
                  name=connection.contact.name)
         get_session_message(session, direction='O')
 

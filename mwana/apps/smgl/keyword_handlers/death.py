@@ -3,15 +3,17 @@ from mwana.apps.smgl.utils import (get_date, DateFormatError,
         get_session_message)
 from mwana.apps.smgl.models import DeathRegistration
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 import datetime
 
 
 @registration_required
+@is_active
 def death_registration(session, xform, router):
     """
     Keyword: death
     """
+
     name = session.connection.contact.name if session.connection.contact else ""
     get_session_message(session)
 
@@ -29,12 +31,20 @@ def death_registration(session, xform, router):
         return True
 
     contact = session.connection.contact
+    unique_id = xform.xpath("form/unique_id")
+    person = xform.xpath("form/death_type")
+    if DeathRegistration.objects.filter(unique_id=unique_id, person=person):
+        router.outgoing(OutgoingMessage(session.connection, const.DEATH_ALREADY_REGISTERED,
+                 **{"unique_id": unique_id, "person": person}))
+        get_session_message(session, direction='O')
+        return True
+
     reg = DeathRegistration(contact=contact,
                             connection=session.connection,
                             session=session,
                             date=date,
-                            unique_id=xform.xpath("form/unique_id"),
-                            person=xform.xpath("form/death_type"),
+                            unique_id=unique_id,
+                            person=person,
                             place=xform.xpath("form/death_location"),
                             district=contact.get_current_district(),
                             facility=contact.get_current_facility()

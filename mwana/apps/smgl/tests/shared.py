@@ -125,13 +125,18 @@ def create_birth_registration(data={}):
 def create_death_registration(data={}):
     contact = create_contact()
     mother = create_mother(data={'contact': contact})
+    trigger = DecisionTrigger.objects.get(trigger_keyword='death')
+    session = create_session(trigger=trigger,
+                             data={'connection': contact.default_connection}
+                             )
     defaults = {
         'contact': contact,
         'connection': contact.default_connection,
         'unique_id': mother.uid,
         'date': datetime.now().date(),
+        'session': session,
         'person': 'inf',
-        'place': 'fac',
+        'place': 'f',
     }
     return create_instance(DeathRegistration, defaults, data)
 

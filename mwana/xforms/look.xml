@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+    <h:head>
+        <h:title>Lookup Motherhood Safe Number</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B" uiVersion="1" version="1" name="Lookup Safe Mother ID">
+                    <f_name />
+                    <l_name />
+                    <zone_id />
+                </data>
+            </instance>
+            <bind nodeset="/data/f_name" type="xsd:string" required="true()" />
+            <bind nodeset="/data/l_name" type="xsd:string" required="true()" />
+            <bind nodeset="/data/zone_id" type="xsd:string" required="true()" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="f_name-label">
+                        <value>First Name</value>
+                    </text>
+                    <text id="l_name-label">
+                        <value>Last Name</value>
+                    </text>
+                    <text id="zone_id-label">
+                        <value>Zone ID</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/f_name">
+            <label ref="jr:itext('f_name-label')" />
+        </input>
+        <input ref="/data/l_name">
+            <label ref="jr:itext('l_name-label')" />
+        </input>
+        <input ref="/data/zone_id">
+            <label ref="jr:itext('zone_id-label')" />
+        </input>
+    </h:body>
+</h:html>

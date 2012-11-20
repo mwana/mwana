@@ -6,11 +6,12 @@ from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
 from datetime import datetime
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 from django.template.defaultfilters import yesno
 
 
 @registration_required
+@is_active
 def refer(session, xform, router):
     assert session.connection.contact is not None, \
         "Must be a registered contact to refer"
@@ -63,6 +64,7 @@ def refer(session, xform, router):
 
 
 @registration_required
+@is_active
 def referral_outcome(session, xform, router):
     get_session_message(session)
     name = session.connection.contact.name if session.connection.contact else ""
