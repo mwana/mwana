@@ -9,7 +9,7 @@ from .models import *
 class LocationAdmin(admin.ModelAdmin):
     list_display = ("name", "type", "full_name")
     list_filter = ("type",)
-    search_fields = ("name", "slug", "type")
+    search_fields = ("name", "slug")
     exclude = ('send_live_results', 'has_independent_printer', 'point',)
 
 
