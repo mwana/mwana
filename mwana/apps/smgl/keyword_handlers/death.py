@@ -3,11 +3,12 @@ from mwana.apps.smgl.utils import (get_date, DateFormatError,
         get_session_message)
 from mwana.apps.smgl.models import DeathRegistration
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 import datetime
 
 
 @registration_required
+@is_active
 def death_registration(session, xform, router):
     """
     Keyword: death

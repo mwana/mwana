@@ -7,7 +7,7 @@ from rapidsms.models import Contact
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl import const
-from mwana.apps.smgl.decorators import registration_required
+from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit, BirthRegistration
 from mwana.apps.smgl.utils import get_value_from_form, send_msg, make_date
 
@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @registration_required
+@is_active
 def postpartum_visit(session, xform, router):
     """
     Handler for PP keyword

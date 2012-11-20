@@ -1626,6 +1626,14 @@
     }
   },
   {
+    "pk": 13,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "look",
+      "function_path": "mwana.apps.smgl.keyword_handlers.motherid_lookup"
+    }
+  },
+  {
     "pk": 14,
     "model": "smgl.xformkeywordhandler",
     "fields": {
@@ -1634,13 +1642,14 @@
     }
   },
   {
-    "pk": 13,
+    "pk": 15,
     "model": "smgl.xformkeywordhandler",
     "fields": {
-      "keyword": "look",
-      "function_path": "mwana.apps.smgl.keyword_handlers.motherid_lookup"
+      "keyword": "leave",
+      "function_path": "mwana.apps.smgl.keyword_handlers.leave"
     }
   },
+
   {
     "pk": 12,
     "model": "smsforms.decisiontrigger",
@@ -1759,6 +1768,15 @@
     }
   },
   {
+    "pk": 22,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "trigger_keyword": "look",
+      "final_response": "",
+      "xform": 24
+    }
+  },
+  {
     "pk": 23,
     "model": "smsforms.decisiontrigger",
     "fields": {
@@ -1768,12 +1786,12 @@
     }
   },
   {
-    "pk": 22,
+    "pk": 24,
     "model": "smsforms.decisiontrigger",
     "fields": {
-      "trigger_keyword": "look",
+      "trigger_keyword": "leave",
       "final_response": "",
-      "xform": 24
+      "xform": 26
     }
   },
   {
@@ -1790,6 +1808,19 @@
     }
   },
   {
+    "pk": 24,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Lookup Safe Mother ID",
+      "created": "2012-11-15T16:45:58.599",
+      "checksum": "734f589135e401611b8c1f4f8046df3bfb27ea19",
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
+      "version": 1,
+      "file": "xforms/look.xml"
+    }
+  },
+  {
     "pk": 25,
     "model": "formplayer.xform",
     "fields": {
@@ -1802,16 +1833,15 @@
     }
   },
   {
-    "pk": 24,
+    "pk": 26,
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Lookup Safe Mother ID",
-      "created": "2012-11-15T16:45:58.599",
-      "checksum": "734f589135e401611b8c1f4f8046df3bfb27ea19",
+      "name": "Leave",
+      "created": "2012-11-19T16:45:58.599",
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
-      "file": "xforms/look.xml"
+      "file": "xforms/leave.xml"
     }
   },
   {
