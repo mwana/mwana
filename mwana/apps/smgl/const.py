@@ -90,6 +90,7 @@ DEACTIVATED = _("This phone number has been deactivated.")
 
 # IN
 IN_COMPLETE = _("Thanks %(name)s. Welcome back!")
+IN_REACTIVATE = _("Your account has been reactivated. Welcome back!")
 
-# IN
+# OUT
 OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s.")

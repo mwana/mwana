@@ -1,10 +1,15 @@
 from datetime import datetime, timedelta
+
+from django.db.models import Q
+
+from rapidsms import router
+from rapidsms.models import Contact
+
+from threadless_router.router import Router
+
+from mwana.apps.smgl import const
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
     PregnantMother
-from mwana.apps.smgl import const
-from django.db.models import Q
-from threadless_router.router import Router
-from rapidsms import router
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
@@ -277,6 +282,31 @@ def send_missed_postpartum_reminders(router_obj=None):
         if found_someone:
             v.reminded = True
             v.save()
+
+
+def reactivate_user(router_obj=None):
+    """
+    Looks up Contacts that are set to is_active=False and have a return date
+    of today. Activates user.
+    """
+    _set_router(router_obj)
+
+    def _contacts_to_activate():
+        now = datetime.utcnow().date()
+
+        contacts_to_activate = Contact.objects.filter(
+            return_date__gte=now - SEND_REMINDER_LOWER_BOUND,
+            return_date__lte=now,
+            is_active=False,
+            )
+        return contacts_to_activate
+
+    for c in _contacts_to_activate():
+        if c.default_connection:
+            c.return_date = None
+            c.is_active = True
+            c.save()
+            c.message(const.IN_REACTIVATE)
 
 
 def _create_notification(type, contact, mother_id):
