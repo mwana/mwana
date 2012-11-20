@@ -1,10 +1,16 @@
 import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
-from mwana.apps.smgl.app import get_value_from_form, send_msg, ER_TO_DRIVER, ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er, INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact, NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID, AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,\
-    ER_STATUS_UPDATE, AMB_OUTCOME_FILED
-from mwana.apps.smgl.models import AmbulanceRequest, PregnantMother, AmbulanceResponse, AmbulanceOutcome
+from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
+    ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er,
+    INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact,
+    NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID,
+    AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, ER_STATUS_UPDATE,
+    AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED)
+from mwana.apps.smgl.models import (AmbulanceRequest, PregnantMother,
+    AmbulanceResponse, AmbulanceOutcome, Referral)
 from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.smgl.decorators import registration_required, is_active
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +19,7 @@ logger = logging.getLogger(__name__)
 # our text.
 _ = lambda s: s
 
-AMBULANCE_WORKFLOW_SYMPTOMS = {
-    # TODO: Get Valid Danger Signs
-    #code: sympton_string
-    # Look at referral model, they are the same symptoms!
-    "symptom_1": "Some symptom 1",
-    "12": "Anemia",
-}
+AMBULANCE_WORKFLOW_SYMPTOMS = Referral.REFERRAL_REASONS
 
 
 def _get_symptom_from_code(xform):
@@ -132,16 +132,17 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     ambulance_session.save()
 
 
+@registration_required
+@is_active
 def ambulance_request(session, xform, router):
     logger.debug('POST PROCESSING FOR AMB KEYWORD')
-    connection = session.connection
     unique_id = get_value_from_form('unique_id', xform)
     danger_signs = _get_symptom_from_code(xform)
-
+    connection = session.connection
     session.template_vars.update({"sender_phone_number": connection.identity})
     amb = AmbulanceRequest()
     amb.danger_sign = danger_signs
-    amb.connection = connection
+    amb.session = session
     contact = None
     try:
         contact = Contact.objects.get(connection=connection)
@@ -177,10 +178,14 @@ def ambulance_request(session, xform, router):
     return True
 
 
+@registration_required
+@is_active
 def ambulance_response(session, xform, router):
     """
-    This handler deals with a status update from an ER user about a specific ambulance
-    i.e. Ambulance confirmed/cancelled/pending
+    This handler deals with a status update from an ER Driver or Triage Nuser
+    about a specific ambulance
+
+    i.e. Ambulance on the way/delayed/not available
     """
     logger.debug('POST PROCESSING FOR RESP KEYWORD')
     connection = session.connection
@@ -191,6 +196,7 @@ def ambulance_response(session, xform, router):
 
     ambulance_response = AmbulanceResponse()
     ambulance_response.responder = contact
+    ambulance_response.session = session
 
     unique_id = get_value_from_form('unique_id', xform)
     ambulance_response.mother_uid = unique_id
@@ -235,6 +241,8 @@ def ambulance_response(session, xform, router):
     return True
 
 
+@registration_required
+@is_active
 def ambulance_outcome(session, xform, router):
     connection = session.connection
     contact = _get_allowed_ambulance_workflow_contact(session)
@@ -262,6 +270,7 @@ def ambulance_outcome(session, xform, router):
     req = req[0]  # select latest one
 
     outcome = AmbulanceOutcome()
+    outcome.session = session
     outcome.ambulance_request = req
     outcome.mother_uid = unique_id
     outcome.outcome = outcome_string
