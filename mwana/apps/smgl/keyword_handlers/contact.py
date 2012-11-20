@@ -17,7 +17,6 @@ def leave(session, xform, router):
     Format:
     LEAVE NOW
     """
-    import ipdb; ipdb.set_trace()
     logger.debug('Handling the LEAVE keyword form')
     connection = session.connection
     get_session_message(session)
@@ -38,3 +37,5 @@ def leave(session, xform, router):
                  name=connection.contact.name)
         get_session_message(session, direction='O')
         return True
+
+
