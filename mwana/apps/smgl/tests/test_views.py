@@ -46,6 +46,9 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
         create_reminder_notification('nvd',
                                     data={'mother': self.mom}
                                     )
+        create_reminder_notification('pos',
+                                    data={'mother': self.mom}
+                                    )
         create_reminder_notification('em_ref',
                                     data={'mother': self.mom}
                                     )
@@ -53,6 +56,9 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
                             data={'mother': self.mom}
                             )
         create_told_reminder('nvd',
+                            data={'mother': self.mom}
+                            )
+        create_told_reminder('pos',
                             data={'mother': self.mom}
                             )
         create_told_reminder('ref',
@@ -79,6 +85,9 @@ class ReminderStatsTestCase(BaseStatisticsViewTestCase):
                                     data={'mother': self.mom}
                                     )
         create_reminder_notification('nvd',
+                                    data={'mother': self.mom}
+                                    )
+        create_reminder_notification('pos',
                                     data={'mother': self.mom}
                                     )
         create_reminder_notification('em_ref',
