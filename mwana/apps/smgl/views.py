@@ -366,6 +366,10 @@ def report(request):
                              start=start_date, end=end_date)
     if locations:
         visits = visits.filter(district__in=locations)
+    births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+                               start=start_date, end=end_date)
+    if locations:
+        births = births.filter(district__in=locations)
 
     mother_ids = visits.distinct('mother').values_list('mother', flat=True)
     mothers = PregnantMother.objects.filter(id__in=mother_ids)
@@ -373,6 +377,10 @@ def report(request):
                         .annotate(Count('facility_visits')) \
                         .values_list('facility_visits__count', flat=True)
     gte_four_ancs = sum(i >= 4 for i in anc_visits)
+    #percentage of women with birth registrations and 4 anc visits
+    p_gtefour_ancs = percentage(gte_four_ancs, births.count())
+
+    #number of women with atleast 3 anc visits
     pos_visits = mothers.filter(facility_visits__visit_type='pos') \
                         .annotate(Count('facility_visits')) \
                         .values_list('facility_visits__count', flat=True)
@@ -394,10 +402,6 @@ def report(request):
     positive_ems_wro = percentage(positive_ems_wro, ems_refs.count())
 
     # computing birth and death percentages
-    births = filter_by_dates(BirthRegistration.objects.all(), 'date',
-                               start=start_date, end=end_date)
-    if locations:
-        births = births.filter(district__in=locations)
 
     m_deaths = DeathRegistration.objects.filter(person='ma')
     m_deaths = filter_by_dates(m_deaths, 'date', start=start_date, end=end_date)
@@ -432,8 +436,8 @@ def report(request):
           'value': cbas},
          {'data': "Number of Date Clerks Registered",
           'value': clerks},
-         {'data': 'Number of Women who attended at least 4 ANC visits',
-          'value': gte_four_ancs},
+         {'data': 'Percentage of Women who attended at least 4 ANC visits',
+          'value': p_gtefour_ancs},
          {'data': "Percentage of women who returned for ANCs after being reminded",
           'value': returned},
          {'data': 'Number of Women who attended at least 3 POS visits',

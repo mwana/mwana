@@ -74,7 +74,7 @@ REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s 
 
 # death registration
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
-
+DEATH_ALREADY_REGISTERED = ("Death for mother with ID  %(unique_id)s and type  %(person)s has already been registered")
 
 # reminders
 REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
