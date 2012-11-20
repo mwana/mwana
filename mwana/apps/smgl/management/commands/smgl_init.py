@@ -7,14 +7,17 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # currently just the schedules
         _update_schedules()
-        
+
 
 def _update_schedules():
-    
+
     reminders = ["mwana.apps.smgl.reminders.send_followup_reminders",
                  "mwana.apps.smgl.reminders.send_non_emergency_referral_reminders",
                  "mwana.apps.smgl.reminders.send_emergency_referral_reminders",
-                 "mwana.apps.smgl.reminders.send_upcoming_delivery_reminders"]
+                 "mwana.apps.smgl.reminders.send_upcoming_delivery_reminders",
+                 "mwana.apps.smgl.reminders.send_first_postpartum_reminders",
+                 "mwana.apps.smgl.reminders.send_second_postpartum_reminders",
+                 "mwana.apps.smgl.reminders.send_missed_postpartum_reminders"]
     for func_abspath in reminders:
         try:
             schedule = EventSchedule.objects.get(callback=func_abspath)
