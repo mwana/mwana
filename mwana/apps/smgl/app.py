@@ -57,16 +57,19 @@ BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been r
 
 
 logger = logging.getLogger(__name__)
+
+
 class SMGL(AppBase):
     #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
     @property
     def _logger(self):
         return logging.getLogger(__name__)
+
     def handle(self, msg):
         pass
-
     # We're handling the submission process using signal hooks
     # Code is located here (in app.py) for ease of finding for other devs.
+
 
 def _generate_uid_for_er():
     #grab all the existing amb requests that have made up UIDs:
@@ -77,19 +80,16 @@ def _generate_uid_for_er():
     else:
         counter = ers.count()
         uids = ers.values_list('mother_uid')
-        uids = map(lambda x: x[0], uids) #gets us a nice list of uids
-        uid = 'A%s' % counter #starting point
+        uids = map(lambda x: x[0], uids)  # gets us a nice list of uids
+        uid = 'A%s' % counter  # starting point
         counter += 1
-        while uid in uids: #iterate until we find a good UID
+        while uid in uids:  # iterate until we find a good UID
             uid = 'A%s' % counter
             counter += 1
-
     return uid
 
 
-
 # Taken from mwana.apps.agents.handler.agrent.AgentHandler
-
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
     zone_type, _ = LocationType.objects.get_or_create(slug=mwanaconst.ZONE_SLUGS[0])
@@ -100,6 +100,7 @@ def _get_or_create_zone(clinic, name):
                                     'name': name,
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
+
 
 def _get_allowed_ambulance_workflow_contact(session):
     connection = session.connection
@@ -136,8 +137,8 @@ def handle_submission(sender, **args):
 
     try:
         func = to_function(str(kw_handler.function_path), True)
-        session.template_vars = {} #legacy from using rapidsms-xforms
-        for k,v in xform.top_level_tags().iteritems():
+        session.template_vars = {}  # legacy from using rapidsms-xforms
+        for k, v in xform.top_level_tags().iteritems():
             session.template_vars[k] = v
 
         # call the actual handling function
