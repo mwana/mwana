@@ -58,15 +58,15 @@ class SMGLAmbulanceTest(SMGLSetUp):
         self.assertEqual(0, AmbulanceResponse.objects.count())
         d = {
             "unique_id": '1234',
-            "status": "CONFIRMED",
+            "status": "OTW",
             "confirm_type": "Triage Nurse",
             "name": "AntonTN",
         }
         response_string = ER_STATUS_UPDATE % d
-        d['response'] = 'CONFIRMED'
+        d['response'] = 'OTW'
         response_to_referrer_string = AMB_RESPONSE_ORIGINATING_LOCATION_INFO % d
         script = """
-            11 > resp 1234 confirmed
+            11 > resp 1234 otw
             11 < {0}
             12 < {0}
             15 < {1}
@@ -78,7 +78,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
         [amb_resp] = AmbulanceResponse.objects.all()
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
-        self.assertEqual("confirmed", amb_resp.response)
+        self.assertEqual("otw", amb_resp.response)
         self.assertEqual("11", amb_resp.responder.default_connection.identity)
 
         # outcome

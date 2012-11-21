@@ -19,6 +19,16 @@
 					<text id="status-label">
 						<value>Ambulance Status</value>
 					</text>
+					<text id="status-otw-label">
+						<value>OTW</value>
+					</text>
+					<text id="status-dl-label">
+						<value>DL</value>
+					</text>
+					<text id="status-na-label">
+						<value>NA</value>
+					</text>
+
 				</translation>
 			</itext>
 		</model>
@@ -27,8 +37,19 @@
 		<input ref="/data/unique_id">
 			<label ref="jr:itext('unique_id-label')" />
 		</input>
-		<input ref="/data/status">
-			<label ref="jr:itext('status-label')" />
-		</input>
-	</h:body>
+        <select1 ref="/data/status">
+            <label ref="jr:itext('status-label')" />
+            <item>
+                <label ref="jr:itext('status-otw-label')" />
+                <value>otw</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-dl-label')" />
+                <value>dl</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-na-label')" />
+                <value>na</value>
+            </item>
+        </select1>	</h:body>
 </h:html>
