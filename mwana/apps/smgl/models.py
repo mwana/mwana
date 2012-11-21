@@ -230,7 +230,7 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
     responded_on = models.DateTimeField(auto_now_add=True, help_text="Date the response happened")
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
-    responder = models. ForeignKey(Contact, help_text="The contact that responded to this ER event")
+    responder = models.ForeignKey(Contact, help_text="The contact that responded to this ER event")
 
 
 class AmbulanceOutcome(FormReferenceBase, MotherReferenceBase):
