@@ -194,3 +194,10 @@ def percentage(part, whole, extended=None):
             return "{0:.5f}%".format(result)
         return "{0:.2f}%".format(result)
     return 0
+
+
+def mother_death_ratio(part, whole):
+    if whole != 0:
+        result = part / float(whole) * 100000
+        return "{0:.0f}".format(result)
+    return 0

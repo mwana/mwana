@@ -331,7 +331,7 @@ def send_no_outcome_reminder(router_obj=None):
 
     for resp in _responses_to_remind():
         req = resp.ambulance_request
-        if resp == 'na':
+        if resp.status == 'na':
             # send reminder to referring facility contact
             contacts = [req.contact]
         else:
