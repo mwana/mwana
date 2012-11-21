@@ -1,5 +1,3 @@
-from threadless_router.router import Router
-from threadless_router.tests.scripted import TestScript
 from mwana.apps.smgl.app import ER_TO_TRIAGE_NURSE, ER_TO_CLINIC_WORKER, ER_TO_OTHER, ER_TO_DRIVER,\
     ER_STATUS_UPDATE, AMB_OUTCOME_FILED
 import logging
@@ -56,7 +54,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
                    ER_TO_DRIVER % d,
                    ER_TO_CLINIC_WORKER % d,
                    ER_TO_OTHER % d)
-        
+
         self.runScript(script)
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual("1234", amb_req.mother_uid)
@@ -66,16 +64,16 @@ class SMGLAmbulanceTest(SMGLSetUp):
         self.assertEqual("11", amb_req.triage_nurse.default_connection.identity)
         self.assertEqual("14", amb_req.other_recipient.default_connection.identity)
         self.assertEqual(False, amb_req.received_response)
-        
+
         # response
         self.assertEqual(0, AmbulanceResponse.objects.count())
         d = {
             "unique_id": '1234',
-            "status" : "CONFIRMED",
+            "status": "CONFIRMED",
             "confirm_type": "Triage Nurse",
             "name": "AntonTN",
         }
-        response_string = ER_STATUS_UPDATE  % d
+        response_string = ER_STATUS_UPDATE % d
         script = """
             11 > resp 1234 confirmed
             11 < {0}
@@ -94,11 +92,11 @@ class SMGLAmbulanceTest(SMGLSetUp):
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("confirmed", amb_resp.response)
         self.assertEqual("11", amb_resp.responder.default_connection.identity)
-        
+
         # outcome
         self.assertEqual(0, AmbulanceOutcome.objects.count())
         d["contact_type"] = "Triage Nurse"
-        outcome_string = AMB_OUTCOME_FILED  % d
+        outcome_string = AMB_OUTCOME_FILED % d
         script = """
             11 > outc 1234 under-care
             11 < {0}
@@ -108,11 +106,9 @@ class SMGLAmbulanceTest(SMGLSetUp):
             # NOTE: is the message also supposed to go to this person? (DA)
             # 15 < {0}
         """.format(outcome_string)
-        
+
         self.runScript(script)
         [amb_outcome] = AmbulanceOutcome.objects.all()
         self.assertEqual(amb_req, amb_outcome.ambulance_request)
         self.assertEqual("1234", amb_outcome.mother_uid)
         self.assertEqual("under-care", amb_outcome.outcome)
-        
-        
