@@ -8,6 +8,8 @@ class ContactLocation(models.Model):
     created_date = models.DateField(auto_now_add=True)
     return_date = models.DateField(null=True, blank=True,
                                   help_text="The Date a user will return to being active")
+    is_super_user = models.BooleanField(default=False,
+                     help_text="Whether this user should receive emergency related messages.")
 
     class Meta:
         abstract = True
