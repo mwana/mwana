@@ -7,7 +7,7 @@ from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
     NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID,
     AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW,
     AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED,
-    AMB_RESPONSE_ORIGINATING_LOCATION_INFO)
+    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE)
 from mwana.apps.smgl.models import (AmbulanceRequest, PregnantMother,
     AmbulanceResponse, AmbulanceOutcome, Referral)
 from mwana.apps.contactsplus.models import ContactType
@@ -55,6 +55,15 @@ def _pick_er_triage_nurse(session, xform, receiving_facility):
         return tns[0]
     else:
         raise Exception('No Triage Nurse type found!')
+
+
+def _pick_superusers(session, xform, receiving_facility):
+    superusers = Contact.objects.filter(is_super_user=True,
+                                        location=receiving_facility)
+    if superusers.count():
+        return superusers
+    else:
+        raise Exception('No Ambulance Driver type found!')
 
 
 def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=None):
@@ -195,10 +204,15 @@ def ambulance_response(session, xform, router):
 
     ambulance_request.save()
     ambulance_response.save()
-    referrer_contact = ambulance_response.ambulance_request.contact
+    referrer_contact = ambulance_request.contact
     send_msg(referrer_contact.default_connection,
              AMB_RESPONSE_ORIGINATING_LOCATION_INFO,
              router, **session.template_vars)
+    if status == 'na':
+        session.template_vars.update({"sender_phone_number": ambulance_request.contact.default_connection.identity,
+                                      "from_location": str(ambulance_request.contact.location.name)})
+        for su in _pick_superusers(session, xform, ambulance_request.receiving_facility):
+            send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
     return True
 
 
