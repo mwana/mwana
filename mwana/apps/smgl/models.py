@@ -197,19 +197,12 @@ class FacilityVisit(models.Model):
         super(FacilityVisit, self).save(*args, **kwargs)
 
 
-class AmbulanceRequest(models.Model):
+class AmbulanceRequest(FormReferenceBase, MotherReferenceBase):
     """
     Bucket for ambulance request info
     """
-    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency response",
+    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency request",
                                 null=True, blank=True, related_name="er_iniator")
-    connection = models.ForeignKey(Connection, help_text="If not a registered contact, the connection " \
-                                                         "of the person who initiated ER",
-                                    null=True, blank=True)
-    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
-    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     #Similarly it shouldn't matter if this field is filled in or not.
     danger_sign = models.CharField(max_length=255, null=True, blank=True, help_text="Danger signs that prompted the ER")
     from_location = models.ForeignKey(Location, null=True, blank=True, help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
@@ -227,38 +220,29 @@ class AmbulanceRequest(models.Model):
     received_response = models.BooleanField(default=False)
 
 
-class AmbulanceResponse(models.Model):
+class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
     ER_RESPONSE_CHOICES = (
-        ('cancelled', 'Cancelled'),
-        ('confirmed', 'Confirmed'),
-        ('pending', 'Pending'),
+        ('na', 'Not Available'),
+        ('dl', 'Delayed'),
+        ('otw', 'On The Way'),
     )
 
-    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
-    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
     responded_on = models.DateTimeField(auto_now_add=True, help_text="Date the response happened")
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
-    responder = models. ForeignKey(Contact, help_text="The contact that responded to this ER event")
+    responder = models.ForeignKey(Contact, help_text="The contact that responded to this ER event")
 
 
-class AmbulanceOutcome(models.Model):
+class AmbulanceOutcome(FormReferenceBase, MotherReferenceBase):
     ER_OUTCOME_CHOICES = (
-        ('under-care', 'Under Care'),
-        ('treated_discharged', 'Treated and Discharged'),
-        ('deceased', 'Deceased'),
+        ('uc', 'Under Care'),
+        ('td', 'Treated and Discharged'),
+        ('dec', 'Deceased'),
     )
-    # Note: we capture both the mom UID and try to match it to a pregnant
-    # mother foreignkey. In the event that an ER is started for NOT a mother
-    # or the UID is garbled/unmatcheable we still want to capture it for analysis.
     outcome_on = models.DateTimeField(auto_now_add=True, help_text="Date and Time this outcome was provided")
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
-
+    no_amb = models.BooleanField(default=False)
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),

@@ -1582,7 +1582,7 @@
     "model": "smgl.xformkeywordhandler",
     "fields": {
       "keyword": "amb",
-      "function_path": "mwana.apps.smgl.ambulance_workflow.ambulance_request"
+      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_request"
     }
   },
   {
@@ -1590,7 +1590,7 @@
     "model": "smgl.xformkeywordhandler",
     "fields": {
       "keyword": "resp",
-      "function_path": "mwana.apps.smgl.ambulance_workflow.ambulance_response"
+      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_response"
     }
   },
   {
@@ -1598,7 +1598,7 @@
     "model": "smgl.xformkeywordhandler",
     "fields": {
       "keyword": "outc",
-      "function_path": "mwana.apps.smgl.ambulance_workflow.ambulance_outcome"
+      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_outcome"
     }
   },
   {

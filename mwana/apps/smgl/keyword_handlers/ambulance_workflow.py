@@ -1,10 +1,17 @@
 import logging
 from rapidsms.models import Contact
 from django.core.exceptions import ObjectDoesNotExist
-from mwana.apps.smgl.app import get_value_from_form, send_msg, ER_TO_DRIVER, ER_TO_TRIAGE_NURSE, ER_TO_OTHER, ER_TO_CLINIC_WORKER, _generate_uid_for_er, INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact, NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID, AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,\
-    ER_STATUS_UPDATE, AMB_OUTCOME_FILED
-from mwana.apps.smgl.models import AmbulanceRequest, PregnantMother, AmbulanceResponse, AmbulanceOutcome
+from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
+    ER_TO_TRIAGE_NURSE, _generate_uid_for_er, ER_STATUS_UPDATE,
+    INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact,
+    NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID,
+    AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, ER_TO_CLINIC_WORKER,
+    AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED,
+    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE)
+from mwana.apps.smgl.models import (AmbulanceRequest, PregnantMother,
+    AmbulanceResponse, AmbulanceOutcome, Referral)
 from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.smgl.decorators import registration_required, is_active
 
 logger = logging.getLogger(__name__)
 
@@ -13,13 +20,7 @@ logger = logging.getLogger(__name__)
 # our text.
 _ = lambda s: s
 
-AMBULANCE_WORKFLOW_SYMPTOMS = {
-    # TODO: Get Valid Danger Signs
-    #code: sympton_string
-    # Look at referral model, they are the same symptoms!
-    "symptom_1": "Some symptom 1",
-    "12": "Anemia",
-}
+AMBULANCE_WORKFLOW_SYMPTOMS = Referral.REFERRAL_REASONS
 
 
 def _get_symptom_from_code(xform):
@@ -33,50 +34,45 @@ def _get_receiving_facility(location):
     """
     Get the facility that should receive an emergency patient, based on the clinic they are coming from
     """
-    # TODO: Refactor to always get an Urban Health Centre?
-    #currently we're just directing patients to whatever is their parent location
-    parent = location.parent_location
-    return parent
+    # currently we're just directing patients to whatever is their parent location
+    # This works for the current data, may need to be refactored if Location hierarchy changes
+    return location.parent
 
 
-def _pick_er_driver(session, xform):
-    # TODO take into account location
+def _pick_er_driver(session, xform, receiving_facility):
     ad_type = ContactType.objects.get(slug__iexact='am')
-    ads = Contact.objects.filter(types=ad_type)
+    ads = Contact.objects.filter(types=ad_type, location=receiving_facility)
     if ads.count():
         return ads[0]
     else:
         raise Exception('No Ambulance Driver type found!')
 
 
-def _pick_other_er_recip(session, xform):
-    # TODO take into account location
-    other_type = ContactType.objects.get(slug__iexact='dmho')
-    others = Contact.objects.filter(types=other_type)
-    if others.count():
-        return others[0]
-    else:
-        logger.error('No Other recipient type found for Ambulance Request Workflow!')
-
-
-def _pick_er_triage_nurse(session, xform):
-    # TODO take into account location
+def _pick_er_triage_nurse(session, xform, receiving_facility):
     tn_type = ContactType.objects.get(slug__iexact='tn')
-    tns = Contact.objects.filter(types=tn_type)
+    tns = Contact.objects.filter(types=tn_type, location=receiving_facility)
     if tns.count():
         return tns[0]
     else:
         raise Exception('No Triage Nurse type found!')
 
 
-def _pick_clinic_recip(session, xform):
-    # TODO take into account location
+def _pick_clinic_recip(session, xform, receiving_facility):
     cw_type = ContactType.objects.get(slug__iexact='worker')
-    cws = Contact.objects.filter(types=cw_type)
+    cws = Contact.objects.filter(types=cw_type, location=receiving_facility)
     if cws.count():
         return cws[0]
     else:
         logger.error('No clinic worker found!')
+
+
+def _pick_superusers(session, xform, receiving_facility):
+    superusers = Contact.objects.filter(is_super_user=True,
+                                        location=receiving_facility)
+    if superusers.count():
+        return superusers
+    else:
+        raise Exception('No Ambulance Driver type found!')
 
 
 def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=None):
@@ -84,8 +80,8 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     Broadcasts a message to the Emergency Response users.  If message is not
     specified, will send the default initial ER message to each respondent.
     """
-    #Figure out who to alert
-    ambulance_driver = _pick_er_driver(session, xform)
+    receiving_facility = ambulance_session.receiving_facility
+    ambulance_driver = _pick_er_driver(session, xform, receiving_facility)
     ambulance_session.ambulance_driver = ambulance_driver
     if ambulance_driver.default_connection:
         if message:
@@ -95,7 +91,7 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     else:
         logger.error('No Ambulance Driver found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
-    tn = _pick_er_triage_nurse(session, xform)
+    tn = _pick_er_triage_nurse(session, xform, receiving_facility)
     ambulance_session.triage_nurse = tn
 
     if tn.default_connection:
@@ -106,42 +102,20 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     else:
         logger.error('No Triage Nurse found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
 
-    other_recip = _pick_other_er_recip(session, xform)
-    if other_recip:  # less important, so not critical if this contact doesn't exist.
-        ambulance_session.other_recipient = other_recip
-        if other_recip.default_connection:
-            if message:
-                send_msg(other_recip.default_connection, message, router, **session.template_vars)
-            else:
-                send_msg(other_recip.default_connection, ER_TO_OTHER, router, **session.template_vars)
-        else:
-            #only warn because we may not have specified one on purpose
-            logger.warn('No Other Recipient found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
-
-    clinic_recip = _pick_clinic_recip(session, xform)
-    if clinic_recip:
-        ambulance_session.receiving_facility_recipient = clinic_recip
-        if clinic_recip.default_connection:
-            if message:
-                send_msg(clinic_recip.default_connection, message, router, **session.template_vars)
-            else:
-                send_msg(clinic_recip.default_connection, ER_TO_CLINIC_WORKER, router, **session.template_vars)
-        else:
-            logger.error('No Receiving Clinic Worker found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
-
     ambulance_session.save()
 
 
+@registration_required
+@is_active
 def ambulance_request(session, xform, router):
     logger.debug('POST PROCESSING FOR AMB KEYWORD')
-    connection = session.connection
     unique_id = get_value_from_form('unique_id', xform)
     danger_signs = _get_symptom_from_code(xform)
-
+    connection = session.connection
     session.template_vars.update({"sender_phone_number": connection.identity})
     amb = AmbulanceRequest()
     amb.danger_sign = danger_signs
-    amb.connection = connection
+    amb.session = session
     contact = None
     try:
         contact = Contact.objects.get(connection=connection)
@@ -150,6 +124,7 @@ def ambulance_request(session, xform, router):
     amb.contact = contact
     if contact:
         amb.from_location = contact.location
+        amb.receiving_facility = _get_receiving_facility(contact.location)
         session.template_vars.update({"from_location": str(contact.location.name)})
     else:
         session.template_vars.update({"from_location": "UNKNOWN"})
@@ -177,10 +152,14 @@ def ambulance_request(session, xform, router):
     return True
 
 
+@registration_required
+@is_active
 def ambulance_response(session, xform, router):
     """
-    This handler deals with a status update from an ER user about a specific ambulance
-    i.e. Ambulance confirmed/cancelled/pending
+    This handler deals with a status update from an ER Driver or Triage Nurse
+    about a specific ambulance
+
+    i.e. Ambulance on the way/delayed/not available
     """
     logger.debug('POST PROCESSING FOR RESP KEYWORD')
     connection = session.connection
@@ -191,6 +170,7 @@ def ambulance_response(session, xform, router):
 
     ambulance_response = AmbulanceResponse()
     ambulance_response.responder = contact
+    ambulance_response.session = session
 
     unique_id = get_value_from_form('unique_id', xform)
     ambulance_response.mother_uid = unique_id
@@ -208,7 +188,8 @@ def ambulance_response(session, xform, router):
 
     status = get_value_from_form('status', xform).lower()
     ambulance_response.response = status
-    session.template_vars.update({"status": status.upper()})
+    session.template_vars.update({"status": status.upper(),
+                                   "response": status.upper()})
 
     #we might be dealing with a mother that has gone through ER multiple times
     ambulance_requests = AmbulanceRequest.objects.filter(mother_uid=unique_id)\
@@ -232,19 +213,35 @@ def ambulance_response(session, xform, router):
 
     ambulance_request.save()
     ambulance_response.save()
+    referrer_contact = ambulance_request.contact
+    send_msg(referrer_contact.default_connection,
+             AMB_RESPONSE_ORIGINATING_LOCATION_INFO,
+             router, **session.template_vars)
+    if status == 'na':
+        session.template_vars.update({"sender_phone_number": ambulance_request.contact.default_connection.identity,
+                                      "from_location": str(ambulance_request.contact.location.name)})
+        for su in _pick_superusers(session, xform, ambulance_request.receiving_facility):
+            send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
+    else:
+        clinic_recip = _pick_clinic_recip(session, xform, ambulance_request.receiving_facility)
+        if clinic_recip:
+            ambulance_request.receiving_facility_recipient = clinic_recip
+            if clinic_recip.default_connection:
+                send_msg(clinic_recip.default_connection, ER_TO_CLINIC_WORKER, router, **session.template_vars)
+            else:
+                logger.error('No Receiving Clinic Worker found (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
     return True
 
 
+@registration_required
+@is_active
 def ambulance_outcome(session, xform, router):
     connection = session.connection
-    contact = _get_allowed_ambulance_workflow_contact(session)
-    if not contact:
-        send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, router,
-            **session.template_vars)
-        return True
-
+    contact = session.connection.contact
     unique_id = get_value_from_form('unique_id', xform)
     outcome_string = get_value_from_form('outcome', xform)
+    noamb = get_value_from_form('no_amb', xform)
+
     session.template_vars.update({
         "unique_id": unique_id,
         "outcome": outcome_string
@@ -262,6 +259,7 @@ def ambulance_outcome(session, xform, router):
     req = req[0]  # select latest one
 
     outcome = AmbulanceOutcome()
+    outcome.session = session
     outcome.ambulance_request = req
     outcome.mother_uid = unique_id
     outcome.outcome = outcome_string
@@ -270,10 +268,13 @@ def ambulance_outcome(session, xform, router):
     except ObjectDoesNotExist:
         mother = None
     outcome.mother = mother
+    if noamb:
+        outcome.no_amb = True
     outcome.save()
     session.template_vars.update({"contact_type": contact.types.all()[0],
                                   "name": contact.name})
-    _broadcast_to_ER_users(req, session, xform,
-                           message=_(AMB_OUTCOME_FILED), router=router)
-    send_msg(req.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
+    if not noamb:
+        _broadcast_to_ER_users(req, session, xform,
+                               message=_(AMB_OUTCOME_FILED), router=router)
+    send_msg(req.contact.default_connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
     return True
