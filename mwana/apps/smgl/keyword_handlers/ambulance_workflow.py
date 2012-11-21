@@ -5,7 +5,7 @@ from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
     ER_TO_TRIAGE_NURSE, _generate_uid_for_er, ER_STATUS_UPDATE,
     INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact,
     NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, AMB_CANT_FIND_UID,
-    AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW,
+    AMB_OUTCOME_NO_OUTCOME, NOT_ALLOWED_ER_WORKFLOW, ER_TO_CLINIC_WORKER,
     AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED,
     AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE)
 from mwana.apps.smgl.models import (AmbulanceRequest, PregnantMother,
@@ -55,6 +55,15 @@ def _pick_er_triage_nurse(session, xform, receiving_facility):
         return tns[0]
     else:
         raise Exception('No Triage Nurse type found!')
+
+
+def _pick_clinic_recip(session, xform, receiving_facility):
+    cw_type = ContactType.objects.get(slug__iexact='worker')
+    cws = Contact.objects.filter(types=cw_type, location=receiving_facility)
+    if cws.count():
+        return cws[0]
+    else:
+        logger.error('No clinic worker found!')
 
 
 def _pick_superusers(session, xform, receiving_facility):
@@ -213,6 +222,14 @@ def ambulance_response(session, xform, router):
                                       "from_location": str(ambulance_request.contact.location.name)})
         for su in _pick_superusers(session, xform, ambulance_request.receiving_facility):
             send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
+    else:
+        clinic_recip = _pick_clinic_recip(session, xform, ambulance_request.receiving_facility)
+        if clinic_recip:
+            ambulance_request.receiving_facility_recipient = clinic_recip
+            if clinic_recip.default_connection:
+                send_msg(clinic_recip.default_connection, ER_TO_CLINIC_WORKER, router, **session.template_vars)
+            else:
+                logger.error('No Receiving Clinic Worker found (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
     return True
 
 

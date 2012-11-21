@@ -4,7 +4,8 @@ from rapidsms.models import Contact
 
 from mwana.apps.smgl.app import (ER_TO_TRIAGE_NURSE, ER_TO_DRIVER,
     ER_STATUS_UPDATE, AMB_OUTCOME_FILED, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,
-    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE)
+    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE,
+    ER_TO_CLINIC_WORKER)
 
 from mwana.apps.smgl.tests.shared import SMGLSetUp, create_prereg_user
 from mwana.apps.smgl.models import (AmbulanceRequest, AmbulanceResponse,
@@ -23,6 +24,7 @@ class SMGLAmbulanceTest(SMGLSetUp):
         AmbulanceOutcome.objects.all().delete()
         create_prereg_user("AntonTN", "804002", '11', 'TN', 'en')
         create_prereg_user("AntonAD", "804002", '12', 'AM', 'en')
+        create_prereg_user("AntonCW", "804002", '13', 'worker', 'en')
         create_prereg_user("AntonDA", "804024", "15", const.CTYPE_DATACLERK, 'en')
         create_prereg_user("AntonSU", "804002", "16", const.CTYPE_DATACLERK, 'en')
 
@@ -31,6 +33,8 @@ class SMGLAmbulanceTest(SMGLSetUp):
             11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District Hospital.
             12 > join ANTONAmb en
             12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo District Hospital.
+            13 > join antonCW en
+            13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo District Hospital.
             15 > join AntonDA en
             15 < Thank you for registering! You have successfully registered as a Data Clerk at Chilala.
             16 > join AntonSU en
@@ -72,13 +76,16 @@ class SMGLAmbulanceTest(SMGLSetUp):
         }
         response_string = ER_STATUS_UPDATE % d
         d['response'] = 'OTW'
+        response_to_worker_string = ER_TO_CLINIC_WORKER % d
         response_to_referrer_string = AMB_RESPONSE_ORIGINATING_LOCATION_INFO % d
         script = """
             11 > resp 1234 otw
             11 < {0}
             12 < {0}
-            15 < {1}
-        """.format(response_string, response_to_referrer_string)
+            13 < {1}
+            15 < {2}
+        """.format(response_string, response_to_worker_string,
+                    response_to_referrer_string)
 
         self.runScript(script)
         [amb_req] = AmbulanceRequest.objects.all()
