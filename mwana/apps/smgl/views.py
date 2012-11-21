@@ -238,6 +238,9 @@ def reminder_stats(request):
     records = []
     province = district = facility = start_date = end_date = None
     record_types = ['edd', 'nvd', 'pos', 'ref']
+    field_mapper = {'edd': 'Expected Delivery Date', 'nvd': 'Next Visit Date',
+                    'pos': 'Post Partem', 'ref': 'Refferals'}
+
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
@@ -290,7 +293,7 @@ def reminder_stats(request):
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
         records.append({
-                'reminder_type': key,
+                'reminder_type': field_mapper[key],
                 'reminders': reminders.count(),
                 'showed_up': showed_up.count(),
                 'told': tolds.count(),
@@ -300,7 +303,7 @@ def reminder_stats(request):
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
-        keys = ['reminder_type', 'reminders', 'showed_up', 'told', 'told_and_showed' ]
+        keys = ['reminder_type', 'reminders', 'showed_up', 'told', 'told_and_showed']
         filename = 'reminder_statistics'
         date_range = ''
         if start_date:
