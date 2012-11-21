@@ -8,12 +8,14 @@ from rapidsms.models import Contact
 from threadless_router.router import Router
 
 from mwana.apps.smgl import const
+from mwana.apps.smgl.app import AMB_OUTCOME_NO_OUTCOME
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
-    PregnantMother
+    PregnantMother, AmbulanceResponse
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
+SEND_AMB_OUTCOME_LOWER_BOUND = timedelta(hours=1)
 
 
 def _set_router(router_obj=None):
@@ -307,6 +309,70 @@ def reactivate_user(router_obj=None):
             c.is_active = True
             c.save()
             c.message(const.IN_REACTIVATE)
+
+
+def send_no_outcome_reminder(router_obj=None):
+    """
+    Send reminders for Amulance Responses that have no Ambulance Outcome
+    """
+    def _responses_to_remind():
+        now = datetime.utcnow().date()
+        # Get AmbulanceResponses @ 12 hours old
+        reminder_threshold = now - timedelta(hours=12)
+        responses_to_remind = AmbulanceResponse.objects.filter(
+            responded_on__gte=reminder_threshold - SEND_AMB_OUTCOME_LOWER_BOUND,
+            responded_on__lte=reminder_threshold,
+            )
+        # Check if missed
+
+        for resp in responses_to_remind:
+            if not resp.ambulanceoutcome_set.all():
+                yield resp
+
+    for resp in _responses_to_remind():
+        req = resp.ambulance_request
+        if resp == 'na':
+            # send reminder to referring facility contact
+            contacts = [req.contact]
+        else:
+            # send reminder(s) to TN and AM
+            contacts = [req.ambulance_driver,
+                        req.triage_nurse,
+                        req.receiving_facility_recipient]
+
+        for c in contacts:
+            if c.default_connection:
+                c.message(const.AMB_OUTCOME_NO_OUTCOME,
+                          **{"unique_id": resp.mother.uid})
+
+
+def send_no_outcome_superuser_reminder(router_obj=None):
+    """
+    Send reminders to superusers for Amulance Responses
+    that have no Ambulance Outcome and are @ 24 hours old
+    """
+    def _responses_to_remind():
+        now = datetime.utcnow().date()
+        # Get AmbulanceResponses @ 12 hours old
+        reminder_threshold = now - timedelta(hours=24)
+        responses_to_remind = AmbulanceResponse.objects.filter(
+            responded_on__gte=reminder_threshold - SEND_AMB_OUTCOME_LOWER_BOUND,
+            responded_on__lte=reminder_threshold,
+            )
+        # Check if missed
+
+        for resp in responses_to_remind:
+            if not resp.ambulanceoutcome_set.all():
+                yield resp
+
+    for resp in _responses_to_remind():
+        receiving_facility = resp.ambulance_request.receiving_facility
+        superusers = Contact.objects.filter(is_super_user=True,
+                                            location=receiving_facility)
+        for su in superusers:
+            if su.default_connection:
+                su.message(const.AMB_OUTCOME_NO_OUTCOME,
+                          **{"unique_id": resp.mother.uid})
 
 
 def _create_notification(type, contact, mother_id):
