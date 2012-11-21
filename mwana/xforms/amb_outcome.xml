@@ -7,10 +7,12 @@
 				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E" uiVersion="1" version="1" name="Ambulance Outcome">
 					<unique_id />
 					<outcome />
+					<no_amb />
 				</data>
 			</instance>
 			<bind nodeset="/data/unique_id" type="xsd:string" />
 			<bind nodeset="/data/outcome" type="xsd:string" />
+			<bind nodeset="/data/no_amb" type="xsd:string" />
 			<itext>
 				<translation lang="en" default="">
 					<text id="unique_id-label">
@@ -18,6 +20,9 @@
 					</text>
 					<text id="outcome-label">
 						<value>Outcome</value>
+					</text>
+					<text id="no_amb-label">
+						<value>No Ambulance?</value>
 					</text>
 				</translation>
 			</itext>
@@ -29,6 +34,9 @@
 		</input>
 		<input ref="/data/outcome">
 			<label ref="jr:itext('outcome-label')" />
+		</input>
+		<input ref="/data/no_amb">
+			<label ref="jr:itext('no_amb-label')" />
 		</input>
 	</h:body>
 </h:html>

@@ -237,14 +237,11 @@ def ambulance_response(session, xform, router):
 @is_active
 def ambulance_outcome(session, xform, router):
     connection = session.connection
-    contact = _get_allowed_ambulance_workflow_contact(session)
-    if not contact:
-        send_msg(connection, NOT_ALLOWED_ER_WORKFLOW, router,
-            **session.template_vars)
-        return True
-
+    contact = session.connection.contact
     unique_id = get_value_from_form('unique_id', xform)
     outcome_string = get_value_from_form('outcome', xform)
+    noamb = get_value_from_form('no_amb', xform)
+
     session.template_vars.update({
         "unique_id": unique_id,
         "outcome": outcome_string
@@ -271,10 +268,13 @@ def ambulance_outcome(session, xform, router):
     except ObjectDoesNotExist:
         mother = None
     outcome.mother = mother
+    if noamb:
+        outcome.no_amb = True
     outcome.save()
     session.template_vars.update({"contact_type": contact.types.all()[0],
                                   "name": contact.name})
-    _broadcast_to_ER_users(req, session, xform,
-                           message=_(AMB_OUTCOME_FILED), router=router)
+    if not noamb:
+        _broadcast_to_ER_users(req, session, xform,
+                               message=_(AMB_OUTCOME_FILED), router=router)
     send_msg(req.contact.default_connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
     return True

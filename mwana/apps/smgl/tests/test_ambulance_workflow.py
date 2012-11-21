@@ -173,3 +173,79 @@ class SMGLAmbulanceTest(SMGLSetUp):
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("na", amb_resp.response)
         self.assertEqual("11", amb_resp.responder.default_connection.identity)
+
+    def testAmbRequestNoAmbWorkflow(self):
+        self.assertEqual(0, AmbulanceRequest.objects.count())
+        # assign superuser
+        su = Contact.objects.get(name="AntonSU")
+        su.is_super_user = True
+        su.save()
+        # request
+        d = {
+            "unique_id": '1234',
+            "from_location": 'Chilala',
+            "sender_phone_number": '15'
+        }
+        script = """
+            15 > AMB 1234 1
+            15 < Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!
+            11 < {0}
+            12 < {1}
+        """.format(ER_TO_TRIAGE_NURSE % d,
+                   ER_TO_DRIVER % d,)
+        self.runScript(script)
+        [amb_req] = AmbulanceRequest.objects.all()
+        self.assertEqual("1234", amb_req.mother_uid)
+        self.assertEqual("1", amb_req.danger_sign)
+        self.assertEqual("15", amb_req.contact.default_connection.identity)
+        self.assertEqual("12", amb_req.ambulance_driver.default_connection.identity)
+        self.assertEqual("11", amb_req.triage_nurse.default_connection.identity)
+        self.assertEqual(False, amb_req.received_response)
+
+        # response
+        self.assertEqual(0, AmbulanceResponse.objects.count())
+        d = {
+            "unique_id": '1234',
+            "status": "NA",
+            "confirm_type": "Triage Nurse",
+            "name": "AntonTN",
+            "from_location": 'Chilala',
+            "sender_phone_number": '15'
+        }
+        response_string = ER_STATUS_UPDATE % d
+        d['response'] = 'NA'
+        response_to_referrer_string = AMB_RESPONSE_ORIGINATING_LOCATION_INFO % d
+        amb_na_string = AMB_RESPONSE_NOT_AVAILABLE % d
+        script = """
+            11 > resp 1234 na
+            11 < {0}
+            12 < {0}
+            15 < {1}
+            16 < {2}
+        """.format(response_string, response_to_referrer_string, amb_na_string)
+
+        self.runScript(script)
+        [amb_req] = AmbulanceRequest.objects.all()
+        self.assertEqual(True, amb_req.received_response)
+        [amb_resp] = AmbulanceResponse.objects.all()
+        self.assertEqual(amb_req, amb_resp.ambulance_request)
+        self.assertEqual("1234", amb_resp.mother_uid)
+        self.assertEqual("na", amb_resp.response)
+        self.assertEqual("11", amb_resp.responder.default_connection.identity)
+
+        # outcome
+        self.assertEqual(0, AmbulanceOutcome.objects.count())
+        d["contact_type"] = const.CTYPE_DATACLERK
+        d['outcome'] = 'under-care'
+        outcome_to_referrer_string = AMB_OUTCOME_ORIGINATING_LOCATION_INFO % d
+        script = """
+            15 > outc 1234 under-care noamb
+            15 < {0}
+        """.format(outcome_to_referrer_string)
+
+        self.runScript(script)
+        [amb_outcome] = AmbulanceOutcome.objects.all()
+        self.assertEqual(amb_req, amb_outcome.ambulance_request)
+        self.assertEqual(True, amb_outcome.no_amb)
+        self.assertEqual("1234", amb_outcome.mother_uid)
+        self.assertEqual("under-care", amb_outcome.outcome)
