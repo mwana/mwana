@@ -201,7 +201,7 @@ class AmbulanceRequest(FormReferenceBase, MotherReferenceBase):
     """
     Bucket for ambulance request info
     """
-    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency response",
+    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency request",
                                 null=True, blank=True, related_name="er_iniator")
     #Similarly it shouldn't matter if this field is filled in or not.
     danger_sign = models.CharField(max_length=255, null=True, blank=True, help_text="Danger signs that prompted the ER")
