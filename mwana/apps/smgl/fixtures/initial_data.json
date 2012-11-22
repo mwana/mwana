@@ -1658,15 +1658,6 @@
     }
   },
   {
-    "pk": 12,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "trigger_keyword": "confirm",
-      "final_response": "",
-      "xform": 14
-    }
-  },
-  {
     "pk": 18,
     "model": "smsforms.decisiontrigger",
     "fields": {
@@ -1865,7 +1856,7 @@
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Leave",
+      "name": "In",
       "created": "2012-11-20T16:45:58.599",
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
@@ -1877,7 +1868,7 @@
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Leave",
+      "name": "Out",
       "created": "2012-11-20T16:45:58.599",
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
@@ -1889,7 +1880,7 @@
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Leave",
+      "name": "Syphilis",
       "created": "2012-11-21T16:45:58.599",
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
@@ -1948,7 +1939,6 @@
       "file": "xforms/emergency_resp.xml"
     }
   },
-
   {
     "pk": 18,
     "model": "formplayer.xform",
@@ -1975,6 +1965,7 @@
       "file": "xforms/death_reg.xml"
     }
   },
+
   {
     "pk": 11,
     "model": "formplayer.xform",

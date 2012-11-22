@@ -362,6 +362,7 @@ def send_no_outcome_superuser_reminder(router_obj=None):
         # Check if missed
 
         for resp in responses_to_remind:
+            # TODO Change to resp.ambulance_request.referral_set.all()[0].outcome
             if not resp.ambulanceoutcome_set.all():
                 yield resp
 
