@@ -9,12 +9,14 @@
                     <mother_outcome />
                     <baby_outcome />
                     <mode_of_delivery />
+                    <noamb />
                 </data>
             </instance>
             <bind nodeset="/data/unique_id" type="xsd:string" />
             <bind nodeset="/data/mother_outcome" required="true()" />
             <bind nodeset="/data/baby_outcome" />
             <bind nodeset="/data/mode_of_delivery" />
+            <bind nodeset="/data/noamb" />
             <itext>
                 <translation lang="en" default="">
                     <text id="unique_id-label">
@@ -55,6 +57,9 @@
                     </text>
                     <text id="mother_outcome-noshow-label">
                         <value>noshow</value>
+                    </text>
+                    <text id="noamb-label">
+                        <value>No Ambulance</value>
                     </text>
                 </translation>
             </itext>
@@ -109,5 +114,8 @@
                 <value>csec</value>
             </item>
         </select1>
+        <input ref="/data/noamb">
+            <label ref="jr:itext('noamb-label')" />
+        </input>
     </h:body>
 </h:html>

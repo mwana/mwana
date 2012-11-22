@@ -126,17 +126,16 @@ def referral_outcome(session, xform, router):
 
     ref.save()
 
-    req = ref.ambulancerequest_set.all()
-    if req:
-        req = req[0]
-        if req.ambulanceresponse_set.all()[0].response != 'na':
+    if ref.amb_req:
+        if ref.amb_req.ambulanceresponse_set.all().order_by('-responded_on')[0].response != 'na':
             session.template_vars.update({"contact_type": contact.types.all()[0],
                                           "name": contact.name})
 
-            if ref.ambulancerequest_set.all().ambulance:
-                _broadcast_to_ER_users(req, session, xform,
+            if xform.xpath("form/mode_of_delivery") == 'noamb':
+                _broadcast_to_ER_users(ref.amb_req, session, xform,
                                        message=_(AMB_OUTCOME_FILED), router=router)
-            send_msg(req.contact.default_connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
+            send_msg(ref.session.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
+            get_session_message(session, direction='O')
             return True
     else:
         router.outgoing(OutgoingMessage(session.connection,
