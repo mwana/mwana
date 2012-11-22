@@ -165,7 +165,8 @@ class FacilityVisit(models.Model):
 
     visit_date = models.DateField()
     visit_type = models.CharField(max_length=255, help_text="ANC or POS visit",
-                                  choices=VISIT_TYPE_CHOICES)
+                                  choices=VISIT_TYPE_CHOICES,
+                                  default='anc')
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")

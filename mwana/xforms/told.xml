@@ -28,6 +28,9 @@
 					<text id="reminder_type-ref-label">
 						<value>ref</value>
 					</text>
+					<text id="reminder_type-pp-label">
+						<value>pp</value>
+					</text>
 				</translation>
 			</itext>
 		</model>
@@ -49,6 +52,10 @@
 			<item>
 				<label ref="jr:itext('reminder_type-ref-label')" />
 				<value>ref</value>
+			</item>
+			<item>
+				<label ref="jr:itext('reminder_type-pp-label')" />
+				<value>pp</value>
 			</item>
 		</select1>
 	</h:body>
