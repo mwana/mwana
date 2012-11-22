@@ -8,8 +8,10 @@ import datetime
 from mwana.apps.smgl.reminders import send_non_emergency_referral_reminders,\
     send_emergency_referral_reminders
 
+
 def _verbose_reasons(reasonstring):
     return ", ".join([Referral.REFERRAL_REASONS[r] for r in reasonstring.split(", ")])
+
 
 class SMGLReferTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
@@ -66,7 +68,6 @@ class SMGLReferTest(SMGLSetUp):
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
 
-
     def testMultipleResponses(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
@@ -100,19 +101,18 @@ class SMGLReferTest(SMGLSetUp):
         script = """
             %(num)s > refer 1234 804024 foo 1200 nem
             %(num)s < %(resp)s
-        """ % { "num": self.user_number, "resp": bad_code_resp }
+        """ % {"num": self.user_number, "resp": bad_code_resp}
         self.runScript(script)
 
         self.assertEqual(0, Referral.objects.count())
 
-
     def testReferBadLocation(self):
         # bad code
-        bad_code_resp = FACILITY_NOT_RECOGNIZED % { "facility": "notaplace" }
+        bad_code_resp = FACILITY_NOT_RECOGNIZED % {"facility": "notaplace"}
         script = """
             %(num)s > refer 1234 notaplace hbp 1200 nem
             %(num)s < %(resp)s
-        """ % { "num": self.user_number, "resp": bad_code_resp }
+        """ % {"num": self.user_number, "resp": bad_code_resp}
         self.runScript(script)
 
         self.assertEqual(0, Referral.objects.count())
@@ -123,22 +123,21 @@ class SMGLReferTest(SMGLSetUp):
             script = """
                 %(num)s > refer 1234 804024 hbp %(time)s nem
                 %(num)s < %(resp)s
-            """ % { "num": self.user_number, "time": bad_time, "resp": resp }
+            """ % {"num": self.user_number, "time": bad_time, "resp": resp}
             self.runScript(script)
             self.assertEqual(0, Referral.objects.count())
-
 
     def testReferralOutcome(self):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
-                                                  "unique_id": "1234" }
+                                                  "unique_id": "1234"}
         notify = const.REFERRAL_OUTCOME_NOTIFICATION % {
             "unique_id": "1234",
             "date": datetime.datetime.now().date(),
             "mother_outcome": "stable",
             "baby_outcome": "critical",
             "delivery_mode": "vaginal"
-        }
+       }
         script = """
             %(num)s > refout 1234 stb cri vag
             %(num)s < %(resp)s
@@ -158,18 +157,18 @@ class SMGLReferTest(SMGLSetUp):
     def testReferralOutcomeNoShow(self):
         self.testRefer()
         resp = const.REFERRAL_OUTCOME_RESPONSE % {"name": self.name,
-                                                  "unique_id": "1234" }
+                                                  "unique_id": "1234"}
         notify = const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % {
             "unique_id": "1234",
             "date": datetime.datetime.now().date(),
-        }
+       }
         script = """
             %(num)s > refout 1234 noshow
             %(num)s < %(resp)s
             %(num)s < %(notify)s
             %(dc_num)s < %(notify)s
             %(ic_num)s < %(notify)s
-        """ % { "num": self.user_number, "resp": resp, "notify": notify,
+        """ % {"num": self.user_number, "resp": resp, "notify": notify,
                 "dc_num": "666999", "ic_num": "666000"}
         self.runScript(script)
         [ref] = Referral.objects.all()
@@ -177,18 +176,18 @@ class SMGLReferTest(SMGLSetUp):
         self.assertFalse(ref.mother_showed)
 
     def testReferralOutcomeNoRef(self):
-        resp = const.REFERRAL_NOT_FOUND % {"unique_id": "1234" }
+        resp = const.REFERRAL_NOT_FOUND % {"unique_id": "1234"}
         script = """
             %(num)s > refout 1234 stb stb vag
             %(num)s < %(resp)s
-        """ % { "num": self.user_number, "resp": resp }
+        """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
 
     def testReferWithMother(self):
         yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
         tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).date()
-        resp = const.MOTHER_SUCCESS_REGISTERED % { "name": self.name,
-                                                   "unique_id": "1234" }
+        resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,
+                                                   "unique_id": "1234"}
         script = """
             %(num)s > REG 1234 Mary Soko none %(future)s R 80402404 %(past)s %(future)s
             %(num)s < %(resp)s
@@ -321,7 +320,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "unique_id": '1234',
 #            "from_location": 'Chilala',
 #            "sender_phone_number": '15'
-#        }
+#       }
 #        script = """
 #            15 > AMB 1234 1
 #            15 < Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!
@@ -345,7 +344,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "status": "OTW",
 #            "confirm_type": "Triage Nurse",
 #            "name": "AntonTN",
-#        }
+#       }
 #        response_string = ER_STATUS_UPDATE % d
 #        d['response'] = 'OTW'
 #        response_to_worker_string = ER_TO_CLINIC_WORKER % d
@@ -398,7 +397,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "unique_id": '1234',
 #            "from_location": 'Chilala',
 #            "sender_phone_number": '15'
-#        }
+#       }
 #        script = """
 #            15 > AMB 1234 1
 #            15 < Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!
@@ -424,7 +423,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "name": "AntonTN",
 #            "from_location": 'Chilala',
 #            "sender_phone_number": '15'
-#        }
+#       }
 #        response_string = ER_STATUS_UPDATE % d
 #        d['response'] = 'NA'
 #        response_to_referrer_string = AMB_RESPONSE_ORIGINATING_LOCATION_INFO % d
@@ -457,7 +456,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "unique_id": '1234',
 #            "from_location": 'Chilala',
 #            "sender_phone_number": '15'
-#        }
+#       }
 #        script = """
 #            15 > AMB 1234 1
 #            15 < Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!
@@ -483,7 +482,7 @@ class SMGLReferTest(SMGLSetUp):
 #            "name": "AntonTN",
 #            "from_location": 'Chilala',
 #            "sender_phone_number": '15'
-#        }
+#       }
 #        response_string = ER_STATUS_UPDATE % d
 #        d['response'] = 'NA'
 #        response_to_referrer_string = AMB_RESPONSE_ORIGINATING_LOCATION_INFO % d
