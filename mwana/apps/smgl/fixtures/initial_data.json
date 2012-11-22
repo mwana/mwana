@@ -1666,6 +1666,14 @@
     }
   },
   {
+    "pk": 18,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "syp",
+      "function_path": "mwana.apps.smgl.keyword_handlers.syphilis"
+    }
+  },
+  {
     "pk": 12,
     "model": "smsforms.decisiontrigger",
     "fields": {
@@ -1828,6 +1836,15 @@
     }
   },
   {
+    "pk": 27,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "trigger_keyword": "syp",
+      "final_response": "",
+      "xform": 29
+    }
+  },
+  {
     "pk": 23,
     "model": "formplayer.xform",
     "fields": {
@@ -1899,6 +1916,18 @@
       "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
       "version": 1,
       "file": "xforms/out.xml"
+    }
+  },
+  {
+    "pk": 29,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Leave",
+      "created": "2012-11-21T16:45:58.599",
+      "namespace": "http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B",
+      "version": 1,
+      "file": "xforms/syp.xml"
     }
   },
   {

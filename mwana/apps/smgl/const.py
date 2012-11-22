@@ -83,6 +83,7 @@ REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother w
 REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."
 REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a postpartum visit in %(num)s days.")
 REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue to visit health center %(loc)s for a postpartum visit.")
+REMINDER_SYP_TREATMENT_DUE = _("This is a reminder: Mother named %(name)s should visit the health center for follow-up on %(date)s")
 
 # LEAVE
 LEAVE_COMPLETE = _("Thanks %(name)s. You have deactivated your account.")
@@ -94,3 +95,7 @@ IN_REACTIVATE = _("Your account has been reactivated. Welcome back!")
 
 # OUT
 OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s.")
+
+# Syphilis
+SYP_TEST_COMPLETE = _("Thanks %(name)s. A Syphilis Test Result has been recorded for %(unique_id)s. Please register the first treatment when it is given.")
+SYP_TREATMENT_COMPLETE = _("Thanks %(name)s. A Syphilis Treatment has been recorded for %(unique_id)s.")
