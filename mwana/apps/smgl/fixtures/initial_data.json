@@ -1578,27 +1578,11 @@
     }
   },
   {
-    "pk": 4,
-    "model": "smgl.xformkeywordhandler",
-    "fields": {
-      "keyword": "amb",
-      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_request"
-    }
-  },
-  {
     "pk": 7,
     "model": "smgl.xformkeywordhandler",
     "fields": {
       "keyword": "resp",
-      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_response"
-    }
-  },
-  {
-    "pk": 8,
-    "model": "smgl.xformkeywordhandler",
-    "fields": {
-      "keyword": "outc",
-      "function_path": "mwana.apps.smgl.keyword_handlers.ambulance_outcome"
+      "function_path": "mwana.apps.smgl.keyword_handlers.emergency_response"
     }
   },
   {
@@ -1710,15 +1694,6 @@
     }
   },
   {
-    "pk": 10,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "trigger_keyword": "amb",
-      "final_response": "",
-      "xform": 12
-    }
-  },
-  {
     "pk": 11,
     "model": "smsforms.decisiontrigger",
     "fields": {
@@ -1734,15 +1709,6 @@
       "trigger_keyword": "resp",
       "final_response": "",
       "xform": 15
-    }
-  },
-  {
-    "pk": 14,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "trigger_keyword": "outc",
-      "final_response": "",
-      "xform": 16
     }
   },
   {
@@ -1970,44 +1936,19 @@
     }
   },
   {
-    "pk": 12,
-    "model": "formplayer.xform",
-    "fields": {
-      "uiversion": 1,
-      "name": "AMB",
-      "created": "2012-04-23T09:10:01.928",
-      "checksum": "f0325162cc4362250c83a1b69d79578db1151cee",
-      "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47",
-      "version": 1,
-      "file": "xforms/amb.xml"
-    }
-  },
-  {
     "pk": 15,
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Ambulance Resp",
+      "name": "Emergency Resp",
       "created": "2012-04-23T16:34:35.059",
       "checksum": "60e84f209a390dbd26af2b93da7dc606d17f521f",
       "namespace": "http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A",
       "version": 1,
-      "file": "xforms/amb_resp.xml"
+      "file": "xforms/emergency_resp.xml"
     }
   },
-  {
-    "pk": 16,
-    "model": "formplayer.xform",
-    "fields": {
-      "uiversion": 1,
-      "name": "Ambulance Outcome",
-      "created": "2012-04-23T16:52:04.172",
-      "checksum": "0cb08c35f35deae9e6e71fd7ba4902a119d9a757",
-      "namespace": "http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E",
-      "version": 1,
-      "file": "xforms/amb_outcome.xml"
-    }
-  },
+
   {
     "pk": 18,
     "model": "formplayer.xform",
@@ -2032,19 +1973,6 @@
       "namespace": "http://openrosa.org/formdesigner/E9B35B44-9CB2-4D22-98BD-4454E9A050CD",
       "version": 1,
       "file": "xforms/death_reg.xml"
-    }
-  },
-  {
-    "pk": 14,
-    "model": "formplayer.xform",
-    "fields": {
-      "uiversion": 1,
-      "name": "Ambulance Request Confirmation",
-      "created": "2012-04-23T12:51:34.552",
-      "checksum": "f2901d7cc981730244271f1d9c1bb4bd1884e86e",
-      "namespace": "http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3",
-      "version": 1,
-      "file": "xforms/amb_request_conf.xml"
     }
   },
   {

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
 	<h:head>
-		<h:title>Ambulance Resp</h:title>
+		<h:title>Emergency Resp</h:title>
 		<model>
 			<instance>
-				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A" uiVersion="1" version="1" name="Ambulance Resp">
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A" uiVersion="1" version="1" name="Emergency Resp">
 					<unique_id />
 					<status />
 				</data>

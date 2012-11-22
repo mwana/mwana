@@ -202,23 +202,9 @@ class AmbulanceRequest(FormReferenceBase, MotherReferenceBase):
     """
     Bucket for ambulance request info
     """
-    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency request",
-                                null=True, blank=True, related_name="er_iniator")
-    #Similarly it shouldn't matter if this field is filled in or not.
-    danger_sign = models.CharField(max_length=255, null=True, blank=True, help_text="Danger signs that prompted the ER")
-    from_location = models.ForeignKey(Location, null=True, blank=True, help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
-
     ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted", related_name="ambulance_driver")
-
     triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted", related_name="triage_nurse")
-
     other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER", related_name="other_recipient")
-
-    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER", related_name="receiving_facility_recipient")
-    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility", related_name="receiving_facility")
-
-    requested_on = models.DateTimeField(auto_now_add=True)
-    received_response = models.BooleanField(default=False)
 
 
 class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
@@ -233,17 +219,6 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
     responder = models.ForeignKey(Contact, help_text="The contact that responded to this ER event")
 
-
-class AmbulanceOutcome(FormReferenceBase, MotherReferenceBase):
-    ER_OUTCOME_CHOICES = (
-        ('uc', 'Under Care'),
-        ('td', 'Treated and Discharged'),
-        ('dec', 'Deceased'),
-    )
-    outcome_on = models.DateTimeField(auto_now_add=True, help_text="Date and Time this outcome was provided")
-    ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
-    outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
-    no_amb = models.BooleanField(default=False)
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
@@ -303,6 +278,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_oth = models.BooleanField(default=False)
 
     reminded = models.BooleanField(default=False)
+    amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
 
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
