@@ -23,7 +23,7 @@ from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable,
                         SummaryReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage)
+    get_location_tree_nodes, percentage, mother_death_ratio)
 
 
 def mothers(request):
@@ -419,7 +419,7 @@ def report(request):
     m_deaths = filter_by_dates(m_deaths, 'date', start=start_date, end=end_date)
     if locations:
         m_deaths = m_deaths.filter(district__in=locations)
-    mortality_rate = percentage(m_deaths.count(), births.count(), extended=True)
+    mortality_rate = mother_death_ratio(m_deaths.count(), births.count())
 
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
@@ -441,7 +441,8 @@ def report(request):
     returned = percentage(visits.count(), reminded_mothers.count())
 
     records = [
-         {'data': "Maternal Mortality Ratio", 'value': mortality_rate},
+         {'data': "Maternal Mortality Ratio per 100,000",
+         'value': mortality_rate},
          {'data': "Number of Clinical Workers Registered",
           'value': workers},
          {'data': "Number of CBAs Registered",
