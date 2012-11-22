@@ -422,7 +422,8 @@ REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("pos", "POS Next Visit Date"),
                          ("em_ref", "Emergency Referral"),
                          ("nem_ref", "Non-Emergency Referral"),
-                         ("edd_14", "Expected Delivery, 14 days before"))
+                         ("edd_14", "Expected Delivery, 14 days before"),
+                         ("syp", "Syphilis Treatment"))
 
 
 class ReminderNotification(MotherReferenceBase):
@@ -452,3 +453,40 @@ class ToldReminder(FormReferenceBase, MotherReferenceBase):
     contact = models.ForeignKey(Contact, null=True)
     date = models.DateTimeField()
     type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)
+
+
+SYPHILIS_TEST_RESULT_CHOICES = (
+                     ("p", 'Positive'),
+                     ("n", "Negative")
+                     )
+
+SYPHILIS_SHOT_NUMBER_CHOICES = (
+                     ("s1", 'S1'),
+                     ("s2", "S2"),
+                     ("s3", 'S3')
+                     )
+
+
+class SyphilisTest(FormReferenceBase, MotherReferenceBase):
+    """
+    Database representation of a syphilis test form. Tracks test results.
+    """
+    date = models.DateField()
+    result = models.CharField(max_length=1,
+                              choices=SYPHILIS_TEST_RESULT_CHOICES)
+
+
+class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
+    """
+    Database representation of a syphilis treatment form. Tracks treatment
+    """
+    date = models.DateField()
+    shot_number = models.CharField(max_length=2,
+                              choices=SYPHILIS_SHOT_NUMBER_CHOICES)
+    next_visit_date = models.DateField(null=True, blank=True)
+    reminded = models.BooleanField(default=False)
+
+    def is_latest_for_mother(self):
+        return SyphilisTreatment.objects.filter(mother=self.mother)\
+            .order_by("-date")[0] == self
+

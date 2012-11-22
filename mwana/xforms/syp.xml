@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+    <h:head>
+        <h:title>Syphilis Test statuss</h:title>
+        <model>
+            <instance>
+                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/592C2F2A-5CEB-492A-91ED-705AD027E421" uiVersion="1" version="1" name="Syphilis Test statuss">
+                    <unique_id />
+                    <date_dd />
+                    <date_mm />
+                    <date_yyyy />
+                    <status />
+                    <next_visit_date_dd />
+                    <next_visit_date_mm />
+                    <next_visit_date_yyyy />
+                </data>
+            </instance>
+            <bind nodeset="/data/unique_id" type="xsd:string"   required="true()" />
+            <bind nodeset="/data/date_dd" type="xsd:string"  required="true()" />
+            <bind nodeset="/data/date_mm" type="xsd:string"  required="true()" />
+            <bind nodeset="/data/date_yyyy" type="xsd:string"  required="true()" />
+            <bind nodeset="/data/status" type="xsd:string"  required="true()" />
+            <bind nodeset="/data/next_visit_date_dd" type="xsd:string" required="false()" />
+            <bind nodeset="/data/next_visit_date_mm" type="xsd:string" required="false()" />
+            <bind nodeset="/data/next_visit_date_yyyy" type="xsd:string" required="false()" />
+            <itext>
+                <translation lang="en" default="">
+                    <text id="unique_id-label">
+                        <value>Woman's Unique ID</value>
+                    </text>
+                    <text id="date_dd-label">
+                        <value>Date of Test: Day (DD)</value>
+                    </text>
+                    <text id="date_mm-label">
+                        <value>Date of Test: Month (MM)</value>
+                    </text>
+                    <text id="date_yyyy-label">
+                        <value>Date of Test: Year (YYYY)</value>
+                    </text>
+                    <text id="status-label">
+                        <value>status</value>
+                    </text>
+                    <text id="status-p-label">
+                        <value>p</value>
+                    </text>
+                    <text id="status-n-label">
+                        <value>n</value>
+                    </text>
+                    <text id="status-s1-label">
+                        <value>s1</value>
+                    </text>
+                    <text id="status-s2-label">
+                        <value>s2</value>
+                    </text>
+                    <text id="status-s3-label">
+                        <value>s3</value>
+                    </text>
+                    <text id="next_visit_date_dd-label">
+                        <value>Date of Next Visit: Day (DD)</value>
+                    </text>
+                    <text id="next_visit_date_mm-label">
+                        <value>Date of Next Visit: Month (MM)</value>
+                    </text>
+                    <text id="next_visit_date_yyyy-label">
+                        <value>Date of Next Visit: Year (YYYY)</value>
+                    </text>
+                </translation>
+            </itext>
+        </model>
+    </h:head>
+    <h:body>
+        <input ref="/data/unique_id">
+            <label ref="jr:itext('unique_id-label')" />
+        </input>
+        <input ref="/data/date_dd">
+            <label ref="jr:itext('date_dd-label')" />
+        </input>
+        <input ref="/data/date_mm">
+            <label ref="jr:itext('date_mm-label')" />
+        </input>
+        <input ref="/data/date_yyyy">
+            <label ref="jr:itext('date_yyyy-label')" />
+        </input>
+        <select1 ref="/data/status">
+            <label ref="jr:itext('status-label')" />
+            <item>
+                <label ref="jr:itext('status-p-label')" />
+                <value>p</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-n-label')" />
+                <value>n</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-s1-label')" />
+                <value>s1</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-s2-label')" />
+                <value>s2</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-s3-label')" />
+                <value>s3</value>
+            </item>
+        </select1>
+        <input ref="/data/next_visit_date_dd">
+            <label ref="jr:itext('next_visit_date_dd-label')" />
+        </input>
+        <input ref="/data/next_visit_date_mm">
+            <label ref="jr:itext('next_visit_date_mm-label')" />
+        </input>
+        <input ref="/data/next_visit_date_yyyy">
+            <label ref="jr:itext('next_visit_date_yyyy-label')" />
+        </input>
+    </h:body>
+</h:html>

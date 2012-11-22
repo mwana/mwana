@@ -8,14 +8,14 @@ from rapidsms.models import Contact
 from threadless_router.router import Router
 
 from mwana.apps.smgl import const
-from mwana.apps.smgl.app import AMB_OUTCOME_NO_OUTCOME
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
-    PregnantMother, AmbulanceResponse
+    PregnantMother, AmbulanceResponse, SyphilisTreatment
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
 SEND_AMB_OUTCOME_LOWER_BOUND = timedelta(hours=1)
+SEND_SYPHILIS_REMINDER_LOWER_BOUND = timedelta(days=2)
 
 
 def _set_router(router_obj=None):
@@ -373,6 +373,43 @@ def send_no_outcome_superuser_reminder(router_obj=None):
             if su.default_connection:
                 su.message(const.AMB_OUTCOME_NO_OUTCOME,
                           **{"unique_id": resp.mother.uid})
+
+
+def send_syphillis_reminders(router_obj=None):
+    """
+    Next visit date from SyphilisTreatment should
+    be used to generate reminder for the next appointment.
+
+    To: CBA
+    On: 2 days before visit date
+    """
+    _set_router(router_obj)
+
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        reminder_threshold = now + timedelta(days=2)
+        visits_to_remind = SyphilisTreatment.objects.filter(
+            next_visit_date__gte=reminder_threshold - SEND_SYPHILIS_REMINDER_LOWER_BOUND,
+            next_visit_date__lte=reminder_threshold,
+            reminded=False)
+
+        for v in visits_to_remind:
+            if v.is_latest_for_mother():
+                yield v
+
+    for v in _visits_to_remind():
+        found_someone = False
+        for c in v.mother.get_laycounselors():
+            if c.default_connection:
+                found_someone = True
+                c.message(const.REMINDER_SYP_TREATMENT_DUE,
+                          **{"name": v.mother.name,
+                             "unique_id": v.mother.uid,
+                             "loc": v.location.name})
+                _create_notification("syp", c, v.mother.uid)
+        if found_someone:
+            v.reminded = True
+            v.save()
 
 
 def _create_notification(type, contact, mother_id):
