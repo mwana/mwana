@@ -15,7 +15,7 @@ from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
 
-from .forms import StatisticsFilterForm
+from .forms import StatisticsFilterForm, MotherForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification)
@@ -27,11 +27,22 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
 
 
 def mothers(request):
-    mothers_table = PregnantMotherTable(PregnantMother.objects.all(),
+    mothers = PregnantMother.objects.all()
+
+    form = MotherForm()
+    if request.method == 'POST':
+        form = MotherForm(request.POST)
+        uid = request.POST.get('uid', None)
+        if uid:
+            mothers = mothers.filter(uid__icontains=uid)
+
+    mothers_table = PregnantMotherTable(mothers,
                                         request=request)
+
     return render_to_response(
         "smgl/mothers.html",
-        {"mothers_table": mothers_table
+        {"mothers_table": mothers_table,
+         "form": form
         },
         context_instance=RequestContext(request))
 

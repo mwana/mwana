@@ -6,6 +6,12 @@
 
 <div class="messages module">
 <h2>Mothers</h2>
+
+<form action="." method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="Submit" />
+</form>
 {{ mothers_table.as_html }}
 </div>
 

@@ -35,3 +35,10 @@ class StatisticsFilterForm(forms.Form):
 
     def save(self, *args, **kwargs):
         return self.cleaned_data
+
+
+class MotherForm(forms.Form):
+    """
+    A Form to lookup mothers
+    """
+    uid = forms.CharField(max_length=100, required=True)
