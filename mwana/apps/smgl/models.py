@@ -237,6 +237,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         "pl":    "Prolonged Labor",
         "cpd":   "Big Baby Small Pelvis",
         "oth":   "Other",
+        "pp":    "post-partum visit"
     }
     date = models.DateTimeField()
     facility = models.ForeignKey(Location,
@@ -276,9 +277,11 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_pl = models.BooleanField(default=False)
     reason_cpd = models.BooleanField(default=False)
     reason_oth = models.BooleanField(default=False)
+    reason_pp = models.BooleanField(default=False)
 
     reminded = models.BooleanField(default=False)
     amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
+
 
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code

@@ -55,6 +55,9 @@
                     <text id="mode_of_delivery-csec-label">
                         <value>csec</value>
                     </text>
+                    <text id="mode_of_delivery-pp-label">
+                        <value>pp</value>
+                    </text>
                     <text id="mother_outcome-noshow-label">
                         <value>noshow</value>
                     </text>
@@ -112,6 +115,10 @@
             <item>
                 <label ref="jr:itext('mode_of_delivery-csec-label')" />
                 <value>csec</value>
+            </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-pp-label')" />
+                <value>pp</value>
             </item>
         </select1>
         <input ref="/data/noamb">

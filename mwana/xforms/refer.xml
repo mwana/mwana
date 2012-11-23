@@ -67,6 +67,9 @@
                     <text id="reason-oth-label">
                         <value>oth</value>
                     </text>
+                    <text id="reason-pp-label">
+                        <value>pp</value>
+                    </text>
                 </translation>
             </itext>
         </model>
@@ -115,6 +118,10 @@
             <item>
                 <label ref="jr:itext('reason-oth-label')" />
                 <value>oth</value>
+            </item>
+            <item>
+                <label ref="jr:itext('reason-pp-label')" />
+                <value>pp</value>
             </item>
         </select>
         <input ref="/data/time">
