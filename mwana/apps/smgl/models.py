@@ -222,8 +222,10 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
-                            ("dec", "deceased"))
-DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"))
+                            ("dec", "deceased"), ("oth", "other"))
+DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"),
+                         ("pp", "post-partum"), ("ref", "new_referral"),
+                            ("oth", "other"))
 
 
 class Referral(FormReferenceBase, MotherReferenceBase):
@@ -281,7 +283,6 @@ class Referral(FormReferenceBase, MotherReferenceBase):
 
     reminded = models.BooleanField(default=False)
     amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
-
 
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code

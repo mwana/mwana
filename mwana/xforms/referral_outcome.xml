@@ -37,6 +37,9 @@
                     <text id="baby_outcome-dec-label">
                         <value>dec</value>
                     </text>
+                    <text id="baby_outcome-oth-label">
+                        <value>oth</value>
+                    </text>
                     <text id="mother_outcome-stb-label">
                         <value>stb</value>
                     </text>
@@ -45,6 +48,9 @@
                     </text>
                     <text id="mother_outcome-dec-label">
                         <value>dec</value>
+                    </text>
+                        <text id="mother_outcome-oth-label">
+                        <value>oth</value>
                     </text>
                     <text id="mode_of_delivery-label">
                         <value>Mode of delivery</value>
@@ -57,6 +63,12 @@
                     </text>
                     <text id="mode_of_delivery-pp-label">
                         <value>pp</value>
+                    </text>
+                    <text id="mode_of_delivery-ref-label">
+                        <value>ref</value>
+                    </text>
+                    <text id="mode_of_delivery-oth-label">
+                        <value>oth</value>
                     </text>
                     <text id="mother_outcome-noshow-label">
                         <value>noshow</value>
@@ -87,6 +99,10 @@
                 <value>dec</value>
             </item>
             <item>
+                <label ref="jr:itext('mother_outcome-oth-label')" />
+                <value>oth</value>
+            </item>
+            <item>
                 <label ref="jr:itext('mother_outcome-noshow-label')" />
                 <value>noshow</value>
             </item>
@@ -105,6 +121,10 @@
                 <label ref="jr:itext('baby_outcome-dec-label')" />
                 <value>dec</value>
             </item>
+            <item>
+                <label ref="jr:itext('baby_outcome-oth-label')" />
+                <value>oth</value>
+            </item>
         </select1>
         <select1 ref="/data/mode_of_delivery">
             <label ref="jr:itext('mode_of_delivery-label')" />
@@ -119,6 +139,14 @@
             <item>
             <label ref="jr:itext('mode_of_delivery-pp-label')" />
                 <value>pp</value>
+            </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-ref-label')" />
+                <value>ref</value>
+            </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-oth-label')" />
+                <value>oth</value>
             </item>
         </select1>
         <input ref="/data/noamb">

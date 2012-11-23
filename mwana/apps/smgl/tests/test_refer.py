@@ -191,11 +191,8 @@ class SMGLReferTest(SMGLSetUp):
         script = """
             %(num)s > refout 1234 stb stb vag
             %(num)s < %(resp)s
-<<<<<<< Updated upstream
+
         """ % {"num": self.user_number, "resp": resp}
-=======
-        """ % {"num": self.user_number, "resp": resp }
->>>>>>> Stashed changes
         self.runScript(script)
 
     def testReferWithMother(self):
