@@ -191,6 +191,7 @@ class SMGLReferTest(SMGLSetUp):
         script = """
             %(num)s > refout 1234 stb stb vag
             %(num)s < %(resp)s
+
         """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
 

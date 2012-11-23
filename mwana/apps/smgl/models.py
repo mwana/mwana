@@ -222,8 +222,10 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
-                            ("dec", "deceased"))
-DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"))
+                            ("dec", "deceased"), ("oth", "other"))
+DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"),
+                         ("pp", "post-partum"), ("ref", "new_referral"),
+                            ("oth", "other"))
 
 
 class Referral(FormReferenceBase, MotherReferenceBase):
@@ -237,6 +239,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         "pl":    "Prolonged Labor",
         "cpd":   "Big Baby Small Pelvis",
         "oth":   "Other",
+        "pp":    "post-partum visit"
     }
     date = models.DateTimeField()
     facility = models.ForeignKey(Location,
@@ -276,6 +279,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_pl = models.BooleanField(default=False)
     reason_cpd = models.BooleanField(default=False)
     reason_oth = models.BooleanField(default=False)
+    reason_pp = models.BooleanField(default=False)
 
     reminded = models.BooleanField(default=False)
     amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
