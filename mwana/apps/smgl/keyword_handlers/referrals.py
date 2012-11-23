@@ -51,21 +51,7 @@ def refer(session, xform, router):
         if reasons:
             for r in reasons.split(" "):
                 referral.set_reason(r)
-        status = xform.xpath("form/status")
-        referral.status = status
-        if referral.status == 'em':
-            #DO SOMETHING WITH AMBULANCES
-            session.template_vars.update({"sender_phone_number": session.connection.identity})
-            amb = AmbulanceRequest()
-            amb.session = session
-            session.template_vars.update({"from_location": str(contact.location.name)})
-            amb.set_mother(mother_id)
-            amb.save()
-            referral.amb_req = amb
-            #Respond that we're on it.
-            send_msg(session.connection, INITIAL_AMBULANCE_RESPONSE, router, **session.template_vars)
-            _broadcast_to_ER_users(amb, session, xform, router=router)
-
+        referral.from_facility = session.connection.contact.location
         try:
             referral.time = to_time(xform.xpath("form/time"))
         except ValueError, e:
@@ -73,20 +59,35 @@ def refer(session, xform, router):
             get_session_message(session, direction='O')
             return True
 
-        referral.from_facility = session.connection.contact.location
+        status = xform.xpath("form/status")
+        referral.status = status
         referral.save()
-        resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
-        router.outgoing(OutgoingMessage(session.connection, resp))
-        from_facility = session.connection.contact.location.name
-        for c in _get_people_to_notify(referral):
-            if c.default_connection:
-                verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
-                msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
-                                                     "facility": from_facility,
-                                                     "reason": ", ".join(verbose_reasons),
-                                                     "time": referral.time.strftime("%H:%M"),
-                                                     "is_emergency": yesno(referral.is_emergency)}
-                router.outgoing(OutgoingMessage(c.default_connection, msg))
+        if referral.status == 'em':
+            # Generate an Ambulance Request
+            session.template_vars.update({"sender_phone_number": session.connection.identity})
+            amb = AmbulanceRequest()
+            amb.session = session
+            session.template_vars.update({"from_location": str(referral.from_facility.name)})
+            amb.set_mother(mother_id)
+            amb.save()
+            referral.amb_req = amb
+            referral.save()
+            #Respond that we're on it.
+            send_msg(session.connection, INITIAL_AMBULANCE_RESPONSE, router, **session.template_vars)
+            _broadcast_to_ER_users(amb, session, xform, router=router)
+        else:
+            resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
+            router.outgoing(OutgoingMessage(session.connection, resp))
+            from_facility = session.connection.contact.location.name
+            for c in _get_people_to_notify(referral):
+                if c.default_connection:
+                    verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
+                    msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
+                                                         "facility": from_facility,
+                                                         "reason": ", ".join(verbose_reasons),
+                                                         "time": referral.time.strftime("%H:%M"),
+                                                         "is_emergency": yesno(referral.is_emergency)}
+                    router.outgoing(OutgoingMessage(c.default_connection, msg))
     get_session_message(session, direction='O')
     return True
 
@@ -196,8 +197,8 @@ def emergency_response(session, xform, router):
 
     #we might be dealing with a mother that has gone through ER multiple times
     ambulance_requests = AmbulanceRequest.objects.filter(mother_uid=unique_id)\
-                .exclude(received_response=True)\
-                .order_by('-requested_on')
+                .exclude(referral__responded=True)\
+                .order_by('-id')
     if not ambulance_requests.count():
         #session doesn't exist or it has already been confirmed
         send_msg(connection, ER_CONFIRM_SESS_NOT_FOUND, router, **session.template_vars)
@@ -216,19 +217,19 @@ def emergency_response(session, xform, router):
 
     ambulance_request.save()
     ambulance_response.save()
-    referrer_contact = ambulance_request.contact
-    send_msg(referrer_contact.default_connection,
+    ref = ambulance_request.referral_set.all()[0]
+    referrer_cnx = ref.session.connection
+    send_msg(referrer_cnx,
              AMB_RESPONSE_ORIGINATING_LOCATION_INFO,
              router, **session.template_vars)
     if status == 'na':
-        session.template_vars.update({"sender_phone_number": ambulance_request.contact.default_connection.identity,
-                                      "from_location": str(ambulance_request.contact.location.name)})
-        for su in _pick_superusers(session, xform, ambulance_request.receiving_facility):
+        session.template_vars.update({"sender_phone_number": referrer_cnx.identity,
+                                      "from_location": str(ref.from_facility.name)})
+        for su in _pick_superusers(session, xform, ref.facility):
             send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
     else:
-        clinic_recip = _pick_clinic_recip(session, xform, ambulance_request.receiving_facility)
+        clinic_recip = _pick_clinic_recip(session, xform, ref.facility)
         if clinic_recip:
-            ambulance_request.receiving_facility_recipient = clinic_recip
             if clinic_recip.default_connection:
                 send_msg(clinic_recip.default_connection, ER_TO_CLINIC_WORKER, router, **session.template_vars)
             else:
@@ -305,7 +306,8 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     Broadcasts a message to the Emergency Response users.  If message is not
     specified, will send the default initial ER message to each respondent.
     """
-    receiving_facility = ambulance_session.receiving_facility
+    ref = ambulance_session.referral_set.all()[0]
+    receiving_facility = ref.facility
     ambulance_driver = _pick_er_driver(session, xform, receiving_facility)
     ambulance_session.ambulance_driver = ambulance_driver
     if ambulance_driver.default_connection:
