@@ -24,15 +24,11 @@ class FacilityVisitAdmin(admin.ModelAdmin):
 
 
 class AmbulanceRequestAdmin(admin.ModelAdmin):
-    list_display = ['requested_on', 'from_location', 'receiving_facility', 'mother', 'mother_uid', 'danger_sign']
+    list_display = ['mother', 'mother_uid']
 
 
 class AmbulanceResponseAdmin(admin.ModelAdmin):
     list_display = ['ambulance_request', 'mother', 'mother_uid', 'response']
-
-
-class AmbulanceOutcomeAdmin(admin.ModelAdmin):
-    list_display = ['ambulance_request', 'mother', 'mother_uid', 'outcome']
 
 
 class ReferralAdmin(admin.ModelAdmin):
