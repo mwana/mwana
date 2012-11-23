@@ -24,15 +24,11 @@ class FacilityVisitAdmin(admin.ModelAdmin):
 
 
 class AmbulanceRequestAdmin(admin.ModelAdmin):
-    list_display = ['requested_on', 'from_location', 'receiving_facility', 'mother', 'mother_uid', 'danger_sign']
+    list_display = ['mother', 'mother_uid']
 
 
 class AmbulanceResponseAdmin(admin.ModelAdmin):
     list_display = ['ambulance_request', 'mother', 'mother_uid', 'response']
-
-
-class AmbulanceOutcomeAdmin(admin.ModelAdmin):
-    list_display = ['ambulance_request', 'mother', 'mother_uid', 'outcome']
 
 
 class ReferralAdmin(admin.ModelAdmin):
@@ -72,9 +68,9 @@ admin.site.register(PregnantMother, PregnantMotherAdmin)
 admin.site.register(FacilityVisit, FacilityVisitAdmin)
 admin.site.register(AmbulanceRequest, AmbulanceRequestAdmin)
 admin.site.register(AmbulanceResponse, AmbulanceResponseAdmin)
-admin.site.register(AmbulanceOutcome, AmbulanceOutcomeAdmin)
 admin.site.register(Referral, ReferralAdmin)
 admin.site.register(BirthRegistration, BirthRegistrationAdmin)
 admin.site.register(DeathRegistration, DeathRegistrationAdmin)
 admin.site.register(ReminderNotification, ReminderNotificationAdmin)
 admin.site.register(ToldReminder, ToldReminderAdmin)
+admin.site.register(SyphilisTest)

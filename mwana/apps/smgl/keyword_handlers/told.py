@@ -52,18 +52,21 @@ def told(session, xform, router):
                 send_msg(connection, msg, router)
                 get_session_message(session, direction='O')
                 return True
-        elif reminder_type == 'nvd':
-            visits = FacilityVisit.objects.filter(next_visit__gte=now.date(),
-                                                  mother=mother)
-            if not visits:
-                msg = const.TOLD_MOTHER_HAS_NO_NVD % {'unique_id': unique_id}
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
         elif reminder_type == 'ref':
             refs = Referral.objects.filter(date__gte=now, mother=mother)
             if not refs:
                 msg = const.TOLD_MOTHER_HAS_NO_REF % {'unique_id': unique_id}
+                send_msg(connection, msg, router)
+                get_session_message(session, direction='O')
+                return True
+        else:
+            if reminder_type == 'nvd':
+                reminder_type = 'anc'
+            visits = FacilityVisit.objects.filter(next_visit__gte=now.date(),
+                                                  mother=mother,
+                                                  visit_type=reminder_type)
+            if not visits:
+                msg = const.TOLD_MOTHER_HAS_NO_NVD % {'unique_id': unique_id}
                 send_msg(connection, msg, router)
                 get_session_message(session, direction='O')
                 return True

@@ -86,7 +86,7 @@ class SMGLToldTestCase(SMGLSetUp):
         self.assertEqual(0, told_reminders.count())
 
     def testBadTold(self):
-        bad_code_resp = 'Answer must be one of the choices for "Type of reminder, choices: edd, nvd, ref"'
+        bad_code_resp = 'Answer must be one of the choices for "Type of reminder, choices: edd, nvd, ref, pp"'
         mom = create_mother()
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())

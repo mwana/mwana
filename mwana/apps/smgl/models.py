@@ -165,7 +165,8 @@ class FacilityVisit(models.Model):
 
     visit_date = models.DateField()
     visit_type = models.CharField(max_length=255, help_text="ANC or POS visit",
-                                  choices=VISIT_TYPE_CHOICES)
+                                  choices=VISIT_TYPE_CHOICES,
+                                  default='anc')
     reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
                                         choices=REASON_FOR_VISIT_CHOICES)
     edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
@@ -197,73 +198,34 @@ class FacilityVisit(models.Model):
         super(FacilityVisit, self).save(*args, **kwargs)
 
 
-class AmbulanceRequest(models.Model):
+class AmbulanceRequest(FormReferenceBase, MotherReferenceBase):
     """
     Bucket for ambulance request info
     """
-    contact = models.ForeignKey(Contact, help_text="Contact who initiated the emergency response",
-                                null=True, blank=True, related_name="er_iniator")
-    connection = models.ForeignKey(Connection, help_text="If not a registered contact, the connection " \
-                                                         "of the person who initiated ER",
-                                    null=True, blank=True)
-    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
-    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
-    #Similarly it shouldn't matter if this field is filled in or not.
-    danger_sign = models.CharField(max_length=255, null=True, blank=True, help_text="Danger signs that prompted the ER")
-    from_location = models.ForeignKey(Location, null=True, blank=True, help_text="The Location the Emergency Request ORIGINATED from", related_name="from_location")
-
     ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted", related_name="ambulance_driver")
-
     triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted", related_name="triage_nurse")
-
     other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER", related_name="other_recipient")
 
-    receiving_facility_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Receiving Clinic Recipient of this ER", related_name="receiving_facility_recipient")
-    receiving_facility = models.ForeignKey(Location, null=True, blank=True, help_text="The receiving facility", related_name="receiving_facility")
 
-    requested_on = models.DateTimeField(auto_now_add=True)
-    received_response = models.BooleanField(default=False)
-
-
-class AmbulanceResponse(models.Model):
+class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
     ER_RESPONSE_CHOICES = (
-        ('cancelled', 'Cancelled'),
-        ('confirmed', 'Confirmed'),
-        ('pending', 'Pending'),
+        ('na', 'Not Available'),
+        ('dl', 'Delayed'),
+        ('otw', 'On The Way'),
     )
 
-    #Note: we capture both the mom UID and try to match it to a pregnant mother foreignkey. In the event that an ER
-    #is started for NOT a mother or the UID is garbled/unmatcheable we still want to capture it for analysis.
     responded_on = models.DateTimeField(auto_now_add=True, help_text="Date the response happened")
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
     ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
-    responder = models. ForeignKey(Contact, help_text="The contact that responded to this ER event")
-
-
-class AmbulanceOutcome(models.Model):
-    ER_OUTCOME_CHOICES = (
-        ('under-care', 'Under Care'),
-        ('treated_discharged', 'Treated and Discharged'),
-        ('deceased', 'Deceased'),
-    )
-    # Note: we capture both the mom UID and try to match it to a pregnant
-    # mother foreignkey. In the event that an ER is started for NOT a mother
-    # or the UID is garbled/unmatcheable we still want to capture it for analysis.
-    outcome_on = models.DateTimeField(auto_now_add=True, help_text="Date and Time this outcome was provided")
-    mother_uid = models.CharField(max_length=255, help_text="Unique ID of mother", null=True, blank=True)
-    mother = models.ForeignKey(PregnantMother, null=True, blank=True)
-    ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
-    outcome = models.CharField(max_length=60, choices=ER_OUTCOME_CHOICES)
+    responder = models.ForeignKey(Contact, help_text="The contact that responded to this ER event")
 
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
 REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
-                            ("dec", "deceased"))
-DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"))
+                            ("dec", "deceased"), ("oth", "other"))
+DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"),
+                         ("pp", "post-partum"), ("ref", "new_referral"),
+                            ("oth", "other"))
 
 
 class Referral(FormReferenceBase, MotherReferenceBase):
@@ -277,6 +239,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         "pl":    "Prolonged Labor",
         "cpd":   "Big Baby Small Pelvis",
         "oth":   "Other",
+        "pp":    "post-partum visit"
     }
     date = models.DateTimeField()
     facility = models.ForeignKey(Location,
@@ -316,8 +279,10 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     reason_pl = models.BooleanField(default=False)
     reason_cpd = models.BooleanField(default=False)
     reason_oth = models.BooleanField(default=False)
+    reason_pp = models.BooleanField(default=False)
 
     reminded = models.BooleanField(default=False)
+    amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
 
     def set_reason(self, code, val=True):
         assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
@@ -438,7 +403,8 @@ REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("pos", "POS Next Visit Date"),
                          ("em_ref", "Emergency Referral"),
                          ("nem_ref", "Non-Emergency Referral"),
-                         ("edd_14", "Expected Delivery, 14 days before"))
+                         ("edd_14", "Expected Delivery, 14 days before"),
+                         ("syp", "Syphilis Treatment"))
 
 
 class ReminderNotification(MotherReferenceBase):
@@ -468,3 +434,40 @@ class ToldReminder(FormReferenceBase, MotherReferenceBase):
     contact = models.ForeignKey(Contact, null=True)
     date = models.DateTimeField()
     type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)
+
+
+SYPHILIS_TEST_RESULT_CHOICES = (
+                     ("p", 'Positive'),
+                     ("n", "Negative")
+                     )
+
+SYPHILIS_SHOT_NUMBER_CHOICES = (
+                     ("s1", 'S1'),
+                     ("s2", "S2"),
+                     ("s3", 'S3')
+                     )
+
+
+class SyphilisTest(FormReferenceBase, MotherReferenceBase):
+    """
+    Database representation of a syphilis test form. Tracks test results.
+    """
+    date = models.DateField()
+    result = models.CharField(max_length=1,
+                              choices=SYPHILIS_TEST_RESULT_CHOICES)
+
+
+class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
+    """
+    Database representation of a syphilis treatment form. Tracks treatment
+    """
+    date = models.DateField()
+    shot_number = models.CharField(max_length=2,
+                              choices=SYPHILIS_SHOT_NUMBER_CHOICES)
+    next_visit_date = models.DateField(null=True, blank=True)
+    reminded = models.BooleanField(default=False)
+
+    def is_latest_for_mother(self):
+        return SyphilisTreatment.objects.filter(mother=self.mother)\
+            .order_by("-date")[0] == self
+

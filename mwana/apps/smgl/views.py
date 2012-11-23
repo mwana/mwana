@@ -15,7 +15,7 @@ from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
 
-from .forms import StatisticsFilterForm
+from .forms import StatisticsFilterForm, MotherForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification)
@@ -23,15 +23,26 @@ from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable,
                         SummaryReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage)
+    get_location_tree_nodes, percentage, mother_death_ratio)
 
 
 def mothers(request):
-    mothers_table = PregnantMotherTable(PregnantMother.objects.all(),
+    mothers = PregnantMother.objects.all()
+
+    form = MotherForm()
+    if request.method == 'POST':
+        form = MotherForm(request.POST)
+        uid = request.POST.get('uid', None)
+        if uid:
+            mothers = mothers.filter(uid__icontains=uid)
+
+    mothers_table = PregnantMotherTable(mothers,
                                         request=request)
+
     return render_to_response(
         "smgl/mothers.html",
-        {"mothers_table": mothers_table
+        {"mothers_table": mothers_table,
+         "form": form
         },
         context_instance=RequestContext(request))
 
@@ -238,6 +249,9 @@ def reminder_stats(request):
     records = []
     province = district = facility = start_date = end_date = None
     record_types = ['edd', 'nvd', 'pos', 'ref']
+    field_mapper = {'edd': 'Expected Delivery Date', 'nvd': 'Next Visit Date',
+                    'pos': 'Post Partem', 'ref': 'Refferals'}
+
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
@@ -290,7 +304,7 @@ def reminder_stats(request):
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
         records.append({
-                'reminder_type': key,
+                'reminder_type': field_mapper[key],
                 'reminders': reminders.count(),
                 'showed_up': showed_up.count(),
                 'told': tolds.count(),
@@ -300,7 +314,7 @@ def reminder_stats(request):
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
-        keys = ['reminder_type', 'reminders', 'showed_up', 'told', 'told_and_showed' ]
+        keys = ['reminder_type', 'reminders', 'showed_up', 'told', 'told_and_showed']
         filename = 'reminder_statistics'
         date_range = ''
         if start_date:
@@ -416,7 +430,7 @@ def report(request):
     m_deaths = filter_by_dates(m_deaths, 'date', start=start_date, end=end_date)
     if locations:
         m_deaths = m_deaths.filter(district__in=locations)
-    mortality_rate = percentage(m_deaths.count(), births.count(), extended=True)
+    mortality_rate = mother_death_ratio(m_deaths.count(), births.count())
 
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
@@ -438,7 +452,8 @@ def report(request):
     returned = percentage(visits.count(), reminded_mothers.count())
 
     records = [
-         {'data': "Maternal Mortality Ratio", 'value': mortality_rate},
+         {'data': "Maternal Mortality Ratio per 100,000",
+         'value': mortality_rate},
          {'data': "Number of Clinical Workers Registered",
           'value': workers},
          {'data': "Number of CBAs Registered",

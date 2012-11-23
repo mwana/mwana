@@ -9,11 +9,13 @@ from threadless_router.router import Router
 
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
-    PregnantMother
+    PregnantMother, AmbulanceResponse, SyphilisTreatment
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
+SEND_AMB_OUTCOME_LOWER_BOUND = timedelta(hours=1)
+SEND_SYPHILIS_REMINDER_LOWER_BOUND = timedelta(days=2)
 
 
 def _set_router(router_obj=None):
@@ -307,6 +309,113 @@ def reactivate_user(router_obj=None):
             c.is_active = True
             c.save()
             c.message(const.IN_REACTIVATE)
+
+
+def send_no_outcome_reminder(router_obj=None):
+    """
+    Send reminders for Amulance Responses that have no Ambulance Outcome
+    """
+    def _responses_to_remind():
+        now = datetime.utcnow().date()
+        # Get AmbulanceResponses @ 12 hours old
+        reminder_threshold = now - timedelta(hours=12)
+        responses_to_remind = AmbulanceResponse.objects.filter(
+            responded_on__gte=reminder_threshold - SEND_AMB_OUTCOME_LOWER_BOUND,
+            responded_on__lte=reminder_threshold,
+            )
+        # Check if missed
+
+        for resp in responses_to_remind:
+            ref = resp.ambulance_request.referral_set.all()[0]
+            if not ref.responded:
+                yield resp
+
+    for resp in _responses_to_remind():
+        req = resp.ambulance_request
+        ref = req.referral_set.all()[0]
+
+        if resp.status == 'na':
+            # send reminder to referring facility contact
+            contacts = [ref.session.connection.contact]
+        else:
+            # send reminder(s) to TN and AM
+            contacts = [req.ambulance_driver,
+                        req.triage_nurse,
+                        req.receiving_facility_recipient]
+
+        for c in contacts:
+            if c.default_connection:
+                c.message(const.AMB_OUTCOME_NO_OUTCOME,
+                          **{"unique_id": resp.mother.uid})
+
+
+def send_no_outcome_superuser_reminder(router_obj=None):
+    """
+    Send reminders to superusers for Amulance Responses
+    that have no Ambulance Outcome and are @ 24 hours old
+    """
+    def _responses_to_remind():
+        now = datetime.utcnow().date()
+        # Get AmbulanceResponses @ 12 hours old
+        reminder_threshold = now - timedelta(hours=24)
+        responses_to_remind = AmbulanceResponse.objects.filter(
+            responded_on__gte=reminder_threshold - SEND_AMB_OUTCOME_LOWER_BOUND,
+            responded_on__lte=reminder_threshold,
+            )
+        # Check if missed
+
+        for resp in responses_to_remind:
+            ref = resp.ambulance_request.referral_set.all()[0]
+            if not ref.responded:
+                yield resp
+
+    for resp in _responses_to_remind():
+        req = resp.ambulance_request
+        ref = req.referral_set.all()[0]
+        receiving_facility = ref.facility
+        superusers = Contact.objects.filter(is_super_user=True,
+                                            location=receiving_facility)
+        for su in superusers:
+            if su.default_connection:
+                su.message(const.AMB_OUTCOME_NO_OUTCOME,
+                          **{"unique_id": resp.mother.uid})
+
+
+def send_syphillis_reminders(router_obj=None):
+    """
+    Next visit date from SyphilisTreatment should
+    be used to generate reminder for the next appointment.
+
+    To: CBA
+    On: 2 days before visit date
+    """
+    _set_router(router_obj)
+
+    def _visits_to_remind():
+        now = datetime.utcnow().date()
+        reminder_threshold = now + timedelta(days=2)
+        visits_to_remind = SyphilisTreatment.objects.filter(
+            next_visit_date__gte=reminder_threshold - SEND_SYPHILIS_REMINDER_LOWER_BOUND,
+            next_visit_date__lte=reminder_threshold,
+            reminded=False)
+
+        for v in visits_to_remind:
+            if v.is_latest_for_mother():
+                yield v
+
+    for v in _visits_to_remind():
+        found_someone = False
+        for c in v.mother.get_laycounselors():
+            if c.default_connection:
+                found_someone = True
+                c.message(const.REMINDER_SYP_TREATMENT_DUE,
+                          **{"name": v.mother.name,
+                             "unique_id": v.mother.uid,
+                             "loc": v.location.name})
+                _create_notification("syp", c, v.mother.uid)
+        if found_someone:
+            v.reminded = True
+            v.save()
 
 
 def _create_notification(type, contact, mother_id):

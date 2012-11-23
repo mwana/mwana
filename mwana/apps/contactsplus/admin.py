@@ -14,15 +14,15 @@ from mwana.apps.contactsplus import models as contactsplus
 admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
-                    'location', 
+                    'location',
 		            'default_connection', 'types_list', 'date_of_first_sms',
-                    'date_of_most_recent_sms', 'is_active', 
-                    'is_help_admin') # note, this probably shouldn't be here
+                    'date_of_most_recent_sms', 'is_active',
+                    'is_help_admin', 'is_super_user') # note, these probably shouldn't be here
     list_filter = ('types', 'is_active', 'language', 'location')
     list_editable = ('is_active',)
     search_fields = ('name', 'alias',)
 
-    
+
     def unicode(self, obj):
         return unicode(obj)
 
@@ -32,7 +32,7 @@ class ContactAdmin(ContactAdmin):
 
     def types_list(self, obj):
         return ', '.join(obj.types.values_list('name', flat=True))
-    
+
     def date_of_first_sms(self, obj):
         earliest = Message.objects.filter(
             contact=obj.id,

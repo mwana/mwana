@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
+	<h:head>
+		<h:title>Emergency Resp</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/5EB269CC-F738-4DC4-B495-51E88C6C7A0A" uiVersion="1" version="1" name="Emergency Resp">
+					<unique_id />
+					<status />
+				</data>
+			</instance>
+			<bind nodeset="/data/unique_id" type="xsd:string" />
+			<bind nodeset="/data/status" type="xsd:string" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="unique_id-label">
+						<value>Mother's Unique ID</value>
+					</text>
+					<text id="status-label">
+						<value>Ambulance Status</value>
+					</text>
+					<text id="status-otw-label">
+						<value>OTW</value>
+					</text>
+					<text id="status-dl-label">
+						<value>DL</value>
+					</text>
+					<text id="status-na-label">
+						<value>NA</value>
+					</text>
+
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/unique_id">
+			<label ref="jr:itext('unique_id-label')" />
+		</input>
+        <select1 ref="/data/status">
+            <label ref="jr:itext('status-label')" />
+            <item>
+                <label ref="jr:itext('status-otw-label')" />
+                <value>otw</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-dl-label')" />
+                <value>dl</value>
+            </item>
+            <item>
+                <label ref="jr:itext('status-na-label')" />
+                <value>na</value>
+            </item>
+        </select1>	</h:body>
+</h:html>

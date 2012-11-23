@@ -90,11 +90,11 @@ class StatisticsLinkTable(StatisticsTable):
 
 
 class ReminderStatsTable(Table):
-    reminder_type = Column(sortable=False, header_class="reminder-type")
-    reminders = Column(sortable=False)
-    showed_up = Column(sortable=False)
-    told = Column(sortable=False)
-    told_and_showed = Column(sortable=False)
+    reminder_type = NamedColumn(sortable=False, header_class="reminder-type", col_name="Number Of Mothers With:")
+    reminders = NamedColumn(sortable=False, col_name="Reminders")
+    showed_up = NamedColumn(sortable=False, col_name="Showed Up")
+    told = NamedColumn(sortable=False, col_name="Told")
+    told_and_showed = NamedColumn(sortable=False, col_name="Showed Up Due to Told")
 
 
 class SummaryReportTable(Table):

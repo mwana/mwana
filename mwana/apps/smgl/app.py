@@ -1,12 +1,11 @@
-import datetime
 import logging
 from rapidsms.apps.base import AppBase
 
-from .models import XFormKeywordHandler, FacilityVisit
+from .models import XFormKeywordHandler
 
 from mwana.apps.agents.handlers.agent import get_unique_value
 from mwana.apps.locations.models import Location, LocationType
-from mwana.apps.smgl.models import PregnantMother, AmbulanceRequest
+from mwana.apps.smgl.models import AmbulanceRequest
 from mwana import const as mwanaconst
 
 from rapidsms.models import Contact
@@ -31,25 +30,25 @@ FACILITY_NOT_RECOGNIZED = _("Sorry, the facility '%(facility)s' is not recognize
 ALREADY_REGISTERED = _("%(name)s, you are already registered as a %(readable_user_type)s at %(facility)s but your details have been updated")
 CONTACT_TYPE_NOT_RECOGNIZED = _("Sorry, the User Type '%(title)s' is not recognized. Please try again.")
 ZONE_SPECIFIED_BUT_NOT_CBA = _("You can not specify a zone when registering as a %(reg_type)s!")
-USER_SUCCESS_REGISTERED =  _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
+USER_SUCCESS_REGISTERED = _("Thank you for registering! You have successfully registered as a %(readable_user_type)s at %(facility)s.")
 NOT_PREREGISTERED = _('Sorry, you are not on the pre-registered users list. Please contact ZCAHRD for assistance')
 DATE_ERROR = _('%(error_msg)s for %(date_name)s')
 INITIAL_AMBULANCE_RESPONSE = _('Thank you.Your request for an ambulance has been received. Someone will be in touch with you shortly.If no one contacts you,please call the emergency number!')
-ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'respond %(unique_id)s [status]' if you see this")
-ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
-ER_TO_OTHER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'confirm %(unique_id)s' if you see this")
+ER_TO_DRIVER = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'RESP %(unique_id)s OTW, DL, or NA' if you see this")
+ER_TO_TRIAGE_NURSE = _("Mother with ID:%(unique_id)s needs ER.Location:%(from_location)s,contact num:%(sender_phone_number)s. Plz SEND 'RESP %(unique_id)s OTW, DL, or NA' if you see this")
 ER_CONFIRM_SESS_NOT_FOUND = _("The Emergency with ID:%(unique_id)s can not be found! Please try again or contact your DMO immediately.")
 NOT_REGISTERED_TO_CONFIRM_ER = _("Sorry. You are not registered as Triage Nurse, Ambulance or DMO")
 THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the Ambulance, please send RESP <RESPONSE_TYPE>!")
 NOT_ALLOWED_ER_WORKFLOW = _("Sorry, your registration type is not allowed to send Emergency Response type messages")
 AMB_RESPONSE_THANKS = _("Thank you. The ambulance for this request has been marked as %(response)s. We will notify the Rural Facility.")
 AMB_CANT_FIND_UID = _("Sorry. We cannot find the Mother's Unique ID you specified. Please try again or contact the DMO")
-AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("Emergency Response: The ambulance for the Unique ID: %(unique_id)s has been marked %(response)s")
-AMB_OUTCOME_NO_OUTCOME = _("No OUTCOME Specified.  Please send an outcome!")
+AMB_RESPONSE_NOT_AVAILABLE = _("No Emergency vehicle was available to address referral from %(from_location)s about mother ID:%(unique_id)s , Please respond accordingly.")
+AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("We want to let you know that emergency vehicle is: %(response)s regarding referral for mother %(unique_id)s ")
+AMB_OUTCOME_NO_OUTCOME = _("Kindly register OUTCOME for Mother :%(unique_id)s.  Please send an outcome!")
 AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
 AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
 AMB_OUTCOME_FILED = _("A patient outcome for an Emergency Response for Patient (%(unique_id)s) has been filed by %(name)s (%(contact_type)s)")
-ER_TO_CLINIC_WORKER = _("This is an emergency message to the clinic. %(unique_id)s")
+ER_TO_CLINIC_WORKER = _("Emergency Response has occured for Mother with Unique ID: %(unique_id)s. Expect a patient.")
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
 
 
@@ -57,16 +56,19 @@ BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth has been r
 
 
 logger = logging.getLogger(__name__)
+
+
 class SMGL(AppBase):
     #overriding because seeing router|mixin is so unhelpful it makes me want to throw my pc out the window.
     @property
     def _logger(self):
         return logging.getLogger(__name__)
+
     def handle(self, msg):
         pass
-
     # We're handling the submission process using signal hooks
     # Code is located here (in app.py) for ease of finding for other devs.
+
 
 def _generate_uid_for_er():
     #grab all the existing amb requests that have made up UIDs:
@@ -77,19 +79,16 @@ def _generate_uid_for_er():
     else:
         counter = ers.count()
         uids = ers.values_list('mother_uid')
-        uids = map(lambda x: x[0], uids) #gets us a nice list of uids
-        uid = 'A%s' % counter #starting point
+        uids = map(lambda x: x[0], uids)  # gets us a nice list of uids
+        uid = 'A%s' % counter  # starting point
         counter += 1
-        while uid in uids: #iterate until we find a good UID
+        while uid in uids:  # iterate until we find a good UID
             uid = 'A%s' % counter
             counter += 1
-
     return uid
 
 
-
 # Taken from mwana.apps.agents.handler.agrent.AgentHandler
-
 def _get_or_create_zone(clinic, name):
     # create the zone if it doesn't already exist
     zone_type, _ = LocationType.objects.get_or_create(slug=mwanaconst.ZONE_SLUGS[0])
@@ -100,6 +99,7 @@ def _get_or_create_zone(clinic, name):
                                     'name': name,
                                     'slug': get_unique_value(Location.objects, "slug", name),
                                 })
+
 
 def _get_allowed_ambulance_workflow_contact(session):
     connection = session.connection
@@ -136,8 +136,8 @@ def handle_submission(sender, **args):
 
     try:
         func = to_function(str(kw_handler.function_path), True)
-        session.template_vars = {} #legacy from using rapidsms-xforms
-        for k,v in xform.top_level_tags().iteritems():
+        session.template_vars = {}  # legacy from using rapidsms-xforms
+        for k, v in xform.top_level_tags().iteritems():
             session.template_vars[k] = v
 
         # call the actual handling function

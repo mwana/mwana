@@ -9,12 +9,14 @@
                     <mother_outcome />
                     <baby_outcome />
                     <mode_of_delivery />
+                    <noamb />
                 </data>
             </instance>
             <bind nodeset="/data/unique_id" type="xsd:string" />
             <bind nodeset="/data/mother_outcome" required="true()" />
             <bind nodeset="/data/baby_outcome" />
             <bind nodeset="/data/mode_of_delivery" />
+            <bind nodeset="/data/noamb" />
             <itext>
                 <translation lang="en" default="">
                     <text id="unique_id-label">
@@ -35,6 +37,9 @@
                     <text id="baby_outcome-dec-label">
                         <value>dec</value>
                     </text>
+                    <text id="baby_outcome-oth-label">
+                        <value>oth</value>
+                    </text>
                     <text id="mother_outcome-stb-label">
                         <value>stb</value>
                     </text>
@@ -43,6 +48,9 @@
                     </text>
                     <text id="mother_outcome-dec-label">
                         <value>dec</value>
+                    </text>
+                        <text id="mother_outcome-oth-label">
+                        <value>oth</value>
                     </text>
                     <text id="mode_of_delivery-label">
                         <value>Mode of delivery</value>
@@ -53,8 +61,20 @@
                     <text id="mode_of_delivery-csec-label">
                         <value>csec</value>
                     </text>
+                    <text id="mode_of_delivery-pp-label">
+                        <value>pp</value>
+                    </text>
+                    <text id="mode_of_delivery-ref-label">
+                        <value>ref</value>
+                    </text>
+                    <text id="mode_of_delivery-oth-label">
+                        <value>oth</value>
+                    </text>
                     <text id="mother_outcome-noshow-label">
                         <value>noshow</value>
+                    </text>
+                    <text id="noamb-label">
+                        <value>No Ambulance</value>
                     </text>
                 </translation>
             </itext>
@@ -79,6 +99,10 @@
                 <value>dec</value>
             </item>
             <item>
+                <label ref="jr:itext('mother_outcome-oth-label')" />
+                <value>oth</value>
+            </item>
+            <item>
                 <label ref="jr:itext('mother_outcome-noshow-label')" />
                 <value>noshow</value>
             </item>
@@ -97,6 +121,10 @@
                 <label ref="jr:itext('baby_outcome-dec-label')" />
                 <value>dec</value>
             </item>
+            <item>
+                <label ref="jr:itext('baby_outcome-oth-label')" />
+                <value>oth</value>
+            </item>
         </select1>
         <select1 ref="/data/mode_of_delivery">
             <label ref="jr:itext('mode_of_delivery-label')" />
@@ -108,6 +136,21 @@
                 <label ref="jr:itext('mode_of_delivery-csec-label')" />
                 <value>csec</value>
             </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-pp-label')" />
+                <value>pp</value>
+            </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-ref-label')" />
+                <value>ref</value>
+            </item>
+            <item>
+            <label ref="jr:itext('mode_of_delivery-oth-label')" />
+                <value>oth</value>
+            </item>
         </select1>
+        <input ref="/data/noamb">
+            <label ref="jr:itext('noamb-label')" />
+        </input>
     </h:body>
 </h:html>
