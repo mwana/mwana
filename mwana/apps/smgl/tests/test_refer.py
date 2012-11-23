@@ -407,7 +407,6 @@ class SMGLReferTest(SMGLSetUp):
                "resp": response_string,
                "su_notif": amb_na_string,
                "notif": response_to_referrer_string}
-        import ipdb; ipdb.set_trace()
         self.runScript(script)
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual(True, referral.responded)

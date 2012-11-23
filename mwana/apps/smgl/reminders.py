@@ -326,14 +326,17 @@ def send_no_outcome_reminder(router_obj=None):
         # Check if missed
 
         for resp in responses_to_remind:
-            if not resp.ambulanceoutcome_set.all():
+            ref = resp.ambulance_request.referral_set.all()[0]
+            if not ref.responded:
                 yield resp
 
     for resp in _responses_to_remind():
         req = resp.ambulance_request
+        ref = req.referral_set.all()[0]
+
         if resp.status == 'na':
             # send reminder to referring facility contact
-            contacts = [req.contact]
+            contacts = [ref.session.connection.contact]
         else:
             # send reminder(s) to TN and AM
             contacts = [req.ambulance_driver,
@@ -362,12 +365,14 @@ def send_no_outcome_superuser_reminder(router_obj=None):
         # Check if missed
 
         for resp in responses_to_remind:
-            # TODO Change to resp.ambulance_request.referral_set.all()[0].outcome
-            if not resp.ambulanceoutcome_set.all():
+            ref = resp.ambulance_request.referral_set.all()[0]
+            if not ref.responded:
                 yield resp
 
     for resp in _responses_to_remind():
-        receiving_facility = resp.ambulance_request.receiving_facility
+        req = resp.ambulance_request
+        ref = req.referral_set.all()[0]
+        receiving_facility = ref.facility
         superusers = Contact.objects.filter(is_super_user=True,
                                             location=receiving_facility)
         for su in superusers:
