@@ -110,7 +110,6 @@ class PregnantMother(models.Model):
         reminders = self.remindernotification_set.all()
         birth_regs = self.birthregistration_set.all()
         told_reminders = self.toldreminder_set.all()
-        amb_outcomes = self.ambulanceoutcome_set.all()
         amb_requests = self.ambulancerequest_set.all()
         amb_responses = self.ambulanceresponse_set.all()
 
