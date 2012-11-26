@@ -18,7 +18,7 @@ from mwana.apps.locations.models import Location
 from .forms import StatisticsFilterForm, MotherForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
-                        ReminderNotification)
+                        ReminderNotification, SyphilisTest)
 from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable,
                         SummaryReportTable)
@@ -451,6 +451,22 @@ def report(request):
 
     returned = percentage(visits.count(), reminded_mothers.count())
 
+    # syphilis information
+    syph_tests = filter_by_dates(SyphilisTest.objects.all(), 'date',
+                             start=start_date, end=end_date)
+    if locations:
+        syph_tests = syph_tests.filter(district__in=locations)
+
+    positive_syphs = syph_tests.filter(result="p")
+
+    positive_syph = percentage(positive_syphs.count(),
+                          syph_tests.count())
+    positive_mothers = positive_syphs.values_list('mother', flat=True)
+    mothers = PregnantMother.objects.filter(id__in=positive_mothers)
+    treatments = mothers.annotate(Count('syphilistreatment')) \
+                        .values_list('syphilistreatment__count', flat=True)
+    positive_syph_completed = sum(i >= 3 for i in treatments)
+
     records = [
          {'data': "Maternal Mortality Ratio per 100,000",
          'value': mortality_rate},
@@ -480,6 +496,10 @@ def report(request):
           'value': f_deaths},
          {'data': "Percentage of community deaths",
           'value': c_deaths},
+         {'data': "Percentage of women who tested positive for Syphilis",
+          'value': positive_syph},
+         {'data': "Percentage of women tested positive who completed the syphilis treatment",
+          'value': positive_syph_completed},
         ]
 
     # render as CSV if export

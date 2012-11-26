@@ -459,6 +459,8 @@ class SyphilisTest(FormReferenceBase, MotherReferenceBase):
     date = models.DateField()
     result = models.CharField(max_length=1,
                               choices=SYPHILIS_TEST_RESULT_CHOICES)
+    district = models.ForeignKey(Location, help_text="The district for this location",
+                                 null=True, blank=True)
 
 
 class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
@@ -470,6 +472,8 @@ class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
                               choices=SYPHILIS_SHOT_NUMBER_CHOICES)
     next_visit_date = models.DateField(null=True, blank=True)
     reminded = models.BooleanField(default=False)
+    district = models.ForeignKey(Location, help_text="The district for this location",
+                                 null=True, blank=True)
 
     def is_latest_for_mother(self):
         return SyphilisTreatment.objects.filter(mother=self.mother)\
