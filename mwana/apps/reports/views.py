@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.forms import GroupUserMappingForm
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
@@ -14,9 +15,9 @@ from django.shortcuts import render_to_response
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from django.shortcuts import redirect
-from django.contrib.auth.models import User
 from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
+from mwana.apps.labresults.models import Result
 
 
 
@@ -506,16 +507,40 @@ def supported_sites(request):
     r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
     records = r.user_facilities().filter(supportedlocation__supported=True)
     sites = []
+    locations = {}
     for record in records:
         if not record.point:
             continue
         site = Site()
         site.point = record.point
         site.name = record.name
-        site.parent = record.parent.name
+        site.district = record.parent.name
+        site.province = record.parent.parent.name
         site.workers = record.contact_set.filter(types__slug='worker', is_active=True).count()
         site.cbas = Contact.active.filter(types__slug='cba', is_active=True, location__parent=record).count()
         site.results = record.lab_results.exclude(result_sent_date=None).count()
+
+        site.sample_sent_to_lab_this_month = Result.objects.filter(clinic=record,
+        entered_on__year=today.year, entered_on__month=today.month).count()
+
+        site.results_retrieved_this_month = Result.objects.filter(clinic=record,
+        result_sent_date__year=today.year, result_sent_date__month=today.month).count()
+
+        site.births = PatientEvent.objects.filter(patient__location__parent=record,
+        ).count()
+
+        site.births_this_month = PatientEvent.objects.filter(patient__location__parent=record,
+        date_logged__year=today.year, date_logged__month=today.month).count()
+
+        if site.province in locations:
+            if site.district in locations[site.province]:
+                locations[site.province][site.district].append(site.name)
+            else:
+                locations[site.province][site.district] = [site.name]
+        else:
+            locations[site.province] = {site.district:[site.name]}
+
+
         sites.append(site)
 
 
@@ -533,6 +558,8 @@ def supported_sites(request):
          'is_report_admin': is_report_admin,
          'region_selectable': True,
          'sites': sites,
+         'facilities': records,
+         'locations': locations,
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,

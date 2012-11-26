@@ -133,20 +133,39 @@ You currently don't belong to any group for viewing reports. Contact the system 
             <h3>
                 Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
-                
+
             </h3>
             <table border="1">
-               
+
                 <tbody>
-                    <tr>
+                    <tr valign="top">
                         <td><div class="">
                                 <div id="map3" style=" position: relative;height: 600px; width: 800px">
 
                                 </div>
 
-                            </div></td>
+                            </div>
+
+                        </td>
+                        <td>
+                            <div><h3>Stats </h3>
+                                <div>
+
+                                    {% for province in locations.items %}
+                                    <p><b>{{ province.0 }}</b><br>
+                                    
+                                    {% for district in province.1.items %}
+                                    {{ forloop.counter1}}
+                                    {{ district.0 }}-
+                                    {{ district.1|length }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                    {% endfor %}
+                                    <p><b>{{ facilities|length}} facilities in total</b>
+                                </div></div>
+                           
+                        </td>
                     </tr>
-                    
+
                 </tbody>
             </table>
 
@@ -171,12 +190,19 @@ You currently don't belong to any group for viewing reports. Contact the system 
     var rnd = Math.random;
     var data = [];
     {% for site in sites %}
-        {%if site.point %}
-        data.push({lon: {{site.point.longitude}}, lat: {{site.point.latitude}},
-            h:   '{{site.name}} of {{site.parent}}\n{{site.workers}} Clinic Workers\n{{site.cbas}} Community Based Agents\n{{site.results}} results delivered via SMS to date',
-            d:   '<b>{{site.name}} of {{site.parent}}</b><br>{{site.workers}} Clinic Workers<br>{{site.cbas}} Community Based Agents<br>{{site.results}} results delivered via SMS to date'
-        });
-        {% endif %}
+    {%if site.point %}
+    data.push({lon: {{site.point.longitude}}, lat: {{site.point.latitude}},
+        h:   '{{site.name}} of {{site.district}}\n{{site.workers}} Clinic Workers\n{{site.cbas}} Community Based Agents\n{{site.results}} results delivered via SMS to date\n\
+\nClick for more information',
+        d:   '<b>{{site.name}} of {{site.district}}</b><p>{{site.workers}} \n\
+    Clinic Workers<br>{{site.cbas}} Community Based Agents<br>{{site.results}} \n\
+results delivered via SMS to date\n\
+<br>{{site.births}} births registered to date\n\
+<hr><u>This Month</u><br>{{site.sample_sent_to_lab_this_month}} DBS samples sent to lab\n\
+<br>{{site.results_retrieved_this_month}} Results received\n\
+<br>{{site.births_this_month}} births registered this month<br><br>'
+    });
+    {% endif %}
     {% endfor %}
     
     window.mapData = data;
