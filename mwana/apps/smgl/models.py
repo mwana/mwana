@@ -379,6 +379,9 @@ class BirthRegistration(FormReferenceBase):
                                  related_name='birth_district')
     facility = models.ForeignKey(Location, null=True,
                                  related_name='birth_facility')
+    location = models.ForeignKey(Location, null=True,
+                                 related_name='birth_location')
+
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
@@ -397,6 +400,8 @@ class DeathRegistration(FormReferenceBase):
                                  related_name='death_district')
     facility = models.ForeignKey(Location, null=True,
                                  related_name='death_facility')
+    location = models.ForeignKey(Location, null=True,
+                                 related_name='death_location')
 
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),

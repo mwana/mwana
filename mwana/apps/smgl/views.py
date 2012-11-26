@@ -111,7 +111,7 @@ def statistics(request, id=None):
         reg_filter = {'district': place}
         visit_filter = {'district': place}
         if id:
-            reg_filter = {'facility': place}
+            reg_filter = {'location': place}
             visit_filter = {'location': place}
         r = {'location': place.name}
         r['location_id'] = place.id
