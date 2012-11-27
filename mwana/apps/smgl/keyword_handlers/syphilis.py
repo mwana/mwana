@@ -1,11 +1,13 @@
+import datetime
+
 from rapidsms.messages.outgoing import OutgoingMessage
+
 from mwana.apps.smgl.utils import (make_date, mom_or_none,
-        get_session_message, send_msg)
+        get_session_message, send_msg, get_current_district)
 from mwana.apps.smgl.models import (SyphilisTest, SyphilisTreatment,
     PregnantMother)
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
-import datetime
 
 
 @registration_required
@@ -43,12 +45,15 @@ def syphilis(session, xform, router):
         router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
         get_session_message(session, direction='O')
         return True
+    contact = session.connection.contact
+    district = get_current_district(contact.location)
     if status in ['p', 'n']:
         # register syp test results
         syp_test = SyphilisTest(session=session,
                                date=date,
                                mother=mom,
-                               result=status
+                               result=status,
+                               district=district
                                )
         syp_test.save()
         resp = const.SYP_TEST_COMPLETE % {"name": name, "unique_id": unique_id}
@@ -72,7 +77,8 @@ def syphilis(session, xform, router):
                                date=date,
                                mother=mom,
                                shot_number=status,
-                               next_visit_date=next_visit_date
+                               next_visit_date=next_visit_date,
+                               district=district
                                )
         syp_treatment.save()
         resp = const.SYP_TREATMENT_COMPLETE % {"name": name, "unique_id": unique_id}

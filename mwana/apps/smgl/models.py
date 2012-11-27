@@ -110,7 +110,6 @@ class PregnantMother(models.Model):
         reminders = self.remindernotification_set.all()
         birth_regs = self.birthregistration_set.all()
         told_reminders = self.toldreminder_set.all()
-        amb_outcomes = self.ambulanceoutcome_set.all()
         amb_requests = self.ambulancerequest_set.all()
         amb_responses = self.ambulanceresponse_set.all()
 
@@ -379,6 +378,9 @@ class BirthRegistration(FormReferenceBase):
                                  related_name='birth_district')
     facility = models.ForeignKey(Location, null=True,
                                  related_name='birth_facility')
+    location = models.ForeignKey(Location, null=True,
+                                 related_name='birth_location')
+
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
@@ -397,6 +399,8 @@ class DeathRegistration(FormReferenceBase):
                                  related_name='death_district')
     facility = models.ForeignKey(Location, null=True,
                                  related_name='death_facility')
+    location = models.ForeignKey(Location, null=True,
+                                 related_name='death_location')
 
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
@@ -455,6 +459,8 @@ class SyphilisTest(FormReferenceBase, MotherReferenceBase):
     date = models.DateField()
     result = models.CharField(max_length=1,
                               choices=SYPHILIS_TEST_RESULT_CHOICES)
+    district = models.ForeignKey(Location, help_text="The district for this location",
+                                 null=True, blank=True)
 
 
 class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
@@ -466,6 +472,8 @@ class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
                               choices=SYPHILIS_SHOT_NUMBER_CHOICES)
     next_visit_date = models.DateField(null=True, blank=True)
     reminded = models.BooleanField(default=False)
+    district = models.ForeignKey(Location, help_text="The district for this location",
+                                 null=True, blank=True)
 
     def is_latest_for_mother(self):
         return SyphilisTreatment.objects.filter(mother=self.mother)\
