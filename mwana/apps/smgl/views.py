@@ -11,6 +11,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
+from rapidsms.contrib.messagelog.models import Message
+
 from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
@@ -19,7 +21,7 @@ from .forms import StatisticsFilterForm, MotherForm
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
-from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
+from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable,
                         SummaryReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
@@ -49,12 +51,14 @@ def mothers(request):
 
 def mother_history(request, id):
     mother = get_object_or_404(PregnantMother, id=id)
-    # TODO: aggregate the messages for a mother into a
-    messages = mother.get_all_messages()
+
+    messages = Message.objects.filter(text__icontains=mother.uid,
+                                      direction='I')
+
     return render_to_response(
         "smgl/mother_history.html",
         {"mother": mother,
-          "history_table": HistoryTable(messages,
+          "message_table": MotherMessageTable(messages,
                                         request=request)
         },
         context_instance=RequestContext(request))

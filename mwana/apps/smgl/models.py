@@ -100,28 +100,6 @@ class PregnantMother(models.Model):
                             ),
                 location=self.zone)
 
-    def get_all_messages(self):
-        """
-        Returns a reverse time-ordered list of all messages related to
-        the mother.
-        """
-        messages = []
-        referrals = self.referral_set.all()
-        reminders = self.remindernotification_set.all()
-        birth_regs = self.birthregistration_set.all()
-        told_reminders = self.toldreminder_set.all()
-        amb_requests = self.ambulancerequest_set.all()
-        amb_responses = self.ambulanceresponse_set.all()
-
-        # if data types are similar, chain then loop through to generate the
-        # list of dicts. If dissimilar, generate dicts for each type first,
-        # is a values_list possible directly from the queryset?
-
-        return [{'date': 1, 'type': 2, 'sender': 3, 'facility': 4, 'message': 'Test'}, ]
-
-#        return sorted(chain(posts, videos, polls, photos, questions),
-#                key=attrgetter('created'), reverse=True)
-
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
 
