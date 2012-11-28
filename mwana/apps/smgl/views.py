@@ -496,7 +496,7 @@ def report(request):
           'value': workers},
          {'data': "Number of CBAs Registered",
           'value': cbas},
-         {'data': "Number of Date Clerks Registered",
+         {'data': "Number of Data Clerks Registered",
           'value': clerks},
          {'data': 'Percentage of Women who attended at least 4 ANC visits',
           'value': p_gtefour_ancs},
