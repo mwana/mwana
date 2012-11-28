@@ -36,7 +36,7 @@ class MotherMessageTable(Table):
                       value=lambda cell: cell.object.text.split(' ')[0].upper()
                     )
     contact = NamedColumn(col_name="Sender")
-    facility = Column(value=lambda cell: "")
+    facility = Column(value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
     text = NamedColumn(col_name="Message")
 
     class Meta:

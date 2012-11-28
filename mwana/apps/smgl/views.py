@@ -52,8 +52,7 @@ def mothers(request):
 def mother_history(request, id):
     mother = get_object_or_404(PregnantMother, id=id)
 
-    messages = Message.objects.filter(text__icontains=mother.uid,
-                                      direction='I')
+    messages = Message.objects.filter(text__icontains=mother.uid)
 
     return render_to_response(
         "smgl/mother_history.html",
