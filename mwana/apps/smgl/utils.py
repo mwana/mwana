@@ -155,7 +155,6 @@ def export_as_csv(records, keys, filename):
     response = HttpResponse(mimetype='text/csv')
     disposition = 'attachment; filename="{0}"'.format(filename)
     response['Content-Disposition'] = disposition
-
     dict_writer = csv.DictWriter(response, keys)
     dict_writer.writer.writerow(keys)
     dict_writer.writerows(records)

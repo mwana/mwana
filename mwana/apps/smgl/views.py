@@ -234,8 +234,11 @@ def statistics(request, id=None):
 
     # render as CSV if export
     if form.data.get('export'):
+        # expunge location_id field
+        [x.pop('location_id') for x in records]
         # The keys must be ordered for the exporter
-        keys = ['location', 'births_com', 'births_fac', 'births_total',
+        keys = ['location', 'pregnancies', 'births_com',
+                'births_fac', 'births_total',
                 'infant_deaths_com', 'infant_deaths_fac',
                 'infant_deaths_total', 'mother_deaths_com',
                 'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
