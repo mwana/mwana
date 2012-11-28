@@ -33,7 +33,7 @@ class PregnantMotherTable(Table):
 class MotherMessageTable(Table):
     date = DateColumn(format="Y m d H:i ")
     msg_type = NamedColumn(col_name="Type",
-                      value=lambda cell: cell.object.text.split(' ')[0].upper()
+                      value=lambda cell: cell.object.text.split(' ')[0].upper() if cell.object.direction == 'I' else 'OUTGOING'
                     )
     contact = NamedColumn(col_name="Sender")
     facility = Column(value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
