@@ -210,7 +210,7 @@ def motherid_lookup(session, xform, router):
     try:
         mother = PregnantMother.objects.get(first_name=f_name,
                                             last_name=l_name,
-                                            zone__slug=zone_id)
+                                            location__slug=zone_id)
     except ObjectDoesNotExist:
         send_msg(connection, const.LOOK_MOTHER_DOES_NOT_EXIST, router)
         get_session_message(session, direction='O')
