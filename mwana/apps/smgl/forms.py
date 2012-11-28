@@ -2,7 +2,7 @@ from django import forms
 
 import selectable.forms as selectable
 
-from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup
+from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
 
 class StatisticsFilterForm(forms.Form):
@@ -37,8 +37,23 @@ class StatisticsFilterForm(forms.Form):
         return self.cleaned_data
 
 
-class MotherForm(forms.Form):
+class MotherSearchForm(forms.Form):
     """
     A Form to lookup mothers
     """
     uid = forms.CharField(max_length=100, required=True)
+
+
+class MotherStatsFilterForm(StatisticsFilterForm):
+    """
+    A form to filter Mothers by various parameters
+    """
+    zone = selectable.AutoCompleteSelectField(
+        lookup_class=ZoneLookup,
+        label='Select a Zone',
+        required=False,
+        widget=selectable.AutoComboboxSelectWidget
+    )
+
+    def save(self, *args, **kwargs):
+        return self.cleaned_data

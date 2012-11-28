@@ -17,7 +17,8 @@ from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
 
-from .forms import StatisticsFilterForm, MotherForm
+from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
+    MotherSearchForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
@@ -29,14 +30,28 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
 
 
 def mothers(request):
+    province = district = facility = zone = start_date = end_date = None
+
     mothers = PregnantMother.objects.all()
 
-    form = MotherForm()
+    search_form = MotherSearchForm()
     if request.method == 'POST':
-        form = MotherForm(request.POST)
+        search_form = MotherSearchForm(request.POST)
         uid = request.POST.get('uid', None)
         if uid:
             mothers = mothers.filter(uid__icontains=uid)
+
+    if request.GET:
+        form = MotherStatsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            zone = form.cleaned_data.get('zone')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+    else:
+        form = MotherStatsFilterForm()
 
     mothers_table = PregnantMotherTable(mothers,
                                         request=request)
@@ -44,6 +59,7 @@ def mothers(request):
     return render_to_response(
         "smgl/mothers.html",
         {"mothers_table": mothers_table,
+         "search_form": search_form,
          "form": form
         },
         context_instance=RequestContext(request))
