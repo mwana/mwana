@@ -53,8 +53,8 @@ def load_users(file_path):
         user_type = user_type.strip()
 
         if "@" not in email:
-            print "%s is not a valid email" % email
-            continue
+            print "%s is not a valid email. Defaulting to blank" % email
+            email = ''
 
         username = first_name[0].lower() + last_name.split()[0].lower()
 
