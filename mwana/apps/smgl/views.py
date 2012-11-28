@@ -11,15 +11,18 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
+from rapidsms.contrib.messagelog.models import Message
+
 from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.locations.models import Location
 
-from .forms import StatisticsFilterForm, MotherForm
+from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
+    MotherSearchForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
-from .tables import (PregnantMotherTable, HistoryTable, StatisticsTable,
+from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                         StatisticsLinkTable, ReminderStatsTable,
                         SummaryReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
@@ -27,14 +30,82 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
 
 
 def mothers(request):
+    province = district = facility = zone = None
+    start_date = end_date = None
+    edd_start_date = edd_end_date = None
+
     mothers = PregnantMother.objects.all()
 
-    form = MotherForm()
+    search_form = MotherSearchForm()
     if request.method == 'POST':
-        form = MotherForm(request.POST)
+        search_form = MotherSearchForm(request.POST)
         uid = request.POST.get('uid', None)
         if uid:
             mothers = mothers.filter(uid__icontains=uid)
+
+    if request.GET:
+        form = MotherStatsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            zone = form.cleaned_data.get('zone')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+            edd_start_date = form.cleaned_data.get('edd_start_date')
+            edd_end_date = form.cleaned_data.get('edd_end_date')
+    else:
+        form = MotherStatsFilterForm()
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+    if zone:
+        locations = [zone]
+
+    mothers = mothers.filter(location__in=locations)
+
+    # filter by created_date
+    mothers = filter_by_dates(mothers, 'created_date',
+                             start=start_date, end=end_date)
+    # filter by EDD
+    mothers = filter_by_dates(mothers, 'edd',
+                             start=edd_start_date, end=edd_end_date)
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['created_date', 'uid', 'location', 'edd', 'risks']
+        records = []
+        for mom in mothers:
+            created = mom.created_date.strftime('%Y-%m-%d') \
+                        if mom.created_date else None
+            records.append({
+                    'created_date': created,
+                    'uid': mom.uid,
+                    'location': mom.location,
+                    'edd': mom.edd,
+                    'risks': ", ".join([x.upper() \
+                                     for x in mom.get_risk_reasons()])
+                })
+        filename = 'summary_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        if edd_start_date:
+            edd_date_range = '_EDDfrom{0}'.format(edd_start_date)
+        if edd_end_date:
+            edd_date_range = '{0}_EDDto{1}'.format(edd_date_range, edd_end_date)
+        filename = '{0}{1}{2}'.format(filename, date_range, edd_date_range)
+
+        return export_as_csv(records, keys, filename)
 
     mothers_table = PregnantMotherTable(mothers,
                                         request=request)
@@ -42,6 +113,7 @@ def mothers(request):
     return render_to_response(
         "smgl/mothers.html",
         {"mothers_table": mothers_table,
+         "search_form": search_form,
          "form": form
         },
         context_instance=RequestContext(request))
@@ -49,12 +121,13 @@ def mothers(request):
 
 def mother_history(request, id):
     mother = get_object_or_404(PregnantMother, id=id)
-    # TODO: aggregate the messages for a mother into a
-    messages = mother.get_all_messages()
+
+    messages = Message.objects.filter(text__icontains=mother.uid)
+
     return render_to_response(
         "smgl/mother_history.html",
         {"mother": mother,
-          "history_table": HistoryTable(messages,
+          "message_table": MotherMessageTable(messages,
                                         request=request)
         },
         context_instance=RequestContext(request))
@@ -215,8 +288,11 @@ def statistics(request, id=None):
 
     # render as CSV if export
     if form.data.get('export'):
+        # expunge location_id field
+        [x.pop('location_id') for x in records]
         # The keys must be ordered for the exporter
-        keys = ['location', 'births_com', 'births_fac', 'births_total',
+        keys = ['location', 'pregnancies', 'births_com',
+                'births_fac', 'births_total',
                 'infant_deaths_com', 'infant_deaths_fac',
                 'infant_deaths_total', 'mother_deaths_com',
                 'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
@@ -474,7 +550,7 @@ def report(request):
           'value': workers},
          {'data': "Number of CBAs Registered",
           'value': cbas},
-         {'data': "Number of Date Clerks Registered",
+         {'data': "Number of Data Clerks Registered",
           'value': clerks},
          {'data': 'Percentage of Women who attended at least 4 ANC visits',
           'value': p_gtefour_ancs},

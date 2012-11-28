@@ -30,12 +30,14 @@ class PregnantMotherTable(Table):
         order_by = "-created_date"
 
 
-class HistoryTable(Table):
-    date = Column()
-    type = Column()
-    sender = Column()
-    facility = Column()
-    message = Column()
+class MotherMessageTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    msg_type = NamedColumn(col_name="Type",
+                      value=lambda cell: cell.object.text.split(' ')[0].upper() if cell.object.direction == 'I' else 'OUTGOING'
+                    )
+    contact = NamedColumn(col_name="Sender")
+    facility = Column(value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
+    text = NamedColumn(col_name="Message")
 
     class Meta:
         order_by = "-date"

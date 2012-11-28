@@ -54,7 +54,7 @@ LOG_FORMAT = "[%(asctime)s] [%(name)s]: %(message)s"
 RAPIDSMS_TABS = [
     ("mwana.apps.smgl.views.statistics",  "Statistics"),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-#    ("mwana.apps.smgl.views.mothers",  "Mothers"),
+    ("mwana.apps.smgl.views.mothers",  "Mothers"),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"

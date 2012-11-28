@@ -3,6 +3,7 @@ import csv
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.query import QuerySet
 from django.http import HttpResponse
 
 from mwana.apps.locations.models import Location
@@ -128,7 +129,9 @@ def get_session_message(session, direction='I'):
             msg_set = msg_set.filter(
                             text__icontains=session.trigger.trigger_keyword
                             )
-        session.message_outgoing = msg_set.reverse()[0]
+            session.message_incoming = msg_set.reverse()[0]
+        else:
+            session.message_outgoing = msg_set.reverse()[0]
         session.save()
 
 
@@ -153,10 +156,14 @@ def export_as_csv(records, keys, filename):
     response = HttpResponse(mimetype='text/csv')
     disposition = 'attachment; filename="{0}"'.format(filename)
     response['Content-Disposition'] = disposition
-
-    dict_writer = csv.DictWriter(response, keys)
-    dict_writer.writer.writerow(keys)
-    dict_writer.writerows(records)
+    if type(records) == QuerySet:
+        writer = csv.writer(response)
+        for r in records:
+            writer.writerow([getattr(r, key) for key in keys])
+    else:
+        dict_writer = csv.DictWriter(response, keys)
+        dict_writer.writer.writerow(keys)
+        dict_writer.writerows(records)
     return response
 
 

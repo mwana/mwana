@@ -38,6 +38,9 @@ button.ui-button-icon-only {
 }
 
 .statistics col { width: 1%; }
-.statistics col:first-child { width: auto; }
 
 .statistics col.location, .statistics col.reminder-type { width: 75px;}
+
+#mothers-form .ui-autocomplete-input {
+    width: 80px;
+}

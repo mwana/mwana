@@ -19,13 +19,14 @@ class DistrictLookup(ModelLookup):
 
     def get_query(self, request, term):
         results = super(DistrictLookup, self).get_query(request, term)
+        results = results.order_by('name')
         province = request.GET.get('province', '')
         if province:
             results = results.filter(parent=province)
         return results
 
     def get_item_label(self, item):
-        return u"%s, %s" % (item.name, item.parent)
+        return u"%s" % (item.name)
 
 
 class FacilityLookup(ModelLookup):
@@ -39,10 +40,11 @@ class FacilityLookup(ModelLookup):
             qs = qs.filter(**self.filters)
         if self.exclude:
             qs = qs.exclude(**self.exclude)
-        return qs.order_by('name')
+        return qs
 
     def get_query(self, request, term):
         results = super(FacilityLookup, self).get_query(request, term)
+        results = results.order_by('name')
         district = request.GET.get('district', '')
         if district:
             loc = Location.objects.get(pk=district)
@@ -50,8 +52,26 @@ class FacilityLookup(ModelLookup):
         return results
 
     def get_item_label(self, item):
-        return u"%s, %s" % (item.name, item.parent)
+        return u"%s" % (item.name)
+
+
+class ZoneLookup(ModelLookup):
+    model = Location
+    filters = {'type__singular': 'Zone'}
+    search_fields = ('name__icontains', )
+
+    def get_query(self, request, term):
+        results = super(ZoneLookup, self).get_query(request, term)
+        results = results.order_by('name')
+        facility = request.GET.get('facility', '')
+        if facility:
+            results = results.filter(parent=facility)
+        return results
+
+    def get_item_label(self, item):
+        return u"%s" % (item.name)
 
 registry.register(ProvinceLookup)
 registry.register(DistrictLookup)
 registry.register(FacilityLookup)
+registry.register(ZoneLookup)
