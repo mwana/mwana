@@ -92,7 +92,9 @@
 
 <form action="." method="POST">
     {% csrf_token %}
-    {{ search_form.as_p }}
+    Or search by (partial) Mother Unique ID<br />
+    {{ search_form.uid.errors }}
+    {{ search_form.uid }}
     <input type="Submit" class="btn" name="search" value="Search" />
 </form>
 
