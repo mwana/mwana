@@ -55,5 +55,8 @@ class MotherStatsFilterForm(StatisticsFilterForm):
         widget=selectable.AutoComboboxSelectWidget
     )
 
+    edd_start_date = forms.DateField(required=False)
+    edd_end_date = forms.DateField(required=False)
+
     def save(self, *args, **kwargs):
         return self.cleaned_data

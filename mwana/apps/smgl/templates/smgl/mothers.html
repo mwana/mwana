@@ -18,6 +18,8 @@
       $(function() {
         $( "#id_start_date" ).datepicker();
         $( "#id_end_date" ).datepicker();
+        $( "#id_edd_start_date" ).datepicker();
+        $( "#id_edd_end_date" ).datepicker();
     });
   </script>
 {% endblock %}
@@ -30,8 +32,9 @@
     <table>
       <thead>
         <tr>
-          <th colspan="2">Period</th>
+          <th colspan="2">Registration Period</th>
           <th colspan="4">Location</th>
+          <th colspan="2">EDD Period</th>
         </tr>
         <tr>
           <th>Start</th>
@@ -40,7 +43,8 @@
           <th>District</th>
           <th>Facility</th>
           <th>Zone</th>
-
+          <th>Start</th>
+          <th>End</th>
         </tr>
       </thead>
       <tbody>
@@ -69,6 +73,14 @@
               {{ form.zone.errors}}
               {{ form.zone }}
             </td>
+          <td>
+            {{ form.edd_start_date.errors}}
+            {{ form.edd_start_date }}
+          </td>
+          <td>
+            {{ form.edd_end_date.errors}}
+            {{ form.edd_end_date }}
+          </td>
 
         </tr>
       </tbody>

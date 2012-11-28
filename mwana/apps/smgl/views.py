@@ -30,7 +30,9 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
 
 
 def mothers(request):
-    province = district = facility = zone = start_date = end_date = None
+    province = district = facility = zone = None
+    start_date = end_date = None
+    edd_start_date = edd_end_date = None
 
     mothers = PregnantMother.objects.all()
 
@@ -50,8 +52,60 @@ def mothers(request):
             zone = form.cleaned_data.get('zone')
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
+            edd_start_date = form.cleaned_data.get('edd_start_date')
+            edd_end_date = form.cleaned_data.get('edd_end_date')
     else:
         form = MotherStatsFilterForm()
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+    if zone:
+        locations = [zone]
+
+    mothers = mothers.filter(location__in=locations)
+
+    # filter by created_date
+    mothers = filter_by_dates(mothers, 'created_date',
+                             start=start_date, end=end_date)
+    # filter by EDD
+    mothers = filter_by_dates(mothers, 'edd',
+                             start=edd_start_date, end=edd_end_date)
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['created_date', 'uid', 'location', 'edd', 'risks']
+        records = []
+        for mom in mothers:
+            created = mom.created_date.strftime('%Y-%m-%d') \
+                        if mom.created_date else None
+            records.append({
+                    'created_date': created,
+                    'uid': mom.uid,
+                    'location': mom.location,
+                    'edd': mom.edd,
+                    'risks': ", ".join([x.upper() \
+                                     for x in mom.get_risk_reasons()])
+                })
+        filename = 'summary_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        if edd_start_date:
+            edd_date_range = '_EDDfrom{0}'.format(edd_start_date)
+        if edd_end_date:
+            edd_date_range = '{0}_EDDto{1}'.format(edd_date_range, edd_end_date)
+        filename = '{0}{1}{2}'.format(filename, date_range, edd_date_range)
+
+        return export_as_csv(records, keys, filename)
 
     mothers_table = PregnantMotherTable(mothers,
                                         request=request)
