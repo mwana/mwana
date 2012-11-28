@@ -128,7 +128,9 @@ def get_session_message(session, direction='I'):
             msg_set = msg_set.filter(
                             text__icontains=session.trigger.trigger_keyword
                             )
-        session.message_outgoing = msg_set.reverse()[0]
+            session.message_incoming = msg_set.reverse()[0]
+        else:
+            session.message_outgoing = msg_set.reverse()[0]
         session.save()
 
 
