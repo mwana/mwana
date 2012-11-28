@@ -27,6 +27,15 @@ _ = lambda s: s
 @registration_required
 @is_active
 def refer(session, xform, router):
+    """
+    Handler for REF keyword
+
+    Used to record a referral to another location
+
+    Format:
+    REFER Mother_UID receiving_facility_id Reason TIME EM/NEM
+    """
+
     assert session.connection.contact is not None, \
         "Must be a registered contact to refer"
     assert session.connection.contact.location is not None, \
@@ -225,8 +234,13 @@ def emergency_response(session, xform, router):
     if status == 'na':
         session.template_vars.update({"sender_phone_number": referrer_cnx.identity,
                                       "from_location": str(ref.from_facility.name)})
-        for su in _pick_superusers(session, xform, ref.facility):
-            send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
+        try:
+            sus = _pick_superusers(session, xform, ref.facility)
+        except:
+            logger.error('No Super Userfound (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
+        else:
+            for su in sus:
+                send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
     else:
         clinic_recip = _pick_clinic_recip(session, xform, ref.facility)
         if clinic_recip:
@@ -298,7 +312,7 @@ def _pick_superusers(session, xform, receiving_facility):
     if superusers.count():
         return superusers
     else:
-        raise Exception('No Ambulance Driver type found!')
+        raise Exception('No Super User type found!')
 
 
 def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=None):
@@ -308,25 +322,29 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     """
     ref = ambulance_session.referral_set.all()[0]
     receiving_facility = ref.facility
-    ambulance_driver = _pick_er_driver(session, xform, receiving_facility)
-    ambulance_session.ambulance_driver = ambulance_driver
-    if ambulance_driver.default_connection:
-        if message:
-            send_msg(ambulance_driver.default_connection, message, router, **session.template_vars)
-        else:
-            send_msg(ambulance_driver.default_connection, ER_TO_DRIVER, router, **session.template_vars)
-    else:
+    try:
+        ambulance_driver = _pick_er_driver(session, xform, receiving_facility)
+    except:
         logger.error('No Ambulance Driver found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
-
-    tn = _pick_er_triage_nurse(session, xform, receiving_facility)
-    ambulance_session.triage_nurse = tn
-
-    if tn.default_connection:
-        if message:
-            send_msg(tn.default_connection, message, router, **session.template_vars)
-        else:
-            send_msg(tn.default_connection, ER_TO_TRIAGE_NURSE, router, **session.template_vars)
     else:
+        ambulance_session.ambulance_driver = ambulance_driver
+        if ambulance_driver.default_connection:
+            if message:
+                send_msg(ambulance_driver.default_connection, message, router, **session.template_vars)
+            else:
+                send_msg(ambulance_driver.default_connection, ER_TO_DRIVER, router, **session.template_vars)
+
+    try:
+        tn = _pick_er_triage_nurse(session, xform, receiving_facility)
+    except:
         logger.error('No Triage Nurse found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
+    else:
+        ambulance_session.triage_nurse = tn
+
+        if tn.default_connection:
+            if message:
+                send_msg(tn.default_connection, message, router, **session.template_vars)
+            else:
+                send_msg(tn.default_connection, ER_TO_TRIAGE_NURSE, router, **session.template_vars)
 
     ambulance_session.save()
