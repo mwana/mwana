@@ -5,6 +5,9 @@ from mwana.apps.reports.models import CbaThanksNotification
 from django.contrib import admin
 from mwana.apps.reports.models import *
 from mwana.apps.reports.models import SupportedLocation
+from mwana.apps.locations.models import Location
+from django.contrib import admin
+from django import forms
 
 
 class TurnaroundAdmin(admin.ModelAdmin):
@@ -26,11 +29,26 @@ class MessageGroupAdmin(admin.ModelAdmin):
 admin.site.register(MessageGroup, MessageGroupAdmin)
 #admin.site.register(MessageGroup)
 
+
+
+class SupportedLocationAdminForm(forms.ModelForm):
+    class Meta:
+        model = SupportedLocation
+
+    def __init__(self, *args, **kwds):
+        super(SupportedLocationAdminForm, self).__init__(*args, **kwds)
+        self.fields['location'].queryset = Location.objects.order_by('name')
+
+
+
 class SupportedLocationAdmin(admin.ModelAdmin):
     list_display = ('location', 'supported')
     list_filter = ('supported',)
     search_fields = ('location__name', 'location__slug',)
+    form = SupportedLocationAdminForm
 admin.site.register(SupportedLocation, SupportedLocationAdmin)
+
+
 
 class PhoReportNotificationAdmin(admin.ModelAdmin):
     list_display = ('contact', 'province', 'type', 'samples', 'results', 'births', 'date', 'date_sent')
