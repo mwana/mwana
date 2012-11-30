@@ -1,0 +1,227 @@
+Partner,Province,District,Facility Name
+ZPCTII,Central ,Chibombo,Chibombo HC
+ZPCTII,Central ,Chibombo,Chikobo
+ZPCTII,Central ,Chibombo,Chisamba
+ZPCTII,Central ,Chibombo,Chitanda
+ZPCTII,Central ,Chibombo,Malambanyama
+ZPCTII,Central ,Kabwe,Bwacha
+ZPCTII,Central ,Kabwe,Chowa
+ZPCTII,Central ,Kabwe,Katondo
+ZPCTII,Central ,Kapiri Mposhi,Kawama
+ZPCTII,Central ,Kapiri Mposhi,Mukonchi
+ZPCTII,Central ,Kapiri Mposhi,Waya
+ZPCTII,Central ,Mkushi ,Chibefwe 
+ZPCTII,Central ,Mkushi ,Mansansa
+ZPCTII,Central ,Serenje,Chibale
+ZPCTII,Central ,Serenje,Chitambo Hosp
+ZPCTII,Central ,Serenje,Kabundi RHC
+ZPCTII,Central ,Serenje,Mpelembe 
+ZPCTII,Central ,Serenje,Mulilima
+ZPCTII,Central ,Serenje,Serenje Hosp
+ZPCTII,Copperbelt,Chililabombwe,Kakoso
+ZPCTII,Copperbelt,Chililabombwe,Lubengele
+ZPCTII,Copperbelt,Chingola,Chiwempala
+ZPCTII,Copperbelt,Chingola,Muchinshi
+ZPCTII,Copperbelt,Chingola,Mutenda
+ZPCTII,Copperbelt,Kalulushi,Chambeshi Govt 
+ZPCTII,Copperbelt,Kitwe,Buchi Main
+ZPCTII,Copperbelt,Kitwe,Bulangililo
+ZPCTII,Copperbelt,Kitwe,Chimwemwe
+ZPCTII,Copperbelt,Kitwe,Kawama
+ZPCTII,Copperbelt,Kitwe,Luangwa
+ZPCTII,Copperbelt,Luanshya,Mikomfwa HC 
+ZPCTII,Copperbelt,Luanshya,Mpatamatu clinic
+CHAZ,Copperbelt,Lufwanyama,St Mary's Mission RHC
+CHAZ,Copperbelt,Lufwanyama ,St Joseph's Mission
+CHAZ,Copperbelt,Masaiti,Fiwale Mission RHC
+CHAZ,Copperbelt,Mpongwe ,St Anthony Mission 
+ZPCTII,Copperbelt,Mufulira,Kamuchanga DH
+ZPCTII,Copperbelt,Ndola,Chipokota Mayamba
+ZPCTII,Copperbelt,Ndola,Kabushi
+ZPCTII,Copperbelt,Ndola,Mushili
+ZPCTII,Copperbelt,Ndola,Ndeke 
+ZPCTII,Copperbelt,Ndola,New Masala
+CIDRZ,Eastern,Chadiza,Chikoma
+CIDRZ,Eastern,Chipata,Chiparamba
+CIDRZ,Eastern,Chipata,Chipata Urban
+CIDRZ,Eastern,Chipata,Gondar
+CIDRZ,Eastern,Chipata,Kapata
+CIDRZ,Eastern,Chipata,Mchini
+CIDRZ,Eastern,Chipata,Namuseche
+CIDRZ,Eastern,Katete,Chibolya
+CIDRZ,Eastern,Katete,Katete Urban
+CIDRZ,Eastern,Katete,Vulamkoko
+CIDRZ,Eastern,Lundazi,Lundazi Urban
+CIDRZ,Eastern,Lundazi,Mwase Mphangwe
+CIDRZ,Eastern,Lundazi,Nkhanyu
+CIDRZ,Eastern,Mambwe,Kakumbi
+CIDRZ,Eastern,Mambwe,Masumba
+CIDRZ,Eastern,Nyimba,Chipembe
+CIDRZ,Eastern,Nyimba,Nyimba Urban
+CIDRZ,Eastern,Petauke,Manyane
+CIDRZ,Eastern,Petauke,Mumbi
+CIDRZ,Eastern,Petauke,Mwanjawanthu
+CIDRZ,Eastern,Petauke,Nyamphande
+CIDRZ,Eastern,Petauke,Petauke Hospital
+CIDRZ,Eastern,Petauke,Petauke Urban
+CIDRZ,Eastern,Petauke,Sinda Zonal
+CHAZ,Eastern ,Lundazi,Kanyanga Mission Hospital
+CHAZ,Eastern ,Lundazi,Lumezi Mission Hospital
+CHAZ,Eastern ,Mambwe,Kamoto Mission Hospital
+ZPCTII,Luapula,Chiengi,Kabole
+ZPCTII,Luapula,Chiengi,Puta
+ZPCTII,Luapula,Kawambwa,Kawambwa DH HAHC
+ZPCTII,Luapula,Kawambwa,Kazembe
+ZPCTII,Luapula,Mansa,Buntungwa
+ZPCTII,Luapula,Mansa,Chembe
+ZPCTII,Luapula,Mansa,Mabumba
+ZPCTII,Luapula,Mwense,Lukwesa
+ZPCTII,Luapula,Mwense,Mwense HC
+CHAZ,Luapula,Mwense ,Mbereshi mission Hospital 
+ZPCTII,Luapula,Nchelenge,Kabuta
+ZPCTII,Luapula,Nchelenge,Kafutuma
+ZPCTII,Luapula,Nchelenge,Kambwali
+ZPCTII,Luapula,Nchelenge,Kanyembo
+ZPCTII,Luapula,Nchelenge,Kashikishi
+ZPCTII,Luapula,Nchelenge,Nchelenge HC
+CHAZ,Luapula,Samfya,St Magarets Mission Hospital Kasaba
+ZPCTII,Luapula,Samfya,Kasanka
+ZPCTII,Luapula,Samfya,Lubwe M. Hosp
+ZPCTII,Luapula,Samfya,Samfya stage II
+ZPCTII,Luapula,Samfya,Shikamushile
+CHAZ,Lusaka ,Chirundu ,Mutendere Mission Hospital 
+CHAZ,Lusaka ,Chongwe ,St lukes Mpanhysa Mission Hospital
+CHAZ,Lusaka ,Luangwa,Katondwe Mission Hospital 
+ZPCTII,Northern,Chinsali,Chinsali DH HAHC
+CHAZ,Northern,Chinsali ,Mulanga Mission RHC
+CHAZ,Northern,Chinsali ,Mulilansolo Mission
+ZPCTII,Northern,Isoka,Isoka OPD
+ZPCTII,Northern,Isoka,Muyombe
+ZPCTII,Northern,Kaputa,Kaputa
+ZPCTII,Northern,Kaputa,Nsumbu
+ZPCTII,Northern,Kasama,Chisanga
+ZPCTII,Northern,Kasama,Kasama GH
+ZPCTII,Northern,Kasama,Kasama Urban
+ZPCTII,Northern,Luwingu,Namukolo
+ZPCTII,Northern,Mbala,Senga Hills
+ZPCTII,Northern,Mbala,Tulemane
+CHAZ,Northern,Mpika ,Chilonga Mission Hospital
+ZPCTII,Northern,Mpika ,Mpepo
+ZPCTII,Northern,Mpika ,Mpika DH HAHC
+ZPCTII,Northern,Mporokoso,Mporokoso DH HAHC
+ZPCTII,Northern,Mpulungu,Mpulungu HC
+ZPCTII,Northern,Mungwi,Malole
+ZPCTII,Northern,Mungwi,Nseluka
+CHAZ,Northern,Mungwi ,Mungwi Mission 
+ZPCTII,Northern,Nakonde,Mwenzo
+ZPCTII,Northern,Nakonde,Nakonde HC
+ZPCTII,Northern,Nakonde,Ntantumbila
+CHAZ,Northern ,Chinsali ,Kayambi Mission Hospital 
+CHAZ,North-Western,Chavuma,Chavuma Mission Hospital 
+ZPCTII,North-Western,Chavuma,Chiyeke
+CHAZ,North-Western,Kabompo,Loloma Mission Hospital
+ZPCTII,North-Western,Kabompo,Kabompo DH
+ZPCTII,North-Western,Kabompo,Mumbeji
+ZPCTII,North-Western,Kabompo,St. Kalemba
+ZPCTII,North-Western,Kasempa,Kasempa HC
+ZPCTII,North-Western,Kasempa,Nselauke
+ZPCTII,North-Western,Mufumbwe,Matushi
+ZPCTII,North-Western,Mufumbwe,Mufumbwe HC
+ZPCTII,North-Western,Mwinilunga,Ikelenge
+ZPCTII,North-Western,Mwinilunga,Luwi Hosp.
+ZPCTII,North-Western,Mwinilunga,Lwau
+ZPCTII,North-Western,Mwinilunga,Mwinilunga DH HAHC
+CHAZ,North-Western,Solowezi ,Luwi Mission Hospital 
+ZPCTII,North-Western,Solwezi,Kapijimpanga
+ZPCTII,North-Western,Solwezi,Maheba D
+ZPCTII,North-Western,Solwezi,Mutanda 
+ZPCTII,North-Western,Solwezi,Solwezi Urban
+ZPCTII,North-Western,Solwezi,St. Dorothy
+ZPCTII,North-Western,Zambezi,Chitokolochi M. Hosp.
+ZPCTII,North-Western,Zambezi,Nyakuleng'a RHC
+ZPCTII,North-Western,Zambezi,Zambezi DH
+CHAZ,North-Western,Zambezi ,Chitokoloki Mission Hospital 
+CHAZ,Southern,Mazabuka,Chikankata Mission hospital
+BU,Southern,Mazabuka,Chikani
+BU,Southern,Mazabuka,Chikankata Mission hospital
+BU,Southern,Mazabuka,Chikokomene
+BU,Southern,Mazabuka,Chikombola
+BU,Southern,Mazabuka,Chivuna 
+CHAZ,Southern,Mazabuka,Chivuna Mission Hospital 
+BU,Southern,Mazabuka,Chuula 
+BU,Southern,Mazabuka,Hanjalika
+BU,Southern,Mazabuka,Hanzala
+BU,Southern,Mazabuka,Itebe
+BU,Southern,Mazabuka,Kafue Gorge Hospital
+BU,Southern,Mazabuka,Kalama
+BU,Southern,Mazabuka,Kaleya Small Holders
+BU,Southern,Mazabuka,Kaleya Urban
+BU,Southern,Mazabuka,Kangila
+BU,Southern,Mazabuka,Kaonga
+BU,Southern,Mazabuka,KASCOL
+BU,Southern,Mazabuka,Lubombo
+BU,Southern,Mazabuka,Magoye
+BU,Southern,Mazabuka,Manyonyo
+BU,Southern,Mazabuka,Moobe
+BU,Southern,Mazabuka,Mubuyu
+BU,Southern,Mazabuka,Mugoto
+BU,Southern,Mazabuka,Mukuyu
+BU,Southern,Mazabuka,Munenga
+BU,Southern,Mazabuka,Munjile
+BU,Southern,Mazabuka,Musuma
+BU,Southern,Mazabuka,Mweemba
+BU,Southern,Mazabuka,Nadezwe
+BU,Southern,Mazabuka,Naluama
+BU,Southern,Mazabuka,Namaila
+BU,Southern,Mazabuka,Nanduba
+BU,Southern,Mazabuka,Nanga
+BU,Southern,Mazabuka,Nanga Farms PLC
+BU,Southern,Mazabuka,Nansenga
+BU,Southern,Mazabuka,Njomona Main
+BU,Southern,Mazabuka,Nkabika
+BU,Southern,Mazabuka,Nkonkola
+BU,Southern,Mazabuka,Research Station
+BU,Southern,Mazabuka,Simwaambwa
+BU,Southern,Mazabuka,Terranova
+CHAZ,Southern,Monze,Monze Mission Hospital
+CHAZ,Southern,Monze,Simwatachela Mission RHC 
+BU,Southern,Monze,Beengwa
+BU,Southern,Monze,Charles Lwangwa
+BU,Southern,Monze,Chisekesi
+BU,Southern,Monze,Hakunkula
+BU,Southern,Monze,Hamangaba
+BU,Southern,Monze,Hamapande
+BU,Southern,Monze,Kanundwa
+BU,Southern,Monze,Katimba
+BU,Southern,Monze,Kaumba
+BU,Southern,Monze,Kaumba
+BU,Southern,Monze,Malundu
+BU,Southern,Monze,Monze Mission Hospital
+BU,Southern,Monze,Moomba
+BU,Southern,Monze,Moonzwe
+BU,Southern,Monze,Nampeyo
+BU,Southern,Monze,Njolamwanza
+BU,Southern,Monze,Nteme
+BU,Southern,Monze,Siatontola
+BU,Southern,Monze,St Marys
+BU,Southern,Monze,ZCA Clinic
+CIDRZ,Western,Kalabo,Libonda
+CIDRZ,Western,Kalabo,Liyoyelo
+CIDRZ,Western,Kalabo,Sikongo
+CHAZ,Western,Kalabo ,Yuka Mission Hospital 
+CHAZ,Western,Kaoma,Luampa Mission hospital 
+CHAZ,Western,Kaoma,Mangango Mission Hospital
+CIDRZ,Western,Kaoma,Kaoma Urban
+CIDRZ,Western,Kaoma,Mulamba
+CIDRZ,Western,Kaoma,Namilangi
+CIDRZ,Western,Kaoma,Nkeyema
+CIDRZ,Western,Lukulu,lubosi
+CIDRZ,Western,Mongu,Lealui
+CIDRZ,Western,Mongu,Limulunga
+CIDRZ,Western,Mongu,Liyoyelo
+CIDRZ,Western,Mongu,Mongu Urban
+CIDRZ,Western,Mongu,Mulambwa
+CIDRZ,Western,Mongu,Ndau
+CIDRZ,Western,Mongu,Prisons
+CIDRZ,Western,Mongu,Sefula
+CHAZ,Western,Mumbwa ,Nangoma Mission hospital
