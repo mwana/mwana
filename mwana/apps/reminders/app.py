@@ -42,7 +42,7 @@ class App(rapidsms.apps.base.AppBase):
     def start(self):
         self.schedule_notification_task()
 
-    def schedule_notification_task (self):
+    def schedule_notification_task(self):
         """
         Resets (removes and re-creates) the task in the scheduler app that is
         used to send notifications to CBAs.
@@ -121,6 +121,18 @@ class App(rapidsms.apps.base.AppBase):
             keywords = [k.strip().lower() for k in event.slug.split('|')]
             if slug in keywords:
                 return event
+
+    def _validate_cell(self, num):
+        if len(num) == 10:
+            if num[:2] == '08':
+                backend_id = 3
+            else:
+                backend_id = 4
+            valid_cell = True
+        else:
+            backend_id = None
+            valid_cell = False
+        return backend_id, valid_cell
 
     def handle(self, msg):
         """
@@ -272,6 +284,7 @@ class App(rapidsms.apps.base.AppBase):
             msg.text = " ".join([part_msg, cell_number])
         else:
             date_str, patient_name = self._parse_message(msg)
+            cell_number = "x"
 
         if patient_name:  # the date is not optional
             if date_str:
@@ -297,6 +310,17 @@ class App(rapidsms.apps.base.AppBase):
             if not patient.types.filter(pk=patient_t.pk).count():
                 patient.types.add(patient_t)
 
+            # validate mothers cell number
+            backend_id, valid_cell = self._validate_cell(cell_number)
+            # create patient_conn
+            if valid_cell:
+                cell_number = "+265" + cell_number[1:]
+                patient_conn = Connection(backend_id=backend_id,
+                                          identity=cell_number,
+                                          contact_id=patient.id)
+            else:
+                patient_conn = None
+
             # make sure we don't create a duplicate patient event
             if msg.contact:
                 cba_name = ' %s' % msg.contact.name
@@ -310,8 +334,13 @@ class App(rapidsms.apps.base.AppBase):
                               "%(gender)s next clinic appointment."), gender=event.possessive_pronoun,
                         date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=py_cupom.encode(patient.id, 5, True))
                 return True
-            patient.patient_events.create(event=event, date=date,
-                                          cba_conn=msg.connection, notification_status="cooc", patient_conn=cell_number)
+            patient_event = patient.patient_events.create(event=event,
+                                                  date=date,
+                                                  cba_conn=msg.connection,
+                                                  notification_status="cooc")
+            if patient_conn is not None:
+                patient_event.patient_conn=patient_conn
+                patient_event.save()
             gender = event.possessive_pronoun
             msg.respond(_("Thanks! You have registered "
                         "%(name)s's EDD as %(date)s. Her RemindMi_ID is Mi%(rsms_id)s, you will be notified for "

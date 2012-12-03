@@ -10,6 +10,7 @@ from mwana.apps.reminders import models as reminders
 from mwana import const
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -18,13 +19,21 @@ _ = lambda s: s
 
 translator = Translator()
 
-NOTIFICATION_NUM_DAYS = 2 # send reminders 2 days before scheduled appointments
+NOTIFICATION_NUM_DAYS = 2  # send reminders 2 days before scheduled appointments
 
 logger = logging.getLogger('mwana.apps.reminders.tasks')
 
 
 def send_appointment_reminder(patient_event, appointment, default_conn=None,
                               pronouns=None):
+
+    def record_notification(appointment, patient_event, connection):
+        reminders.SentNotification.objects.create(
+                appointment=appointment,
+                patient_event=patient_event,
+                recipient=connection,
+                date_logged=datetime.datetime.now())
+
     if pronouns is None:
         pronouns = {}
     patient = patient_event.patient
@@ -69,25 +78,49 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             clinic_name = 'the clinic'
         appt_date = patient_event.date +\
                     datetime.timedelta(days=appointment.num_days)
-        msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for "
-                              "%(type)s clinic visit on %(date)s.Please "
-                              "remind them to visit %(clinic)s, then "
-                              "reply with TOLD %(patient)s"),
-                              cba=cba_name, patient=patient.name,
-                              date=appt_date.strftime('%d/%m/%Y'),
-                              clinic=clinic_name, type=translator.translate(lang_code, type))
-        
-        msg.send()
-        
-        reminders.SentNotification.objects.create(
-                                   appointment=appointment,
-                                   patient_event=patient_event,
-                                   recipient=connection,
-                                   date_logged=datetime.datetime.now())
+
+        if SYSTEM_LOCALE == LOCALE_MALAWI:
+            # filter appointments which have custom messages
+            # get messages for hsa and send
+            hsa_msgs = appointment.messages.filter(recipient_type='hsa')
+            for msg in hsa_msgs:
+                hsa_msg = OutgoingMessage(connection, _(msg.content),
+                                  cba=cba_name, patient=patient.name,
+                                  date=appt_date.strftime('%d/%m/%Y'),
+                                  clinic=clinic_name,
+                                  type=translator.translate(lang_code, type))
+                hsa_msg.send()
+                record_notification(appointment, patient_event, connection)
+            # get messages for mother and send
+            client_conn = patient.default_connection
+            client_msgs = appointment.messages.filter(recipient_type='client')
+            if client_conn and client_msgs:
+                for msg in client_msgs:
+                    client_msg = OutgoingMessage(client_conn, _(msg.content),
+                                     cba=cba_name, patient=patient.name,
+                                     date=appt_date.strftime('%d/%m/%Y'),
+                                     clinic=clinic_name,
+                                     type=translator.translate(lang_code, type))
+                    client_msg.send()
+                    record_notification(appointment, patient_event, client_conn)
+        else:
+            msg = OutgoingMessage(connection,
+                                  _("Hi%(cba)s.%(patient)s is due for "
+                                    "%(type)s clinic visit on %(date)s.Please "
+                                    "remind them to visit %(clinic)s, then "
+                                    "reply with TOLD %(patient)s"),
+                                  cba=cba_name, patient=patient.name,
+                                  date=appt_date.strftime('%d/%m/%Y'),
+                                  clinic=clinic_name,
+                                  type=translator.translate(lang_code, type))
+
+            msg.send()
+
+            record_notification(appointment, patient_event, connection)
 
     patient_trace = PatientTrace()
     patient_trace.type = appointment.name
-    patient_trace.start_date=datetime.datetime.now()
+    patient_trace.start_date = datetime.datetime.now()
     patient_trace.name = patient_event.patient.name[:50]
     patient_trace.patient_event = patient_event
     patient_trace.status = 'new'

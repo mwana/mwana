@@ -9,6 +9,11 @@ class AppointmentInline(admin.TabularInline):
     model = reminders.Appointment
 
 
+class MessagesInline(admin.TabularInline):
+    model = reminders.Message
+    extra = 1
+    max = 1
+
 class EventAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug',)
     inlines = (AppointmentInline,)
@@ -23,7 +28,16 @@ class AppointmentAdmin(admin.ModelAdmin):
     list_filter = ('event',)
     list_select_related = True
     search_fields = ('name', 'event__name',)
+    inlines = (MessagesInline,)
 admin.site.register(reminders.Appointment, AppointmentAdmin)
+
+
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('appointment', 'recipient_type', 'content',)
+    list_filter = ('recipient_type',)
+    list_select_related = True
+    search_fields = ('content', 'appointment',)
+admin.site.register(reminders.Message, MessageAdmin)
 
 
 class PatientEventAdmin(admin.ModelAdmin):
@@ -39,12 +53,12 @@ class PatientEventAdmin(admin.ModelAdmin):
         except:
             return "Unknown"
 
-    def cba(self, obj):        
-        try:           
+    def cba(self, obj):
+        try:
             return obj.cba_conn.contact.name
         except:
             return "Unknown"
-        
+
 admin.site.register(reminders.PatientEvent, PatientEventAdmin)
 
 

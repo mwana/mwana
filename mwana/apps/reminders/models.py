@@ -51,7 +51,26 @@ class Appointment(models.Model):
                                    'this appointment should be. Reminders are '
                                    'sent two days before the appointment '
                                    'date.')
-    
+
+    def __unicode__(self):
+        return self.name
+
+
+class Message(models.Model):
+    """
+    A message to send to the user by type (healthworker or mother if opted in)
+    """
+    RECIPIENT_CHOICES = (
+    ('hsa', 'Healthworker'),
+    ('client', 'Mother'),
+    )
+
+    appointment = models.ForeignKey(Appointment, related_name='messages')
+    name = models.CharField(max_length=255, null=True)
+    content = models.TextField()
+    recipient_type = models.CharField(choices=RECIPIENT_CHOICES, max_length=10,
+                                      null=True, blank=True)
+
     def __unicode__(self):
         return self.name
 
@@ -64,12 +83,10 @@ class PatientEvent(models.Model):
         ('new', 'New birth registered'),
         ('notified', 'Clinic notified of new birth'),
         ('sent', 'Birth details sent to clinic'),
-        ('cooc', 'New continuum of care registered'),#set when server receives updates to a sample record
-                                                #AFTER this result has already been sent to the clinic.
-                                                #if result has not yet been sent, it keeps status 'new'.
-                                                #the updated data may or may not merit sending the
-                                                #update to the clinic (i.e., changed result, yes, changed
-                                                #child age, no)
+        ('cooc', 'New continuum of care registered'),
+        ('sam', 'New SAM event registered'),
+        ('lbw', 'New low birth weight event registered'),
+        ('exp','New exposure event registered'),
     )
 
     LOCATION_TYPE_CHOICES = (
@@ -83,23 +100,26 @@ class PatientEvent(models.Model):
                                 limit_choices_to={'types__slug': 'patient'})
     event = models.ForeignKey(Event, related_name='patient_events')
     cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events',
-                                 limit_choices_to={'contact__types__slug': 
+                                 limit_choices_to={'contact__types__slug':
                                           'cba'},verbose_name='CBA Connection')
-    patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
+    #patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
+    patient_conn = models.ForeignKey(Connection, related_name='patient_patient_events',
+                                     limit_choices_to={'contact__types__slug':
+                                                           'patient'},verbose_name='Patient Connection')
     date = models.DateField()
     date_logged = models.DateTimeField()
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)   #New field added to accomodate birth notification status
     notification_sent_date = models.DateTimeField(null=True, blank=True)    #New field added to accomodate birth notification sent date
-    
-    
+
+
     def save(self, *args, **kwargs):
         if not self.pk:
             self.date_logged = datetime.datetime.now()
         super(PatientEvent, self).save(*args, **kwargs)
-        
+
     def __unicode__(self):
         return '%s %s on %s' % (self.patient.name, self.event, self.date)
-    
+
     class Meta:
         unique_together = (('patient', 'event', 'date'),)
 
@@ -117,7 +137,7 @@ class SentNotification(models.Model):
                                   limit_choices_to={'contact__types__slug':
                                                                         'cba'})
     date_logged = models.DateTimeField()
-    
+
     def __unicode__(self):
         return '%s sent to %s on %s' % (self.appointment,
                                         self.patient_event.patient,
