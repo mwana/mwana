@@ -15,6 +15,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
+from mwana.apps.reminders.models import PatientEvent
 
 
 class ReportGMHandler(KeywordHandler):
@@ -189,7 +190,6 @@ class ReportGMHandler(KeywordHandler):
         try:
             survey = Survey.objects.get(begin_date__lte=datetime.now().date(),\
                 end_date__gte=datetime.now().date())
-
         except ObjectDoesNotExist, MultipleObjectsReturned:
             return self.respond("No active survey at this date")
 
@@ -416,6 +416,27 @@ class ReportGMHandler(KeywordHandler):
                     if ((ass.weight4height < D(str(-3.00))) or (ass.muac <= survey.severe_muac)):
                         ass.wasting = 'S'
                 ass.save()
+
+                # continuum of care for SAM children
+                if ((ass.wasting == 'S') or (ass.stunting == 'S') or (ass.underweight == 'S')):
+                    event = "SAM"
+                    sam_date = datetime.date.today()
+                    # this is one for a ... moment, create an alternate patient!
+                    if healthworker and healtworker.location:
+                        child, created = Contact.objects.get_or_create(
+                            name=patient.code,
+                            location=healthworker.location)
+                        # TODO: link this child to assessments
+                        # make sure the contact has the correct type (patient)
+                        patient_t = const.get_patient_type()
+                        if not child.types.filter(pk=patient_t.pk).count():
+                            child.types.add(patient_t)
+
+                    # finally create the SAM event
+                    PatientEvent(event=event,
+                                date=sam_date,
+                                cba_conn=healthworker.default_connection,
+                                notification_status="sam")
 
             try:
                 #response_map = {
