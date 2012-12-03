@@ -167,7 +167,8 @@ def process_payload(payload, data=None):
 
 def normalize_clinic_id (zpct_id):
     """turn the ZPCT clinic id format into the MoH clinic id format"""
-    return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
+    if zpct_id != '':
+        return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
 
 def map_result (verbose_result):
     """map the result type from extract.py codes to Result model codes"""
@@ -266,7 +267,7 @@ def accept_record (record, payload):
         if rec_status == 'update':
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
-        new_record.notification_status = 'new' if new_record.result else 'unprocessed'        
+        new_record.notification_status = 'new' if new_record.result else 'unprocessed'
     else:
         #keep track of original date for payload with result
         if old_record.arrival_date and old_record.result:
@@ -495,7 +496,7 @@ def mwana_reports (request):
 #    , startdate=datetime.today().date()-timedelta(days=30),
 #                    enddate=datetime.today().date(
     from mwana.apps.reports.webreports.reportcreator import Results160Reports
-   
+
     today = datetime.today().date()
     try:
         startdate1 = text_date(request.REQUEST['startdate'])
@@ -508,7 +509,7 @@ def mwana_reports (request):
         enddate1 = datetime.today().date()
     startdate = min(startdate1, enddate1, datetime.today().date())
     enddate = min(max(enddate1, startdate1), datetime.today().date())
-    
+
     r = Results160Reports()
     res = r.dbs_sent_results_report(startdate, enddate)
 
