@@ -286,7 +286,7 @@ class ReportGMHandler(KeywordHandler):
             return self.respond(INVALID_GENDER % (survey_entry.gender))
 
         # check if action taken is valid
-        action_taken = self._validate_action_taken(survey.action_taken)
+        action_taken = self._validate_action_taken(survey_entry.action_taken)
         if action_taken is not None:
             self.debug(action_taken)
             patient_kwargs.update({'action_taken': action_taken})

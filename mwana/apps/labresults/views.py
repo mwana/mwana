@@ -292,8 +292,11 @@ def accept_record (record, payload):
 
         #change to clinic
         if old_record.notification_status in ('sent', 'notified') and old_record.clinic != new_record.clinic:
-            logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this?' %
+            if new_record.clinic is not None:
+                logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this?' %
                            (sample_id, old_record.clinic.slug, new_record.clinic.slug))
+            else:
+                logger.warning('the new record does not have an associated clinic.')
 
         #change to test result
         if not old_record.result and new_record.result:
