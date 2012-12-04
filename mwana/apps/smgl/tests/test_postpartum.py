@@ -4,9 +4,6 @@ from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
     ReminderNotification
 from mwana.apps.smgl import const
 from datetime import datetime, timedelta
-from mwana.apps.smgl.reminders import send_followup_reminders,\
-    send_upcoming_delivery_reminders
-from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 
 
 class SMGLPostPartumTest(SMGLSetUp):
@@ -23,7 +20,6 @@ class SMGLPostPartumTest(SMGLSetUp):
 
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
-
 
     def testRegister(self):
         resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,
@@ -50,8 +46,6 @@ class SMGLPostPartumTest(SMGLSetUp):
         self.assertEqual("r", mom.reason_for_visit)
 
         self.assertEqual(0, FacilityVisit.objects.count())
-
-
 
     def testPostPartum(self):
         self.testRegister()

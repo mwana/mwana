@@ -5,9 +5,8 @@ from mwana.apps.help.models import HelpRequest
 from rapidsms.contrib.messagelog.models import Message
 
 
-
 class HelpTest(SMGLSetUp):
-    
+
     def setUp(self):
         super(HelpTest, self).setUp()
         self.createDefaults()
@@ -21,7 +20,7 @@ class HelpTest(SMGLSetUp):
         help_admin.is_help_admin = True
         help_admin.save()
         return help_admin
-    
+
     def testBasicHelpWorkflow(self):
         script = """
             11    > help me rhonda!
@@ -34,7 +33,7 @@ class HelpTest(SMGLSetUp):
         self.assertEqual(self.contact.default_connection, req.requested_by)
         self.assertEqual('me rhonda!', req.additional_text)
         self.assertEqual('P', req.status)
-        
+
     def testUnregisteredHelpWorkflow(self):
         script = """
             90109 > help i need somebody!
@@ -47,7 +46,7 @@ class HelpTest(SMGLSetUp):
         self.assertEqual('90109', req.requested_by.identity)
         self.assertEqual('i need somebody!', req.additional_text)
         self.assertEqual('P', req.status)
-        
+
     def testMultipleAdmins(self):
         other_admin_num = "14"
         self._make_admin(other_admin_num)
@@ -72,4 +71,4 @@ class HelpTest(SMGLSetUp):
         self.assertEqual(1, HelpRequest.objects.count())
         self.assertEqual(prev_count,
                          Message.objects.filter(connection__identity=self.help_number).count())
-        
+

@@ -9,9 +9,8 @@ from mwana.apps.smgl.reminders import (send_non_emergency_referral_reminders,
     send_emergency_referral_reminders)
 
 from mwana.apps.smgl.app import (ER_TO_TRIAGE_NURSE, ER_TO_DRIVER,
-    ER_STATUS_UPDATE, AMB_OUTCOME_FILED, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,
-    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE,
-    ER_TO_CLINIC_WORKER, INITIAL_AMBULANCE_RESPONSE)
+    ER_STATUS_UPDATE, AMB_RESPONSE_ORIGINATING_LOCATION_INFO,
+    AMB_RESPONSE_NOT_AVAILABLE, ER_TO_CLINIC_WORKER, INITIAL_AMBULANCE_RESPONSE)
 
 
 def _verbose_reasons(reasonstring):
