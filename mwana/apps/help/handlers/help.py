@@ -50,8 +50,8 @@ class HelpHandler(KeywordHandler):
 
         for help_admin in Contact.active.filter(is_help_admin=True):
             if help_admin.default_connection:
-                    self.router.outgoing(OutgoingMessage(help_admin.default_connection, 
-                                                         resp_template, **params))
+                self.router.outgoing(OutgoingMessage(help_admin.default_connection,
+                                                     resp_template, **params))
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
         self.respond(RESPONSE, person=person_arg)
                                          

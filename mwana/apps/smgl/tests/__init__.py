@@ -1,6 +1,7 @@
 from .test_birth_reg import *
 from .test_bug_reports import *
 from .test_death_reg import *
+from .test_help import *
 from .test_join import *
 from .test_lookups import *
 from .test_models import *
