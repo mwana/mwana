@@ -108,7 +108,7 @@ class SMGLReferTest(SMGLSetUp):
 
     def testReferBadCode(self):
         # bad code
-        bad_code_resp = 'Answer must be one of the choices for "Reason for referral, choices: fd, pec, ec, hbp, pph, aph, pl, cpd, oth"'
+        bad_code_resp = 'Answer must be one of the choices for "Reason for referral, choices: fd, pec, ec, hbp, pph, aph, pl, cpd, oth, pp"'
         script = """
             %(num)s > refer 1234 804024 foo 1200 nem
             %(num)s < %(resp)s
