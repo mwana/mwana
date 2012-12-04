@@ -1,4 +1,4 @@
-from mwana.apps.locations.models import LocationType
+from mwana.apps.locations.models import Location, LocationType
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
     ReminderNotification
@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from mwana.apps.smgl.reminders import send_followup_reminders,\
     send_upcoming_delivery_reminders
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
-from mwana.apps.smgl.tests.shared import create_mother, create_location
+from mwana.apps.smgl.tests.shared import create_mother
 
 
 class SMGLPregnancyTest(SMGLSetUp):
@@ -354,15 +354,11 @@ class SMGLPregnancyTest(SMGLSetUp):
 
     def testValidLookUpMother(self):
         loc_type = LocationType.objects.get(singular='Zone')
-        zone = create_location(data={'name': 'foo',
-                                     'slug': '123456',
-                                     'type': loc_type,
-                                     }
-                              )
+        zone = Location.objects.filter(type=loc_type)[0]
         mom = create_mother(data={'first_name': 'Jane',
                                   'last_name': 'Doe',
                                   'uid': '333333',
-                                  'zone': zone})
+                                  'location': zone})
         resp = const.LOOK_COMPLETE % {"unique_id": mom.uid}
         script = """
             %(num)s > look %(f_name)s %(l_name)s %(zone_id)s

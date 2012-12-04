@@ -35,8 +35,6 @@ class ProvinceLookupTestCase(LookupTestMixin, TestCase):
     lookup_class = lookups.ProvinceLookup
 
     def setUp(self):
-        # Delete other existing markets loaded by fixtures
-        Location.objects.all().delete()
         self.province1 = create_location(data={'name': 'prov1'})
         self.province2 = create_location(data={'name': 'prov2'})
 
@@ -59,8 +57,6 @@ class DistrictLookupTestCase(LookupTestMixin, TestCase):
     lookup_class = lookups.DistrictLookup
 
     def setUp(self):
-        # Delete other existing markets loaded by fixtures
-        Location.objects.all().delete()
         self.province1 = create_location(data={'name': 'prov1'})
         loc_type = LocationType.objects.get(singular='district')
         self.district1 = create_location(data={'name': 'district1',
@@ -88,8 +84,6 @@ class FacilityLookupTestCase(LookupTestMixin, TestCase):
     lookup_class = lookups.FacilityLookup
 
     def setUp(self):
-        # Delete other existing markets loaded by fixtures
-        Location.objects.all().delete()
         self.province1 = create_location(data={'name': 'prov1'})
         loc_type = LocationType.objects.get(singular='district')
         self.district1 = create_location(data={'name': 'district1',

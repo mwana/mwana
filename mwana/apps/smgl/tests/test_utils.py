@@ -8,6 +8,8 @@ from mwana.apps.smgl.tests.shared import create_location
 
 class TestUtilities(TestCase):
 
+    fixtures = ["initial_data.json"]
+
     def testTimeFormats(self):
         for good in ["1530", "0000", "2359", "15:30", " 1530 "]:
             to_time(good)

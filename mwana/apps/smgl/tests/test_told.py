@@ -1,6 +1,5 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
-from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
-    ReminderNotification, ToldReminder
+from mwana.apps.smgl.models import ReminderNotification, ToldReminder
 from mwana.apps.smgl.models import TOLD_TYPE_CHOICES
 from mwana.apps.smgl import const
 from datetime import datetime, timedelta
@@ -19,9 +18,6 @@ class SMGLToldTestCase(SMGLSetUp):
         self.user_number = "15"
         self.name = "AntonDA"
         self.cba = self.createUser("cba", "456", location="80402404")
-
-        self.assertEqual(0, PregnantMother.objects.count())
-        self.assertEqual(0, FacilityVisit.objects.count())
 
     def testValidTold(self):
         mom = create_mother()

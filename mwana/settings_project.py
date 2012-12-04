@@ -126,7 +126,7 @@ XFORMS_PLAYER_URL = "http://127.0.0.1:4444"
 
 # for translations
 _ = lambda x: x
-DEFAULT_RESPONSE = _("Invalid keyword. Submit a form with a valid keyword: AMB, RESP, OUTC, REFER, REG, FUP, BIRTH, DEATH, REFOUT, TOLD, LOOK, LEAVE or text HELP for assistance.")
+DEFAULT_RESPONSE = _("Invalid keyword. Submit a form with a valid keyword: AMB, RESP, OUTC, REFER, REG, FUP, PP, BIRTH, DEATH, REFOUT, TOLD, LOOK, LEAVE or text HELP for assistance.")
 
 
 # -------------------------------------------------------------------- #

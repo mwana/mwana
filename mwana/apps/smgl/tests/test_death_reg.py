@@ -4,6 +4,7 @@ from mwana.apps.smgl.models import DeathRegistration, PregnantMother
 from datetime import date, datetime, timedelta
 from mwana.apps.smgl import const
 
+
 class SMGLDeathRegTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
 
@@ -16,15 +17,13 @@ class SMGLDeathRegTest(SMGLSetUp):
 
         self.assertEqual(0, PregnantMother.objects.count())
 
-
-
     # TODO: beef these up. Just testing the basic workflow
     def testBasicDeathReg(self):
-        resp = const.DEATH_REG_RESPONSE % {"name": self.name }
+        resp = const.DEATH_REG_RESPONSE % {"name": self.name}
         script = """
             %(num)s > death 1234 01 01 2012 ma h
             %(num)s < %(resp)s
-        """ % { "num": self.user_number, "resp": resp }
+        """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
         [reg] = DeathRegistration.objects.all()
         self.assertEqual("1234", reg.unique_id)
