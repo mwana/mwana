@@ -48,11 +48,11 @@ def create_instance(model, defaults, data):
 
 def create_location(data={}):
     name = get_random_string()
-    type = LocationType.objects.get(singular="Province")
+    loc_type = LocationType.objects.get(singular="Province")
     defaults = {
         'name': name,
         'slug': name,
-        'type': type,
+        'type': loc_type,
     }
     return create_instance(Location, defaults, data)
 

@@ -1,6 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from rapidsms.models import Contact
 
+
 class SMGLContactTest(SMGLSetUp):
 
     fixtures = ["initial_data.json"]
@@ -20,4 +21,3 @@ class SMGLContactTest(SMGLSetUp):
         district = contact.get_current_district()
         self.assertNotEqual(contact.location, district)
         self.assertEqual('district', district.type.singular)
-

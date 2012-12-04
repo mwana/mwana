@@ -127,7 +127,6 @@ def handle_submission(sender, **args):
     keyword = session.trigger.trigger_keyword
 
     logger.debug('Attempting to post-process submission. Keyword: %s  Session is: %s' % (keyword, session))
-
     try:
         kw_handler = XFormKeywordHandler.objects.get(keyword=keyword)
     except ObjectDoesNotExist:

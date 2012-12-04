@@ -44,7 +44,7 @@ class LocationType(models.Model):
 
     slug = models.CharField(max_length=30, unique=True,
         help_text="An URL-safe alternative to the <em>plural</em> field.")
-                  
+
 
     exists_in = models.ForeignKey("Location", null=True, blank=True,
         help_text='The Location which this LocationType exists within. For '
@@ -63,7 +63,7 @@ class LocationType(models.Model):
         return '<%s: %s>' %\
             (type(self).__name__, self)
 
-    
+
 class Point(models.Model):
     """
     This model represents an anonymous point on the globe. It should be
@@ -146,10 +146,10 @@ class LocationBase(models.Model):
         # delimiter, so we'll do it here transparently.
         self.name = re.sub(r"\s+", " ", self.name)
 
-        # do some processing on the slug field to ensure we only store 
+        # do some processing on the slug field to ensure we only store
         # lowercase and strip spaces
         self.slug = self.slug.lower().strip()
-        
+
         # then save the model as usual
         models.Model.save(self, *args, **kwargs)
 

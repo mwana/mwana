@@ -4,14 +4,16 @@ from mwana.apps.smgl.app import USER_SUCCESS_REGISTERED
 
 class SMGLJoinTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
+
     def testCreateUser(self):
         create_prereg_user("Anton", "804024", "11", "TN", "en")
         script = """
             11 > join Anton en
             11 < %s
 
-        """ % (USER_SUCCESS_REGISTERED % {"name" : "Anton", "readable_user_type": "Triage Nurse",
-                                          "facility": "Chilala"}) #TODO:Is this bad testing style?
+        """ % (USER_SUCCESS_REGISTERED % {"name": "Anton",
+                                          "readable_user_type": "Triage Nurse",
+                                          "facility": "Chilala"})  # TODO:Is this bad testing style?
         self.runScript(script)
 
         script = """
@@ -22,7 +24,7 @@ class SMGLJoinTest(SMGLSetUp):
 
     def testJoin(self):
         self.createDefaults()
-        
+
     def testNotPreRegd(self):
         script = """
             12 > join Foo en
