@@ -98,7 +98,8 @@ class PregnantMother(models.Model):
                 types=ContactType.objects.get(
                             slug__iexact=const.CTYPE_LAYCOUNSELOR
                             ),
-                location=self.zone)
+                location=self.zone,
+                is_active=True)
 
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
@@ -305,7 +306,8 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     def get_receiving_data_clerks(self):
         # people who need to be reminded to collect the outcome
         return Contact.objects.filter(types__slug=const.CTYPE_DATACLERK,
-                                      location=self.facility)
+                                      location=self.facility,
+                                      is_active=True)
 
 
 class PreRegistration(models.Model):
