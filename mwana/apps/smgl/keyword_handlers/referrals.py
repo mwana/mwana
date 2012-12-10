@@ -72,7 +72,8 @@ def refer(session, xform, router):
         referral.status = status
         referral.save()
         # IF CBA, DO NOT SEND AN EMERGENCY REQUEST, JUST NOTIFY via _get_people_to_notify
-        if referral.status == 'em':
+        is_cba = ['cba'] == list(contact.types.all().values_list('slug', flat=True))
+        if referral.status == 'em' and not is_cba:
             # Generate an Ambulance Request
             session.template_vars.update({"sender_phone_number": session.connection.identity})
             amb = AmbulanceRequest()
