@@ -57,8 +57,8 @@ class Results160Reports:
             facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
             if self.reporting_group:
                 facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)|Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
-            
-            
+
+
             if self.reporting_facility:
                 facs = facs.filter(slug=self.reporting_facility)
             elif self.reporting_district:
@@ -68,9 +68,9 @@ class Results160Reports:
             return facs
         else:
             return Location.objects.all()
-        
+
     def get_rpt_provinces(self, user):
-        self.user = user         
+        self.user = user
         return self.get_distinct_parents(self.get_rpt_districts(user))
 
     def get_rpt_districts(self, user):
@@ -150,7 +150,7 @@ class Results160Reports:
 
     def get_results_by_status(self, status):
         """Returns results query set by status in reporting period"""
-        
+
         return Result.objects.filter(Q(result_sent_date__gt=self.dbsr_startdate)
                                      | Q(result_sent_date=self.dbsr_startdate),
                                      Q(result_sent_date__lt=self.dbsr_enddate) |
@@ -193,7 +193,7 @@ class Results160Reports:
                                         processed_on__lte=self.dbsr_enddate,
                                         result_sent_date__gte=self.dbsr_startdate,
                                         result_sent_date__lte=self.dbsr_enddate)
-            
+
         if not results:
             return (0, None)
         tt_diff = 0.0
@@ -245,7 +245,7 @@ class Results160Reports:
     def dbs_payloads_report(self, startdate=None, enddate=None):
         self.set_reporting_period(startdate, enddate)
         table = []
-        
+
         table.append(['  Source Lab', 'Count'])
 
         cursor = connection.cursor()
@@ -282,7 +282,7 @@ class Results160Reports:
             tt_updated = tt_updated + updated
             tt_unprocessed = tt_unprocessed + unprocessed
             tt_total = tt_total + total
-            
+
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, tt_unprocessed, tt_total])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -299,7 +299,7 @@ class Results160Reports:
                                                          Q(date__lt=self.dbsr_enddate) |
                                                          Q(date=self.dbsr_enddate)).\
             aggregate(sum=Sum("count"))['sum']
-                
+
             tt_reported = tt_reported + reported
             parent_name = location.parent and location.parent.name or ' '
             table.append([' ' + parent_name, ' ' + location.name, reported])
@@ -551,7 +551,6 @@ class Results160Reports:
         Returns active contacts
         """
         table = []
-       
 
         locations = self.user_facilities()
         contacts = Contact.active.filter(Q(location__in=locations)|
@@ -660,10 +659,9 @@ class Results160Reports:
 #                Q(cba_conn__contact=None)|
                 Q(patient__location__parent__in=self.user_facilities()) |
                 Q(patient__location__in=self.user_facilities())
-                
+
         ).distinct()
 
-        
         for event in events:
             location = "Unknown"
             if event.patient.location:
@@ -677,7 +675,7 @@ class Results160Reports:
 
             if location not in facility_dict.keys():
                 facility_dict[location] = [0, 0, 0, 0]
-                
+
             facility_dict[location][3] = facility_dict[location][3] + 1
             if event.event_location_type == 'hm':
                 facility_dict[location][0] = facility_dict[location][0] + 1
@@ -685,15 +683,15 @@ class Results160Reports:
                 facility_dict[location][1] = facility_dict[location][1] + 1
             else:
                 facility_dict[location][2] = facility_dict[location][2] + 1
-                    
-            
+
+
 
         tt_home, tt_clinic, tt_unknown, tt_all = [0, 0, 0, 0]
 
         for key, value in facility_dict.iteritems():
             facility_name = key
             district_name = "Unknown"
-            if not isinstance(key, (str, unicode)):                
+            if not isinstance(key, (str, unicode)):
                 facility_name = key.name
                 district_name = key.parent.name
 
@@ -859,15 +857,14 @@ class Results160Reports:
                 percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
                 percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
                 percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
-            
-                    
-        
+
+
         months_reporting = 0
         days_reporting = 0
         if results:
             start_date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
             days_reporting = (date.today()-start_date).days
-        
+
         year_reporting = year
 
 
@@ -878,7 +875,7 @@ class Results160Reports:
 
 
 class MalawiReports(Results160Reports):
-    
+
     def get_live_facilities(self):
         return self.user_facilities().filter(send_live_results=True).distinct()
 
@@ -887,16 +884,16 @@ class MalawiReports(Results160Reports):
         parents = []
         for site in self.get_live_facilities():
             parents.append(site.parent and site.parent.name or ' ')
-            
-        return sorted(list(set(parents))) 
-            
+
+        return sorted(list(set(parents)))
+
     def get_new_results(self, location):
         """Returns new results query set for location in reporting period"""
 
         return Result.objects.filter(Q(processed_on__gte=self.dbsr_startdate),
                                      Q(processed_on__lte=self.dbsr_enddate))\
                                      .filter(clinic=location)
-        
+
     def dbsr_tested_retrieved_report(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)
         table = []
@@ -911,10 +908,10 @@ class MalawiReports(Results160Reports):
         for location in self.get_live_facilities():
             parent_name = location.parent and location.parent.name or ' '
             if (district == "All Districts" or district == parent_name):
-                positive = self.get_new_results(location).filter(result='P').count()
-                negative = self.get_new_results(location).filter(result='N').count()
+                positive = self.get_new_results(location).filter(result='P', verified=True).count()
+                negative = self.get_new_results(location).filter(result='N', verified=True).count()
                 rejected = self.get_new_results(location).filter(result__in='XIR').count()
-                total_retrieved = self.get_new_results(location).filter(notification_status='sent').count()
+                total_retrieved = self.get_new_results(location).filter(notification_status='sent', verified=True).count()
                 total_verified = self.get_new_results(location).filter(verified=True).count()
                 total_tested = positive + negative
 
@@ -962,7 +959,7 @@ class MalawiReports(Results160Reports):
                 tt_pending = tt_pending + total_pending
             else:
                 pass
-        table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated, 
+        table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated,
                       tt_unprocessed, tt_pending])
         return sorted(table, key=itemgetter(0, 1))
 
@@ -977,7 +974,6 @@ class MalawiReports(Results160Reports):
                 return 0
             else:
                 return "%4.1f" % (100.0 * num / den)
-                
 
         tt_positive = tt_negative = tt_rejected = 0
         tt_tested = tt_verified = tt_retrieved = total_dbs = 0
@@ -1009,7 +1005,7 @@ class MalawiReports(Results160Reports):
         percent_positive_district = percent(tt_positive, total_dbs)
         percent_negative_district = percent(tt_negative, total_dbs)
         percent_rejected_district = percent(tt_rejected, total_dbs)
-                
+
         return total_dbs, percent_positive_district, percent_negative_district, percent_rejected_district
 
 
