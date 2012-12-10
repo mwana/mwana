@@ -89,12 +89,12 @@ admin.site.unregister(User)
 class UserAdmin(admin.ModelAdmin):
 
     list_display = ('username', 'email', 'first_name', 'last_name',
-    'last_login', 'days_ago', 'is_staff', 'partner_list',)
+    'last_login', 'days_ago', 'is_staff', 'partner_groups',)
     list_filter = ('is_active', 'is_staff', 'is_superuser', 'last_login',)
     search_fields = ('username', 'email', 'first_name', 'last_name',
     'groupusermapping__group__name',)
 
-    def partner_list(self, obj):
+    def partner_groups(self, obj):
         return ', '.join(g.group.name for g in  obj.groupusermapping_set.all())
 
     def days_ago(self, obj):
