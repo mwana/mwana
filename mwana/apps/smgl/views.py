@@ -12,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
+from rapidsms.models import Contact
 from rapidsms.contrib.messagelog.models import Message
 
 from mwana.apps.contactsplus.models import ContactType
@@ -24,8 +25,8 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
-                        StatisticsLinkTable, ReminderStatsTable,
-                        SummaryReportTable)
+                     StatisticsLinkTable, ReminderStatsTable,
+                     SummaryReportTable, ReferralsTable, NotificationsTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
@@ -52,8 +53,8 @@ def mothers(request):
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
             zone = form.cleaned_data.get('zone')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
             edd_start_date = form.cleaned_data.get('edd_start_date')
             edd_end_date = form.cleaned_data.get('edd_end_date')
     else:
@@ -663,5 +664,81 @@ def report(request):
          "start_date": start_date,
          "end_date": end_date,
          "summary_report_table": summary_report_table
+        },
+        context_instance=RequestContext(request))
+
+
+def notifications(request):
+    """
+    Report on notifications to help_admin users
+    """
+    help_admins = Contact.objects.filter(is_help_admin=True)
+    messages = Message.objects.filter(contact__in=help_admins)
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'facility', 'message']
+        records = []
+        for msg in messages:
+            records.append({
+                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
+                    'facility': msg.contact.location.name if msg.contact else '',
+                    'message': msg.text
+                })
+        filename = 'notifications_report'
+        return export_as_csv(records, keys, filename)
+
+    return render_to_response(
+        "smgl/notifications.html",
+        {"message_table": NotificationsTable(messages,
+                                        request=request)
+        },
+        context_instance=RequestContext(request))
+
+
+def referrals(request):
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    province = district = facility = None
+
+    referrals = Referral.objects.all()
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    referrals = referrals.filter(from_facility__in=locations)
+
+    # filter by created_date
+    referrals = filter_by_dates(referrals, 'date',
+                             start=start_date, end=end_date)
+
+    return render_to_response(
+        "smgl/referrals.html",
+        {"message_table": ReferralsTable(referrals,
+                                        request=request),
+         "form": form,
         },
         context_instance=RequestContext(request))

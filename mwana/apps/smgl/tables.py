@@ -43,6 +43,32 @@ class MotherMessageTable(Table):
         order_by = "-date"
 
 
+class NotificationsTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    facility = Column(value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
+    text = NamedColumn(col_name="Message")
+
+    class Meta:
+        order_by = "-date"
+
+
+class ReferralsTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    from_facility = Column()
+    sender = Column(value=lambda cell: cell.object.session.connection.contact if cell.object.session.connection else '', sortable=False)
+    number = Column(value=lambda cell: cell.object.session.connection.identity if cell.object.session.connection else '', sortable=False)
+    response = Column(value=lambda cell: "Yes" if cell.object.responded else "No", sortable=False)
+    status = Column()
+    confirm_amb = Column(value=lambda cell: cell.object.ambulance_response, sortable=False)
+    outcome = Column(sortable=False)
+    message = Column(value=lambda cell: cell.object.session.message_incoming.text if cell.object.session.message_incoming else '',
+                     sortable=False)
+    flag = Column(value=lambda cell: '<div style="background-color: {0}; border: 1px solid black; height: 16px; width: 16px; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px;">&nbsp;</div>'.format(cell.object.flag), sortable=False, safe=True)
+
+    class Meta:
+        order_by = "-date"
+
+
 class StatisticsTable(Table):
     location = Column(header_class="location")
     pregnancies = Column()

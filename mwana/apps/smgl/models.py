@@ -307,6 +307,37 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         return Contact.objects.filter(types__slug=const.CTYPE_DATACLERK,
                                       location=self.facility)
 
+    @property
+    def ambulance_response(self):
+        response = 'non-em'
+        if self.status == 'em':
+            if self.amb_req:
+                try:
+                    response = self.amb_req.ambulanceresponse_set.all()[0].response
+                except:
+                    response = None
+            else:
+                response = "No Data"
+        return response
+
+    @property
+    def outcome(self):
+        outcome = self.mother_outcome if self.mother_outcome else ''
+        if self.baby_outcome:
+            outcome = '{}/{}'.format(outcome, self.baby_outcome)
+        return outcome
+
+    @property
+    def flag(self):
+        if self.status == 'em':
+            if self.ambulance_response and not self.outcome:
+                return 'yellow'
+            elif self.ambulance_response and self.outcome:
+                return 'green'
+            else:
+                return 'red'
+        return ''
+
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (

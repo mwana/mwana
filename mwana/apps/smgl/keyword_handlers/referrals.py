@@ -237,12 +237,12 @@ def emergency_response(session, xform, router):
         session.template_vars.update({"sender_phone_number": referrer_cnx.identity,
                                       "from_location": str(ref.from_facility.name)})
         try:
-            sus = _pick_superusers(session, xform, ref.facility)
+            help_admins = _pick_help_admin(session, xform, ref.facility)
         except:
-            logger.error('No Super Userfound (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
+            logger.error('No Help Admin found (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
         else:
-            for su in sus:
-                send_msg(su.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
+            for ha in help_admins:
+                send_msg(ha.default_connection, AMB_RESPONSE_NOT_AVAILABLE, router, **session.template_vars)
     else:
         clinic_recip = _pick_clinic_recip(session, xform, ref.facility)
         if clinic_recip:
@@ -308,13 +308,13 @@ def _pick_clinic_recip(session, xform, receiving_facility):
         logger.error('No clinic worker found!')
 
 
-def _pick_superusers(session, xform, receiving_facility):
-    superusers = Contact.objects.filter(is_super_user=True,
+def _pick_help_admin(session, xform, receiving_facility):
+    help_admins = Contact.objects.filter(is_help_admin=True,
                                         location=receiving_facility)
-    if superusers.count():
-        return superusers
+    if help_admins.count():
+        return help_admins
     else:
-        raise Exception('No Super User type found!')
+        raise Exception('No Help Admin type found!')
 
 
 def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=None):
