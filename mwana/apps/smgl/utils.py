@@ -188,9 +188,8 @@ def get_location_tree_nodes(location, locations=None):
     if not locations:
         locations = []
     for child in location.location_set.all():
-        if child.type.singular != 'Zone':
-            locations.append(child)
-            get_location_tree_nodes(child, locations)
+        locations.append(child)
+        get_location_tree_nodes(child, locations)
     return locations
 
 

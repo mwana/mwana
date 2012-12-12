@@ -1,7 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 import urllib
+import datetime
 
-from datetime import date
+from datetime import date, timedelta
 
 from operator import itemgetter
 
@@ -11,6 +12,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
+from rapidsms.models import Contact
 from rapidsms.contrib.messagelog.models import Message
 
 from mwana.apps.contactsplus.models import ContactType
@@ -23,15 +25,16 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
-                        StatisticsLinkTable, ReminderStatsTable,
-                        SummaryReportTable)
+                     StatisticsLinkTable, ReminderStatsTable,
+                     SummaryReportTable, ReferralsTable, NotificationsTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
 
 def mothers(request):
     province = district = facility = zone = None
-    start_date = end_date = None
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
     edd_start_date = edd_end_date = None
 
     mothers = PregnantMother.objects.all()
@@ -50,12 +53,16 @@ def mothers(request):
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
             zone = form.cleaned_data.get('zone')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
             edd_start_date = form.cleaned_data.get('edd_start_date')
             edd_end_date = form.cleaned_data.get('edd_end_date')
     else:
-        form = MotherStatsFilterForm()
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = MotherStatsFilterForm(initial=initial)
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -68,7 +75,7 @@ def mothers(request):
     if zone:
         locations = [zone]
 
-    mothers = mothers.filter(location__in=locations)
+    mothers = mothers.filter(Q(location__in=locations) | Q(zone__in=locations))
 
     # filter by created_date
     mothers = filter_by_dates(mothers, 'created_date',
@@ -122,7 +129,27 @@ def mothers(request):
 def mother_history(request, id):
     mother = get_object_or_404(PregnantMother, id=id)
 
-    messages = Message.objects.filter(text__icontains=mother.uid)
+    messages = Message.objects.filter(text__icontains=mother.uid,
+                                      direction='I')
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'msg_type', 'sender', 'facility', 'message']
+        records = []
+        for msg in messages:
+            text = msg.text
+            msg_type = text.split(' ')[0].upper()
+            records.append({
+                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
+                    'msg_type': msg_type,
+                    'sender': msg.contact,
+                    'facility': msg.contact.location.name if msg.contact else '',
+                    'message': text
+                })
+        filename = 'mother{0}_messages_report'.format(mother.uid)
+
+        return export_as_csv(records, keys, filename)
 
     return render_to_response(
         "smgl/mother_history.html",
@@ -136,7 +163,10 @@ def mother_history(request, id):
 def statistics(request, id=None):
     records = []
     facility_parent = None
-    province = district = facility = start_date = end_date = None
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    province = district = facility = None
 
     visits = FacilityVisit.objects.all()
     records_for = Location.objects.filter(type__singular='district')
@@ -146,7 +176,10 @@ def statistics(request, id=None):
         # Prepopulate the district
         if not request.GET:
             update = {u'district_0': facility_parent.name,
-                      u'district_1': facility_parent.id}
+                      u'district_1': facility_parent.id,
+                      u'start_date': start_date,
+                      u'end_date': end_date
+                      }
             request.GET = request.GET.copy()
             request.GET.update(update)
 
@@ -156,8 +189,8 @@ def statistics(request, id=None):
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
         # determine what location(s) to include in the report
         if id:
             # get district facilities
@@ -178,15 +211,38 @@ def statistics(request, id=None):
             if district:
                 records_for = [district]
     else:
-        form = StatisticsFilterForm()
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
 
     for place in records_for:
-        reg_filter = {'district': place}
-        visit_filter = {'district': place}
-        if id:
+        locations = Location.objects.all()
+        if not id:
+
+            reg_filter = {'location__in': [x for x in locations \
+                                if get_current_district(x) == place]}
+            visit_filter = {'location__in': [x for x in locations \
+                                if get_current_district(x) == place]}
+        else:
             reg_filter = {'location': place}
             visit_filter = {'location': place}
+
+        # Get PregnantMother count for each place
+        if not id:
+            district_facilities = [x for x in locations \
+                                if get_current_district(x) == place]
+            pregnancies = PregnantMother.objects \
+                            .filter(location__in=district_facilities)
+        else:
+            pregnancies = PregnantMother.objects.filter(location=place)
+
+        pregnancies = filter_by_dates(pregnancies, 'created_date',
+                                 start=start_date, end=end_date)
+
         r = {'location': place.name}
+
         r['location_id'] = place.id
         births = BirthRegistration.objects.filter(**reg_filter)
         # utilize start/end date if supplied
@@ -227,14 +283,17 @@ def statistics(request, id=None):
                             .values_list('facility_visits__count', flat=True)
 
         r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
+        # ANC1 is PregnantMother registrations
+        r['pregnancies'] = pregnancies.count()
+        r['anc1'] = pregnancies.count()
         num_visits = {}
         for num in anc_visits:
             if num in num_visits:
                 num_visits[num] += 1
             else:
                 num_visits[num] = 1
-        for i in range(1, 5):
-            key = 'anc{0}'.format(i)
+        for i in range(1, 4):
+            key = 'anc{0}'.format(i + 1)
             if i in num_visits:
                 r[key] = num_visits[i]
 
@@ -253,21 +312,6 @@ def statistics(request, id=None):
             key = 'pos{0}'.format(i)
             if i in num_visits:
                 r[key] = num_visits[i]
-
-        # Get PregnantMother count for each place
-        if not id:
-            locations = Location.objects.all()
-            district_facilities = [x for x in locations \
-                                if get_current_district(x) == place]
-            pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities)
-        else:
-            pregnancies = PregnantMother.objects.filter(location=place)
-
-        pregnancies = filter_by_dates(pregnancies, 'created_date',
-                                 start=start_date, end=end_date)
-
-        r['pregnancies'] = pregnancies.count()
 
         records.append(r)
 
@@ -323,7 +367,10 @@ def statistics(request, id=None):
 
 def reminder_stats(request):
     records = []
-    province = district = facility = start_date = end_date = None
+    province = district = facility = None
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
     record_types = ['edd', 'nvd', 'pos', 'ref']
     field_mapper = {'edd': 'Expected Delivery Date', 'nvd': 'Next Visit Date',
                     'pos': 'Post Partem', 'ref': 'Refferals'}
@@ -337,7 +384,11 @@ def reminder_stats(request):
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
     else:
-        form = StatisticsFilterForm()
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
 
     for key in record_types:
         mothers = PregnantMother.objects.all()
@@ -429,7 +480,11 @@ def report(request):
             if form_end_date:
                 end_date = form_end_date
     else:
-        form = StatisticsFilterForm()
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
 
     if province:
         # districts are direct children
@@ -511,13 +566,18 @@ def report(request):
     f_births = percentage(births.filter(place='f').count(), births.count())
     c_births = percentage(births.filter(place='h').count(), births.count())
 
-    deaths = filter_by_dates(DeathRegistration.objects.filter(person='inf'),
+    deaths = filter_by_dates(DeathRegistration.objects.all(),
                               'date', start=start_date, end=end_date)
     if locations:
         deaths = deaths.filter(district__in=locations)
 
-    f_deaths = percentage(deaths.filter(place='f').count(), deaths.count())
-    c_deaths = percentage(deaths.filter(place='h').count(), deaths.count())
+    f_deaths = deaths.filter(place='f')
+    c_deaths = deaths.filter(place='h')
+
+    inf_f_deaths = percentage(f_deaths.filter(person='inf').count(), deaths.count())
+    inf_c_deaths = percentage(c_deaths.filter(person='inf').count(), deaths.count())
+    ma_f_deaths = percentage(f_deaths.filter(person='ma').count(), deaths.count())
+    ma_c_deaths = percentage(c_deaths.filter(person='ma').count(), deaths.count())
 
     #anc reminders
     reminders = filter_by_dates(ReminderNotification.objects.filter(type='nvd'),
@@ -568,10 +628,14 @@ def report(request):
           'value': f_births},
          {'data': "Percentage of community births",
           'value': c_births},
-         {'data': "Percentage of facility deaths",
-          'value': f_deaths},
-         {'data': "Percentage of community deaths",
-          'value': c_deaths},
+         {'data': "Percentage of Infant facility deaths",
+          'value': inf_f_deaths},
+         {'data': "Percentage of Infant community deaths",
+          'value': inf_c_deaths},
+         {'data': "Percentage of Maternal facility deaths",
+          'value': ma_f_deaths},
+         {'data': "Percentage of Maternal community deaths",
+          'value': ma_c_deaths},
          {'data': "Percentage of women who tested positive for Syphilis",
           'value': positive_syph},
          {'data': "Percentage of women tested positive who completed the syphilis treatment",
@@ -600,5 +664,142 @@ def report(request):
          "start_date": start_date,
          "end_date": end_date,
          "summary_report_table": summary_report_table
+        },
+        context_instance=RequestContext(request))
+
+
+def notifications(request):
+    """
+    Report on notifications to help_admin users
+    """
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+ #   province = district = facility = None
+
+    help_admins = Contact.objects.filter(is_help_admin=True)
+    messages = Message.objects.filter(contact__in=help_admins, direction='O')
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+#            province = form.cleaned_data.get('province')
+#            district = form.cleaned_data.get('district')
+#            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+#    # filter by location if needed...
+#    locations = Location.objects.all()
+#    if province:
+#        locations = get_location_tree_nodes(province)
+#    if district:
+#        locations = get_location_tree_nodes(district)
+#    if facility:
+#        locations = get_location_tree_nodes(facility)
+#
+#    message = messages.filter(from_facility__in=locations)
+
+    # filter by created_date
+    messages = filter_by_dates(messages, 'date',
+                             start=start_date, end=end_date)
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'facility', 'message']
+        records = []
+        for msg in messages:
+            records.append({
+                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
+                    'facility': msg.contact.location.name if msg.contact else '',
+                    'message': msg.text
+                })
+        filename = 'notifications_report'
+        return export_as_csv(records, keys, filename)
+
+    return render_to_response(
+        "smgl/notifications.html",
+        {"message_table": NotificationsTable(messages,
+                                        request=request),
+         "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def referrals(request):
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    province = district = facility = None
+
+    referrals = Referral.objects.all()
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    referrals = referrals.filter(from_facility__in=locations)
+
+    # filter by created_date
+    referrals = filter_by_dates(referrals, 'date',
+                             start=start_date, end=end_date)
+
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'from_facility', 'sender', 'number', 'response',
+                'status', 'confirm_amb', 'outcome', 'message']
+
+        records = []
+        for ref in referrals:
+            contact = ref.session.connection.contact if ref.session.connection else ''
+            number = ref.session.connection.identity if ref.session.connection else ''
+            message = ref.session.message_incoming.text if ref.session.message_incoming else ''
+            records.append({
+                    'date': ref.date.strftime('%Y-%m-%d') if ref.date else '',
+                    'from_facility': ref.from_facility,
+                    'sender': contact,
+                    'number': number,
+                    'response': "Yes" if ref.responded else "No",
+                    'status': ref.status,
+                    'confirm_amb': ref.ambulance_response,
+                    'outcome': ref.outcome,
+                    'message': message
+                })
+        filename = 'referrals_report'
+        return export_as_csv(records, keys, filename)
+
+
+    return render_to_response(
+        "smgl/referrals.html",
+        {"message_table": ReferralsTable(referrals,
+                                        request=request),
+         "form": form,
         },
         context_instance=RequestContext(request))

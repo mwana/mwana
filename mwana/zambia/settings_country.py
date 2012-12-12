@@ -55,6 +55,8 @@ RAPIDSMS_TABS = [
     ("mwana.apps.smgl.views.statistics",  "Statistics"),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
     ("mwana.apps.smgl.views.mothers",  "Mothers"),
+    ("mwana.apps.smgl.views.referrals",  "Referrals"),
+    ("mwana.apps.smgl.views.notifications",  "Notifications"),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
