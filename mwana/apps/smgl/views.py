@@ -672,8 +672,43 @@ def notifications(request):
     """
     Report on notifications to help_admin users
     """
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+ #   province = district = facility = None
+
     help_admins = Contact.objects.filter(is_help_admin=True)
-    messages = Message.objects.filter(contact__in=help_admins)
+    messages = Message.objects.filter(contact__in=help_admins, direction='O')
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+#            province = form.cleaned_data.get('province')
+#            district = form.cleaned_data.get('district')
+#            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+#    # filter by location if needed...
+#    locations = Location.objects.all()
+#    if province:
+#        locations = get_location_tree_nodes(province)
+#    if district:
+#        locations = get_location_tree_nodes(district)
+#    if facility:
+#        locations = get_location_tree_nodes(facility)
+#
+#    message = messages.filter(from_facility__in=locations)
+
+    # filter by created_date
+    messages = filter_by_dates(messages, 'date',
+                             start=start_date, end=end_date)
 
     # render as CSV if export
     if request.GET.get('export'):
@@ -692,7 +727,8 @@ def notifications(request):
     return render_to_response(
         "smgl/notifications.html",
         {"message_table": NotificationsTable(messages,
-                                        request=request)
+                                        request=request),
+         "form": form
         },
         context_instance=RequestContext(request))
 
