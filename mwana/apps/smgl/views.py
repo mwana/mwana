@@ -735,6 +735,31 @@ def referrals(request):
     referrals = filter_by_dates(referrals, 'date',
                              start=start_date, end=end_date)
 
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'from_facility', 'sender', 'number', 'response',
+                'status', 'confirm_amb', 'outcome', 'message']
+
+        records = []
+        for ref in referrals:
+            contact = ref.session.connection.contact if ref.session.connection else ''
+            number = ref.session.connection.identity if ref.session.connection else ''
+            message = ref.session.message_incoming.text if ref.session.message_incoming else ''
+            records.append({
+                    'date': ref.date.strftime('%Y-%m-%d') if ref.date else '',
+                    'from_facility': ref.from_facility,
+                    'sender': contact,
+                    'number': number,
+                    'response': "Yes" if ref.responded else "No",
+                    'status': ref.status,
+                    'confirm_amb': ref.ambulance_response,
+                    'outcome': ref.outcome,
+                    'message': message
+                })
+        filename = 'referrals_report'
+        return export_as_csv(records, keys, filename)
+
+
     return render_to_response(
         "smgl/referrals.html",
         {"message_table": ReferralsTable(referrals,
