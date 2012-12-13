@@ -49,6 +49,7 @@ class FacilityLookup(ModelLookup):
         if district:
             loc = Location.objects.get(pk=district)
             results = get_location_tree_nodes(loc)
+            results = [x for x in results if x.type.singular != 'Zone']
         return results
 
     def get_item_label(self, item):

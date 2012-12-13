@@ -686,8 +686,8 @@ def notifications(request):
 #            province = form.cleaned_data.get('province')
 #            district = form.cleaned_data.get('district')
 #            facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
     else:
         initial = {
                     'start_date': start_date,
@@ -747,8 +747,8 @@ def referrals(request):
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
     else:
         initial = {
                     'start_date': start_date,
