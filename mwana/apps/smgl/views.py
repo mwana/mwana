@@ -27,7 +27,7 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
-                     SMSUsersTable)
+                     SMSUsersTable, SMSUserMessageTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
@@ -877,5 +877,37 @@ def sms_users(request):
                                         request=request),
          "search_form": search_form,
          "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def sms_user_history(request, name):
+    contact = get_object_or_404(Contact, name=name)
+
+    messages = Message.objects.filter(contact=contact,
+                                      direction='I')
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'msg_type', 'message']
+        records = []
+        for msg in messages:
+            text = msg.text
+            msg_type = text.split(' ')[0].upper()
+            records.append({
+                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
+                    'msg_type': msg_type,
+                    'message': text
+                })
+        filename = 'sms_user_{0}_messages_report'.format(contact.name)
+
+        return export_as_csv(records, keys, filename)
+
+    return render_to_response(
+        "smgl/sms_user_history.html",
+        {"user": contact,
+          "message_table": SMSUserMessageTable(messages,
+                                        request=request)
         },
         context_instance=RequestContext(request))

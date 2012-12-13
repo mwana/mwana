@@ -15,4 +15,5 @@ urlpatterns = patterns('',
             name="district-stats"),
     url(r"^statistics/reminder-stats/$", views.reminder_stats, name="reminder-stats"),
     url(r"^sms-users/$", views.sms_users, name="sms-users"),
+    url(r"^sms-users/(?P<name>[\w]+)/$", views.sms_user_history, name="sms-user-history"),
 )

@@ -132,8 +132,9 @@ class SummaryReportTable(Table):
 
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y-m-d ")
-    name = Column()
-    number = Column(value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '')
+    name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.name]))
+    number = Column(value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '',
+                    sortable=False)
     last_active = Column(value=lambda cell: cell.object.latest_sms_date,
                          sortable=False)
     location = Column(value=lambda cell: cell.object.location.name if cell.object.location else '',)
@@ -141,3 +142,13 @@ class SMSUsersTable(Table):
     class Meta:
         order_by = "-created_date"
 
+
+class SMSUserMessageTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    msg_type = NamedColumn(col_name="Type",
+                      value=lambda cell: cell.object.text.split(' ')[0].upper()
+                    )
+    text = NamedColumn(col_name="Message")
+
+    class Meta:
+        order_by = "-date"

@@ -1,0 +1,13 @@
+{% extends  "layout.html" %}
+
+{% block title %}SMS User's Message History - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<div class="messages module">
+<h2>{{ user.name }} - {{ user.default_connection.identity }}</h2>
+<a href="?export=1"><button class="btn" name="export">Export</button></a>
+{{ message_table.as_html }}
+</div>
+
+{% endblock %}
