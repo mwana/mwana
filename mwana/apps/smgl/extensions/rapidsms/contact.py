@@ -33,3 +33,15 @@ class ContactLocation(models.Model):
         while location.parent.type.singular.lower() != 'district':
             location = location.parent
         return location
+
+    @property
+    def latest_sms_date(self):
+        model = models.get_model('messagelog', 'Message')
+        latest = model.objects.filter(
+            contact=self.id,
+            direction='I',
+        ).aggregate(date=models.Max('date'))
+        if latest['date']:
+            return latest['date'].strftime('%d/%m/%Y %H:%M:%S')
+        else:
+            return 'None'

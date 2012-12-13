@@ -14,5 +14,5 @@ urlpatterns = patterns('',
     url(r"^statistics/(?P<id>[\d]+)/$", views.statistics,
             name="district-stats"),
     url(r"^statistics/reminder-stats/$", views.reminder_stats, name="reminder-stats"),
-
+    url(r"^sms-users/$", views.sms_users, name="sms-users"),
 )

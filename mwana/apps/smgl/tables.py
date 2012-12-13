@@ -128,3 +128,16 @@ class ReminderStatsTable(Table):
 class SummaryReportTable(Table):
     data = Column(sortable=False)
     value = Column(sortable=False)
+
+
+class SMSUsersTable(Table):
+    created_date = DateColumn(format="Y-m-d ")
+    name = Column()
+    number = Column(value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '')
+    last_active = Column(value=lambda cell: cell.object.latest_sms_date,
+                         sortable=False)
+    location = Column(value=lambda cell: cell.object.location.name if cell.object.location else '',)
+
+    class Meta:
+        order_by = "-created_date"
+
