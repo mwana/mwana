@@ -259,7 +259,9 @@ def _get_people_to_notify(referral):
     types = ContactType.objects.filter(
                     slug__in=[const.CTYPE_DATACLERK, const.CTYPE_TRIAGENURSE]
                 ).all()
-    return Contact.objects.filter(types__in=types, location=referral.facility)
+    return Contact.objects.filter(types__in=types,
+                                  location=referral.facility,
+                                  is_active=True)
 
 
 def _get_people_to_notify_outcome(referral):
@@ -273,17 +275,20 @@ def _get_people_to_notify_outcome(referral):
     from_facility = referral.referring_facility
     facility_contacts = list(Contact.objects.filter(
                 types__in=types,
-                location=from_facility)
+                location=from_facility,
+                is_active=True)
             ) if from_facility else []
-    if referral.get_connection().contact and \
-       referral.get_connection().contact not in facility_contacts:
+    contact = referral.get_connection().contact
+    if contact and contact.is_active and contact not in facility_contacts:
         facility_contacts.append(referral.get_connection().contact)
     return facility_contacts
 
 
 def _pick_er_driver(session, xform, receiving_facility):
     ad_type = ContactType.objects.get(slug__iexact='am')
-    ads = Contact.objects.filter(types=ad_type, location=receiving_facility)
+    ads = Contact.objects.filter(types=ad_type,
+                                 location=receiving_facility,
+                                 is_active=True)
     if ads.count():
         return ads[0]
     else:
@@ -292,7 +297,9 @@ def _pick_er_driver(session, xform, receiving_facility):
 
 def _pick_er_triage_nurse(session, xform, receiving_facility):
     tn_type = ContactType.objects.get(slug__iexact='tn')
-    tns = Contact.objects.filter(types=tn_type, location=receiving_facility)
+    tns = Contact.objects.filter(types=tn_type,
+                                 location=receiving_facility,
+                                 is_active=True)
     if tns.count():
         return tns[0]
     else:
@@ -301,7 +308,9 @@ def _pick_er_triage_nurse(session, xform, receiving_facility):
 
 def _pick_clinic_recip(session, xform, receiving_facility):
     cw_type = ContactType.objects.get(slug__iexact='worker')
-    cws = Contact.objects.filter(types=cw_type, location=receiving_facility)
+    cws = Contact.objects.filter(types=cw_type,
+                                 location=receiving_facility,
+                                 is_active=True)
     if cws.count():
         return cws[0]
     else:
@@ -310,7 +319,8 @@ def _pick_clinic_recip(session, xform, receiving_facility):
 
 def _pick_help_admin(session, xform, receiving_facility):
     help_admins = Contact.objects.filter(is_help_admin=True,
-                                        location=receiving_facility)
+                                        location=receiving_facility,
+                                        is_active=True)
     if help_admins.count():
         return help_admins
     else:
