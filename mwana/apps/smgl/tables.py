@@ -63,7 +63,7 @@ class ReferralsTable(Table):
     outcome = Column(sortable=False)
     message = Column(value=lambda cell: cell.object.session.message_incoming.text if cell.object.session.message_incoming else '',
                      sortable=False)
-    flag = Column(value=lambda cell: '<div style="background-color: {0}; border: 1px solid black; height: 16px; width: 16px; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px;">&nbsp;</div>'.format(cell.object.flag), sortable=False, safe=True)
+    flag = Column(value=lambda cell: '<div class="status {0}">&nbsp;</div>'.format(cell.object.flag), sortable=False, safe=True)
 
     class Meta:
         order_by = "-date"
@@ -131,20 +131,22 @@ class SummaryReportTable(Table):
 
 
 class SMSUsersTable(Table):
-    created_date = DateColumn(format="Y-m-d ")
+    created_date = DateColumn(format="Y m d ")
     name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.name]))
     number = Column(value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '',
                     sortable=False)
-    last_active = Column(value=lambda cell: cell.object.latest_sms_date,
+    last_active = DateColumn(value=lambda cell: cell.object.latest_sms_date,
+                         format="Y m d H:i",
                          sortable=False)
     location = Column(value=lambda cell: cell.object.location.name if cell.object.location else '',)
+    active_status = Column(value=lambda cell: '<div class="status {0}">&nbsp;</div>'.format(cell.object.active_status), sortable=False, safe=True)
 
     class Meta:
         order_by = "-created_date"
 
 
 class SMSUserMessageTable(Table):
-    date = DateColumn(format="Y m d H:i ")
+    date = DateColumn(format="Y m d H:i")
     msg_type = NamedColumn(col_name="Type",
                       value=lambda cell: cell.object.text.split(' ')[0].upper()
                     )

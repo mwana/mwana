@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 
@@ -42,6 +44,18 @@ class ContactLocation(models.Model):
             direction='I',
         ).aggregate(date=models.Max('date'))
         if latest['date']:
-            return latest['date'].strftime('%d/%m/%Y %H:%M:%S')
+            return latest['date']
         else:
-            return 'None'
+            return None
+
+    @property
+    def active_status(self):
+        status = 'inactive'
+        if self.latest_sms_date:
+            now = datetime.now()
+            days = (now - self.latest_sms_date).days
+            if days <= 10:
+                status = 'active'
+            elif days <= 14:
+                status = 'short-term-inactive'
+        return status

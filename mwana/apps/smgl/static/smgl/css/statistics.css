@@ -44,3 +44,26 @@ button.ui-button-icon-only {
 #mothers-form .ui-autocomplete-input {
     width: 80px;
 }
+
+table tr td div.status {
+    border: 1px solid black;
+    height: 16px;
+    width: 16px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius: 8px;
+}
+
+table tr td div.active, table tr td div.resp-out {
+    background-color: green;
+}
+
+table tr td div.short-term-inactive, table tr td div.resp-no-out {
+    background-color: yellow;
+}
+
+table tr td div.inactive, table tr td div.no-resp-no-out {
+    background-color: red;
+}
+
+
