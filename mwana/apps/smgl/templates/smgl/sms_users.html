@@ -1,0 +1,94 @@
+{% extends  "layout.html" %}
+
+{% block title %}SMS Users - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+{{ form.media.css }}
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
+  <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
+  <script>
+      $(function() {
+        $( "#id_start_date" ).datepicker();
+        $( "#id_end_date" ).datepicker();
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+
+<div class="statistics messages module">
+  <h2>SMS Users</h2>
+  <form action="" method="GET" >
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">Period</th>
+          <th colspan="2">Location</th>
+          <th>User</th>
+        </tr>
+        <tr>
+          <th>Start</th>
+          <th>End</th>
+          <th>Province</th>
+          <th>District</th>
+          <th>Contact Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            {{ form.start_date.errors}}
+            {{ form.start_date }}
+          </td>
+          <td>
+            {{ form.end_date.errors}}
+            {{ form.end_date }}
+          </td>
+          <td>
+            {{ form.province.errors}}
+            {{ form.province }}
+          </td>
+          <td>
+            {{ form.district.errors}}
+            {{ form.district }}
+          </td>
+          <td>
+            {{ form.c_type.errors}}
+            {{ form.c_type }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+      <input type="submit" class="btn" name="filter" value="Filter" />
+      <input type="submit" class="btn" name="export" value="Export" />
+  </form>
+  {{ form.media.js }}
+
+  <form action="." method="POST">
+    {% csrf_token %}
+    Or search by (partial) Name or Phone Number<br />
+    {{ search_form.search_string.errors }}
+    {{ search_form.search_string }}
+    <input type="Submit" class="btn" name="search" value="Search" />
+</form>
+{{ users_table.as_html }}
+</div>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+        function newDistrictParameters(query) {
+            query.province = $('#id_province_1').val();
+        }
+        $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
+    });
+</script>
+
+
+{% endblock %}

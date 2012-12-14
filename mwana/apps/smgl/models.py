@@ -333,11 +333,11 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     def flag(self):
         if self.status == 'em':
             if self.ambulance_response and not self.outcome:
-                return 'yellow'
+                return 'resp-no-out'
             elif self.ambulance_response and self.outcome:
-                return 'green'
+                return 'resp-out'
             else:
-                return 'red'
+                return 'no-resp-no-out'
         return ''
 
 

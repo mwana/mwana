@@ -16,17 +16,18 @@ from rapidsms.models import Contact
 from rapidsms.contrib.messagelog.models import Message
 
 from mwana.apps.contactsplus.models import ContactType
-
+from mwana.apps.help.models import HelpRequest
 from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
-    MotherSearchForm)
+    MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
-                     SummaryReportTable, ReferralsTable, NotificationsTable)
+                     SummaryReportTable, ReferralsTable, NotificationsTable,
+                     SMSUsersTable, SMSUserMessageTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
@@ -38,13 +39,6 @@ def mothers(request):
     edd_start_date = edd_end_date = None
 
     mothers = PregnantMother.objects.all()
-
-    search_form = MotherSearchForm()
-    if request.method == 'POST':
-        search_form = MotherSearchForm(request.POST)
-        uid = request.POST.get('uid', None)
-        if uid:
-            mothers = mothers.filter(uid__icontains=uid)
 
     if request.GET:
         form = MotherStatsFilterForm(request.GET)
@@ -113,6 +107,14 @@ def mothers(request):
         filename = '{0}{1}{2}'.format(filename, date_range, edd_date_range)
 
         return export_as_csv(records, keys, filename)
+
+    search_form = MotherSearchForm()
+    if request.method == 'POST':
+        mothers = PregnantMother.objects.all()
+        search_form = MotherSearchForm(request.POST)
+        uid = request.POST.get('uid', None)
+        if uid:
+            mothers = mothers.filter(uid__icontains=uid)
 
     mothers_table = PregnantMotherTable(mothers,
                                         request=request)
@@ -473,12 +475,8 @@ def report(request):
         if form.is_valid():
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
-            form_start_date = form.cleaned_data.get('start_date')
-            form_end_date = form.cleaned_data.get('end_date')
-            if form_start_date:
-                start_date = form_start_date
-            if form_end_date:
-                end_date = form_end_date
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
     else:
         initial = {
                     'start_date': start_date,
@@ -795,11 +793,227 @@ def referrals(request):
         filename = 'referrals_report'
         return export_as_csv(records, keys, filename)
 
-
     return render_to_response(
         "smgl/referrals.html",
         {"message_table": ReferralsTable(referrals,
                                         request=request),
          "form": form,
+        },
+        context_instance=RequestContext(request))
+
+
+def sms_users(request):
+    """
+    Report on all users
+    """
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    province = district = c_type = None
+
+    contacts = Contact.objects.all()
+
+    if request.GET:
+        form = SMSUsersFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            c_type = form.cleaned_data.get('c_type')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = SMSUsersFilterForm(initial=initial)
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+
+    if c_type:
+        contacts = contacts.filter(types__in=[c_type])
+    contacts = contacts.filter(location__in=locations)
+
+    # filter by created_date
+    contacts = filter_by_dates(contacts, 'created_date',
+                             start=start_date, end=end_date)
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['created_date', 'name', 'number', 'last_active', 'location']
+        records = []
+        for c in contacts:
+            records.append({
+                    'created_date': c.created_date.strftime('%Y-%m-%d') if c.created_date else None,
+                    'name': c.name,
+                    'number': c.default_connection.identity if c.default_connection else None,
+                    'last_active': c.latest_sms_date,
+                    'location': c.location.name if c.location else '',
+                })
+        filename = 'sms_users_report'
+        return export_as_csv(records, keys, filename)
+
+    search_form = SMSUsersSearchForm()
+    if request.method == 'POST':
+        contacts = Contact.objects.all()
+        search_form = SMSUsersSearchForm(request.POST)
+        search_string = request.POST.get('search_string', None)
+        if search_string:
+            contacts = contacts.filter(Q(name__icontains=search_string) | Q(connection__identity__icontains=search_string))
+
+    return render_to_response(
+        "smgl/sms_users.html",
+        {"users_table": SMSUsersTable(contacts,
+                                        request=request),
+         "search_form": search_form,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def sms_user_history(request, name):
+    contact = get_object_or_404(Contact, name=name)
+
+    messages = Message.objects.filter(contact=contact,
+                                      direction='I')
+
+    # render as CSV if export
+    if request.GET.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'msg_type', 'message']
+        records = []
+        for msg in messages:
+            text = msg.text
+            msg_type = text.split(' ')[0].upper()
+            records.append({
+                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
+                    'msg_type': msg_type,
+                    'message': text
+                })
+        filename = 'sms_user_{0}_messages_report'.format(contact.name)
+
+        return export_as_csv(records, keys, filename)
+
+    return render_to_response(
+        "smgl/sms_user_history.html",
+        {"user": contact,
+          "message_table": SMSUserMessageTable(messages,
+                                        request=request)
+        },
+        context_instance=RequestContext(request))
+
+
+def sms_user_statistics(request, name):
+    contact = get_object_or_404(Contact, name=name)
+
+    start_date = date(date.today().year, 1, 1)
+    end_date = date(date.today().year, 12, 31)
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+    mothers = PregnantMother.objects.filter(contact=contact)
+    # filter by created_date
+    mothers = filter_by_dates(mothers, 'created_date',
+                             start=start_date, end=end_date)
+
+    anc_visits = FacilityVisit.objects.filter(contact=contact, visit_type='anc')
+    anc_visits = filter_by_dates(anc_visits, 'created_date',
+                             start=start_date, end=end_date)
+
+    pos_visits = FacilityVisit.objects.filter(contact=contact, visit_type='pos')
+    pos_visits = filter_by_dates(pos_visits, 'created_date',
+                             start=start_date, end=end_date)
+
+    births = BirthRegistration.objects.filter(contact=contact)
+    births = filter_by_dates(births, 'date',
+                             start=start_date, end=end_date)
+
+    deaths = DeathRegistration.objects.filter(contact=contact)
+    deaths = filter_by_dates(deaths, 'date',
+                             start=start_date, end=end_date)
+
+    query = Q(requested_by__contact=contact) | Q(requested_by__identity=contact.default_connection.identity)
+
+    help_reqs = HelpRequest.objects.filter(query)
+    help_reqs = filter_by_dates(help_reqs, 'requested_on',
+                             start=start_date, end=end_date)
+
+    tolds = ToldReminder.objects.filter(contact=contact)
+    tolds = filter_by_dates(tolds, 'date',
+                             start=start_date, end=end_date)
+
+    # Referrals store neither the initiator of the Referral or the initiator of the Referral Outcomes
+    # inspect the messagelog
+    refs = Message.objects.filter(text__istartswith='REFER ', contact=contact,
+                                  direction='I')
+    refs = filter_by_dates(refs, 'date',
+                             start=start_date, end=end_date)
+
+    ref_outcomes = Message.objects.filter(text__istartswith='REFOUT', contact=contact,
+                                  direction='I')
+    ref_outcomes = filter_by_dates(ref_outcomes, 'date',
+                             start=start_date, end=end_date)
+
+    records = [
+         {'data': "Number of Pregnancies registered",
+         'value': mothers.count()},
+         {'data': "Number of ANC Follow-Up visits registered",
+          'value': anc_visits.count()},
+         {'data': "Number of POS Follow-Up visits registered",
+          'value': pos_visits.count()},
+         {'data': "Number of Referrals registereted",
+          'value': refs.count()},
+         {'data': "Number of Referral Outcomes registered",
+          'value': ref_outcomes.count()},
+         {'data': 'Number of Births Registered',
+          'value': births.count()},
+         {'data': 'Number of Deaths Registered',
+          'value': deaths.count()},
+         {'data': 'Number of Help messages sent',
+          'value': help_reqs.count()},
+         {'data': 'Number of "TOLD" sent',
+          'value': tolds.count()},
+        ]
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['data', 'value']
+        filename = 'sms_user_summary_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+        return export_as_csv(records, keys, filename)
+
+    summary_report_table = SummaryReportTable(records,
+                                       request=request)
+
+    return render_to_response(
+        "smgl/sms_user_statistics.html",
+        {"user": contact,
+         "start_date": start_date,
+         "end_date": end_date,
+         "summary_report_table": summary_report_table,
+         "form": form,
+         "user": contact
         },
         context_instance=RequestContext(request))

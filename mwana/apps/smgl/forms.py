@@ -1,6 +1,8 @@
+import selectable.forms as selectable
+
 from django import forms
 
-import selectable.forms as selectable
+from mwana.apps.contactsplus.models import ContactType
 
 from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
@@ -60,3 +62,19 @@ class MotherStatsFilterForm(StatisticsFilterForm):
 
     def save(self, *args, **kwargs):
         return self.cleaned_data
+
+
+class SMSUsersFilterForm(StatisticsFilterForm):
+    """
+    A Form to filter SMS Users
+    """
+    c_type = forms.ModelChoiceField(queryset=ContactType.objects.all(),
+                                    empty_label='(All)',
+                                    required=False)
+
+
+class SMSUsersSearchForm(forms.Form):
+    """
+    A Form to lookup SMS Users
+    """
+    search_string = forms.CharField(max_length=100, required=True)
