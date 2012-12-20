@@ -349,9 +349,9 @@ def send_no_outcome_reminder(router_obj=None):
                           **{"unique_id": resp.mother.uid})
 
 
-def send_no_outcome_superuser_reminder(router_obj=None):
+def send_no_outcome_help_admin_reminder(router_obj=None):
     """
-    Send reminders to superusers for Amulance Responses
+    Send reminders to help admin for Amulance Responses
     that have no Ambulance Outcome and are @ 24 hours old
     """
     def _responses_to_remind():
@@ -373,11 +373,11 @@ def send_no_outcome_superuser_reminder(router_obj=None):
         req = resp.ambulance_request
         ref = req.referral_set.all()[0]
         receiving_facility = ref.facility
-        superusers = Contact.objects.filter(is_super_user=True,
-                                            location=receiving_facility)
-        for su in superusers:
-            if su.default_connection:
-                su.message(const.AMB_OUTCOME_NO_OUTCOME,
+        users = Contact.objects.filter(is_help_admin=True,
+                                       location=receiving_facility)
+        for u in users:
+            if u.default_connection:
+                u.message(const.AMB_OUTCOME_NO_OUTCOME,
                           **{"unique_id": resp.mother.uid})
 
 
