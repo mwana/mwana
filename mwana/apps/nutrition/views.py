@@ -13,7 +13,7 @@ from django.db.models import Q
 from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
 from django.views.generic import list_detail
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, InvalidPage
 
 from .models import *
 from .graphs import NutritionGraphs
@@ -26,6 +26,12 @@ DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
              "Thyolo", "Phalombe", "Zomba", "Neno"]
 
 OEDEMA_VALUES = {1: "Yes", 0: "No", }
+
+stat_options = {"All": "All", "Cancelled": "C", "Good": "G",
+                    "Baseline": "B", "Suspect": "S"}
+
+action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
+                      "All": "All"}
 
 
 def index(req):
@@ -103,14 +109,11 @@ def assessments(request):
     locations = sorted(DISTRICTS)
     status = request.GET.get('status', 'All')
     selected_status = str(status)
-    stat_options = {"All": "All", "Cancelled": "C", "Good": "G",
-                    "Baseline": "B", "Suspect": "S"}
     action_taken = request.GET.get('action_taken', 'All')
     selected_action = str(action_taken)
-    action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
-                      "All": "All"}
     ass_list = Assessment.objects.filter(Q(date__gte=startdate),
                                       Q(date__lte=enddate)).order_by('-date')
+
     if location != "All Districts":
         ass_list = ass_list.filter(healthworker__location__parent__parent__name=location)
     if status != "All":
@@ -135,7 +138,8 @@ def assessments(request):
                'selected_status': selected_status,
                'stat_options': sorted(stat_options.keys()),
                'action_options': sorted(action_options.keys()),
-               'selected_action': selected_action}
+               'selected_action': selected_action,
+               'ass_list': ass_list}
 
     return render_to_response("nutrition/assessment_list.html", context,
                                                              context_instance=RequestContext(request))
@@ -196,7 +200,7 @@ def get_human_oedema(value):
 
 
 # TODO DRY
-def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage):
+def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage, status, action_taken):
     dicts_for_export = []
     asses = Assessment.objects.all().order_by('-date').select_related()
     if location != "All Districts":
@@ -278,7 +282,9 @@ def csv_assessments(req):
     gender = req.GET.get('gender', 'Both')
     startage = req.GET.get('startage', 0)
     endage = req.GET.get('endage', 60)
-    assessments = ass_dicts_for_export(location, startdate, enddate, gender, startage, endage)
+    status = req.GET.get('status', 'All')
+    action_taken = req.GET.get('action_taken', 'All')
+    assessments = ass_dicts_for_export(location, startdate, enddate, gender, startage, endage, status, action_taken)
     # sort by date, descending
     #assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     return export(headers, keys, assessments, 'assessments.csv')
