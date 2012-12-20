@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     (r'^', include('mwana.urls')),
     # custom URL additions for Malawi:
     url(r'^$', views.dashboard_malawi, name='malawi_home'),
+    url(r'^results160/graphs/', views.malawi_graphs, name='mwana_graphs'),
     url(r'^results160', views.malawi_reports, name='mwana_reports'),
     url(r"^csv/report-one/", views.csv_report_one, name="csv_report_one"),
     url(r"^csv/report-two/", views.csv_report_two, name="csv_report_two"),

@@ -928,7 +928,8 @@ class MalawiReports(Results160Reports):
                 pass
         table.append(['All listed districts', 'All listed  clinics', tt_positive, tt_negative, tt_rejected,
                       tt_tested, tt_verified, tt_retrieved])
-        return sorted(table, key=itemgetter(0, 1))
+        table = sorted(table, key=itemgetter(0, 1))
+        return table, tt_tested, tt_verified, tt_retrieved
 
 
     def dbsr_pending_results_report(self, startdate=None, enddate=None, district=None):
@@ -961,7 +962,8 @@ class MalawiReports(Results160Reports):
                 pass
         table.append(['All listed districts', 'All listed  clinics', tt_new, tt_notified, tt_updated,
                       tt_unprocessed, tt_pending])
-        return sorted(table, key=itemgetter(0, 1))
+        table = sorted(table, key=itemgetter(0, 1))
+        return table, tt_new, tt_notified, tt_updated, tt_unprocessed, tt_pending
 
 
     def dbsr_positivity_data(self, startdate=None, enddate=None, district=None):
@@ -1006,7 +1008,7 @@ class MalawiReports(Results160Reports):
         percent_negative_district = percent(tt_negative, total_dbs)
         percent_rejected_district = percent(tt_rejected, total_dbs)
 
-        return total_dbs, percent_positive_district, percent_negative_district, percent_rejected_district
+        return total_dbs, percent_positive_district, percent_negative_district, percent_rejected_district, tt_positive, tt_negative, tt_rejected
 
 
     def dbsr_graph_data(self, startdate=None, enddate=None, district=None):

@@ -59,6 +59,7 @@ INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
 #INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
+RAPIDSMS_TABS.append(('mwana_graphs', 'Results160 Analysis'))
 RAPIDSMS_TABS.append(('remindmi_reports', 'RemindMi'))
 
 # Add the people and growth monitoring apps for Malawi:

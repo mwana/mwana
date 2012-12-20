@@ -87,12 +87,12 @@ def malawi_reports(request, location=None):
         district = "All Districts"
 
     r = MalawiReports()
-    res = r.dbsr_tested_retrieved_report(startdate, enddate, district)
+    res, tt_tested, tt_verified, tt_retrieved = r.dbsr_tested_retrieved_report(startdate, enddate, district)
 
     min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
     turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
 
-    pending = r.dbsr_pending_results_report(startdate, enddate, district)
+    pending, tt_new, tt_notified, tt_updated, tt_unprocessed, tt_pending = r.dbsr_pending_results_report(startdate, enddate, district)
 
     districts = DISTRICTS
 
@@ -101,8 +101,12 @@ def malawi_reports(request, location=None):
     single_bar_length, tt_in_graph, \
     graph = r.dbsr_graph_data(startdate, enddate, district)
 
+    # total_dbs, percent_positive_district, percent_negative_district, \
+    # percent_rejected_district = r.dbsr_positivity_data(startdate, enddate, district)
+
     total_dbs, percent_positive_district, percent_negative_district, \
-    percent_rejected_district = r.dbsr_positivity_data(startdate, enddate, district)
+        percent_rejected_district, tt_positive, tt_negative, \
+        tt_rejected= r.dbsr_positivity_data(startdate, enddate, district)
 
     return render_to_response('reports/malawi.html',
         {'startdate': startdate,
@@ -127,6 +131,88 @@ def malawi_reports(request, location=None):
          'percent_negative_district': percent_negative_district,
          'percent_rejected_district': percent_rejected_district,
          'total_dbs': total_dbs,
+     }, context_instance=RequestContext(request))
+
+
+@require_GET
+def malawi_graphs(request, location=None):
+
+    today = datetime.today().date()
+    try:
+        startdate1 = text_date(request.REQUEST['startdate'])
+    except (KeyError, ValueError, IndexError):
+        startdate1 = today - timedelta(days=30)
+
+    try:
+        enddate1 = text_date(request.REQUEST['enddate'])
+    except (KeyError, ValueError, IndexError):
+        enddate1 = datetime.today().date()
+    startdate = min(startdate1, enddate1, datetime.today().date())
+    enddate = min(max(enddate1, startdate1), datetime.today().date())
+
+    try:
+        district = request.REQUEST['location']
+    except (KeyError, ValueError, IndexError):
+        district = "All Districts"
+
+    r = MalawiReports()
+    res, tt_tested, tt_verified, tt_retrieved = r.dbsr_tested_retrieved_report(startdate, enddate, district)
+
+    min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
+    turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
+
+    pending, tt_new, tt_notified, tt_updated, tt_unprocessed, tt_pending = r.dbsr_pending_results_report(startdate, enddate, district)
+
+    districts = DISTRICTS
+
+    births = r.reminders_patient_events_report(startdate, enddate)
+
+    single_bar_length, tt_in_graph, \
+    graph = r.dbsr_graph_data(startdate, enddate, district)
+    graph_data = [["Date", "Samples sent"]]
+    for item in graph:
+        graph_data.append([item[0].isoformat(), item[1]])
+    total_dbs, percent_positive_district, percent_negative_district, \
+    percent_rejected_district, tt_positive, tt_negative, \
+    tt_rejected = r.dbsr_positivity_data(startdate, enddate, district)
+
+#    pdb.set_trace()
+
+    return render_to_response('reports/malawi_graphs.html',
+        {'startdate': startdate,
+         'enddate': enddate,
+         'today': today,
+         'sent_results_rpt': res,
+         'districts': districts,
+         'selected_location': district,
+         'turnaround_time_rpt': turnaround_time,
+         'min_turnaround_time': min_turnaround_time,
+         'max_turnaround_time': max_turnaround_time,
+         'num_of_results': num_of_rsts,
+         'num_of_facilities': num_of_facilities,
+         'births_rpt': births,
+         'formattedtoday': today.strftime("%d %b %Y"),
+         'formattedtime': datetime.today().strftime("%I:%M %p"),
+         'graph': graph,
+         'graph_data': graph_data,
+         'single_bar_length': single_bar_length,
+         'tt_in_graph': tt_in_graph,
+         'pending_results': pending,
+         'percent_positive_district': percent_positive_district,
+         'percent_negative_district': percent_negative_district,
+         'percent_rejected_district': percent_rejected_district,
+         'total_dbs': total_dbs,
+         'tt_positive': tt_positive,
+         'tt_negative': tt_negative,
+         'tt_rejected': tt_rejected,
+         'tt_tested': tt_tested,
+         'tt_verified': tt_verified,
+         'tt_retrieved': tt_retrieved,
+         'tt_new': tt_new,
+         'tt_notified': tt_notified,
+         'tt_updated': tt_updated,
+         'tt_unprocessed': tt_unprocessed,
+         'tt_pending': tt_pending,
      }, context_instance=RequestContext(request))
 
 
