@@ -1,5 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
-""" Initilises the table that stores information on whether someone has logged
+""" Initialises the table that stores information on whether someone has logged
 in before
 """
 from django.contrib.auth.models import User
