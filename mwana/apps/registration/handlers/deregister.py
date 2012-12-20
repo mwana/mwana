@@ -57,6 +57,7 @@ class DeregisterHandler(KeywordHandler):
                 self.respond('The phone number %(phone)s does not belong to any'
                              ' CBA at %(clinic)s. Make sure you typed it '
                              'correctly', phone=text, clinic=location)
+                return True
             # we do not expect this to happen. phone number is excpected to be
             # unique (>=9 chars) project wide
             except Contact.MultipleObjectsReturned:
@@ -72,7 +73,7 @@ class DeregisterHandler(KeywordHandler):
                        worker.default_connection.identity,
                        location.name))
                 self.notify_help_admins(msg)
-                return
+                return True
 
         if not cba:
             cbas = \
@@ -118,6 +119,7 @@ class DeregisterHandler(KeywordHandler):
                    cba.location.name,
                    location.name))
             self.notify_help_admins(msg)
+            return True
 
     def notify_help_admins(self, msg):
         for help_admin in Contact.active.filter(is_help_admin=True):
