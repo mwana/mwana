@@ -326,13 +326,14 @@ class App(rapidsms.apps.base.AppBase):
                 cba_name = ' %s' % msg.contact.name
             else:
                 cba_name = ''
+            rsms_id = "Mi" + str(py_cupom.encode(patient.id, 5, True))
             if patient.patient_events.filter(event=event, date=date).count():
                 #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
                 #you and get on with it.
                 msg.respond(_("Thanks! You have registered "
-                        "%(name)s's EDD as %(date)s. Her RemindMi_ID is Mi%(rsms_id)s, you will be notified for "
+                        "%(name)s's LMP as %(date)s. Her RemindMi_ID is %(remind_id)s, you will be notified for "
                               "%(gender)s next clinic appointment."), gender=event.possessive_pronoun,
-                        date=date.strftime('%d/%m/%Y'), name=patient.name, rsms_id=py_cupom.encode(patient.id, 5, True))
+                        date=date.strftime('%d/%m/%Y'), name=patient.name, remind_id=patient.remind_id)
                 return True
             patient_event = patient.patient_events.create(event=event,
                                                   date=date,
@@ -343,10 +344,12 @@ class App(rapidsms.apps.base.AppBase):
                 patient_event.save()
             gender = event.possessive_pronoun
             msg.respond(_("Thanks! You have registered "
-                        "%(name)s's EDD as %(date)s. Her RemindMi_ID is Mi%(rsms_id)s, you will be notified for "
+                        "%(name)s's LMP as %(date)s. Her RemindMi_ID is %(rsms_id)s, you will be notified for "
                         "%(gender)s next clinic appointment."), gender=gender,
-                        rsms_id=py_cupom.encode(patient.id, 5, True),
+                        rsms_id=rsms_id,
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
+            patient.remind_id = rsms_id
+            patient.save()
         else:
             msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "
                       "MAYI <DELIVERY_DATE> <MOTHERS_NAME> <OPTIONAL_MOTHERS_CELL_NUMBER>"))
