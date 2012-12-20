@@ -418,6 +418,31 @@ def send_syphillis_reminders(router_obj=None):
             v.save()
 
 
+def send_inactive_notice(router_obj=None):
+    """
+    Automated Reminder for inactive users
+
+    To: Active CBAs & Data Clerks
+    On: 14th day after Contact.latest_sms_date who are marked as
+        Contact.is_active=True
+    """
+    _set_router(router_obj)
+
+    def _contacts_to_remind():
+        now = datetime.utcnow().date()
+        inactive_threshold = now - timedelta(days=14)
+        contacts = Contact.objects.filter(is_active=True)
+
+        for c in contacts:
+            last_sent = c.latest_sms_date
+            if last_sent and last_sent.date() == inactive_threshold:
+                yield c
+
+    for c in _contacts_to_remind():
+        if c.default_connection:
+            c.message(const.INACTIVE_CONTACT, **{})
+
+
 def _create_notification(type, contact, mother_id):
     notif = ReminderNotification(type=type,
                                  recipient=contact,

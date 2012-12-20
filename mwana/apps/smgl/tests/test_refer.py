@@ -33,9 +33,9 @@ class SMGLReferTest(SMGLSetUp):
         self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
         self.tn = self.createUser(const.CTYPE_TRIAGENURSE, "666888")
         self.am = self.createUser("AM", "666555")
-        self.su = self.createUser("worker", "666111")
-        self.su.is_super_user = True
-        self.su.save()
+        self.ha = self.createUser("worker", "666111")
+        self.ha.is_help_admin = True
+        self.ha.save()
 
         self.refferring_dc = self.createUser(const.CTYPE_DATACLERK, "666999",
                                              location="804034")

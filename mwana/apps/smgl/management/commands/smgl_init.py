@@ -17,6 +17,7 @@ class Command(BaseCommand):
                      "mwana.apps.smgl.reminders.send_missed_postpartum_reminders",
                      "mwana.apps.smgl.reminders.reactivate_user",
                      "mwana.apps.smgl.reminders.send_syphillis_reminders",
+                     "mwana.apps.smgl.reminders.send_inactive_notice"
                      ]
         amb_reminders = ["mwana.apps.smgl.reminders.send_no_outcome_reminder",
                           "mwana.apps.smgl.reminders.send_no_outcome_superuser_reminder"]

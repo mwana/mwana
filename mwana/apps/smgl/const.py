@@ -99,3 +99,6 @@ OUT_COMPLETE = _("Thanks %(name)s. Your account will be re-activated on %(date)s
 # Syphilis
 SYP_TEST_COMPLETE = _("Thanks %(name)s. A Syphilis Test Result has been recorded for %(unique_id)s. Please register the first treatment when it is given.")
 SYP_TREATMENT_COMPLETE = _("Thanks %(name)s. A Syphilis Treatment has been recorded for %(unique_id)s.")
+
+# MISC OUTBOUND SCHEDULED MESSAGES
+INACTIVE_CONTACT = _("Our records indicate that you have not sent a single SMS for 14 days. You will be contacted on this matter soon by a representative")
