@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
 
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from rapidsms import router
 from rapidsms.models import Contact
 
 from threadless_router.router import Router
 
+from mwana.apps.contactsplus.models import ContactType
+
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
-    PregnantMother, AmbulanceResponse, SyphilisTreatment
+    PregnantMother, AmbulanceResponse, SyphilisTreatment, Location
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
@@ -441,6 +443,29 @@ def send_inactive_notice(router_obj=None):
     for c in _contacts_to_remind():
         if c.default_connection:
             c.message(const.INACTIVE_CONTACT, **{})
+
+
+def send_expected_deliveries(router_obj=None):
+    """
+    Weekly reminder for expected deliveries
+
+    To: In Charge Contacts
+    On: Weekly
+    """
+    _set_router(router_obj)
+
+    incharge = ContactType.objects.get(slug='incharge')
+    now = datetime.utcnow().date()
+    next_week = now + timedelta(days=7)
+
+    contacts = Contact.objects.filter(is_active=True, types=incharge,
+                                      location__pregnantmother__edd__gte=now,
+                                      location__pregnantmother__edd__lte=next_week) \
+                        .annotate(num_edds=Count('location__pregnantmother'))
+
+    for c in contacts:
+        if c.default_connection:
+            c.message(const.EXPECTED_EDDS, **{"edd_count": c.num_edds, })
 
 
 def _create_notification(type, contact, mother_id):
