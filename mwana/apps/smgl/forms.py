@@ -3,6 +3,7 @@ import selectable.forms as selectable
 from django import forms
 
 from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.help.models import HelpRequest
 
 from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
@@ -78,3 +79,14 @@ class SMSUsersSearchForm(forms.Form):
     A Form to lookup SMS Users
     """
     search_string = forms.CharField(max_length=100, required=True)
+
+
+class HelpRequestManagerForm(forms.ModelForm):
+    """
+    A Form to resolve Help Request
+    """
+
+    class Meta:
+        model = HelpRequest
+        fields = ('notes',)
+

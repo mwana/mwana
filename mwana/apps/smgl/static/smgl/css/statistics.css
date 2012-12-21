@@ -54,7 +54,7 @@ table tr td div.status {
     border-radius: 8px;
 }
 
-table tr td div.active, table tr td div.resp-out {
+table tr td div.active, table tr td div.resp-out, table tr td div.resolved {
     background-color: green;
 }
 
@@ -62,8 +62,10 @@ table tr td div.short-term-inactive, table tr td div.resp-no-out {
     background-color: yellow;
 }
 
-table tr td div.inactive, table tr td div.no-resp-no-out {
+table tr td div.inactive, table tr td div.no-resp-no-out, table tr td div.pending {
     background-color: red;
 }
+
+
 
 

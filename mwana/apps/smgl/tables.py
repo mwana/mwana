@@ -155,3 +155,19 @@ class SMSUserMessageTable(Table):
 
     class Meta:
         order_by = "-date"
+
+
+class HelpRequestTable(Table):
+    id = Column(link=lambda cell: reverse("help-manager", args=[cell.object.id]))
+    requested_on = DateColumn(format="Y m d H:i ")
+    phone = Column(value=lambda cell: cell.object.requested_by.identity)
+    name = Column(value=lambda cell: cell.object.requested_by.contact.name if cell.object.requested_by.contact else '')
+#    title = Column(value=lambda cell: ", ".join([x for x in cell.object.requested_by.contact.types.all()]) if cell.object.requested_by.contact else '',
+#                   sortable=False)
+    facility = Column(value=lambda cell: cell.object.requested_by.contact.location if cell.object.requested_by.contact else '')
+    additional_text = NamedColumn(col_name='message')
+    resolved_by = Column(value=lambda cell: cell.object.resolved_by or 'Unresolved')
+    status = Column(value=lambda cell: '<div class="status {0}">&nbsp;</div>'.format(cell.object.get_status_display), sortable=False, safe=True)
+
+    class Meta:
+        order_by = "-requested_on"

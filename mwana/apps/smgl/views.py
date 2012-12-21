@@ -20,14 +20,15 @@ from mwana.apps.help.models import HelpRequest
 from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
-    MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm)
+    MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm,
+    HelpRequestManagerForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest)
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
-                     SMSUsersTable, SMSUserMessageTable)
+                     SMSUsersTable, SMSUserMessageTable, HelpRequestTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
@@ -1015,5 +1016,101 @@ def sms_user_statistics(request, name):
          "summary_report_table": summary_report_table,
          "form": form,
          "user": contact
+        },
+        context_instance=RequestContext(request))
+
+
+def help(request):
+    province = district = facility = None
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    help_reqs = HelpRequest.objects.all()
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=initial)
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    help_reqs = help_reqs.filter(requested_by__contact__location__in=locations)
+
+    # filter by created_date
+    help_reqs = filter_by_dates(help_reqs, 'requested_on',
+                             start=start_date, end=end_date)
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['id', 'requested_on', 'phone', 'name', 'facility',
+                'additional_text', 'resolved_by', 'status']
+        records = []
+        for req in help_reqs:
+            requested_on = req.requested_on.strftime('%Y-%m-%d') \
+                        if req.requested_on else None
+            records.append({
+                    'id': req.id,
+                    'requested_on': requested_on,
+                    'phone': req.requested_by.identity,
+                    'name': req.requested_by.contact.name if req.requested_by.contact else None,
+                    'facility': req.requested_by.contact.location if req.requested_by.contact else None,
+                    'additional_text': req.additional_text,
+                    'resolved_by': req.resolved_by,
+                    'status': req.get_status_display
+                })
+        filename = 'help_request_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+
+        return export_as_csv(records, keys, filename)
+
+    helpreqs_table = HelpRequestTable(help_reqs, request=request)
+
+    return render_to_response(
+        "smgl/helprequests.html",
+        {"helpreqs_table": helpreqs_table,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+
+
+def help_manager(request, id):
+    help_request = get_object_or_404(HelpRequest, id=id)
+
+    form = HelpRequestManagerForm(request.POST or None, instance=help_request)
+    if form.is_valid():
+        help_request = form.save()
+        now = datetime.datetime.now()
+        help_request.addressed_on = now
+        help_request.resolved_by = request.user.username
+        help_request.status = 'R'
+        help_request.save()
+
+    return render_to_response(
+        "smgl/helprequest_manager.html",
+        {"help_request": help_request,
+         "form": form
         },
         context_instance=RequestContext(request))

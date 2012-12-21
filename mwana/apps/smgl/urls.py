@@ -17,4 +17,6 @@ urlpatterns = patterns('',
     url(r"^sms-users/$", views.sms_users, name="sms-users"),
     url(r"^sms-users/(?P<name>[\w]+)/$", views.sms_user_history, name="sms-user-history"),
     url(r"^sms-users/(?P<name>[\w]+)/statistics/$", views.sms_user_statistics, name="sms-user-statistics"),
+    url(r"^help/(?P<id>[\d]+)/$", views.help_manager, name="help-manager"),
+    url(r"^help/$", views.help, name="help"),
 )
