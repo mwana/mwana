@@ -1,15 +1,17 @@
 from datetime import datetime, timedelta
 
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from rapidsms import router
 from rapidsms.models import Contact
 
 from threadless_router.router import Router
 
+from mwana.apps.contactsplus.models import ContactType
+
 from mwana.apps.smgl import const
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
-    PregnantMother, AmbulanceResponse, SyphilisTreatment
+    PregnantMother, AmbulanceResponse, SyphilisTreatment, Location
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
@@ -349,9 +351,9 @@ def send_no_outcome_reminder(router_obj=None):
                           **{"unique_id": resp.mother.uid})
 
 
-def send_no_outcome_superuser_reminder(router_obj=None):
+def send_no_outcome_help_admin_reminder(router_obj=None):
     """
-    Send reminders to superusers for Amulance Responses
+    Send reminders to help admin for Amulance Responses
     that have no Ambulance Outcome and are @ 24 hours old
     """
     def _responses_to_remind():
@@ -373,11 +375,11 @@ def send_no_outcome_superuser_reminder(router_obj=None):
         req = resp.ambulance_request
         ref = req.referral_set.all()[0]
         receiving_facility = ref.facility
-        superusers = Contact.objects.filter(is_super_user=True,
-                                            location=receiving_facility)
-        for su in superusers:
-            if su.default_connection:
-                su.message(const.AMB_OUTCOME_NO_OUTCOME,
+        users = Contact.objects.filter(is_help_admin=True,
+                                       location=receiving_facility)
+        for u in users:
+            if u.default_connection:
+                u.message(const.AMB_OUTCOME_NO_OUTCOME,
                           **{"unique_id": resp.mother.uid})
 
 
@@ -416,6 +418,54 @@ def send_syphillis_reminders(router_obj=None):
         if found_someone:
             v.reminded = True
             v.save()
+
+
+def send_inactive_notice(router_obj=None):
+    """
+    Automated Reminder for inactive users
+
+    To: Active CBAs & Data Clerks
+    On: 14th day after Contact.latest_sms_date who are marked as
+        Contact.is_active=True
+    """
+    _set_router(router_obj)
+
+    def _contacts_to_remind():
+        now = datetime.utcnow().date()
+        inactive_threshold = now - timedelta(days=14)
+        contacts = Contact.objects.filter(is_active=True)
+
+        for c in contacts:
+            last_sent = c.latest_sms_date
+            if last_sent and last_sent.date() == inactive_threshold:
+                yield c
+
+    for c in _contacts_to_remind():
+        if c.default_connection:
+            c.message(const.INACTIVE_CONTACT, **{})
+
+
+def send_expected_deliveries(router_obj=None):
+    """
+    Weekly reminder for expected deliveries
+
+    To: In Charge Contacts
+    On: Weekly
+    """
+    _set_router(router_obj)
+
+    incharge = ContactType.objects.get(slug='incharge')
+    now = datetime.utcnow().date()
+    next_week = now + timedelta(days=7)
+
+    contacts = Contact.objects.filter(is_active=True, types=incharge,
+                                      location__pregnantmother__edd__gte=now,
+                                      location__pregnantmother__edd__lte=next_week) \
+                        .annotate(num_edds=Count('location__pregnantmother'))
+
+    for c in contacts:
+        if c.default_connection:
+            c.message(const.EXPECTED_EDDS, **{"edd_count": c.num_edds, })
 
 
 def _create_notification(type, contact, mother_id):

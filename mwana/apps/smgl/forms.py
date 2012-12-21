@@ -3,6 +3,8 @@ import selectable.forms as selectable
 from django import forms
 
 from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.help.models import HelpRequest
+from mwana.apps.smgl.models import XFormKeywordHandler
 
 from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
@@ -64,6 +66,15 @@ class MotherStatsFilterForm(StatisticsFilterForm):
         return self.cleaned_data
 
 
+class SMSRecordsFilterForm(StatisticsFilterForm):
+    """
+    A Form to filter SMS Records
+    """
+    keyword = forms.ModelChoiceField(queryset=XFormKeywordHandler.objects.all(),
+                                    empty_label='(All)',
+                                    required=False)
+
+
 class SMSUsersFilterForm(StatisticsFilterForm):
     """
     A Form to filter SMS Users
@@ -78,3 +89,14 @@ class SMSUsersSearchForm(forms.Form):
     A Form to lookup SMS Users
     """
     search_string = forms.CharField(max_length=100, required=True)
+
+
+class HelpRequestManagerForm(forms.ModelForm):
+    """
+    A Form to resolve Help Request
+    """
+
+    class Meta:
+        model = HelpRequest
+        fields = ('notes',)
+

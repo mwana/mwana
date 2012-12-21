@@ -1,0 +1,18 @@
+<ul id="tabs">{% for tab in tabs %}{% if tab.visible %}
+        <li class="app-{{ tab.caption_slug }}{% if tab.is_active %} active{% endif %}">
+                <a href="{{ tab.url }}"><span>{{ tab.caption }}</span></a>
+        </li>{% endif %}{% endfor %}
+</ul>
+
+
+
+<ul id="page-tabs">
+    {% with current_url=request.get_full_path %}
+    <li class="{% if current_url == "/smgl/sms-records/" %}active{% endif %}">
+      <a href="{% url sms-records %}"><span>SMS Records</span></a>
+    </li>
+    <li class="{% if current_url == "/smgl/help/" %}active{% endif %}">
+      <a href="{% url help %}"><span>Help</span></a>
+    </li>
+    {% endwith %}
+</ul>

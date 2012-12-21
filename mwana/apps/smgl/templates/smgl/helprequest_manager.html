@@ -1,0 +1,28 @@
+{% extends  "layout.html" %}
+
+{% block title %}Help Request Manager - {{ block.super }}{% endblock %}
+
+{% block page_tabs %}
+ {% include "smgl/includes/message_panel_subnav.html" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="messages module">
+<h2>Help Request Manager</h2>
+<p><strong>ID:</strong> {{ help_request.id }}</p>
+<p><strong>Facility:</strong> {{ help_request.requested_by.contact.location }}</p>
+<p><strong>Message:</strong> {{ help_request.additional_text|default:"No additional text was sent" }}</p>
+<p><strong>Resolved By:</strong> {{ help_request.resolved_by|default:"Unresolved" }}<p>
+<p><strong>Resolved On:</strong> {{ help_request.addressed_on|default:"Unresolved" }}</p>
+{% if help_request.addressed_on %}
+    <p><strong>Notes:</strong> {{ help_request.notes }}</p>
+{% else %}
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" value="Resolve" />
+    </form>
+{% endif %}
+</div>
+{% endblock %}

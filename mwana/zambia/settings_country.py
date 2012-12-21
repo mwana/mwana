@@ -53,10 +53,10 @@ LOG_FORMAT = "[%(asctime)s] [%(name)s]: %(message)s"
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
     ("mwana.apps.smgl.views.statistics",  "Statistics"),
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    ("mwana.apps.smgl.views.mothers",  "Mothers"),
     ("mwana.apps.smgl.views.referrals",  "Referrals & Notifications"),
     ("mwana.apps.smgl.views.sms_users",  "SMS Users"),
+    ("mwana.apps.smgl.views.mothers",  "Mothers"),
+    ("mwana.apps.smgl.views.sms_records",  "Message Panel"),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
