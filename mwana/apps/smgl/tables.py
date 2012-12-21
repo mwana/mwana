@@ -130,6 +130,20 @@ class SummaryReportTable(Table):
     value = Column(sortable=False)
 
 
+class SMSRecordsTable(Table):
+    date = DateColumn(format="Y m d H:i")
+    id = Column()
+    msg_type = NamedColumn(col_name="Type",
+                      value=lambda cell: cell.object.text.split(' ')[0].upper(),
+                      sortable=False
+                    )
+    facility = Column(value=lambda cell: cell.object.connection.contact.location if cell.object.connection.contact else '')
+    text = NamedColumn(col_name="Message")
+
+    class Meta:
+        order_by = "-date"
+
+
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y m d ")
     name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.name]))

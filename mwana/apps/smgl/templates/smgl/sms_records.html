@@ -1,6 +1,6 @@
 {% extends  "layout.html" %}
 
-{% block title %}Help Messages - {{ block.super }}{% endblock %}
+{% block title %}SMS Records - {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -29,13 +29,14 @@
 {% block content %}
 
 <div class="statistics module">
-<h2>Help Messages</h2>
-  <form action="" method="GET" id="helprequests-form" >
+<h2>SMS Records</h2>
+  <form action="" method="GET" id="sms-records-form" >
     <table>
       <thead>
         <tr>
           <th colspan="2">Period</th>
           <th colspan="3">Location</th>
+          <th>Message</th>
         </tr>
         <tr>
           <th>Start</th>
@@ -43,6 +44,7 @@
           <th>Province</th>
           <th>District</th>
           <th>Facility</th>
+          <th>Keyword</th>
         </tr>
       </thead>
       <tbody>
@@ -63,10 +65,14 @@
             {{ form.district.errors}}
             {{ form.district }}
           </td>
-            <td>
-              {{ form.facility.errors}}
-              {{ form.facility }}
-            </td>
+           <td>
+             {{ form.facility.errors}}
+             {{ form.facility }}
+           </td>
+           <td>
+             {{ form.keyword.errors}}
+             {{ form.keyword }}
+           </td>
         </tr>
       </tbody>
     </table>
@@ -75,7 +81,7 @@
   </form>
   {{ form.media.js }}
 
-{{ helpreqs_table.as_html }}
+{{ records_table.as_html }}
 </div>
 
   <script type="text/javascript">

@@ -20,7 +20,7 @@ from mwana.apps.help.models import HelpRequest
 from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
-    MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm,
+    MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm, SMSRecordsFilterForm,
     HelpRequestManagerForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
@@ -28,7 +28,8 @@ from .models import (PregnantMother, BirthRegistration, DeathRegistration,
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
-                     SMSUsersTable, SMSUserMessageTable, HelpRequestTable)
+                     SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
+                     HelpRequestTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio)
 
@@ -799,6 +800,86 @@ def referrals(request):
         {"message_table": ReferralsTable(referrals,
                                         request=request),
          "form": form,
+        },
+        context_instance=RequestContext(request))
+
+
+def sms_records(request):
+    """
+    Report on all messages
+    """
+    province = district = facility = keyword = None
+    end_date = datetime.datetime.today()
+    start_date = (end_date - timedelta(days=14)).date()
+
+    sms_records = Message.objects.filter(direction="I")
+
+    if request.GET:
+        form = SMSRecordsFilterForm(request.GET)
+        if form.is_valid():
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+            keyword = form.cleaned_data.get('keyword')
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = SMSRecordsFilterForm(initial=initial)
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    sms_records = sms_records.filter(connection__contact__location__in=locations)
+
+    # filter by created_date
+    sms_records = filter_by_dates(sms_records, 'date',
+                             start=start_date, end=end_date)
+
+    # filter by keyword
+    if keyword:
+        sms_records = sms_records.filter(text__istartswith=keyword)
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # The keys must be ordered for the exporter
+        keys = ['date', 'id', 'msg_type', 'facility', 'text']
+        records = []
+        for rec in sms_records:
+            date = rec.date.strftime('%Y-%m-%d') \
+                        if rec.date else None
+            records.append({
+                    'date': date,
+                    'id': rec.id,
+                    'msg_type': rec.text.split(' ')[0].upper(),
+                    'facility': rec.connection.contact.location if rec.connection.contact else None,
+                    'text': rec.text,
+                })
+        filename = 'sms_records_report'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+
+        return export_as_csv(records, keys, filename)
+
+    records_table = SMSRecordsTable(sms_records, request=request)
+
+    return render_to_response(
+        "smgl/sms_records.html",
+        {"records_table": records_table,
+         "form": form
         },
         context_instance=RequestContext(request))
 
