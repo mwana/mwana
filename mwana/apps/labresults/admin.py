@@ -12,7 +12,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ('result', 'notification_status', 'verified',
                    'result_sent_date', 'collected_on',  'entered_on',
                    'processed_on', 'arrival_date', 'clinic',)
-    search_fields = ('sample_id','requisition_id')
+    search_fields = ('sample_id','requisition_id', 'clinic_care_no',)
     date_hierarchy = 'result_sent_date'
     actions = [export_as_csv_action("Export selected results as CSV"), 'mark_as_new']
 
