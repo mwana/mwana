@@ -105,7 +105,7 @@ class PatientEvent(models.Model):
     #patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
     patient_conn = models.ForeignKey(Connection, related_name='patient_patient_events',
                                      limit_choices_to={'contact__types__slug':
-                                                           'patient'},verbose_name='Patient Connection')
+                                                           'patient'},verbose_name='Patient Connection', null=True, blank=True)
     date = models.DateField()
     date_logged = models.DateTimeField()
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)   #New field added to accomodate birth notification status
