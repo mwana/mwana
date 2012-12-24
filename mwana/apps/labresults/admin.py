@@ -23,7 +23,7 @@ class ResultAdmin(admin.ModelAdmin):
         else:
             message_bit = "%s results were" % rows_updated
             self.message_user(request, "%s to be sent again." % message_bit)
-    mark_confirmed.short_description = "Mark selected results as new from lab."
+    mark_as_new.short_description = "Mark selected results as new from lab."
 
 
 admin.site.register(Result, ResultAdmin)
