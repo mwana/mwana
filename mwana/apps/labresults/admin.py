@@ -5,16 +5,27 @@ from mwana.apps.labresults.actions import export_as_csv_action
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
+    list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec', 'clinic_care_no',
                     'result', 'collected_on', 'entered_on', 'processed_on',
                     'arrival_date', 'result_sent_date', 'notification_status',
                     'verified',)
-    list_filter = ('result', 'notification_status', 'verified', 
+    list_filter = ('result', 'notification_status', 'verified',
                    'result_sent_date', 'collected_on',  'entered_on',
                    'processed_on', 'arrival_date', 'clinic',)
     search_fields = ('sample_id','requisition_id')
     date_hierarchy = 'result_sent_date'
-    actions = [export_as_csv_action("Export selected results as CSV")]
+    actions = [export_as_csv_action("Export selected results as CSV"), 'mark_as_new']
+
+    def mark_as_new(self, request, queryset):
+        rows_updated = queryset.update(notification_status='new')
+        if rows_updated == 1:
+            message_bit = "1 result was reset"
+        else:
+            message_bit = "%s results were" % rows_updated
+            self.message_user(request, "%s to be sent again." % message_bit)
+    mark_confirmed.short_description = "Mark selected results as new from lab."
+
+
 admin.site.register(Result, ResultAdmin)
 
 
@@ -25,7 +36,7 @@ class LabLogAdmin(admin.ModelAdmin):
 
     def source(self, obj):
         return obj.payload.source
-        
+
 admin.site.register(LabLog, LabLogAdmin)
 
 
@@ -47,4 +58,3 @@ class PendingPinConnectionsAdmin(admin.ModelAdmin):
     list_display =('connection', 'result', 'timestamp')
     date_hierarchy = 'timestamp'
 admin.site.register(PendingPinConnections, PendingPinConnectionsAdmin)
-
