@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+
+
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="left">
+    <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Blacklisted People</h2>
+            <p/>
+
+            <hr>
+
+            <div>
+                <h3>Existing {{ model }}</h3>
+
+                <table width="100%">
+
+                    <tr>
+                        <th>#</th>
+                        <th>Login Name</th>
+                        <th>
+                            <a href="?ot=asc&amp;o=1">
+                                Full Name
+                            </a></th><th>
+                                Email
+                            </th><th>
+                            Groups
+                            </th><th>
+                            <a href="?ot=asc&amp;o=6">
+                                Last Login
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=8">
+                                Days ago
+                            </a></th>
+                    </tr>
+
+                    {% for record in records %}
+                    <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                        <td>{{ forloop.counter|add:offset }}</td>
+                        <td>{{ record.username }}</td>
+                        <td>{{ record.first_name }} {{ record.last_name }}</td>
+                        
+                        <td>{{ record.email }}</td>
+                        <td>{% for type in record.groupusermapping_set.all%}
+                            {{ type.group.name }}  
+                            {% endfor %}</td>
+                        <td>{{ record.last_login }}</td>
+                        <td>{{ record.days_ago }}</td>                        
+                    </tr>
+
+                    {% endfor %}
+
+                </table>
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+
+    </form>
+    <form>
+        <div class="pagination">
+            <span class="step-links">
+                {% if has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
+
+                <span class="current">
+                    Page {{ number }} of {{ num_pages }}.
+                </span>
+
+                {% if has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ number }}>
+            </span>
+
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $("select").chosen();
+</script>
+
+{% endblock %}

@@ -121,3 +121,6 @@ def get_next_navigation(text):
         return {"Next":1,"Previous":-1}[text]
     except:
         return 0
+
+def get_default_int(val):
+    return int(val) if str(val).isdigit() else 0

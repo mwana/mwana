@@ -28,6 +28,7 @@ INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
 INSTALLED_APPS.append("mwana.apps.birthcertification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
+INSTALLED_APPS.append("mwana.apps.webusers")
 
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
@@ -79,6 +80,7 @@ RAPIDSMS_TABS = [
     ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
     ('mwana.apps.reports.views.supported_sites', 'Supported Sites'),
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
+    ('mwana.apps.webusers.views.webusers', 'Web Users'),
     ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
     ('mwana.apps.training.views.trained', 'Trained People'),
