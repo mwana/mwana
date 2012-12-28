@@ -40,10 +40,12 @@ class WebUserService:
         return Location.objects.filter(groupfacilitymapping__group__in=
                                 user_groups).distinct().count()
 
-    def get_web_users(self, current_user, page=1):
+    def get_web_users(self, current_user, page=1, group=None, district=None, province=None):
         to_return = []
         user_groups = ReportingGroup.objects.filter(groupusermapping__user=
                                                     current_user).distinct()
+        if group and group.lower().strip() != 'all':
+            user_groups = [group]
         
         peers = User.objects.filter(groupusermapping__group__in=user_groups).distinct()
 
@@ -54,6 +56,13 @@ class WebUserService:
         user_facilities = Location.objects.filter(
                                                   groupfacilitymapping__group__in=
                                                   user_groups).distinct()
+
+
+
+        if district and district.lower().strip() != 'all':
+            user_facilities = user_facilities.filter(slug__startswith=district[:4])
+        elif province and province.lower().strip() != 'all':
+            user_facilities = user_facilities.filter(slug__startswith=province[:2])
 
         my_facilities_count = len(user_facilities.distinct())
         

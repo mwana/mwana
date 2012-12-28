@@ -5,15 +5,9 @@
 
 {% block stylesheets %}
 {{ block.super }}
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
 
 {% endblock %}
-
-
 {% block javascripts %}
 {{ block.super }}
 
@@ -22,20 +16,42 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
 
 {% endblock %}
-
 {% block content %}
 
 
 <div class="left">
-    <form name="getValues" action="" method="POST">
+    <form name="getValues" action="" method="GET">
         <div class="module">
-            <h2>Blacklisted People</h2>
-            <p/>
+            <h2>Supported Sites</h2>
+        <br>
+        {% if region_selectable %}
+        <p>Select Region: &nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+            {{rpt_provinces}}
+            {% endautoescape %}&nbsp;
+            or District:{% autoescape off %}
+            {{rpt_districts}}
+            {% endautoescape %}&nbsp;
+            
+            {% if is_report_admin %}
+        <p>Select Implementer:
+            {% autoescape off %}
+            {{rpt_group}}
+            {% endautoescape %}
+            &nbsp;
+            {%endif%}
+            {%endif%}
 
-            <hr>
+            &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+        <hr>
+        <div>
 
-            <div>
-                <h3>Existing {{ model }}</h3>
+
+            <h3>
+                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+
+            </h3>
 
                 <table width="100%">
 
@@ -68,7 +84,7 @@
                         <td>{% for type in record.groupusermapping_set.all%}
                             {{ type.group.name }}  
                             {% endfor %}</td>
-                        <td>{{ record.last_login }}</td>
+                        <td>{{ record.last_login|date:"d F Y" }}</td>
                         <td>{{ record.days_ago }}</td>                        
                     </tr>
 
@@ -103,7 +119,7 @@
 </div>
 
 <script type="text/javascript">
-    $("select").chosen();
+    $("#rpt_group").chosen();
 </script>
 
 {% endblock %}
