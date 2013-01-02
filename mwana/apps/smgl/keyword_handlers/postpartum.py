@@ -9,10 +9,9 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit, BirthRegistration
-from mwana.apps.smgl.utils import get_value_from_form, send_msg, make_date
+from mwana.apps.smgl.utils import get_value_from_form, make_date, respond_to_session
 
 logger = logging.getLogger(__name__)
-
 
 @registration_required
 @is_active
@@ -33,43 +32,41 @@ def postpartum_visit(session, xform, router):
     try:
         contact = Contact.objects.get(types__in=c_types, connection=connection)
     except ObjectDoesNotExist:
-        send_msg(connection, const.NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
-        return True
+        return respond_to_session(router, session, const.NOT_A_DATA_ASSOCIATE, 
+                                  is_error=True)
 
     unique_id = get_value_from_form('unique_id', xform)
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        send_msg(connection, const.PP_MOTHER_DOES_NOT_EXIST, router)
-        return True
+        return respond_to_session(router, session, const.PP_MOTHER_DOES_NOT_EXIST,
+                                  is_error=True)
 
     # Ensure mother has delivered
     try:
         BirthRegistration.objects.get(mother=mother)
     except ObjectDoesNotExist:
-        send_msg(connection, const.PP_MOTHER_HAS_NOT_DELIVERED)
-        return True
+        return respond_to_session(router, session, const.PP_MOTHER_HAS_NOT_DELIVERED,
+                                  is_error=True)
 
     next_visit, error_msg = make_date(xform,
                         "next_visit_dd", "next_visit_mm", "next_visit_yy",
                         is_optional=True,
                         )
     if error_msg:
-        send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
-                                                   "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg, is_error=True,
+                                  **{"date_name": "Next Visit"})
 
     if next_visit:
         if next_visit < datetime.datetime.now().date():
-            send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                     **{"date_name": "Next Visit", "date": next_visit})
-            return True
+            return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                      is_error=True, **{"date_name": "Next Visit",
+                                                        "date": next_visit})
     else:
         pos_visits = FacilityVisit.objects.filter(mother=mother, visit_type="pos")
         if pos_visits.count() < 2:
-            send_msg(connection, const.PP_NVD_REQUIRED, router,
-                     **{"num": pos_visits.count()})
-            return True
+            return respond_to_session(router, session, const.PP_NVD_REQUIRED,
+                                      is_error=True, **{"num": pos_visits.count()})
 
     mother_status = get_value_from_form('mother_status', xform)
     baby_status = get_value_from_form('baby_status', xform)
@@ -91,4 +88,5 @@ def postpartum_visit(session, xform, router):
         visit.next_visit = next_visit
     visit.save()
 
-    send_msg(connection, const.PP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
+    return respond_to_session(router, session, const.PP_COMPLETE,
+                              **{'name': contact.name, 'unique_id': mother.uid})
