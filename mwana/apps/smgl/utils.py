@@ -125,7 +125,7 @@ def respond_to_session(router, session, outgoing_text, is_error=False,
         session.save()
     return True
 
-def get_session_message(session, direction='I'):
+def update_session_message(session, direction='I'):
     """
     Saves the Inbound or Outbound message to an XFormsSession object
     """
@@ -141,8 +141,6 @@ def get_session_message(session, direction='I'):
         else:
             session.message_outgoing = msg_set.reverse()[0]
         session.save()
-
-update_session_message = get_session_message # tmp rename hack
 
 def filter_by_dates(qs, field, start=None, end=None):
     """

@@ -1,5 +1,5 @@
 from mwana.apps.smgl.utils import (get_date, DateFormatError,
-        get_session_message, respond_to_session)
+        respond_to_session)
 from mwana.apps.smgl.models import DeathRegistration
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
@@ -14,7 +14,6 @@ def death_registration(session, xform, router):
     """
 
     name = session.connection.contact.name if session.connection.contact else ""
-    get_session_message(session)
 
     try:
         date = get_date(xform, "death_date_dd", "death_date_mm", "death_date_yyyy")

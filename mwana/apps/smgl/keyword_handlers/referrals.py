@@ -2,8 +2,7 @@ import logging
 
 from rapidsms.messages import OutgoingMessage
 from mwana.apps.smgl.models import Referral, AmbulanceRequest, AmbulanceResponse
-from mwana.apps.smgl.utils import get_location, to_time, get_session_message,\
-    respond_to_session
+from mwana.apps.smgl.utils import get_location, to_time, respond_to_session
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
@@ -41,7 +40,6 @@ def refer(session, xform, router):
         "Must be a registered contact to refer"
     assert session.connection.contact.location is not None, \
         "Contact must have a location to refer"
-    get_session_message(session)
     contact = session.connection.contact
     name = contact.name
 
@@ -103,7 +101,6 @@ def refer(session, xform, router):
 @registration_required
 @is_active
 def referral_outcome(session, xform, router):
-    get_session_message(session)
     contact = session.connection.contact
     name = contact.name
     mother_id = xform.xpath("form/unique_id")
@@ -170,7 +167,6 @@ def emergency_response(session, xform, router):
     i.e. Ambulance on the way/delayed/not available
     """
     logger.debug('POST PROCESSING FOR RESP KEYWORD')
-    connection = session.connection
     contact = _get_allowed_ambulance_workflow_contact(session)
     if not contact:
         return respond_to_session(router, session, NOT_REGISTERED_TO_CONFIRM_ER,

@@ -7,8 +7,8 @@ from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import (PregnantMother, FacilityVisit,
     ToldReminder, BirthRegistration, Referral)
-from mwana.apps.smgl.utils import (get_value_from_form,
-                get_session_message, respond_to_session)
+from mwana.apps.smgl.utils import (get_value_from_form, respond_to_session)
+
 from mwana.apps.smgl.const import TOLD_COMPLETE
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,6 @@ def told(session, xform, router):
     """
     logger.debug('Handling the TOLD keyword form')
     connection = session.connection
-    get_session_message(session)
 
     if not connection.contact:
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,

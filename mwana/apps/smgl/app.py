@@ -16,7 +16,7 @@ from dimagi.utils.modules import to_function
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
 from mwana.apps.smgl.utils import get_contacttype, send_msg,\
-    get_value_from_form, make_date
+    get_value_from_form, make_date, update_session_message, respond_to_session
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 
@@ -135,6 +135,8 @@ def handle_submission(sender, **args):
 
     try:
         func = to_function(str(kw_handler.function_path), True)
+        # attach the incoming message to the session
+        update_session_message(session)
         session.template_vars = {}  # legacy from using rapidsms-xforms
         for k, v in xform.top_level_tags().iteritems():
             session.template_vars[k] = v
@@ -147,9 +149,7 @@ def handle_submission(sender, **args):
         # TODO: should we also mark the form somehow as errored out?
         logging.exception("Problem processing message in session %s from %s." % \
                           (session, session.connection))
-        router.outgoing(OutgoingMessage(session.connection,
-                                        const.GENERAL_ERROR))
-        return True
+        respond_to_session(router, session, const.GENERAL_ERROR, is_error=True)
 
 # then wire it to the xform_received signal
 xform_saved_with_session.connect(handle_submission)

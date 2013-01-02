@@ -4,8 +4,7 @@ from datetime import datetime, timedelta
 
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
-from mwana.apps.smgl.utils import (get_value_from_form, send_msg,
-        get_session_message, respond_to_session)
+from mwana.apps.smgl.utils import (get_value_from_form, respond_to_session)
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,6 @@ def leave(session, xform, router):
     """
     logger.debug('Handling the LEAVE keyword form')
     connection = session.connection
-    get_session_message(session)
 
     if not connection.contact:
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
@@ -45,7 +43,6 @@ def make_active(session, xform, router):
     """
     logger.debug('Handling the IN keyword form')
     connection = session.connection
-    get_session_message(session)
 
     if not connection.contact:
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
@@ -70,7 +67,6 @@ def out(session, xform, router):
     """
     logger.debug('Handling the OUT keyword form')
     connection = session.connection
-    get_session_message(session)
     if not connection.contact:
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
                                   is_error=True)

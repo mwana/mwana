@@ -1,7 +1,7 @@
 import datetime
 
 from mwana.apps.smgl.utils import (make_date, mom_or_none,
-        get_session_message, get_current_district, respond_to_session)
+        get_current_district, respond_to_session)
 from mwana.apps.smgl.models import (SyphilisTest, SyphilisTreatment,
     PregnantMother)
 from mwana.apps.smgl import const
@@ -21,7 +21,6 @@ def syphilis(session, xform, router):
     SYP Mother_UID date_dd date_mm date_yyyy P/N/S[1-3] next_shot_dd next_shot_mm next_shot_yyyy
     """
     name = session.connection.contact.name if session.connection.contact else ""
-    get_session_message(session)
     date, error_msg = make_date(xform,
                         "date_dd", "date_mm", "date_yyyy"
                         )
