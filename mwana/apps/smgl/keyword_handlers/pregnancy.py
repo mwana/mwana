@@ -11,7 +11,7 @@ from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
-    get_session_message)
+    get_session_message, respond_to_session)
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +35,15 @@ def pregnant_registration(session, xform, router):
     try:
         data_associate = Contact.objects.get(connection=connection, types=contactType)
     except ObjectDoesNotExist:
-        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router)
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     # get or create a new Mother Object without saving the object
     # (and triggering premature errors)
     uid = get_value_from_form('unique_id', xform)
     if PregnantMother.objects.filter(uid=uid).count():
-        send_msg(connection, const.DUPLICATE_REGISTRATION, router,
-                 **{"unique_id": uid})
-        return True
+        return respond_to_session(router, session, const.DUPLICATE_REGISTRATION,
+                                  is_error=True, **{"unique_id": uid})
 
     mother = PregnantMother(uid=uid)
     mother.created_date = session.modified_time
@@ -54,14 +53,13 @@ def pregnant_registration(session, xform, router):
 
     next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     if error_msg:
-        send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
-                                                   "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg,
+                                  is_error=True, **{"date_name": "Next Visit"})
 
     if next_visit < datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                 **{"date_name": "Next Visit", "date": next_visit})
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                  is_error=True, **{"date_name": "Next Visit",
+                                                    "date": next_visit})
 
     mother.next_visit = next_visit
     mother.reason_for_visit = get_value_from_form('visit_reason', xform)
@@ -69,27 +67,24 @@ def pregnant_registration(session, xform, router):
 
     lmp_date, error_msg = make_date(xform, "lmp_dd", "lmp_mm", "lmp_yy", is_optional=True)
     if error_msg:
-        send_msg(connection, error_msg, router,  **{"date_name": "LMP",
-                                                    "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg,
+                                  is_error=True, **{"date_name": "LMP"})
 
     if lmp_date and lmp_date > datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_PAST, router,
-                 **{"date_name": "LMP", "date": lmp_date})
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_PAST,
+                                  is_error=True, **{"date_name": "LMP",
+                                                    "date": lmp_date})
 
     edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
     session.template_vars.update()
     if error_msg:
-        send_msg(connection, error_msg, router, **{"date_name": "EDD",
-                                                   "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg,
+                                  is_error=True, **{"date_name": "EDD"})
 
     if edd_date and edd_date < datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                 **{"date_name": "EDD", "date": edd_date})
-        return True
-
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                  is_error=True, **{"date_name": "EDD",
+                                                    "date": edd_date})
     mother.lmp = lmp_date
     mother.edd = edd_date
 
@@ -99,8 +94,8 @@ def pregnant_registration(session, xform, router):
             mother.zone = Location.objects.get(type=LocationType.objects.get(slug__iexact=const.LOCTYPE_ZONE),
                                                slug__iexact=zone_name)
         except Location.DoesNotExist:
-            send_msg(connection, const.UNKOWN_ZONE, router, zone=zone_name)
-            return True
+            return respond_to_session(router, session, const.UNKOWN_ZONE,
+                                      is_error=True, **{"zone": zone_name})
 
     reasons = xform.xpath("form/high_risk_factor")
     if reasons:
@@ -110,9 +105,6 @@ def pregnant_registration(session, xform, router):
     mother.contact = data_associate
     mother.save()
 
-    send_msg(connection, const.MOTHER_SUCCESS_REGISTERED, router,
-             **{"name": mother.contact.name, "unique_id": mother.uid})
-
     # if there is a lay counselor(s) registered, also notify them
     for contact in mother.get_laycounselors():
         if contact.default_connection:
@@ -120,8 +112,9 @@ def pregnant_registration(session, xform, router):
                      const.NEW_MOTHER_NOTIFICATION, router,
                      **{"mother": mother.name, "unique_id": mother.uid})
 
-    return True
-
+    return respond_to_session(router, session, const.MOTHER_SUCCESS_REGISTERED,
+                              **{"name": mother.contact.name,
+                                 "unique_id": mother.uid})
 
 @registration_required
 @is_active
@@ -134,38 +127,35 @@ def follow_up(session, xform, router):
     try:
         contact = Contact.objects.get(types=dc_type, connection=connection)
     except ObjectDoesNotExist:
-        send_msg(connection, const.NOT_A_DATA_ASSOCIATE, router, **session.template_vars)
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     unique_id = get_value_from_form('unique_id', xform)
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
-        return True
+        return respond_to_session(router, session, const.FUP_MOTHER_DOES_NOT_EXIST)
 
     edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
     if error_msg:
-        send_msg(connection, error_msg, router, **{"date_name": "EDD",
-                                                   "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg,
+                                  is_error=True, **{"date_name": "EDD"})
 
     if edd_date and edd_date < datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                 **{"date_name": "EDD", "date": edd_date})
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                  is_error=True, **{"date_name": "EDD",
+                                                    "date": edd_date})
 
     visit_reason = get_value_from_form('visit_reason', xform)
     next_visit, error_msg = make_date(xform, "next_visit_dd", "next_visit_mm", "next_visit_yy")
     if error_msg:
-        send_msg(connection, error_msg, router, **{"date_name": "Next Visit",
-                                                   "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg,
+                                  is_error=True, **{"date_name": "Next Visit"})
 
     if next_visit < datetime.datetime.now().date():
-        send_msg(connection, const.DATE_MUST_BE_IN_FUTURE, router,
-                 **{"date_name": "Next Visit", "date": next_visit})
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                  is_error=True, **{"date_name": "Next Visit",
+                                                    "date": next_visit})
 
     # Make the follow up facility visit
     visit = FacilityVisit()
@@ -180,8 +170,8 @@ def follow_up(session, xform, router):
     visit.visit_type = 'anc'
     visit.save()
 
-    send_msg(connection, const.FOLLOW_UP_COMPLETE, router, name=contact.name, unique_id=mother.uid)
-
+    return respond_to_session(router, session, const.FOLLOW_UP_COMPLETE,
+                              **{'name': contact.name, 'unique_id': mother.uid})
 
 @registration_required
 @is_active
@@ -198,11 +188,8 @@ def motherid_lookup(session, xform, router):
     get_session_message(session)
 
     if not connection.contact:
-        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     f_name = get_value_from_form('f_name', xform)
     l_name = get_value_from_form('l_name', xform)
@@ -212,14 +199,8 @@ def motherid_lookup(session, xform, router):
                                             last_name=l_name,
                                             location__slug=zone_id)
     except ObjectDoesNotExist:
-        send_msg(connection, const.LOOK_MOTHER_DOES_NOT_EXIST, router)
-        get_session_message(session, direction='O')
-
-        return True
+        # NOTE: should this be an error?
+        return respond_to_session(router, session, const.LOOK_MOTHER_DOES_NOT_EXIST)
     else:
-        msg = const.LOOK_COMPLETE % {'unique_id': mother.uid}
-        send_msg(connection, msg, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-
-    return True
+        return respond_to_session(router, session, const.LOOK_COMPLETE,
+                                  **{'unique_id': mother.uid})

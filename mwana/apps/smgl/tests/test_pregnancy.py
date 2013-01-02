@@ -36,7 +36,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
-
+        self.assertSessionSuccess()
         self.assertEqual(1, PregnantMother.objects.count())
         mom = PregnantMother.objects.get(uid='80403000000112')
         self.assertEqual(self.user_number, mom.contact.default_connection.identity)
@@ -61,6 +61,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "later": self.later.strftime("%d %m %Y")
         }
         self.runScript(script)
+        self.assertSessionFail()
 
     def testRegisterMultipleReasons(self):
         resp = const.MOTHER_SUCCESS_REGISTERED % {"name": self.name,
@@ -74,6 +75,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
+        self.assertSessionSuccess()
 
         mom = PregnantMother.objects.get(uid='80403000000112')
         rback = list(mom.get_risk_reasons())
@@ -93,6 +95,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
+        self.assertSessionFail()
         self.assertEqual(0, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
 
@@ -114,6 +117,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
+        self.assertSessionSuccess()
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
 
@@ -128,6 +132,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
                "later": self.later.strftime("%d %m %Y")}
         self.runScript(script)
+        self.assertSessionFail()
 
         # make sure we didn't create a new one
         self.assertEqual(1, PregnantMother.objects.count())
@@ -146,6 +151,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "later": self.later.strftime("%d %m %Y")
         }
         self.runScript(script)
+        self.assertSessionSuccess()
 
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
@@ -159,6 +165,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "later": self.later.strftime("%d %m %Y")
               }
         self.runScript(script)
+        self.assertSessionFail()
 
     def testFollowUpOptionalEdd(self):
         self.testRegister()
@@ -172,6 +179,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "future": tomorrow.strftime("%d %m %Y"),
               }
         self.runScript(script)
+        self.assertSessionSuccess()
 
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(1, FacilityVisit.objects.count())
@@ -186,6 +194,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "tomorrow": self.tomorrow.strftime("%d %m %Y"),
                }
         self.runScript(script)
+        self.assertSessionFail()
 
         self.assertEqual(1, PregnantMother.objects.count())
         self.assertEqual(0, FacilityVisit.objects.count())
@@ -203,6 +212,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "resp": const.DATE_MUST_BE_IN_FUTURE % {"date_name": "Next Visit",
                                                        "date": yesterday}}
         self.runScript(script)
+        self.assertSessionFail()
 
         # lmp in future
         script = """
@@ -211,7 +221,10 @@ class SMGLPregnancyTest(SMGLSetUp):
         """ % {"num": self.user_number, "past": yesterday.strftime("%d %m %Y"),
                "future": tomorrow.strftime("%d %m %Y"),
                "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "LMP",
-                                                     "date": yesterday}}
+                                                     "date": tomorrow}}
+        self.runScript(script)
+        self.assertSessionFail()
+
         # edd in past
         script = """
             %(num)s > REG 80403000000112 Mary Soko none %(future)s R 80402404 %(past)s %(past)s
@@ -221,6 +234,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "resp": const.DATE_MUST_BE_IN_FUTURE % {"date_name": "EDD",
                                                        "date": yesterday}}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testVisitReminders(self):
         self.testFollowUp()
@@ -277,6 +291,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "earlier": self.earlier.strftime("%d %m %Y"),
               }
         self.runScript(script)
+        self.assertSessionSuccess()
 
         # send reminders and make sure they didn't actually fire on this one
         send_followup_reminders(router_obj=self.router)
@@ -304,6 +319,7 @@ class SMGLPregnancyTest(SMGLSetUp):
                "later": self.later.strftime("%d %m %Y")
                }
         self.runScript(script)
+        self.assertSessionSuccess()
 
         [second_visit] = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)
         self.assertTrue(second_visit.created_date > visit.created_date)
@@ -366,6 +382,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         """ % {"f_name": mom.first_name, "l_name": mom.last_name,
                "zone_id": zone.slug, "resp": resp, "num": self.user_number}
         self.runScript(script)
+        self.assertSessionSuccess()
 
     def testInvalidLookUpMother(self):
         resp = const.LOOK_MOTHER_DOES_NOT_EXIST
@@ -374,3 +391,4 @@ class SMGLPregnancyTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"resp": resp, "num": self.user_number}
         self.runScript(script)
+        self.assertSessionSuccess()
