@@ -14,8 +14,8 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.name = "Anton"
         self.createUser("worker", self.user_number)
         DeathRegistration.objects.all().delete()
-
         self.assertEqual(0, PregnantMother.objects.count())
+        self.assertSessionSuccess()
 
     # TODO: beef these up. Just testing the basic workflow
     def testBasicDeathReg(self):
@@ -30,6 +30,7 @@ class SMGLDeathRegTest(SMGLSetUp):
         self.assertEqual(date(2012, 1, 1), reg.date)
         self.assertEqual("ma", reg.person)
         self.assertEqual("h", reg.place)
+        self.assertSessionSuccess()
 
     def testDODInPast(self):
         tomorrow = (datetime.now() + timedelta(days=1)).date()
@@ -40,6 +41,7 @@ class SMGLDeathRegTest(SMGLSetUp):
                 "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "Date of Death",
                                                       "date": tomorrow}}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testDeathNotRegistered(self):
         script = """
@@ -47,6 +49,7 @@ class SMGLDeathRegTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testBadDate(self):
         resp = const.DATE_NOT_NUMBERS
@@ -56,6 +59,7 @@ class SMGLDeathRegTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
         self.assertEqual(0, DeathRegistration.objects.count())
+        self.assertSessionFail()
 
     def testDuplicateMotherPersonDeath(self):
         mom = create_mother()
@@ -68,3 +72,4 @@ class SMGLDeathRegTest(SMGLSetUp):
                 "resp": resp}
         self.runScript(script)
         self.assertEqual(1, DeathRegistration.objects.count())
+        self.assertSessionFail()
