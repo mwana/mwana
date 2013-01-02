@@ -1,6 +1,7 @@
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl import const
 import functools
+from mwana.apps.smgl.utils import respond_to_session
 
 class registration_required(object):
     """
@@ -13,10 +14,8 @@ class registration_required(object):
 
     def __call__(self, session, xform, router):
         if not session.connection.contact:
-            # TODO: should we set something in the form here?
-            router.outgoing(OutgoingMessage(session.connection,
-                                            const.NOT_REGISTERED))
-            return True
+            return respond_to_session(router, session, const.NOT_REGISTERED,
+                                      is_error=True)
         else:
             return self.func(session, xform, router)
 

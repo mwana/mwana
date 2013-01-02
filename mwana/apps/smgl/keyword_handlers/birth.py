@@ -1,7 +1,7 @@
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl.utils import (make_date, mom_or_none,
-        get_session_message)
+        get_session_message, respond_to_session)
 from mwana.apps.smgl.models import BirthRegistration, PregnantMother
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
@@ -20,17 +20,13 @@ def birth_registration(session, xform, router):
 
     date, error = make_date(xform, "date_of_birth_dd", "date_of_birth_mm", "date_of_birth_yyyy")
     if error:
-        router.outgoing(OutgoingMessage(session.connection, error,
-                                        **{"date_name": "Date of Birth",
-                                           "error_msg": error}))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, error, is_error=True,
+                                  **{"date_name": "Date of Birth"})
 
     if date > datetime.datetime.now().date():
-        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST,
-                 **{"date_name": "Date of Birth", "date": date}))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_PAST,
+                                  is_error=True,
+                                  **{"date_name": "Date of Birth", "date": date})
 
     num_kids = xform.xpath("form/num_children") or "t1"
     assert num_kids and num_kids[0] == "t"
@@ -39,9 +35,9 @@ def birth_registration(session, xform, router):
     try:
         mom = mom_or_none(xform.xpath("form/unique_id").lower())
     except PregnantMother.DoesNotExist:
-        router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.MOTHER_NOT_FOUND,
+                                  is_error=True)
+
     contact = session.connection.contact
     reg = BirthRegistration(contact=contact,
                             connection=session.connection,
@@ -55,6 +51,5 @@ def birth_registration(session, xform, router):
                             district=contact.get_current_district(),
                             facility=contact.get_current_facility())
     reg.save()
-    resp = BIRTH_REG_RESPONSE % {"name": name}
-    router.outgoing(OutgoingMessage(session.connection, resp))
-    get_session_message(session, direction='O')
+    return respond_to_session(router, session, BIRTH_REG_RESPONSE,
+                               **{"name": name})

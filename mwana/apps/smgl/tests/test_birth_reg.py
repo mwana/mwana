@@ -1,4 +1,4 @@
-from mwana.apps.smgl.tests.shared import SMGLSetUp
+from mwana.apps.smgl.tests.shared import SMGLSetUp, get_last_session
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from mwana.apps.smgl.models import BirthRegistration
 from datetime import date, datetime, timedelta
@@ -45,6 +45,7 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertEqual("h", reg.place)
         self.assertEqual(True, reg.complications)
         self.assertEqual(2, reg.number)
+        self.assertSessionSuccess()
 
     def testBirthNotRegistered(self):
         script = """
@@ -52,6 +53,7 @@ class SMGLBirthRegTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testDOBInPast(self):
         tomorrow = (datetime.now() + timedelta(days=1)).date()
@@ -62,6 +64,7 @@ class SMGLBirthRegTest(SMGLSetUp):
                "resp": const.DATE_MUST_BE_IN_PAST % {"date_name": "Date of Birth",
                                                       "date": tomorrow}}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testOptionalLastQuestion(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name}
@@ -78,6 +81,7 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertEqual("f", reg.place)
         self.assertEqual(True, reg.complications)
         self.assertEqual(1, reg.number)
+        self.assertSessionSuccess()
 
     def testNoMother(self):
         resp = BIRTH_REG_RESPONSE % {"name": self.name}
@@ -89,6 +93,7 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertEqual(1, BirthRegistration.objects.count())
         [reg] = BirthRegistration.objects.all()
         self.assertEqual(None, reg.mother)
+        self.assertSessionSuccess()
 
     def testBadMotherId(self):
         resp = const.MOTHER_NOT_FOUND
@@ -98,3 +103,4 @@ class SMGLBirthRegTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
         self.assertEqual(0, BirthRegistration.objects.count())
+        self.assertSessionFail()

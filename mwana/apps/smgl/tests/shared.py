@@ -211,6 +211,9 @@ def create_told_reminder(told_type, data={}):
 def get_random_string(length=10, choices=string.ascii_letters):
     return u''.join(random.choice(choices) for x in xrange(length))
 
+def get_last_session():
+    return XFormsSession.objects.order_by('-modified_time')[0] \
+        if XFormsSession.objects.count() else None
 
 class SMGLSetUp(TestScript):
 
@@ -253,3 +256,9 @@ class SMGLSetUp(TestScript):
             15 < Thank you for registering! You have successfully registered as a Data Clerk at Chilala.
         """
         self.runScript(create_users)
+
+    def assertSessionSuccess(self, **kwargs):
+        self.assertFalse(get_last_session().has_error, **kwargs)
+
+    def assertSessionFail(self, **kwargs):
+        self.assertTrue(get_last_session().has_error, **kwargs)
