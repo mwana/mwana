@@ -34,6 +34,7 @@ class SMGLToldTestCase(SMGLSetUp):
             """ % {"num": self.user_number, "muid": mom.uid,
                    "resp": resp, "type": told_type[0]}
             self.runScript(script)
+            self.assertSessionSuccess()
 
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(3, told_reminders.count())
@@ -48,6 +49,7 @@ class SMGLToldTestCase(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
         self.runScript(script)
+        self.assertSessionFail()
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
 
@@ -63,6 +65,7 @@ class SMGLToldTestCase(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
         self.runScript(script)
+        self.assertSessionFail()
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
 
@@ -78,6 +81,7 @@ class SMGLToldTestCase(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "muid": mom.uid, "resp": resp}
         self.runScript(script)
+        self.assertSessionFail()
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
 
@@ -92,7 +96,7 @@ class SMGLToldTestCase(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "muid": mom.uid, "resp": bad_code_resp}
         self.runScript(script)
-
+        self.assertSessionFail() # real failure
         told_reminders = ToldReminder.objects.filter(mother=mom)
         self.assertEqual(0, told_reminders.count())
 
@@ -102,3 +106,4 @@ class SMGLToldTestCase(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
+        self.assertSessionFail()

@@ -8,7 +8,8 @@ from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import (PregnantMother, FacilityVisit,
     ToldReminder, BirthRegistration, Referral)
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg,
-                get_session_message)
+                get_session_message, respond_to_session)
+from mwana.apps.smgl.const import TOLD_COMPLETE
 logger = logging.getLogger(__name__)
 
 
@@ -26,39 +27,29 @@ def told(session, xform, router):
     get_session_message(session)
 
     if not connection.contact:
-        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     unique_id = get_value_from_form('unique_id', xform)
     reminder_type = get_value_from_form('reminder_type', xform)
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        send_msg(connection, const.FUP_MOTHER_DOES_NOT_EXIST, router)
-        get_session_message(session, direction='O')
-
-        return True
+        return respond_to_session(router, session, const.FUP_MOTHER_DOES_NOT_EXIST,
+                                  is_error=True)
     else:
         now = datetime.datetime.now()
         if reminder_type == 'edd':
             reg = BirthRegistration.objects.filter(mother=mother)
             if reg:
-                msg = const.TOLD_MOTHER_HAS_ALREADY_DELIVERED % {
-                                                        'unique_id': unique_id
-                                                        }
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
+                return respond_to_session(router, session,
+                                          const.TOLD_MOTHER_HAS_ALREADY_DELIVERED,
+                                          is_error=True, **{'unique_id': unique_id})
         elif reminder_type == 'ref':
             refs = Referral.objects.filter(date__gte=now, mother=mother)
             if not refs:
-                msg = const.TOLD_MOTHER_HAS_NO_REF % {'unique_id': unique_id}
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
+                return respond_to_session(router, session, const.TOLD_MOTHER_HAS_NO_REF,
+                                          is_error=True, **{'unique_id': unique_id})
         else:
             if reminder_type == 'nvd':
                 reminder_type = 'anc'
@@ -66,10 +57,10 @@ def told(session, xform, router):
                                                   mother=mother,
                                                   visit_type=reminder_type)
             if not visits:
-                msg = const.TOLD_MOTHER_HAS_NO_NVD % {'unique_id': unique_id}
-                send_msg(connection, msg, router)
-                get_session_message(session, direction='O')
-                return True
+                return respond_to_session(router, session, 
+                                          const.TOLD_MOTHER_HAS_NO_NVD,
+                                          is_error=True, 
+                                          **{'unique_id': unique_id})
         # Generate the TOLD Reminder database entry
         ToldReminder.objects.create(
                             contact=connection.contact,
@@ -78,8 +69,5 @@ def told(session, xform, router):
                             date=session.modified_time,
                             type=reminder_type,
                             )
-        send_msg(connection, const.TOLD_COMPLETE, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-
-    return True
+        return respond_to_session(router, session, TOLD_COMPLETE, 
+                                  **{'name': connection.contact.name})
