@@ -59,6 +59,7 @@ class SMGLReferTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": success_resp,
                "danum": "666777", "tnnum": "666888", "notif": notif}
         self.runScript(script)
+        self.assertSessionSuccess()
 
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
@@ -77,6 +78,7 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": "notacontact", "resp": const.NOT_REGISTERED}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testMultipleResponses(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
@@ -94,6 +96,7 @@ class SMGLReferTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": success_resp,
                "danum": "666777", "tnnum": "666888", "notif": notif}
         self.runScript(script)
+        self.assertSessionSuccess()
 
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
@@ -113,7 +116,7 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "resp": bad_code_resp}
         self.runScript(script)
-
+        self.assertSessionFail() # this is a real error that needs fixing
         self.assertEqual(0, Referral.objects.count())
 
     def testReferBadLocation(self):
@@ -124,7 +127,7 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s < %(resp)s
         """ % {"num": self.user_number, "resp": bad_code_resp}
         self.runScript(script)
-
+        self.assertSessionFail()
         self.assertEqual(0, Referral.objects.count())
 
     def testReferBadTimes(self):
@@ -135,6 +138,7 @@ class SMGLReferTest(SMGLSetUp):
                 %(num)s < %(resp)s
             """ % {"num": self.user_number, "time": bad_time, "resp": resp}
             self.runScript(script)
+            self.assertSessionFail()
             self.assertEqual(0, Referral.objects.count())
 
     def testReferralOutcome(self):
@@ -157,6 +161,7 @@ class SMGLReferTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": resp, "notify": notify,
                "dc_num": "666999", "ic_num": "666000"}
         self.runScript(script)
+        self.assertSessionSuccess()
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
         self.assertTrue(ref.mother_showed)
@@ -181,6 +186,7 @@ class SMGLReferTest(SMGLSetUp):
         """ % {"num": self.user_number, "resp": resp, "notify": notify,
                 "dc_num": "666999", "ic_num": "666000"}
         self.runScript(script)
+        self.assertSessionSuccess()
         [ref] = Referral.objects.all()
         self.assertTrue(ref.responded)
         self.assertFalse(ref.mother_showed)
@@ -193,6 +199,7 @@ class SMGLReferTest(SMGLSetUp):
 
         """ % {"num": self.user_number, "resp": resp}
         self.runScript(script)
+        self.assertSessionFail()
 
     def testReferWithMother(self):
         yesterday = (datetime.datetime.now() - datetime.timedelta(days=1)).date()
@@ -206,6 +213,7 @@ class SMGLReferTest(SMGLSetUp):
                "past": yesterday.strftime("%d %m %Y"),
                "future": tomorrow.strftime("%d %m %Y")}
         self.runScript(script)
+        self.assertSessionSuccess()
         mom = PregnantMother.objects.get(uid='1234')
         self.testRefer()
         [ref] = Referral.objects.all()
@@ -295,6 +303,7 @@ class SMGLReferTest(SMGLSetUp):
                "tn_notif": ER_TO_TRIAGE_NURSE % d,
                "am_notif": ER_TO_DRIVER % d}
         self.runScript(script)
+        self.assertSessionSuccess()
 
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
@@ -339,6 +348,7 @@ class SMGLReferTest(SMGLSetUp):
                "notif": response_to_referrer_string}
 
         self.runScript(script)
+        self.assertSessionSuccess()
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
@@ -363,6 +373,7 @@ class SMGLReferTest(SMGLSetUp):
                "tn_notif": ER_TO_TRIAGE_NURSE % d,
                "am_notif": ER_TO_DRIVER % d}
         self.runScript(script)
+        self.assertSessionSuccess()
 
         [referral] = Referral.objects.all()
         self.assertEqual("1234", referral.mother_uid)
@@ -408,6 +419,7 @@ class SMGLReferTest(SMGLSetUp):
                "su_notif": amb_na_string,
                "notif": response_to_referrer_string}
         self.runScript(script)
+        self.assertSessionSuccess()
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
@@ -415,5 +427,4 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("na", amb_resp.response)
         self.assertEqual("666888", amb_resp.responder.default_connection.identity)
-
 

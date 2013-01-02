@@ -2,7 +2,8 @@ import logging
 
 from rapidsms.messages import OutgoingMessage
 from mwana.apps.smgl.models import Referral, AmbulanceRequest, AmbulanceResponse
-from mwana.apps.smgl.utils import get_location, to_time, get_session_message
+from mwana.apps.smgl.utils import get_location, to_time, get_session_message,\
+    respond_to_session
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 from rapidsms.models import Contact
@@ -48,10 +49,9 @@ def refer(session, xform, router):
     facility_id = xform.xpath("form/facility")
     loc = get_location(facility_id)
     if not loc:
-        router.outgoing(OutgoingMessage(session.connection,
-                                        FACILITY_NOT_RECOGNIZED % {
-                                            "facility": facility_id
-                                        }))
+        return respond_to_session(router, session, FACILITY_NOT_RECOGNIZED,
+                                  is_error=True,
+                                  **{"facility": facility_id})
     else:
         referral = Referral(facility=loc, form_id=xform.get_id,
                             session=session, date=datetime.utcnow())
@@ -64,9 +64,8 @@ def refer(session, xform, router):
         try:
             referral.time = to_time(xform.xpath("form/time"))
         except ValueError, e:
-            router.outgoing(OutgoingMessage(session.connection, str(e)))
-            get_session_message(session, direction='O')
-            return True
+            return respond_to_session(router, session, str(e), 
+                                      is_error=True)
 
         status = xform.xpath("form/status")
         referral.status = status
@@ -83,12 +82,10 @@ def refer(session, xform, router):
             amb.save()
             referral.amb_req = amb
             referral.save()
-            #Respond that we're on it.
-            send_msg(session.connection, INITIAL_AMBULANCE_RESPONSE, router, **session.template_vars)
             _broadcast_to_ER_users(amb, session, xform, router=router)
+            # Respond that we're on it.
+            return respond_to_session(router, session, INITIAL_AMBULANCE_RESPONSE)
         else:
-            resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
-            router.outgoing(OutgoingMessage(session.connection, resp))
             from_facility = session.connection.contact.location.name
             for c in _get_people_to_notify(referral):
                 if c.default_connection:
@@ -99,8 +96,8 @@ def refer(session, xform, router):
                                                          "time": referral.time.strftime("%H:%M"),
                                                          "is_emergency": yesno(referral.is_emergency)}
                     router.outgoing(OutgoingMessage(c.default_connection, msg))
-    get_session_message(session, direction='O')
-    return True
+            return respond_to_session(router, session, const.REFERRAL_RESPONSE,
+                                      **{"name": name, "unique_id": mother_id})
 
 
 @registration_required
@@ -113,19 +110,13 @@ def referral_outcome(session, xform, router):
 
     refs = Referral.objects.filter(mother_uid=mother_id.lower()).order_by('-date')
     if not refs.count():
-        router.outgoing(OutgoingMessage(session.connection,
-                                        const.REFERRAL_NOT_FOUND % \
-                                        {"unique_id": mother_id}))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.REFERRAL_NOT_FOUND,
+                                  is_error=True, **{"unique_id": mother_id})
 
     ref = refs[0]
     if ref.responded:
-        router.outgoing(OutgoingMessage(session.connection,
-                                        const.REFERRAL_ALREADY_RESPONDED % \
-                                        {"unique_id": mother_id}))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.REFERRAL_ALREADY_RESPONDED,
+                                  is_error=True, **{"unique_id": mother_id})
 
     ref.responded = True
     if xform.xpath("form/mother_outcome").lower() == const.REFERRAL_OUTCOME_NOSHOW:
@@ -146,15 +137,9 @@ def referral_outcome(session, xform, router):
             if xform.xpath("form/mode_of_delivery") == 'noamb':
                 _broadcast_to_ER_users(ref.amb_req, session, xform,
                                        message=_(AMB_OUTCOME_FILED), router=router)
-            send_msg(ref.session.connection, AMB_OUTCOME_ORIGINATING_LOCATION_INFO, router, **session.template_vars)
-            get_session_message(session, direction='O')
-            return True
+            return respond_to_session(router, session, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,
+                                      **session.template_vars)
     else:
-        router.outgoing(OutgoingMessage(session.connection,
-                                        const.REFERRAL_OUTCOME_RESPONSE % \
-                                            {'name': name, "unique_id": mother_id}))
-        get_session_message(session, direction='O')
-
         # also notify folks at the referring facility about the outcome
         for c in _get_people_to_notify_outcome(ref):
             if c.default_connection:
@@ -171,8 +156,9 @@ def referral_outcome(session, xform, router):
                                                     const.REFERRAL_OUTCOME_NOTIFICATION_NOSHOW % \
                                                         {"unique_id": ref.mother_uid,
                                                          "date": ref.date.date()}))
-    return True
 
+        return respond_to_session(router, session, const.REFERRAL_OUTCOME_RESPONSE,
+                                  **{'name': name, "unique_id": mother_id})
 
 @registration_required
 @is_active
@@ -187,8 +173,8 @@ def emergency_response(session, xform, router):
     connection = session.connection
     contact = _get_allowed_ambulance_workflow_contact(session)
     if not contact:
-        send_msg(connection, NOT_REGISTERED_TO_CONFIRM_ER, router, **session.template_vars)
-        return True
+        return respond_to_session(router, session, NOT_REGISTERED_TO_CONFIRM_ER,
+                                  is_error=True)
 
     ambulance_response = AmbulanceResponse()
     ambulance_response.responder = contact
@@ -212,8 +198,8 @@ def emergency_response(session, xform, router):
                 .order_by('-id')
     if not ambulance_requests.count():
         #session doesn't exist or it has already been confirmed
-        send_msg(connection, ER_CONFIRM_SESS_NOT_FOUND, router, **session.template_vars)
-        return True
+        return respond_to_session(router, session, ER_CONFIRM_SESS_NOT_FOUND,
+                                  is_error=True, **{'unique_id': unique_id})
 
     #take the latest one in case this mother has been ER'd a bunch
     ambulance_response.ambulance_request = ambulance_request = ambulance_requests[0]
