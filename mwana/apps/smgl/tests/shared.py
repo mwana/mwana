@@ -212,7 +212,7 @@ def get_random_string(length=10, choices=string.ascii_letters):
     return u''.join(random.choice(choices) for x in xrange(length))
 
 def get_last_session():
-    return XFormsSession.objects.order_by('-modified_time')[0] \
+    return XFormsSession.objects.order_by('-pk')[0] \
         if XFormsSession.objects.count() else None
 
 class SMGLSetUp(TestScript):
