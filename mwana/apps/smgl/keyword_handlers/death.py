@@ -1,4 +1,3 @@
-from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.smgl.utils import (get_date, DateFormatError,
         get_session_message, respond_to_session)
 from mwana.apps.smgl.models import DeathRegistration
