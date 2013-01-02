@@ -1,9 +1,7 @@
 import datetime
 
-from rapidsms.messages.outgoing import OutgoingMessage
-
 from mwana.apps.smgl.utils import (make_date, mom_or_none,
-        get_session_message, send_msg, get_current_district)
+        get_session_message, get_current_district, respond_to_session)
 from mwana.apps.smgl.models import (SyphilisTest, SyphilisTreatment,
     PregnantMother)
 from mwana.apps.smgl import const
@@ -28,23 +26,19 @@ def syphilis(session, xform, router):
                         "date_dd", "date_mm", "date_yyyy"
                         )
     if error_msg:
-        send_msg(session.connection, error_msg, router,
-                 **{"date_name": "Test Date", "error_msg": error_msg})
-        return True
+        return respond_to_session(router, session, error_msg, is_error=True,
+                                  **{"date_name": "Test Date"})
 
     if date > datetime.datetime.now().date():
-        router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_PAST,
-                 **{"date_name": "Test Date", "date": date}))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.DATE_MUST_BE_IN_PAST,
+                                  is_error=True, **{"date_name": "Test Date",
+                                                    "date": date})
     status = xform.xpath("form/status")
     unique_id = xform.xpath("form/unique_id")
     try:
         mom = mom_or_none(unique_id)
     except PregnantMother.DoesNotExist:
-        router.outgoing(OutgoingMessage(session.connection, const.MOTHER_NOT_FOUND))
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.MOTHER_NOT_FOUND)
     contact = session.connection.contact
     district = get_current_district(contact.location)
     if status in ['p', 'n']:
@@ -56,7 +50,9 @@ def syphilis(session, xform, router):
                                district=district
                                )
         syp_test.save()
-        resp = const.SYP_TEST_COMPLETE % {"name": name, "unique_id": unique_id}
+        return respond_to_session(router, session, const.SYP_TEST_COMPLETE,
+                                  **{"name": name, "unique_id": unique_id})
+
     else:
         # register syp treatment information
         next_visit_date, error_msg = make_date(xform,
@@ -64,15 +60,15 @@ def syphilis(session, xform, router):
                             is_optional=True
                             )
         if error_msg:
-            send_msg(session.connection, error_msg, router,
-                     **{"date_name": "Next Shot Date", "error_msg": error_msg})
-            return True
+            return respond_to_session(router, session, error_msg,
+                                      is_error=True,
+                                      **{"date_name": "Next Shot Date"})
 
         if next_visit_date and next_visit_date < datetime.datetime.now().date():
-            router.outgoing(OutgoingMessage(session.connection, const.DATE_MUST_BE_IN_FUTURE,
-                     **{"date_name": "Next Shot Date", "date": next_visit_date}))
-            get_session_message(session, direction='O')
-            return True
+            return respond_to_session(router, session, const.DATE_MUST_BE_IN_FUTURE,
+                                      is_error=True, 
+                                      **{"date_name": "Next Shot Date",
+                                         "date": next_visit_date})
         syp_treatment = SyphilisTreatment(session=session,
                                date=date,
                                mother=mom,
@@ -81,7 +77,5 @@ def syphilis(session, xform, router):
                                district=district
                                )
         syp_treatment.save()
-        resp = const.SYP_TREATMENT_COMPLETE % {"name": name, "unique_id": unique_id}
-
-    router.outgoing(OutgoingMessage(session.connection, resp))
-    get_session_message(session, direction='O')
+        return respond_to_session(router, session, const.SYP_TREATMENT_COMPLETE,
+                                  **{"name": name, "unique_id": unique_id})
