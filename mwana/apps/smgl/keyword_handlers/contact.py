@@ -48,23 +48,16 @@ def make_active(session, xform, router):
     get_session_message(session)
 
     if not connection.contact:
-        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     when = get_value_from_form('when', xform)
     if when == 'now':
         connection.contact.is_active = True
         connection.contact.return_date = None
         connection.contact.save()
-
-        send_msg(connection, const.IN_COMPLETE, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-        return True
-
+        return respond_to_session(router, session, const.IN_COMPLETE,
+                                  **{'name': connection.contact.name})
 
 @registration_required
 @is_active
@@ -79,10 +72,8 @@ def out(session, xform, router):
     connection = session.connection
     get_session_message(session)
     if not connection.contact:
-        send_msg(connection, const.NOT_REGISTERED_FOR_DATA_ASSOC, router,
-                 name=connection.contact.name)
-        get_session_message(session, direction='O')
-        return True
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
 
     days = int(get_value_from_form('days', xform))
     now = datetime.utcnow().date()
@@ -92,8 +83,6 @@ def out(session, xform, router):
     connection.contact.return_date = return_date
     connection.contact.save()
 
-    send_msg(connection, const.OUT_COMPLETE, router,
-             name=connection.contact.name,
-             date=return_date.strftime("%d %m %Y")
-             )
-    get_session_message(session, direction='O')
+    return respond_to_session(router, session, const.OUT_COMPLETE, 
+                              **{'name': connection.contact.name,
+                                 'date': return_date.strftime("%d %m %Y")})
