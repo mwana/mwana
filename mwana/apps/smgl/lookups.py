@@ -31,7 +31,7 @@ class DistrictLookup(ModelLookup):
 
 class FacilityLookup(ModelLookup):
     model = Location
-    exclude = {'type__singular__in': ['district', 'Province', 'Zone']}
+    exclude = {'type__singular__in': ['district', 'Province', 'Zone', 'Head Office']}
     search_fields = ('name__icontains', )
 
     def get_queryset(self):
@@ -49,7 +49,7 @@ class FacilityLookup(ModelLookup):
         if district:
             loc = Location.objects.get(pk=district)
             results = get_location_tree_nodes(loc)
-            results = [x for x in results if x.type.singular != 'Zone']
+            results = [x for x in results if x.type.singular not in ['Zone', 'Head Office']]
         return results
 
     def get_item_label(self, item):

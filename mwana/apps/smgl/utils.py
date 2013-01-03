@@ -190,6 +190,7 @@ def get_location_tree_nodes(location, locations=None):
     for child in location.location_set.all():
         locations.append(child)
         get_location_tree_nodes(child, locations)
+    locations = sorted(locations, key=lambda loc: loc.name)
     return locations
 
 
