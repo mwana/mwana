@@ -7,10 +7,8 @@ from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.smgl.tests.shared import SMGLSetUp, create_mother
 from mwana.apps.smgl import const
-from mwana.apps.smgl.models import Location
 from mwana.apps.smgl.reminders import (send_inactive_notice,
     send_expected_deliveries)
-
 
 
 class SMGLReminderTest(SMGLSetUp):
@@ -45,7 +43,6 @@ class SMGLReminderTest(SMGLSetUp):
         self.assertEqual(out_msgs.count(), 2)
         self.assertEqual(out_msgs[1].text, const.INACTIVE_CONTACT)
 
-
     def testExpectedEddReminder(self):
         Message.objects.all().delete()
 
@@ -53,7 +50,7 @@ class SMGLReminderTest(SMGLSetUp):
         send_expected_deliveries(router_obj=self.router)
         msgs = Message.objects.all()
         self.assertEqual(msgs.count(), 1)
-        self.assertEqual(msgs[0].text, const.EXPECTED_EDDS % {'edd_count':1})
+        self.assertEqual(msgs[0].text, const.EXPECTED_EDDS % {'edd_count': 1})
 
     def testExpectedEddReminderBeforeRange(self):
         Message.objects.all().delete()

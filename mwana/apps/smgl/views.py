@@ -36,8 +36,8 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
 
 def mothers(request):
     province = district = facility = zone = None
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
     edd_start_date = edd_end_date = None
 
     mothers = PregnantMother.objects.all()
@@ -167,8 +167,8 @@ def mother_history(request, id):
 def statistics(request, id=None):
     records = []
     facility_parent = None
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     province = district = facility = None
 
@@ -372,8 +372,8 @@ def statistics(request, id=None):
 def reminder_stats(request):
     records = []
     province = district = facility = None
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     record_types = ['edd', 'nvd', 'pos', 'ref']
     field_mapper = {'edd': 'Expected Delivery Date', 'nvd': 'Next Visit Date',
@@ -469,8 +469,8 @@ def reminder_stats(request):
 def report(request):
     records = []
     province = district = locations = None
-    start_date = date(date.today().year, 1, 1)
-    end_date = date(date.today().year, 12, 31)
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     if request.GET:
         form = StatisticsFilterForm(request.GET)
@@ -598,8 +598,8 @@ def report(request):
     positive_syph = percentage(positive_syphs.count(),
                           syph_tests.count())
     positive_mothers = positive_syphs.values_list('mother', flat=True)
-    mothers = PregnantMother.objects.filter(id__in=positive_mothers)
-    treatments = mothers.annotate(Count('syphilistreatment')) \
+    positive_mothers = PregnantMother.objects.filter(id__in=positive_mothers)
+    treatments = positive_mothers.annotate(Count('syphilistreatment')) \
                         .values_list('syphilistreatment__count', flat=True)
     positive_syph_completed = sum(i >= 3 for i in treatments)
 
@@ -612,6 +612,8 @@ def report(request):
           'value': cbas},
          {'data': "Number of Data Clerks Registered",
           'value': clerks},
+         {'data': "Number of Pregnent Mothers Registered",
+          'value': mothers.count()},
          {'data': 'Percentage of Women who attended at least 4 ANC visits',
           'value': p_gtefour_ancs},
          {'data': "Percentage of women who returned for ANCs after being reminded",
@@ -672,8 +674,8 @@ def notifications(request):
     """
     Report on notifications to help_admin users
     """
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
  #   province = district = facility = None
 
@@ -734,8 +736,8 @@ def notifications(request):
 
 
 def referrals(request):
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     province = district = facility = None
 
@@ -809,8 +811,8 @@ def sms_records(request):
     Report on all messages
     """
     province = district = facility = keyword = None
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     sms_records = Message.objects.filter(direction="I")
 
@@ -888,8 +890,8 @@ def sms_users(request):
     """
     Report on all users
     """
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     province = district = c_type = None
 
@@ -921,9 +923,9 @@ def sms_users(request):
         contacts = contacts.filter(types__in=[c_type])
     contacts = contacts.filter(location__in=locations)
 
-    # filter by created_date
-    contacts = filter_by_dates(contacts, 'created_date',
-                             start=start_date, end=end_date)
+    # filter by latest_sms_date, which is a property on the model, not a field
+    contacts = [x for x in contacts if x.latest_sms_date != None and x.latest_sms_date.date() >= start_date and x.latest_sms_date.date() <= end_date]
+    contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
     # render as CSV if export
     if request.GET.get('export'):
@@ -1103,8 +1105,8 @@ def sms_user_statistics(request, name):
 
 def help(request):
     province = district = facility = None
-    end_date = datetime.datetime.today()
-    start_date = (end_date - timedelta(days=14)).date()
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - timedelta(days=14)
 
     help_reqs = HelpRequest.objects.all()
 
