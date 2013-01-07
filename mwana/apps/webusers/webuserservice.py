@@ -67,7 +67,7 @@ class WebUserService:
         my_facilities_count = len(user_facilities.distinct())
         
         if my_facilities_count == 0:
-            return to_return
+            return self.get_paginated(list(set(to_return)), page, 30)
 
 
         other_users = User.objects.filter(groupusermapping__group__groupfacilitymapping__facility__in
