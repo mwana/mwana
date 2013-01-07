@@ -25,7 +25,7 @@ from mwana.apps.reports.utils.htmlhelper import *
 
 def webusers(request):
 
-    #TODO enable filter by province and district
+    #TODO refine filter by province and district
     navigation = read_request(request, "navigate")
     page = read_request(request, "page")
 
@@ -54,10 +54,7 @@ def webusers(request):
         
     offset = max_per_page * (number - 1)
     
-    groups = ReportingGroup.objects.filter(groupusermapping__user=
-                                                    request.user).distinct()
-    rpt_group = groups[0] if groups else None
-
+    
     is_report_admin = False
     try:
         user_group_name = request.user.groupusermapping_set.all()[0].group.name

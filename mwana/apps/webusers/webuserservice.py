@@ -47,7 +47,7 @@ class WebUserService:
         if group and group.lower().strip() != 'all':
             user_groups = [group]
         
-        peers = User.objects.filter(groupusermapping__group__in=user_groups).distinct()
+        peers = User.objects.filter(is_active=True, groupusermapping__group__in=user_groups).distinct()
 
         for peer in peers:
             to_return.append(peer)
@@ -70,7 +70,7 @@ class WebUserService:
             return self.get_paginated(list(set(to_return)), page, 30)
 
 
-        other_users = User.objects.filter(groupusermapping__group__groupfacilitymapping__facility__in
+        other_users = User.objects.filter(is_active=True, groupusermapping__group__groupfacilitymapping__facility__in
                                           =user_facilities).exclude(
                                           id=current_user.id).distinct()
         for user in other_users:
