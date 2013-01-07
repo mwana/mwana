@@ -13,7 +13,14 @@ class LocationAdmin(admin.ModelAdmin):
     list_editable = ("send_live_results", "has_independent_printer")
     search_fields = ("name","parent__name", "slug")
 
+class PointAdmin(admin.ModelAdmin):
+    list_display = ("latitude", "longitude", "my_location")
+    search_fields = ("latitude", "longitude", "location__name",)
 
-admin.site.register(Point)
+    def my_location(self, obj):        
+        return ", ".join(loc.name for loc in obj.location_set.all())
+
+
+admin.site.register(Point, PointAdmin)
 admin.site.register(LocationType)
 admin.site.register(Location, LocationAdmin)
