@@ -55,11 +55,11 @@ You currently don't belong to any group for viewing reports. Contact the system 
                     <tr>
                         <td colspan="3">
                             {% for record in stacked %}
-                            <img title="{{ record.positive}}% Negative" src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
+                            <img title="{{ record.positive}}% Positive" src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
                                  width="{% widthratio record.positive 7 50 %}" />
                             
 
-                            <img title="{{ record.negative}}% Positive" src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
+                            <img title="{{ record.negative}}% Negative" src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
                                  width="{% widthratio record.negative 7 50 %}" />
                             
                             <img title="{{ record.rejected}}% Rejected" src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
