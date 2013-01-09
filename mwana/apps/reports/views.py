@@ -352,9 +352,8 @@ def zambia_reports(request):
                                                              enddate)
 
     percent_positive_country, percent_negative_country, \
-    percent_rejected_country, percent_positive_provinces, \
-    percent_negative_provinces, percent_rejected_provinces, total_dbs, \
-    months_reporting, days_reporting, year_reporting = r.dbs_positivity_data()
+    percent_rejected_country, total_dbs, \
+    months_reporting, days_reporting, year_reporting, stacked = r.dbs_positivity_data()
 
     return render_to_response('reports/zambia.html',
         {'startdate': startdate,
@@ -404,9 +403,7 @@ def zambia_reports(request):
          'percent_positive_country': percent_positive_country,
          'percent_negative_country': percent_negative_country,
          'percent_rejected_country': percent_rejected_country,
-         'percent_positive_provinces': percent_positive_provinces,
-         'percent_negative_provinces': percent_negative_provinces,
-         'percent_rejected_provinces': percent_rejected_provinces,
+         'stacked': stacked,
          'total_dbs': total_dbs,
          'months_reporting': months_reporting,
          'days_reporting': days_reporting,
