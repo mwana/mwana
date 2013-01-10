@@ -18,6 +18,7 @@ from django.shortcuts import redirect
 from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 from mwana.apps.labresults.models import Result
+from mwana.const import get_district_worker_type, get_province_worker_type, get_dbs_printer_type, get_clinic_worker_type, get_cba_type
 
 
 
@@ -505,16 +506,20 @@ def supported_sites(request):
     records = r.user_facilities().filter(supportedlocation__supported=True)
     sites = []
     locations = {}
-    for record in records:
+    for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
         if not record.point:
             continue
         site = Site()
         site.point = record.point
+        site.slug = record.slug
         site.name = record.name
         site.district = record.parent.name
         site.province = record.parent.parent.name
-        site.workers = record.contact_set.filter(types__slug='worker', is_active=True).count()
-        site.cbas = Contact.active.filter(types__slug='cba', is_active=True, location__parent=record).count()
+        site.workers = record.contact_set.filter(types=get_clinic_worker_type(), is_active=True).distinct().count()
+        site.cbas = Contact.active.filter(types=get_cba_type(), is_active=True, location__parent=record).distinct().count()
+        site.dhos = Contact.active.filter(types=get_district_worker_type(), is_active=True, location__location=record).distinct().count()
+        site.phos = Contact.active.filter(types=get_province_worker_type(), is_active=True, location__location=record).distinct().count()
+        site.printers = Contact.active.filter(types=get_dbs_printer_type(), is_active=True, location=record).distinct().count()
         site.results = record.lab_results.exclude(result_sent_date=None).count()
 
         site.sample_sent_to_lab_this_month = Result.objects.filter(clinic=record,
@@ -540,7 +545,7 @@ def supported_sites(request):
 
         sites.append(site)
 
-
+    
 
     return render_to_response('reports/supported_sites.html',
         {

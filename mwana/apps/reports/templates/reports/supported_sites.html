@@ -15,6 +15,7 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
 <style>
+    .warning_0 {background-color:red}
     html { height: auto; }
     body { height: auto; margin: 0; padding: 0; font-family: Georgia, serif; font-size: 0.9em; }
     table { border-collapse: collapse; border-spacing: 0; }
@@ -164,7 +165,22 @@ You currently don't belong to any group for viewing reports. Contact the system 
                                 </div></div>
                            
                         </td>
-                    </tr>
+                    </tr>{% for site in sites %}
+                    <tr>
+                        
+                        <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                            
+                            {{forloop.counter}}. <i>{{ site.province }}</i> - <i>{{ site.district }}</i> - <b>{{ site.name }} - {{ site.slug }}</b>:
+
+                            <span class="warning_{{site.workers}}">{{ site.workers}}</span> Clinic staff; 
+                            <span class="warning_{{site.cbas}}">{{ site.cbas}}</span> CBAs;
+                            <span class="warning_{{site.results}}">{{ site.results}}</span> Results retrieved to date;
+                            <a title="{{site.results_retrieved_this_month}} Results retrieved this month; {{site.births}} Births registered to date; {{site.births_this_month}} Births registered this month; {{site.dhos}} DHOs; {{site.phos}} PHOs; {{site.printers}} DBS Printers" onclick="alert(this.title.replace(/;\s?/g,'\n').trim())">more infor</a>
+                            <br>
+                            
+                        </td>
+                        
+                    </tr>{% endfor %}
 
                 </tbody>
             </table>
