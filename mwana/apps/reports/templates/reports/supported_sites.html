@@ -161,11 +161,12 @@ You currently don't belong to any group for viewing reports. Contact the system 
                                     {{ district.1|length }}{% if not forloop.last %}, {% endif %}
                                     {% endfor %}
                                     {% endfor %}
-                                    <p><b>{{ facilities|length}} facilities in total</b>
+                                    <p><b>{{ total_supported}} facilities in total</b>
                                 </div></div>
                            
                         </td>
-                    </tr>{% for site in sites %}
+                    </tr>
+                    {% for site in sites %}
                     <tr>
                         
                         <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
@@ -176,11 +177,27 @@ You currently don't belong to any group for viewing reports. Contact the system 
                             <span class="warning_{{site.cbas}}">{{ site.cbas}}</span> CBAs;
                             <span class="warning_{{site.results}}">{{ site.results}}</span> Results retrieved to date;
                             <a title="{{site.results_retrieved_this_month}} Results retrieved this month; {{site.births}} Births registered to date; {{site.births_this_month}} Births registered this month; {{site.dhos}} DHOs; {{site.phos}} PHOs; {{site.printers}} DBS Printers" onclick="alert(this.title.replace(/;\s?/g,'\n').trim())">more infor</a>
-                            <br>
-                            
-                        </td>
-                        
+                            <br>                            
+                        </td>                        
                     </tr>{% endfor %}
+                    <tr>
+                        <td colspan="2"><h3>The following sites don't have GIS coordinates and so are not shown on the map:</h3></td>
+                    </tr>
+                    {% for site in unplotable_sites %}
+                    <tr>
+
+                        <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                            {{forloop.counter}}. <i>{{ site.province }}</i> - <i>{{ site.district }}</i> - <b>{{ site.name }} - {{ site.slug }}</b>:
+
+                            <span class="warning_{{site.workers}}">{{ site.workers}}</span> Clinic staff;
+                            <span class="warning_{{site.cbas}}">{{ site.cbas}}</span> CBAs;
+                            <span class="warning_{{site.results}}">{{ site.results}}</span> Results retrieved to date;
+                            <a title="{{site.results_retrieved_this_month}} Results retrieved this month; {{site.births}} Births registered to date; {{site.births_this_month}} Births registered this month; {{site.dhos}} DHOs; {{site.phos}} PHOs; {{site.printers}} DBS Printers" onclick="alert(this.title.replace(/;\s?/g,'\n').trim())">more infor</a>
+                            <br>
+                        </td>
+                    </tr>{% endfor %}
+
 
                 </tbody>
             </table>
@@ -190,10 +207,6 @@ You currently don't belong to any group for viewing reports. Contact the system 
         </div>
     </form>
 </div>
-
-
-
-
 
 
 <script type="text/javascript">

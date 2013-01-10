@@ -505,10 +505,9 @@ def supported_sites(request):
     r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
     records = r.user_facilities().filter(supportedlocation__supported=True)
     sites = []
+    unplotable_sites = []
     locations = {}
-    for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
-        if not record.point:
-            continue
+    for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):        
         site = Site()
         site.point = record.point
         site.slug = record.slug
@@ -542,8 +541,10 @@ def supported_sites(request):
         else:
             locations[site.province] = {site.district:[site.name]}
 
-
-        sites.append(site)
+        if not record.point:
+            unplotable_sites.append(site)
+        else:
+            sites.append(site)
 
     
 
@@ -560,8 +561,9 @@ def supported_sites(request):
          'is_report_admin': is_report_admin,
          'region_selectable': True,
          'sites': sites,
-         'facilities': records,
+         'total_supported': len(records),
          'locations': locations,
+         'unplotable_sites': unplotable_sites,
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
          'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
