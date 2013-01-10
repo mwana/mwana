@@ -913,7 +913,11 @@ def sms_users(request):
     contacts = contacts.filter(location__in=locations)
 
     # filter by latest_sms_date, which is a property on the model, not a field
-    contacts = [x for x in contacts if x.latest_sms_date != None and x.latest_sms_date.date() >= start_date and x.latest_sms_date.date() <= end_date]
+    contacts = [x for x in contacts if x.latest_sms_date != None]
+    if start_date:
+        contacts = [x for x in contacts if x.latest_sms_date.date() >= start_date]
+    if end_date:
+        contacts = [x for x in contacts if x.latest_sms_date.date() <= end_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
     # render as CSV if export
