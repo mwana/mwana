@@ -21,6 +21,7 @@ ACTION_TAKEN_CHOICES = (
     ('OT', 'R-OTP'),
     ('RG', 'C-R'),
     ('SF', 'R-SFP'),
+    ('XX', 'X'),
 )
 
 
@@ -87,7 +88,7 @@ class Assessment(models.Model):
     stunting = models.CharField(max_length=1, choices=STUNTING_CHOICES, default='N')
     wasting = models.CharField(max_length=1, choices=WASTING_CHOICES, default='N')
 
-    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='RG')
+    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='XX')
 
     class Meta:
         # define a permission for this app to use the @permission_required

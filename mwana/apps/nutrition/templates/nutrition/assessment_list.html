@@ -201,7 +201,7 @@
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.height4age|default:"<span class='x'>X</span>" }}</td>
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display|default:"<span class='x'>X</span>" }}</td>
                 <td>{{ ass.get_status_display }}</td>
-                <td>{{ ass.get_action_taken_display }}</td>
+                <td>{% if ass.action_taken == 'XX' %} <span class='x'>X</span> {% else %} {{ ass.get_action_taken_display }} {% endif %}</td> 
             </tr>
             {% endfor %}
             <tr>
@@ -241,6 +241,8 @@
     R-OTP = Refer to Outpatient Therapeutic Programme
     <br />
     R-NRU = Refer to Nutrition Rehabilitation Unit
+    <br />
+    X = Indicator was not reported on
   </p>
 </div>
 

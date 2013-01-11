@@ -9,6 +9,7 @@ import csv
 
 from django.http import HttpResponse
 from django.db.models import Q
+from django.db import transaction
 
 from django.template import RequestContext
 from django.shortcuts import redirect, get_object_or_404, render_to_response
@@ -31,7 +32,20 @@ stat_options = {"All": "All", "Cancelled": "C", "Good": "G",
                     "Baseline": "B", "Suspect": "S"}
 
 action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
-                      "All": "All"}
+                     "X": "XX", "All": "All"}
+
+@transaction.commit_manually
+def flush_transaction():
+    """
+    Flush the current transaction so we don't read stale data
+
+    Use in long running processes to make sure fresh data is read from
+    the database.  This is a problem with MySQL and the default
+    transaction mode.  You can fix it by setting
+    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
+    this function at the appropriate moment
+    """
+    transaction.commit()
 
 
 def index(req):
@@ -129,6 +143,7 @@ def assessments(request):
 
     try:
         ass_list = paginator.page(page)
+        flush_transaction()
     except(EmptyPage, InvalidPage):
         ass_list = paginator.page(paginator.num_pages)
 
