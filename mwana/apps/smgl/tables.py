@@ -146,7 +146,7 @@ class SMSRecordsTable(Table):
 
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y m d ")
-    name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.name]))
+    name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.id]))
     number = Column(value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '',
                     sortable=False)
     last_active = DateColumn(value=lambda cell: cell.object.latest_sms_date,

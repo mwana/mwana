@@ -8,7 +8,7 @@
 <div class="messages module">
 <h2>{{ user.name }} - {{ user.default_connection.identity }}</h2>
 <a href="?export=1"><button class="btn" name="export">Export</button></a>
-<a href="{% url 'sms-user-statistics' user.name %}">User's SMS Statistics</a>
+<a href="{% url 'sms-user-statistics' user.id %}">User's SMS Statistics</a>
 {{ message_table.as_html }}
 </div>
 

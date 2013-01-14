@@ -55,7 +55,7 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   <h2>{{ user.name }}'s SMS Statistics</h2>
-  <p><a href="{% url 'sms-user-history' user.name %}">Back to User</a></p>
+  <p><a href="{% url 'sms-user-history' user.id %}">Back to User</a></p>
   <div id="records">
     {{ summary_report_table.as_html }}
   </div>

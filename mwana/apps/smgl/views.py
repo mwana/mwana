@@ -954,8 +954,8 @@ def sms_users(request):
         context_instance=RequestContext(request))
 
 
-def sms_user_history(request, name):
-    contact = get_object_or_404(Contact, name=name)
+def sms_user_history(request, id):
+    contact = get_object_or_404(Contact, id=id)
 
     messages = Message.objects.filter(contact=contact,
                                       direction='I')
@@ -986,8 +986,8 @@ def sms_user_history(request, name):
         context_instance=RequestContext(request))
 
 
-def sms_user_statistics(request, name):
-    contact = get_object_or_404(Contact, name=name)
+def sms_user_statistics(request, id):
+    contact = get_object_or_404(Contact, id=id)
 
     start_date, end_date = get_default_dates()
 
