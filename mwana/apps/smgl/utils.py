@@ -197,6 +197,7 @@ def get_location_tree_nodes(location, locations=None):
     for child in location.location_set.all():
         locations.append(child)
         get_location_tree_nodes(child, locations)
+    locations = sorted(locations, key=lambda loc: loc.name)
     return locations
 
 
@@ -214,3 +215,13 @@ def mother_death_ratio(part, whole):
         result = part / float(whole) * 100000
         return "{0:.0f}".format(result)
     return 0
+
+
+def get_default_dates(days=14):
+    """
+    Return a start and end date values for the supplied range of days
+    """
+    end_date = datetime.datetime.today().date()
+    start_date = end_date - datetime.timedelta(days=days)
+    return start_date, end_date
+
