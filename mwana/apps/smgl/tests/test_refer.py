@@ -330,17 +330,16 @@ class SMGLReferTest(SMGLSetUp):
             %(tnnum)s > resp 1234 otw
             %(tnnum)s < %(resp)s
             %(amnum)s < %(resp)s
-            %(wonum)s < %(wo_notif)s
             %(num)s < %(notif)s
+            %(wonum)s < %(wo_notif)s
         """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
-               "wonum": "666444",
+               "wonum": "666111",
                "resp": response_string,
                "wo_notif": response_to_worker_string,
                "notif": response_to_referrer_string}
 
         self.runScript(script)
         [amb_req] = AmbulanceRequest.objects.all()
-        self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
@@ -409,7 +408,6 @@ class SMGLReferTest(SMGLSetUp):
                "notif": response_to_referrer_string}
         self.runScript(script)
         [amb_req] = AmbulanceRequest.objects.all()
-        self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
