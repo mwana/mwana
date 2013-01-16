@@ -218,7 +218,7 @@ class SurveyEntry(models.Model):
     oedema              = models.CharField(max_length=15,blank=True,null=True)
     muac                = models.CharField(max_length=15,blank=True,null=True)
 
-    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='RG')
+    action_taken = models.CharField(max_length=2, choices=ACTION_TAKEN_CHOICES, default='XX')
 
 
 class Survey(models.Model):
