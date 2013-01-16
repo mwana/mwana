@@ -27,7 +27,7 @@ class ConfirmHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "cofirm|confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed"
+    keyword = "cofirm|confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed|C0mf1rm|Comf1rm|C0nf1rm|Conf1rm"
 #    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri"
