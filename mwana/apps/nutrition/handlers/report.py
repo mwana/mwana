@@ -420,7 +420,7 @@ class ReportGMHandler(KeywordHandler):
                 # continuum of care for SAM children
                 if ((ass.wasting == 'S') or (ass.stunting == 'S') or (ass.underweight == 'S')):
                     event = "SAM"
-                    sam_date = datetime.date.today()
+                    sam_date = date.today()
                     # this is one for a ... moment, create an alternate patient!
                     if healthworker and healtworker.location:
                         child, created = Contact.objects.get_or_create(
