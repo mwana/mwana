@@ -28,7 +28,6 @@ class SMGLReferTest(SMGLSetUp):
         self.cba_number = "456"
         self.name = "Anton"
         self.createUser("worker", self.user_number, location="804034")
-        self.cworker = self.createUser("worker", "666444")
         self.cba = self.createUser("cba", self.cba_number, location="80402404")
         self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
         self.tn = self.createUser(const.CTYPE_TRIAGENURSE, "666888")

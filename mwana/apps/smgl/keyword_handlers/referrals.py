@@ -73,20 +73,7 @@ def refer(session, xform, router):
         referral.save()
         # IF CBA, DO NOT SEND AN EMERGENCY REQUEST, JUST NOTIFY via _get_people_to_notify
         is_cba = ['cba'] == list(contact.types.all().values_list('slug', flat=True))
-        if referral.status == 'em' and not is_cba:
-            # Generate an Ambulance Request
-            session.template_vars.update({"sender_phone_number": session.connection.identity})
-            amb = AmbulanceRequest()
-            amb.session = session
-            session.template_vars.update({"from_location": str(referral.from_facility.name)})
-            amb.set_mother(mother_id)
-            amb.save()
-            referral.amb_req = amb
-            referral.save()
-            #Respond that we're on it.
-            send_msg(session.connection, INITIAL_AMBULANCE_RESPONSE, router, **session.template_vars)
-            _broadcast_to_ER_users(amb, session, xform, router=router)
-        else:
+        if is_cba or referral.status == 'nem':
             resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
             router.outgoing(OutgoingMessage(session.connection, resp))
             from_facility = session.connection.contact.location.name
@@ -99,6 +86,19 @@ def refer(session, xform, router):
                                                          "time": referral.time.strftime("%H:%M"),
                                                          "is_emergency": yesno(referral.is_emergency)}
                     router.outgoing(OutgoingMessage(c.default_connection, msg))
+        else:
+            # Generate an Ambulance Request
+            session.template_vars.update({"sender_phone_number": session.connection.identity})
+            amb = AmbulanceRequest()
+            amb.session = session
+            session.template_vars.update({"from_location": str(referral.from_facility.name)})
+            amb.set_mother(mother_id)
+            amb.save()
+            referral.amb_req = amb
+            referral.save()
+            #Respond that we're on it.
+            send_msg(session.connection, INITIAL_AMBULANCE_RESPONSE, router, **session.template_vars)
+            _broadcast_to_ER_users(amb, session, xform, router=router)
     get_session_message(session, direction='O')
     return True
 
