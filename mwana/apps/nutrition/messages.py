@@ -12,6 +12,7 @@ INVALID_ACTION_TAKEN = "Sorry, valid actions taken are: RG for reinforce good pr
 INVALID_MEASUREMENT = "Possible measurement error. Please check height, weight, MUAC or age of child: %s."
 REPORT_HELP = "To report measurements send: GM <CHILD ID> <DATEOFBIRTH> <GENDER> <WEIGHT> <HEIGHT> <OEDEMA> <MUAC> <ACTION_TAKEN>"
 REPORT_CONFIRM = "Thanks, %s. Received %s."
+ASSESS_CONFIRM = "Thanks, %s. The child has been assessed as Wasting: %s, Underweight: %s, Stunting: %s. Please counsel the mother appropriately."
 INVALID_MESSAGE = "Sorry, I don't understand."
 CANCEL_HELP = "To cancel the last report and assessment for a child send: CANCEL <CHILD ID>."
 CANCEL_CONFIRM = "CANCELLED report submitted by %s (ID %s) on %s for Child ID %s."
@@ -23,4 +24,3 @@ REMOVE_HELP = "To remove an Interviewer send: REMOVE <Inteviewer ID>."
 REMOVE_CONFIRM = "%s has been removed from Interviewer ID %s."
 ADMIT_HELP = "To admit a child send: ADMIT <CHILD ID> <NAME>"
 DISMISS_HELP = "To discharge a child send: DISMISS <CHILD_ID>"
-

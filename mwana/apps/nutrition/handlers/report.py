@@ -482,19 +482,9 @@ class ReportGMHandler(KeywordHandler):
             self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))
 
         try:
-            data = [
-                    "ChildID=%s" % (patient.code or "??"),
-                    "Gender=%s" % (patient.gender or "??"),
-                    "DOB=%s" % (patient.date_of_birth or "??"),
-                    "Age=%sm" % (patient.age_in_months or "??"),
-                    "Weight=%skg" % (measurements['weight'] or "??"),
-                    "Height=%scm" % (measurements['height'] or "??"),
-                    "Oedema=%s" % (human_oedema or "??"),
-                    "MUAC=%scm" % (measurements['muac'] or "??")]
-
             self.debug('constructing confirmation')
-            confirmation = REPORT_CONFIRM %\
-                (healthworker.name, " ".join(data))
+            confirmation = ASSESS_CONFIRM %\
+                (healthworker.name, ass.get_wasting_display(), ass.get_underweight_display(), ass.get_stunting_display())
             self.debug('confirmation constructed')
                     # send confirmation AFTER any error messages
             if confirmation is not None:
