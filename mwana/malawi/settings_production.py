@@ -38,6 +38,7 @@ RAPIDSMS_TABS = [
 #    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
+    ('mwana.apps.reports.views.malawi_graphs', 'Results160 Analysis'),
     ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('growth_index', 'AnthroWatch Reports'),
