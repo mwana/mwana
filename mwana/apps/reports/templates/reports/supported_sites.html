@@ -89,6 +89,10 @@
         // for debugging/exploratory use in console
         window.map = map;
         window.oms = oms;
+//
+//        var nyLayer = new google.maps.KmlLayer('/alerts',
+//        {suppressInfoWindows: true});
+//        nyLayer.setMap(map);
     }
 </script>
 {% endblock %}
@@ -154,23 +158,23 @@ You currently don't belong to any group for viewing reports. Contact the system 
 
                                     {% for province in locations.items %}
                                     <p><b>{{ province.0 }}</b><br>
-                                    
-                                    {% for district in province.1.items %}
-                                    {{ forloop.counter1}}
-                                    {{ district.0 }}-
-                                    {{ district.1|length }}{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                    {% endfor %}
+
+                                        {% for district in province.1.items %}
+                                        {{ forloop.counter1}}
+                                        {{ district.0 }}-
+                                        {{ district.1|length }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                        {% endfor %}
                                     <p><b>{{ total_supported}} facilities in total</b>
                                 </div></div>
-                           
+
                         </td>
                     </tr>
                     {% for site in sites %}
                     <tr>
-                        
+
                         <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                            
+
                             {{forloop.counter}}. <i>{{ site.province }}</i> - <i>{{ site.district }}</i> - <b>{{ site.name }} - {{ site.slug }}</b>:
 
                             <span class="warning_{{site.workers}}">{{ site.workers}}</span> Clinic staff; 
