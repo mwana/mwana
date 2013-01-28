@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-#from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_GET
@@ -7,8 +6,6 @@ from mwana.apps.alerts.labresultsalerts.alerter import Alerter
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
 from mwana.apps.reports.views import read_request
-
-#from mwana.apps.reports.utils.kml import provinces_kml
 
 def get_int(val):
     return int(val) if str(val).isdigit() else None
@@ -22,7 +19,6 @@ def get_from_request(request, name):
 
 @require_GET
 def mwana_alerts (request):
-#    return HttpResponse(provinces_kml,content_type="application/xhtml+kml")
     transport_time = get_from_request(request, 'input_transport_time')
     retrieving_time = get_from_request(request, 'input_retrieving_time')
     notifying_time = get_from_request(request, 'input_notifying_time')
