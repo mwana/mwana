@@ -1,7 +1,8 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import (Referral, PregnantMother,
     ReminderNotification, AmbulanceRequest, AmbulanceResponse)
-from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED
+from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED,\
+    AMB_RESPONSE_ALREADY_HANDLED
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
 import datetime
@@ -28,7 +29,6 @@ class SMGLReferTest(SMGLSetUp):
         self.cba_number = "456"
         self.name = "Anton"
         self.createUser("worker", self.user_number, location="804034")
-        self.cworker = self.createUser("worker", "666444")
         self.cba = self.createUser("cba", self.cba_number, location="80402404")
         self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
         self.tn = self.createUser(const.CTYPE_TRIAGENURSE, "666888")
@@ -42,12 +42,13 @@ class SMGLReferTest(SMGLSetUp):
         self.refferring_ic = self.createUser(const.CTYPE_INCHARGE, "666000",
                                              location="804034")
         self.assertEqual(0, Referral.objects.count())
+        self._facility_string = "Mawaya (in Kalomo District Hospital HAHC)"
 
     def testRefer(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Mawaya",
+                                               "facility": self._facility_string,
                                                "reason": _verbose_reasons("hbp"),
                                                "time": "12:00",
                                                "is_emergency": "no"}
@@ -84,7 +85,7 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Mawaya",
+                                               "facility": self._facility_string,
                                                "reason": _verbose_reasons("ec, fd, hbp, pec"),
                                                "time": "12:00",
                                                "is_emergency": "no"}
@@ -109,7 +110,6 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual("nem", referral.status)
 
     def testReferBadCode(self):
-        # bad code
         bad_code_resp = 'Answer must be one of the choices for "Reason for referral, choices: fd, pec, ec, hbp, pph, aph, pl, cpd, oth, pp"'
         script = """
             %(num)s > refer 1234 804024 foo 1200 nem
@@ -120,12 +120,11 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(0, Referral.objects.count())
 
     def testReferBadLocation(self):
-        # bad code
-        bad_code_resp = FACILITY_NOT_RECOGNIZED % {"facility": "notaplace"}
+        bad_loc_resp = FACILITY_NOT_RECOGNIZED % {"facility": "notaplace"}
         script = """
             %(num)s > refer 1234 notaplace hbp 1200 nem
             %(num)s < %(resp)s
-        """ % {"num": self.user_number, "resp": bad_code_resp}
+        """ % {"num": self.user_number, "resp": bad_loc_resp}
         self.runScript(script)
         self.assertSessionFail()
         self.assertEqual(0, Referral.objects.count())
@@ -339,10 +338,10 @@ class SMGLReferTest(SMGLSetUp):
             %(tnnum)s > resp 1234 otw
             %(tnnum)s < %(resp)s
             %(amnum)s < %(resp)s
-            %(wonum)s < %(wo_notif)s
             %(num)s < %(notif)s
+            %(wonum)s < %(wo_notif)s
         """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
-               "wonum": "666444",
+               "wonum": "666111",
                "resp": response_string,
                "wo_notif": response_to_worker_string,
                "notif": response_to_referrer_string}
@@ -350,12 +349,29 @@ class SMGLReferTest(SMGLSetUp):
         self.runScript(script)
         self.assertSessionSuccess()
         [amb_req] = AmbulanceRequest.objects.all()
-        self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("otw", amb_resp.response)
         self.assertEqual("666888", amb_resp.responder.default_connection.identity)
+
+    def testReferEmSecondResponse(self):
+        # not so atomic, but better(?) than copy/pasting code
+        self.testReferEmWorkflow()
+        # at the end of the above test we've just responded
+        # respond again and make sure the system catches it appropriately
+        duplicate_refer_response = AMB_RESPONSE_ALREADY_HANDLED % {"response": "otw",
+                                                                   "person": "Anton"}
+        previous_count = AmbulanceResponse.objects.count()
+        self.runScript("""
+            %(amnum)s > resp 1234 otw
+            %(amnum)s < %(resp)s
+        """ % {"amnum": "666555",
+               "resp": duplicate_refer_response}
+        )
+
+        # make sure we didn't initiate a new response
+        self.assertEqual(previous_count, AmbulanceResponse.objects.count())
 
     def testReferEmNotAvailableWorkflow(self):
         d = {
@@ -421,7 +437,6 @@ class SMGLReferTest(SMGLSetUp):
         self.runScript(script)
         self.assertSessionSuccess()
         [amb_req] = AmbulanceRequest.objects.all()
-        self.assertEqual(True, referral.responded)
         [amb_resp] = AmbulanceResponse.objects.all()
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)

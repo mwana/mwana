@@ -151,6 +151,8 @@ def filter_by_dates(qs, field, start=None, end=None):
         key = '{0}__gte'.format(field)
         filters[key] = start
     if end:
+        #convert to datetime object
+        end = datetime.datetime.combine(end, datetime.time(hour=23, minute=59, second=59))
         key = '{0}__lte'.format(field)
         filters[key] = end
     return qs.filter(**filters)

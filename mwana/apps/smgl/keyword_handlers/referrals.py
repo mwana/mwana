@@ -15,7 +15,8 @@ from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
     INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact,
     NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, ER_TO_CLINIC_WORKER,
     AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED, FACILITY_NOT_RECOGNIZED,
-    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE)
+    AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE,
+    AMB_RESPONSE_ALREADY_HANDLED)
 
 logger = logging.getLogger(__name__)
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -70,7 +71,22 @@ def refer(session, xform, router):
         referral.save()
         # IF CBA, DO NOT SEND AN EMERGENCY REQUEST, JUST NOTIFY via _get_people_to_notify
         is_cba = ['cba'] == list(contact.types.all().values_list('slug', flat=True))
-        if referral.status == 'em' and not is_cba:
+        if is_cba or referral.status == 'nem':
+            loc = session.connection.contact.location
+            from_facility = loc.name if not loc.parent else "%s (in %s)" % \
+                (loc.name, loc.parent.name)
+            for c in _get_people_to_notify(referral):
+                if c.default_connection:
+                    verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
+                    msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
+                                                         "facility": from_facility,
+                                                         "reason": ", ".join(verbose_reasons),
+                                                         "time": referral.time.strftime("%H:%M"),
+                                                         "is_emergency": yesno(referral.is_emergency)}
+                    router.outgoing(OutgoingMessage(c.default_connection, msg))
+            return respond_to_session(router, session, const.REFERRAL_RESPONSE,
+                                      name=name, unique_id=mother_id)
+        else:
             # Generate an Ambulance Request
             session.template_vars.update({"sender_phone_number": session.connection.identity})
             amb = AmbulanceRequest()
@@ -83,20 +99,6 @@ def refer(session, xform, router):
             _broadcast_to_ER_users(amb, session, xform, router=router)
             # Respond that we're on it.
             return respond_to_session(router, session, INITIAL_AMBULANCE_RESPONSE)
-        else:
-            from_facility = session.connection.contact.location.name
-            for c in _get_people_to_notify(referral):
-                if c.default_connection:
-                    verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]
-                    msg = const.REFERRAL_NOTIFICATION % {"unique_id": mother_id,
-                                                         "facility": from_facility,
-                                                         "reason": ", ".join(verbose_reasons),
-                                                         "time": referral.time.strftime("%H:%M"),
-                                                         "is_emergency": yesno(referral.is_emergency)}
-                    router.outgoing(OutgoingMessage(c.default_connection, msg))
-            return respond_to_session(router, session, const.REFERRAL_RESPONSE,
-                                      **{"name": name, "unique_id": mother_id})
-
 
 @registration_required
 @is_active
@@ -192,6 +194,7 @@ def emergency_response(session, xform, router):
     ambulance_requests = AmbulanceRequest.objects.filter(mother_uid=unique_id)\
                 .exclude(referral__responded=True)\
                 .order_by('-id')
+
     if not ambulance_requests.count():
         #session doesn't exist or it has already been confirmed
         return respond_to_session(router, session, ER_CONFIRM_SESS_NOT_FOUND,
@@ -199,7 +202,14 @@ def emergency_response(session, xform, router):
 
     #take the latest one in case this mother has been ER'd a bunch
     ambulance_response.ambulance_request = ambulance_request = ambulance_requests[0]
-    ambulance_request.received_response = True
+    if ambulance_request.ambulanceresponse_set.filter(response='otw').exists():
+        # if we've already responded 'otw' then just respond indicating such
+        last_response = ambulance_request.ambulanceresponse_set.filter(response='otw')[0]
+        send_msg(connection, AMB_RESPONSE_ALREADY_HANDLED, router,
+                 response=last_response.response, person=last_response.responder)
+        return True
+
+    ambulance_request.received_response = True # FIXME: this dosen't do anything?
 
     confirm_contact_type = contact.types.all()[0]
     session.template_vars.update({"confirm_type": confirm_contact_type,
