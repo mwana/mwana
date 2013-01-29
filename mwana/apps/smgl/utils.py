@@ -112,12 +112,20 @@ def to_time(timestring):
         raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
     return datetime.time(hh, mm)
 
-
 def send_msg(connection, txt, router, **kwargs):
     router.outgoing(OutgoingMessage(connection, txt, **kwargs))
 
+def respond_to_session(router, session, outgoing_text, is_error=False,
+                       **message_kwargs):
+    router.outgoing(OutgoingMessage(session.connection, outgoing_text,
+                                    **message_kwargs))
+    update_session_message(session, direction='O')
+    if is_error:
+        session.has_error = True
+        session.save()
+    return True
 
-def get_session_message(session, direction='I'):
+def update_session_message(session, direction='I'):
     """
     Saves the Inbound or Outbound message to an XFormsSession object
     """
@@ -133,7 +141,6 @@ def get_session_message(session, direction='I'):
         else:
             session.message_outgoing = msg_set.reverse()[0]
         session.save()
-
 
 def filter_by_dates(qs, field, start=None, end=None):
     """

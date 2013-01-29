@@ -16,7 +16,7 @@ from dimagi.utils.modules import to_function
 from django.core.exceptions import ObjectDoesNotExist
 from smscouchforms.signals import xform_saved_with_session
 from mwana.apps.smgl.utils import get_contacttype, send_msg,\
-    get_value_from_form, make_date
+    get_value_from_form, make_date, update_session_message, respond_to_session
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 
@@ -42,7 +42,7 @@ THANKS_ER_CONFIRM = _("Thank you for confirming. When you know the status of the
 NOT_ALLOWED_ER_WORKFLOW = _("Sorry, your registration type is not allowed to send Emergency Response type messages")
 AMB_RESPONSE_THANKS = _("Thank you. The ambulance for this request has been marked as %(response)s. We will notify the Rural Facility.")
 AMB_CANT_FIND_UID = _("Sorry. We cannot find the Mother's Unique ID you specified. Please try again or contact the DMO")
-AMB_RESPONSE_NOT_AVAILABLE = _("No Emergency vehicle was available to address referral from %(from_location)s about mother ID:%(unique_id)s , Please respond accordingly.")
+AMB_RESPONSE_NOT_AVAILABLE = _("No Emergency vehicle was available to address referral from %(from_location)s about mother ID:%(unique_id)s, Please respond accordingly.")
 AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("We want to let you know that emergency vehicle is: %(response)s regarding referral for mother %(unique_id)s")
 AMB_RESPONSE_ALREADY_HANDLED = _("The ambulance for this request has been already marked as %(response)s by %(person)s. No action has been taken.")
 AMB_OUTCOME_NO_OUTCOME = _("Kindly register OUTCOME for Mother :%(unique_id)s.  Please send an outcome!")
@@ -136,6 +136,8 @@ def handle_submission(sender, **args):
 
     try:
         func = to_function(str(kw_handler.function_path), True)
+        # attach the incoming message to the session
+        update_session_message(session)
         session.template_vars = {}  # legacy from using rapidsms-xforms
         for k, v in xform.top_level_tags().iteritems():
             session.template_vars[k] = v
@@ -148,9 +150,7 @@ def handle_submission(sender, **args):
         # TODO: should we also mark the form somehow as errored out?
         logging.exception("Problem processing message in session %s from %s." % \
                           (session, session.connection))
-        router.outgoing(OutgoingMessage(session.connection,
-                                        const.GENERAL_ERROR))
-        return True
+        respond_to_session(router, session, const.GENERAL_ERROR, is_error=True)
 
 # then wire it to the xform_received signal
 xform_saved_with_session.connect(handle_submission)
