@@ -205,9 +205,9 @@ def emergency_response(session, xform, router):
     if ambulance_request.ambulanceresponse_set.filter(response='otw').exists():
         # if we've already responded 'otw' then just respond indicating such
         last_response = ambulance_request.ambulanceresponse_set.filter(response='otw')[0]
-        send_msg(connection, AMB_RESPONSE_ALREADY_HANDLED, router,
-                 response=last_response.response, person=last_response.responder)
-        return True
+        return respond_to_session(router, session, AMB_RESPONSE_ALREADY_HANDLED,
+                                  response=last_response.response,
+                                  person=last_response.responder)
 
     ambulance_request.received_response = True # FIXME: this dosen't do anything?
 
