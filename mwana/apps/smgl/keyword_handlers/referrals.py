@@ -77,7 +77,9 @@ def refer(session, xform, router):
         if is_cba or referral.status == 'nem':
             resp = const.REFERRAL_RESPONSE % {"name": name, "unique_id": mother_id}
             router.outgoing(OutgoingMessage(session.connection, resp))
-            from_facility = session.connection.contact.location.name
+            loc = session.connection.contact.location
+            from_facility = loc.name if not loc.parent else "%s (in %s)" % \
+                (loc.name, loc.parent.name)
             for c in _get_people_to_notify(referral):
                 if c.default_connection:
                     verbose_reasons = [Referral.REFERRAL_REASONS[r] for r in referral.get_reasons()]

@@ -42,12 +42,13 @@ class SMGLReferTest(SMGLSetUp):
         self.refferring_ic = self.createUser(const.CTYPE_INCHARGE, "666000",
                                              location="804034")
         self.assertEqual(0, Referral.objects.count())
+        self._facility_string = "Mawaya (in Kalomo District Hospital HAHC)"
 
     def testRefer(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Mawaya",
+                                               "facility": self._facility_string,
                                                "reason": _verbose_reasons("hbp"),
                                                "time": "12:00",
                                                "is_emergency": "no"}
@@ -82,7 +83,7 @@ class SMGLReferTest(SMGLSetUp):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
                                                   "unique_id": "1234"}
         notif = const.REFERRAL_NOTIFICATION % {"unique_id": "1234",
-                                               "facility": "Mawaya",
+                                               "facility": self._facility_string,
                                                "reason": _verbose_reasons("ec, fd, hbp, pec"),
                                                "time": "12:00",
                                                "is_emergency": "no"}
