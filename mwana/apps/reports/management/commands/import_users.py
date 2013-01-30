@@ -61,6 +61,7 @@ def load_users(file_path):
         password = "%s%s" % (username, date.today().day)
 
         if User.objects.filter(username=username):
+#            User.objects.filter(username=username).delete()
             print "%s exists. Skipping %s" % (username, line)
             continue
 
@@ -72,7 +73,7 @@ def load_users(file_path):
         print "Created login: %s , password: %s, for %s %s " % (username, password, first_name, last_name)
 
         group, created = ReportingGroup.objects.get_or_create(name=("%s %s" % (user_type, district_name)).strip())
-        if created:
+        if group:
             gum, c = GroupUserMapping.objects.get_or_create(user=user, group=group)
-            print "Created GroupUserMapping: %s %s"% (gum, c)
+#            print "Created GroupUserMapping: %s %s"% (gum, c)
 
