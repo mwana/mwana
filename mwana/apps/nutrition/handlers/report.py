@@ -291,8 +291,8 @@ class ReportGMHandler(KeywordHandler):
             self.debug(action_taken)
             patient_kwargs.update({'action_taken': action_taken})
         else:
-            patient_kwargs.update({'action_taken': ''})
-            self.respond(INVALID_ACTION_TAKEN % (survey_entry.action_taken))
+            patient_kwargs.update({'action_taken': 'XX'})
+            #self.respond(INVALID_ACTION_TAKEN % (survey_entry.action_taken,))
 
         try:
             # find patient or create a new one
@@ -418,8 +418,10 @@ class ReportGMHandler(KeywordHandler):
                 ass.save()
 
                 # continuum of care for SAM children
-                if ((ass.wasting == 'S') or (ass.stunting == 'S') or (ass.underweight == 'S')):
-                    event = "SAM"
+                if (ass.wasting == 'S'):
+                    event = "RUTF"
+#                    import pdb
+#                    pdb.set_trace()
                     sam_date = date.today()
                     # this is one for a ... moment, create an alternate patient!
                     if healthworker and healtworker.location:
@@ -452,6 +454,7 @@ class ReportGMHandler(KeywordHandler):
                     self.debug(str(ind) + " " + str(z))
                     if z is not None:
                         survey_avg = average_zscores[ind]
+                        self.debug(survey_avg)
                         # TODO plus or minus!
                         survey_avg_limit = survey.average_limit
                         if survey_avg is not None:
