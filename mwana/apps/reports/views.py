@@ -569,3 +569,96 @@ def supported_sites(request):
          'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
          'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
      }, context_instance=RequestContext(request))
+
+@require_GET
+def welcome(request):
+
+    from webreports.reportcreator import Results160Reports
+
+    today = datetime.today().date()
+
+
+    is_report_admin = False
+    try:
+        user_group_name = request.user.groupusermapping_set.all()[0].group.name
+        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
+        and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
+            is_report_admin = True
+    except:
+        pass
+
+    rpt_group = read_request(request, "rpt_group")
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+
+    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
+    records = r.user_facilities().filter(supportedlocation__supported=True)
+    sites = []
+    unplotable_sites = []
+    locations = {}
+    for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
+        site = Site()
+        site.point = record.point
+        site.slug = record.slug
+        site.name = record.name
+        site.district = record.parent.name
+        site.province = record.parent.parent.name
+        site.workers = record.contact_set.filter(types=get_clinic_worker_type(), is_active=True).distinct().count()
+        site.cbas = Contact.active.filter(types=get_cba_type(), is_active=True, location__parent=record).distinct().count()
+        site.dhos = Contact.active.filter(types=get_district_worker_type(), is_active=True, location__location=record).distinct().count()
+        site.phos = Contact.active.filter(types=get_province_worker_type(), is_active=True, location__location=record).distinct().count()
+        site.printers = Contact.active.filter(types=get_dbs_printer_type(), is_active=True, location=record).distinct().count()
+        site.results_retrieved = record.lab_results.exclude(result_sent_date=None).count()
+        site.results_positive = record.lab_results.filter(result='P').count()
+        site.results_negative = record.lab_results.filter(result='N').count()
+        site.results_rejected = record.lab_results.filter(result__in='RIX').count()
+
+        site.sample_sent_to_lab_this_month = Result.objects.filter(clinic=record,
+        entered_on__year=today.year, entered_on__month=today.month).count()
+
+        site.results_retrieved_this_month = Result.objects.filter(clinic=record,
+        result_sent_date__year=today.year, result_sent_date__month=today.month).count()
+
+        site.births = PatientEvent.objects.filter(patient__location__parent=record,
+        ).count()
+
+        site.births_this_month = PatientEvent.objects.filter(patient__location__parent=record,
+        date_logged__year=today.year, date_logged__month=today.month).count()
+
+        if site.province in locations:
+            if site.district in locations[site.province]:
+                locations[site.province][site.district].append(site.name)
+            else:
+                locations[site.province][site.district] = [site.name]
+        else:
+            locations[site.province] = {site.district:[site.name]}
+
+        if not record.point:
+            unplotable_sites.append(site)
+        else:
+            sites.append(site)
+
+
+
+    return render_to_response('reports/index.html',
+        {
+         'today': today,
+         'adminEmail': get_admin_email_address(),
+         'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
+         'formattedtoday': today.strftime("%d %b %Y"),
+         'formattedtime': datetime.today().strftime("%I:%M %p"),
+         'implementer': get_groups_name(rpt_group),
+          'province': get_facility_name(rpt_provinces),
+          'district': get_facility_name(rpt_districts),
+         'is_report_admin': is_report_admin,
+         'region_selectable': True,
+         'sites': sites,
+         'total_supported': len(records),
+         'locations': locations,
+         'unplotable_sites': unplotable_sites,
+         'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
+         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
+         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
+         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
+     }, context_instance=RequestContext(request))
