@@ -127,37 +127,207 @@ results delivered via SMS to date\n\
 <br>{{site.births}} births registered to date\n\
 <hr><u>This Month</u><br>{{site.sample_sent_to_lab_this_month}} DBS samples sent to lab\n\
 <br>{{site.results_retrieved_this_month}} Results received\n\
-<br>{{site.births_this_month}} births registered this month<br><br>\n\
-<img src="https://chart.googleapis.com/chart?chs=250x100&chd=t:60,40,30&cht=p3&chl=Positive|Negative|Rejected">'
+<br>{{site.births_this_month}} births registered this month<br><br>'
     });
     {% endif %}
     {% endfor %}
 
     window.mapData = data;
+
+    
 </script>
 
 <script type="text/javascript">$(function() {
     $('.map').maphilight({fade: false});
 });</script>
 <script type="text/javascript">
+
 function mapOnMouseOver(str){
             
 }
 
 
 function mapOnMouseOut(str){
-            
+   
+}
+var nationalData = ""
+function showNationalData(){
+    
+    if(nationalData.length==0){
+        loadNationalData();
+    }
+    document.getElementById("mousemovemessage").innerHTML=nationalData
+    
+    moveToLocation(-13, 28, 5)
+    
+}
+function loadNationalData(){
+
+    var toDisplay = []
+    var districts = []
+    var workers = 0
+    var cbas = 0
+    var results_retrieved = 0
+    var results_retrieved_this_month = 0
+    var births = 0
+    var births_this_month = 0
+    var results_positive = 0
+    var results_negative = 0
+    var results_rejected = 0
+    var facilities = 0
+    var lat = 0
+    var lon = 0
+    var points = 0
+    for (var i = 0; i < window.mapData.length; i ++) {
+        var datum = window.mapData[i];
+        
+            if(datum.lat){
+                lat = lat + datum.lat
+                lon = lon + datum.lon
+                points = points + 1
+            }
+            if(districts.indexOf(datum.province) == -1){
+                districts.push(datum.province)
+            }
+
+            workers = workers + datum.workers
+            cbas = cbas + datum.cbas
+            results_retrieved = results_retrieved + datum.results_retrieved
+            results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
+            births = births + datum.births
+            facilities = facilities + 1
+            births_this_month = births_this_month + datum.births_this_month
+            results_positive = results_positive + datum.results_positive
+            results_negative = results_negative + datum.results_negative
+            results_rejected = results_rejected + datum.results_rejected
+        
+
+    }
+    var total_results = results_positive + results_negative + results_rejected
+    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
+    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
+    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
+    district_fragment = ""
+    clinic_fragment = ""
+    contact_fragment = ""
+    toDisplay.push("<h2>Zambia</h2>")
+    if(districts.length > 1){
+        district_fragment = " Zambia Mwana has been deployed to " +(districts.length) + " provinces namely, "
+            + districts.slice(0,-2).join(", ") + " and " + districts[districts.length - 1] + "."
+
+        
+
+    }else if(districts.length == 1){
+        district_fragment = " Zambia Mwana has been deployed to 1 province namely, " + districts[0]
+
+        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+    }else if(districts.length == 0){
+        district_fragment = " Zambia Mwana hasn't been deployed yet"
+    }
+    imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
+        results_positive+","+results_negative+","+results_rejected+"&cht=p3&chl="+
+        perc_pos+" Positive|"+perc_neg+" Negative|"+
+        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800'/>"
+    toDisplay.push("<p>In " + district_fragment )
+    toDisplay.push(clinic_fragment)
+    toDisplay.push(contact_fragment)
+    if(districts.length > 0){
+    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in Zambia. Click on the map on the left to view data for a particular region.")
+    toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
+    toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
+    toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
+    toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
+    toDisplay.push("</tbody></table>")
+    toDisplay.push(imageSource)}
+
+
+    nationalData=toDisplay.join('')
+
 }
 function mapOnClick(str){
     var toDisplay = []
+    var districts = []
+    var workers = 0
+    var cbas = 0
+    var results_retrieved = 0
+    var results_retrieved_this_month = 0
+    var births = 0
+    var births_this_month = 0
+    var results_positive = 0
+    var results_negative = 0
+    var results_rejected = 0
+    var facilities = 0
+    var lat = 0
+    var lon = 0
+    var points = 0
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
-        if(datum.province == str || datum.district==str){
-            toDisplay.push(datum.d)
+        if(datum.district == str){
+            if(datum.lat){
+                lat = lat + datum.lat
+                lon = lon + datum.lon
+                points = points + 1
+            }
+            if(districts.indexOf(datum.district) == -1){
+                districts.push(datum.name)
+            }
+
+            workers = workers + datum.workers
+            cbas = cbas + datum.cbas
+            results_retrieved = results_retrieved + datum.results_retrieved
+            results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
+            births = births + datum.births
+            facilities = facilities + 1
+            births_this_month = births_this_month + datum.births_this_month
+            results_positive = results_positive + datum.results_positive
+            results_negative = results_negative + datum.results_negative
+            results_rejected = results_rejected + datum.results_rejected
         }
 
     }
+    var total_results = results_positive + results_negative + results_rejected
+    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
+    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
+    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
+    district_fragment = ""
+    clinic_fragment = ""
+    contact_fragment = ""
+    toDisplay.push("<h3>" + str + " District" +"</h3>")
+    if(districts.length > 1){
+        district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
+            + districts.slice(0,-2).join(", ") + " and " + districts[districts.length - 1] + "."
+
+
+
+    }else if(districts.length == 1){
+        district_fragment = " District Mwana has been deployed to 1 facility namely, " + districts[0]
+
+        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+    }else if(districts.length == 0){
+        district_fragment = " District Mwana hasn't been deployed yet"
+    }
+    imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
+        results_positive+","+results_negative+","+results_rejected+"&cht=p3&chl="+
+        perc_pos+" Positive|"+perc_neg+" Negative|"+
+        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800'/>"
+    toDisplay.push("<p>In " + str + district_fragment )
+    toDisplay.push(clinic_fragment)
+    toDisplay.push(contact_fragment)
+    if(districts.length > 0){
+    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str)
+    toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
+    toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
+    toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
+    toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
+    toDisplay.push("</tbody></table>")
+    toDisplay.push(imageSource)}
+
+
     document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
+    if(points > 1){
+        moveToLocation(lat/points, lon/points, 7)
+    }
+
 }
 function mapOnClickProvince(str){
     var toDisplay = []
@@ -215,7 +385,7 @@ function mapOnClickProvince(str){
         clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
         contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
     }else if(districts.length == 1){
-        district_fragment = " Province Mwana has been deployed to 1 district namely, " + district[0]
+        district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
         clinic_fragment = "<br>In this district Mwana has been deployed to a total of " + facilities + " health facilities "
         contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
     }else if(districts.length == 0){
@@ -228,13 +398,14 @@ function mapOnClickProvince(str){
     toDisplay.push("<p>In " + str + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
-    toDisplay.push("<p>Below is summary data for Results160 and RemindMi")
+    if(districts.length > 0){
+    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str+" Province")
     toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
     toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
     toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
     toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
     toDisplay.push("</tbody></table>")
-    toDisplay.push(imageSource)
+    toDisplay.push(imageSource)}
     
 
     document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
@@ -264,7 +435,7 @@ function mapOnClickProvince(str){
             <td valign="top" style="border: 0px">
                 <div id="Map_Area">
                     <div id="tab1" >
-                        <img src="{{ MEDIA_URL }}reports/images/provinces.png"  border="0" class="map" ismap="ismap" usemap="#provinces_coords" alt="html imagemap created with QGIS" >
+                        <img title="Click on a province for details" src="{{ MEDIA_URL }}reports/images/provinces.png"  border="0" class="map" ismap="ismap" usemap="#provinces_coords" alt="html imagemap created with QGIS" >
                         <map name="provinces_coords">
                             <area shape="poly" hreff="#" onClick="mapOnClickProvince('Luapula')" onMouseOver="mapOnMouseOver('Luapula')" onMouseOut="mapOnMouseOut('Luapula')"  coords="511,26,512,26,511,26,512,26,512,27,511,27,511,28,511,29,510,29,510,30,510,31,509,32,508,33,507,33,507,34,506,34,505,34,504,34,504,35,503,35,502,35,502,36,501,36,501,37,500,37,500,38,500,39,499,39,499,40,498,41,498,42,497,43,496,44,496,45,495,46,495,47,495,48,494,48,494,50,494,51,494,52,494,53,493,54,493,55,493,56,492,57,492,58,491,59,491,60,491,61,490,61,490,62,489,62,488,62,488,63,487,63,486,63,485,64,485,65,485,66,485,67,484,68,484,69,483,69,482,70,482,71,482,72,481,73,482,73,482,74,483,74,484,74,485,75,486,75,486,76,487,76,487,77,488,77,489,77,490,77,491,78,492,79,493,79,494,80,494,81,495,81,496,81,496,80,496,81,497,81,497,82,497,83,497,84,497,85,497,86,497,87,497,88,497,89,498,89,498,90,497,91,496,92,496,93,496,94,496,95,496,96,496,97,497,98,497,99,497,100,497,101,498,101,499,102,500,102,501,102,502,102,503,102,504,102,504,103,505,104,505,105,506,106,507,106,507,107,508,107,509,108,509,109,510,109,511,109,512,109,513,109,514,109,514,110,515,110,516,110,517,111,518,111,519,111,520,111,521,111,521,112,522,112,523,113,525,113,526,113,527,113,528,114,528,115,529,116,530,117,531,119,531,120,532,120,533,120,534,121,535,122,535,123,536,124,536,125,535,125,535,126,535,127,534,127,534,128,534,129,533,130,533,132,534,132,534,133,534,134,535,135,535,136,535,137,534,137,534,138,533,138,533,139,532,140,532,141,532,143,532,144,531,145,531,146,530,146,529,146,528,146,527,146,526,146,525,146,524,146,521,146,520,146,519,146,518,147,517,147,517,148,516,148,515,149,514,150,513,150,513,151,512,151,511,151,511,152,510,152,509,152,508,152,508,153,507,153,506,153,506,154,505,155,504,155,503,156,502,157,502,159,502,160,501,161,501,162,500,162,500,163,500,164,501,165,501,166,501,167,500,167,500,168,499,168,499,169,498,170,498,171,498,172,498,173,497,173,495,173,494,173,494,174,493,174,493,175,492,175,491,176,490,176,489,177,488,177,487,178,486,178,486,179,485,179,485,180,485,181,485,187,485,188,484,189,483,190,482,191,481,191,481,192,480,192,480,193,480,194,481,194,482,195,483,195,484,196,485,196,486,196,487,197,487,198,488,198,488,199,489,199,489,200,490,200,490,201,491,201,491,202,492,202,493,202,494,202,495,202,496,203,497,203,498,204,499,204,499,203,499,202,500,201,500,200,500,199,499,198,499,197,498,197,498,196,498,194,498,193,497,193,497,192,496,192,496,191,496,190,496,189,497,189,498,189,498,188,499,188,500,188,501,187,502,187,502,186,503,186,504,185,505,185,506,184,507,184,508,183,509,183,510,183,511,182,512,181,513,181,514,180,515,180,516,179,517,179,517,180,518,180,519,180,519,181,520,182,521,182,522,182,523,182,524,183,525,183,525,184,526,184,526,185,526,186,527,186,527,187,527,188,528,188,529,189,530,190,531,191,531,192,532,192,532,193,532,195,532,196,532,197,533,197,533,198,532,198,532,199,532,200,532,201,532,204,532,205,531,205,531,206,531,207,531,208,531,209,530,210,530,211,530,212,530,213,530,214,530,215,529,216,529,217,529,218,529,219,529,220,529,221,530,221,530,220,531,220,532,220,532,219,532,218,533,217,534,216,535,216,535,215,536,214,536,213,536,212,537,212,538,212,541,212,546,212,547,212,548,212,550,214,551,214,551,215,552,215,553,216,554,216,555,217,555,218,556,218,557,219,558,219,559,220,560,221,561,221,561,222,563,223,564,223,564,224,565,224,565,225,566,225,566,226,568,227,569,228,569,229,569,230,568,231,568,232,568,234,568,235,568,236,567,236,567,237,566,237,566,238,565,238,564,239,564,240,563,241,562,242,562,243,561,243,560,244,560,245,560,246,559,246,559,247,558,248,557,248,556,249,555,250,554,250,553,250,552,250,551,251,550,251,549,251,548,251,547,251,546,252,544,252,543,252,542,252,541,252,540,252,538,252,537,252,536,252,535,253,534,253,533,253,532,253,531,254,530,254,528,254,527,254,526,254,526,255,525,255,525,256,525,257,524,257,524,258,524,259,525,259,525,260,525,261,525,263,525,264,525,265,526,265,526,266,527,266,527,267,528,267,528,268,527,269,527,270,527,271,526,271,525,272,525,271,524,272,523,272,522,272,521,273,520,274,519,274,518,275,516,275,515,275,515,274,514,274,513,274,512,274,511,274,509,275,508,276,507,276,506,277,505,277,505,279,504,280,504,281,504,282,504,283,504,284,505,286,506,287,507,287,508,287,509,287,509,288,509,289,508,290,508,291,507,292,506,292,505,292,504,291,503,291,501,290,500,289,499,288,498,288,497,288,496,288,495,288,494,288,493,288,493,287,493,286,492,285,491,285,490,285,489,285,488,285,487,285,486,285,485,286,484,286,483,287,482,287,482,286,481,286,480,286,478,286,477,286,476,286,476,285,476,284,475,283,475,282,474,282,474,281,474,280,473,279,472,276,471,275,470,274,468,273,466,271,465,270,464,269,464,268,463,268,462,266,461,266,460,265,459,264,459,263,459,262,459,261,458,260,457,260,456,260,455,260,453,259,452,259,452,258,451,258,450,258,450,257,449,256,449,255,448,255,447,255,446,255,445,255,444,254,443,254,442,253,442,252,441,251,441,250,440,250,439,250,438,250,437,250,437,249,438,247,438,246,438,245,437,244,436,244,436,243,437,243,437,242,437,241,436,240,437,239,437,238,437,237,436,236,434,235,434,234,434,233,434,232,434,230,435,230,435,229,435,228,435,227,435,226,436,226,436,225,436,224,437,223,437,222,437,221,438,221,439,220,439,219,438,218,438,217,439,216,439,215,440,215,440,214,440,213,441,212,441,211,440,210,441,209,441,208,441,206,441,205,441,204,440,204,440,203,440,202,441,202,441,201,441,200,442,199,442,198,442,197,442,196,442,195,442,194,443,194,443,193,444,193,444,192,444,191,444,189,445,187,445,186,445,185,446,184,447,183,448,181,449,180,449,179,449,178,450,178,451,178,452,178,453,177,453,176,454,175,454,174,454,173,454,172,453,172,452,171,452,170,453,168,453,167,452,167,451,166,450,165,450,164,451,163,450,162,451,160,451,159,451,158,450,158,450,157,450,156,450,155,450,154,450,153,451,151,450,151,450,150,449,150,449,149,448,148,447,147,447,146,447,145,447,144,448,144,449,143,449,142,449,141,450,141,450,140,450,139,450,137,450,136,450,134,450,133,450,132,450,131,450,130,450,129,450,128,451,125,452,124,452,123,452,122,453,121,453,119,454,119,454,118,454,117,453,117,453,116,453,115,452,115,451,115,450,115,450,114,450,113,450,112,450,111,450,109,449,107,449,106,449,105,448,104,447,104,448,103,449,103,450,102,449,102,448,103,447,103,447,102,446,102,446,98,446,97,445,97,444,97,444,96,443,95,443,94,443,93,444,92,444,91,444,90,443,90,443,89,442,89,441,89,440,91,439,92,438,93,437,93,436,93,435,93,434,92,433,92,433,91,433,90,432,90,433,88,433,86,433,85,434,84,435,82,436,80,438,79,440,77,442,76,444,75,446,74,447,73,449,72,451,71,452,70,454,68,457,66,458,65,459,64,459,63,462,59,464,57,465,56,467,53,468,52,468,51,469,49,470,48,471,46,472,43,472,42,472,41,471,40,471,38,469,35,468,33,468,32,469,32,474,31,476,30,479,30,484,29,488,29,491,28,494,28,497,28,499,27,500,27,503,27,504,27,506,26,508,26,509,26,511,26" alt="Luapula">
                             <area shape="poly" hreff="Lusaka" onClick="mapOnClickProvince('Lusaka')" onMouseOver="mapOnMouseOver('Lusaka')" onMouseOut="mapOnMouseOut('Lusaka')"  coords="552,446,552,453,552,454,552,455,553,455,553,456,554,457,554,458,554,459,554,460,554,461,554,462,554,463,554,464,554,465,555,466,555,467,556,467,556,468,556,469,556,470,556,471,557,473,558,473,560,474,560,475,561,476,562,476,562,477,563,478,564,478,564,480,564,481,564,482,564,484,564,485,565,485,565,486,565,487,565,488,564,490,563,490,563,492,564,493,564,494,565,494,565,495,566,495,566,496,566,497,565,498,563,498,562,498,561,498,560,498,558,498,557,498,557,497,556,497,555,498,554,499,553,499,552,499,552,498,551,497,550,497,549,496,548,496,547,497,545,497,543,497,542,497,541,497,540,497,539,498,538,498,537,498,535,497,534,497,533,497,532,496,531,496,530,496,529,496,528,496,526,496,525,496,524,497,523,497,521,498,520,498,516,499,515,499,514,499,513,499,512,498,511,498,510,498,509,499,508,500,507,501,505,501,504,501,502,501,501,501,500,502,500,503,498,502,497,503,496,503,496,504,495,504,494,504,492,505,491,506,490,506,489,506,488,506,487,508,486,508,484,509,484,510,483,510,482,511,480,513,478,513,478,514,477,515,476,516,476,517,475,517,474,517,473,517,472,517,471,517,470,517,469,517,468,518,468,517,467,516,466,516,465,516,465,517,464,517,463,517,462,517,461,518,460,518,459,518,458,518,457,518,457,517,456,517,456,516,455,516,454,515,453,515,453,514,452,514,448,514,447,514,446,514,445,513,444,512,443,512,442,511,441,510,440,510,439,510,438,510,438,509,437,509,437,508,436,508,436,507,435,507,434,507,433,507,432,507,431,507,430,507,429,507,428,507,427,507,426,508,425,509,425,510,424,510,423,510,423,509,422,509,422,508,421,508,421,507,420,506,419,506,418,506,417,505,416,505,415,504,414,504,412,504,411,504,411,503,410,502,410,501,409,500,408,500,407,499,406,499,405,499,404,499,403,499,402,499,401,500,400,500,399,500,398,500,398,499,397,498,395,498,394,498,394,497,394,496,395,496,395,495,395,494,395,493,396,493,397,493,398,493,399,494,401,494,401,493,402,493,403,493,403,492,404,492,404,491,404,490,404,486,404,485,404,484,403,484,403,483,403,482,402,482,402,481,401,481,401,480,399,480,398,479,397,479,396,479,395,479,395,478,394,478,394,477,393,475,394,474,395,474,396,474,397,474,398,474,398,473,399,473,400,473,401,473,405,473,406,473,407,473,408,473,408,474,409,474,410,474,411,474,412,474,412,475,413,475,414,475,415,476,416,476,417,476,418,477,419,477,420,477,421,478,422,479,423,479,424,480,425,480,425,481,426,481,427,481,427,480,428,479,429,478,430,478,430,477,430,476,430,475,430,474,429,473,429,472,429,471,430,470,430,469,430,468,431,467,431,466,432,466,433,466,434,466,435,466,436,466,438,466,439,466,439,467,440,467,441,467,442,467,443,468,444,467,445,467,446,467,448,467,449,467,449,466,450,466,451,466,452,466,453,466,455,466,456,466,457,465,458,465,459,465,461,465,462,465,462,464,463,464,464,464,464,463,465,463,466,461,466,460,467,460,467,459,468,458,469,458,470,458,471,457,472,457,473,457,474,456,475,455,476,455,477,455,478,454,478,453,479,453,480,452,481,452,482,451,483,451,484,451,485,450,486,450,487,450,488,450,489,449,490,449,500,449,501,449,502,448,503,448,504,447,505,447,506,447,507,447,508,447,508,446,509,446,510,446,510,445,511,445,512,444,513,444,514,443,515,443,516,442,517,442,518,442,518,441,519,441,520,441,520,440,521,440,522,439,523,439,524,439,525,438,526,438,527,438,528,438,529,438,529,437,530,437,531,436,532,436,533,436,534,436,534,435,535,435,536,435,536,434,537,434,538,434,540,434,541,434,542,434,542,435,543,435,543,436,543,437,544,437,545,437,545,438,546,438,547,440,547,441,548,441,549,442,550,442,551,443,551,444,552,444,552,445,552,446" alt="Lusaka">
@@ -279,7 +450,7 @@ function mapOnClickProvince(str){
                     </div>
                     <div id="tab2" style="display: none; ">
 
-                        <img  src="{{ MEDIA_URL }}reports/images/districts.png" class="map" border="0" ismap="ismap" usemap="#districts_coords" alt="html imagemap created with QGIS" >
+                        <img title="Click on a district for details" src="{{ MEDIA_URL }}reports/images/districts.png" class="map" border="0" ismap="ismap" usemap="#districts_coords" alt="html imagemap created with QGIS" >
                         <map name="districts_coords">
                             <area shape="poly" hreff="Chibombo" onClick="mapOnClick('Chibombo')" onMouseOver="mapOnMouseOver('Chibombo')" onMouseOut="mapOnMouseOut('Chibombo')"  coords="462,436,462,437,463,438,463,439,464,439,464,440,465,440,465,441,466,441,467,441,468,442,468,448,468,449,469,450,469,451,469,452,469,453,469,454,470,455,470,456,470,457,470,458,469,458,468,458,467,459,467,460,466,460,466,461,465,463,464,463,464,464,463,464,462,464,462,465,461,465,459,465,458,465,457,465,456,466,455,466,453,466,452,466,451,466,450,466,449,466,449,467,448,467,446,467,445,467,444,467,443,468,442,467,441,467,440,467,439,467,439,466,438,466,436,466,435,466,434,466,433,466,432,466,431,466,431,467,430,468,430,469,430,470,429,471,429,472,429,473,430,474,430,475,430,476,430,477,430,478,429,478,428,479,427,480,427,481,426,481,425,481,425,480,424,480,423,479,422,479,421,478,420,477,419,477,418,477,417,476,416,476,415,476,414,475,413,475,412,475,412,474,411,474,410,474,409,474,408,474,408,473,407,473,406,473,405,473,401,473,400,473,399,473,398,473,398,474,397,474,396,474,395,474,394,474,393,474,392,474,392,473,391,473,391,472,390,472,389,472,388,471,388,470,387,470,386,470,386,469,385,469,385,468,385,467,384,466,384,465,383,464,383,463,383,462,382,462,382,461,382,460,381,460,381,459,381,458,380,457,380,456,379,456,378,455,377,455,376,454,375,453,374,453,373,452,372,452,371,451,370,451,369,451,369,450,368,450,367,449,366,449,366,448,365,448,364,447,363,446,362,445,361,445,360,444,357,441,356,441,356,440,356,439,354,438,354,436,353,435,353,434,353,433,353,432,352,431,352,430,352,429,352,426,352,425,352,424,351,424,351,423,351,422,351,418,351,417,354,417,355,418,356,418,357,418,389,418,393,418,394,418,395,418,395,419,404,427,406,429,407,430,408,430,412,430,413,430,414,431,415,431,416,431,420,431,419,432,418,432,418,433,417,433,416,433,416,434,415,435,415,436,415,437,416,437,417,436,418,436,419,435,420,435,421,435,422,435,423,435,424,435,425,435,426,435,427,436,428,436,429,436,434,436,435,436,436,436,436,435,437,435,437,434,437,433,437,432,438,431,438,430,439,430,440,429,441,429,441,428,442,428,443,428,443,427,444,426,445,426,445,425,445,424,444,423,444,422,443,421,442,421,441,420,441,419,441,418,442,418,442,417,443,416,443,415,444,415,444,414,445,414,446,415,447,415,448,416,449,416,450,416,450,417,451,417,452,418,455,421,456,421,456,422,456,423,457,423,457,424,458,424,458,425,458,426,459,426,459,427,459,428,459,429,460,429,460,430,460,431,460,432,461,433,461,434,462,435,462,436" alt="Chibombo">
                             <area shape="poly" hreff="Kabwe" onClick="mapOnClick('Kabwe')" onMouseOver="mapOnMouseOver('Kabwe')" onMouseOut="mapOnMouseOut('Kabwe')"  coords="433,408,438,408,439,408,440,408,441,409,442,409,442,410,443,410,444,411,445,411,446,411,446,412,447,412,447,413,446,413,446,414,445,414,444,414,444,415,443,415,443,416,442,417,442,418,441,418,441,419,441,420,442,421,443,421,444,422,444,423,445,424,445,425,445,426,444,426,443,427,443,428,442,428,441,428,441,429,440,429,439,430,438,430,438,431,437,432,437,433,437,434,437,435,436,435,436,436,435,436,434,436,429,436,428,436,427,436,426,435,425,435,424,435,423,435,422,435,421,435,420,435,419,435,418,436,417,436,416,437,415,437,415,436,415,435,416,434,416,433,417,433,418,433,418,432,419,432,420,431,422,429,423,429,423,428,423,427,423,426,422,426,422,425,422,424,423,424,423,423,424,423,425,422,425,421,425,420,425,419,425,418,423,416,422,416,422,415,422,414,422,413,422,412,423,412,423,411,424,410,425,409,425,408,426,408,426,407,427,407,428,407,429,407,430,407,431,408,432,408,433,408" alt="Kabwe">
@@ -376,12 +547,16 @@ function mapOnClickProvince(str){
 
 <script type="text/javascript">
 function tab(tab) {
+    showNationalData();
     document.getElementById('tab1').style.display = 'none';
     document.getElementById('tab2').style.display = 'none';
     document.getElementById('li_tab1').setAttribute("class", "");
     document.getElementById('li_tab2').setAttribute("class", "");
     document.getElementById(tab).style.display = 'block';
 }
+</script>
+<script type="text/javascript">
+showNationalData();
 </script>
 
 {% endblock %}
