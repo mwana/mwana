@@ -571,29 +571,15 @@ def supported_sites(request):
      }, context_instance=RequestContext(request))
 
 @require_GET
-def welcome(request):
+def home(request):
 
     from webreports.reportcreator import Results160Reports
 
     today = datetime.today().date()
 
 
-    is_report_admin = False
-    try:
-        user_group_name = request.user.groupusermapping_set.all()[0].group.name
-        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
-        and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
-            is_report_admin = True
-    except:
-        pass
-
-    rpt_group = read_request(request, "rpt_group")
-    rpt_provinces = read_request(request, "rpt_provinces")
-    rpt_districts = read_request(request, "rpt_districts")
-    rpt_facilities = read_request(request, "rpt_facilities")
-
-    r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
-    records = r.user_facilities().filter(supportedlocation__supported=True)
+    
+    records = Location.objects.filter(supportedlocation__supported=True)
     sites = []
     unplotable_sites = []
     locations = {}
@@ -645,20 +631,11 @@ def welcome(request):
         {
          'today': today,
          'adminEmail': get_admin_email_address(),
-         'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
+         'userHasNoAssingedFacilities': False,
          'formattedtoday': today.strftime("%d %b %Y"),
          'formattedtime': datetime.today().strftime("%I:%M %p"),
-         'implementer': get_groups_name(rpt_group),
-          'province': get_facility_name(rpt_provinces),
-          'district': get_facility_name(rpt_districts),
-         'is_report_admin': is_report_admin,
-         'region_selectable': True,
          'sites': sites,
          'total_supported': len(records),
          'locations': locations,
-         'unplotable_sites': unplotable_sites,
-         'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
-         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
-         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
-         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
+         'unplotable_sites': unplotable_sites,         
      }, context_instance=RequestContext(request))
