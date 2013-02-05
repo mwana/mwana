@@ -213,7 +213,7 @@ function loadNationalData(){
     toDisplay.push("<h2>Zambia</h2>")
     if(districts.length > 1){
         district_fragment = " Zambia Mwana has been deployed to " +(districts.length) + " provinces namely, "
-            + districts.slice(0,-2).join(", ") + " and " + districts[districts.length - 1] + "."
+            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
 
         
 
@@ -295,7 +295,7 @@ function mapOnClick(str){
     toDisplay.push("<h3>" + str + " District" +"</h3>")
     if(districts.length > 1){
         district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
-            + districts.slice(0,-2).join(", ") + " and " + districts[districts.length - 1] + "."
+            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
 
 
 
@@ -380,7 +380,7 @@ function mapOnClickProvince(str){
     toDisplay.push("<h3>" + str + " Province" +"</h3>")
     if(districts.length > 1){
         district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
-            + districts.slice(0,-2).join(", ") + " and " + districts[districts.length - 1] + "."
+            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
 
         clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
         contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
