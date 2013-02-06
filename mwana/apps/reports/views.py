@@ -571,13 +571,18 @@ def supported_sites(request):
      }, context_instance=RequestContext(request))
 
 @require_GET
-def home(request):
+def home(request):    
+    if request.user and request.user.username and "dont_check_first_login" \
+            not in request.session:
+        request.session["dont_check_first_login"] = True
 
-    from webreports.reportcreator import Results160Reports
+        login = Login.objects.get_or_create(user=request.user)[0]
+        if not login.ever_logged_in:
+            login.ever_logged_in = True
+            login.save()
+            return redirect('/admin/password_change')
 
     today = datetime.today().date()
-
-
     
     records = Location.objects.filter(supportedlocation__supported=True)
     sites = []
