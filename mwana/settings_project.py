@@ -146,6 +146,8 @@ MEDIA_URL = "/static/"
 # URL for admin media (also defined in apache configuration)
 ADMIN_MEDIA_PREFIX = '/admin-media/'
 
+# URLs for pages that should not require login. See mwana.middleware.LoginRequired
+EXCLUDE_FROM_LOGIN = ['/you-may-override-in-settings-country/']
 
 # this is required for the django.contrib.sites tests to run, but also
 # not included in global_settings.py, and is almost always ``1``.

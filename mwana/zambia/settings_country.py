@@ -91,3 +91,6 @@ RAPIDSMS_TABS = [
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
 
 SESSION_COOKIE_AGE = 3600 # 1 hour
+
+# These URL will not require login
+EXCLUDE_FROM_LOGIN = ['', '/home', '/', '/home/']

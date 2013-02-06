@@ -28,6 +28,9 @@ class LoginRequired(object):
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         for url in self.urls:
+            if request.get_full_path() in settings.EXCLUDE_FROM_LOGIN:
+                return
+            
             if request.get_full_path().startswith(url):
                 return # allow normal processing to continue
         return login_required(view_func)(request, *view_args, **view_kwargs)
