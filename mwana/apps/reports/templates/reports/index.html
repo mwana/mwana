@@ -29,11 +29,15 @@
 <script type="text/javascript" >
     var map;
     function moveToLocation(lat, lng, zoom){
-        var center = new google.maps.LatLng(lat, lng);
-        // using global variable:
-        map.setZoom(zoom)
-        map.panTo(center);
+        // When offline google is not defined. function should not cause error
+        // and block other processes. 
+        try{
+            var center = new google.maps.LatLng(lat, lng);
+            map.setZoom(zoom)
+            map.panTo(center);
+        }catch(err){
 
+        }
     }
     window.onload = function() {
         var gm = google.maps;
@@ -181,25 +185,25 @@ function loadNationalData(){
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         
-            if(datum.lat){
-                lat = lat + datum.lat
-                lon = lon + datum.lon
-                points = points + 1
-            }
-            if(districts.indexOf(datum.province) == -1){
-                districts.push(datum.province)
-            }
+        if(datum.lat){
+            lat = lat + datum.lat
+            lon = lon + datum.lon
+            points = points + 1
+        }
+        if(districts.indexOf(datum.province) == -1){
+            districts.push(datum.province)
+        }
 
-            workers = workers + datum.workers
-            cbas = cbas + datum.cbas
-            results_retrieved = results_retrieved + datum.results_retrieved
-            results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
-            births = births + datum.births
-            facilities = facilities + 1
-            births_this_month = births_this_month + datum.births_this_month
-            results_positive = results_positive + datum.results_positive
-            results_negative = results_negative + datum.results_negative
-            results_rejected = results_rejected + datum.results_rejected
+        workers = workers + datum.workers
+        cbas = cbas + datum.cbas
+        results_retrieved = results_retrieved + datum.results_retrieved
+        results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
+        births = births + datum.births
+        facilities = facilities + 1
+        births_this_month = births_this_month + datum.births_this_month
+        results_positive = results_positive + datum.results_positive
+        results_negative = results_negative + datum.results_negative
+        results_rejected = results_rejected + datum.results_rejected
         
 
     }
@@ -232,13 +236,13 @@ function loadNationalData(){
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
-    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in Zambia. Click on the map on the left to view data for a particular region.")
-    toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
-    toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
-    toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
-    toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
-    toDisplay.push("</tbody></table>")
-    toDisplay.push(imageSource)}
+        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in Zambia. Click on the map on the left to view data for a particular region.")
+        toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
+        toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
+        toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
+        toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
+        toDisplay.push("</tbody></table>")
+        toDisplay.push(imageSource)}
 
 
     nationalData=toDisplay.join('')
@@ -314,13 +318,13 @@ function mapOnClick(str){
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
-    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str)
-    toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
-    toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
-    toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
-    toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
-    toDisplay.push("</tbody></table>")
-    toDisplay.push(imageSource)}
+        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str)
+        toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
+        toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
+        toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
+        toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
+        toDisplay.push("</tbody></table>")
+        toDisplay.push(imageSource)}
 
 
     document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
@@ -399,13 +403,13 @@ function mapOnClickProvince(str){
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
-    toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str+" Province")
-    toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
-    toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
-    toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
-    toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
-    toDisplay.push("</tbody></table>")
-    toDisplay.push(imageSource)}
+        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str+" Province")
+        toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
+        toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
+        toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
+        toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
+        toDisplay.push("</tbody></table>")
+        toDisplay.push(imageSource)}
     
 
     document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
