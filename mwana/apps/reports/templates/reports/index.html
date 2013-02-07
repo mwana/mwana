@@ -229,9 +229,9 @@ function loadNationalData(){
         district_fragment = " Zambia Mwana hasn't been deployed yet"
     }
     imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
-        results_positive+","+results_negative+","+results_rejected+"&cht=p3&chl="+
+        perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
         perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800'/>"
+        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800&chds=a'/>"
     toDisplay.push("<p>In " + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
@@ -311,9 +311,10 @@ function mapOnClick(str){
         district_fragment = " District Mwana hasn't been deployed yet"
     }
     imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
-        results_positive+","+results_negative+","+results_rejected+"&cht=p3&chl="+
+        perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
         perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800'/>"
+        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800&chds=a'/>"
+
     toDisplay.push("<p>In " + str + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
@@ -396,9 +397,9 @@ function mapOnClickProvince(str){
         district_fragment = " Province Mwana hasn't been deployed yet"
     }
     imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
-        results_positive+","+results_negative+","+results_rejected+"&cht=p3&chl="+
+        perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
         perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800'/>"
+        perc_rej+" Rejected&chco=39A8C1|A3CA00|DEC800&chds=a'/>"
     toDisplay.push("<p>In " + str + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
