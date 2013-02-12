@@ -11,6 +11,7 @@ CTYPE_LAYCOUNSELOR = "cba"
 CTYPE_DATACLERK = "dc"
 CTYPE_TRIAGENURSE = 'tn'
 CTYPE_INCHARGE = 'incharge'
+CTYPE_CLINICWORKER = 'worker'
 
 # from forms
 
