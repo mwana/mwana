@@ -586,8 +586,8 @@ def home(request):
     
     records = Location.objects.filter(supportedlocation__supported=True)
     sites = []
-    unplotable_sites = []
-    locations = {}
+    
+    
     for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
         site = Site()
         site.point = record.point
@@ -617,18 +617,7 @@ def home(request):
         site.births_this_month = PatientEvent.objects.filter(patient__location__parent=record,
         date_logged__year=today.year, date_logged__month=today.month).count()
 
-        if site.province in locations:
-            if site.district in locations[site.province]:
-                locations[site.province][site.district].append(site.name)
-            else:
-                locations[site.province][site.district] = [site.name]
-        else:
-            locations[site.province] = {site.district:[site.name]}
-
-        if not record.point:
-            unplotable_sites.append(site)
-        else:
-            sites.append(site)
+        sites.append(site)
 
 
 
@@ -639,8 +628,5 @@ def home(request):
          'userHasNoAssingedFacilities': False,
          'formattedtoday': today.strftime("%d %b %Y"),
          'formattedtime': datetime.today().strftime("%I:%M %p"),
-         'sites': sites,
-         'total_supported': len(records),
-         'locations': locations,
-         'unplotable_sites': unplotable_sites,         
+         'sites': sites,         
      }, context_instance=RequestContext(request))

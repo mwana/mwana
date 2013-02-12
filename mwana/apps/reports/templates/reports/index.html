@@ -84,6 +84,9 @@
         var bounds = new gm.LatLngBounds();
         for (var i = 0; i < window.mapData.length; i ++) {
             var datum = window.mapData[i];
+            if (datum.lat == null){
+                continue
+            }
             var loc = new gm.LatLng(datum.lat, datum.lon);
             bounds.extend(loc);
             var marker = new gm.Marker({
@@ -122,7 +125,13 @@
 results delivered via SMS to date<br>{{site.births}} births registered to date\n\
 <hr><u>This Month</u><br>{{site.sample_sent_to_lab_this_month}} DBS samples sent to lab\n\
 <br>{{site.results_retrieved_this_month}} Results received\n\
-<br>{{site.births_this_month}} births registered this month<br><br>'}); {% endif %} {% endfor %}
+<br>{{site.births_this_month}} births registered this month<br><br>'}); {% else %}data.push({
+        province:'{{site.province}}', district:'{{site.district}}',
+        name:'{{site.name}}', workers:{{site.workers}}, cbas:{{site.cbas}},
+        results_retrieved:{{site.results_retrieved}}, results_negative:{{site.results_negative}},
+        results_positive:{{site.results_positive}},results_rejected:{{site.results_rejected}},
+        results_retrieved_this_month:{{site.results_retrieved_this_month}},
+        births:{{site.births}}, births_this_month:{{site.births_this_month}}});{% endif %} {% endfor %}
     window.mapData = data;    
 </script>
 
@@ -203,7 +212,8 @@ function loadNationalData(){
     if(districts.length > 1){
         district_fragment = " Zambia Mwana has been deployed to " +(districts.length) + " provinces namely, "
             + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-
+        clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
+        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
         
 
     }else if(districts.length == 1){
