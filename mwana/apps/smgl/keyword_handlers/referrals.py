@@ -249,10 +249,12 @@ def _get_people_to_notify(referral):
     # who to notifiy on an initial referral
     # this should be the people who are being referred to
     types = ContactType.objects.filter(
-                    slug__in=[const.CTYPE_DATACLERK, const.CTYPE_TRIAGENURSE]
-                ).all()
+        slug__in=[const.CTYPE_DATACLERK, const.CTYPE_TRIAGENURSE]
+    ).all()
+    loc_parent = referral.from_facility.parent if referral.from_facility else None
+    facility_lookup = loc_parent or referral.facility
     return Contact.objects.filter(types__in=types,
-                                  location=referral.facility,
+                                  location=facility_lookup,
                                   is_active=True)
 
 
@@ -299,7 +301,7 @@ def _pick_er_triage_nurse(session, xform, receiving_facility):
 
 
 def _pick_clinic_recip(session, xform, receiving_facility):
-    cw_type = ContactType.objects.get(slug__iexact='worker')
+    cw_type = ContactType.objects.get(slug__iexact=const.CTYPE_CLINICWORKER)
     cws = Contact.objects.filter(types=cw_type,
                                  location=receiving_facility,
                                  is_active=True)
