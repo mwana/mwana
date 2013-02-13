@@ -29,14 +29,16 @@ class App (rapidsms.apps.base.AppBase):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[9, 15], minutes=[40, 48],
-                                     days_of_week=[0, 1, 2, 3])
+#                                     days_of_week=[0, 1, 2, 3])
+                                     days_of_week=[6])
 
     def schedule_inactivate_lost_users_task(self):
         callback = 'mwana.apps.userverification.tasks.inactivate_lost_users'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[6, 18], minutes=[15],
-                                     days_of_week=[2, 4, 5, 6])
+#                                     days_of_week=[2, 4, 5, 6])
+                                     days_of_week=[0])
 
     def handle(self, message):
         """

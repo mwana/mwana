@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_cba_type
+from django.db.models import Q
 from mwana.apps.userverification.models import DeactivatedUser
-from mwana.apps.userverification.messages import VERICATION_MSG
+from mwana.apps.userverification.messages import CBA_VERICATION_MSG, VERICATION_MSG
 from datetime import datetime
 from datetime import timedelta
 import logging
@@ -15,26 +17,32 @@ logger = logging.getLogger(__name__)
 
 
 
-def send_verification_request(router):
-    logger.info('sending initial verification request to clinic workers')
-
-    days_back = 75
+def get_defaulters(days_back):
     today = datetime.today()
     date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
 
-
-    supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
-    location__supportedlocation__supported=True).distinct()
+    supported_contacts = Contact.active.filter(
+                        Q(types__in=[get_clinic_worker_type(), get_cba_type()]),
+                        Q(location__supportedlocation__supported=True)|
+                        Q(location__parent__supportedlocation__supported=True)
+                        ).distinct()
 
     complying_contacts = supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
 
 
+    return set(supported_contacts) - set(complying_contacts), date_back
 
-    defaulting_contacts = set(supported_contacts) - set(complying_contacts)
+def send_verification_request(router):
+    logger.info('sending initial verification request to clinic workers')
+
+    days_back = 75
+
+
+    defaulting_contacts, date_back = get_defaulters(days_back)
     counter = 0
     msg_limit = 19
 
-    logger.info('%s clinic workers have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
+    logger.info('%s clinic workers/CBAs have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
     
     
     for contact in defaulting_contacts:
@@ -45,6 +53,8 @@ def send_verification_request(router):
             continue
 
         msg = VERICATION_MSG % (contact.name, contact.location.name)
+        if get_cba_type() in contact.types.all():
+            msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)
 
         OutgoingMessage(contact.default_connection, msg).send()
 
@@ -60,18 +70,8 @@ def send_final_verification_request(router):
     logger.info('sending final verification request to clinic workers')
 
     days_back = 120
-    today = datetime.today()
-    date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
-
-
-    supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
-    location__supportedlocation__supported=True).distinct()
-
-    complying_contacts = supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
-
-
-
-    defaulting_contacts = set(supported_contacts) - set(complying_contacts)
+    
+    defaulting_contacts, date_back = get_defaulters(days_back)
     counter = 0
     msg_limit = 19
 
@@ -86,6 +86,8 @@ def send_final_verification_request(router):
             continue
 
         msg = VERICATION_MSG % (contact.name, contact.location.name)
+        if get_cba_type() in contact.types.all():
+            msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)
 
         OutgoingMessage(contact.default_connection, msg).send()
 
@@ -104,8 +106,11 @@ def inactivate_lost_users(router):
     date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
 
 
-    supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
-    location__supportedlocation__supported=True).distinct()
+    supported_contacts = Contact.active.filter(
+                        Q(types__in=[get_clinic_worker_type(), get_cba_type()]),
+                        Q(location__supportedlocation__supported=True)|
+                        Q(location__parent__supportedlocation__supported=True)
+                        ).distinct()
 
     warned_contacts = supported_contacts.filter(userverification__request=2).distinct()
 
