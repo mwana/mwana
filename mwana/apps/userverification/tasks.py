@@ -75,7 +75,7 @@ def send_final_verification_request(router):
     counter = 0
     msg_limit = 19
 
-    logger.info('%s clinic workers have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
+    logger.info('%s clinic workers/CBAs have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
 
 
     for contact in defaulting_contacts:
