@@ -143,7 +143,7 @@ def update_overall_groups():
 
     for group in groups:
         try:
-            reporting_group = ReportingGroup.objects.get(id=1, name__icontains=group)
+            reporting_group = ReportingGroup.objects.get(name__icontains=group)
         except:
             logger.error("Reporting group matching '%s' not found" % group)
 
