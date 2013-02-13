@@ -145,13 +145,11 @@ def update_overall_groups():
         try:
             reporting_group = ReportingGroup.objects.get(id=1, name__icontains=group)
         except:
-            pass
+            logger.error("Reporting group matching '%s' not found" % group)
 
         if reporting_group and facilities:
             try_assign(reporting_group, facilities)
-        else:
-            logger.error("%s might have changed" % reporting_group)
-
+        
 def delete_training_births():
     logger.info("deleting training births")
     # clear loveness bwalya patient events
