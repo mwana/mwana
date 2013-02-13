@@ -22,7 +22,7 @@ class App (rapidsms.apps.base.AppBase):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[9, 15], minutes=[20, 38],
-                                     days_of_week=[0, 1, 2, 3])
+                                     days_of_week=[0, 1, 2, 3, 4, 5, 6])
 
     def schedule_send_final_verification_request_task(self):
         callback = 'mwana.apps.userverification.tasks.send_final_verification_request'
