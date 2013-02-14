@@ -10,7 +10,6 @@ from mwana.apps.locations.models import Location
 from django.contrib import admin
 from django import forms
 
-from django import template
 from django.db import transaction
 from django.conf import settings
 from django.contrib import admin
@@ -54,7 +53,7 @@ class SupportedLocationAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwds):
         super(SupportedLocationAdminForm, self).__init__(*args, **kwds)
-        self.fields['location'].queryset = Location.objects.order_by('name')
+        self.fields['location'].queryset = Location.objects.exclude(type__slug='zone').order_by('name')
 
 
 
