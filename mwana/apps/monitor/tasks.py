@@ -1,5 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
+from datetime import datetime
+from datetime import timedelta
 import logging
 
 from django.db.models import Count
@@ -20,7 +22,7 @@ from mwana.apps.hub_workflow.models import HubSampleNotification
 
 logger = logging.getLogger(__name__)
 
-today = date.today()
+
 
 def year():
     return date.today().year
@@ -159,7 +161,7 @@ def delete_training_births():
 
 def close_open_old_training_sessions():
     logger.info("Closing obsolete training sessions")
-    for ts in TrainingSession.objects.filter(is_on=True).exclude(start_date__gte=today):
+    for ts in TrainingSession.objects.filter(is_on=True).exclude(start_date__gte=date.today()):
         ts.is_on=False
         ts.save()
 
@@ -195,6 +197,24 @@ def update_sub_groups():
         except Exception, e:
             logger.error("%s. Location: %s" % (e, loc))
 
+def mark_long_pending_results_as_obsolete():
+    """
+    When results stay unretrieved for over a month from the time they were ready,
+    mark them as obsolete
+    """
+
+    logger.info('in mark_long_pending_results_as_obsolete')
+    now = datetime.today()
+    
+    #approximate
+    last_month = now - timedelta(days=31)
+    
+    for res in Result.objects.filter(notification_status__in=['new', 'notified'],
+    arrival_date__lt=last_month):
+        # @type res Result
+        res.notification_status = 'obsolete'
+        res.save()
+
 def cleanup_data(router):
     logger.info('cleaning up data, updating supported sites')
     
@@ -210,4 +230,7 @@ def cleanup_data(router):
     delete_spurious_group_facility_mappings()
     delete_spurious_supported_sites()
     update_sub_groups()
-    
+
+    mark_long_pending_results_as_obsolete()
+
+

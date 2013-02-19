@@ -82,12 +82,13 @@ class Result(models.Model):
         ('new', 'Fresh result from lab'),
         ('notified', 'Clinic notified of new result'),
         ('sent', 'Result sent to clinic'),
-        ('updated', 'Updated data from lab')    #set when server receives updates to a sample record
+        ('updated', 'Updated data from lab'),    #set when server receives updates to a sample record
                                                 #AFTER this result has already been sent to the clinic.
                                                 #if result has not yet been sent, it keeps status 'new'.
                                                 #the updated data may or may not merit sending the
                                                 #update to the clinic (i.e., changed result, yes, changed
                                                 #child age, no)
+        ('obsolete', 'Obsolete') # As good as deleted on the Mwana server but kept for reference sake
     )
 
     SEX_CHOICES = (
