@@ -1,7 +1,7 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp
 from mwana.apps.smgl.models import (Referral, PregnantMother,
     ReminderNotification, AmbulanceRequest, AmbulanceResponse)
-from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED,\
+from mwana.apps.smgl.app import FACILITY_NOT_RECOGNIZED, \
     AMB_RESPONSE_ALREADY_HANDLED
 from mwana.apps.locations.models import Location
 from mwana.apps.smgl import const
@@ -28,11 +28,14 @@ class SMGLReferTest(SMGLSetUp):
         self.user_number = "123"
         self.cba_number = "456"
         self.name = "Anton"
-        self.createUser("worker", self.user_number, location="804034")
+        self.worker = self.createUser("worker", self.user_number, location="804034")
         self.cba = self.createUser("cba", self.cba_number, location="80402404")
-        self.dc = self.createUser(const.CTYPE_DATACLERK, "666777")
-        self.tn = self.createUser(const.CTYPE_TRIAGENURSE, "666888")
+        self.dc = self.createUser(const.CTYPE_DATACLERK, "666777",
+                                  location=self.worker.location.parent.slug)
+        self.tn = self.createUser(const.CTYPE_TRIAGENURSE, "666888",
+                                  location=self.worker.location.parent.slug)
         self.am = self.createUser("AM", "666555")
+        self.amb_tn = self.createUser(const.CTYPE_TRIAGENURSE, "222222")
         self.ha = self.createUser("worker", "666111")
         self.ha.is_help_admin = True
         self.ha.save()
@@ -273,6 +276,9 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(False, ref.reminded)
         self.assertEqual(1, Referral.emergencies().count())
 
+        em_dc = self.createUser(const.CTYPE_DATACLERK, "777777",
+                                location='804024')
+
         # this should do nothing because it's not in range
         send_emergency_referral_reminders(router_obj=self.router)
         ref = Referral.objects.get(pk=ref.pk)
@@ -287,7 +293,7 @@ class SMGLReferTest(SMGLSetUp):
                                                         "loc": "Mawaya"}
         script = """
             %(num)s < %(msg)s
-        """ % {"num": "666777",
+        """ % {"num": "777777",
                "msg": reminder}
         self.runScript(script)
 
@@ -296,7 +302,7 @@ class SMGLReferTest(SMGLSetUp):
         [notif] = ReminderNotification.objects.all()
         self.assertEqual(ref.mother, notif.mother)
         self.assertEqual(ref.mother_uid, notif.mother_uid)
-        self.assertEqual(self.dc, notif.recipient)
+        self.assertEqual(em_dc, notif.recipient)
         self.assertEqual("em_ref", notif.type)
 
     def testReferEmWorkflow(self):
@@ -305,12 +311,13 @@ class SMGLReferTest(SMGLSetUp):
             "from_location": 'Mawaya',
             "sender_phone_number": self.user_number
         }
+        tnnum = '222222'
         script = """
             %(num)s > refer 1234 804024 hbp 1200 em
             %(num)s < %(resp)s
             %(tnnum)s < %(tn_notif)s
             %(amnum)s < %(am_notif)s
-        """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
+        """ % {"num": self.user_number, "amnum": "666555", "tnnum": tnnum,
                "resp": INITIAL_AMBULANCE_RESPONSE,
                "tn_notif": ER_TO_TRIAGE_NURSE % d,
                "am_notif": ER_TO_DRIVER % d}
@@ -331,7 +338,7 @@ class SMGLReferTest(SMGLSetUp):
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual("1234", amb_req.mother_uid)
         self.assertEqual("666555", amb_req.ambulance_driver.default_connection.identity)
-        self.assertEqual("666888", amb_req.triage_nurse.default_connection.identity)
+        self.assertEqual(tnnum, amb_req.triage_nurse.default_connection.identity)
 
         # Test OTW Response
         self.assertEqual(0, AmbulanceResponse.objects.count())
@@ -353,7 +360,7 @@ class SMGLReferTest(SMGLSetUp):
             %(amnum)s < %(resp)s
             %(num)s < %(notif)s
             %(wonum)s < %(wo_notif)s
-        """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
+        """ % {"num": self.user_number, "amnum": "666555", "tnnum": tnnum,
                "wonum": "666111",
                "resp": response_string,
                "wo_notif": response_to_worker_string,
@@ -366,7 +373,7 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("otw", amb_resp.response)
-        self.assertEqual("666888", amb_resp.responder.default_connection.identity)
+        self.assertEqual(tnnum, amb_resp.responder.default_connection.identity)
 
     def testReferEmSecondResponse(self):
         # not so atomic, but better(?) than copy/pasting code
@@ -387,6 +394,7 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(previous_count, AmbulanceResponse.objects.count())
 
     def testReferEmNotAvailableWorkflow(self):
+        tnnum = '222222'
         d = {
             "unique_id": '1234',
             "from_location": 'Mawaya',
@@ -397,7 +405,7 @@ class SMGLReferTest(SMGLSetUp):
             %(num)s < %(resp)s
             %(tnnum)s < %(tn_notif)s
             %(amnum)s < %(am_notif)s
-        """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
+        """ % {"num": self.user_number, "amnum": "666555", "tnnum": tnnum,
                "resp": INITIAL_AMBULANCE_RESPONSE,
                "tn_notif": ER_TO_TRIAGE_NURSE % d,
                "am_notif": ER_TO_DRIVER % d}
@@ -418,7 +426,7 @@ class SMGLReferTest(SMGLSetUp):
         [amb_req] = AmbulanceRequest.objects.all()
         self.assertEqual("1234", amb_req.mother_uid)
         self.assertEqual("666555", amb_req.ambulance_driver.default_connection.identity)
-        self.assertEqual("666888", amb_req.triage_nurse.default_connection.identity)
+        self.assertEqual(tnnum, amb_req.triage_nurse.default_connection.identity)
 
         # Test NA Response
         self.assertEqual(0, AmbulanceResponse.objects.count())
@@ -442,7 +450,7 @@ class SMGLReferTest(SMGLSetUp):
             %(amnum)s < %(resp)s
             %(num)s < %(notif)s
             %(sunum)s < %(su_notif)s
-        """ % {"num": self.user_number, "amnum": "666555", "tnnum": "666888",
+        """ % {"num": self.user_number, "amnum": "666555", "tnnum": tnnum,
                "sunum": "666111",
                "resp": response_string,
                "su_notif": amb_na_string,
@@ -454,5 +462,4 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(amb_req, amb_resp.ambulance_request)
         self.assertEqual("1234", amb_resp.mother_uid)
         self.assertEqual("na", amb_resp.response)
-        self.assertEqual("666888", amb_resp.responder.default_connection.identity)
-
+        self.assertEqual(tnnum, amb_resp.responder.default_connection.identity)
