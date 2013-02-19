@@ -153,8 +153,7 @@ class Alerter:
             days_late = self.days_ago(last_retrieved_results)
             level = Alert.LOW_LEVEL
             contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).\
+        Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
             distinct().order_by('pk')
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_TRACE, "%s clinic have "\
                              " retrieved %s results but have NOT used TRACE command. Please call and enquire "
@@ -180,8 +179,7 @@ class Alerter:
                            ).distinct()
         for clinic in clinics:
             contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).\
+        Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
             distinct().order_by('pk')
             days_late = self.days_ago(self.earliest_pending_result_arrival_date(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.retrieving_days) else Alert.LOW_LEVEL
@@ -257,6 +255,8 @@ class Alerter:
     def last_used_result(self, location):        
         try:
             return Message.objects.filter(Q(contact__location=location) ,
+                                          Q(direction='O'),
+                                          Q(text__istartswith='The'),
                                            Q(text__istartswith='The results for sample') |
                                            Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
         except IndexError:
@@ -309,9 +309,8 @@ class Alerter:
                 
                 
             contacts = \
-    Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                          Q(types=const.get_clinic_worker_type())).\
-        distinct().order_by('pk')
+    Contact.active.filter(location=clinic,types=const.get_clinic_worker_type()).\
+        distinct().order_by('name')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
             alert_msg = ("Clinic "
@@ -430,7 +429,7 @@ class Alerter:
                                                 "")
     def last_used_system(self, contact):
         latest = Message.objects.filter(
-            contact=contact.id,
+            contact=contact,
             direction='I',
         ).aggregate(date=Max('date'))
         if latest['date']:
@@ -440,9 +439,7 @@ class Alerter:
 
 
     def get_complying_contacts(self):
-        """
-        quick and dirty fix.
-        """
+        
         #TODO: to better implementation of fix
         days_back = 75
         today = datetime.today()
@@ -596,12 +593,13 @@ class Alerter:
                  self.today.day)-timedelta(days=self.tracing_days-1)
 
     def get_facilities_for_reporting(self):
-        facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
+        facs = Location.objects.filter(supportedlocation__supported=True, groupfacilitymapping__group__groupusermapping__user=self.user)
         if self.reporting_group:
             facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
         if self.reporting_facility:
             facs = facs.filter(slug=self.reporting_facility)
+        # TODO : use location.parent instead of relying on slug naming convetions
         elif self.reporting_district:
             facs = facs.filter(slug__startswith=self.reporting_district[:4])
         elif self.reporting_province:

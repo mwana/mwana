@@ -7,7 +7,7 @@ from rapidsms.models import Contact, Connection
 
 class UserVerification(models.Model):
     """
-    Virifies if users(clinic workers) are still working at their register facilities
+    Virifies if users(clinic workers, CBA's) are still working at their register facilities
     """
     VERIFICATION_FREQ = (
                          ('Q', 'Querterly'),
@@ -17,12 +17,12 @@ class UserVerification(models.Model):
                          )
 
     REQUEST_TYPES = (
-                     ('1', 'Still using Results160/At same clinic?'),
-                     ('2', 'Final msg. Still using Results160/At same clinic?'),
+                     ('1', 'Still using Results160/RemindMi/At same clinic?'),
+                     ('2', 'Final msg. Still using Results160/RemindMi/At same clinic?'),
                      )
 
-    facility = models.ForeignKey(Location, limit_choices_to={'parent__type__slug': 'districts'})
-    contact = models.ForeignKey(Contact, limit_choices_to={'types__slug': 'clinic_worker'})
+    facility = models.ForeignKey(Location)
+    contact = models.ForeignKey(Contact)
 
     verification_freq    = models.CharField(choices=VERIFICATION_FREQ, max_length=1, blank=True, verbose_name='verification')
     request    = models.CharField(choices=REQUEST_TYPES, max_length=1, blank=True)

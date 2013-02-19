@@ -85,6 +85,9 @@ def clean_up_unconfirmed_results():
                                                   text__icontains=TEST_TYPE)
     for msg in messages:
         req_id = msg.text.split(".")[1].split(":")[-1].strip()
+
+        if not msg.connection.contact:
+            continue
         
         clinic = msg.connection.contact.location
 

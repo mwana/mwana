@@ -155,6 +155,7 @@ class App(rapidsms.apps.base.AppBase):
         date_str, patient_name, event_location_type = self._parse_message(msg)
         # if patient name is too long it's most likely the message sent was wrong
         if patient_name and len(patient_name) < 50: # the date is optional
+            today = datetime.datetime.today()
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
@@ -163,12 +164,18 @@ class App(rapidsms.apps.base.AppBase):
                                 "DAY MONTH YEAR, for example: 23 04 2010"))
                     return True
             else:
-                date = datetime.datetime.today()
+                date = today
 
             # make sure the birth date is not in the future
-            if date > datetime.datetime.today():
+            if date > today:
                 msg.respond(_("Sorry, you can not register a %s with a date "
                 "after today's." % event.name.lower()))
+                return True
+
+            # make sure the date is not unreasonably too old
+            if date.year < 2010:
+                msg.respond(_("Sorry, make sure you enter the year correctly."
+                " %s is too old. We are in %s." % (date.year, today.year)))
                 return True
 
             # fetch or create the patient

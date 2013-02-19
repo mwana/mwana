@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.locale_settings import SYSTEM_LOCALE
+from mwana.locale_settings import LOCALE_ZAMBIA
 from django.conf import settings
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
@@ -69,6 +71,11 @@ class PrinterHandler(KeywordHandler):
                                           'results as soon as they are '
                                           'available.', location=location.name)
             conf_msg.send()
+            if SYSTEM_LOCALE == LOCALE_ZAMBIA:
+                loc = contact.location
+                loc.has_independent_printer = True
+                loc.save()
+                
             self.respond('Printer added successfully.')
         elif action == 'remove':
             try:

@@ -31,7 +31,7 @@ class ToldHandler(KeywordHandler):
     
     help_txt = "To tell that someone has been to the clinic send: TOLD <PATIENT_NAME>, e.g TOLD Bana Malama"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_told_thanks_txt = _("Thank you %s! After you confirm %s has visited the clinic, please send: CONFIRM %s.")
+    response_told_thanks_txt = _("Thank you %(cba)s! After you confirm %(patient)s has visited the clinic, please send: CONFIRM %(patient)s.")
     
     clinic_worker_not_allowed = "Sorry %s, only CBAs can trace patients.  Please ask the CBA to find the patient."
                                
@@ -124,7 +124,7 @@ class ToldHandler(KeywordHandler):
         Responds with a thank you message for telling the patient to come into the clinic,
         Informs the user about confirming the visit
         '''
-        self.respond(self.response_told_thanks_txt % (self.msg.connection.contact.name, pat_name, pat_name))
+        self.respond(self.response_told_thanks_txt % {'cba':self.msg.connection.contact.name, 'patient':pat_name})
         
  
     def help(self):

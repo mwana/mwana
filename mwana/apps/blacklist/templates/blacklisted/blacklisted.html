@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+
+
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="left">
+    <form name="getValues" action="" method="POST">
+        <div class="module">
+            <h2>Blacklisted People</h2>
+            <p/>
+            
+            <hr>
+
+            <div>
+                <h3>Existing {{ model }}</h3>
+
+                <table width="100%">
+
+                    <tr>
+                        <th>#</th>
+                        <th>
+                            <a href="?ot=asc&amp;o=1">
+                                Name
+                            </a></th><th>
+                                Location
+                            </th><th>
+                            Type
+                            </th><th>
+                            Phone</th><th>
+                            <a href="?ot=asc&amp;o=6">
+                                Date
+                            </a></th><th>
+                            <a href="?ot=asc&amp;o=8">
+                                Sample text
+                            </a></th>
+                    </tr>
+
+                    {% for record in query_set %}
+                    <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                        <td>{{ forloop.counter|add:offset }}</td>
+                        <td>{{ record.contact }}</td>
+                        <td>{{ record.contact.location }}</td>
+                        <td>{% for type in record.contact.types.all%}
+                            {{ type.name }},
+                            {% endfor %}
+                        </td>
+                        <td>{{ record.connection.identity }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.text }}</td>
+                    </tr>
+
+                    {% endfor %}
+
+                </table>
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+
+    </form>
+    <form>
+        <div class="pagination">
+            <span class="step-links">
+                {% if has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
+
+                <span class="current">
+                    Page {{ number }} of {{ num_pages }}.
+                </span>
+
+                {% if has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ number }}>
+            </span>
+
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    $("select").chosen();
+</script>
+
+{% endblock %}

@@ -13,24 +13,26 @@ from django.core.management.base import LabelCommand
 
 
 class Command(LabelCommand):
-    help = ("assign facilities ro reporing group\nUsage: assignfacilities DISTRICT_NAME")
+    help = ("assign facilities to reporing group\nUsage: assignfacilities DISTRICT_CODE")
 
     def handle(self, * args, ** options):
 
 
-        if len(args) < 2:
-            raise CommandError('Please specify district followed by slug.')
+        if len(args) < 1:
+            raise CommandError('Please specify district slug.')
 
-        district_name = args[0]
-        slug = args[1]
+        slug = args[0]
 
-        district = Location.objects.get(name__iexact=district_name, slug=slug)
-
+        district = Location.objects.get(slug=slug)
+        district_name = district.name
+        print "District is %s"%district.name
         print "Province is %s"%district.parent.name
-        dho = ReportingGroup.objects.get(name__iexact="DHO %s" %district_name )
-        pho = ReportingGroup.objects.get(name__iexact="PHO %s" %district.parent.name.split()[0] )
+        dho= ReportingGroup.objects.get_or_create(name="DHO %s" %district_name )[0]
+        pho = ReportingGroup.objects.get_or_create(name="PHO %s" %district.parent.name.split()[0] )[0]
 
-        facilities = Location.objects.filter(parent=district, send_live_results=True)
+        
+
+        facilities = Location.objects.filter(parent=district, send_live_results=True, supportedlocation__supported=True)
         self.try_assign(dho, facilities)
         self.try_assign(pho, facilities)
        

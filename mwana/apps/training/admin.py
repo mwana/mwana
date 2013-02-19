@@ -7,5 +7,11 @@ class TrainingSessionAdmin(admin.ModelAdmin):
     list_filter = ("start_date", "is_on", "location", )
 admin.site.register(training.TrainingSession, TrainingSessionAdmin)
 
+class TrainedAdmin(admin.ModelAdmin):
+    list_display = ("name", "location", "type", "email", "phone", "date", "trained_by", "additional_text",)
+    list_filter = ("trained_by", "type", "date", "location", )
+    date_hierarchy = 'date'
+    search_fields = ('name', "email", "phone", "additional_text",)
+admin.site.register(training.Trained, TrainedAdmin)
 
 

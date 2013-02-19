@@ -14,10 +14,10 @@ RESULTS160_SLUGS = {
     'LAB_WORKER_SLUG': 'lab',
     # location types:
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
-                    'rural_health_centre', 'health_post'),
-    'ZONE_SLUGS': ('zone',),
-    'DISTRICT_SLUGS': ('districts',), # XXX verify me
-    'PROVINCE_SLUGS': ('provinces',), # XXX verify me
+                     'rural_health_centre', 'health_post', 'clinic', 'hahc'),
+    'ZONE_SLUGS': ('zone', ),
+    'DISTRICT_SLUGS': ('districts', ), # XXX verify me
+    'PROVINCE_SLUGS': ('provinces', ), # XXX verify me
 }
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.append("mwana.apps.userverification")
@@ -28,11 +28,13 @@ INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
 INSTALLED_APPS.append("mwana.apps.birthcertification")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
+INSTALLED_APPS.append("mwana.apps.webusers")
 
+INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
 ADMINS = (
-    ('Trevor Sinkala', 'sinkalation@gmail.com'),
-)
+          ('Trevor Sinkala', 'sinkalation@gmail.com'),
+          )
 
 MANAGERS = ADMINS
 
@@ -46,11 +48,11 @@ TIME_ZONE = 'Africa/Lusaka'
 
 LANGUAGE_CODE = 'en'
 LANGUAGES = (
-    ('bem', _('Bemba')),
-    ('tn', _('Tonga')),
-    ('en', _('English')),
-    ('nya', _('Nyanja')),
-)
+             ('bem', _('Bemba')),
+             ('ton', _('Tonga')),
+             ('en', _('English')),
+             ('nya', _('Nyanja')),
+             )
 
 LOCATION_CODE_CLASS = 'mwana.zambia.locations.LocationCode'
 
@@ -73,12 +75,17 @@ RAPIDSMS_TABS = [
 #    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
 #    ('mwana.apps.supply.views.dashboard', 'Supplies'),
 #    ('mwana.apps.labresults.views.dashboard', 'Results160'),
+    ('mwana.apps.reports.views.home', 'Home'),
     ('mwana.apps.reports.views.zambia_reports', 'Reports'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('mwana.apps.filteredlogs.views.filtered_logs', 'Message Logs'),
+    ('mwana.apps.filteredlogs.views.filtered_logs', 'Logs'),
+    ('mwana.apps.reports.views.supported_sites', 'Supported Sites'),
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
+    ('mwana.apps.webusers.views.webusers', 'Web Users'),
     ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
+    ('mwana.apps.training.views.trained', 'Trained People'),
+#    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 
 ADH_LAB_NAME = "ADH DNA-PCR LAB"
@@ -89,3 +96,7 @@ SOUTH_MIGRATION_MODULES = {
     'rapidsms': 'mwana.zambia.migrations.rapidsms',
 }
 
+SESSION_COOKIE_AGE = 3600 # 1 hour
+
+# These URL will not require login
+EXCLUDE_FROM_LOGIN = ['', '/home', '/', '/home/']

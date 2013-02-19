@@ -1,0 +1,241 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Supported Sites - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<style type="text/css" >
+    .warning_0 {background-color:red}
+    html { height: auto; }
+    body { height: auto; margin: 0; padding: 0; font-family: Georgia, serif; font-size: 0.9em; }
+    table { border-collapse: collapse; border-spacing: 0; }
+    p { margin: 0.75em 0; }
+    #map3 { height: auto; position: absolute; bottom: 0; left: 0; right: 0; top: 0; }
+    @media print { #map3 { height: 950px; } }
+</style>
+<script src="https://maps-api-ssl.google.com/maps/api/js?v=3.7&amp;key=AIzaSyCRNwriAGXx8oi0a6E8gIeo36MCyBmjKNk&amp;sensor=false"></script>
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/oms.min.js" ></script>
+<script type="text/javascript" >
+    window.onload = function() {
+        var gm = google.maps;
+        var map = new gm.Map(document.getElementById('map3'), {
+            mapTypeId: gm.MapTypeId.ROADMAP,
+            center: new gm.LatLng(-13, 28), zoom: 6,  // whatevs: fitBounds will override
+            scrollwheel: false
+        });
+        var iw = new gm.InfoWindow();
+        var oms = new OverlappingMarkerSpiderfier(map,
+        {markersWontMove: true, markersWontHide: true});
+
+        var usualColor = '0495d4';
+        var spiderfiedColor = 'eebb22';
+        var iconWithColor = function(color) {
+            return 'https://chart.googleapis.com/chart?chst=d_map_xpin_letter&chld=pin|+|' +
+                color + '|000000|ffff00';
+        }
+        var shadow = new gm.MarkerImage(
+        'https://www.google.com/intl/en_ALL/mapfiles/shadow50.png',
+        new gm.Size(37, 34),  // size   - for sprite clipping
+        new gm.Point(0, 0),   // origin - ditto
+        new gm.Point(10, 34)  // anchor - where to meet map location
+    );
+
+        oms.addListener('click', function(marker) {
+            iw.setContent(marker.desc);
+            iw.open(map, marker);
+        });
+        oms.addListener('spiderfy', function(markers) {
+            for(var i = 0; i < markers.length; i ++) {
+                markers[i].setIcon(iconWithColor(spiderfiedColor));
+                markers[i].setShadow(null);
+            }
+            iw.close();
+        });
+        oms.addListener('unspiderfy', function(markers) {
+            for(var i = 0; i < markers.length; i ++) {
+                markers[i].setIcon(iconWithColor(usualColor));
+                markers[i].setShadow(shadow);
+            }
+        });
+
+        var bounds = new gm.LatLngBounds();
+        for (var i = 0; i < window.mapData.length; i ++) {
+            var datum = window.mapData[i];
+            var loc = new gm.LatLng(datum.lat, datum.lon);
+            bounds.extend(loc);
+            var marker = new gm.Marker({
+                position: loc,
+                title: datum.h,
+                map: map,
+                icon: iconWithColor(usualColor),
+                shadow: shadow
+            });
+            marker.desc = datum.d;
+            oms.addMarker(marker);
+        }
+        //map.fitBounds(bounds);
+
+        // for debugging/exploratory use in console
+        window.map = map;
+        window.oms = oms;
+    }
+</script>
+{% endblock %}
+{% block content %}
+
+{%if userHasNoAssingedFacilities%}
+You currently don't belong to any group for viewing reports. Contact the system administrator at <a href="mailto:{{adminEmail}}">{{adminEmail}}</a>  for help.
+{%else%}
+
+
+
+<div class="module">
+    <form name="getValues" action="" method="GET">
+
+        <h2>Supported Sites</h2>
+        <br>
+        {% if region_selectable %}
+        <p>Select Region: &nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+            {{rpt_provinces}}
+            {% endautoescape %}&nbsp;
+            or District:{% autoescape off %}
+            {{rpt_districts}}
+            {% endautoescape %}&nbsp;
+            or Facility:{% autoescape off %}
+            {{rpt_facilities}}
+            {% endautoescape %}&nbsp;
+
+            {% if is_report_admin %}
+        <p>Select Implementer:
+            {% autoescape off %}
+            {{rpt_group}}
+            {% endautoescape %}
+            &nbsp;
+            {%endif%}
+            {%endif%}
+
+            &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
+        <hr>
+        <div>
+
+
+            <h3>
+                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+
+            </h3>
+            <table border="1">
+
+                <tbody>
+                    <tr valign="top">
+                        <td><div class="">
+                                <div id="map3" style=" position: relative;height: 600px; width: 800px">
+
+                                </div>
+
+                            </div>
+
+                        </td>
+                        <td>
+                            <div><h3>Stats </h3>
+                                <div>
+
+                                    {% for province in locations.items %}
+                                    <p><b>{{ province.0 }}</b><br>
+
+                                        {% for district in province.1.items %}
+                                        {{ forloop.counter1}}
+                                        {{ district.0 }}-
+                                        {{ district.1|length }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                        {% endfor %}
+                                    <p><b>{{ total_supported}} facilities in total</b>
+                                </div></div>
+
+                        </td>
+                    </tr>
+                    {% for site in sites %}
+                    <tr>
+
+                        <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                            {{forloop.counter}}. <i>{{ site.province }}</i> - <i>{{ site.district }}</i> - <b>{{ site.name }} - {{ site.slug }}</b>:
+
+                            <span class="warning_{{site.workers}}">{{ site.workers}}</span> Clinic staff; 
+                            <span class="warning_{{site.cbas}}">{{ site.cbas}}</span> CBAs;
+                            <span class="warning_{{site.results}}">{{ site.results}}</span> Results retrieved to date;
+                            <a title="{{site.results_retrieved_this_month}} Results retrieved this month; {{site.births}} Births registered to date; {{site.births_this_month}} Births registered this month; {{site.dhos}} DHOs; {{site.phos}} PHOs; {{site.printers}} DBS Printers" onclick="alert(this.title.replace(/;\s?/g,'\n').trim())">more infor</a>
+                            <br>                            
+                        </td>                        
+                    </tr>{% endfor %}
+                    <tr>
+                        <td colspan="2"><h3>The following sites don't have GIS coordinates and so are not shown on the map:</h3></td>
+                    </tr>
+                    {% for site in unplotable_sites %}
+                    <tr>
+
+                        <td colspan="2" bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                            {{forloop.counter}}. <i>{{ site.province }}</i> - <i>{{ site.district }}</i> - <b>{{ site.name }} - {{ site.slug }}</b>:
+
+                            <span class="warning_{{site.workers}}">{{ site.workers}}</span> Clinic staff;
+                            <span class="warning_{{site.cbas}}">{{ site.cbas}}</span> CBAs;
+                            <span class="warning_{{site.results}}">{{ site.results}}</span> Results retrieved to date;
+                            <a title="{{site.results_retrieved_this_month}} Results retrieved this month; {{site.births}} Births registered to date; {{site.births_this_month}} Births registered this month; {{site.dhos}} DHOs; {{site.phos}} PHOs; {{site.printers}} DBS Printers" onclick="alert(this.title.replace(/;\s?/g,'\n').trim())">more infor</a>
+                            <br>
+                        </td>
+                    </tr>{% endfor %}
+
+
+                </tbody>
+            </table>
+
+
+
+        </div>
+    </form>
+</div>
+
+
+<script type="text/javascript">
+    $("#rpt_group").chosen();
+</script>
+
+
+<script type="text/javascript" >
+   
+    var rnd = Math.random;
+    var data = [];
+    {% for site in sites %}
+    {%if site.point %}
+    data.push({lon: {{site.point.longitude}}, lat: {{site.point.latitude}},
+        h:   '{{site.name}} of {{site.district}}\n{{site.workers}} Clinic Workers\n{{site.cbas}} Community Based Agents\n{{site.results}} results delivered via SMS to date\n\
+\nClick for more information',
+        d:   '<b>{{site.name}} of {{site.district}}</b><p>{{site.workers}} \n\
+    Clinic Workers<br>{{site.cbas}} Community Based Agents<br>{{site.results}} \n\
+results delivered via SMS to date\n\
+<br>{{site.births}} births registered to date\n\
+<hr><u>This Month</u><br>{{site.sample_sent_to_lab_this_month}} DBS samples sent to lab\n\
+<br>{{site.results_retrieved_this_month}} Results received\n\
+<br>{{site.births_this_month}} births registered this month<br><br>'
+    });
+    {% endif %}
+    {% endfor %}
+    
+    window.mapData = data;
+</script>
+
+{% endif %}
+{% endblock %}

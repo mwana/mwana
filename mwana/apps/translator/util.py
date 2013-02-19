@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class Translator:
     """
-    Complements django gettext based translator. Specially used to translate dynamic phrases if formatted strings
+    Complements django gettext based translator. Specially used to translate dynamic phrases in formatted strings
     """
 
     dictionary = {}

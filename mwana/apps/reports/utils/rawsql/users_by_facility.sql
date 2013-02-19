@@ -33,7 +33,7 @@ LEFT JOIN locations_locationtype ON locations_locationtype.id=location.type_id
 LEFT JOIN rapidsms_contact_types ON rapidsms_contact_types.contact_id=rapidsms_contact.id
 LEFT JOIN contactsplus_contacttype ON contactsplus_contacttype.id=rapidsms_contact_types.contacttype_id
 WHERE is_active = 't'
-AND rapidsms_connection.backEND_id IN (1,3)
+AND rapidsms_connection.identity like '+260%'
 AND location.name NOT ilike 'support'
 --AND locations_locationtype.sINgular ilike 'zone'
 ORDER BY 1,2,3,4

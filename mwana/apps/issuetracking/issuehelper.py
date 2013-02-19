@@ -1,10 +1,16 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.blacklist.models import BlacklistedPeople
+from mwana.apps.training.models import Trained
+
+from rapidsms.contrib.messagelog.models import Message
+from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class IssueHelper:   
+#    TODO take out generic methods here to a util/general 
 
     def get_paginated(self, query_set, page=1, num_pay_page=30):
         if not page:
@@ -44,5 +50,42 @@ class IssueHelper:
 
         issues = GroupFacilityMapping.objects.all().order_by('pk')
         return self.get_paginated(issues, page, 400)
+
+    def get_group_user_mappings(self, page=1):
+        """
+        Returns open group_facilty_mappings with pagination
+        """
+
+        issues = GroupUserMapping.objects.all().order_by('pk')
+        return self.get_paginated(issues, page, 400)
+
+    def get_trained_people(self, order='pk', page=1):
+        """
+        Returns trained people
+        """
+        max_per_page = 400
+        issues = Trained.objects.all().order_by(order)
+        return self.get_paginated(issues, page, max_per_page), max_per_page
+
+    def get_blacklisted_people(self, order='pk', page=1):
+        """
+        Returns blacklisted people
+        """
+        max_per_page = 400
+        blacklist = (bl.phone for bl in BlacklistedPeople.objects.filter(valid=True))
+        messages = Message.objects.filter(
+        direction='I', connection__identity__in=blacklist).order_by(order)\
+            .exclude(text__istartswith='help')\
+            .exclude(text__istartswith='training')\
+            .exclude(text__istartswith='result')\
+            .exclude(text__istartswith='check')\
+            .exclude(text__istartswith='leave')\
+            .exclude(text__istartswith='join')\
+            .exclude(text__istartswith='trace')\
+            .exclude(text__istartswith='received')\
+            .exclude(text__istartswith='send')\
+            .exclude(text__icontains='demo')\
+            .exclude(text__istartswith='sent')
+        return self.get_paginated(messages, page, max_per_page), max_per_page
         
     

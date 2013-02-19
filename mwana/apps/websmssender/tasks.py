@@ -66,8 +66,7 @@ Message:
 
     message = ("%s\n%s\n%s" % (header, body, footer))
 
-    print message
-
+    
     email_sender.send(list(set(recipients)), subject, message)
 
     

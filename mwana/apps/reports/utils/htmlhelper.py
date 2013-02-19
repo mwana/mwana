@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.locations.models import Location
 from mwana.apps.contactsplus.models import ContactType
 from datetime import date
 
@@ -71,7 +72,7 @@ def get_facilities_dropdown_htmlb(id, facilities, selected_facility):
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
-    code ='<select name="%s" size="1">\n'%id
+    code ='<select name="%s" id="%s" class="drop-down" size="1">\n'%(id, id)
     code +='<option value="All">All</option>\n'
     for group in ReportingGroup.objects.all():
         if str(group.id) == selected_group:
@@ -121,3 +122,26 @@ def get_next_navigation(text):
         return {"Next":1,"Previous":-1}[text]
     except:
         return 0
+
+def get_default_int(val):
+    return int(val) if str(val).isdigit() else 0
+
+def get_distinct_parents(locations, type_slugs=None):
+    if not locations:
+        return None
+    parents = []
+    for location in locations:
+        if not type_slugs or (location.parent and location.parent.type.slug in type_slugs):
+            parents.append(location.parent)
+
+    return list(set(parents))
+
+def get_rpt_provinces(user):
+    return get_distinct_parents(get_rpt_districts(user))
+
+def get_rpt_districts(user):
+
+    return get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user))
+
+def get_rpt_facilities(user):
+    return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user)

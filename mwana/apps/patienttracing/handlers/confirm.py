@@ -1,14 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
-import re
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
-from datetime import datetime, timedelta
-from rapidsms.models import Contact
+from datetime import datetime
 from rapidsms.messages.outgoing import OutgoingMessage
-from mwana.util import get_clinic_or_default
-from mwana.apps.broadcast.models import BroadcastMessage
-from mwana.const import get_cba_type
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
 _ = lambda s: s
@@ -32,12 +27,12 @@ class ConfirmHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "cofirm|confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed"
+    keyword = "cofirm|confirm|conferm|confhrm|cnfrm|CONFIRM|Confirm|C0nfirm|comfirm|c0mfirm|comferm|comfhrm|cmfrm|CONFIRM|C0NFIRM|Comfirm|C0mfirm|confirmed|confermed|confhrmed|cnfrmed|CONFIRMed|Confirmed|comfirmed|comfermed|comfhrmed|cmfrmed|CONFIRMed|Comfirmed|C0mf1rm|Comf1rm|C0nf1rm|Conf1rm"
 #    PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")  #TODO: FIX ME
     
     help_txt = "To confirm that a patient has been to the clinic please send: CONFIRM <PATIENT_NAME>, e.g CONFIRM Amake Phiri"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
-    response_confirmed_thanks_txt = _("Thank you %s! You have confirmed that %s has been to the clinic!")
+    response_confirmed_thanks_txt = _("Thank you %(cba)s! You have confirmed that %(patient)s has been to the clinic!")
                                
     patient_not_found_txt = "Sorry %s, we don't have a patient being traced by that name. Did you check the spelling of the patient's name?"
     
@@ -130,7 +125,7 @@ class ConfirmHandler(KeywordHandler):
         Responds with a thank you message for telling the patient to come into the clinic,
         Informs the user about confirming the visit
         '''
-        self.respond(self.response_confirmed_thanks_txt % (self.msg.connection.contact.name, pat_name))
+        self.respond(self.response_confirmed_thanks_txt % {'cba':self.msg.connection.contact.name, 'patient':pat_name})
         
  
     def help(self):

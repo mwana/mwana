@@ -30,8 +30,9 @@
     <form name="getValues" action="" method="POST">
         <div class="module">
             <h2>Group Facility Mappings</h2>
-            <details>
-                <summary><h3>Create New {{ model }}</h3></summary>
+            <p/>
+                <h3>Create New {{ model }}</h3>
+        
                 <br>
                 
                 <table border="0">
@@ -43,18 +44,14 @@
                     {% endfor %}
                 </table>
                 <p><input type="submit" value="Submit" /></p>
-            </details>
             <hr>
             <div>
 
                 <h3>Existing {{ model }}</h3>
+                <br>
 
                 {% for record in query_set %}
-{{ record }}<br>
-
-               
-
-
+                {{ record }}<br>
                 {% endfor %}
 
 

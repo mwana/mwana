@@ -20,8 +20,25 @@ class TestApp(TestScript):
 #    apps = (cleaner_App, handler_app, )
     
     def testCBARegistrationWithLanguage(self):
-        # TODO : Implement test
+        #TODO implement test in such a way that is passes in both malawi and zambia
         pass
+#        self.assertEqual(0, Contact.objects.count())
+#        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+#        Location.objects.create(name="Central Clinic",
+#                                                 slug="403012", type=ctr)
+#
+#        script = """
+#            cba > join cba NYA 403012 3 rupiah banda
+#            cba   < Zikomo Rupiah Banda! Mwakwanitsa kulembetsa ngati wothandiza wa RemindMi wa  3 la Central Clinic
+#            phiri > join cba eng 403012 3 phiri banda
+#            phiri < Thank you Phiri Banda! You have successfully registered as a RemindMi Agent for zone 3 of Central Clinic.
+#        """
+#        self.runScript(script)
+#
+#        self.assertEquals(Contact.active.filter(language='nya').count(), 1)
+#        self.assertEquals(Contact.active.filter(language='').count(), 1)
+#        self.assertEquals(Contact.active.all().count(), 2)
+
     
     def testRegistration(self):
         self.assertEqual(0, Contact.objects.count())

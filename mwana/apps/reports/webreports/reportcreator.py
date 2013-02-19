@@ -16,6 +16,8 @@ from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+class Positivity():
+    pass
 class Results160Reports:
     def __init__(self, current_user=None, group=None, province=None,
                     district=None, facility=None):
@@ -62,9 +64,9 @@ class Results160Reports:
             if self.reporting_facility:
                 facs = facs.filter(slug=self.reporting_facility)
             elif self.reporting_district:
-                facs = facs.filter(slug__startswith=self.reporting_district[:4])
+                facs = facs.filter(parent__slug=self.reporting_district)
             elif self.reporting_province:
-                facs = facs.filter(slug__startswith=self.reporting_province[:2])
+                facs = facs.filter(parent__parent__slug=self.reporting_province)
             return facs
         else:
             return Location.objects.all()
@@ -851,15 +853,25 @@ class Results160Reports:
         percent_positive_provinces = []
         percent_negative_provinces = []
         percent_rejected_provinces = []
+        stacked = []
         facilities = self.get_active_facilities()
         districts = self.get_distinct_parents(facilities, type_slugs=const.DISTRICT_SLUGS)
         provinces = self.get_distinct_parents(districts, type_slugs=const.PROVINCE_SLUGS)
         if provinces:
             for province in provinces:
-                percent_positive_provinces.append((percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
-                percent_negative_provinces.append((percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
-                percent_rejected_provinces.append((percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), self.get_total_results_in_province(province)), province.name))
-            
+                p_percent = percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
+                n_percent = percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
+                r_percent = percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
+                percent_positive_provinces.append((p_percent,  province.name))
+                percent_negative_provinces.append((n_percent,  province.name))
+                percent_rejected_provinces.append((r_percent,  province.name))
+                positivity = Positivity()
+                positivity.name = province.name
+                positivity.positive = p_percent
+                positivity.negative = n_percent
+                positivity.rejected = r_percent
+                stacked.append(positivity)
+                
                     
         
         months_reporting = 0
@@ -872,9 +884,8 @@ class Results160Reports:
 
 
         return percent_positive_country, percent_negative_country, \
-            percent_rejected_country, percent_positive_provinces, \
-            percent_negative_provinces, percent_rejected_provinces, \
-            total_dbs, months_reporting, days_reporting, year_reporting
+            percent_rejected_country, total_dbs, months_reporting,\
+            days_reporting, year_reporting, stacked
 
 
 class MalawiReports(Results160Reports):

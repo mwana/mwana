@@ -50,41 +50,33 @@ You currently don't belong to any group for viewing reports. Contact the system 
                             <p>{{percent_negative_country}} % Negative,
                             <p>{{ percent_rejected_country}}% Rejected
                         </td>
-                    </tr>                    
-                    <tr>                        
-                        <td>
-                            {% for record in percent_positive_provinces %}
-                            {% for column in record %}
-                            {% ifequal forloop.counter0 0%}
-                            <b>{{ column }}%</b>
-                            {% else %}
-                            Positive <b>{{ column }}</b><br>
-                            {% endifequal %}
+                    </tr>                   
+                    
+                    <tr>
+                        <td colspan="3">
+                            {% for record in stacked %}
+                            <img title="{{ record.positive}}% Positive" src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
+                                 width="{% widthratio record.positive 7 50 %}" />
+                            
+
+                            <img title="{{ record.negative}}% Negative" src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
+                                 width="{% widthratio record.negative 7 50 %}" />
+                            
+                            <img title="{{ record.rejected}}% Rejected" src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
+                                 width="{% widthratio record.rejected 7 50 %}" />
+                            
+                            <b>{{ record.name }}</b><br>
                             {% endfor %}
-                            {% endfor %}
+                            
+                            <br><span style="float: right; width: 70%">
+                                <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
+                                     width="10" />Positive&nbsp;
+                                <img src="{{ MEDIA_URL }}reports/images/green-bar.GIF"  height="10"
+                                     width="10" />Negative&nbsp;
+                                <img src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
+                                     width="10" />Rejected&nbsp;
+                            </span>
                         </td>
-                        <td>
-                            {% for record in percent_negative_provinces %}
-                            {% for column in record %}
-                            {% ifequal forloop.counter0 0%}
-                            <b>{{ column }}%</b>
-                            {% else %}
-                            Negative <b>{{ column }}</b><br>
-                            {% endifequal %}
-                            {% endfor %}
-                            {% endfor %}
-                        </td>
-                        <td>
-                            {% for record in percent_rejected_provinces %}
-                            {% for column in record %}
-                            {% ifequal forloop.counter0 0%}
-                            <b>{{ column }}%</b>
-                            {% else %}
-                            Rejected <b>{{ column }}</b><br>
-                            {% endifequal %}
-                            {% endfor %}
-                            {% endfor %}
-                        </td>   
                     </tr>
                 </table>               
 
@@ -150,7 +142,23 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         {% if forloop.parentloop.last %}
                         <td width="20"><b>{{ column }}</b></td>
                         {% else %}
-                        <td width="20">{{ column }}</td>
+                        <td width="20">
+                            {% ifequal forloop.counter 3 %}
+
+                            <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
+                                 width="{% widthratio column 10 50 %}" />
+                            {% endifequal %}
+                            {% ifequal forloop.counter 5 %}
+                            <img src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
+                                 width="{% widthratio column 10 50 %}" />
+                            {% endifequal %}
+                            {% ifequal forloop.counter 4 %}
+
+                            <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
+                                 width="{% widthratio column 10 50 %}" />
+                            {% endifequal %} {{ column }}
+
+                        </td>
                         {% endif %}
                         {% endif %}
                         {% else %}
@@ -656,8 +664,8 @@ You currently don't belong to any group for viewing reports. Contact the system 
 
             <p><p><p>
             <div class="left">
-               
-              <div class="module">
+
+                <div class="module">
                     <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
                     <p>
                     <h3>Births from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
@@ -697,8 +705,8 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         {% endfor %}
                     </table>
 
-              {% if is_report_admin %}
-              <p>
+                    {% if is_report_admin %}
+                    <p>
                     <h3>Births from Unkonwn Users/Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
 
                     <table width="100%">
@@ -735,8 +743,8 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         </tr>
                         {% endfor %}
                     </table>
-              {%endif%}
-              </div>
+                    {%endif%}
+                </div>
             </div>
         </div>
         <div class="clear-hack"></div>
@@ -745,7 +753,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
 </div>
 
 <script type="text/javascript">
-  $("#rpt_group").chosen();
-  </script>
+    $("#rpt_group").chosen();
+</script>
 {%endif%}
 {% endblock %}
