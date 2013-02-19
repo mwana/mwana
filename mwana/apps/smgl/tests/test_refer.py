@@ -130,7 +130,7 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual(0, Referral.objects.count())
 
     def testReferBadTimes(self):
-        for bad_time in ["foo", "123", "55555"]:
+        for bad_time in ["foo", "13", "55555", "013A", "A130"]:
             resp = const.TIME_INCORRECTLY_FORMATTED % {"time": bad_time}
             script = """
                 %(num)s > refer 1234 804024 hbp %(time)s nem
@@ -139,6 +139,19 @@ class SMGLReferTest(SMGLSetUp):
             self.runScript(script)
             self.assertSessionFail()
             self.assertEqual(0, Referral.objects.count())
+
+    def testReferGoodTimes(self):
+        resp = const.REFERRAL_RESPONSE % {"name": self.name,
+                                          "unique_id": "1234"}
+        for good_time in ["0900", "900"]:
+            script = """
+                %(num)s > refer 1234 804024 hbp %(time)s nem
+                %(num)s < %(resp)s
+            """ % {"num": self.user_number, "time": good_time, "resp": resp}
+            self.runScript(script)
+            self.assertSessionSuccess()
+            self.assertEqual(1, Referral.objects.count())
+            Referral.objects.all().delete() # cleanup for the next one
 
     def testReferralOutcome(self):
         self.testRefer()
