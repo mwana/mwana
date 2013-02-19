@@ -148,9 +148,9 @@ Births registered: 0""" % month_ago.strftime("%B")]
         self.stopRouter()
         msgs = self.receiveAllMessages()
         
-        expected_msgs =["Thank you, Cba Phiri. You have helped about 3 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
+        expected_msgs =["Thank you, Cba Phiri. You helped about 3 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
         % (month_ago.strftime("%B"), month_ago.year),
-        "Thank you, Cba2 Mwanza. You have helped about 1 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
+        "Thank you, Cba2 Mwanza. You helped about 1 mothers in your community in %s %s. Keep up the good work, reminding mothers saves lives."
         % (month_ago.strftime("%B"), month_ago.year)]
 
         self.assertEqual(len(msgs), 2)
