@@ -503,7 +503,8 @@ def supported_sites(request):
     rpt_facilities = read_request(request, "rpt_facilities")
 
     r = Results160Reports(request.user,rpt_group,rpt_provinces,rpt_districts,rpt_facilities)
-    records = r.user_facilities().filter(supportedlocation__supported=True)
+    records = r.user_facilities().filter(supportedlocation__supported=True).\
+                            exclude(parent__parent=None)
     sites = []
     unplotable_sites = []
     locations = {}
@@ -584,7 +585,7 @@ def home(request):
 
     today = datetime.today().date()
     
-    records = Location.objects.filter(supportedlocation__supported=True)
+    records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
     sites = []
     
     
