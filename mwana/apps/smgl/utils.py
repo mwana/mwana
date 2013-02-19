@@ -100,11 +100,11 @@ def to_time(timestring):
     numeric string between 0000 and 2359 (although it will do a bit of work
     to clean up the string)
     """
-    timestring = strip_punctuation(timestring).strip()
-    if (len(timestring) != 4):
+    cleaned = strip_punctuation(timestring).strip()
+    if (len(cleaned) != 4):
         raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
-    hh = timestring[:2]
-    mm = timestring[2:]
+    hh = cleaned[:2]
+    mm = cleaned[2:]
     try:
         hh = int(hh)
         mm = int(mm)
