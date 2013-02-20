@@ -202,7 +202,7 @@ class App (rapidsms.apps.base.AppBase):
             for res in results:
                 if len(res.requisition_id) > 10:
                     NUIDS =+ ", ".join(str(res.clinic_care_no))
-                else
+                else:
                     NUIDS =+ ", ".join(str(res.requisition_id))
         else:
             NUIDs = ", ".join(str(res.requisition_id) for res in results)
