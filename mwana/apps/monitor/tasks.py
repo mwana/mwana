@@ -102,7 +102,7 @@ def update_supported_sites():
 
 def inactivate_sms_users_without_connections():
     logger.info("inactivate_sms_users_without_connections")
-    slugs = ['worker', 'hub', 'district', 'province', 'dbs-printer']
+    slugs = ['worker', 'hub', 'district', 'province', 'dbs-printer', 'cba']
     for cont in Contact.active.filter(connection=None, types__slug__in=slugs):
         cont.is_active=False
         cont.save()
