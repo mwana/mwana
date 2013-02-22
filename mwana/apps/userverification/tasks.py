@@ -11,7 +11,6 @@ from mwana.apps.userverification.models import UserVerification
 from mwana.const import get_clinic_worker_type
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
-from rapidsms.models import Connection
 
 logger = logging.getLogger(__name__)
 
@@ -124,12 +123,8 @@ def inactivate_lost_users(router):
     for contact in defaulting_contacts:
         contact.is_active = False
         contact.save()
-        conn = None
-        try:
-            conn= Connection.objects.get(contact=contact)
-            conn.contact = None
-            conn.save()
-        except Connection.DoesNotExist:
-            pass
+        conn = contact.default_connection
+        conn.contact = None
+        conn.save()        
 
         DeactivatedUser(contact=contact, connection=conn).save()
