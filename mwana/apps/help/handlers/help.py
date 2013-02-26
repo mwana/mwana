@@ -49,7 +49,7 @@ class HelpHandler(KeywordHandler):
             params["message"] = text
 
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
-        self.respond(HELP_RESPONSE % {'person': person_arg})
+        self.respond(RESPONSE % {'person': person_arg})
 
         for help_admin in Contact.active.filter(is_help_admin=True):
             OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
