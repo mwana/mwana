@@ -5,6 +5,8 @@ from datetime import timedelta
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_GET
+from mwana.apps.reports.utils.htmlhelper import get_contacttypes
+from mwana.apps.reports.utils.htmlhelper import get_contacttype_dropdown_html
 from mwana.apps.alerts.views import get_int
 from mwana.apps.filteredlogs.messagefilter import MessageFilter
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
@@ -70,6 +72,7 @@ def filtered_logs(request):
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
+    worker_types = read_request(request, "worker_types")
     search_key = read_request(request, "search_key")
     navigation = read_request(request, "navigate")
     page = read_request(request, "page")
@@ -78,8 +81,7 @@ def filtered_logs(request):
     page = page + get_next_navigation(navigation)
     
 
-
-    log = MessageFilter(request.user, rpt_group, rpt_provinces, rpt_districts, rpt_facilities)
+    log = MessageFilter(request.user, rpt_group, rpt_provinces, rpt_districts, rpt_facilities, get_contacttypes(worker_types, True))
 
     (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = log.get_filtered_message_logs(startdate, enddate, search_key, page)
     
@@ -105,6 +107,7 @@ def filtered_logs(request):
                               'implementer': get_groups_name(rpt_group),
                               'province': get_facility_name(rpt_provinces),
                               'district': get_facility_name(rpt_districts),
+                              'worker_types': get_contacttype_dropdown_html('worker_types',worker_types, True),
                               'rpt_group': get_groups_dropdown_html('rpt_group', rpt_group),
                               'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", log.get_rpt_provinces(request.user), rpt_provinces),
                               'rpt_districts': get_facilities_dropdown_html("rpt_districts", log.get_rpt_districts(request.user), rpt_districts),

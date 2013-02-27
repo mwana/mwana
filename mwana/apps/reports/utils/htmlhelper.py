@@ -22,10 +22,11 @@ def text_date(text):
         return date(int(c), int(b), int(a))
 
 
-def get_contacttype_dropdown_html(id, selected_worker_type=None):
-    code ='<select name="%s" size="1">\n'%id
+def get_contacttype_dropdown_html(id, selected_worker_type=None, include_printer=False):
+    code ='<select id="%s" name="%s" size="1">\n' % (id, id)
     code +='<option value="All">All</option>\n'
-    for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]):
+    contact_types = get_contacttypes(None, include_printer)
+    for type in contact_types:
         if type.slug == selected_worker_type:
             code = code + '<option selected value="%s">%s</option>\n'%(type.slug,type.name)
         else:
@@ -34,11 +35,16 @@ def get_contacttype_dropdown_html(id, selected_worker_type=None):
     code = code +'</select>'
     return code
 
-def get_contacttypes(slug):
-    if slug is None:
-        return ContactType.objects.exclude(name__in=["Patient", "DBS Printer"])
-    else:
-        return ContactType.objects.filter(slug=slug).exclude(name__in=["Patient", "DBS Printer"])
+def get_contacttypes(slug, include_printer=False):
+
+    toReturn = ContactType.objects.exclude(name="Patient")
+    if slug is not None:
+        toReturn = toReturn.filter(slug=slug)
+    
+    if not include_printer:
+        toReturn = toReturn.exclude(name="DBS Printer")
+
+    return toReturn
 
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
     if not facilities:

@@ -10,12 +10,13 @@ from rapidsms.contrib.messagelog.models import Message
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MessageFilter:
-    def __init__(self, current_user=None, group=None, province=None, district=None, facility=None):
+    def __init__(self, current_user=None, group=None, province=None, district=None, facility=None, worker_types=[]):
         self.user = current_user
         self.reporting_group = group
         self.reporting_province = province
         self.reporting_district = district
         self.reporting_facility = facility
+        self.worker_types = worker_types
 
     
     today = date.today()
@@ -109,18 +110,20 @@ class MessageFilter:
 
     def get_filtered_message_logs(self, startdate=None, enddate=None, search_key=None, page=1):
         """
-        Returns censored message logs, albeit with useful associated information
+        Returns censored message logs (with Requisition IDs, Results hidden)
         """
         self.set_reporting_period(startdate, enddate)
 
         locations = Q(contact__location__in=self.get_facilities_for_reporting()) |\
+                               Q(contact__location__location__in=self.get_facilities_for_reporting())|\
+                               Q(contact__location__location__location__in=self.get_facilities_for_reporting())|\
                                Q(contact__location__parent__in=self.get_facilities_for_reporting())
         daterange = Q(date__gte=self.dbsr_startdate) & Q(date__lte=self.dbsr_enddate)
 
-        msgs = Message.objects.filter(locations).filter(daterange).order_by('-date')
 
-        
+        msgs = Message.objects.filter(contact__types__in=self.worker_types).filter(locations).filter(daterange).order_by('-date')
 
+      
         if search_key and search_key.strip():
             stripped = search_key.strip();
             search = Q(text__icontains=stripped) |\
