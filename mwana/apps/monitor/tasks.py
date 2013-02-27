@@ -2,6 +2,8 @@
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+from mwana.const import get_dbs_printer_type
+from rapidsms.contrib.messagelog.models import Message
 import logging
 
 from django.db.models import Count
@@ -106,6 +108,49 @@ def inactivate_sms_users_without_connections():
     for cont in Contact.active.filter(connection=None, types__slug__in=slugs):
         cont.is_active=False
         cont.save()
+
+def date_of_most_recent_incoming_msg(contact):
+    msgs = Message.objects.filter(contact=contact, direction='I').order_by('-date')
+    if msgs:
+        return msgs[0].date
+    else:
+        return None
+
+def date_of_most_recent_outgoing_msg(contact):
+    msgs = Message.objects.filter(contact=contact, direction='O').order_by('-date')
+    if msgs:
+        return msgs[0].date
+    else:
+        return None
+
+
+def inactivate_unresponsive_dbs_printers():
+    logger.info("inactivate_unresponsive_dbs_printers")
+
+    active_printers = Contact.active.filter(types=get_dbs_printer_type())
+
+    for printer in active_printers:
+        last_incoming_smg_date = date_of_most_recent_incoming_msg(printer)
+        last_outgoing_smg_date = date_of_most_recent_outgoing_msg(printer)
+        if last_incoming_smg_date and last_outgoing_smg_date:
+            diff = (last_outgoing_smg_date - last_incoming_smg_date).days
+            if diff > 2:
+                now = datetime.today()
+                today = datetime(now.year, now.month, now.day)
+                days_ago = today - timedelta(days=3)
+                # check if printer was sent a message just before today
+                if Message.objects.filter(contact=printer, date__gte=days_ago, date__lt=today):
+                    # @type printer Contact
+                    printer.is_active = False
+                    printer.save()
+                    logger.warn("%s with connection %s has been inactivated for being unresponsive for possibly %s days" % (printer, printer.default_connection, diff))
+
+        elif last_outgoing_smg_date and not last_incoming_smg_date :
+            if Message.objects.filter(contact=printer).count() > 10:# 10 is arbitrary
+                printer.is_active = False
+                printer.save()
+                logger.warn("%s with connection %s has been inactivated for being unresponsive" % (printer, printer.default_connection))
+
 
 
 def delete_spurious_supported_sites():
@@ -223,6 +268,7 @@ def cleanup_data(router):
     delete_training_births()
     delete_training_sample_notifications()
     inactivate_sms_users_without_connections()
+    inactivate_unresponsive_dbs_printers()
     clear_en_language_code()
 
     update_overall_groups()
