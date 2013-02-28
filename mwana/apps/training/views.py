@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_province_worker_type, get_hub_worker_type, get_district_worker_type, get_clinic_worker_type, get_cba_type
 from mwana.apps.training.models import Trained
 from mwana.apps.training.forms import TrainedForm
 from mwana.apps.issuetracking.issuehelper import IssueHelper
@@ -85,7 +86,29 @@ def get_admin_email_address():
         return "Admin's email address"
 
 
+def get_trained_data(type):
+    trained = Trained.objects.all()
+    trained_cbas = trained.filter(type=type)
 
+    from collections import defaultdict
+    dict = defaultdict(list)
+    total = 0
+    for item in trained_cbas:
+        key = item.trained_by.name if item.trained_by else ""
+        if not key:
+            key = "Unclear"
+        elif "DHO" in key.upper() or "PHO" in key.upper() or "MOH" in key.upper():
+            key = "MoH"
+        dict[key].append(1)
+        total = total + 1
+
+    trainer_labels = []
+    trainer_values = []
+    for a in dict:
+        trainer_labels.append(a)
+        trainer_values.append(len(dict[a]))
+
+    return "[%s]"%','.join("'%s'" % i for i in trainer_labels), trainer_values, total
 
 @csrf_response_exempt
 @csrf_view_exempt
@@ -142,6 +165,14 @@ def trained(request):
     (query_set, num_pages, number, has_next, has_previous), max_per_page = issueHelper.get_trained_people("%s%s"% (direction, sort), page)
 
     offset = max_per_page * (number - 1)
+ 
+    
+    cba_trainer_labels, cba_trainer_values, cba_total = get_trained_data(get_cba_type())
+    dho_trainer_labels, dho_trainer_values, dho_total = get_trained_data(get_district_worker_type())
+    pho_trainer_labels, pho_trainer_values, pho_total = get_trained_data(get_province_worker_type())
+    hub_trainer_labels, hub_trainer_values, hub_total = get_trained_data(get_hub_worker_type())
+    clinic_trainer_labels, clinic_trainer_values, clinic_total = get_trained_data(get_clinic_worker_type())
+
     return render_to_response('training/trained.html',
                               {
                               'form': form,
@@ -153,6 +184,21 @@ def trained(request):
                               'offset': offset,
                               'has_next': has_next,
                               'has_previous': has_previous,
+                              'cba_trainer_labels': cba_trainer_labels,
+                              'cba_trainer_values': cba_trainer_values,
+                              'clinic_trainer_labels': clinic_trainer_labels,
+                              'clinic_trainer_values': clinic_trainer_values,
+                              'hub_trainer_labels': hub_trainer_labels,
+                              'hub_trainer_values': hub_trainer_values,
+                              'dho_trainer_labels': dho_trainer_labels,
+                              'dho_trainer_values': dho_trainer_values,
+                              'pho_trainer_labels': pho_trainer_labels,
+                              'pho_trainer_values': pho_trainer_values,
+                              'hub_total': hub_total,
+                              'pho_total': pho_total,
+                              'dho_total': dho_total,
+                              'cba_total': cba_total,
+                              'clinic_total': clinic_total,
                               }, context_instance=RequestContext(request)
                               )
 
