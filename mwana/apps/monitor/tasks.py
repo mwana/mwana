@@ -77,7 +77,10 @@ def update_supported_sites():
 #    update based on reported training sessions
     t_sessions=TrainingSession.objects.exclude(location__name__icontains='Train', location__slug__endswith='00').exclude(location__name__icontains='Support')
     for ts in t_sessions:
-        loc=ts.location;loc.send_live_results=True;loc.save(); a,b=SupportedLocation.objects.get_or_create(location=loc)
+        loc=ts.location
+        loc.send_live_results=True
+        loc.save()
+        a,b=SupportedLocation.objects.get_or_create(location=loc)
 
 #    update based on active registered staff, printers
     for contact in Contact.active.filter(types__slug='worker'):
@@ -161,6 +164,11 @@ def delete_spurious_supported_sites():
     SupportedLocation.objects.filter(location__type__slug='zone').delete()
     SupportedLocation.objects.filter(location__name__istartswith='Training').delete()
     SupportedLocation.objects.filter(location__name__istartswith='Support').delete()
+
+    for loc in Location.objects.filter(send_live_results=True,
+        type__slug__in=['province', 'district' ,'zone']):
+        loc.send_live_results = False
+        loc.save()
 
 
 def delete_spurious_group_facility_mappings():
