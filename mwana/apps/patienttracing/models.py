@@ -20,28 +20,28 @@ class SentConfirmationMessage(models.Model):
     
 class PatientTrace(models.Model):
     STATUS_CHOICES = (
-                  ("new", "new"),
-                  ("told", "told"),
-                  ("confirmed", "confirmed"),
-                  ("awaiting_confirm", "awaiting_confirm"), #waiting for CBA to send in confirm message (after system sent confirm reminder msg)
-                  ("refused", "patient refused"),# when mother can't be traced
-                  ("lost", "lost to followup"),# when mother can't be traced
-                  ("dead", "patient died"),# when mother can't be traced
+                  ("new", "New"),
+                  ("told", "Told"),
+                  ("confirmed", "Confirmed"),
+                  ("awaiting_confirm", "Awaiting confirm"), #waiting for CBA to send in confirm message (after system sent confirm reminder msg)
+                  ("refused", "Patient refused"),# when mother can't be traced
+                  ("lost", "Lost to followup"),# when mother can't be traced
+                  ("dead", "Patient died"),# when mother can't be traced
                   )
 
     TYPE_CHOICES = (
-                ("manual", "manual"),
+                ("manual", "Manual"),
                 ("6 day", "6 day"),
                 ("6 week", "6 week"),
                 ("6 month","6 month"),
-                ("unrecognized_patient", "unrecognized_patient")  #this is when we get a told message and are unable to link it to a previously initiated trace.
+                ("unrecognized_patient", "Unrecognized Patient")  #this is when we get a told message and are unable to link it to a previously initiated trace.
                 )
 
     INITIATOR_CHOICES = (
-                         ("admin", "admin"),
-                         ("clinic_worker", "clinic_worker"),
-                         ("automated_task", "automated_task"),
-                         ("cba", "cba"),
+                         ("admin", "Admin"),
+                         ("clinic_worker", "Clinic worker"),
+                         ("automated_task", "Automated Task"),
+                         ("cba", "CBA"),
                          )
 
     initiator = models.CharField(choices=INITIATOR_CHOICES, max_length=20)
@@ -75,6 +75,9 @@ class PatientTrace(models.Model):
         if not self.pk:
             self.start_date = datetime.datetime.now()
         super(PatientTrace, self).save(*args, ** kwargs)
+
+    def __unicode__(self):
+        return "%s patient trace for %s" % (self.initiator, self.name)
 
 def get_status_new():
     return PatientTrace.STATUS_CHOICES[0][1]
