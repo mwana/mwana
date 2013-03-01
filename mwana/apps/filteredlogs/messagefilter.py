@@ -121,7 +121,7 @@ class MessageFilter:
         daterange = Q(date__gte=self.dbsr_startdate) & Q(date__lte=self.dbsr_enddate)
 
 
-        msgs = Message.objects.filter(contact__types__in=self.worker_types).filter(locations).filter(daterange).order_by('-date')
+        msgs = Message.objects.filter(contact__types__in=self.worker_types).filter(locations).filter(daterange).distinct().order_by('-date')
 
       
         if search_key and search_key.strip():
@@ -129,7 +129,7 @@ class MessageFilter:
             search = Q(text__icontains=stripped) |\
             Q(connection__identity__icontains=stripped) |\
             Q(contact__name__icontains=stripped)
-            msgs = Message.objects.filter(locations).filter(daterange).filter(search).order_by('-date')
+            msgs = Message.objects.filter(locations).filter(daterange).filter(search).distinct().order_by('-date')
 
         table = []
 
