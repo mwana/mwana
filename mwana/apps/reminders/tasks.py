@@ -91,7 +91,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     patient_trace.name = patient_event.patient.name[:50]
     patient_trace.patient_event = patient_event
     patient_trace.status = 'new'
-    patient_trace.initator = patienttracing.get_initiator_automated()
+    patient_trace.initiator = patienttracing.get_initiator_automated()
     patient_trace.save()
 
 
