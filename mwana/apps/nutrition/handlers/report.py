@@ -173,7 +173,7 @@ class ReportGMHandler(KeywordHandler):
             if action_taken[:2].upper() in ['NR', 'OF', 'OT', 'RG', 'SF']:
                 return action_taken[:2]
             else:
-                self.respond(INVALID_ACTION_TAKEN)
+                return None
         else:
             return None
 
