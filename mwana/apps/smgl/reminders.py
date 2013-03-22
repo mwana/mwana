@@ -236,7 +236,7 @@ def send_second_postpartum_reminders(router_obj=None):
         for c in v.mother.get_laycounselors():
             if c.default_connection:
                 found_someone = True
-                c.message(const.REMINDER_SECOND__PP_DUE,
+                c.message(const.REMINDER_PP_DUE,
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
                              "loc": v.location.name,
