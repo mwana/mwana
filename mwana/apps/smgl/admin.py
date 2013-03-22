@@ -49,7 +49,7 @@ class DeathRegistrationAdmin(admin.ModelAdmin):
 
 class ReminderNotificationAdmin(admin.ModelAdmin):
     list_display = ['mother', 'mother_uid', 'type', 'recipient', 'date']
-    list_filter = ['type']
+    list_filter = ['type', 'date']
 
 
 class ToldReminderAdmin(admin.ModelAdmin):
