@@ -805,8 +805,6 @@ def sms_records(request):
     province = district = facility = keyword = None
     start_date, end_date = get_default_dates()
 
-    sms_records = Message.objects.filter(direction="I")
-
     if request.GET:
         form = SMSRecordsFilterForm(request.GET)
         if form.is_valid():
@@ -832,11 +830,11 @@ def sms_records(request):
     if facility:
         locations = get_location_tree_nodes(facility)
 
-    sms_records = sms_records.filter(connection__contact__location__in=locations)
+    sms_records = Message.objects.filter(connection__contact__location__in=locations)
 
     # filter by created_date
     sms_records = filter_by_dates(sms_records, 'date',
-                             start=start_date, end=end_date)
+                                  start=start_date, end=end_date)
 
     # filter by keyword
     if keyword:
@@ -853,6 +851,7 @@ def sms_records(request):
             records.append({
                     'date': date,
                     'id': rec.id,
+                    'phone_number': rec.connection.identity,
                     'msg_type': rec.text.split(' ')[0].upper(),
                     'facility': rec.connection.contact.location if rec.connection.contact else None,
                     'text': rec.text,
@@ -875,7 +874,6 @@ def sms_records(request):
          "form": form
         },
         context_instance=RequestContext(request))
-
 
 def sms_users(request):
     """

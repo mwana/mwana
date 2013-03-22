@@ -132,7 +132,7 @@ class SummaryReportTable(Table):
 
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
-    id = Column()
+    phone_number = Column(value= lambda cell: cell.object.connection.identity)
     msg_type = NamedColumn(col_name="Type",
                       value=lambda cell: cell.object.text.split(' ')[0].upper(),
                       sortable=False

@@ -230,7 +230,7 @@ def emergency_response(session, xform, router):
                                       "from_location": str(ref.from_facility.name)})
         try:
             help_admins = _pick_help_admin(session, xform, ref.facility)
-        except:
+        except Exception:
             logger.error('No Help Admin found (or missing connection for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_response, session, xform))
         else:
             for ha in help_admins:
@@ -249,10 +249,12 @@ def _get_people_to_notify(referral):
     # who to notifiy on an initial referral
     # this should be the people who are being referred to
     types = ContactType.objects.filter(
-                    slug__in=[const.CTYPE_DATACLERK, const.CTYPE_TRIAGENURSE]
-                ).all()
+        slug__in=[const.CTYPE_DATACLERK, const.CTYPE_TRIAGENURSE]
+    ).all()
+    loc_parent = referral.from_facility.parent if referral.from_facility else None
+    facility_lookup = loc_parent or referral.facility
     return Contact.objects.filter(types__in=types,
-                                  location=referral.facility,
+                                  location=facility_lookup,
                                   is_active=True)
 
 
@@ -299,7 +301,7 @@ def _pick_er_triage_nurse(session, xform, receiving_facility):
 
 
 def _pick_clinic_recip(session, xform, receiving_facility):
-    cw_type = ContactType.objects.get(slug__iexact='worker')
+    cw_type = ContactType.objects.get(slug__iexact=const.CTYPE_CLINICWORKER)
     cws = Contact.objects.filter(types=cw_type,
                                  location=receiving_facility,
                                  is_active=True)
@@ -328,7 +330,7 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
     receiving_facility = ref.facility
     try:
         ambulance_driver = _pick_er_driver(session, xform, receiving_facility)
-    except:
+    except Exception:
         logger.error('No Ambulance Driver found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
     else:
         ambulance_session.ambulance_driver = ambulance_driver
@@ -340,11 +342,10 @@ def _broadcast_to_ER_users(ambulance_session, session, xform, router, message=No
 
     try:
         tn = _pick_er_triage_nurse(session, xform, receiving_facility)
-    except:
+    except Exception:
         logger.error('No Triage Nurse found (or missing connection) for Ambulance Session: %s, XForm Session: %s, XForm: %s' % (ambulance_session, session, xform))
     else:
         ambulance_session.triage_nurse = tn
-
         if tn.default_connection:
             if message:
                 send_msg(tn.default_connection, message, router, **session.template_vars)
