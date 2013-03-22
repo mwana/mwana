@@ -21,7 +21,7 @@ class Command(BaseCommand):
                      ]
         weekly_reminders = ["mwana.apps.smgl.reminders.send_expected_deliveries"]
         amb_reminders = ["mwana.apps.smgl.reminders.send_no_outcome_reminder",
-                          "mwana.apps.smgl.reminders.send_no_outcome_superuser_reminder"]
+                         "mwana.apps.smgl.reminders.send_no_outcome_help_admin_reminder"]
 
         _update_schedules(daily_reminders)
         _update_schedules(weekly_reminders, days=[4])
