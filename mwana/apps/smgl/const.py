@@ -72,6 +72,7 @@ REFERRAL_OUTCOME_NOTIFICATION_NOSHOW = _("This is outcome for Mother ID %(unique
 REFERRAL_NOT_FOUND = _("No referrals for Mother ID %(unique_id)s were found. Please check the mother's ID.")
 REFERRAL_ALREADY_RESPONDED = _("The latest referral for Mother ID %(unique_id)s was already responded to. Please check the mother's ID.")
 
+AMB_OUTCOME_NO_OUTCOME = _("Kindly register OUTCOME for Mother :%(unique_id)s.  Please send an outcome!")
 
 # death registration
 DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
