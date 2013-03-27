@@ -16,7 +16,7 @@ DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
 TEMPLATE_DIRS = ("/home/mwana/production-environment/code_root/mwana/malawi/templates",)
 
-#XFORMS_HOST = 'malawi-qa.projectmwana.org'
+XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 # Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
 # only on the production or production server, so that development can continue

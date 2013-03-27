@@ -57,7 +57,7 @@ ROOT_URLCONF = 'mwana.malawi.urls'
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
-#INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
+INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 RAPIDSMS_TABS.append(('mwana_graphs', 'Results160 Analysis'))
 RAPIDSMS_TABS.append(('remindmi_reports', 'RemindMi'))
@@ -81,3 +81,4 @@ SOUTH_MIGRATION_MODULES = {
 
 # reduce noise in logs
 LOG_LEVEL = "INFO"
+#XFORMS_HOST = '127.0.0.1:8000'
