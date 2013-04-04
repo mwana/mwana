@@ -43,6 +43,6 @@ requests==0.7.5
 restkit==3.3.1
 -e git+https://github.com/dimagi/rapidsms-tropo.git@ca0c13d2c15e9c057262d86ee35f4c877c499b88#egg=rtropo-dev
 six==1.1.0
--e git+http://github.com/caktus/rapidsms-threadless-router.git@d3ecbd7c031c91b5ca0bc97f263cbc050d46675e#egg=threadless_router-dev
+-e git+http://github.com/caktus/rapidsms-threadless-router.git@269dbc8404ec7e376e7418ffb8dc3c2eae396f3b#egg=threadless_router-dev
 django-selectable==0.6.2
 
