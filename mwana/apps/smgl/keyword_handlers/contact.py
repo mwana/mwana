@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 @is_active
 def leave(session, xform, router):
     """
-    Handler for LEAVE keyword (Used to deactivate the user).
+    Handler for QUIT keyword (Used to deactivate the user).
 
     Format:
-    LEAVE NOW
+    QUIT NOW
     """
-    logger.debug('Handling the LEAVE keyword form')
+    logger.debug('Handling the QUIT keyword form')
     connection = session.connection
 
     if not connection.contact:
@@ -36,12 +36,12 @@ def leave(session, xform, router):
 @is_active
 def make_active(session, xform, router):
     """
-    Handler for IN keyword (Used to re-activate the user early).
+    Handler for BACK keyword (Used to re-activate the user early).
 
     Format:
-    IN NOW
+    BACK NOW
     """
-    logger.debug('Handling the IN keyword form')
+    logger.debug('Handling the BACK keyword form')
     connection = session.connection
 
     if not connection.contact:
@@ -60,12 +60,12 @@ def make_active(session, xform, router):
 @is_active
 def out(session, xform, router):
     """
-    Handler for OUT keyword (Used to temporarily deactivate the user).
+    Handler for LEAVE keyword (Used to temporarily deactivate the user).
 
     Format:
-    OUT ##_of_days
+    LEAVE ##_of_days
     """
-    logger.debug('Handling the OUT keyword form')
+    logger.debug('Handling the LEAVE keyword form')
     connection = session.connection
     if not connection.contact:
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
@@ -79,6 +79,6 @@ def out(session, xform, router):
     connection.contact.return_date = return_date
     connection.contact.save()
 
-    return respond_to_session(router, session, const.OUT_COMPLETE, 
+    return respond_to_session(router, session, const.OUT_COMPLETE,
                               **{'name': connection.contact.name,
                                  'date': return_date.strftime("%d %m %Y")})
