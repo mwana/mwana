@@ -1,8 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
+from django.db.models.query import QuerySet
+from mwana.const import get_province_worker_type
+from mwana.const import get_hub_worker_type
+from mwana.const import get_district_worker_type
 from mwana.const import get_cba_type
 from django.db.models import Q
 from mwana.apps.userverification.models import DeactivatedUser
-from mwana.apps.userverification.messages import CBA_VERICATION_MSG, VERICATION_MSG
+from mwana.apps.userverification.messages import (PHO_VERICATION_MSG,
+DHO_VERICATION_MSG, HUB_VERICATION_MSG, CBA_VERICATION_MSG, VERICATION_MSG)
 from datetime import datetime
 from datetime import timedelta
 import logging
@@ -21,8 +26,12 @@ def get_defaulters(days_back):
     date_back = datetime(today.year, today.month, today.day) - timedelta(days=days_back)
 
     supported_contacts = Contact.active.filter(
-                        Q(types__in=[get_clinic_worker_type(), get_cba_type()]),
+                        Q(types__in=[get_clinic_worker_type(), get_cba_type(),
+                        get_district_worker_type(), get_hub_worker_type(),
+                        get_province_worker_type()]),
                         Q(location__supportedlocation__supported=True)|
+                        Q(location__location__supportedlocation__supported=True)|
+                        Q(location__location__location__supportedlocation__supported=True)|
                         Q(location__parent__supportedlocation__supported=True)
                         ).distinct()
 
@@ -39,11 +48,10 @@ def send_verification_request(router):
 
     defaulting_contacts, date_back = get_defaulters(days_back)
     counter = 0
-    msg_limit = 19
+    msg_limit = 29
 
-    logger.info('%s clinic workers/CBAs have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
-    
-    
+    logger.info('%s SMS contacts have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
+        
     for contact in defaulting_contacts:
         if UserVerification.objects.filter(contact=contact,
                                            facility=contact.location, request='1',
@@ -52,8 +60,15 @@ def send_verification_request(router):
             continue
 
         msg = VERICATION_MSG % (contact.name, contact.location.name)
-        if get_cba_type() in contact.types.all():
+        contact_types = contact.types.all()
+        if get_cba_type() in contact_types:
             msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)
+        elif get_hub_worker_type() in contact_types:
+            msg = HUB_VERICATION_MSG % (contact.name, contact.location.name)
+        elif get_district_worker_type() in contact_types:
+            msg = DHO_VERICATION_MSG % (contact.name, contact.location.name)
+        elif get_province_worker_type() in contact_types:
+            msg = PHO_VERICATION_MSG % (contact.name, contact.location.name)
 
         OutgoingMessage(contact.default_connection, msg).send()
 
@@ -66,16 +81,13 @@ def send_verification_request(router):
 
 def send_final_verification_request(router):
     #TODO Consider refactoring this method and above one into one
-    logger.info('sending final verification request to clinic workers')
+    logger.info('sending final verification request to SMS users')
 
     days_back = 120
     
     defaulting_contacts, date_back = get_defaulters(days_back)
     counter = 0
-    msg_limit = 19
-
-    logger.info('%s clinic workers/CBAs have not sent messages in the last %s days' % (len(defaulting_contacts), days_back))
-
+    msg_limit = 29
 
     for contact in defaulting_contacts:
         if UserVerification.objects.filter(contact=contact,
@@ -85,8 +97,15 @@ def send_final_verification_request(router):
             continue
 
         msg = VERICATION_MSG % (contact.name, contact.location.name)
-        if get_cba_type() in contact.types.all():
+        contact_types = contact.types.all()
+        if get_cba_type() in contact_types:
             msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)
+        elif get_hub_worker_type() in contact_types:
+            msg = HUB_VERICATION_MSG % (contact.name, contact.location.name)
+        elif get_district_worker_type() in contact_types:
+            msg = DHO_VERICATION_MSG % (contact.name, contact.location.name)
+        elif get_province_worker_type() in contact_types:
+            msg = PHO_VERICATION_MSG % (contact.name, contact.location.name)
 
         OutgoingMessage(contact.default_connection, msg).send()
 
@@ -106,11 +125,15 @@ def inactivate_lost_users(router):
 
 
     supported_contacts = Contact.active.filter(
-                        Q(types__in=[get_clinic_worker_type(), get_cba_type()]),
+                        Q(types__in=[get_clinic_worker_type(), get_cba_type(),
+                        get_district_worker_type(), get_hub_worker_type(),
+                        get_province_worker_type()]),
                         Q(location__supportedlocation__supported=True)|
+                        Q(location__location__supportedlocation__supported=True)|
+                        Q(location__location__location__supportedlocation__supported=True)|
                         Q(location__parent__supportedlocation__supported=True)
                         ).distinct()
-
+    
     warned_contacts = supported_contacts.filter(userverification__request=2).distinct()
 
     complying_contacts = supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
@@ -119,7 +142,7 @@ def inactivate_lost_users(router):
 
     defaulting_contacts = set(warned_contacts) - set(complying_contacts)
 
-    
+
     for contact in defaulting_contacts:
         contact.is_active = False
         contact.save()

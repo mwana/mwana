@@ -79,41 +79,6 @@ class UserVerificationSetUp(TestScript):
 
 class TestUserVerications(UserVerificationSetUp):
 
-
-    def testSendingOnlyToClinicWorkers(self):
-        """
-        Only clinic workers and CBAs should receive user verification messages
-        """
-
-        self.assertEqual(UserVerification.objects.count(), 0,
-                        "User verication model is not empty")
-        time.sleep(.1)
-
-        self.startRouter()
-        tasks.send_verification_request(self.router)
-        msgs = self.receiveAllMessages()
-
-        expected_recipients = ["salanga_worker", "mibenge_worker",
-                                "kashitu_worker", "central_worker",'mibenge_cba',
-                                'kashitu_cba', 'central_cba1', 'central_cba2']
-
-        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
-Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
-Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic? Please respond with YES or No
-Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
-Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
-Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
-        """
-        for msg in msgs:
-            self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
-            self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
-
-
-        self.assertEqual(len(msgs), 8)
-        self.stopRouter()
-
     def testSendingOnlyOnceInAPeriod(self):
         """
         defaulting clinic workers should receive user verification messages only
@@ -130,7 +95,9 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
 
         expected_recipients = ["salanga_worker", "mibenge_worker",
                                 "kashitu_worker", "central_worker",'mibenge_cba',
-                                'kashitu_cba', 'central_cba1', 'central_cba2']
+                                'kashitu_cba', 'central_cba1', 'central_cba2',
+                                'luapula_pho', 'mansa_dho', 'samfya_dho',
+                                'kawambwa_dho', 'peter_hubs']
         expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
 Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
 Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
@@ -139,16 +106,21 @@ Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic?
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
 Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
+Hello Luapula Pho. Are you still working at Luapula Province PHO? Please respond with YES or No
+Hello Mansa Dho. Are you still working at Mansa District DHO? Please respond with YES or No
+Hello Samfya Dho. Are you still working at Samfya District DHO? Please respond with YES or No
+Hello Kawambwa Dho. Are you still working at Kawambwa District DHO? Please respond with YES or No
+Hello Peter Hubs. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
         """
         for msg in msgs:
             self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
             self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
 
 
-        self.assertEqual(len(msgs), 8)
+        self.assertEqual(len(msgs), 13)
         self.stopRouter()
 
-    def testSendingOnlyToDefautingClinicWorkers(self):
+    def testSendingOnlyToDefautingUsers(self):
         """
         Only defaulting clinic workers should receive user verification messages
         """
@@ -156,6 +128,11 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
         script = """
         central_worker > i use the system
         kashitu_cba > i use the system
+        luapula_pho > helo
+        mansa_dho > report
+        samfya_dho > help
+        kawambwa_dho > msg
+        peter_hubs > sent
         """
         self.runScript(script)
         self.assertEqual(UserVerification.objects.count(), 0, "User verification model is not empty")
@@ -217,7 +194,9 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
 
         expected_recipients = ["salanga_worker", "mibenge_worker",
                                 "kashitu_worker", "central_worker",'mibenge_cba',
-                                'kashitu_cba', 'central_cba1', 'central_cba2']
+                                'kashitu_cba', 'central_cba1', 'central_cba2',
+                                'luapula_pho', 'mansa_dho', 'samfya_dho',
+                                'kawambwa_dho', 'peter_hubs']
         expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
 Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
 Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
@@ -226,13 +205,18 @@ Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic?
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
 Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
+Hello Luapula Pho. Are you still working at Luapula Province PHO? Please respond with YES or No
+Hello Mansa Dho. Are you still working at Mansa District DHO? Please respond with YES or No
+Hello Samfya Dho. Are you still working at Samfya District DHO? Please respond with YES or No
+Hello Kawambwa Dho. Are you still working at Kawambwa District DHO? Please respond with YES or No
+Hello Peter Hubs. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
         """
         for msg in msgs:
             self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
             self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
 
 
-        self.assertEqual(len(msgs), 8)
+        self.assertEqual(len(msgs), 13)
         self.stopRouter()
 
         script = """
@@ -240,17 +224,23 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
         mibenge_worker > no
         kashitu_worker > i do
         central_worker > some message
+        luapula_pho > hello
+        mansa_dho > i do
+        samfya_dho > yes
+        kawambwa_dho > yes
+        peter_hubs > no
         """
 
         self.runScript(script)
-
-        self.assertTrue(0==len(self.receiveAllMessages()))
+        msgs = self.receiveAllMessages()
+        self.assertTrue(0==len(msgs), "%s" % ", ".join(msg.text for msg in msgs))
         
-        self.assertEqual(UserVerification.objects.count(), 8, "User verications not equal to 4")
-        self.assertEqual(UserVerification.objects.filter(response="yes").count(), 1, "User verications not equal to 1")
-        self.assertEqual(UserVerification.objects.filter(response="no").count(), 1, "User verications not equal to 1")
-        self.assertEqual(UserVerification.objects.filter(response="i do").count(), 1, "User verications not equal to 1")
+        self.assertEqual(UserVerification.objects.count(), 13, "User verications not equal to 8")
+        self.assertEqual(UserVerification.objects.filter(response="yes").count(), 3, "User verications not equal")
+        self.assertEqual(UserVerification.objects.filter(response="no").count(), 2, "User verications not equal")
+        self.assertEqual(UserVerification.objects.filter(response="i do").count(), 2, "User verications not equal")
         self.assertEqual(UserVerification.objects.filter(response="some message").count(), 1, "User verications not equal to 1")
+        self.assertEqual(UserVerification.objects.filter(response="hello").count(), 1, "User verications not equal to 1")
 
 
 
@@ -265,7 +255,9 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
 
         expected_recipients = ["salanga_worker", "mibenge_worker",
                                 "kashitu_worker", "central_worker",'mibenge_cba',
-                                'kashitu_cba', 'central_cba1', 'central_cba2']
+                                'kashitu_cba', 'central_cba1', 'central_cba2',
+                                'luapula_pho', 'mansa_dho', 'samfya_dho',
+                                'kawambwa_dho', 'peter_hubs']
         expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
 Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
 Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
@@ -274,13 +266,18 @@ Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic?
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
 Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
+Hello Luapula Pho. Are you still working at Luapula Province PHO? Please respond with YES or No
+Hello Mansa Dho. Are you still working at Mansa District DHO? Please respond with YES or No
+Hello Samfya Dho. Are you still working at Samfya District DHO? Please respond with YES or No
+Hello Kawambwa Dho. Are you still working at Kawambwa District DHO? Please respond with YES or No
+Hello Peter Hubs. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
         """
         for msg in msgs:
             self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
             self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
 
 
-        self.assertEqual(len(msgs), 8)
+        self.assertEqual(len(msgs), 13)
         self.stopRouter()
 
         script = """
@@ -293,7 +290,7 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
 
         self.assertTrue(0==len(self.receiveAllMessages()))
 
-        self.assertEqual(UserVerification.objects.count(), 8, "User verications not equal to 8")
+        self.assertEqual(UserVerification.objects.count(), 13, "User verications not equal")
         self.assertEqual(UserVerification.objects.filter(response="yes").count(), 1, "User verications not equal to 1")
         self.assertEqual(UserVerification.objects.filter(response="no").count(), 2, "User verications not equal to 2")
 
@@ -303,13 +300,13 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
         msgs = self.receiveAllMessages()
         self.stopRouter()
 
-        self.assertEqual(UserVerification.objects.count(), 13)
+        self.assertEqual(UserVerification.objects.count(), 23)
         for msg in msgs:
             self.assertTrue(msg.connection.identity in expected_recipients, "%s not in expected recipients" %msg.connection.identity)
             self.assertTrue(msg.text in expected_msgs.split("\n"), "%s not in expected messages" %msg.text)
 
 
-        self.assertEqual(len(msgs), 5)
+        self.assertEqual(len(msgs), 10)
 
         time.sleep(.1)
         self.startRouter()
@@ -318,4 +315,4 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
         self.assertEqual(Contact.objects.filter(is_active=False).count(), 2)
         tasks.inactivate_lost_users(self.router)
 
-        self.assertEqual(Contact.objects.filter(is_active=False).count(), 7)
+        self.assertEqual(Contact.objects.filter(is_active=False).count(), 12)
