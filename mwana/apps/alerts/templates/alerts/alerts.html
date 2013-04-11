@@ -56,11 +56,11 @@
 
                
                 <hr>
-                <h1>Clinic Issues:</h1>
+                <h1 id="ClinicIssues">Clinic Issues:</h1>
                 <div>
                     <!-- Report 1-->
                     <p align="center">
-                    <h3>Alerts for Clinics Not Retrieving Results in the last {{ retrieving_time }} days</h3>
+                    <h3 id="ClinicsNotRetrievingResults">Alerts for Clinics Not Retrieving Results in the last {{ retrieving_time }} days</h3>
                     <br>Select date range (days)
                     <select name="input_retrieving_time" size="1">
                         {% for a in days%}
@@ -93,7 +93,7 @@
                     <hr>
                         <!-- Report 2-->
                     <p align="center">
-                    <h3>Alerts for Clinics Not Sending DBS Samples in the last {{ notifying_time }} days</h3>
+                    <h3 id="ClinicsNotSendingDBS">Alerts for Clinics Not Sending DBS Samples in the last {{ notifying_time }} days</h3>
                     <br>Select date range (days)
                     <select name="input_notifying_time" size="1">
                         {% for a in days%}
@@ -137,9 +137,9 @@
                     <p><p>
                     <hr>
                     <!--Resport3-->
-                    <h1>Hub Issues:</h1>
+                    <h1 id="HubIssues">Hub Issues:</h1>
                     <p align="center">
-                    <h3>Alerts for Clinic Hubs Not Sending Samples to Labs in the last {{ transport_time }} days</h3>
+                    <h3 id="HubsNotSendingSamples">Alerts for Clinic Hubs Not Sending Samples to Labs in the last {{ transport_time }} days</h3>
                     <br>
                     Select date range (days)
                     <select name="input_transport_time" size="1">
@@ -183,10 +183,10 @@
 
                     <p><p>
                     <hr>
-                    <h1>Lab Issues:</h1>
+                    <h1 id="LabIssues">Lab Issues:</h1>
                     <!-- Alert Report 4-->
                     <p align="center">
-                    <h3>Alerts for Labs Not Processing DBS samples in the last {{ lab_processing_days }} days.</h3>
+                    <h3 id="LabsNotProcessingDBS">Alerts for Labs Not Processing DBS samples in the last {{ lab_processing_days }} days.</h3>
                     <br>Select date range (days)
                     <select name="input_lab_processing_days" size="1">
                         {% for a in days%}
@@ -221,7 +221,7 @@
                     <hr>
                         <!-- Alert Report 5-->
                     <p align="center">
-                    <h3>Alerts for Labs Not Sending Payloads in the last {{ lab_sending_days }} days.</h3>
+                    <h3 id="LabsNotSendingPayloads">Alerts for Labs Not Sending Payloads in the last {{ lab_sending_days }} days.</h3>
                     <br>Select date range (days)
                     <select name="input_lab_sending_days" size="1">
                         {% for a in days%}
@@ -253,7 +253,7 @@
                         {% endfor %}
                     <p><p>
                         <hr>
-                <h1>Tracing Issues:</h1>
+                <h1 id="TracingIssues">Tracing Issues:</h1>
                         <!-- Alert Report 6-->
                     <p align="center">
                     <h3>Alerts for clinics not using the trace command in the last {{ tracing_days }} days.</h3>
@@ -288,7 +288,7 @@
                         {% endfor %}
                         <p><p><hr>
                         <h1>Staff Issues:</h1><p>
-           <h3>Alerts for Clinic staff not using Results160</h3>
+           <h3 id="StaffNotUsingResults160">Alerts for Clinic staff not using Results160</h3>
                         <p>
                         {% for record in inactive_workers_alerts %}
 
