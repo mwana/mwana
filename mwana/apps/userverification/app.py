@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 class App (rapidsms.apps.base.AppBase):
 
-
     def start (self):
         self.schedule_send_verification_request_task()
         self.schedule_send_final_verification_request_task()
