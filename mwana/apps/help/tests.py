@@ -178,3 +178,25 @@ class TestApp(TestScript):
                 "startdate4": startdate4.strftime("%d/%m/%Y"), "enddate4": enddate4.strftime("%d/%m/%Y")}
         self.runScript(script)
 
+
+    def test_getting_pin(self):
+        """
+        Tests getting PIN codes for a user by HELP ADMINS
+        """
+
+        script = """
+            unknown > pin
+            unknown < To get the PIN for a user, send PIN <PHONE_NUMBER_PATTERN>
+            unknown > pin 097
+            unknown < Sorry, you must be registered as HELP ADMIN to retrieve PIN codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0971 > pin 0972
+            0971 < Sorry, you must be registered as HELP ADMIN to retrieve PIN codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0974 > PIN 098773
+            0974 < There are no active SMS users with phone number matching 098773
+            0974 > pin 0972
+            0974 < Worker Two: 1234.
+            0974 > pin 097
+            0974 < Worker One: 1234. Worker Two: 1234. Worker Three: 1234. Help Admin: 1234.
+        """
+        self.runScript(script)
+
