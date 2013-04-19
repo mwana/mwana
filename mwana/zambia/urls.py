@@ -19,4 +19,5 @@ urlpatterns = patterns('',
     (r'^blacklist/', include('mwana.apps.blacklist.urls')),
     (r'^webusers/', include('mwana.apps.webusers.urls')),
     (r'^graphs/', include('mwana.apps.graphs.urls')),
+    (r'^charts/', include('mwana.apps.graphs.urls')),
 )
