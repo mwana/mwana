@@ -1,0 +1,111 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Message Logs - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
+<!--<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap.min.css" />-->
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+
+
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.report').bind('click', function () {
+            $.get("/graphs/"+this.id+"?start_date="+
+                document.getElementById("startdate").value+"&end_date="+
+                document.getElementById("enddate").value+"&rpt_provinces="+
+                document.getElementById("rpt_provinces").value+"&rpt_districts="+
+                document.getElementById("rpt_districts").value+"&rpt_facilties="+
+                document.getElementById("rpt_facilities").value
+            , function(data) {
+                
+
+                $('#graph')[0].innerHTML=data;
+                eval(document.getElementById("runscript").innerHTML);
+            });
+        });
+    });
+</script>
+<script>
+    $(function(){
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' })
+        $.datepicker.formatDate
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="left">
+    <div class="module">
+        <h2>Filters</h2>
+        <table border="0" width="100%">
+            <thead>
+                <tr>
+                    <th colspan="2" width="30%">Period</th>
+                    <th colspan="3">Location</th>
+                </tr>
+            </thead>
+            <tbody>
+            <thead>
+            <th>Start</th>
+            <th>End</th>
+            <th>Province</th>
+            <th>District</th>
+            <th>Facility</th>
+            </thead>
+            <tr>
+                <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
+                <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value={{ fend_date }}  placeholder='{{ fend_date }}' /></td>
+                <td>{% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
+                    {{rpt_facilities}}
+                    {% endautoescape %}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div >
+                <a class="report" id="lab_submissions">Lab Submissions</a>
+                | <a class="report" id="births">Births</a>
+            </div>
+                </td>
+                </tr>
+                </tbody>
+        </table>
+        <div>
+            
+            <div class="module">
+                <div id="graph">
+
+                </div>
+            </div>
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#rpt_group").chosen();
+    $("#worker_types").chosen();
+</script>
+{% endblock %}

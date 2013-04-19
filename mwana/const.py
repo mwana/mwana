@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
 from django.conf import settings
 
 from mwana.apps.contactsplus.models import ContactType
@@ -30,6 +31,8 @@ PROVINCE_SLUGS = settings.RESULTS160_SLUGS.get('PROVINCE_SLUGS', ('province',))
 
 # apps
 LAB_RESULTS_APP = "mwana.apps.labresults"
+
+MWANA_ZAMBIA_START_DATE = date(2010, 6, 14)
 
 def _get_contacttype(slug, name):
     try:
