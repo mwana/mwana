@@ -2,7 +2,6 @@
 import logging
 
 from django.conf import settings
-
 from django.contrib.auth.decorators import login_required
 
 
@@ -24,13 +23,12 @@ class LoginRequired(object):
     """
     
     urls = ['/admin/', '/accounts/login/', '/accounts/logout/',
-            '/labresults/incoming/', settings.MEDIA_URL]
+        '/labresults/incoming/', settings.MEDIA_URL]
     
     def process_view(self, request, view_func, view_args, view_kwargs):
+        if request.get_full_path() in settings.EXCLUDE_FROM_LOGIN:
+            return
         for url in self.urls:
-            if request.get_full_path() in settings.EXCLUDE_FROM_LOGIN:
-                return
-            
             if request.get_full_path().startswith(url):
                 return # allow normal processing to continue
-        return login_required(view_func)(request, *view_args, **view_kwargs)
+        return login_required(view_func)(request, * view_args, ** view_kwargs)
