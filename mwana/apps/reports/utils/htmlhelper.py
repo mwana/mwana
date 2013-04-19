@@ -153,11 +153,13 @@ def get_rpt_provinces(user):
 
 def get_rpt_districts(user):
     return sorted(get_distinct_parents(
-                  Location.objects.filter(
+                  Location.objects.\
+        exclude(name__icontains='training').exclude(name__icontains='support').filter(
                   groupfacilitymapping__group__groupusermapping__user=user
                   )), key=lambda x:x.name)
 
 def get_rpt_facilities(user):
-    return sorted(Location.objects.filter(
+    return sorted(Location.objects.\
+        exclude(name__icontains='training').exclude(name__icontains='support').filter(
                   groupfacilitymapping__group__groupusermapping__user=user),
                   key=lambda x:x.name)

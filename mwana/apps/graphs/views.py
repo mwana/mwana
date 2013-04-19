@@ -17,6 +17,13 @@ from mwana.const import MWANA_ZAMBIA_START_DATE
 class Expando:
     pass
 
+def get_location_type_display(code):
+    if code == "cl":
+        return 'Faccility Birth'
+    elif code == "hm":
+        return 'Community Birth'
+    return "Location not given"
+
 def graphs(request):
     end_date = date.today()
     start_date = end_date - timedelta(days=30)
@@ -35,20 +42,21 @@ def graphs(request):
                               }, context_instance=RequestContext(request)
                               )
 
-def lab_submissions(request):
-    today = date.today()
+
+def get_report_parameters(request, today):
     startdate1 = read_date_or_default(request, 'start_date', today - timedelta(days=1))
     enddate1 = read_date_or_default(request, 'end_date', today)
-    
-    start_date = min(startdate1, enddate1, date.today())
-    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-
-    start_date = end_date - timedelta(days=30)
-
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
+    return enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1
 
+
+def lab_submissions(request):
+    today = date.today()
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30)
 
     service = GraphServive()
     report_data = []
@@ -64,7 +72,31 @@ def lab_submissions(request):
     return render_to_response('graphs/lab_submissions.html',
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
-                              "title": "'Laboratory DBS Submissions to Mwana'",
+                              "title": "'Monthly Laboratory DBS Submissions to Mwana'",
+                              "sub_title": "'%s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'DBS samples'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
+def facility_vs_community(request):
+    today = date.today()
+    enddate1, district_slug, facility_slug, province_slug, startdate1 = get_report_parameters(request, today)
+
+    start_date = min(startdate1, enddate1, date.today())
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    
+    service = GraphServive()
+    
+    report_data = []
+
+    for item in service.get_facility_vs_community(start_date, end_date, province_slug, district_slug, facility_slug):
+        report_data.append([get_location_type_display(item['event_location_type']), item['total']])
+
+    return render_to_response('graphs/facility_vs_community.html',
+                              {
+                              "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
+                              "title": "'Facility vs Community Births'",
                               "sub_title": "'%s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
