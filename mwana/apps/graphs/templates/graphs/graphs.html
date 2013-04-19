@@ -23,8 +23,10 @@
 <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
 
 <script type="text/javascript">
+    
     $(document).ready(function() {
         $('.report').bind('click', function () {
+            document.getElementById("graph").innerHTML = '<div align="center"><img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em"/></div>';
             $.get("/graphs/"+this.id+"?start_date="+
                 document.getElementById("startdate").value+"&end_date="+
                 document.getElementById("enddate").value+"&rpt_provinces="+
@@ -51,7 +53,7 @@
 {% block content %}
 <div class="left">
     <div class="module">
-        <h2>Filters</h2>
+        <h2>Charts</h2>
         <table border="0" width="100%">
             <thead>
                 <tr>
@@ -97,15 +99,20 @@
         <div>
 
             <div class="module">
+                
                 <div id="graph">
-                    <div class="info" style="padding: 1em">
-                        Click on a link above to display the corresponding graph.
+                    
+                    <div class="info" style="padding: 5em" align="center">                        
+                        <br><strong>Click on a link above to display the corresponding graph.</strong>
                     </div>
                 </div>
             </div>
         </div>
         <div class="clear-hack"></div>
     </div>
+</div>
+<div id="resources" style="display: None">
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em"/>
 </div>
 <script type="text/javascript">
     $("#rpt_group").chosen();
