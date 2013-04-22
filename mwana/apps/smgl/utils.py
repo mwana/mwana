@@ -101,6 +101,8 @@ def to_time(timestring):
     to clean up the string)
     """
     cleaned = strip_punctuation(timestring).strip()
+    if len(cleaned) == 3:
+        cleaned = '0%s' % cleaned
     if (len(cleaned) != 4):
         raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
     hh = cleaned[:2]
