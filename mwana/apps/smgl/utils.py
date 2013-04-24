@@ -164,6 +164,8 @@ def export_as_csv(records, keys, filename):
     """
     export a set of records as CSV
     """
+    if '.' not in filename:
+        filename = '%s.csv' % filename
     response = HttpResponse(mimetype='text/csv')
     disposition = 'attachment; filename="{0}"'.format(filename)
     response['Content-Disposition'] = disposition
