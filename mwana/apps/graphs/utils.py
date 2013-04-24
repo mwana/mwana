@@ -1,5 +1,5 @@
 from django.db import connection
-from datetime import datetime
+from datetime import datetime, date
 from datetime import timedelta
 
 from django.db.models import Count
@@ -83,11 +83,11 @@ class GraphServive:
                                         payload__incoming_date__lt=end,
                                         clinic__in=facs)
 
-        my_date = start_date
+        my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
         for lab in sorted(labs):
             data[lab[0]] = []
-
+        time_ranges = []
         while my_date <= end_date:
             for lab in sorted(labs):
                 data[lab[0]].append(results.filter(
@@ -96,9 +96,37 @@ class GraphServive:
                                     payload__incoming_date__day=my_date.day,
                                     payload__source=lab[0]
                                     ).count())
+            time_ranges.append(my_date.strftime('%d %b'))
             my_date = my_date + timedelta(days=1)
 
-        return data
+        return time_ranges, data
+
+    def get_monthly_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        labs = Payload.objects.values_list('source').all().distinct()
+        results = Result.objects.filter(payload__incoming_date__gte=start,
+                                        payload__incoming_date__lt=end,
+                                        clinic__in=facs)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for lab in sorted(labs):
+            data[lab[0]] = []
+
+        month_ranges = []
+        while my_date <= end_date:
+            for lab in sorted(labs):
+                data[lab[0]].append(results.filter(
+                                    payload__incoming_date__year=my_date.year,
+                                    payload__incoming_date__month=my_date.month,
+                                    payload__source=lab[0]
+                                    ).count())
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date =  date(my_date.year, my_date.month, 28) + timedelta(days=6)            
+
+        return month_ranges, data
 
     def get_facility_vs_community(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_facilities(province_slug, district_slug, facility_slug)
