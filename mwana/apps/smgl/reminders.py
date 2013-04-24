@@ -315,7 +315,7 @@ def reactivate_user(router_obj=None):
 
 def send_no_outcome_reminder(router_obj=None):
     """
-    Send reminders for Amulance Responses that have no Ambulance Outcome
+    Send reminders for Ambulance Responses that have no Ambulance Outcome
     """
     def _responses_to_remind():
         now = datetime.utcnow().date()
@@ -413,7 +413,7 @@ def send_syphillis_reminders(router_obj=None):
                 c.message(const.REMINDER_SYP_TREATMENT_DUE,
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
-                             "loc": v.location.name})
+                             "loc": v.mother.location.name})
                 _create_notification("syp", c, v.mother.uid)
         if found_someone:
             v.reminded = True
