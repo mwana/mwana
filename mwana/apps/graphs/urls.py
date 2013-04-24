@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url(r"^$", views.graphs, name="graphs"),
     url(r"^lab_submissions/$", views.lab_submissions, name="lab_submissions"),
     url(r"^facility_vs_community/$", views.facility_vs_community, name="facility_vs_community"),
+    url(r"^turnaround/$", views.turnaround, name="turnaround"),
 )

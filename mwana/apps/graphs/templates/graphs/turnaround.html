@@ -1,0 +1,63 @@
+
+<body>
+<script type="text/javascript" id="runscript">
+        $(function () {
+            var chart;
+            $(document).ready(function() {
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'container',
+                        type: 'bar'
+                    },
+                    title: {
+                        text: {% autoescape off %} {{ title }} {% endautoescape %}
+                    },
+                    subtitle: {
+                        text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
+                    },
+                    xAxis: {
+                        categories: {% autoescape off %} {{ categories }} {% endautoescape %}
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Time (days)'
+                        }
+                    },
+                    legend: {
+                        backgroundColor: '#FFFFFF',
+                        reversed: true
+                    },
+                    tooltip: {
+                        formatter: function() {
+                            return ''+
+                                this.series.name +': '+ this.y.toFixed(0) +' days';
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal'
+                        }
+                    },
+                    series: [{
+                            name: 'Retrieving time',
+                            data: {{ retrieving}}
+                        }, {
+                            name: 'Delays at Lab',
+                            data: {{ delays }}
+                        }, {
+                            name: 'Processing Time',
+                            data: {{ processing }}
+                        }, {
+                            name: 'Transport Time',
+                            data: {{ transport }}
+                        }
+                    ]
+                });
+            });
+
+        });
+    </script>
+    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
+
+</body>

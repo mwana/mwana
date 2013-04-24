@@ -73,7 +73,7 @@ def lab_submissions(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'Monthly Laboratory DBS Submissions to Mwana'",
-                              "sub_title": "'%s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
@@ -97,8 +97,35 @@ def facility_vs_community(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'Facility vs Community Births'",
-                              "sub_title": "'%s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
+
+def turnaround(request):
+    today = date.today()
+    enddate1, district_slug, facility_slug, province_slug, startdate1 = get_report_parameters(request, today)
+
+    start_date = min(startdate1, enddate1, date.today())
+    end_date = min(max(enddate1, MWANA_ZAMBIA_START_DATE), date.today())
+
+    service = GraphServive()
+
+
+    categories, transport, processing, delays, retrieving =  service.get_turnarounds(start_date, end_date, province_slug, district_slug, facility_slug)
+
+    return render_to_response('graphs/turnaround.html',
+                              {
+                              "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
+                              "title": "'DBS Turnaround'",
+                              "sub_title": "'Month: %s'" % (end_date.strftime("%b %Y")),
+                              "label_y_axis": "'DBS samples'",
+                              "transport": transport,
+                              "processing": processing,
+                              "delays": delays,
+                              "retrieving": retrieving,
+                              "categories": categories,
                               }, context_instance=RequestContext(request)
                               )

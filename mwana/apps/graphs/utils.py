@@ -1,4 +1,4 @@
-
+from django.db import connection
 from datetime import datetime
 from datetime import timedelta
 
@@ -26,6 +26,53 @@ def get_datetime_bounds(start_date, end_date):
         timedelta(days=1)
 
 class GraphServive:
+
+    def get_turnarounds(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        """
+        Uses plain SQL for performance reasons
+        """
+        
+        sql = '''select name, avg(transport_time), avg(processing_time), avg(delays_at_lab), avg(retrieving_time) from (
+            SELECT province."name", entered_on-collected_on as transport_time, processed_on - entered_on as processing_time
+            ,arrival_date::date-processed_on as delays_at_lab, 
+            result_sent_date::date - arrival_date::date as retrieving_time FROM labresults_result
+            join locations_location as faciity on faciity.id=clinic_id
+            join locations_location as district on district.id = faciity.parent_id
+            join locations_location as province on province.id = district.parent_id
+            where collected_on is not null
+            and entered_on is not null
+            and processed_on is not null
+            and arrival_date is not null
+            and extract(year from result_sent_date) = %s
+            and extract(month from result_sent_date) = %s
+            ) a
+
+            group by name
+            order by name
+            '''
+            
+        cursor = connection.cursor()
+        cursor.execute(sql, [end_date.year, end_date.month])
+        facs = get_facilities(province_slug, district_slug, facility_slug)
+        provinces = Location.objects.filter(location__location__in=facs).values_list('name').all().distinct()
+                
+        province_names  = [province[0] for province in provinces]
+        rows = cursor.fetchall()
+
+        transport = []
+        processing = []
+        delays = []
+        retrieving = []
+        categories = []
+        for row in rows:            
+            if row[0] in province_names:
+                transport.append(float(row[1]))
+                processing.append(float(row[2]))
+                delays.append(float(row[3]))
+                retrieving.append(float(row[4]))
+                categories.append(str(row[0]))
+        
+        return categories, transport, processing, delays, retrieving
 
     def get_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_facilities(province_slug, district_slug, facility_slug)

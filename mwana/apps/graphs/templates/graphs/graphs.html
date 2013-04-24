@@ -25,7 +25,11 @@
     
     $(document).ready(function() {
         $('.report').bind('click', function () {
-            document.getElementById("graph").innerHTML = '<div align="center"><img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em"/></div>';
+            document.getElementById("graph").innerHTML = '<div align="center">\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="left" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>Please wait...\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="right" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
+</div>';
             $.get("/graphs/"+this.id+"?start_date="+
                 document.getElementById("startdate").value+"&end_date="+
                 document.getElementById("enddate").value+"&rpt_provinces="+
@@ -88,8 +92,9 @@
                 <td colspan="5">
                     <div >
                         <a class="report" id="lab_submissions">Lab Submissions</a>
-                      | <a class="report" id="facility_vs_community" disabled="false" >Facility vs Community Births </a>
-                        | Turnaround | Birth Trends
+                      | <a class="report" id="facility_vs_community" disabled="false" >Facility vs Community Births</a>
+                      | <a class="report" id="turnaround" disabled="false" >DBS Turnaround</a>
+                      | Birth Trends
                     </div>
                 </td>
             </tr>
