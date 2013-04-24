@@ -192,15 +192,16 @@ def get_current_district(location):
     return location
 
 
-def get_location_tree_nodes(location, locations=None):
+def get_location_tree_nodes(location, locations=None, *qs, **extras):
     """
     Returns the children of a given province
     """
+    qs = qs or []
     if not locations:
         locations = []
-    for child in location.location_set.all():
+    for child in location.location_set.filter(*qs, **extras):
         locations.append(child)
-        get_location_tree_nodes(child, locations)
+        get_location_tree_nodes(child, locations, *qs, **extras)
     locations = sorted(locations, key=lambda loc: loc.name)
     return locations
 
