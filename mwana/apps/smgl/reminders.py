@@ -223,7 +223,7 @@ def send_second_postpartum_reminders(router_obj=None):
             next_visit__lte=reminder_threshold,
             reminded=False,
             visit_type='pos'
-            )
+        )
         # Check if second visit
 
         for v in visits_to_remind:
