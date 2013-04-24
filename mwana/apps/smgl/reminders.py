@@ -187,7 +187,7 @@ def send_first_postpartum_reminders(router_obj=None):
         # Check if first visit for mother
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 0 and \
+            if v.mother.facility_visits.filter(visit_type='pos').count() == 0 and \
                v.is_latest_for_mother():
                 yield v
 
@@ -227,7 +227,7 @@ def send_second_postpartum_reminders(router_obj=None):
         # Check if second visit
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 1 and \
+            if v.mother.facility_visits.filter(visit_type='pos').count() == 1 and \
                v.is_latest_for_mother():
                 yield v
 
@@ -267,7 +267,7 @@ def send_missed_postpartum_reminders(router_obj=None):
         # Check if missed
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos',
+            if v.mother.facility_visits.filter(visit_type='pos',
                                         visit_date=reminder_threshold)\
                         .count() == 1 and \
                v.is_latest_for_mother():
