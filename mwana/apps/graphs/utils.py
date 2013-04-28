@@ -114,6 +114,8 @@ def _turnaround_query(start_date, end_date, province_slug, district_slug, facili
         Uses raw SQL for performance reasons
     """
     ids = ", ".join("%s" % fac.id for fac in get_dbs_facilities(province_slug, district_slug, facility_slug))
+    if not ids:
+        ids = '-1'
 
     select_clause  = '''select name, avg(transport_time), avg(processing_time), avg(delays_at_lab), avg(retrieving_time) from (
             SELECT province."name", entered_on-collected_on as transport_time, processed_on - entered_on as processing_time
@@ -130,7 +132,7 @@ def _turnaround_query(start_date, end_date, province_slug, district_slug, facili
             and arrival_date is not null
             and extract(year from result_sent_date) = %s
             and extract(month from result_sent_date) = %s
-            and facility.id in (-1,''' + ids + ''')
+            and facility.id in (''' + ids + ''')
             ) a
             '''
 
@@ -184,12 +186,4 @@ def get_facilities(province_slug, district_slug, facility_slug):
     return facs
 
 def get_dbs_facilities(province_slug, district_slug, facility_slug):
-    facs = Location.objects.exclude(lab_results=None).\
-        exclude(name__icontains='training').exclude(name__icontains='support')
-    if facility_slug:
-        facs = facs.filter(slug=facility_slug)
-    elif district_slug:
-        facs = facs.filter(parent__slug=district_slug)
-    elif province_slug:
-        facs = facs.filter(parent__parent__slug=province_slug)
-    return facs
+    return get_facilities(province_slug, district_slug, facility_slug).exclude(lab_results=None)
