@@ -40,16 +40,43 @@
                 
 
                 $('#graph')[0].innerHTML=data;
+                checkIfLoggedOutAndRefresh()
                 eval(document.getElementById("runscript").innerHTML);
+                
             });
         });
     });
 </script>
-<script>
+<script type="text/javascript" >
     $(function(){
         $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' })
         $.datepicker.formatDate
     });
+</script>
+<script type="text/javascript" >
+    function checkIfLoggedOutAndRefresh(){
+        password_field = document.getElementById('id_password')
+        username_field = document.getElementsByName('username')
+        
+        if(password_field && username_field){
+            document.getElementById('graph').innerHTML = '<strong><p>Sorry, your session has expired. You have to log in again.</strong>'
+            $("<div>Sorry, your session has expired. You need to log in again.</div>").dialog({
+                draggable: false,
+                resizable: false,
+                modal: true,
+                buttons: {
+                    Ok: function() {
+                        $(this).dialog("close");
+                        location.reload(true);
+                    },
+                    Understood: function() {
+                        $(this).dialog("close");
+                        location.reload(true);
+                    }
+                }
+            });
+        }
+    }
 </script>
 {% endblock %}
 
@@ -92,10 +119,10 @@
                 <td colspan="5">
                     <div >
                         <a class="report" id="lab_submissions">Daily Lab Submissions</a>
-                      |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
-                      | <a class="report" id="facility_vs_community" disabled="false" >Facility vs Community Births</a>
-                      | <a class="report" id="turnaround" disabled="false" >DBS Turnaround</a>
-                      | Birth Trends
+                        |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
+                        | <a class="report" id="facility_vs_community" disabled="false" >Facility vs Community Births</a>
+                        | <a class="report" id="turnaround" disabled="false" >DBS Turnaround</a>
+                        | Birth Trends
                     </div>
                 </td>
             </tr>
@@ -104,10 +131,9 @@
         <div>
 
             <div class="module">
-                
-                <div id="graph">
-                    
-                    <div class="info" style="padding: 5em" align="center">                        
+
+                <div id="graph" align="center">                    
+                    <div class="info" style="padding: 5em" align="center">
                         <br><strong>Click on a link above to display the corresponding graph.</strong>
                     </div>
                 </div>
