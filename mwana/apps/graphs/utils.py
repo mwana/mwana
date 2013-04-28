@@ -20,7 +20,7 @@ class GraphServive:
         cursor = connection.cursor()
         cursor.execute(sql, [end_date.year, end_date.month])
         category_names = get_category_data(province_slug, district_slug, facility_slug)
-        
+
         rows = cursor.fetchall()
 
         transport = []
@@ -28,17 +28,14 @@ class GraphServive:
         delays = []
         retrieving = []
         categories = []
-
-        for row in rows:            
-            if row[0] in category_names or row[-2] in category_names or row[-1] in category_names:
+        for row in rows:
+            if row[0] in category_names or row[-1] in category_names:
                 transport.append(float(row[1]))
                 processing.append(float(row[2]))
                 delays.append(float(row[3]))
                 retrieving.append(float(row[4]))
             if row[0] in category_names:
                 categories.append(str(row[0]))
-            elif row[-2] in category_names:
-                categories.append(str(row[-2]))
             elif row[-1] in category_names:
                 categories.append(str(row[-1]))
         
