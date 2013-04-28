@@ -157,7 +157,7 @@ def _turnaround_query(start_date, end_date, province_slug, district_slug, facili
     return select_clause + join_clause + aggregate_clause
 
 def get_category_data(province_slug, district_slug, facility_slug):
-    facs = Location.objects.exclude(lab_results=None).\
+    facs = Location.objects.filter(supportedlocation__supported=True).exclude(lab_results=None).\
         exclude(name__icontains='training').exclude(name__icontains='support')
     if facility_slug:
         return [loc.name for loc in facs.filter(slug=facility_slug)]
