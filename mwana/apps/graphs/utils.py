@@ -173,8 +173,7 @@ def get_datetime_bounds(start_date, end_date):
         timedelta(days=1)
 
 def get_facilities(province_slug, district_slug, facility_slug):
-#    facs = Location.objects.exclude(type__slug__in=['province', 'district', 'zone']).exclude(lab_results=None)
-    facs = Location.objects.exclude(lab_results=None).\
+    facs = Location.objects.filter(supportedlocation__supported=True).\
         exclude(name__icontains='training').exclude(name__icontains='support')
     if facility_slug:
         facs = facs.filter(slug=facility_slug)
