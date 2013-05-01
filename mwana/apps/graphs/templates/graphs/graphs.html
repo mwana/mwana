@@ -30,6 +30,8 @@
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>Please wait...\n\
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="right" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
 </div>';
+            $('#wait').show()
+            $('#active-links').hide()
             $.get("/graphs/"+this.id+"?start_date="+
                 document.getElementById("startdate").value+"&end_date="+
                 document.getElementById("enddate").value+"&rpt_provinces="+
@@ -42,6 +44,8 @@
                 $('#graph')[0].innerHTML=data;
                 checkIfLoggedOutAndRefresh()
                 eval(document.getElementById("runscript").innerHTML);
+                $('#wait').hide()
+                $('#active-links').show()
                 
             });
         });
@@ -118,11 +122,16 @@
             <tr>
                 <td colspan="5">
                     <div >
-                        <a class="report" id="lab_submissions">Daily Lab Submissions</a>
-                        |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
-                        | <a class="report" id="facility_vs_community" disabled="false" >Facility vs Community Births</a>
-                        | <a class="report" id="turnaround" disabled="false" >DBS Turnaround</a>
-                        | Birth Trends
+                        <div id="wait" align="center">
+                            Wait while chart loads
+                        </div>
+                        <div id="active-links">
+                            <a class="report" id="lab_submissions">Daily Lab Submissions</a>
+                            |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
+                            | <a class="report" id="facility_vs_community" >Facility vs Community Births</a>
+                            | <a class="report" id="turnaround" >DBS Turnaround</a>
+                            | Birth Trends
+                        </div>
                     </div>
                 </td>
             </tr>
