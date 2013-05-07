@@ -2,28 +2,26 @@
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
-from mwana.const import get_dbs_printer_type
-from rapidsms.contrib.messagelog.models import Message
 import logging
 
 from django.db.models import Count
+from mwana.apps.hub_workflow.models import HubSampleNotification
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
-from rapidsms.messages import OutgoingMessage
-from rapidsms.models import Contact
-from mwana.apps.training.models import TrainingSession, Trained
+from mwana.apps.labresults.models import SampleNotification
+from mwana.apps.locations.models import Location
+from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reports.models import SupportedLocation
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.reports.webreports.models import ReportingGroup
-from datetime import date
+from mwana.apps.training.models import Trained
+from mwana.apps.training.models import TrainingSession
+from mwana.const import get_dbs_printer_type
+from rapidsms.contrib.messagelog.models import Message
+from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
-from mwana.apps.locations.models import Location
-from mwana.apps.reminders.models import PatientEvent
-from mwana.apps.labresults.models import SampleNotification
-from mwana.apps.hub_workflow.models import HubSampleNotification
 
 logger = logging.getLogger(__name__)
-
 
 
 def year():
@@ -40,7 +38,7 @@ def get_payload_data():
                                incoming_date__month=month(),
                                incoming_date__day=day()).\
         values("source").annotate(Count('id'))
-    return "\n".join(entry['source'] + ": " + str(entry['id__count']) for entry in p)
+    return "\n".join(entry['source'].split('/')[1].title().replace('Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')  + ":" + str(entry['id__count']) for entry in p)
 
 def get_results_data():
     sent_today = Result.objects.filter(notification_status='sent',
@@ -51,7 +49,34 @@ def get_results_data():
     new = Result.objects.filter(notification_status='new').count()
     notified = Result.objects.filter(notification_status='notified').count()
 
-    return "New: %s\nNotified: %s\nSent: %s" % (new, notified, sent_today,)
+    return "New:%s\nNotified:%s\nSent:%s" % (new, notified, sent_today)
+
+def get_messages_data():
+    msgs_i = Message.objects.exclude(connection__backend__name='message_tester').\
+                                   filter(date__year=year(), date__month=month(),
+                                            date__day=day(), direction='I').\
+                                  values('connection__backend__name').\
+                                  annotate(Count('id'))
+
+    msgs_o = Message.objects.exclude(connection__backend__name='message_tester').\
+                                   filter(date__year=year(), date__month=month(),
+                                            date__day=day(), direction='O').\
+                                  values('connection__backend__name').\
+                                  annotate(Count('id'))
+
+    my_map = {}
+    for entry in msgs_i:
+        my_map[entry['connection__backend__name']] = "%s" % entry['id__count']
+
+    for entry in msgs_o:
+        k = entry['connection__backend__name']
+        v = entry['id__count']
+        if k in my_map:
+            my_map[k] = my_map[k] + "/%s" % v
+        else:
+            my_map[k] = "0/%s" % v
+
+    return "\n".join("%s:%s" % (k, v) for k,v in my_map.items())
 
 def send_monitor_report(router):
     logger.info('sending monitoring information to support staff')
@@ -63,8 +88,8 @@ def send_monitor_report(router):
     if not admins:
         logger.warning('No admins to send monitoring data to were found in system')
         return
-    message = "System message.\nPayloads:\n%s;\nResults:\n%s" % (get_payload_data(), get_results_data())
-
+    message = "System Info\n_Payloads_\n%s;\n_Results_\n%s;\n_SMS_(I/O)\n%s" % (get_payload_data(), get_results_data(), get_messages_data())
+    logger.info('Sending msg: %s' % message)
     
     for admin in admins:
         OutgoingMessage(admin.default_connection, message).send()
@@ -75,41 +100,41 @@ def update_supported_sites():
 #    types
 
 #    update based on reported training sessions
-    t_sessions=TrainingSession.objects.exclude(location__name__icontains='Train', location__slug__endswith='00').exclude(location__name__icontains='Support')
+    t_sessions = TrainingSession.objects.exclude(location__name__icontains='Train', location__slug__endswith='00').exclude(location__name__icontains='Support')
     for ts in t_sessions:
-        loc=ts.location
-        loc.send_live_results=True
+        loc = ts.location
+        loc.send_live_results = True
         loc.save()
-        a,b=SupportedLocation.objects.get_or_create(location=loc)
+        a, b = SupportedLocation.objects.get_or_create(location=loc)
 
 #    update based on active registered staff, printers
     for contact in Contact.active.filter(types__slug='worker'):
-        a,b=SupportedLocation.objects.get_or_create(location=contact.location)
+        a, b = SupportedLocation.objects.get_or_create(location=contact.location)
         
 #update site with dbs printer
     for contact in Contact.active.filter(types__slug='dbs-printer'):
-        loc=contact.location
-        loc.has_independent_printer=True;loc.save()
+        loc = contact.location
+        loc.has_independent_printer = True;loc.save()
 
 #    update based on trained user's reports
-    trained=Trained.objects.exclude(location__name__icontains='Train').exclude(location__slug__endswith='00').exclude(location__name__icontains='Support')#.exclude(location__type__slug='zone');
+    trained = Trained.objects.exclude(location__name__icontains='Train').exclude(location__slug__endswith='00').exclude(location__name__icontains='Support')#.exclude(location__type__slug='zone');
 
     for ts in trained:
-        loc=ts.location;
+        loc = ts.location;
         if ts.location.type.slug == 'zone':
-            loc=ts.location.parent
-            loc.send_live_results=True
+            loc = ts.location.parent
+            loc.send_live_results = True
             loc.save()
-            a,b=SupportedLocation.objects.get_or_create(location=loc)
+            a, b = SupportedLocation.objects.get_or_create(location=loc)
 
         if ts.trained_by:
-            a,b=GroupFacilityMapping.objects.get_or_create(group=ts.trained_by, facility=loc)
+            a, b = GroupFacilityMapping.objects.get_or_create(group=ts.trained_by, facility=loc)
 
 def inactivate_sms_users_without_connections():
     logger.info("inactivate_sms_users_without_connections")
     slugs = ['worker', 'hub', 'district', 'province', 'dbs-printer', 'cba']
     for cont in Contact.active.filter(connection=None, types__slug__in=slugs):
-        cont.is_active=False
+        cont.is_active = False
         cont.save()
 
 def date_of_most_recent_incoming_msg(contact):
@@ -148,7 +173,7 @@ def inactivate_unresponsive_dbs_printers():
                     printer.save()
                     logger.warn("%s with connection %s has been inactivated for being unresponsive for possibly %s days" % (printer, printer.default_connection, diff))
 
-        elif last_outgoing_smg_date and not last_incoming_smg_date :
+        elif last_outgoing_smg_date and not last_incoming_smg_date:
             if Message.objects.filter(contact=printer).count() > 10:# 10 is arbitrary
                 printer.is_active = False
                 printer.save()
@@ -166,7 +191,7 @@ def delete_spurious_supported_sites():
     SupportedLocation.objects.filter(location__name__istartswith='Support').delete()
 
     for loc in Location.objects.filter(send_live_results=True,
-        type__slug__in=['province', 'district' ,'zone']):
+                                       type__slug__in=['province', 'district', 'zone']):
         loc.send_live_results = False
         loc.save()
 
@@ -189,7 +214,7 @@ def update_overall_groups():
     group = ReportingGroup.objects.get(name__icontains='Support')
 
     for sl in SupportedLocation.objects.all():
-        a,b=GroupFacilityMapping.objects.get_or_create(group=group, facility=sl.location)
+        a, b = GroupFacilityMapping.objects.get_or_create(group=group, facility=sl.location)
 
     facilities = Location.objects.exclude(groupfacilitymapping__group=None)
 
@@ -215,7 +240,7 @@ def delete_training_births():
 def close_open_old_training_sessions():
     logger.info("Closing obsolete training sessions")
     for ts in TrainingSession.objects.filter(is_on=True).exclude(start_date__gte=date.today()):
-        ts.is_on=False
+        ts.is_on = False
         ts.save()
 
 def delete_training_sample_notifications():
@@ -226,27 +251,27 @@ def delete_training_sample_notifications():
 def clear_en_language_code():
     logger.info("In clear_en_language_code")
     for cont in Contact.objects.filter(language='en'):
-        cont.language=''
+        cont.language = ''
         cont.save()
 
 def update_sub_groups():
     logger.info("updating sub groups - PHOs, DHOs, UNICEF, IDInsight")
     for sl in SupportedLocation.objects.all():
-        loc=sl.location;loc.send_live_results=True;
+        loc = sl.location;loc.send_live_results = True;
         loc.save();
-        dho="DHO %s" % loc.parent.name;
-        pho="PHO %s" % loc.parent.parent.name
+        dho = "DHO %s" % loc.parent.name;
+        pho = "PHO %s" % loc.parent.parent.name
         try:
-            group=ReportingGroup.objects.get(name=dho)
-            try_assign(group,[loc])
-            group=ReportingGroup.objects.get(name=pho)
-            try_assign(group,[loc])
+            group = ReportingGroup.objects.get(name=dho)
+            try_assign(group, [loc])
+            group = ReportingGroup.objects.get(name=pho)
+            try_assign(group, [loc])
 
-            if loc.parent.slug in ['106000','302000', '301000', '901000', '903000']:
+            if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
                 idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
-                try_assign(idinsight,[loc])
+                try_assign(idinsight, [loc])
                 unicef = ReportingGroup.objects.get(name__iexact='unicef')
-                try_assign(unicef,[loc]);
+                try_assign(unicef, [loc]);
         except Exception, e:
             logger.error("%s. Location: %s" % (e, loc))
 
@@ -263,7 +288,7 @@ def mark_long_pending_results_as_obsolete():
     last_month = now - timedelta(days=31)
     
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
-    arrival_date__lt=last_month):
+                                     arrival_date__lt=last_month):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
