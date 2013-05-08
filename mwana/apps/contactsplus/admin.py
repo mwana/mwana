@@ -63,7 +63,7 @@ admin.site.unregister(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "direction", "who", "date",)
     list_filter = ("direction", "date", "contact",)
-    search_fields = ("text",)
+    search_fields = ("text", "connection__identity", "contact__name")
 admin.site.register(Message, MessageAdmin)
 
 
