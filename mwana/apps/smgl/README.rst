@@ -63,7 +63,7 @@ Developer Setup
 
 Alternatively, if you are just setting up a server you can use the read-only URL
     
-    `git clone git://github.com/mwana/mwana.git`
+    git clone git://github.com/mwana/mwana.git
 
 #. Checkout the **zhcard_dev** branch::
 
