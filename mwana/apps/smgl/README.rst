@@ -61,7 +61,7 @@ Developer Setup
 
     git clone git@github.com:mwana/mwana.git
 
-Alternatively, if you are just setting up a server you can use the read-only URL
+Alternatively, if you are just setting up a server you can use the read-only URL::
     
     git clone git://github.com/mwana/mwana.git
 
