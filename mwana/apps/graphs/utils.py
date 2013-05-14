@@ -4,10 +4,13 @@ from datetime import timedelta
 
 from django.db import connection
 from django.db.models import Count
+from django.db.models import Q
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 from mwana.apps.reminders.models import PatientEvent
+from rapidsms.contrib.messagelog.models import Message
+from rapidsms.models import Backend
 
 
 class GraphServive:
@@ -92,6 +95,37 @@ class GraphServive:
                                     ).count())
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)            
+
+        return month_ranges, data
+
+    def get_monthly_messages(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        backends = Backend.objects.exclude(name='message_tester').values_list('name').all().distinct()
+        messages = Message.objects.filter(date__gte=start,
+                                          date__lt=end)
+
+        if any([province_slug, district_slug, facility_slug]):
+            messages = Message.objects.filter(date__gte=start,
+                                              date__lt=end,
+                                              contact__location__in=facs)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for backend in sorted(backends):
+            data[backend[0]] = []
+
+        month_ranges = []
+        while my_date <= end_date:
+            for backend in sorted(backends):
+                data[backend[0]].append(messages.filter(
+                                    date__year=my_date.year,
+                                    date__month=my_date.month,
+                                    connection__backend__name=backend[0]
+                                    ).count())
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
         return month_ranges, data
 
@@ -180,6 +214,17 @@ def get_facilities(province_slug, district_slug, facility_slug):
         facs = facs.filter(parent__slug=district_slug)
     elif province_slug:
         facs = facs.filter(parent__parent__slug=province_slug)
+    return facs
+
+def get_sms_facilities(province_slug, district_slug, facility_slug):
+    facs = Location.objects.all().\
+        exclude(name__icontains='training').exclude(name__icontains='support')
+    if facility_slug:
+        facs = facs.filter(Q(slug=facility_slug) | Q(parent__slug=facility_slug))
+    elif district_slug:
+        facs = facs.filter(Q(parent__slug=district_slug) | Q(slug=district_slug))
+    elif province_slug:
+        facs = facs.filter(Q(parent__parent__parent__slug=province_slug) | Q(parent__parent__slug=province_slug) | Q(parent__slug=province_slug) | Q(slug=province_slug))
     return facs
 
 def get_dbs_facilities(province_slug, district_slug, facility_slug):

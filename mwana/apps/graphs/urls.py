@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url(r"^monthly_lab_submissions/$", views.monthly_lab_submissions, name="monthly_lab_submissions"),
     url(r"^facility_vs_community/$", views.facility_vs_community, name="facility_vs_community"),
     url(r"^turnaround/$", views.turnaround, name="turnaround"),
+    url(r"^messages/$", views.messages, name="messages"),
 )

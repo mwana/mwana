@@ -22,7 +22,6 @@
 <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
 
 <script type="text/javascript">
-    
     $(document).ready(function() {
         $('.report').bind('click', function () {
             document.getElementById("graph").innerHTML = '<div align="center">\n\
@@ -46,7 +45,11 @@
                 eval(document.getElementById("runscript").innerHTML);
                 $('#wait').hide()
                 $('#active-links').show()
-                
+                jscript =       document.getElementById("runscript2")
+                //alert(jscript.innerHTML)
+                if(jscript){
+                    eval(jscript.innerHTML);
+                }
             });
         });
     });
@@ -122,7 +125,7 @@
             <tr>
                 <td colspan="5">
                     <div >
-                        <div id="wait" align="center">
+                        <div id="wait" align="center" style="display: none">
                             Wait while chart loads
                         </div>
                         <div id="active-links">
@@ -130,7 +133,7 @@
                             |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
                             | <a class="report" id="facility_vs_community" >Facility vs Community Births</a>
                             | <a class="report" id="turnaround" >DBS Turnaround</a>
-                            | Birth Trends
+                            | <a class="report" id="messages" >SMS's</a>                            
                         </div>
                     </div>
                 </td>
