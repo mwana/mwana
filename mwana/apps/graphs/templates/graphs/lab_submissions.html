@@ -1,66 +1,91 @@
 
-    <body>
-        <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js"></script>
+<body>
+    <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js"></script>
 
-        <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
-        <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
-        <script type="text/javascript" id="runscript">
-            $(function () {
-                var chart;
-                $(document).ready(function() {
-                    chart = new Highcharts.Chart({
-                        chart: {
-                            renderTo: 'container',
-                            type: 'spline'
-                        },
+    <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+    <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
+    <script type="text/javascript" id="runscript">
+        function changeType(chart, series, newType) {
+            for (var i = 0; i < series.length; i++) {
+                serie = series[0];
+                serie.chart.addSeries({
+                    type: newType,
+                    name: serie.name,
+                    yaxis: serie.yaxis,
+                    color: serie.color,
+                    data: serie.options.data
+                }, false);
+
+                serie.remove();
+            }
+        }
+        $(function () {
+            var chart;
+            $(document).ready(function() {
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'container',
+                        type: 'spline'
+                    },
+                    title: {
+                        text: {% autoescape off %} {{ title }} {% endautoescape %}
+                    },
+                    subtitle: {
+                        text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
+                    },
+                    xAxis: {
+                        categories: {% autoescape off %} {{ x_axis}} {% endautoescape %}
+                    },
+                    yAxis: {
+                        min: 0,
                         title: {
-                            text: {% autoescape off %} {{ title }} {% endautoescape %}
+                            text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
                         },
-                        subtitle: {
-                            text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
-                        },
-                        xAxis: {
-                            categories: {% autoescape off %} {{ x_axis}} {% endautoescape %}
-                        },
-                        yAxis: {
-                            min: 0,
-                            title: {
-                                text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
-                            },
-                            labels: {
-                                formatter: function() {
-                                    return this.value
-                                }
+                        labels: {
+                            formatter: function() {
+                                return this.value
                             }
-                        },
-                        tooltip: {
-                            crosshairs: true,
-                            shared: true
-                        },
-                        plotOptions: {
-                            spline: {
-                                marker: {
-                                    radius: 4,
-                                    lineColor: '#666666',
-                                    lineWidth: 1
-                                }
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true
+                    },
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                radius: 4,
+                                lineColor: '#666666',
+                                lineWidth: 1
                             }
-                        },
-                        series: [
-                            {% for item in report_data %}
-                            {
-                                name: '{{ item.key}}',
-                                marker: {
-                                    symbol: 'diamond'
-                                },
-                                data: {{ item.value }}
+                        }
+                    },
+                    series: [
+                        {% for item in report_data %}
+                        {
+                            name: '{{ item.key}}',
+                            marker: {
+                                symbol: 'diamond'
                             },
-                            {% endfor %}
-                            ]
-                    });
+                            data: {{ item.value }}
+                        },
+                        {% endfor %}
+                    ]
                 });
-
+                 $('#chartType').change(function() {
+                    changeType(chart, chart.series, this.value);
+                });
             });
-        </script>
-        <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
-    </body>
+
+        });
+    </script>
+    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
+    <div align="center">
+       Change chart type: <select id="chartType">
+            <option value="spline">Spline</option>
+            <option value="column">Column</option>
+            <option value="line">Line</option>
+            <option value="area">Area</option>
+        </select>
+    </div
+</body>
