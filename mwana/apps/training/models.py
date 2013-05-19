@@ -28,7 +28,7 @@ class Trained(models.Model):
     type = models.ForeignKey(ContactType)#,
 #    limit_choices_to={'slug__in':(type.slug for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]))})
     trained_by = models.ForeignKey(ReportingGroup, blank=True, null=True)
-    date = models.DateField(default=datetime.date.today(), blank=True, null=True)
+    date = models.DateField(default=datetime.date.today, blank=True, null=True)
     additional_text = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
