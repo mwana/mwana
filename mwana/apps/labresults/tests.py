@@ -933,7 +933,8 @@ class TestResultsAcceptor(LabresultsSetUp):
 
     def test_results_changed_notification(self):        
         """
-        Tests sending of notifications for previously sent later change in either
+        Tests sending of notifications for previously sent results but later
+        change in either
         requisition id, or actual results (from or to Positive/Negative). One
         notification goes to all clinic workers and another to all support staff.
         """
