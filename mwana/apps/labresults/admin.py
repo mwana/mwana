@@ -33,6 +33,8 @@ class PayloadAdmin(admin.ModelAdmin):
                     'validated_schema')
     list_filter = ('incoming_date',  'source', 'version',
                    'parsed_json', 'validated_schema',)
+    search_fields = ('raw',)    
+
 admin.site.register(Payload, PayloadAdmin)
 
 class SampleNotificationAdmin(admin.ModelAdmin):
