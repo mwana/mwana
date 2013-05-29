@@ -109,3 +109,11 @@ class TestApp(TestScript):
         """
         self.runScript(script)
 
+    def test_blank_message(self):
+        script = """
+        09795658992 >
+        09795658992 < Sorry, I couldn't read your message. Make sure you have correct GSM message settings on your phone
+        """
+
+        self.runScript(script)
+

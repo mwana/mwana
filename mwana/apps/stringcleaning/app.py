@@ -122,6 +122,7 @@ class App (rapidsms.apps.base.AppBase):
 
         if message.text == '':
             message.respond("Sorry, I couldn't read your message. Make sure you have correct GSM message settings on your phone")
+            return True
 
         
     def period_vs_decimal(self, str):
