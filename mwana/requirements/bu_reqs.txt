@@ -17,4 +17,4 @@ django-kombu
 django-selectable==0.6.2
 # these are busted on windows so put them last
 lxml==2.2.4
-psycopg2==2.2.1
+psycopg2==2.4.2

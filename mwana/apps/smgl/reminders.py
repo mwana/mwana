@@ -187,7 +187,7 @@ def send_first_postpartum_reminders(router_obj=None):
         # Check if first visit for mother
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 0 and \
+            if v.mother.facility_visits.filter(visit_type='pos').count() == 0 and \
                v.is_latest_for_mother():
                 yield v
 
@@ -223,11 +223,11 @@ def send_second_postpartum_reminders(router_obj=None):
             next_visit__lte=reminder_threshold,
             reminded=False,
             visit_type='pos'
-            )
+        )
         # Check if second visit
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos').count() == 1 and \
+            if v.mother.facility_visits.filter(visit_type='pos').count() == 1 and \
                v.is_latest_for_mother():
                 yield v
 
@@ -267,7 +267,7 @@ def send_missed_postpartum_reminders(router_obj=None):
         # Check if missed
 
         for v in visits_to_remind:
-            if v.mother.facilityvisit_set.filter(visit_type='pos',
+            if v.mother.facility_visits.filter(visit_type='pos',
                                         visit_date=reminder_threshold)\
                         .count() == 1 and \
                v.is_latest_for_mother():
@@ -315,7 +315,7 @@ def reactivate_user(router_obj=None):
 
 def send_no_outcome_reminder(router_obj=None):
     """
-    Send reminders for Amulance Responses that have no Ambulance Outcome
+    Send reminders for Ambulance Responses that have no Ambulance Outcome
     """
     def _responses_to_remind():
         now = datetime.utcnow().date()
@@ -413,7 +413,7 @@ def send_syphillis_reminders(router_obj=None):
                 c.message(const.REMINDER_SYP_TREATMENT_DUE,
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
-                             "loc": v.location.name})
+                             "loc": v.mother.location.name})
                 _create_notification("syp", c, v.mother.uid)
         if found_someone:
             v.reminded = True

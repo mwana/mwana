@@ -194,9 +194,9 @@ def statistics(request, id=None):
         # determine what location(s) to include in the report
         if id:
             # get district facilities
-            records_for = get_location_tree_nodes(facility_parent)
+            records_for = get_location_tree_nodes(facility_parent, None)
             if district:
-                records_for = get_location_tree_nodes(district)
+                records_for = get_location_tree_nodes(district, None, ~Q(type__slug='zone'))
                 if facility_parent != district:
                     redirect_url = reverse('district-stats',
                                             args=[district.id])

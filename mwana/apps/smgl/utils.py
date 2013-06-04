@@ -101,6 +101,8 @@ def to_time(timestring):
     to clean up the string)
     """
     cleaned = strip_punctuation(timestring).strip()
+    if len(cleaned) == 3:
+        cleaned = '0%s' % cleaned
     if (len(cleaned) != 4):
         raise ValueError(const.TIME_INCORRECTLY_FORMATTED % {"time": timestring})
     hh = cleaned[:2]
@@ -162,6 +164,8 @@ def export_as_csv(records, keys, filename):
     """
     export a set of records as CSV
     """
+    if '.' not in filename:
+        filename = '%s.csv' % filename
     response = HttpResponse(mimetype='text/csv')
     disposition = 'attachment; filename="{0}"'.format(filename)
     response['Content-Disposition'] = disposition
@@ -190,15 +194,16 @@ def get_current_district(location):
     return location
 
 
-def get_location_tree_nodes(location, locations=None):
+def get_location_tree_nodes(location, locations=None, *qs, **extras):
     """
     Returns the children of a given province
     """
+    qs = qs or []
     if not locations:
         locations = []
-    for child in location.location_set.all():
+    for child in location.location_set.filter(*qs, **extras):
         locations.append(child)
-        get_location_tree_nodes(child, locations)
+        get_location_tree_nodes(child, locations, *qs, **extras)
     locations = sorted(locations, key=lambda loc: loc.name)
     return locations
 
