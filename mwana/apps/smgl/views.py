@@ -95,6 +95,7 @@ def mothers(request):
                 })
         filename = 'summary_report'
         date_range = ''
+        edd_date_range = 'ALL'
         if start_date:
             date_range = '_from{0}'.format(start_date)
         if start_date:
@@ -843,7 +844,7 @@ def sms_records(request):
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
-        keys = ['date', 'id', 'msg_type', 'facility', 'text']
+        keys = ['date', 'id', 'phone_number', 'msg_type', 'facility', 'text']
         records = []
         for rec in sms_records:
             date = rec.date.strftime('%Y-%m-%d') \
@@ -854,7 +855,7 @@ def sms_records(request):
                     'phone_number': rec.connection.identity,
                     'msg_type': rec.text.split(' ')[0].upper(),
                     'facility': rec.connection.contact.location if rec.connection.contact else None,
-                    'text': rec.text,
+                    'text': (rec.text or '').encode('utf-8'),
                 })
         filename = 'sms_records_report'
         date_range = ''
@@ -926,10 +927,10 @@ def sms_users(request):
         for c in contacts:
             records.append({
                     'created_date': c.created_date.strftime('%Y-%m-%d') if c.created_date else None,
-                    'name': c.name,
+                    'name': c.name.encode('utf-8'),
                     'number': c.default_connection.identity if c.default_connection else None,
                     'last_active': c.latest_sms_date,
-                    'location': c.location.name if c.location else '',
+                    'location': c.location.name.encode('utf-8') if c.location else '',
                 })
         filename = 'sms_users_report'
         return export_as_csv(records, keys, filename)
