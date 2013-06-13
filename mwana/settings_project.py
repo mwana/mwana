@@ -344,4 +344,7 @@ DUPECHECKER_IGNORE = ["birth none",
                       'in',
                       'out',
                       'join',
+                      'leave',
+                      'quit',
+                      'back',
                      ]
