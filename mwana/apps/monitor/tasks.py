@@ -53,16 +53,16 @@ def get_results_data():
 
 def get_messages_data():
     msgs_i = Message.objects.exclude(connection__backend__name='message_tester').\
-                                   filter(date__year=year(), date__month=month(),
-                                            date__day=day(), direction='I').\
-                                  values('connection__backend__name').\
-                                  annotate(Count('id'))
+        filter(date__year=year(), date__month=month(),
+               date__day=day(), direction='I').\
+    values('connection__backend__name').\
+        annotate(Count('id'))
 
     msgs_o = Message.objects.exclude(connection__backend__name='message_tester').\
-                                   filter(date__year=year(), date__month=month(),
-                                            date__day=day(), direction='O').\
-                                  values('connection__backend__name').\
-                                  annotate(Count('id'))
+        filter(date__year=year(), date__month=month(),
+               date__day=day(), direction='O').\
+    values('connection__backend__name').\
+        annotate(Count('id'))
 
     my_map = {}
     for entry in msgs_i:
@@ -76,7 +76,7 @@ def get_messages_data():
         else:
             my_map[k] = "0/%s" % v
 
-    return "\n".join("%s:%s" % (k, v) for k,v in my_map.items())
+    return "\n".join("%s:%s" % (k, v) for k, v in my_map.items())
 
 def send_monitor_report(router):
     logger.info('sending monitoring information to support staff')
@@ -109,12 +109,16 @@ def update_supported_sites():
 
 #    update based on active registered staff, printers
     for contact in Contact.active.filter(types__slug='worker'):
+        loc = contact.location
+        loc.send_live_results = True
         a, b = SupportedLocation.objects.get_or_create(location=contact.location)
         
 #update site with dbs printer
     for contact in Contact.active.filter(types__slug='dbs-printer'):
         loc = contact.location
+        loc.send_live_results = True
         loc.has_independent_printer = True;loc.save()
+        a, b = SupportedLocation.objects.get_or_create(location=contact.location)
 
 #    update based on trained user's reports
     trained = Trained.objects.exclude(location__name__icontains='Train').exclude(location__slug__endswith='00').exclude(location__name__icontains='Support')#.exclude(location__type__slug='zone');
@@ -150,7 +154,6 @@ def date_of_most_recent_outgoing_msg(contact):
         return msgs[0].date
     else:
         return None
-
 
 def inactivate_unresponsive_dbs_printers():
     logger.info("inactivate_unresponsive_dbs_printers")
@@ -247,6 +250,12 @@ def delete_training_sample_notifications():
     logger.info("deleting training sample notifications")
     SampleNotification.objects.filter(count__gte=80).delete()
     HubSampleNotification.objects.filter(count__gte=120).delete()
+    for ts in TrainingSession.objects.all():
+        d = ts.start_date
+        a = datetime(d.year, d.month, d.day)
+        b = a + timedelta(days=1)
+        SampleNotification.objects.filter(location=ts.location, date__gt=a, date__lt=b).delete()
+        HubSampleNotification.objects.filter(location=ts.location, date__gt=a, date__lt=b).delete()
 
 def clear_en_language_code():
     logger.info("In clear_en_language_code")
@@ -273,11 +282,13 @@ def update_sub_groups():
                 unicef = ReportingGroup.objects.get(name__iexact='unicef')
                 try_assign(unicef, [loc]);
         except Exception, e:
-            logger.error("%s. Location: %s" % (e, loc))
+            a, b = ReportingGroup.objects.get_or_create(name=dho)
+            a, b = ReportingGroup.objects.get_or_create(name=pho)
+            logger.error("%s. Location: %s. Dho: %. Pho: %s" % (e, loc. dho, pho))
 
 def mark_long_pending_results_as_obsolete():
     """
-    When results stay unretrieved for over a month from the time they were ready,
+    When results stay unretrieved for too long from the time they were ready,
     mark them as obsolete
     """
 
@@ -286,6 +297,7 @@ def mark_long_pending_results_as_obsolete():
     
     #approximate
     last_month = now - timedelta(days=31)
+    two_months_ago = date.today() - timedelta(days=60)
     
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
                                      arrival_date__lt=last_month):
@@ -293,23 +305,72 @@ def mark_long_pending_results_as_obsolete():
         res.notification_status = 'obsolete'
         res.save()
 
+    for res in Result.objects.filter(notification_status__in=['new', 'notified'],
+                                     processed_on__lt=two_months_ago):
+        # @type res Result
+        res.notification_status = 'obsolete'
+        res.save()
+        res.processed_on
+
 def cleanup_data(router):
-    logger.info('cleaning up data, updating supported sites')
-    
-    update_supported_sites()
-    close_open_old_training_sessions()
-    delete_training_births()
-    delete_training_sample_notifications()
-    inactivate_sms_users_without_connections()
-    inactivate_unresponsive_dbs_printers()
-    clear_en_language_code()
+    logger.info('cleaning up data, updating supported sites')    
 
-    update_overall_groups()
+    try:
+        update_supported_sites()
+    except Exception, e:
+        logger.error('update_supported_sites(). %s', e)
 
-    delete_spurious_group_facility_mappings()
-    delete_spurious_supported_sites()
-    update_sub_groups()
+    try:
+        close_open_old_training_sessions()
+    except Exception, e:
+        logger.error('close_open_old_training_sessions(). %s', e)
 
-    mark_long_pending_results_as_obsolete()
+    try:
+        delete_training_births()
+    except Exception, e:
+        logger.error('delete_training_births(). %s', e)
 
+    try:
+        delete_training_sample_notifications()
+    except Exception, e:
+        logger.error('delete_training_sample_notifications(). %s', e)
 
+    try:
+        inactivate_sms_users_without_connections()
+    except Exception, e:
+        logger.error('inactivate_sms_users_without_connections(). %s', e)
+
+    try:
+        inactivate_unresponsive_dbs_printers()
+    except Exception, e:
+        logger.error('inactivate_unresponsive_dbs_printers(). %s', e)
+
+    try:
+        clear_en_language_code()
+    except Exception, e:
+        logger.error('clear_en_language_code(). %s', e)
+
+    try:
+        update_overall_groups()
+    except Exception, e:
+        logger.error('update_overall_groups(). %s', e)
+
+    try:
+        delete_spurious_group_facility_mappings()
+    except Exception, e:
+        logger.error('delete_spurious_group_facility_mappings(). %s', e)
+
+    try:
+        delete_spurious_supported_sites()
+    except Exception, e:
+        logger.error('delete_spurious_supported_sites(). %s', e)
+
+    try:
+        update_sub_groups()
+    except Exception, e:
+        logger.error('update_sub_groups(). %s', e)
+
+    try:
+        mark_long_pending_results_as_obsolete()
+    except Exception, e:
+        logger.error('mark_long_pending_results_as_obsolete()). %s', e)
