@@ -292,8 +292,8 @@ results delivered via SMS to date<br>{{site.births}} births registered to date\n
     if(usd){
         for(var i in usd){
             elem_id = usd[i]
-            $("#" + elem_id).attr("data-maphilight",'{"fillColor":"00ff00","shadow":true,"shadowBackground":"ffffff","alwaysOn":true}')
-            //    $("#" + elem_id).maphilight({fade: false, fillColor: '00ff00', strokeWidth:0, strokeColor: '000000' });
+            $("#" + elem_id).attr("data-maphilight", '{"fillColor":"00ff00","shadow":true,"shadowBackground":"ffffff","alwaysOn":true}')
+            $("#" + elem_id).attr("title", usd[i] + ': Mwana not yet deployed here')
             var data = $("#" + elem_id).data('maphilight') || {};
             data.alwaysOn = true;
             $("#"+ elem_id).data('maphilight', data).trigger('alwaysOn.maphilight');
