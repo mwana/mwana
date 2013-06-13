@@ -221,9 +221,7 @@ def statistics(request, id=None):
     for place in records_for:
         locations = Location.objects.all()
         if not id:
-
-            reg_filter = {'location__in': [x for x in locations \
-                                if get_current_district(x) == place]}
+            reg_filter = {'district': place}
             visit_filter = {'location__in': [x for x in locations \
                                 if get_current_district(x) == place]}
         else:
@@ -246,6 +244,7 @@ def statistics(request, id=None):
 
         r['location_id'] = place.id
         births = BirthRegistration.objects.filter(**reg_filter)
+
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
                                  start=start_date, end=end_date)
