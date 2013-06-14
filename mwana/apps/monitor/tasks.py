@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+#TODO write unit tests for this module
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -255,7 +256,7 @@ def delete_training_sample_notifications():
         a = datetime(d.year, d.month, d.day)
         b = a + timedelta(days=1)
         SampleNotification.objects.filter(location=ts.location, date__gt=a, date__lt=b).delete()
-        HubSampleNotification.objects.filter(location=ts.location, date__gt=a, date__lt=b).delete()
+        HubSampleNotification.objects.filter(clinic=ts.location, date__gt=a, date__lt=b).delete()
 
 def clear_en_language_code():
     logger.info("In clear_en_language_code")
