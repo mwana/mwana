@@ -1,6 +1,20 @@
 
 <body>
-<script type="text/javascript" id="runscript">
+    <script type="text/javascript" id="runscript">
+        function changeType(chart, series, newType) {
+            for (var i = 0; i < series.length; i++) {
+                serie = series[0];
+                serie.chart.addSeries({
+                    type: newType,
+                    name: serie.name,
+                    yaxis: serie.yaxis,
+                    color: serie.color,
+                    data: serie.options.data
+                }, false);
+
+                serie.remove();
+            }
+        }
         $(function () {
             var chart;
             $(document).ready(function() {
@@ -54,10 +68,18 @@
                         }
                     ]
                 });
+                $('#chartType').change(function() {
+                    changeType(chart, chart.series, this.value);
+                });
             });
 
         });
     </script>
     <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
-
+    <div align="center">
+        Change chart type: <select id="chartType">
+            <option value="bar">Bar</option>
+            <option value="area">Area</option>
+        </select>
+    </div
 </body>
