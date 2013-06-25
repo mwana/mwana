@@ -98,6 +98,37 @@ class GraphServive:
 
         return month_ranges, data
 
+    def get_monthly_birth_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        trend_items = ['Facility births', 'Community births', 'Unspecified']
+        births = PatientEvent.objects.filter(Q(date__gte=start),
+                                        Q(date__lt=end),
+                                        (Q(patient__location__parent__in=facs)|
+                                        Q(patient__location__in=facs))
+                                        )
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(trend_items):
+            data[item] = []
+
+        births_map = {'Facility births':'cl', 'Community births':'hm', 'Unspecified':None}
+        
+        month_ranges = []
+        while my_date <= end_date:
+            for item in sorted(trend_items):
+                data[item].append(births.filter(
+                                    date__year=my_date.year,
+                                    date__month=my_date.month,
+                                    event_location_type=births_map[item]
+                                    ).count())
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
     def get_monthly_messages(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_sms_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
@@ -142,7 +173,7 @@ class GraphServive:
 
 def _turnaround_query(start_date, end_date, province_slug, district_slug, facility_slug):
     """
-        Uses raw SQL for performance reasons
+        Uses raw SQL for performance reasons. Works on PostgreSql database
     """
     ids = ", ".join("%s" % fac.id for fac in get_dbs_facilities(province_slug, district_slug, facility_slug))
     if not ids:

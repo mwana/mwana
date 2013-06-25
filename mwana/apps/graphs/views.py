@@ -19,7 +19,7 @@ class Expando:
 
 def get_location_type_display(code):
     if code == "cl":
-        return 'Faccility Birth'
+        return 'Facility Birth'
     elif code == "hm":
         return 'Community Birth'
     return "Location not given"
@@ -105,6 +105,36 @@ def monthly_lab_submissions(request):
                               "title": "'Monthly Laboratory DBS Submissions to Mwana'",
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
+def monthly_birth_trends(request):
+    today = date.today()
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30 * 12)
+
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_birth_trends(start_date, end_date,
+                                                            rpt_provinces
+                                            , rpt_districts,
+                                            rpt_facilities)
+
+    for k, v in sorted(data.items()):
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+   
+    return render_to_response('graphs/lab_submissions.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly Birth Trends'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Births'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
