@@ -22,42 +22,98 @@
 <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        $('.report').bind('click', function () {
-            document.getElementById("graph").innerHTML = '<div align="center">\n\
+    function getReport(id){
+        document.getElementById("graph").innerHTML = '<div align="center">\n\
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="left" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>Please wait...\n\
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="right" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
 </div>';
-            $('#wait').show()
-            $('#active-links').hide()
-            $.get("/graphs/"+this.id+"?start_date="+
-                document.getElementById("startdate").value+"&end_date="+
-                document.getElementById("enddate").value+"&rpt_provinces="+
-                document.getElementById("rpt_provinces").value+"&rpt_districts="+
-                document.getElementById("rpt_districts").value+"&rpt_facilities="+
-                document.getElementById("rpt_facilities").value
-            , function(data) {
-                
+        $('#wait').show();
+        $('#active-links').hide();
+        $.get("/graphs/"+id+"?start_date="+
+            document.getElementById("startdate").value+"&end_date="+
+            document.getElementById("enddate").value+"&rpt_provinces="+
+            document.getElementById("rpt_provinces").value+"&rpt_districts="+
+            document.getElementById("rpt_districts").value+"&rpt_facilities="+
+            document.getElementById("rpt_facilities").value
+        , function(data) {
+            $('#graph')[0].innerHTML=data;
+            checkIfLoggedOutAndRefresh()
+            eval(document.getElementById("runscript").innerHTML);
+            $('#wait').hide()
+            $('#active-links').show()
+            jscript = document.getElementById("runscript2")
 
-                $('#graph')[0].innerHTML=data;
-                checkIfLoggedOutAndRefresh()
-                eval(document.getElementById("runscript").innerHTML);
-                $('#wait').hide()
-                $('#active-links').show()
-                jscript =       document.getElementById("runscript2")
-                //alert(jscript.innerHTML)
-                if(jscript){
-                    eval(jscript.innerHTML);
+            if(jscript){
+                eval(jscript.innerHTML);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('.report').bind('click', function () {
+            
+            element_id = this.id;
+            var showStartDate = false;
+            var showEndDate = false;
+
+            try{
+                showStartDate = $("#" + element_id)[0].getAttribute('startdate') !== null;
+            }catch(error){
+
+            }
+            try{
+                showEndDate = $("#" + element_id)[0].getAttribute('enddate') !== null;
+            }catch(error){
+
+            }
+            var html = "<div><p>This report uses default date parameters</div>"
+            var myStartDate = document.getElementById("startdate").value;
+            var myEndDate = document.getElementById("enddate").value;
+            var startDateField = 'Start Date: <input type="text" name="startDate" class="datefield" size="10" value="'+ myStartDate + '" />'
+            var endDateField = 'End Date: <input type="text" name="endDate" class="datefield" size="10" value="'+ myEndDate + '" />'
+            if(showStartDate && showEndDate){
+                html = '<div align="center"><p>' + startDateField + endDateField + '</div>'
+            }
+            else if(showStartDate){
+                html = '<div align="center"><p>' + startDateField + '</div>'
+            }
+            else if(showEndDate){
+                html = html = '<div align="center"><p>' + endDateField + '</div>'
+            }
+            $(html
+        ).dialog({
+                draggable: false,
+                resizable: true,
+                width: 400,
+                modal: true,
+                hide: 'slide',
+                title: 'Select date parameters ',
+                buttons: {
+                    Ok: function() {
+                        if(showStartDate){
+                            document.getElementById("startdate").value = document.getElementsByName("startDate")[0].value
+                        }
+                        if(showEndDate){
+                            document.getElementById("enddate").value = document.getElementsByName("endDate")[0].value
+                        }
+                        this.outerHTML = ""
+                        $(this).dialog("close");
+                        getReport(element_id)
+                    }
                 }
             });
+            $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+            // remome focus from input field
+            $("input").blur()
+            $.datepicker.formatDate;
         });
     });
 </script>
 <script type="text/javascript" >
     $(function(){
-        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' })
-        $.datepicker.formatDate
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+        $.datepicker.formatDate;
     });
 </script>
 <script type="text/javascript" >
@@ -107,8 +163,8 @@
             <th>Facility</th>
             </thead>
             <tr>
-                <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
-                <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value={{ fend_date }}  placeholder='{{ fend_date }}' /></td>
+                <td><input type="text" id="startdate" name="startdate" disabled="" class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
+                <td><input type="text" id="enddate" name="enddate" disabled="" class="datefield" size="9" value={{ fend_date }}  placeholder='{{ fend_date }}' /></td>
                 <td>{% autoescape off %}
                     {{rpt_provinces}}
                     {% endautoescape %}
@@ -129,11 +185,11 @@
                             Wait while chart loads
                         </div>
                         <div id="active-links">
-                            <a class="report" id="lab_submissions">Daily Lab Submissions</a>
-                            |  <a class="report" id="monthly_lab_submissions">Monthly Lab Submissions</a>
-                            | <a class="report" id="facility_vs_community" >Facility vs Community Births</a>
-                            | <a class="report" id="turnaround" >DBS Turnaround</a>
-                            | <a class="report" id="messages" >SMS's</a>                            
+                            <a class="report" id="lab_submissions" enddate="" >Daily Lab Submissions</a>
+                            |  <a class="report" id="monthly_lab_submissions" enddate="" >Monthly Lab Submissions</a>
+                            | <a class="report" id="facility_vs_community" startdate="" enddate="" >Facility vs Community Births</a>
+                            | <a class="report" id="turnaround" enddate="" >DBS Turnaround</a>
+                            | <a class="report" id="messages" enddate="" >SMS's</a>
                         </div>
                     </div>
                 </td>
@@ -141,9 +197,7 @@
             </tbody>
         </table>
         <div>
-
             <div class="module">
-
                 <div id="graph" align="center">                    
                     <div class="info" style="padding: 5em" align="center">
                         <br><strong>Click on a link above to display the corresponding graph.</strong>
@@ -157,8 +211,4 @@
 <div id="resources" style="display: None">
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em"/>
 </div>
-<script type="text/javascript">
-    $("#rpt_group").chosen();
-    $("#worker_types").chosen();
-</script>
 {% endblock %}
