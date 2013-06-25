@@ -93,9 +93,15 @@
                     Ok: function() {
                         if(showStartDate){
                             document.getElementById("startdate").value = document.getElementsByName("startDate")[0].value
+                            if(!showEndDate){
+                                document.getElementById("enddate").value = document.getElementsByName("startDate")[0].value
+                            }
                         }
                         if(showEndDate){
                             document.getElementById("enddate").value = document.getElementsByName("endDate")[0].value
+                            if(!showStartDate){
+                                document.getElementById("startdate").value = document.getElementsByName("endDate")[0].value
+                            }
                         }
                         this.outerHTML = ""
                         $(this).dialog("close");
@@ -190,6 +196,7 @@
                             | <a class="report" id="facility_vs_community" startdate="" enddate="" >Facility vs Community Births</a>
                             | <a class="report" id="turnaround" enddate="" >DBS Turnaround</a>
                             | <a class="report" id="messages" enddate="" >SMS's</a>
+                            | <a class="report" id="monthly_birth_trends" enddate="" >Birth Trends</a>
                         </div>
                     </div>
                 </td>
