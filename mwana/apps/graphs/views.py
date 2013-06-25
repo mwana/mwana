@@ -46,14 +46,19 @@ def graphs(request):
 def get_report_parameters(request, today):
     startdate1 = read_date_or_default(request, 'start_date', today - timedelta(days=1))
     enddate1 = read_date_or_default(request, 'end_date', today)
+    monthrange = read_request(request, 'monthrange')
+    if monthrange:
+        monthrange = int(monthrange)
+    else:
+        monthrange = 12
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
-    return enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1
+    return enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange
 
 def lab_submissions(request):
     today = date.today()
-    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
     start_date = end_date - timedelta(days=30)
 
@@ -82,9 +87,9 @@ def lab_submissions(request):
 
 def monthly_lab_submissions(request):
     today = date.today()
-    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * 12)
+    start_date = end_date - timedelta(days=30 * monthrange)
 
     service = GraphServive()
     report_data = []
@@ -98,7 +103,7 @@ def monthly_lab_submissions(request):
         rpt_object.key = k.title()
         rpt_object.value = v
         report_data.append(rpt_object)
-
+    
     return render_to_response('graphs/lab_submissions.html',
                               {
                               "x_axis": time_ranges,
@@ -111,9 +116,9 @@ def monthly_lab_submissions(request):
 
 def monthly_birth_trends(request):
     today = date.today()
-    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * 12)
+    start_date = end_date - timedelta(days=30 * monthrange)
 
     service = GraphServive()
     report_data = []
@@ -134,16 +139,46 @@ def monthly_birth_trends(request):
                               "x_axis": time_ranges,
                               "title": "'Monthly Birth Trends'",
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'Births'",
+                              "label_y_axis": "'# of Births'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
+def monthly_turnaround_trends(request):
+    today = date.today()
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30 * monthrange)
+
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_turnaround_trends(start_date, end_date,
+                                                            rpt_provinces
+                                            , rpt_districts,
+                                            rpt_facilities)
+
+    for k, v in sorted(data.items()):
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/messages.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly DBS Turnaround Trends'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Days'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
 
 def messages(request):
     today = date.today()
-    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1 = get_report_parameters(request, today)
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * 12)
+    start_date = end_date - timedelta(days=30 * monthrange)
 
     service = GraphServive()
     report_data = []
@@ -170,7 +205,7 @@ def messages(request):
 
 def facility_vs_community(request):
     today = date.today()
-    enddate1, district_slug, facility_slug, province_slug, startdate1 = get_report_parameters(request, today)
+    enddate1, district_slug, facility_slug, province_slug, startdate1, _ = get_report_parameters(request, today)
 
     start_date = min(startdate1, enddate1, date.today())
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
@@ -195,7 +230,7 @@ def facility_vs_community(request):
 
 def turnaround(request):
     today = date.today()
-    enddate1, district_slug, facility_slug, province_slug, startdate1 = get_report_parameters(request, today)
+    enddate1, district_slug, facility_slug, province_slug, startdate1, monthrange = get_report_parameters(request, today)
 
     start_date = min(startdate1, enddate1, date.today())
     end_date = min(max(enddate1, MWANA_ZAMBIA_START_DATE), date.today())

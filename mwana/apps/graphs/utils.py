@@ -104,10 +104,10 @@ class GraphServive:
 
         trend_items = ['Facility births', 'Community births', 'Unspecified']
         births = PatientEvent.objects.filter(Q(date__gte=start),
-                                        Q(date__lt=end),
-                                        (Q(patient__location__parent__in=facs)|
-                                        Q(patient__location__in=facs))
-                                        )
+                                             Q(date__lt=end),
+                                             (Q(patient__location__parent__in=facs) |
+                                             Q(patient__location__in=facs))
+                                             )
 
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
@@ -120,10 +120,85 @@ class GraphServive:
         while my_date <= end_date:
             for item in sorted(trend_items):
                 data[item].append(births.filter(
-                                    date__year=my_date.year,
-                                    date__month=my_date.month,
-                                    event_location_type=births_map[item]
-                                    ).count())
+                                  date__year=my_date.year,
+                                  date__month=my_date.month,
+                                  event_location_type=births_map[item]
+                                  ).count())
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
+    def get_monthly_turnaround_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        trend_items = ['Turnaround Time', '1. Transport Time', '2. Processing Time',
+        '3. Delays at Lab', '4. Retrieval Time']
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(trend_items):
+            data[item] = []
+
+        results = Result.objects.filter(clinic__in=facs)
+
+        month_ranges = []
+        while my_date <= end_date:
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    ).exclude(collected_on=None)
+            tt_diff = 0.0
+            tt = max(1, len(tt_res))
+            for result in tt_res:
+                tt_diff = 1 + tt_diff + (result.result_sent_date.date() - result.collected_on).days
+            
+            data['Turnaround Time'].append(int(tt_diff / tt))
+
+            #Transport Time
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    ).exclude(collected_on=None).exclude(entered_on=None)
+            tt_diff = 0.0
+            tt = max(1, len(tt_res))
+            for result in tt_res:
+                tt_diff = tt_diff + (result.entered_on - result.collected_on).days
+
+            data['1. Transport Time'].append(int(tt_diff / tt))
+
+            #Processing Time
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    ).exclude(entered_on=None).exclude(processed_on=None)
+            tt_diff = 0.0
+            tt = max(1, len(tt_res))
+            for result in tt_res:
+                tt_diff = 1 + tt_diff + (result.processed_on - result.entered_on).days
+
+            data['2. Processing Time'].append(int(tt_diff / tt))
+
+            #Delays at Lab
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    ).exclude(processed_on=None).exclude(arrival_date=None)
+            tt_diff = 0.0
+            tt = max(1, len(tt_res))
+            for result in tt_res:
+                tt_diff = tt_diff + (result.arrival_date.date() - result.processed_on).days
+
+            data['3. Delays at Lab'].append(int(tt_diff / tt))
+
+            #Retrieval Time
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    ).exclude(arrival_date=None)
+            tt_diff = 0.0
+            tt = max(1, len(tt_res))
+            for result in tt_res:
+                tt_diff = 1 + tt_diff + (result.result_sent_date - result.arrival_date).days
+
+            data['4. Retrieval Time'].append(int(tt_diff / tt))
+
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
@@ -151,10 +226,10 @@ class GraphServive:
         while my_date <= end_date:
             for backend in sorted(backends):
                 data[backend[0]].append(messages.filter(
-                                    date__year=my_date.year,
-                                    date__month=my_date.month,
-                                    connection__backend__name=backend[0]
-                                    ).count())
+                                        date__year=my_date.year,
+                                        date__month=my_date.month,
+                                        connection__backend__name=backend[0]
+                                        ).count())
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 

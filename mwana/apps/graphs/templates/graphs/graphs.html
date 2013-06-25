@@ -35,7 +35,8 @@
             document.getElementById("enddate").value+"&rpt_provinces="+
             document.getElementById("rpt_provinces").value+"&rpt_districts="+
             document.getElementById("rpt_districts").value+"&rpt_facilities="+
-            document.getElementById("rpt_facilities").value
+            document.getElementById("rpt_facilities").value+"&monthrange="+
+            document.getElementById("monthrange").value
         , function(data) {
             $('#graph')[0].innerHTML=data;
             checkIfLoggedOutAndRefresh()
@@ -56,31 +57,44 @@
             element_id = this.id;
             var showStartDate = false;
             var showEndDate = false;
+            var showMonthRange = false;
 
             try{
                 showStartDate = $("#" + element_id)[0].getAttribute('startdate') !== null;
             }catch(error){
-
             }
             try{
                 showEndDate = $("#" + element_id)[0].getAttribute('enddate') !== null;
             }catch(error){
-
             }
+            try{
+                showMonthRange = $("#" + element_id)[0].getAttribute('monthrange') !== null;
+            }catch(error){
+            }
+
             var html = "<div><p>This report uses default date parameters</div>"
             var myStartDate = document.getElementById("startdate").value;
             var myEndDate = document.getElementById("enddate").value;
             var startDateField = 'Start Date: <input type="text" name="startDate" class="datefield" size="10" value="'+ myStartDate + '" />'
             var endDateField = 'End Date: <input type="text" name="endDate" class="datefield" size="10" value="'+ myEndDate + '" />'
             if(showStartDate && showEndDate){
-                html = '<div align="center"><p>' + startDateField + endDateField + '</div>'
+                html = '<div align="center"><p>' + startDateField + endDateField
             }
             else if(showStartDate){
-                html = '<div align="center"><p>' + startDateField + '</div>'
+                html = '<div align="center"><p>' + startDateField 
             }
             else if(showEndDate){
-                html = html = '<div align="center"><p>' + endDateField + '</div>'
+                html = '<div align="center"><p>' + endDateField 
             }
+            
+            if(showMonthRange){
+                html = html + 'Range: <select id="monthRange" name="monthRange">\
+                                <option value="12">12 months</option>\
+                                <option value="6">6 months</option>\
+                                <option value="3">3 months</option>\
+                               </select>'
+            }
+            html = html + '</div>'
             $(html
         ).dialog({
                 draggable: false,
@@ -102,6 +116,10 @@
                             if(!showStartDate){
                                 document.getElementById("startdate").value = document.getElementsByName("endDate")[0].value
                             }
+                        }
+                        if(showMonthRange){
+                            dropDown = document.getElementById("monthRange");
+                            document.getElementById("monthrange").value = dropDown.options[dropDown.selectedIndex].value;
                         }
                         this.outerHTML = ""
                         $(this).dialog("close");
@@ -188,15 +206,17 @@
                 <td colspan="5">
                     <div >
                         <div id="wait" align="center" style="display: none">
+                            <input type="hidden" id="monthrange" value="" />
                             Wait while chart loads
                         </div>
                         <div id="active-links">
                             <a class="report" id="lab_submissions" enddate="" >Daily Lab Submissions</a>
-                            |  <a class="report" id="monthly_lab_submissions" enddate="" >Monthly Lab Submissions</a>
+                            |  <a class="report" id="monthly_lab_submissions" enddate="" monthrange="" >Monthly Lab Submissions</a>
                             | <a class="report" id="facility_vs_community" startdate="" enddate="" >Facility vs Community Births</a>
                             | <a class="report" id="turnaround" enddate="" >DBS Turnaround</a>
-                            | <a class="report" id="messages" enddate="" >SMS's</a>
-                            | <a class="report" id="monthly_birth_trends" enddate="" >Birth Trends</a>
+                            | <a class="report" id="messages" enddate="" monthrange="" >SMS's</a>
+                            | <a class="report" id="monthly_birth_trends" enddate="" monthrange="" >Birth Trends</a>
+                            | <a class="report" id="monthly_turnaround_trends" enddate="" monthrange="" >Turnaround Trends</a>
                         </div>
                     </div>
                 </td>

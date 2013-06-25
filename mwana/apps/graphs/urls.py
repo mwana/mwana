@@ -10,4 +10,6 @@ urlpatterns = patterns('',
     url(r"^facility_vs_community/$", views.facility_vs_community, name="facility_vs_community"),
     url(r"^turnaround/$", views.turnaround, name="turnaround"),
     url(r"^messages/$", views.messages, name="messages"),
+    url(r"^monthly_birth_trends/$", views.monthly_birth_trends, name="monthly_birth_trends"),
+    url(r"^monthly_turnaround_trends/$", views.monthly_turnaround_trends, name="monthly_turnaround_trends"),
 )
