@@ -3,6 +3,7 @@ from datetime import date
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
+from datetime import timedelta
 from mwana.apps.reports.webreports.models import ReportingGroup
 
 def get_groups_name(id):
@@ -163,3 +164,10 @@ def get_rpt_facilities(user):
         exclude(name__icontains='training').exclude(name__icontains='support').filter(
                   groupfacilitymapping__group__groupusermapping__user=user),
                   key=lambda x:x.name)
+
+def get_month_start(dte):
+    return date(dte.year, dte.month, 1)
+
+def get_month_end(dte):
+    next_month_start = get_month_start(date(dte.year, dte.month, 27) + timedelta(days=5))
+    return next_month_start - timedelta(days=1)

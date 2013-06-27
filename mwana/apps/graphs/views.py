@@ -4,6 +4,8 @@ from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from mwana.apps.reports.utils.htmlhelper import get_month_end
+from mwana.apps.reports.utils.htmlhelper import get_month_start
 from mwana.apps.graphs.utils import GraphServive
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_rpt_districts
@@ -17,12 +19,22 @@ from mwana.const import MWANA_ZAMBIA_START_DATE
 class Expando:
     pass
 
+
+def get_month_range_bounds(enddate1, monthrange, startdate1):
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30 * monthrange)
+    start_date = get_month_start(start_date)
+    end_date = get_month_end(end_date)
+    return end_date, start_date
+
+
 def get_location_type_display(code):
     if code == "cl":
         return 'Facility Birth'
     elif code == "hm":
         return 'Community Birth'
     return "Location not given"
+
 
 def graphs(request):
     end_date = date.today()
@@ -88,8 +100,7 @@ def lab_submissions(request):
 def monthly_lab_submissions(request):
     today = date.today()
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
-    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * monthrange)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
     service = GraphServive()
     report_data = []
@@ -147,8 +158,7 @@ def monthly_birth_trends(request):
 def monthly_turnaround_trends(request):
     today = date.today()
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
-    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * monthrange)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
     service = GraphServive()
     report_data = []
@@ -177,8 +187,7 @@ def monthly_turnaround_trends(request):
 def monthly_results_retrival_trends(request):
     today = date.today()
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
-    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * monthrange)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
     service = GraphServive()
     report_data = []
@@ -207,8 +216,7 @@ def monthly_results_retrival_trends(request):
 def messages(request):
     today = date.today()
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
-    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
-    start_date = end_date - timedelta(days=30 * monthrange)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
     service = GraphServive()
     report_data = []
