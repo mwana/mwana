@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r"^messages/$", views.messages, name="messages"),
     url(r"^monthly_birth_trends/$", views.monthly_birth_trends, name="monthly_birth_trends"),
     url(r"^monthly_turnaround_trends/$", views.monthly_turnaround_trends, name="monthly_turnaround_trends"),
+    url(r"^monthly_results_retrival_trends/$", views.monthly_results_retrival_trends, name="monthly_results_retrival_trends"),
 )

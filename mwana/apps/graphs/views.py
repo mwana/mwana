@@ -174,6 +174,36 @@ def monthly_turnaround_trends(request):
                               }, context_instance=RequestContext(request)
                               )
 
+def monthly_results_retrival_trends(request):
+    today = date.today()
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30 * monthrange)
+
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_results_retrival_trends(start_date, end_date,
+                                                            rpt_provinces
+                                            , rpt_districts,
+                                            rpt_facilities)
+
+    for k, v in sorted(data.items()):
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/lab_submissions.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly Results Retrieval Trends'",
+                              "sub_title": "'Facilities retrieving results in Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Count'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
 def messages(request):
     today = date.today()
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request, today)

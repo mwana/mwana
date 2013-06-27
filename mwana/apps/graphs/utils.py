@@ -204,6 +204,36 @@ class GraphServive:
 
         return month_ranges, data
 
+    def get_monthly_results_retrival_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        trend_items = ['Facilities', 'Results']
+        for item in sorted(trend_items):
+            data[item] = []
+
+        results = Result.objects.filter(clinic__in=facs,
+                                        result_sent_date__gte=start,
+                                        result_sent_date__lte=end)
+
+        month_ranges = []
+        while my_date <= end_date:
+            tt_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month
+                                    )
+
+            data['Results'].append(len(tt_res))
+            tt_clinics = len(set([res.clinic for res in tt_res]))
+
+            data['Facilities'].append(tt_clinics)
+
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
     def get_monthly_messages(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_sms_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
