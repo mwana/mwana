@@ -25,13 +25,13 @@ class Command(LabelCommand):
     def handle(self, * args, ** options):
 
         codes = args or ['707018', '205020', '208001', '208002', '703014',
-        '702096', '702020', '707002']
+        '702001', '702020', '707002']
         delm = '|'
         field_labels = ['Facility Name', 'Code', 'Registered Workers',
-            'Users Removed By System', 'Date Of First Sms',
-            'Date Of First Dbs Results', 'Names Of Users Not Retrieving',
+            'Users Removed By System', 'Date Of First SMS',
+            'Date Of First DBS Results', 'Names Of Users Not Retrieving',
             'Dates Users Were Trained', 'Ever Had Printer', 'Printers In Use',
-            'Are Dbs Registers Used', 'Dbs Samples', 'DBS Results']
+            'Are DBS Registers Used', 'DBS Samples', 'DBS Results']
 
         print delm.join(field_labels)
 
@@ -76,10 +76,10 @@ class Command(LabelCommand):
             trained_dates = [ts.date.strftime('%Y-%m-%d')
             for ts in Trained.objects.filter(location=facility)]
             demo_dates = [msg.date.strftime('%Y-%m-%d')
-            for msg in Message.objects.filter(contact__location=facility,
-            text__icontains='Demo', direction='I').filter(text__icontains=code)]
+            for msg in Message.objects.filter(text__icontains='Demo',
+                direction='I').filter(text__icontains=code)]
             dates_users_were_trained = "; ".join(set(ts_dates + trained_dates + demo_dates))
-            ever_had_printer = "Yes" if Contact.objects.filter(location=facility, types__slug='printer').exists() else "No"
+            ever_had_printer = "Yes" if Contact.objects.filter(location=facility, types__slug__icontains='printer').exists() else "No"
             printers_in_use = ""
             if ever_had_printer == "Yes": printers_in_use = str(Contact.active.filter(location=facility, types__slug='printer').count())
 
