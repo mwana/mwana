@@ -12,7 +12,8 @@ from rapidsms.contrib.messagelog.models import Message
 
 
 class Command(LabelCommand):
-    help = ("assign facilities ro reporing group\nUsage: tracing_analysis KEYWORD DISTRICT_NAMES"
+    help = ("Outputs interval between trace commands for a patient"
+    "\nUsage: tracing_analysis KEYWORD DISTRICT_NAMES"
             '\nE.g. tracing_analysis TOLD Monze Mazabuka')
 
     def handle(self, * args, ** options):
