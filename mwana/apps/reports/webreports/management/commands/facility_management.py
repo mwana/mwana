@@ -31,7 +31,7 @@ class Command(LabelCommand):
             'Users Removed By System', 'Date Of First Sms',
             'Date Of First Dbs Results', 'Names Of Users Not Retrieving',
             'Dates Users Were Trained', 'Ever Had Printer', 'Printers In Use',
-            'Are Dbs Registers Used', 'Dbs Samples', 'Dbs Rsults']
+            'Are Dbs Registers Used', 'Dbs Samples', 'DBS Results']
 
         print delm.join(field_labels)
 
@@ -46,8 +46,8 @@ class Command(LabelCommand):
                                                          location=facility,
                                                          types__slug='worker')
                                                          )
-            users_removed_by_system = "; ".join("%s:%s" % (du.name,
-                                                du.connection.identity)
+            users_removed_by_system = "; ".join("%s:%s" % (du.contact.name,
+                                                du.contact.default_connection.identity if du.contact.default_connection else "" )
                                                 for du in DeactivatedUser.\
                                                 objects.filter(
                                                 contact__location=facility,
@@ -85,13 +85,13 @@ class Command(LabelCommand):
 
             are_dbs_registers_used = ""
             dbs_samples = str(Result.objects.all().count())
-            dbs_rsults = str(Result.objects.filter(notification_status='sent').count())
+            dbs_results = str(Result.objects.filter(notification_status='sent').count())
             
             fields = [facility_name, code, registered_workers, users_removed_by_system
             , date_of_first_sms, date_of_first_dbs_results,
             names_of_users_not_retrieving, dates_users_were_trained,
             ever_had_printer, printers_in_use, are_dbs_registers_used,
-            dbs_samples, dbs_rsults]
+            dbs_samples, dbs_results]
            
             print delm.join(fields)
         
