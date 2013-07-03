@@ -84,7 +84,7 @@ class Command(LabelCommand):
             if ever_had_printer == "Yes": printers_in_use = str(Contact.active.filter(location=facility, types__slug='printer').count())
 
             are_dbs_registers_used = ""
-            dbs_samples = str(Result.objects.all(clinic=facility).count())
+            dbs_samples = str(Result.objects.filter(clinic=facility).count())
             dbs_results = str(Result.objects.filter(clinic=facility, notification_status='sent').count())
             
             fields = [facility_name, code, registered_workers, users_removed_by_system
