@@ -12,13 +12,10 @@ from rapidsms.contrib.messagelog.models import Message
 
 
 class Command(LabelCommand):
-    help = ("Outputs interval between trace commands for a patient"
-    "\nUsage: tracing_analysis KEYWORD DISTRICT_NAMES"
+    help = ("\nUsage: tracing_analysis KEYWORD DISTRICT_NAMES"
             '\nE.g. tracing_analysis TOLD Monze Mazabuka')
 
     def handle(self, * args, ** options):
-        pass
-
 
         if len(args) < 2:
             raise CommandError('Please specify Keyword followed by District Name(s).\n'
