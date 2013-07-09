@@ -326,200 +326,15 @@ function showNationalData(){
     highlightMarkers([])
 }
 function loadNationalData(){
-
-    var toDisplay = []
-    var districts = []
-    var workers = 0
-    var cbas = 0
-    var results_retrieved = 0
-    var results_retrieved_this_month = 0
-    var births = 0
-    var births_this_month = 0
-    var results_positive = 0
-    var results_negative = 0
-    var results_rejected = 0
-    var facilities = 0
-    var lat = 0
-    var lon = 0
-    var points = 0
-    for (var i = 0; i < window.mapData.length; i ++) {
-        var datum = window.mapData[i];
-
-        if(datum.lat){
-            lat = lat + datum.lat
-            lon = lon + datum.lon
-            points = points + 1
-        }
-        if(districts.indexOf(datum.province) == -1){
-            districts.push(datum.province)
-        }
-
-        workers = workers + datum.workers
-        cbas = cbas + datum.cbas
-        results_retrieved = results_retrieved + datum.results_retrieved
-        results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
-        births = births + datum.births
-        facilities = facilities + 1
-        births_this_month = births_this_month + datum.births_this_month
-        results_positive = results_positive + datum.results_positive
-        results_negative = results_negative + datum.results_negative
-        results_rejected = results_rejected + datum.results_rejected
-
-
-    }
-    var total_results = results_positive + results_negative + results_rejected
-    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
-    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
-    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
-    district_fragment = ""
-    clinic_fragment = ""
-    contact_fragment = ""
-    toDisplay.push("<h2>Zambia</h2>")
-    if(districts.length > 1){
-        district_fragment = " Zambia Mwana has been deployed to " +(districts.length) + " provinces namely, "
-            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-        clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
-        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
-
-
-    }else if(districts.length == 1){
-        district_fragment = " Zambia Mwana has been deployed to 1 province namely, " + districts[0]
-
-        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
-    }else if(districts.length == 0){
-        district_fragment = " Zambia Mwana hasn't been deployed yet"
-    }
-    imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
-        perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
-        perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
-    toDisplay.push("<p>In " + district_fragment )
-    toDisplay.push(clinic_fragment)
-    toDisplay.push(contact_fragment)
-    if(districts.length > 0){
-        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in Zambia. Click on the map on the left to view data for a particular region.")
-        toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
-        toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
-        toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
-        toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
-        toDisplay.push("</tbody></table>")
-        toDisplay.push(imageSource)}
-
-
-    nationalData=toDisplay.join('')
-
+    updateDisplay("Zambia", "Country")
 }
 function mapOnClick(str){
-    var toDisplay = []
-    var districts = []
-    var workers = 0
-    var cbas = 0
-    var results_retrieved = 0
-    var results_retrieved_this_month = 0
-    var births = 0
-    var births_this_month = 0
-    var results_positive = 0
-    var results_negative = 0
-    var results_rejected = 0
-    var facilities = 0
-    var lat = 0
-    var lon = 0
-    var points = 0
-    var markerIds = []
-    for (var i = 0; i < window.mapData.length; i ++) {
-        var datum = window.mapData[i];
-        if(datum.district == str){
-            if(datum.lat){
-                lat = lat + datum.lat
-                lon = lon + datum.lon
-                points = points + 1
-                markerIds.push(datum.id)
-            }
-            if(districts.indexOf(datum.district) == -1){
-                districts.push(datum.name)
-            }
-
-            workers = workers + datum.workers
-            cbas = cbas + datum.cbas
-            results_retrieved = results_retrieved + datum.results_retrieved
-            results_retrieved_this_month = results_retrieved_this_month + datum.results_retrieved_this_month
-            births = births + datum.births
-            facilities = facilities + 1
-            births_this_month = births_this_month + datum.births_this_month
-            results_positive = results_positive + datum.results_positive
-            results_negative = results_negative + datum.results_negative
-            results_rejected = results_rejected + datum.results_rejected
-        }
-
-    }
-    var total_results = results_positive + results_negative + results_rejected
-    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
-    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
-    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
-    district_fragment = ""
-    clinic_fragment = ""
-    contact_fragment = ""
-    toDisplay.push("<h3>" + str + " District" +"</h3>")
-    if(districts.length > 1){
-        district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
-            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-        contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " clinic staff and " + cbas + " Comminuty Based Agents are registered."
-
-
-    }else if(districts.length == 1){
-        district_fragment = " District Mwana has been deployed to 1 facility namely, " + districts[0]
-
-        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
-    }else if(districts.length == 0){
-        district_fragment = " District Mwana hasn't been deployed yet"
-    }
-    imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
-        perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
-        perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
-
-    toDisplay.push("<p>In " + str + district_fragment )
-    toDisplay.push(clinic_fragment)
-    toDisplay.push(contact_fragment)
-    if(districts.length > 0){
-        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str)
-        toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
-        toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
-        toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
-        toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
-        toDisplay.push("</tbody></table>")
-        toDisplay.push(imageSource)}
-
-
-    document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
-    try{
-        $("#mousemovemessage").flippy({
-            duration: "500",
-            verso: toDisplay.join(''),
-            direction: 'BOTTOM'
-        });
-    }
-    catch(error){
-
-    }
-    
-    myMarkers = [];
-    if(points > 1){
-
-        moveToLocation(lat/points, lon/points, 7)
-
-        for(var i = 0; i < window.oms.a.length; i ++) {
-            if(markerIds.indexOf(window.oms.a[i].metadata.id) > -1){
-                myMarkers.push(window.oms.a[i])
-            }
-            else{
-
-            }
-        }
-    }
-    highlightMarkers(myMarkers)
+    updateDisplay(str, "District")
 }
 function mapOnClickProvince(str){
+    updateDisplay(str, "Province");
+}
+function updateDisplay(str, location_type){
     var toDisplay = []
     var districts = []
     var workers = 0
@@ -538,17 +353,26 @@ function mapOnClickProvince(str){
     var markerIds = []
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
-        if(datum.province == str){
+        var location_
+        if((location_type === "Province" && datum.province === str) ||
+            (location_type === "District" && datum.district === str) ||
+            (location_type === "Country")
+    ){
             if(datum.lat){
                 lat = lat + datum.lat
                 lon = lon + datum.lon
                 points = points + 1
                 markerIds.push(datum.id)
             }
-            if(districts.indexOf(datum.district) == -1){
+            if(location_type === "Province" && districts.indexOf(datum.district) === -1){
                 districts.push(datum.district)
+            }else if(location_type === "District" && districts.indexOf(datum.district) === -1){
+                districts.push(datum.name)
             }
-
+            else if(location_type === "Country" && districts.indexOf(datum.province) === -1){
+                districts.push(datum.province)
+            }        
+        
             workers = workers + datum.workers
             cbas = cbas + datum.cbas
             results_retrieved = results_retrieved + datum.results_retrieved
@@ -560,7 +384,6 @@ function mapOnClickProvince(str){
             results_negative = results_negative + datum.results_negative
             results_rejected = results_rejected + datum.results_rejected
         }
-
     }
     var total_results = results_positive + results_negative + results_rejected
     perc_pos = (100.0 * results_positive / total_results).toFixed(1)
@@ -569,63 +392,106 @@ function mapOnClickProvince(str){
     district_fragment = ""
     clinic_fragment = ""
     contact_fragment = ""
-    toDisplay.push("<h3>" + str + " Province" +"</h3>")
+    if(location_type === "Country"){
+        toDisplay.push("<h2>Zambia</h2>")
+    }else{
+        toDisplay.push("<h3>" + str + " " + location_type +"</h3>")
+    }
+    
     if(districts.length > 1){
-        district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
-            + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-
-        clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
-        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        if(location_type === "Province"){
+            district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
+                + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
+            clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        }else if(location_type === "District"){
+            district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
+                + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
+            contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " clinic staff and " + cbas + " Comminuty Based Agents are registered."
+        }else if(location_type === "Country"){
+            district_fragment = " Mwana has been deployed to " +(districts.length) + " provinces namely, "
+                + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
+            clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        }
+        
     }else if(districts.length == 1){
-        district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
-        clinic_fragment = "<br>In this district Mwana has been deployed to a total of " + facilities + " health facilities "
-        contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        if(location_type === "Province"){
+            district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
+            clinic_fragment = "<br>In this district Mwana has been deployed to a total of " + facilities + " health facilities "
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        }else if(location_type === "District"){
+            district_fragment = " District Mwana has been deployed to 1 facility namely, " + districts[0]
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        }else if(location_type === "Country"){
+            district_fragment = " Mwana has been deployed to 1 province namely, " + districts[0]
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+        }
+        
     }else if(districts.length == 0){
-        district_fragment = " Province Mwana hasn't been deployed yet"
+        if(location_type === "Province"){
+            district_fragment = " Province Mwana hasn't been deployed yet."
+        }else if(location_type === "District"){
+            district_fragment = " District Mwana hasn't been deployed yet."
+        }else if(location_type === "Country"){
+            district_fragment = " Mwana hasn't been deployed yet"
+        }
     }
     imageSource = "<img src='https://chart.googleapis.com/chart?chs=400x110&chd=t:"+
         perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
-        perc_pos+" Positive|"+perc_neg+" Negative|"+
-        perc_rej+" Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
+        perc_pos+"% Positive|"+perc_neg+"% Negative|"+
+        perc_rej+"% Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
+    
     toDisplay.push("<p>In " + str + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
-        toDisplay.push("<p>Below is summary data for Results160 and RemindMi in "+str+" Province")
+        if(location_type === "Country"){
+            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + str + ". Click on the map on the left to view data for a particular region.")
+        }else{
+            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + str + " " + location_type)
+        }
         toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
         toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
         toDisplay.push("<tr><td>DBS Results deivered by SMS</td><td class='value'>" + results_retrieved + "</td><td class='value'>" + results_retrieved_this_month + "</td></tr>")
         toDisplay.push("<tr><td>Births registered</td><td class='value'>" + births + "</td><td class='value'>" + births_this_month + "</td></tr>")
         toDisplay.push("</tbody></table>")
         toDisplay.push(imageSource)}
-
-    document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
-    try{
-        $("#mousemovemessage").flippy({
-            duration: "500",
-            verso: toDisplay.join('')
-        });
-    }
-    catch(error){
-
-    }
-    myMarkers = [];
-    if(points > 1){
-
-        moveToLocation(lat/points, lon/points, 7)
-
-        for(var i = 0; i < window.oms.a.length; i ++) {
-            if(markerIds.indexOf(window.oms.a[i].metadata.id) > -1){
-                myMarkers.push(window.oms.a[i])
+    if(location_type === "Country"){
+        nationalData=toDisplay.join('')
+    }else{
+        document.getElementById("mousemovemessage").innerHTML=toDisplay.join('')
+        try{
+            var flip_direction = 'BOTTOM';
+            if(location_type === "Province"){
+                flip_direction = 'LEFT';
             }
-            else{
+            $("#mousemovemessage").flippy({
+                duration: "500",
+                verso: toDisplay.join(''),
+                direction: flip_direction
+            });
+        }
+        catch(error){
 
+        }
+        myMarkers = [];
+        if(points > 1){
+
+            moveToLocation(lat/points, lon/points, 7)
+
+            for(var i = 0; i < window.oms.a.length; i ++) {
+                if(markerIds.indexOf(window.oms.a[i].metadata.id) > -1){
+                    myMarkers.push(window.oms.a[i])
+                }
+                else{
+
+                }
             }
         }
+        try{highlightMarkers(myMarkers)}
+        catch(error){}
     }
-    try{highlightMarkers(myMarkers)}
-    catch(error){} 
-   
 }
 
 </script>
