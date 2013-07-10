@@ -1,7 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.help.models import HelpAdminGroup
 from django.contrib import admin
-from django import forms
-from django.db import models
 
 from mwana.apps.help import models as help
 
@@ -42,4 +41,9 @@ class HelpRequestAdmin(admin.ModelAdmin):
 admin.site.register(help.HelpRequest, HelpRequestAdmin)
 
 
+class HelpAdminGroupAdmin(admin.ModelAdmin):
+    list_display = ('contact', 'group')
+    list_filter = ('group', 'group')
+
+admin.site.register(HelpAdminGroup, HelpAdminGroupAdmin)
 

@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import ReportingGroup
+from rapidsms.models import Contact
 from django.db import models
 from rapidsms.models import Connection
 import datetime
@@ -34,4 +36,11 @@ class HelpRequest(models.Model):
 
         problem = self.additional_text if self.additional_text else '<NO MORE INFO>'
         return "%s from %s asks for help with '%s' on %s"  % (contact, location, problem, self.requested_on)
-        
+
+
+class HelpAdminGroup(models.Model):
+    contact = models.ForeignKey(Contact, limit_choices_to={"is_help_admin": True, "is_active": True})
+    group = models.ForeignKey(ReportingGroup)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.contact, self.group)
