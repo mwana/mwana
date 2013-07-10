@@ -4,7 +4,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location
 
 
-class ContactsHandler(KeywordHandler):
+class FacilityCodeHandler(KeywordHandler):
     """
     A simple app, that allows help admins to get the code for a facility
     """
