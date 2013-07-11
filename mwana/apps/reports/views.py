@@ -547,8 +547,6 @@ def supported_sites(request):
         else:
             sites.append(site)
 
-    
-
     return render_to_response('reports/supported_sites.html',
         {
          'today': today,
@@ -588,7 +586,7 @@ def home(request):
     records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
     sites = []
     
-    
+    unsupported_districts = [str(loc.name) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
     for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
         site = Site()
         site.point = record.point
@@ -630,4 +628,5 @@ def home(request):
          'formattedtoday': today.strftime("%d %b %Y"),
          'formattedtime': datetime.today().strftime("%I:%M %p"),
          'sites': sites,         
+         'unsupported_districts': unsupported_districts,
      }, context_instance=RequestContext(request))

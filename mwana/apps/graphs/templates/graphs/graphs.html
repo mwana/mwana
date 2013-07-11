@@ -1,0 +1,242 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Charts - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
+<!--<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap-responsive.min.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap.min.css" />-->
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+
+
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
+
+<script type="text/javascript">
+    function getReport(id){
+        document.getElementById("graph").innerHTML = '<div align="center">\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="left" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>Please wait...\n\
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="right" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
+</div>';
+        $('#wait').show();
+        $('#active-links').hide();
+        $.get("/graphs/"+id+"?start_date="+
+            document.getElementById("startdate").value+"&end_date="+
+            document.getElementById("enddate").value+"&rpt_provinces="+
+            document.getElementById("rpt_provinces").value+"&rpt_districts="+
+            document.getElementById("rpt_districts").value+"&rpt_facilities="+
+            document.getElementById("rpt_facilities").value+"&monthrange="+
+            document.getElementById("monthrange").value
+        , function(data) {
+            $('#graph')[0].innerHTML=data;
+            checkIfLoggedOutAndRefresh()
+            eval(document.getElementById("runscript").innerHTML);
+            $('#wait').hide()
+            $('#active-links').show()
+            jscript = document.getElementById("runscript2")
+
+            if(jscript){
+                eval(jscript.innerHTML);
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $('.report').bind('click', function () {
+            
+            element_id = this.id;
+            var showStartDate = false;
+            var showEndDate = false;
+            var showMonthRange = false;
+
+            try{
+                showStartDate = $("#" + element_id)[0].getAttribute('startdate') !== null;
+            }catch(error){
+            }
+            try{
+                showEndDate = $("#" + element_id)[0].getAttribute('enddate') !== null;
+            }catch(error){
+            }
+            try{
+                showMonthRange = $("#" + element_id)[0].getAttribute('monthrange') !== null;
+            }catch(error){
+            }
+
+            var html = "<div><p>This report uses default date parameters</div>"
+            var myStartDate = document.getElementById("startdate").value;
+            var myEndDate = document.getElementById("enddate").value;
+            var startDateField = 'Start Date: <input type="text" name="startDate" class="datefield" size="10" value="'+ myStartDate + '" />'
+            var endDateField = 'End Date: <input type="text" name="endDate" class="datefield" size="10" value="'+ myEndDate + '" />'
+            if(showStartDate && showEndDate){
+                html = '<div align="center"><p>' + startDateField + endDateField
+            }
+            else if(showStartDate){
+                html = '<div align="center"><p>' + startDateField 
+            }
+            else if(showEndDate){
+                html = '<div align="center"><p>' + endDateField 
+            }
+            
+            if(showMonthRange){
+                html = html + 'Range: <select id="monthRange" name="monthRange">\
+                                <option value="12">12 months</option>\
+                                <option value="6">6 months</option>\
+                                <option value="3">3 months</option>\
+                               </select>'
+            }
+            html = html + '</div>'
+            $(html
+        ).dialog({
+                draggable: false,
+                resizable: true,
+                width: 400,
+                modal: true,
+                hide: 'slide',
+                title: 'Select date parameters ',
+                buttons: {
+                    Ok: function() {
+                        if(showStartDate){
+                            document.getElementById("startdate").value = document.getElementsByName("startDate")[0].value
+                            if(!showEndDate){
+                                document.getElementById("enddate").value = document.getElementsByName("startDate")[0].value
+                            }
+                        }
+                        if(showEndDate){
+                            document.getElementById("enddate").value = document.getElementsByName("endDate")[0].value
+                            if(!showStartDate){
+                                document.getElementById("startdate").value = document.getElementsByName("endDate")[0].value
+                            }
+                        }
+                        if(showMonthRange){
+                            dropDown = document.getElementById("monthRange");
+                            document.getElementById("monthrange").value = dropDown.options[dropDown.selectedIndex].value;
+                        }
+                        this.outerHTML = ""
+                        $(this).dialog("close");
+                        getReport(element_id)
+                    }
+                }
+            });
+            $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+            // remome focus from input field
+            $("input").blur()
+            $.datepicker.formatDate;
+        });
+    });
+</script>
+<script type="text/javascript" >
+    $(function(){
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+        $.datepicker.formatDate;
+    });
+</script>
+<script type="text/javascript" >
+    function checkIfLoggedOutAndRefresh(){
+        password_field = document.getElementById('id_password')
+        username_field = document.getElementsByName('username')
+        
+        if(password_field && username_field){
+            document.getElementById('graph').innerHTML = '<strong><p>Sorry, your session has expired. You have to log in again.</strong>'
+            $("<div>Sorry, your session has expired. You need to log in again.</div>").dialog({
+                draggable: false,
+                resizable: false,
+                modal: true,
+                buttons: {
+                    Ok: function() {
+                        $(this).dialog("close");
+                        location.reload(true);
+                    },
+                    Understood: function() {
+                        $(this).dialog("close");
+                        location.reload(true);
+                    }
+                }
+            });
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="left">
+    <div class="module">
+        <h2>Charts</h2>
+        <table border="0" width="100%">
+            <thead>
+                <tr>
+                    <th colspan="2" width="30%">Period</th>
+                    <th colspan="3">Location</th>
+                </tr>
+            </thead>
+            <tbody>
+            <thead>
+            <th>Start</th>
+            <th>End</th>
+            <th>Province</th>
+            <th>District</th>
+            <th>Facility</th>
+            </thead>
+            <tr>
+                <td><input type="text" id="startdate" name="startdate" disabled="" class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
+                <td><input type="text" id="enddate" name="enddate" disabled="" class="datefield" size="9" value={{ fend_date }}  placeholder='{{ fend_date }}' /></td>
+                <td>{% autoescape off %}
+                    {{rpt_provinces}}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
+                    {{rpt_districts}}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
+                    {{rpt_facilities}}
+                    {% endautoescape %}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5">
+                    <div >
+                        <div id="wait" align="center" style="display: none">
+                            <input type="hidden" id="monthrange" value="" />
+                            Wait while chart loads
+                        </div>
+                        <div id="active-links">
+                            <a class="report" id="lab_submissions" enddate="" >Daily Lab Submissions</a>
+                            |  <a class="report" id="monthly_lab_submissions" enddate="" monthrange="" >Monthly Lab Submissions</a>
+                            | <a class="report" id="facility_vs_community" startdate="" enddate="" >Facility vs Community Births</a>
+                            | <a class="report" id="turnaround" enddate="" >DBS Turnaround</a>
+                            | <a class="report" id="messages" enddate="" monthrange="" >SMS's</a>
+                            | <a class="report" id="monthly_birth_trends" enddate="" monthrange="" >Birth Trends</a>
+                            | <a class="report" id="monthly_turnaround_trends" enddate="" monthrange="" >Turnaround Trends</a>
+                            | <a class="report" id="monthly_results_retrival_trends" enddate="" monthrange="" >Results Retrieval Trends</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div>
+            <div class="module">
+                <div id="graph" align="center">                    
+                    <div class="info" style="padding: 5em" align="center">
+                        <br><strong>Click on a link above to display the corresponding graph.</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clear-hack"></div>
+    </div>
+</div>
+<div id="resources" style="display: None">
+    <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="middle" style="padding: 5em"/>
+</div>
+{% endblock %}

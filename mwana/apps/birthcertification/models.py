@@ -99,7 +99,7 @@ class RegistrationReminder(models.Model):
     """
     certification = models.ForeignKey(Certification)
     agent = models.ForeignKey(Agent)
-    date_sent = models.DateTimeField(default=datetime.now(), editable=False)
+    date_sent = models.DateTimeField(default=datetime.now, editable=False)
 
     def __unicode__(self):
         return "Reminder sent to %s to regisiter %s." % (self.agent, self.certification)
@@ -111,7 +111,7 @@ class CertificateNotification(models.Model):
     """
     certification = models.ForeignKey(Certification)
     agent = models.ForeignKey(Agent)
-    date_sent = models.DateTimeField(default=datetime.now(), editable=False)
+    date_sent = models.DateTimeField(default=datetime.now, editable=False)
 
     def __unicode__(self):
         return "Reminder to collect certificate for %s" % (self.certification)

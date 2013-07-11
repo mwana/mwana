@@ -1,0 +1,113 @@
+<body>
+
+    <script type="text/javascript" id="runscript">
+        function changeType(chart, series, newType) {
+            for (var i = 0; i < series.length; i++) {
+                serie = series[0];
+                serie.chart.addSeries({
+                    type: newType,
+                    name: serie.name,
+                    yaxis: serie.yaxis,
+                    color: serie.color,
+                    data: serie.options.data
+                }, false);
+
+                serie.remove();
+            }
+        }
+        
+        $(function () {
+            var chart;
+            
+            $(document).ready(function() {
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'container',
+                        type: 'column'
+                    },
+                    title: {
+                        text: {% autoescape off %} {{ title }} {% endautoescape %}
+                    },
+                    subtitle: {
+                        text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
+                    },
+                    xAxis: {
+                        categories: {% autoescape off %} {{ x_axis}} {% endautoescape %}
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
+                        }
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        backgroundColor: '#FFFFFF',
+                        align: 'left',
+                        verticalAlign: 'top',
+                        x: 100,
+                        y: 70,
+                        floating: true,
+                        shadow: true
+                    },
+                    tooltip: {
+                        
+                        formatter: function() {
+                            //                            var s = '<b>'+ this.x +'</b>',
+                            var s = '<span style="font-size:10px">'+this.x+'</span><table>',
+                            sum = 0;
+
+                            $.each(this.points, function(i, point) {
+                                //                                s += '<br/>'+ point.series.name +': '+
+                                //                                    point.y +'m';
+                                s += '<tr><td style="color:'+point.series.color+';padding:0">' + point.series.name + ': </td>'+
+                                    "<td  style='padding:0; text-align:right'><b>"+point.y +"</b></td></tr>"
+                                sum += point.y;
+                            });
+
+                            s += '<tr><td>Total</td><td style="padding:0"><b>' + sum + "</b></td></tr></table>"
+                            
+                            return s;
+                        },
+                        crosshairs: true,
+                        shared: true,
+                        useHTML: true
+                    },
+                    plotOptions: {
+                        column: {
+                            
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [
+                        {% for item in report_data %}
+                        {
+                            name: '{{ item.key}}',                            
+                            data: {{ item.value }}
+                        },
+                        {% endfor %}
+                    ]
+                });
+
+                $('#chartType').change(function() {
+                    changeType(chart, chart.series, this.value);
+                });
+            });
+
+        });
+    </script>
+
+
+
+    <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
+    <div align="center">
+        Change chart type: <select id="chartType">
+            <option value="column">Column</option>
+            <option value="spline">Spline</option>
+            <option value="line">Line</option>
+            <option value="area">Area</option>
+        </select>
+    </div
+</body>
+

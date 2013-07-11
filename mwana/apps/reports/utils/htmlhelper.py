@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.locations.models import Location
-from mwana.apps.contactsplus.models import ContactType
 from datetime import date
 
+from mwana.apps.contactsplus.models import ContactType
+from mwana.apps.locations.models import Location
+from datetime import timedelta
 from mwana.apps.reports.webreports.models import ReportingGroup
 
 def get_groups_name(id):
@@ -22,75 +23,87 @@ def text_date(text):
         return date(int(c), int(b), int(a))
 
 
-def get_contacttype_dropdown_html(id, selected_worker_type=None):
-    code ='<select name="%s" size="1">\n'%id
-    code +='<option value="All">All</option>\n'
-    for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]):
+def get_contacttype_dropdown_html(id, selected_worker_type=None, include_printer=False):
+    code = '<select id="%s" name="%s" size="1">\n' % (id, id)
+    code += '<option value="All">All</option>\n'
+    contact_types = get_contacttypes(None, include_printer)
+    for type in contact_types:
         if type.slug == selected_worker_type:
-            code = code + '<option selected value="%s">%s</option>\n'%(type.slug,type.name)
+            code = code + '<option selected value="%s">%s</option>\n' % (type.slug, type.name)
         else:
-            code = code + '<option value="%s">%s</option>\n'%(type.slug,type.name)
+            code = code + '<option value="%s">%s</option>\n' % (type.slug, type.name)
 
-    code = code +'</select>'
+    code = code + '</select>'
     return code
 
-def get_contacttypes(slug):
-    if slug is None:
-        return ContactType.objects.exclude(name__in=["Patient", "DBS Printer"])
-    else:
-        return ContactType.objects.filter(slug=slug).exclude(name__in=["Patient", "DBS Printer"])
+def get_contacttypes(slug, include_printer=False):
+
+    toReturn = ContactType.objects.exclude(name="Patient")
+    if slug is not None:
+        toReturn = toReturn.filter(slug=slug)
+    
+    if not include_printer:
+        toReturn = toReturn.exclude(name="DBS Printer")
+
+    return toReturn
 
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
     if not facilities:
-        return '<select name="%s" size="1"></select>\n'%id
-    code ='<select name="%s"" onchange="fire%sChange()" id="%s" class="drop-down" size="1">\n' % (id, id, id)
+        return '<select name="%s" size="1"></select>\n' % id
+    code = '<select name="%s"" onchange="fire%sChange()" id="%s" class="drop-down" size="1">\n' % (id, id, id)
     if selected_facility and get_only_select:
         pass
     else:
-        code +='<option value="All">All</option>\n'
+        code += '<option value="All">All</option>\n'
     for fac in facilities:
         if fac.slug == selected_facility:
-            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+            code = code + '<option selected value="%s">%s</option>\n' % (fac.slug, fac.name)
         elif get_only_select:
             pass
         else:
-            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
+            code = code + '<option value="%s">%s</option>\n' % (fac.slug, fac.name)
 
-    code = code +'</select>'
+    code = code + '</select>'
     return code
 
 def get_facilities_dropdown_htmlb(id, facilities, selected_facility):
-    code ='<select name="%s" size="1">\n'%id
+    code = '<select name="%s" size="1">\n' % id
     for fac in facilities:
         if fac.slug == selected_facility:
-            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
+            code = code + '<option selected value="%s">%s</option>\n' % (fac.slug, fac.name)
         else:
-            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
+            code = code + '<option value="%s">%s</option>\n' % (fac.slug, fac.name)
 
-    code = code +'</select>'
+    code = code + '</select>'
     return code
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
-    code ='<select name="%s" id="%s" class="drop-down" size="1">\n'%(id, id)
-    code +='<option value="All">All</option>\n'
+    code = '<select name="%s" id="%s" class="drop-down" size="1">\n' % (id, id)
+    code += '<option value="All">All</option>\n'
     for group in ReportingGroup.objects.all():
         if str(group.id) == selected_group:
-            code = code + '<option selected value="%s">%s</option>\n'%(group.id,group.name)
+            code = code + '<option selected value="%s">%s</option>\n' % (group.id, group.name)
         else:
-            code = code + '<option value="%s">%s</option>\n'%(group.id,group.name)
+            code = code + '<option value="%s">%s</option>\n' % (group.id, group.name)
 
-    code = code +'</select>'
+    code = code + '</select>'
     return code
 
-def read_request(request,param):
+def read_request(request, param):
     try:
         value = request.REQUEST[param]
-        if value =='All':
+        if value == 'All':
             value = None
     except:
         value = None
     return value
+
+def read_date_or_default(request, param, default):
+    try:
+        return text_date(read_request(request, param))
+    except (KeyError, ValueError, IndexError, AttributeError):
+        return default
 
 def try_format(date):
     try:
@@ -119,7 +132,7 @@ def get_facility_name(slug):
 
 def get_next_navigation(text):
     try:
-        return {"Next":1,"Previous":-1}[text]
+        return {"Next":1, "Previous":-1}[text]
     except:
         return 0
 
@@ -137,11 +150,24 @@ def get_distinct_parents(locations, type_slugs=None):
     return list(set(parents))
 
 def get_rpt_provinces(user):
-    return get_distinct_parents(get_rpt_districts(user))
+    return sorted(get_distinct_parents(get_rpt_districts(user)), key=lambda x:x.name)
 
 def get_rpt_districts(user):
-
-    return get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user))
+    return sorted(get_distinct_parents(
+                  Location.objects.\
+        exclude(name__icontains='training').exclude(name__icontains='support').filter(
+                  groupfacilitymapping__group__groupusermapping__user=user
+                  )), key=lambda x:x.name)
 
 def get_rpt_facilities(user):
-    return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user)
+    return sorted(Location.objects.\
+        exclude(name__icontains='training').exclude(name__icontains='support').filter(
+                  groupfacilitymapping__group__groupusermapping__user=user),
+                  key=lambda x:x.name)
+
+def get_month_start(dte):
+    return date(dte.year, dte.month, 1)
+
+def get_month_end(dte):
+    next_month_start = get_month_start(date(dte.year, dte.month, 27) + timedelta(days=5))
+    return next_month_start - timedelta(days=1)

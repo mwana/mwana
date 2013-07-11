@@ -12,7 +12,7 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ('result', 'notification_status', 'verified', 
                    'result_sent_date', 'collected_on',  'entered_on',
                    'processed_on', 'clinic',)
-    search_fields = ('sample_id','requisition_id')
+    search_fields = ('sample_id','requisition_id', 'payload__source')
     date_hierarchy = 'result_sent_date'
     actions = [export_as_csv_action("Export selected results as CSV")]
 admin.site.register(Result, ResultAdmin)
@@ -21,7 +21,7 @@ admin.site.register(Result, ResultAdmin)
 class LabLogAdmin(admin.ModelAdmin):
     list_display = ('timestamp', 'message', 'level', 'line','source',)
     list_filter = ('timestamp', 'level')
-    search_fields = ('message', 'level')
+    search_fields = ('message', 'payload__source')
 
     def source(self, obj):
         return obj.payload.source
@@ -33,8 +33,10 @@ class PayloadAdmin(admin.ModelAdmin):
     list_display = ('incoming_date', 'auth_user', 'version', 'source',
                     'client_timestamp', 'info', 'parsed_json',
                     'validated_schema')
-    list_filter = ('incoming_date', 'auth_user', 'version', 'source',
-                   'parsed_json', 'validated_schema')
+    list_filter = ('incoming_date',  'source', 'version',
+                   'parsed_json', 'validated_schema',)
+    search_fields = ('raw',)    
+
 admin.site.register(Payload, PayloadAdmin)
 
 class SampleNotificationAdmin(admin.ModelAdmin):

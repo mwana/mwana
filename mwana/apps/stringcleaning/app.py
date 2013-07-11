@@ -105,7 +105,8 @@ class App (rapidsms.apps.base.AppBase):
 
     def default(self, message):
         """
-        quick and dirty way of ignoring messages from mobile service providers
+        quick way of ignoring messages from mobile service providers.
+        Also handle blank messages from mobile users
         """
         from django.conf import settings
         if settings.ON_LIVE_SERVER:
@@ -118,6 +119,11 @@ class App (rapidsms.apps.base.AppBase):
         len(message.connection.identity) <7:
             logger.info("Ignoring message %s from %s"% (message.text, message.connection.identity) )
             return True
+
+        if message.text == '':
+            message.respond("Sorry, I couldn't read your message. Make sure you have correct GSM message settings on your phone")
+            return True
+
         
     def period_vs_decimal(self, str):
         '''Removes .'s unless they are between two digits'''

@@ -3,7 +3,6 @@ from datetime import datetime
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.decorators.http import require_GET
 from mwana.apps.reports.utils.htmlhelper import get_contacttype_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_contacttypes
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
@@ -16,8 +15,10 @@ from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
 from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
 from mwana.apps.reports.views import read_request
 from mwana.apps.websmssender.smssender import SMSSender
+from django.views.decorators.csrf import csrf_exempt
 
-@require_GET
+
+@csrf_exempt
 def send_sms(request):
 
     today = datetime.today().date()

@@ -12,16 +12,22 @@
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 
 {% endblock %}
 
 
 {% block javascripts %}
-{{ block.super }}
-
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+<script>
+    $(function(){
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' })
+        $.datepicker.formatDate
+    });
+</script>
 
 {% endblock %}
 
@@ -83,16 +89,16 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </div>
 
 
-            <h1>Date range reports:</h1>
+            <h1 id="DateRangeReports">Date range reports:</h1>
 
 
-            <h2>Results160 Reports in period {{fstartdate}} to {{fenddate}}</h2>
+            <h2 id="Results160">Results160 Reports in period {{fstartdate}} to {{fenddate}}</h2>
             <br>
             <form name="getValues" action="" method="GET">
                 <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
+                    <input type="text" name="startdate" class="datefield" size="9" value={{ fstartdate }} />
                            to
-                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
+                           <input type="text" name="enddate" class="datefield" size="9" value={{ fenddate }} />
                            {% if region_selectable %}
                 <p>Select Region: &nbsp;
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
@@ -115,9 +121,6 @@ You currently don't belong to any group for viewing reports. Contact the system 
                     {%endif%}
 
                     &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
-
-
-
             </form><hr>
             <p>
                 Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
@@ -201,7 +204,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </div>
             <p>
 
-            <h3>Average Turnaround &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageTurnaround">Average Turnaround &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
@@ -264,7 +267,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
 
             <p>
-            <h3>Average Transport Time of DBS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageTransportTime">Average Transport Time of DBS &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
@@ -328,7 +331,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
             <p>
 
-            <h3>Average Processing Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageProcessing">Average Processing Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
@@ -391,7 +394,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
             <p>
 
-            <h3>Average Entering Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageEnteringTime">Average Entering Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
@@ -454,7 +457,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
 
             <p>
-            <h3>Average Retrieving Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageRetrievingTime">Average Retrieving Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
@@ -517,7 +520,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
 
             <p>
 
-            <h3>Sample Notifications from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <h3 id="SampleNotifications">Sample Notifications from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
 
             <table width="100%">
                 {% for record in samples_reported_rpt %}
@@ -553,7 +556,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
             <p>
 
-            <h3>Samples Captured at Labs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+            <h3 id="SamplesCaptured">Samples Captured at Labs &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
 
             <table width="100%">
                 {% for record in samples_at_lab_rpt %}
@@ -589,7 +592,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
             <p>
 
-            <h3>Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="PendingResults">Pending Results for Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;Date: {{ today }}</h3>
 
@@ -666,7 +669,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             <div class="left">
 
                 <div class="module">
-                    <h2>RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
+                    <h2 id="RemindMiReports">RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
                     <p>
                     <h3>Births from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
 

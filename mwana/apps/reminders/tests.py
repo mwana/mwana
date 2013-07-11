@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.patienttracing.models import get_initiator_automated
+from mwana.apps.patienttracing.models import PatientTrace
 import datetime
 import time
 
@@ -288,6 +290,9 @@ class Reminders(TestScript):
             self.assertTrue(msg.text in expected_messages, msg)
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), len(expected_messages))
+        self.assertEqual(sent_notifications.count(), PatientTrace.objects.all().count())
+        self.assertEqual(sent_notifications.count(), PatientTrace.objects.filter(initiator=get_initiator_automated()).count())
+
         
     def testRemindersSentOnlyOnce(self):
         """

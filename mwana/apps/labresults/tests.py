@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.tlcprinters.models import MessageConfirmation
 import time
 import json
@@ -302,7 +303,7 @@ class TestApp(LabresultsSetUp):
             clinic_worker < Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
         """ % {"name": self.contact.name, "count": 3}
         self.runScript(script)
-        
+        self.assertEqual(PendingPinConnections.objects.all().count(), 3)
         for res in [labresults.Result.objects.get(id=res.id)
                     for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
@@ -317,6 +318,8 @@ class TestApp(LabresultsSetUp):
             "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
+
+        self.assertEqual(PendingPinConnections.objects.all().count(), 0)
         
         for res in [labresults.Result.objects.get(id=res.id)
                     for res in [res1, res2, res3]]:
@@ -930,7 +933,8 @@ class TestResultsAcceptor(LabresultsSetUp):
 
     def test_results_changed_notification(self):        
         """
-        Tests sending of notifications for previously sent later change in either
+        Tests sending of notifications for previously sent results but later
+        change in either
         requisition id, or actual results (from or to Positive/Negative). One
         notification goes to all clinic workers and another to all support staff.
         """

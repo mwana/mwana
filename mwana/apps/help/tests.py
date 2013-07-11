@@ -1,18 +1,23 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import GroupFacilityMapping
+from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.apps.help.models import HelpAdminGroup
+import datetime
 import json
 
-import datetime
-import mwana.const as const
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from mwana import const
+from mwana.apps.help.models import HelpRequest
+from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD
 from mwana.apps.locations.models import Location
 from mwana.apps.locations.models import LocationType
+import mwana.const as const
+from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
-from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD, INITIAL_PAYLOAD
-
 
 
 class TestApp(TestScript):
@@ -22,13 +27,13 @@ class TestApp(TestScript):
         super(TestApp, self).setUp()
         # create some contacts
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
-        kdh = Location.objects.create(name="Kafue District Hospital",
+        self.kdh = Location.objects.create(name="Kafue District Hospital",
                                       slug="kdh", type=ctr)
-        central_clinic = Location.objects.create(name="Central Clinic",
+        self.central_clinic = Location.objects.create(name="Central Clinic",
                                                  slug="403012", type=ctr)
 
         ghost_clinic = Location.objects.create(name="Ghost Clinic",
-                                                 slug="ghost", type=ctr)
+                                               slug="ghost", type=ctr)
         #create some contacts for the facilities
         script = """
             0971 > join kdh worker one  1234
@@ -40,9 +45,9 @@ class TestApp(TestScript):
         self.runScript(script)
 
         # Turn on help-admin contact
-        help_admin=Contact.active.get(connection__identity="0974")
-        help_admin.is_help_admin=True
-        help_admin.save()
+        self.help_admin = Contact.active.get(connection__identity="0974")
+        self.help_admin.is_help_admin = True
+        self.help_admin.save()
 
     def testGettingContacts(self):
         """
@@ -50,61 +55,50 @@ class TestApp(TestScript):
         HELP ADMINS
         """
 
-        script = """
-            unknown > contacts
-            unknown < To get active contacts for a clinic, send <CONTACTS> <CLINIC CODE> [<COUNT = {5}>]
-            unknown > contacts kdh
-            unknown < Sorry, you must be registered as HELP ADMIN to request for facility contacts. If you think this message is a mistake, respond with keyword 'HELP'
-            0971 > contacts kdh
-            0971 < Sorry, you must be registered as HELP ADMIN to request for facility contacts. If you think this message is a mistake, respond with keyword 'HELP'
-            0974 > contacts ghost
-            0974 < There are no active contacts at Ghost Clinic
-            0974 > contacts kdh
-            0974 < Contacts at Kafue District Hospital: Worker One;0971.
-            0974 > contacts 403012
-            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
-            0974 > contacts 403012 what ever
-            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
-            0974 > contacts 403012 0
-            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973. ****Help Admin;0974.
-            0974 > contacts 403012 2
-            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973.
-            0974 > contacts 403012 two
-            0974 < Contacts at Central Clinic: Worker Two;0972. ****Worker Three;0973.
-            0974 > contacts 403012 -1
-            0974 < Contacts at Central Clinic: Worker Two;0972.
-            0974 > contacts 403012 -one
-            0974 < Contacts at Central Clinic: Worker Two;0972.
-        """
-        self.runScript(script)
-
-    def testGettingCodes(self):
-        """
-        Tests getting codes for a clinic by HELP ADMINS
-        """
+    def testHelp(self):
 
         script = """
-            unknown > code
-            unknown < To get the code for a clinic, send <CODE> <CLINIC NAME>
-            unknown > code kdh
-            unknown < Sorry, you must be registered as HELP ADMIN to request for facility codes. If you think this message is a mistake, respond with keyword 'HELP'
-            0971 > code kdh
-            0971 < Sorry, you must be registered as HELP ADMIN to request for facility codes. If you think this message is a mistake, respond with keyword 'HELP'
-            0974 > code unknown
-            0974 < There are no locations matching unknown
-            0974 > code Kafue
-            0974 < kdh-Kafue District Hospital.
-            0974 > code Central Clinic
-            0974 < 403012-Central Clinic.
-            0974 > code Central what ever
-            0974 < 403012-Central Clinic.
-            0974 > code 403012
-            0974 < 403012-Central Clinic.
-            0974 > code 403012 whatever
-            0974 < 403012-Central Clinic.
+            unknown > help
+            0974 < Someone has requested help. Please call them at unknown.
+            unknown < Sorry you're having trouble. Your help request has been forwarded to a support team member and they will call you soon.
+            0971 > help
+            0974 < Worker One (worker) at Kafue District Hospital has requested help. Please call them at 0971.
+            0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
         """
         self.runScript(script)
+        self.assertEqual(Message.objects.filter(direction='O',
+                         text__contains='requested help',
+                         contact=self.help_admin).count(), 2)
+        self.assertEqual(HelpRequest.objects.count(), 2)
+
+        group = ReportingGroup.objects.create(name="Mansa District")
+        HelpAdminGroup.objects.create(contact=self.help_admin, group=group)
+        GroupFacilityMapping.objects.create(facility=self.central_clinic, group=group)
+
+        script = """
+            0971 > help
+            0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
+        """
+        self.runScript(script)
+        self.assertEqual(Message.objects.filter(direction='O',
+                         text__contains='requested help',
+                         contact__name__iexact='help admin').count(), 2)
+        self.assertEqual(HelpRequest.objects.count(), 3)
+
+        GroupFacilityMapping.objects.create(facility=self.kdh, group=group)
+
+        script = """
+            0971 > help
+            0974 < Worker One (worker) at Kafue District Hospital has requested help. Please call them at 0971.
+            0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
+        """
+        self.runScript(script)
+        self.assertEqual(Message.objects.filter(direction='O',
+                         text__contains='requested help',
+                         contact__name__iexact='help admin').count(), 3)
+        self.assertEqual(HelpRequest.objects.count(), 4)
         
+
     def _post_json(self, url, data):
         if not isinstance(data, basestring):
             data = json.dumps(data)
@@ -128,7 +122,7 @@ class TestApp(TestScript):
         self._post_json(reverse('accept_results'), payload1)
         self._post_json(reverse('accept_results'), payload2)
 
-        payload2["source"] = payload2["source"].replace("ndola/arthur-davison", "lusaka/uth")        
+        payload2["source"] = payload2["source"].replace("ndola/arthur-davison", "lusaka/uth")
         self._post_json(reverse('accept_results'), payload2)
 
         # create some dynamic dates
@@ -150,7 +144,7 @@ class TestApp(TestScript):
         script = """
             unknown > payload
             unknown < To view payloads, send <PAYLOADS> <FROM-HOW-MANY-DAYS-AGO> [<TO-HOW-MANY-DAYS-AGO>], e.g PAYLOAD 7 1, (between 7 days ago and 1 day ago)
-            unknown > payload 
+            unknown > payload
             unknown < To view payloads, send <PAYLOADS> <FROM-HOW-MANY-DAYS-AGO> [<TO-HOW-MANY-DAYS-AGO>], e.g PAYLOAD 7 1, (between 7 days ago and 1 day ago)
             unknown > paylods 7
             unknown < Sorry, you must be registered as HELP ADMIN to view payloads. If you think this message is a mistake, respond with keyword 'HELP'
@@ -176,5 +170,27 @@ class TestApp(TestScript):
                 "startdate2": startdate2.strftime("%d/%m/%Y"), "enddate2": enddate2.strftime("%d/%m/%Y"),
                 "startdate3": startdate3.strftime("%d/%m/%Y"), "enddate3": enddate3.strftime("%d/%m/%Y"),
                 "startdate4": startdate4.strftime("%d/%m/%Y"), "enddate4": enddate4.strftime("%d/%m/%Y")}
+        self.runScript(script)
+
+
+    def test_getting_pin(self):
+        """
+        Tests getting PIN codes for a user by HELP ADMINS
+        """
+
+        script = """
+            unknown > pin
+            unknown < To get the PIN for a user, send PIN <PHONE_NUMBER_PATTERN>
+            unknown > pin 097
+            unknown < Sorry, you must be registered as HELP ADMIN to retrieve PIN codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0971 > pin 0972
+            0971 < Sorry, you must be registered as HELP ADMIN to retrieve PIN codes. If you think this message is a mistake, respond with keyword 'HELP'
+            0974 > PIN 098773
+            0974 < There are no active SMS users with phone number matching 098773
+            0974 > pin 0972
+            0974 < Worker Two: 1234.
+            0974 > pin 097
+            0974 < Worker One: 1234. Worker Two: 1234. Worker Three: 1234. Help Admin: 1234.
+        """
         self.runScript(script)
 

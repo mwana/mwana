@@ -4,251 +4,129 @@
 
 {% block title %}Message Logs - {{ block.super }}{% endblock %}
 
-{% block javascripts %}
-{{ block.super }}
-<script type="text/javascript">
-    var _allProvinces = []
-    var _allDistricts = []
-    var _allFacilities = []
-    var _loaded = false
-    function loadLocationData(){
-        if(_loaded){
-            return
-        }
-
-        var provinces = document.getElementById('rpt_provinces');
-        for(i in provinces.options){
-
-            if(provinces.options[i].value){
-                _allProvinces.push([provinces.options[i].value, provinces.options[i].innerHTML])
-            }
-
-        }
-        var districts = document.getElementById('rpt_districts');
-        for(i in districts.options){
-            if(districts.options[i].value){
-                _allDistricts.push([districts.options[i].value, districts.options[i].innerHTML])
-            }
-        }
-        var facilities = document.getElementById('rpt_facilities');
-        for(i in facilities.options){
-            if(facilities.options[i].value){
-                _allFacilities.push([facilities.options[i].value, facilities.options[i].innerHTML])
-            }
-        }
-
-        _loaded = true
-    }
-
-    function clearDropDown(element){
-        while ( element.options.length ){
-            element.options[0] = null;
-        }
-    }
-
-    // to be called when selected province changes
-    function firerpt_provincesChange(){
-        loadLocationData()
-        var provinceDropDown = document.getElementById('rpt_provinces');
-        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
-        var districtDropDown = document.getElementById('rpt_districts');
-        var facilityDropDown = document.getElementById('rpt_facilities');
-
-        // reload district combo
-        clearDropDown(districtDropDown);
-        var childDistricts = []
-        for(value in _allDistricts){
-            if(provinceSlug=="Al" || provinceSlug ==_allDistricts[value][0].substring(0, 2) || _allDistricts[value][0]=="All"){
-                childDistricts.push(_allDistricts[value])
-            }
-        }
-        fillList(districtDropDown, childDistricts)
-
-        // reload facility combo
-        clearDropDown(facilityDropDown);
-        var childFacilities = []
-        for(value in _allFacilities){
-            if(provinceSlug=="Al" ||
-                provinceSlug ==_allFacilities[value][0].substring(0, 2) ||
-                _allFacilities[value][0]=="All"){
-                childFacilities.push(_allFacilities[value])
-            }
-        }
-        fillList(facilityDropDown, childFacilities)
-    }
-
-    function firerpt_districtsChange(){
-        loadLocationData()
-        var provinceDropDown = document.getElementById('rpt_provinces');
-        var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
-        var districtDropDown = document.getElementById('rpt_districts');
-        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
-
-        if(districtSlug != "All"){
-            districtSlug = districtSlug.substring(0, 4)
-        }
-        var facilityDropDown = document.getElementById('rpt_facilities');
-
-
-        // reload facility combo
-        clearDropDown(facilityDropDown);
-        var childFacilitiesInProvince = []
-
-        for(value in _allFacilities){
-            if(provinceSlug=="Al" ||
-                provinceSlug ==_allFacilities[value][0].substring(0, 2)
-                || _allFacilities[value][0]=="All"){
-                childFacilitiesInProvince.push(_allFacilities[value])
-            }
-        }
-
-        var childFacilities = []
-
-        for(value in childFacilitiesInProvince){
-            if(districtSlug == "All" ||
-                districtSlug == childFacilitiesInProvince[value][0].substring(0, 4) ||
-                childFacilitiesInProvince[value][0]=="All"){
-                childFacilities.push(childFacilitiesInProvince[value])
-            }
-        }
-
-        fillList(facilityDropDown, childFacilities)
-    }
-
-    function fillList( box, arr ) {
-        // arr[0] holds the display text
-        // arr[1] are the values
-
-        for ( i in arr ) {
-
-            // Create a new drop down option with the
-            // display text and value from arr
-
-            option = new Option( arr[i][1], arr[i][0]);
-
-            // Add to the end of the existing options
-
-            box.options[box.length] = option;
-        }
-
-        // Preselect option 0
-
-        box.selectedIndex=0;
-    }
-    
-</script>
-{% endblock %}
-
 {% block stylesheets %}
 {{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+{% endblock %}
 
+{% block javascripts %}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 {% endblock %}
 
 {% block content %}
-{# TODO: Find a better way of displaying the reports to avoid repeating code #}
-
-
-    <div class="left">
-        <form name="getValues" action="" method="GET">
+<div class="left">
+    <form name="getValues" action="" method="GET">
         <div class="module">
-            
-
-            <!--h1>Filtered Message Logs:</h1-->
-
-
             <h2>Filtered Message Logs</h2>
-            <br>
-            
-                <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="startdate" size="9" value={{ fstartdate }} />
-                           to
-                           <input type="text" name="enddate" size="9" value={{ fenddate }} />
-                           {% if region_selectable %}
-                <p>Select Region: &nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
-                    {{rpt_provinces}}
-                    {% endautoescape %}&nbsp;
-                    or District:{% autoescape off %}
-                    {{rpt_districts}}
-                    {% endautoescape %}&nbsp;
-                    or Facility:{% autoescape off %}
-                    {{rpt_facilities}}
-                    {% endautoescape %}&nbsp;
+            <br>                        
+            <table border="0"   width="100%">
 
-                <p>Search: &nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="search_key" size="17" value="{{ search_key }}">
-                    &nbsp;
-                    {% if is_report_admin %}
-                <p>Select Implementer:
-                    {% autoescape off %}
-                    {{rpt_group}}
-                    {% endautoescape %}
-                    &nbsp;
-                    {%endif%}
-                    {%endif%}
-
-                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
-
-            
-            <hr>
-           <div>
-              
-
-            <h3>
-                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
-                </h3>
-              
-
-       <table width="100%">
-                {% for record in messages %}
-                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                    
-                    {% for column in record %}
-                    {% if column %}
-                    {% if not forloop.parentloop.counter0 %}
-                    <td ><u>{{ column }}</u></td>
-                    {% else %}
-                    <td >{{ column }}</td>
-                    
-                    {% endif %}
-                    {% else %}
-                    {% if forloop.parentloop.last %}
-                    <td><b> 0 </b></td>
-                    {% else %}
-                    <td> 0 </td>
-                    {% endif %}
-                    {% endif %}
-                    {% endfor %}
-                </tr>
-                {% endfor %}
+                <tbody>
+                    <tr>
+                        <td style="border: 0px">Select Period:</td>
+                        <td style="border: 0px"><input type="text" name="startdate" size="9" value={{ fstartdate }} />
+                                   to
+                                   <input type="text" name="enddate" size="9" value={{ fenddate }} />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 0px">Province:</td>
+                        <td style="border: 0px">{% autoescape off %}
+                            {{rpt_provinces}}
+                            {% endautoescape %}
+                            District:{% autoescape off %}
+                            {{rpt_districts}}
+                            {% endautoescape %}
+                            Facility:{% autoescape off %}
+                            {{rpt_facilities}}
+                            {% endautoescape %}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 0px">Worker Type:</td>
+                        <td style="border: 0px">
+                            {% autoescape off %}
+                            {{worker_types}}
+                            {% endautoescape %}  Text(Optional): <input type="text" name="search_key" size="17" value="{{ search_key }}">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 0px">  {% if is_report_admin %}
+                            Select Implementer:
+                            {% endif %}
+                        <td style="border: 0px"> {% if is_report_admin %}
+                            {% autoescape off %}
+                            {{rpt_group}}
+                            {% endautoescape %}
+                            {% endif %}
+                            <input type="submit" value="Ok" name="SubmitValues" />
+                        </td>
+                    </tr>
+                </tbody>
             </table>
 
+            <hr>
+            <div>
+
+
+                <h3>
+                    Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                </h3>
+
+
+                <table width="100%">
+                    {% for record in messages %}
+                    <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                        {% for column in record %}
+                        {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                        <td ><u>{{ column }}</u></td>
+                        {% else %}
+                        <td >{{ column }}</td>
+
+                        {% endif %}
+                        {% else %}
+                        {% if forloop.parentloop.last %}
+                        <td style="border: 0px"><b> 0 </b></td>
+                        {% else %}
+                        <td style="border: 0px"> 0 </td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if messages_has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
+
+                <span class="current">
+                    Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+                </span>
+
+                {% if messages_has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ messages_number }}>
+            </span>
 
         </div>
-        <div class="clear-hack"></div>
-    </div>
-        
-        <div class="pagination">
-    <span class="step-links">
-        {% if messages_has_previous %}
-            <input type="submit" value="Previous" name="navigate" />
-        {% endif %}
-
-        <span class="current">
-            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
-        </span>
-
-        {% if messages_has_next %}
-        <input type="submit" value="Next" name="navigate" size="8" />
-        {% endif %}
-        <input type="hidden" name="page" value={{ messages_number }}>
-    </span>
+    </form>
 
 </div>
-        </form>
-
-</div>
+<script type="text/javascript">
+    $("#rpt_group").chosen();
+    $("#worker_types").chosen();
+</script>
 {% endblock %}

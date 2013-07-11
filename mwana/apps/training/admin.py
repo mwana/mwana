@@ -5,6 +5,7 @@ from mwana.apps.training import models as training
 class TrainingSessionAdmin(admin.ModelAdmin):
     list_display = ("start_date", "end_date", "is_on", "trainer", "location", )
     list_filter = ("start_date", "is_on", "location", )
+    date_hierarchy = 'start_date'
 admin.site.register(training.TrainingSession, TrainingSessionAdmin)
 
 class TrainedAdmin(admin.ModelAdmin):

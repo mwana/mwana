@@ -49,8 +49,15 @@ function firerpt_provincesChange(){
     clearDropDown(districtDropDown);
     var childDistricts = []
     for(value in _allDistricts){
-        if(provinceSlug=="Al" || provinceSlug ==_allDistricts[value][0].substring(0, 2) || _allDistricts[value][0]=="All"){
-            childDistricts.push(_allDistricts[value])
+        if(provinceSlug === "Al" ||
+            provinceSlug ===_allDistricts[value][0].substring(0, 2)
+            || _allDistricts[value][0] === "All"){
+            childDistricts.push(_allDistricts[value]);
+        }
+        // Special case for Ndola district
+        else if(provinceSlug === '20'
+            && _allDistricts[value][0].substring(0, 2) === '21'){
+            childDistricts.push(_allDistricts[value]);
         }
     }
     fillList(districtDropDown, childDistricts)
@@ -59,10 +66,15 @@ function firerpt_provincesChange(){
     clearDropDown(facilityDropDown);
     var childFacilities = []
     for(value in _allFacilities){
-        if(provinceSlug=="Al" ||
-            provinceSlug ==_allFacilities[value][0].substring(0, 2) ||
-            _allFacilities[value][0]=="All"){
-            childFacilities.push(_allFacilities[value])
+        if(provinceSlug === "Al" ||
+            provinceSlug === _allFacilities[value][0].substring(0, 2) ||
+            _allFacilities[value][0] === "All"){
+            childFacilities.push(_allFacilities[value]);
+        }
+        // Special case for Ndola facilities
+        else if(provinceSlug === '20'
+            && _allFacilities[value][0].substring(0, 2) === '21'){
+            childFacilities.push(_allFacilities[value]);
         }
     }
     fillList(facilityDropDown, childFacilities)
@@ -80,7 +92,6 @@ function firerpt_districtsChange(){
     }
     var facilityDropDown = document.getElementById('rpt_facilities');
 
-
     // reload facility combo
     clearDropDown(facilityDropDown);
     var childFacilitiesInProvince = []
@@ -88,7 +99,8 @@ function firerpt_districtsChange(){
     for(value in _allFacilities){
         if(provinceSlug=="Al" ||
             provinceSlug ==_allFacilities[value][0].substring(0, 2)
-            || _allFacilities[value][0]=="All"){
+            || _allFacilities[value][0]=="All" || (provinceSlug === '20'
+            && _allFacilities[value][0].substring(0, 2) === '21')){
             childFacilitiesInProvince.push(_allFacilities[value])
         }
     }

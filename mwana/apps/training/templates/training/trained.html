@@ -5,12 +5,8 @@
 
 {% block stylesheets %}
 {{ block.super }}
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
 
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
 {% endblock %}
 
 
@@ -18,9 +14,16 @@
 {{ block.super }}
 
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
-
+<script type="text/javascript">
+    function tab(tab) {
+        document.getElementById('tab1').style.display = 'none';
+        document.getElementById('tab2').style.display = 'none';
+        document.getElementById('li_tab1').setAttribute("class", "");
+        document.getElementById('li_tab2').setAttribute("class", "");
+        document.getElementById(tab).style.display = 'block';
+    }
+</script>
 {% endblock %}
 
 {% block content %}
@@ -28,27 +31,202 @@
 
 <div class="left">
     <form name="getValues" action="" method="POST">
+
+
+
         <div class="module">
             <h2>Trained People</h2>
-            <p/>
-            <h3>Create New {{ model }}</h3>
 
-            <br>
-            {%if confirm_message%}
-            <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
-                {{confirm_message}}
-            </div>
-            {% endif %}
             <table border="0">
-                {% for field in form %}
-                <tr>
-                    <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
-                    <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
-                </tr>
-                {% endfor %}
+                <tbody>
+                    <tr>
+                        <td style="border: 0px">
+                            <div id="Tabs">
+                                <ul>
+                                    <li id="li_tab1" onclick="tab('tab1')" ><a>Chart</a></li>
+                                    <li id="li_tab2" onclick="tab('tab2')"><a>Add Trained</a></li>
+                                </ul> </div>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td valign="top" style="border: 0px" width="100%">
+                            <div id="id">
+                                <div id="tab1" >
+                                    <div id="container" style="min-width: 800px; height: auto; margin: 0 auto"></div>
+                                </div>
+                                <div id="tab2" style="display: none;">
+                                    <p></p>
+                                    <h3>Create New {{ model }}</h3>
+
+                                    <br>
+                                    {%if confirm_message%}
+                                    <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
+                                        {{confirm_message}}
+                                    </div>
+                                    {% endif %}
+                                    <table border="0">
+                                        {% for field in form %}
+                                        <tr>
+                                            <td style="border: 0">{{ field.label_tag }}</td><td style="border: 0"></td>
+                                            <td style="border: 0">{{ field }}</td><td style="border: 0">{{ field.errors }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                    <p><input type="submit" value="Submit" /></p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
-            <p><input type="submit" value="Submit" /></p>
             <hr>
+            <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js"></script>
+            <script type="text/javascript">
+                $(function () {
+                    var chart;
+                    $(document).ready(function() {
+
+                        var colors = Highcharts.getOptions().colors,
+                        categories = ['CBA', 'Clinic Staff', 'Hub Workers', 'DHO Staff', 'PHO Staff'],
+                        name = 'Trained SMS users',
+                        
+                        data = [
+                            {
+                                y: {{ cba_total}},
+                                color: colors[0],
+                                drilldown: {
+                                    name: 'CBAs Trained by partners',
+                                    categories: {% autoescape off %} {{cba_trainer_labels}}{% endautoescape %},
+                                    data: {{cba_trainer_values}},
+                                    color: colors[0]
+                                }
+                            },
+
+                            {
+                                y: {{ clinic_total}},
+                                color: colors[1],
+                                drilldown: {
+                                    name: 'Clinic Staff Trained by partners',
+                                    categories: {% autoescape off %} {{clinic_trainer_labels}}{% endautoescape %},
+                                    data: {{clinic_trainer_values}},
+                                    color: colors[1]
+                                }
+                            }, {
+                                y: {{ hub_total}},
+                                color: colors[2],
+                                drilldown: {
+                                    name: 'Hub Workers Trained by partners',
+                                    categories: {% autoescape off %} {{hub_trainer_labels}}{% endautoescape %},
+                                    data: {{hub_trainer_values}},
+                                    color: colors[2]
+                                }
+                            }, {
+                                y: {{ dho_total}},
+                                color: colors[3],
+                                drilldown: {
+                                    name: 'DHOs Trained by partners',
+                                    categories: {% autoescape off %} {{dho_trainer_labels}}{% endautoescape %},
+                                    data: {{dho_trainer_values}},
+                                    color: colors[3]
+                                }
+                            }, {
+                                y: {{ pho_total}},
+                                color: colors[4],
+                                drilldown: {
+                                    name: 'PHOs Trained by partners',
+                                    categories: {% autoescape off %} {{pho_trainer_labels}}{% endautoescape %},
+                                    data: {{pho_trainer_values}},
+                                    color: colors[4]
+                                }
+                            }];
+
+                        function setChart(name, categories, data, color) {
+                            chart.xAxis[0].setCategories(categories, false);
+                            chart.series[0].remove(false);
+                            chart.addSeries({
+                                name: name,
+                                data: data,
+                                color: color || 'white'
+                            }, false);
+                            chart.redraw();
+                        }
+
+                        chart = new Highcharts.Chart({
+                            chart: {
+                                renderTo: 'container',
+                                type: 'column'
+                            },
+                            title: {
+                                text: 'Confirmed Trained Mwana SMS users since October 2012'
+                            },
+                            subtitle: {
+                                text: 'Click the columns to view Partners. Click again to view SMS users.'
+                            },
+                            xAxis: {
+                                categories: categories
+                            },
+                            yAxis: {
+                                title: {
+                                    text: 'Total trained'
+                                }
+                            },
+                            plotOptions: {
+                                column: {
+                                    cursor: 'pointer',
+                                    point: {
+                                        events: {
+                                            click: function() {
+                                                var drilldown = this.drilldown;
+                                                if (drilldown) { // drill down
+                                                    setChart(drilldown.name, drilldown.categories, drilldown.data, drilldown.color);
+                                                } else { // restore
+                                                    setChart(name, categories, data);
+                                                }
+                                            }
+                                        }
+                                    },
+                                    dataLabels: {
+                                        enabled: true,
+                                        color: colors[0],
+                                        style: {
+                                            fontWeight: 'bold'
+                                        },
+                                        formatter: function() {
+                                            return this.y;
+                                        }
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                formatter: function() {
+                                    var point = this.point,
+                                    s = this.x +':<b>'+ this.y +' trained</b><br/>';
+                                    if (point.drilldown) {
+                                        s += 'Click to view '+ point.category +' partners';
+                                    } else {
+                                        s += 'Click to return to user groups';
+                                    }
+                                    return s;
+                                }
+                            },
+                            series: [{
+                                    name: name,
+                                    data: data,
+                                    color: 'white'
+                                }],
+                            exporting: {
+                                enabled: false
+                            }
+                        });
+                    });
+
+                });
+            </script>
+
+            <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+            <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
+
 
             <div>
                 <h3>Existing {{ model }}</h3>
@@ -126,9 +304,13 @@
         </div>
     </form>
 </div>
-
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript">
     $("select").chosen();
+    $(".chzn-single").css('width','290px');
+    $(".chzn-drop").css('width','298px');
+    $(".chzn-search input").css('width','263px');
 </script>
 
 {% endblock %}
