@@ -20,7 +20,6 @@ from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.labresults.util import is_eligible_for_results
-from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 from mwana.util import get_clinic_or_default
 from rapidsms.contrib.scheduler.models import EventSchedule
