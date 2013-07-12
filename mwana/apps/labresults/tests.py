@@ -984,7 +984,12 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=212987b, Result=N, old value=212987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = ("Make a followup for changed results Mibenge Clinic: "
+        "ID=1029023412, Result=R, old value=N, Lab ID=10-09998;****"
+        "ID=87, Result=P, old value=78:N, Lab ID=10-09999;****"
+        "ID=212987b, Result=N, old value=212987, Lab ID=10-09997."
+        " Contacts = John ""Banda:clinic_worker, Mary Phiri:other_worker")
+
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)
