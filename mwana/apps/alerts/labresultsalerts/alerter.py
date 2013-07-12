@@ -88,7 +88,7 @@ class Alerter:
                 days_late = self.days_ago(self.last_sent_payloads[lab].date())
                 level = Alert.HIGH_LEVEL if days_late >= (2 * self.lab_sending_days) else Alert.LOW_LEVEL
                 my_alerts.append(Alert(Alert.LAB_NOT_SENDING_PAYLOD, "%s lab "
-                                 "has not sent any paylods for %s days. This "
+                                 "has not sent any DBS data for %s days. This "
                                  "could be a modem problem at the lab. "
                                  "Please call and enquire (%s)" % (lab,
                                  (self.today - self.last_sent_payloads[lab].date()
