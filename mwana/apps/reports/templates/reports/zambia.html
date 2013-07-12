@@ -12,6 +12,7 @@
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/navi.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 
 {% endblock %}
@@ -41,7 +42,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
 <div>
     <div class="left">
         <div class="module">
-            <div class="module">
+            <div class="module" id="top">
                 <h2>Percentage (%) Positivity</h2>                
                 <table width="100%" class="th" bgcolor="#EEEEEE">
 
@@ -57,23 +58,23 @@ You currently don't belong to any group for viewing reports. Contact the system 
                             <p>{{ percent_rejected_country}}% Rejected
                         </td>
                     </tr>                   
-                    
+
                     <tr>
                         <td colspan="3">
                             {% for record in stacked %}
                             <img title="{{ record.positive}}% Positive" src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
                                  width="{% widthratio record.positive 7 50 %}" />
-                            
+
 
                             <img title="{{ record.negative}}% Negative" src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
                                  width="{% widthratio record.negative 7 50 %}" />
-                            
+
                             <img title="{{ record.rejected}}% Rejected" src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
                                  width="{% widthratio record.rejected 7 50 %}" />
-                            
+
                             <b>{{ record.name }}</b><br>
                             {% endfor %}
-                            
+
                             <br><span style="float: right; width: 70%">
                                 <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
                                      width="10" />Positive&nbsp;
@@ -754,7 +755,21 @@ You currently don't belong to any group for viewing reports. Contact the system 
     </div>
 
 </div>
-
+<div id="floating-navigator">
+    <div id="title"> Quick Navigator</div><p></p>
+    <a href="#top">Percentage Positivity</a><p>
+        <a href="#DateRangeReports">Date range reports:</a><p>
+        <a href="#Results160">Results160 Reports</a><p>
+        <a href="#AverageTurnaround">DBS Turnaround</a><p>
+        <a href="#AverageTransportTime">Transport Time</a><p>
+        <a href="#AverageProcessing">Processing Time</a><p>
+        <a href="#AverageEnteringTime">Entering Time</a><p>
+        <a href="#AverageRetrievingTime">Retrieving Time</a><p>
+        <a href="#SampleNotifications">Sample Notifications</a><p>
+        <a href="#SamplesCaptured">Samples Captured at Labs</a><p>
+        <a href="#PendingResults">Pending Results</a><p>
+        <a href="#RemindMiReports">RemindMi Reports</a><p>
+</div>
 <script type="text/javascript">
     $("#rpt_group").chosen();
 </script>
