@@ -11,23 +11,24 @@ function loadLocationData(){
     for(i in provinces.options){
 
         if(provinces.options[i].value){
-            _allProvinces.push([provinces.options[i].value, provinces.options[i].innerHTML])
+            _allProvinces.push([provinces.options[i].id,
+                provinces.options[i].value, provinces.options[i].innerHTML])
         }
-
     }
     var districts = document.getElementById('rpt_districts');
     for(i in districts.options){
         if(districts.options[i].value){
-            _allDistricts.push([districts.options[i].value, districts.options[i].innerHTML])
+            _allDistricts.push([districts.options[i].id,
+                districts.options[i].value, districts.options[i].innerHTML])
         }
     }
     var facilities = document.getElementById('rpt_facilities');
     for(i in facilities.options){
         if(facilities.options[i].value){
-            _allFacilities.push([facilities.options[i].value, facilities.options[i].innerHTML])
+            _allFacilities.push([facilities.options[i].id,
+                facilities.options[i].value, facilities.options[i].innerHTML])
         }
     }
-
     _loaded = true
 }
 
@@ -41,23 +42,18 @@ function clearDropDown(element){
 function firerpt_provincesChange(){
     loadLocationData()
     var provinceDropDown = document.getElementById('rpt_provinces');
-    var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+    var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].id.split('_')[0]
     var districtDropDown = document.getElementById('rpt_districts');
     var facilityDropDown = document.getElementById('rpt_facilities');
 
     // reload district combo
     clearDropDown(districtDropDown);
     var childDistricts = []
-    for(value in _allDistricts){
-        if(provinceSlug === "Al" ||
-            provinceSlug ===_allDistricts[value][0].substring(0, 2)
-            || _allDistricts[value][0] === "All"){
-            childDistricts.push(_allDistricts[value]);
-        }
-        // Special case for Ndola district
-        else if(provinceSlug === '20'
-            && _allDistricts[value][0].substring(0, 2) === '21'){
-            childDistricts.push(_allDistricts[value]);
+    for(index in _allDistricts){
+        if(provinceSlug === "All" ||
+            provinceSlug ===_allDistricts[index][0].split('_')[0]
+            || _allDistricts[index][0] === "All"){
+            childDistricts.push(_allDistricts[index]);
         }
     }
     fillList(districtDropDown, childDistricts)
@@ -65,17 +61,12 @@ function firerpt_provincesChange(){
     // reload facility combo
     clearDropDown(facilityDropDown);
     var childFacilities = []
-    for(value in _allFacilities){
-        if(provinceSlug === "Al" ||
-            provinceSlug === _allFacilities[value][0].substring(0, 2) ||
-            _allFacilities[value][0] === "All"){
-            childFacilities.push(_allFacilities[value]);
-        }
-        // Special case for Ndola facilities
-        else if(provinceSlug === '20'
-            && _allFacilities[value][0].substring(0, 2) === '21'){
-            childFacilities.push(_allFacilities[value]);
-        }
+    for(index in _allFacilities){
+        if(provinceSlug === "All" ||
+            provinceSlug === _allFacilities[index][0].split('_')[0] ||
+            _allFacilities[index][0] === "All"){
+            childFacilities.push(_allFacilities[index]);
+        }       
     }
     fillList(facilityDropDown, childFacilities)
 }
@@ -83,13 +74,10 @@ function firerpt_provincesChange(){
 function firerpt_districtsChange(){
     loadLocationData()
     var provinceDropDown = document.getElementById('rpt_provinces');
-    var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].value.substring(0, 2)
+    var provinceSlug = provinceDropDown.options[provinceDropDown.selectedIndex].id.split('_')[0]
     var districtDropDown = document.getElementById('rpt_districts');
     var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
 
-    if(districtSlug != "All"){
-        districtSlug = districtSlug.substring(0, 4)
-    }
     var facilityDropDown = document.getElementById('rpt_facilities');
 
     // reload facility combo
@@ -97,10 +85,9 @@ function firerpt_districtsChange(){
     var childFacilitiesInProvince = []
 
     for(value in _allFacilities){
-        if(provinceSlug=="Al" ||
-            provinceSlug ==_allFacilities[value][0].substring(0, 2)
-            || _allFacilities[value][0]=="All" || (provinceSlug === '20'
-            && _allFacilities[value][0].substring(0, 2) === '21')){
+        if(provinceSlug=="All" ||
+            provinceSlug === _allFacilities[value][0].split('_')[0]
+            || _allFacilities[value][0] === "All"){
             childFacilitiesInProvince.push(_allFacilities[value])
         }
     }
@@ -108,26 +95,26 @@ function firerpt_districtsChange(){
     var childFacilities = []
 
     for(value in childFacilitiesInProvince){
-        if(districtSlug == "All" ||
-            districtSlug == childFacilitiesInProvince[value][0].substring(0, 4) ||
-            childFacilitiesInProvince[value][0]=="All"){
+        if(districtSlug === "All" ||
+            districtSlug === childFacilitiesInProvince[value][0].split('_')[1] ||
+            childFacilitiesInProvince[value][0] === "All"){
             childFacilities.push(childFacilitiesInProvince[value])
         }
     }
-
     fillList(facilityDropDown, childFacilities)
 }
-
+function firerpt_facilitiesChange(){
+    //
+}
 function fillList( box, arr ) {
-    // arr[0] holds the display text
-    // arr[1] are the values
-
+    
     for ( i in arr ) {
 
         // Create a new drop down option with the
         // display text and value from arr
 
-        option = new Option( arr[i][1], arr[i][0]);
+        option = new Option( arr[i][2], arr[i][1]);
+        option.id = arr[i][0]
 
         // Add to the end of the existing options
 
