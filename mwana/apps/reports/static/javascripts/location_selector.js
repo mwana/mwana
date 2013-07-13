@@ -16,17 +16,26 @@ function loadLocationData(){
         }
     }
     var districts = document.getElementById('rpt_districts');
+    
     for(i in districts.options){
         if(districts.options[i].value){
-            _allDistricts.push([districts.options[i].id,
-                districts.options[i].value, districts.options[i].innerHTML])
+            entry = [districts.options[i].id,
+                districts.options[i].value, districts.options[i].innerHTML];
+            // accommodate weired behaviour in some browsers
+            if(_allDistricts.toString().indexOf(entry) === -1 ){
+                _allDistricts.push(entry)
+            }
         }
     }
+    
     var facilities = document.getElementById('rpt_facilities');
     for(i in facilities.options){
         if(facilities.options[i].value){
-            _allFacilities.push([facilities.options[i].id,
-                facilities.options[i].value, facilities.options[i].innerHTML])
+            entry = [facilities.options[i].id,
+                facilities.options[i].value, facilities.options[i].innerHTML];
+            if(_allFacilities.toString().indexOf(entry) === -1 ){
+                _allFacilities.push(entry)
+            }
         }
     }
     _loaded = true
@@ -104,7 +113,7 @@ function firerpt_districtsChange(){
     fillList(facilityDropDown, childFacilities)
 }
 function firerpt_facilitiesChange(){
-    //
+//
 }
 function fillList( box, arr ) {
     
