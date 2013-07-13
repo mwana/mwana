@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
+from mwana.apps.reports.utils.facilityfilter import get_rpt_districts
+from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
 from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.forms import GroupUserMappingForm
@@ -125,22 +128,6 @@ def malawi_reports(request, location=None):
          'total_dbs': total_dbs,
      }, context_instance=RequestContext(request))
 
-
-#def get_facilities_dropdown_html(id, facilities, selected_facility):
-#    #TODO: move this implemention to templates
-#    code ='<select name="%s" size="1">\n'%id
-#    code +='<option value="All">All</option>\n'
-#    if not facilities:
-#        return '<select name="%s" size="1"></select>\n'%id
-#
-#    for fac in facilities:
-#        if fac.slug == selected_facility:
-#            code = code + '<option selected value="%s">%s</option>\n'%(fac.slug,fac.name)
-#        else:
-#            code = code + '<option value="%s">%s</option>\n'%(fac.slug,fac.name)
-#
-#    code = code +'</select>'
-#    return code
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
@@ -412,9 +399,9 @@ def zambia_reports(request):
          'is_report_admin': is_report_admin,
          'region_selectable': True,
          'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
-         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", r.get_rpt_provinces(request.user), rpt_provinces) ,
-         'rpt_districts': get_facilities_dropdown_html("rpt_districts", r.get_rpt_districts(request.user), rpt_districts) ,
-         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", r.get_rpt_facilities(request.user), rpt_facilities) ,
+         'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces) ,
+         'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts) ,
+         'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities) ,
      }, context_instance=RequestContext(request))
 
 @require_GET

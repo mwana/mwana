@@ -2,6 +2,7 @@
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_GET
+from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities, get_rpt_districts, get_rpt_provinces
 from mwana.apps.alerts.labresultsalerts.alerter import Alerter
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
@@ -87,8 +88,8 @@ def mwana_alerts (request):
                               'is_report_admin': is_report_admin,
                               'region_selectable': True,
                               'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
-                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", alerter.get_rpt_provinces(request.user), rpt_provinces) ,
-                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", alerter.get_rpt_districts(request.user), rpt_districts) ,
-                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", alerter.get_rpt_facilities(request.user), rpt_facilities) ,
+                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces) ,
+                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts) ,
+                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities) ,
                               }, context_instance=RequestContext(request)
                               )

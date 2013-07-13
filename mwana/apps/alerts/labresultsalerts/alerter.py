@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.utils.facilityfilter import get_distinct_parents
 from mwana.apps.userverification.models import UserVerification
 from django.db.models import Max
 
@@ -378,7 +379,7 @@ class Alerter:
         self.set_district_last_received_dbs()
 
         all_districts = \
-        self.get_distinct_parents(self.get_facilities_for_reporting())
+        get_distinct_parents(self.get_facilities_for_reporting())
         for dist in all_districts:
             if dist in self.last_received_dbs.keys():
                 if self.last_received_dbs[dist] < self.district_trans_referal_date.date():
@@ -613,23 +614,4 @@ class Alerter:
         if payloads:
             return [payloads[0].source]
         return []
-
-    def get_distinct_parents(self, locations):
-        if not locations:
-            return []
-        parents = []
-        for location in locations:
-            parents.append(location.parent)
-        return list(set(parents))
-    
-    def get_rpt_facilities(self, user):
-        self.user = user
-        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
-
-    def get_rpt_districts(self, user):
-        self.user = user
-        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
-
-    def get_rpt_provinces(self, user):
-        self.user = user
-        return self.get_distinct_parents(self.get_rpt_districts(user))
+  
