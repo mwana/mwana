@@ -22,7 +22,7 @@ def postpartum_visit(session, xform, router):
     Used to record a post-partum vist
 
     Format:
-    PP Mother_UID WELL/SICK WELL/SICK YES/NO NVD_dd NVD_mm NVD_yyyy
+    PP Mother_UID GOOD/FAIR/ILL/CRITICAL GOOD/FAIR/ILL/CRITICAL YES/NO NVD_dd NVD_mm NVD_yyyy
     """
     connection = session.connection
     c_types = ContactType.objects.filter(
@@ -32,7 +32,7 @@ def postpartum_visit(session, xform, router):
     try:
         contact = Contact.objects.get(types__in=c_types, connection=connection)
     except ObjectDoesNotExist:
-        return respond_to_session(router, session, const.NOT_A_DATA_ASSOCIATE, 
+        return respond_to_session(router, session, const.NOT_A_DATA_ASSOCIATE,
                                   is_error=True)
 
     unique_id = get_value_from_form('unique_id', xform)

@@ -589,8 +589,7 @@ def report(request):
 
     positive_syphs = syph_tests.filter(result="p")
 
-    positive_syph = percentage(positive_syphs.count(),
-                          syph_tests.count())
+    positive_syph = positive_syphs.count()
     positive_mothers = positive_syphs.values_list('mother', flat=True)
     positive_mothers = PregnantMother.objects.filter(id__in=positive_mothers)
     treatments = positive_mothers.annotate(Count('syphilistreatment')) \
@@ -632,7 +631,7 @@ def report(request):
           'value': ma_f_deaths},
          {'data': "Percentage of Maternal community deaths",
           'value': ma_c_deaths},
-         {'data': "Percentage of women who tested positive for Syphilis",
+         {'data': "Number of women who tested positive for Syphilis",
           'value': positive_syph},
          {'data': "Percentage of women tested positive who completed the syphilis treatment",
           'value': positive_syph_completed},

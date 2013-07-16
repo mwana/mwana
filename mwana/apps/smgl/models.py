@@ -18,8 +18,10 @@ VISIT_TYPE_CHOICES = (
 )
 
 POS_STATUS_CHOICES = (
-    ('well', 'Well'),
-    ('sick', 'Sick')
+    ('good', 'Good'),
+    ('fair', 'Fair'),
+    ('ill', 'Ill'),
+    ('critical', 'Critical')
 )
 
 
@@ -157,10 +159,10 @@ class FacilityVisit(models.Model):
     next_visit = models.DateField(null=True, blank=True)
     contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
-    mother_status = models.CharField(max_length=4, help_text="Mother's Status",
+    mother_status = models.CharField(max_length=8, help_text="Mother's Status",
                                      choices=POS_STATUS_CHOICES,
                                      null=True, blank=True)
-    baby_status = models.CharField(max_length=4, help_text="Baby's Status",
+    baby_status = models.CharField(max_length=8, help_text="Baby's Status",
                                      choices=POS_STATUS_CHOICES,
                                      null=True, blank=True)
     referred = models.BooleanField(default=False)
