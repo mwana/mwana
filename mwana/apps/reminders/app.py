@@ -175,7 +175,8 @@ class App(rapidsms.apps.base.AppBase):
             # make sure the date is not unreasonably too old
             if date.year < 2010:
                 msg.respond(_("Sorry, make sure you enter the year correctly."
-                " %s is too old. We are in %s." % (date.year, today.year)))
+                " %(date_entered)s is too old. We are in %(current_date)s."),
+                date_entered=date.year, current_date=today.year)
                 return True
 
             # fetch or create the patient
