@@ -600,11 +600,10 @@ class Alerter:
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
         if self.reporting_facility:
             facs = facs.filter(slug=self.reporting_facility)
-        # TODO : use location.parent instead of relying on slug naming convetions
         elif self.reporting_district:
-            facs = facs.filter(slug__startswith=self.reporting_district[:4])
+            facs = facs.filter(parent__slug=self.reporting_district)
         elif self.reporting_province:
-            facs = facs.filter(slug__startswith=self.reporting_province[:2])
+            facs = facs.filter(parent__parent__slug=self.reporting_province)
         return facs.filter(supportedlocation__supported=True
                                        ).distinct()
 
