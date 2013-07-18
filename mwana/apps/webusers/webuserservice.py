@@ -60,9 +60,9 @@ class WebUserService:
 
 
         if district and district.lower().strip() != 'all':
-            user_facilities = user_facilities.filter(slug__startswith=district[:4])
+            user_facilities = user_facilities.filter(parent__slug=district)
         elif province and province.lower().strip() != 'all':
-            user_facilities = user_facilities.filter(slug__startswith=province[:2])
+            user_facilities = user_facilities.filter(parent__parent__slug=province)
 
         my_facilities_count = len(user_facilities.distinct())
         

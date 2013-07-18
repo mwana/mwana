@@ -12,9 +12,9 @@ def user_facilities(current_user=None, group=None, province=None, district=None,
     if facility:
         facs = facs.filter(slug=facility)
     elif district:
-        facs = facs.filter(slug__startswith=district[:4])
+        facs = facs.filter(parent__slug=district)
     elif province:
-        facs = facs.filter(slug__startswith=province[:2])
+        facs = facs.filter(parent__parent__slug=province)
     return facs
 
 
