@@ -135,6 +135,16 @@ def update_supported_sites():
         if ts.trained_by:
             a, b = GroupFacilityMapping.objects.get_or_create(group=ts.trained_by, facility=loc)
 
+#    update based on results retrieved
+    results = Result.objects.filter(result_sent_date__year=datetime.today().year
+                                    , clinic__supportedlocation=None)
+
+    for res in results:
+        # @type res Result
+        loc = res.clinic;
+        a, b = SupportedLocation.objects.get_or_create(location=loc)
+
+
 def inactivate_sms_users_without_connections():
     logger.info("inactivate_sms_users_without_connections")
     slugs = ['worker', 'hub', 'district', 'province', 'dbs-printer', 'cba']
