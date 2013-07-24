@@ -147,6 +147,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         <td width="20"><b>{{ column }}</b></td>
                         {% else %}
                         <td width="20">
+                            {% if single_bar_length %}
                             {% ifequal forloop.counter 3 %}
 
                             <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
@@ -160,7 +161,9 @@ You currently don't belong to any group for viewing reports. Contact the system 
 
                             <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
                                  width="{% widthratio column 10 50 %}" />
-                            {% endifequal %} {{ column }}
+                            {% endifequal %}
+                            {%  endif %}
+                            {{ column }}
 
                         </td>
                         {% endif %}
