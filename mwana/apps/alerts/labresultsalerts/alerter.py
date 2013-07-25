@@ -400,7 +400,7 @@ class Alerter:
         all_districts = \
         get_distinct_parents(self.get_facilities_for_reporting())
         for dist in all_districts:
-            if dist in self.last_received_dbs.keys():
+            if dist.id in self.last_received_dbs.keys():
                 if self.last_received_dbs[dist.id] < self.district_trans_referal_date.date():
                     additional = ""
                     clinics = Location.\
