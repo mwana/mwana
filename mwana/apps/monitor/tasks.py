@@ -1,8 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.util import is_today_a_weekend
+from mwana.apps.alerts.models import Lab
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+from mwana.const import get_lab_worker_type
 import logging
 
 from django.db.models import Count
@@ -79,9 +82,47 @@ def get_messages_data():
 
     return "\n".join("%s:%s" % (k, v) for k, v in my_map.items())
 
+def send_report_to_lab_workers():
+    logger.info('sending monitoring information to support staff at lab')
+    if is_today_a_weekend():
+        return
+
+    today = datetime.today()
+    my_date = datetime(today.year, today.month, today.day)
+
+    if today.hour < 12:
+        return
+         
+    lab_workers = Contact.active.filter(types=get_lab_worker_type()).\
+    exclude(connection=None)
+    
+    for lab_worker in lab_workers:
+        lab = Lab.objects.filter(phone__endswith=lab_worker.default_connection.identity[-10:])
+        if not lab:
+            continue
+            
+        my_lab = lab[0]
+        res = Result.objects.filter(payload__source=my_lab.source_key,
+        payload__incoming_date__year=my_date.year,
+        payload__incoming_date__month=my_date.month,
+        payload__incoming_date__day=my_date.day
+        ).count()
+
+        payloads = Payload.objects.filter(source=my_lab.source_key,
+        incoming_date__year=my_date.year,
+        incoming_date__month=my_date.month,
+        incoming_date__day=my_date.day
+        ).count()
+
+        message = ("Hi %(name)s. Today Mwana server has received %(payloads)s "
+        "payloads and %(res)s results from %(lab)s" % {
+        "name":lab_worker.name, "lab":my_lab.source_key.title(), "payloads":payloads, "res":res})
+
+        OutgoingMessage(lab_worker.default_connection, message).send()
+    
+
 def send_monitor_report(router):
     logger.info('sending monitoring information to support staff')
-
     
     admins = Contact.active.filter(is_help_admin=True,
                                    monitormessagerecipient__receive_sms=True)
@@ -94,6 +135,8 @@ def send_monitor_report(router):
     
     for admin in admins:
         OutgoingMessage(admin.default_connection, message).send()
+
+    send_report_to_lab_workers()
 
 def update_supported_sites():
     logger.info("In update_supported_sites")
