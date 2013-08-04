@@ -358,7 +358,7 @@ def get_sms_facilities(province_slug, district_slug, facility_slug):
     if facility_slug:
         facs = facs.filter(Q(slug=facility_slug) | Q(parent__slug=facility_slug))
     elif district_slug:
-        facs = facs.filter(Q(parent__slug=district_slug) | Q(slug=district_slug))
+        facs = facs.filter(Q(parent__parent__slug=district_slug) |Q(parent__slug=district_slug) | Q(slug=district_slug))
     elif province_slug:
         facs = facs.filter(Q(parent__parent__parent__slug=province_slug) | Q(parent__parent__slug=province_slug) | Q(parent__slug=province_slug) | Q(slug=province_slug))
     return facs
