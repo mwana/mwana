@@ -36,7 +36,7 @@ def webusers(request):
     records = []
     dynamic_object = None
     
-    for record in sorted(items, key=lambda item:item.last_login):
+    for record in items:
         dynamic_object = record
         dynamic_object.days_ago = (datetime.now() - record.last_login).days
         records.append(record)

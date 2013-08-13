@@ -13,8 +13,7 @@ class WebUserService:
     def get_paginated(self, query_set, page=1, num_pay_page=30):
         if not page:
             page = 1
-        
-            
+                    
         paginator = Paginator(query_set, num_pay_page)
         try:
             p_issues = paginator.page(page)
@@ -24,8 +23,6 @@ class WebUserService:
         except EmptyPage:
             # If page is out of range (e.g. 9999), deliver last page of results.
             p_issues = paginator.page(paginator.num_pages)
-
-
 
         number = p_issues.number
         has_previous = p_issues.has_previous()
@@ -41,7 +38,7 @@ class WebUserService:
                                 user_groups).distinct().count()
 
     def get_web_users(self, current_user, page=1, group=None, district=None, province=None):
-        to_return = []
+        to_return = set()
         user_groups = ReportingGroup.objects.filter(groupusermapping__user=
                                                     current_user).distinct()
         if group and group.lower().strip() != 'all':
@@ -50,14 +47,11 @@ class WebUserService:
         peers = User.objects.filter(is_active=True, groupusermapping__group__in=user_groups).distinct()
 
         for peer in peers:
-            to_return.append(peer)
-
+            to_return.add(peer)
 
         user_facilities = Location.objects.filter(
                                                   groupfacilitymapping__group__in=
                                                   user_groups).distinct()
-
-
 
         if district and district.lower().strip() != 'all':
             user_facilities = user_facilities.filter(parent__slug=district)
@@ -75,8 +69,8 @@ class WebUserService:
                                           id=current_user.id).distinct()
         for user in other_users:
             if self.user_facilities_count(user) and my_facilities_count >= self.user_facilities_count(user):
-                to_return.append(user)
+                to_return.add(user)
 
-        
-        return self.get_paginated(list(set(to_return)), page, 30)
+        to_return = list(to_return)
+        return self.get_paginated(sorted(to_return, key=lambda item:item.last_login), page, 30)
 
