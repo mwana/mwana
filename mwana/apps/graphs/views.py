@@ -181,6 +181,7 @@ def monthly_turnaround_trends(request):
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'Days'",
                               "report_data": report_data,
+                              "skip_total": True,
                               }, context_instance=RequestContext(request)
                               )
 
