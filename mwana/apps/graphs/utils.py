@@ -41,7 +41,7 @@ class GraphServive:
                 categories.append(str(row[0]))
             elif row[-1] in category_names:
                 categories.append(str(row[-1]))
-        
+
         return categories, transport, processing, delays, retrieving
 
     def get_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
@@ -94,7 +94,7 @@ class GraphServive:
                                     payload__source=lab[0]
                                     ).count())
             month_ranges.append(my_date.strftime('%b %Y'))
-            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)            
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
         return month_ranges, data
 
@@ -115,7 +115,7 @@ class GraphServive:
             data[item] = []
 
         births_map = {'Facility births':'cl', 'Community births':'hm', 'Unspecified':None}
-        
+
         month_ranges = []
         while my_date <= end_date:
             for item in sorted(trend_items):
@@ -152,7 +152,7 @@ class GraphServive:
             tt = max(1, len(tt_res))
             for result in tt_res:
                 tt_diff = 1 + tt_diff + (result.result_sent_date.date() - result.collected_on).days
-            
+
             data['Turnaround Time'].append(int(tt_diff / tt))
 
             #Transport Time
@@ -210,7 +210,7 @@ class GraphServive:
 
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
-        trend_items = ['Facilities', 'Results']
+        trend_items = ['Facilities', "Negative", "Positive", "Rejected", 'Total Results']
         for item in sorted(trend_items):
             data[item] = []
 
@@ -223,8 +223,23 @@ class GraphServive:
             tt_res = results.filter(result_sent_date__year=my_date.year,
                                     result_sent_date__month=my_date.month
                                     )
+            neg_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month,
+                                    result='N'
+                                    ).count()
+            pos_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month,
+                                    result='P'
+                                    ).count()
+            rej_res = results.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month,
+                                    result__in=['R', 'I', 'X']
+                                    ).count()
 
-            data['Results'].append(len(tt_res))
+            data['Negative'].append(neg_res)
+            data['Positive'].append(pos_res)
+            data['Rejected'].append(rej_res)
+            data['Total Results'].append(len(tt_res))
             tt_clinics = len(set([res.clinic for res in tt_res]))
 
             data['Facilities'].append(tt_clinics)
@@ -267,7 +282,7 @@ class GraphServive:
 
     def get_facility_vs_community(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_facilities(province_slug, district_slug, facility_slug)
-        start, end = get_datetime_bounds(start_date, end_date)       
+        start, end = get_datetime_bounds(start_date, end_date)
 
         return PatientEvent.objects.filter(date_logged__gte=start,
                                            date_logged__lt=end,
