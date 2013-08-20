@@ -80,7 +80,7 @@ def load_locations(file_path):
         if not facility.parent:
             facility.parent = district
 
-        if not facility.point:
+        if not facility.point and latitude and longitude:
             facility.point = Point.objects.get_or_create(latitude=latitude, longitude=longitude)[0]
 
         facility.type = type
