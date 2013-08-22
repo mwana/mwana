@@ -80,16 +80,16 @@ class PatientTrace(models.Model):
         return "%s patient trace for %s" % (self.initiator, self.name)
 
 def get_status_new():
-    return PatientTrace.STATUS_CHOICES[0][1]
+    return PatientTrace.STATUS_CHOICES[0][0]
 
 def get_status_told():
-    return PatientTrace.STATUS_CHOICES[1][1]
+    return PatientTrace.STATUS_CHOICES[1][0]
 
 def get_status_await_confirm():
-    return PatientTrace.STATUS_CHOICES[3][1]
+    return PatientTrace.STATUS_CHOICES[3][0]
 
 def get_status_confirmed():
-    return PatientTrace.STATUS_CHOICES[2][1]
+    return PatientTrace.STATUS_CHOICES[2][0]
 
 def get_initiator_cba():
     return PatientTrace.INITIATOR_CHOICES[3][0]
