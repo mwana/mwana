@@ -31,7 +31,7 @@ class EventRegistration(TestScript):
             kk     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
             """
         self.runScript(script)
-    
+
     def testMalformedMessage(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
@@ -300,12 +300,12 @@ class Reminders(TestScript):
         cba1 > told patient 1
         """)      
         
-        self.assertEqual(2, PatientTrace.objects.filter(status='told').count())
+        self.assertEqual(2, PatientTrace.objects.filter(status='told', initiator='automated_task').count())
 
         self.runScript("""
         cba1 > confirm patient 2
         """)
-        self.assertEqual(1, PatientTrace.objects.filter(status='confirmed').count())
+        self.assertEqual(1, PatientTrace.objects.filter(status='confirmed', initiator='automated_task').count())
      
         
     def testRemindersSentOnlyOnce(self):
