@@ -140,15 +140,9 @@ class ToldHandler(KeywordHandler):
         Respond with a message indicating that the sender is not recognized/authorized to initiate
         traces
         '''
-        self.respond(self.unrecognized_txt)
-    
-
+        self.respond(self.unrecognized_txt)    
     
     def update_initiator_on_status(self,pat_name, initiator_contact):
         if initiator_contact.default_connection is not None:
             msg = OutgoingMessage(initiator_contact.default_connection, self.initiator_status_update_txt % (initiator_contact.name, self.msg.connection.contact.name, pat_name))
             msg.send()
-
-
-
-    
