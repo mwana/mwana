@@ -38,11 +38,17 @@ def day():
     return date.today().day
 
 def get_payload_data():
+    results= Result.objects.filter(arrival_date__year=year(),
+                               arrival_date__month=month(),
+                               arrival_date__day=day())
     p = Payload.objects.filter(incoming_date__year=year(),
                                incoming_date__month=month(),
                                incoming_date__day=day()).\
         values("source").annotate(Count('id'))
-    return "\n".join(entry['source'].split('/')[1].title().replace('Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')  + ":" + str(entry['id__count']) for entry in p)
+    return "\n".join(entry['source'].split('/')[1].title().replace(
+        'Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')
+        + ":" + str(entry['id__count']) + "/"+
+        str(results.filter(payload__source=entry['source']).count()) for entry in p)
 
 def get_results_data():
     sent_today = Result.objects.filter(notification_status='sent',
@@ -130,7 +136,7 @@ def send_monitor_report(router):
     if not admins:
         logger.warning('No admins to send monitoring data to were found in system')
         return
-    message = "System Info\n_Payloads_\n%s;\n_Results_\n%s;\n_SMS_(I/O)\n%s" % (get_payload_data(), get_results_data(), get_messages_data())
+    message = "Sys. Info\n_Payloads/Res_\n%s\n_Results_\n%s\n_SMS_(I/O)\n%s" % (get_payload_data(), get_results_data(), get_messages_data())
     logger.info('Sending msg: %s' % message)
     
     for admin in admins:
