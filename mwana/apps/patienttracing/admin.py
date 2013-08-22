@@ -6,7 +6,7 @@ class PatientTraceAdmin(admin.ModelAdmin):
     list_display = ('name', 'patient_event', 'messenger', 'confirmed_by', 'status', 'start_date',
                      'confirmed_date','initiator',)
     list_filter = ('status', 'initiator', 'messenger','confirmed_by', 'start_date', 'reminded_date', 'confirmed_date')
-    search_fields = ('name', 'messenger','confirmed_by')
+    search_fields = ('name', 'messenger__name','confirmed_by__name')
     date_hierarchy = 'confirmed_date'
 admin.site.register(PatientTrace, PatientTraceAdmin)
 
