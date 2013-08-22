@@ -58,6 +58,9 @@ class ResultsHandler(KeywordHandler):
         if found > 5:
             return True
         return False
+
+    def _not_unique(self, result, results):
+        return results.filter(requisition_id=result.requisition_id).count() > 1
     
     def handle(self, text):
         text = text.strip()
@@ -104,11 +107,20 @@ class ResultsHandler(KeywordHandler):
             elif results:
                 for result in results:
                     if result.result and len(result.result.strip()) > 0:
-                        reply = result.get_result_text()
-                        ready_sample_results.append(
-                                "%(req_id)s;%(res)s" %
+                        result_display = result.get_result_text()
+                        if self._not_unique(result, results):
+                           ready_sample_results.append("%(req_id)s;%(res)s. Date Collected;%(date_coll)s. Tested on;%(tested_on)s" %
                                 {'req_id':result.requisition_id,
-                                'res':reply})
+                                'res':result.get_result_text(),
+                                'date_coll':result.collected_on.strftime("%d %b %Y") if result.collected_on else "",
+                                'tested_on':result.processed_on.strftime("%d %b %Y") if result.processed_on else ""
+                                })
+                        else:
+                            ready_sample_results.append(
+                                    "%(req_id)s;%(res)s" %
+                                    {'req_id':result.requisition_id,
+                                    'res':result_display})
+
                         result.notification_status = "sent"
                         if not result.result_sent_date:
                             result.result_sent_date = datetime.now()

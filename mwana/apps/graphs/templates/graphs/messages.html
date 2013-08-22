@@ -53,20 +53,19 @@
                     tooltip: {
                         
                         formatter: function() {
-                            //                            var s = '<b>'+ this.x +'</b>',
                             var s = '<span style="font-size:10px">'+this.x+'</span><table>',
                             sum = 0;
 
                             $.each(this.points, function(i, point) {
-                                //                                s += '<br/>'+ point.series.name +': '+
-                                //                                    point.y +'m';
                                 s += '<tr><td style="color:'+point.series.color+';padding:0">' + point.series.name + ': </td>'+
                                     "<td  style='padding:0; text-align:right'><b>"+point.y +"</b></td></tr>"
                                 sum += point.y;
                             });
 
+                            {% if skip_total %}
+                            {% else %}
                             s += '<tr><td>Total</td><td style="padding:0"><b>' + sum + "</b></td></tr></table>"
-                            
+                            {% endif %}
                             return s;
                         },
                         crosshairs: true,

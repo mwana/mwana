@@ -13,14 +13,6 @@ from mwana.apps.webusers.webuserservice import WebUserService
 from mwana.apps.reports.utils.htmlhelper import get_facility_name
 from mwana.apps.reports.utils.htmlhelper import get_groups_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import *
-
-
-
-
-
-
-
-
     
 
 def webusers(request):
@@ -31,14 +23,12 @@ def webusers(request):
 
     page = get_default_int(page)
     page = page + get_next_navigation(navigation)
-    
-    
+        
     rpt_group = read_request(request, "rpt_group")
     rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
     rpt_facilities = read_request(request, "rpt_facilities")
-    
-    
+        
     webuserservice = WebUserService()
     (items, num_pages, number, has_next, has_previous, max_per_page) = webuserservice.get_web_users(request.user,
     page, rpt_group, rpt_districts, rpt_provinces)
@@ -46,15 +36,13 @@ def webusers(request):
     records = []
     dynamic_object = None
     
-    for record in sorted(items, key=lambda item:item.last_login):
+    for record in items:
         dynamic_object = record
         dynamic_object.days_ago = (datetime.now() - record.last_login).days
         records.append(record)
-        
-        
+                
     offset = max_per_page * (number - 1)
-    
-    
+        
     is_report_admin = False
     try:
         user_group_name = request.user.groupusermapping_set.all()[0].group.name
@@ -63,9 +51,7 @@ def webusers(request):
             is_report_admin = True
     except:
         pass
-
-    
-
+  
     return render_to_response('webusers/webusers.html',
                               {
                               'records': records,
@@ -88,6 +74,4 @@ def webusers(request):
                               'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities),
                               }, context_instance=RequestContext(request)
                               )
-
-
 

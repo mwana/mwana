@@ -3,15 +3,18 @@
 
 {% block title %}Issues - {{ block.super }}{% endblock %}
 
-{% block javascripts %}
-{{ block.super }}
-
-{% endblock %}
-
 {% block stylesheets %}
 {{ block.super }}
-
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 {% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+{% endblock %}
+
+
 
 {% block content %}
 
@@ -86,4 +89,7 @@
     </form>
 
 </div>
+<script type="text/javascript" >
+$(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+</script>
 {% endblock %}

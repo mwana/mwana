@@ -394,7 +394,7 @@ class App (rapidsms.apps.base.AppBase):
                                         help_admin.default_connection,
                                         "Make a followup for changed results %s: %s. Contacts = %s" %
                                         (clinic.name, ";****".join("ID=" + res.requisition_id + ", Result="
-                                        + res.result + ", old value=" + res.old_value for res in changed_results),
+                                        + res.result + ", old value=" + res.old_value + ", Lab ID=" + res.sample_id for res in changed_results),
                                         ", ".join(contact_detail for contact_detail in contact_details))
                                         )
                 help_msgs.append(h_msg)

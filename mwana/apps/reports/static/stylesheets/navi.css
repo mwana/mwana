@@ -1,0 +1,12 @@
+#floating-navigator {
+    position: fixed;top: 140px;right: 3px;z-index: 20;width: 200px; height: 230px;
+    border: 0px solid #ccc;
+    color: #cc0000;
+    background: #fff3f3;
+    opacity:0.4;
+    filter:alpha(opacity=40); /* For <=IE8*/
+}
+#floating-navigator #title{
+    /* May not work on some browsers */
+    text-decoration: blink;
+}

@@ -17,9 +17,9 @@ from mwana import const
 
 
 class EventRegistration(TestScript):
-    
+
 #    "Hi %(cba)s.%(patient)s is due for %(type)s clinic visit.Please remind them to visit %(clinic)s within 3 days then reply with TOLD %(patient)s"
-    
+
     def _register(self):
         clinic = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         Location.objects.create(name="Kafue District Hospital", slug="kdh",
@@ -31,7 +31,7 @@ class EventRegistration(TestScript):
             kk     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
             """
         self.runScript(script)
-    
+
     def testMalformedMessage(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
@@ -115,7 +115,7 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(1, patients.count())
-        
+
     def testCorrectMessageWithoutRegisteringAgent(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
@@ -145,7 +145,7 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(4, patients.count())
-        
+
     def testCorrectMessageWithoutDate(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
@@ -190,7 +190,7 @@ class EventRegistration(TestScript):
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(3, patients.count())
-        
+
         self.assertEqual(3, reminders.PatientEvent.objects.filter(event_location_type='cl').count())
 
     def testCommunityBirthRegistration(self):
@@ -243,7 +243,7 @@ class Reminders(TestScript):
         patient1 = Contact.objects.create(name='patient 1', location=zone1)
         patient2 = Contact.objects.create(name='patient 2', location=zone1)
         patient3 = Contact.objects.create(name='patient 3', location=zone2)
-        
+
         # this gets the backend and connection in the db
         self.runScript("""
         cba1 > hello world
@@ -293,6 +293,20 @@ class Reminders(TestScript):
         self.assertEqual(sent_notifications.count(), PatientTrace.objects.all().count())
         self.assertEqual(sent_notifications.count(), PatientTrace.objects.filter(initiator=get_initiator_automated()).count())
 
+        self.stopRouter()
+
+        self.runScript("""
+        cba1 > told patient 2
+        cba1 > told patient 1
+        """)      
+        
+        self.assertEqual(2, PatientTrace.objects.filter(status='told', initiator='automated_task').count())
+
+        self.runScript("""
+        cba1 > confirm patient 2
+        """)
+        self.assertEqual(1, PatientTrace.objects.filter(status='confirmed', initiator='automated_task').count())
+     
         
     def testRemindersSentOnlyOnce(self):
         """
@@ -301,7 +315,7 @@ class Reminders(TestScript):
         birth = reminders.Event.objects.create(name="Birth", slug="birth")
         birth.appointments.create(name='1 day', num_days=2)
         patient1 = Contact.objects.create(name='patient 1')
-        
+
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
         # take a break to allow the router thread to catch up; otherwise we
@@ -326,14 +340,14 @@ class Reminders(TestScript):
         sent_notifications = reminders.SentNotification.objects.all()
         # number of sent notifications should still be 1 (not 2)
         self.assertEqual(sent_notifications.count(), 1)
-        
+
         self.stopRouter()
-        
+
     def testRemindersNoLocation(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth")
         birth.appointments.create(name='1 day', num_days=2)
         patient1 = Contact.objects.create(name='Henry')
-        
+
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
         # take a break to allow the router thread to catch up; otherwise we
@@ -357,7 +371,7 @@ class Reminders(TestScript):
                          "the clinic, then reply with TOLD Henry" % appt_date.strftime("%d/%m/%Y"))
         sent_notifications = reminders.SentNotification.objects.all()
         self.assertEqual(sent_notifications.count(), 1)
-        
+
     def testRemindersRegistered(self):
         birth = reminders.Event.objects.create(name="Birth", slug="birth")
         birth.appointments.create(name='1 day', num_days=2)
@@ -365,7 +379,7 @@ class Reminders(TestScript):
                                              plural='Clinics', slug='clinic')
         central = Location.objects.create(name='Central Clinic', type=clinic)
         patient1 = Contact.objects.create(name='Henry', location=central)
-        
+
         # this gets the backend and connection in the db
         self.runScript("""cba > hello world""")
         # take a break to allow the router thread to catch up; otherwise we
@@ -390,8 +404,8 @@ class Reminders(TestScript):
                                             "Please remind them to visit Central Clinic, "
                                             "then reply with TOLD Henry" % appt_date.strftime("%d/%m/%Y"))
         sent_notifications = reminders.SentNotification.objects.all()
-        self.assertEqual(sent_notifications.count(), 1)        
-        
+        self.assertEqual(sent_notifications.count(), 1)
+
 class MockReminders(TestScript):
 
     apps = (handler_app, App, )
@@ -435,7 +449,7 @@ class MockReminders(TestScript):
         self.assertEqual(Contact.objects.count(), 11)
 
         msgs=self.receiveAllMessages()
-        
+
         self.assertEqual(11,len(msgs))
 
         from datetime import date, timedelta
@@ -485,4 +499,4 @@ class MockReminders(TestScript):
             self.assertTrue(msg.text in expected_msgs)
             self.assertTrue(msg.connection.identity in ["central_cba1", "central_cba2"],
             msg.connection.identity + " not in connection list" )
-        
+

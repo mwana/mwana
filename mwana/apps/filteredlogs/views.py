@@ -9,7 +9,6 @@ from mwana.apps.reports.utils.htmlhelper import get_contacttypes
 from mwana.apps.reports.utils.htmlhelper import get_contacttype_dropdown_html
 from mwana.apps.alerts.views import get_int
 from mwana.apps.filteredlogs.messagefilter import MessageFilter
-from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
 from mwana.apps.reports.views import read_request
 from mwana.apps.reports.views import text_date
@@ -17,6 +16,10 @@ from mwana.apps.reports.views import try_format
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.locations.models import Location
 
+from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
+from mwana.apps.reports.utils.facilityfilter import get_rpt_districts
+from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
+from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
 
 
 def get_int(val):
@@ -109,9 +112,9 @@ def filtered_logs(request):
                               'district': get_facility_name(rpt_districts),
                               'worker_types': get_contacttype_dropdown_html('worker_types',worker_types, True),
                               'rpt_group': get_groups_dropdown_html('rpt_group', rpt_group),
-                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", log.get_rpt_provinces(request.user), rpt_provinces),
-                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", log.get_rpt_districts(request.user), rpt_districts),
-                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", log.get_rpt_facilities(request.user), rpt_facilities),
+                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
+                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts),
+                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities),
                               'search_key': search_key if search_key else ""
                               }, context_instance=RequestContext(request)
                               )

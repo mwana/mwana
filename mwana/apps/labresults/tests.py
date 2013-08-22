@@ -591,6 +591,47 @@ class TestApp(LabresultsSetUp):
             self.assertEqual("sent", res.notification_status)
         self.assertEqual("new", res4.notification_status)
 
+    def testResultsWithDuplicateReqId(self):
+        """
+        Tests getting of results for given samples with non-unique requision ID's.
+        """
+        results = labresults.Result.objects.all()
+
+        res1 = results.create(requisition_id="0002", clinic=self.clinic,
+                              result="P",
+                              collected_on=datetime.datetime(2013, 1, 1),
+                              processed_on=datetime.datetime(2013, 2, 23),
+                              notification_status="new")
+
+        res2 = results.create(requisition_id="0002",
+                              clinic=self.clinic, result="N",
+                              processed_on=datetime.datetime(2012, 11, 1),
+                              entered_on=datetime.datetime(2012, 9, 4),
+                              notification_status="new")
+
+        res3 = results.create(requisition_id="0000", clinic=self.clinic,
+                              result="P",
+                              collected_on=datetime.datetime.today(),
+                              entered_on=datetime.datetime.today(),
+                              notification_status="new")
+
+        fake_req_id = getattr(settings, 'RESULTS160_FAKE_ID_FORMAT', '{id:04d}')
+        fake_req_id = fake_req_id.format(id=9999, clinic=self.clinic.slug)
+        script = """
+            clinic_worker > RESULT 0002
+            clinic_worker < **** 0002;Detected. Date Collected;01 Jan 2013. Tested on;23 Feb 2013. **** 0002;NotDetected. Date Collected;. Tested on;01 Nov 2012. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 0000
+            clinic_worker < **** 0000;Detected. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            clinic_worker > RESULT 0000 0002
+            clinic_worker < **** 0000;Detected. **** 0002;Detected. Date Collected;01 Jan 2013. Tested on;23 Feb 2013. **** 0002;NotDetected. Date Collected;. Tested on;01 Nov 2012. Please record these results in your clinic records and promptly delete them from your phone. Thanks again
+            """.format(clinic=self.clinic.slug, fake_req_id=fake_req_id,
+                      **self._result_text())
+
+        self.runScript(script)
+
+        for res in [results.get(id=res.id) for res in [res1, res2, res3]]:
+            self.assertEqual("sent", res.notification_status)
+
     def testReports(self):
         """
         Tests getting of report for sent results. A report for a district
@@ -984,7 +1025,12 @@ class TestResultsAcceptor(LabresultsSetUp):
         # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
         # to them. A follow-up message should be sent to the support staff
         msg1 = msg2 = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
-        msg3 = "Make a followup for changed results Mibenge Clinic: ID=1029023412, Result=R, old value=N;****ID=87, Result=P, old value=78:N;****ID=212987b, Result=N, old value=212987. Contacts = John Banda:clinic_worker, Mary Phiri:other_worker"
+        msg3 = ("Make a followup for changed results Mibenge Clinic: "
+        "ID=1029023412, Result=R, old value=N, Lab ID=10-09998;****"
+        "ID=87, Result=P, old value=78:N, Lab ID=10-09999;****"
+        "ID=212987b, Result=N, old value=212987, Lab ID=10-09997."
+        " Contacts = John ""Banda:clinic_worker, Mary Phiri:other_worker")
+
         self.assertEqual(msg1,msgs[0].text)
         self.assertEqual(msg2,msgs[1].text)
         self.assertEqual(msg3,msgs[2].text)

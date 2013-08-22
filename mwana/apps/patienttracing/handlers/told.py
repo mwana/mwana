@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.util import get_clinic_or_default
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
@@ -85,7 +86,8 @@ class ToldHandler(KeywordHandler):
         #Check to see if there are any patients being traced by the given name        
         patients = PatientTrace.objects.filter(name__iexact=pat_name) \
                                         .filter(status=patienttracing.get_status_new()) \
-                                        .filter(clinic = self.msg.connection.contact.location.parent)
+                                        .filter(clinic = get_clinic_or_default(self.msg.contact)
+                                        )
         
         if len(patients) == 0:
 #            self.respond("patient "+pat_name+" not found! Making a new one!")

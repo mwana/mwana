@@ -6,7 +6,6 @@ from django.template import RequestContext
 from mwana.apps.reports.utils.htmlhelper import get_contacttype_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_contacttypes
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
-from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_htmlb
 from mwana.apps.reports.utils.htmlhelper import get_facility_name
 from mwana.apps.reports.utils.htmlhelper import get_groups_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_groups_name

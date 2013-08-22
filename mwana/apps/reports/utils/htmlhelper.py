@@ -47,6 +47,21 @@ def get_contacttypes(slug, include_printer=False):
 
     return toReturn
 
+def _location_path(location):
+    # if location is a clinic
+    facility_slug = location.slug
+    district_slug = location.slug
+    province_slug = location.slug
+    if location.parent and location.parent.type.slug.lower() == 'districts':
+        district_slug = location.parent.slug
+        province_slug = location.parent.parent.slug if location.parent.parent else location.slug
+    elif location.type.slug.lower() == 'districts':
+        province_slug = location.parent.slug if location.parent else location.slug
+    elif location.type.slug.lower() == 'provinces':
+        province_slug = location.slug
+
+    return "%s_%s_%s" % (province_slug, district_slug, facility_slug)
+
 def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_select=False):
     if not facilities:
         return '<select name="%s" size="1"></select>\n' % id
@@ -54,14 +69,14 @@ def get_facilities_dropdown_html(id, facilities, selected_facility, get_only_sel
     if selected_facility and get_only_select:
         pass
     else:
-        code += '<option value="All">All</option>\n'
+        code += '<option id="All" value="All">All</option>\n'
     for fac in facilities:
         if fac.slug == selected_facility:
-            code = code + '<option selected value="%s">%s</option>\n' % (fac.slug, fac.name)
+            code = code + '<option selected id="%s" value="%s">%s</option>\n' % (_location_path(fac), fac.slug, fac.name)
         elif get_only_select:
             pass
         else:
-            code = code + '<option value="%s">%s</option>\n' % (fac.slug, fac.name)
+            code = code + '<option id="%s" value="%s">%s</option>\n' % (_location_path(fac), fac.slug, fac.name)
 
     code = code + '</select>'
     return code
@@ -144,7 +159,7 @@ def get_distinct_parents(locations, type_slugs=None):
         return None
     parents = []
     for location in locations:
-        if not type_slugs or (location.parent and location.parent.type.slug in type_slugs):
+        if (not type_slugs) or (location.parent and location.parent.type.slug in type_slugs):
             parents.append(location.parent)
 
     return list(set(parents))

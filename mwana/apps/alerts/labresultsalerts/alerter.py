@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.utils.facilityfilter import get_distinct_parents
 from mwana.apps.userverification.models import UserVerification
 from django.db.models import Max
 
@@ -20,6 +21,8 @@ from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from mwana.const import get_hub_worker_type
 from mwana.const import get_clinic_worker_type
+
+from django.db import connection
 
 class Alerter:
     def __init__(self, current_user=None, group=None, province=None,
@@ -88,7 +91,7 @@ class Alerter:
                 days_late = self.days_ago(self.last_sent_payloads[lab].date())
                 level = Alert.HIGH_LEVEL if days_late >= (2 * self.lab_sending_days) else Alert.LOW_LEVEL
                 my_alerts.append(Alert(Alert.LAB_NOT_SENDING_PAYLOD, "%s lab "
-                                 "has not sent any paylods for %s days. This "
+                                 "has not sent any DBS data for %s days. This "
                                  "could be a modem problem at the lab. "
                                  "Please call and enquire (%s)" % (lab,
                                  (self.today - self.last_sent_payloads[lab].date()
@@ -340,27 +343,44 @@ class Alerter:
         return self.clinic_notification_days, sorted(my_alerts, key=itemgetter(5))
 
     def set_district_last_received_dbs(self):
-        results = Result.objects.exclude(entered_on=None).exclude(clinic=None)
-        for result in results:
-            district = result.clinic.parent
-            if district in  self.last_received_dbs.keys():
-                self.last_received_dbs[district] = \
-                max(self.last_received_dbs[district], result.entered_on)
-            else:
-                self.last_received_dbs[district] = result.entered_on
+        # uses raw sql for performance reasons
+        ids = self._get_reporting_ids()
+        sql = '''
+        SELECT district.id, max(entered_on) as entered_on FROM labresults_result
+        join locations_location as clinic on clinic.id = labresults_result.clinic_id
+        join locations_location as district on district.id = clinic.parent_id
+        WHERE entered_on is not null
+        and clinic_id in (''' + ids + ''')
+        GROUP BY district.id;
+        '''
+       
+        cursor = connection.cursor()
+        cursor.execute(sql)
+
+        rows = cursor.fetchall()
+
+        for row in rows:
+            self.last_received_dbs[row[0]] = row[1]
 
     def set_lab_last_processed_dbs(self):
-        results = Result.objects.exclude(processed_on=None).\
-        filter(clinic__in=self.get_facilities_for_reporting())
-        self.last_processed_dbs.clear()
-        for result in results:
-            lab = result.payload.source
-            if lab in  self.last_processed_dbs.keys():
-                self.last_processed_dbs[lab] = \
-                max(self.last_processed_dbs[lab], result.processed_on)
-            else:
-                self.last_processed_dbs[lab] = result.processed_on
 
+        # uses raw sql for performance reasons
+        ids = self._get_reporting_ids()
+
+        sql = '''
+        SELECT "source", max(processed_on) FroM labresults_result
+        JOIN labresults_payload on labresults_payload.id=labresults_result.payload_id
+        WHERE clinic_id in (''' + ids + ''')
+        GROUP BY "source";
+        '''
+        cursor = connection.cursor()
+        cursor.execute(sql)
+
+        rows = cursor.fetchall()
+        self.last_processed_dbs.clear()
+        for row in rows:
+            self.last_processed_dbs[row[0]] = row[1]
+      
     def set_lab_last_sent_payload(self):
         payloads = Payload.objects.exclude(incoming_date=None).\
         filter(source__in=self.my_payload_sources())
@@ -376,12 +396,12 @@ class Alerter:
 
     def set_not_sending_dbs_alerts(self):
         self.set_district_last_received_dbs()
-
+        
         all_districts = \
-        self.get_distinct_parents(self.get_facilities_for_reporting())
+        get_distinct_parents(self.get_facilities_for_reporting())
         for dist in all_districts:
-            if dist in self.last_received_dbs.keys():
-                if self.last_received_dbs[dist] < self.district_trans_referal_date.date():
+            if dist.id in self.last_received_dbs.keys():
+                if self.last_received_dbs[dist.id] < self.district_trans_referal_date.date():
                     additional = ""
                     clinics = Location.\
                     objects.filter(
@@ -394,7 +414,7 @@ class Alerter:
                     if clinics:
                         additional = "These clinics have sent samples to the "\
                         "hub: %s" % ",".join(clinic.name for clinic in clinics)
-                    days_late = (self.today - self.last_received_dbs[dist]).days
+                    days_late = (self.today - self.last_received_dbs[dist.id]).days
                     level = Alert.HIGH_LEVEL if days_late >= (2 * self.district_transport_days) else Alert.LOW_LEVEL
                     self.add_to_district_dbs_elerts(Alert.DISTRICT_NOT_SENDING_DBS,
                                                     "The %s district hub (%s) has not "
@@ -405,7 +425,7 @@ class Alerter:
                                                     self.get_hub_name(dist),
                                                     self.get_lab_name(dist),
                                                     (self.today-\
-                                                    self.last_received_dbs[dist]).days,
+                                                    self.last_received_dbs[dist.id]).days,
                                                     self.get_hub_number(dist)),
                                                     dist.name,
                                                     days_late,
@@ -453,21 +473,23 @@ class Alerter:
 
 
     def get_inactive_workers_alerts(self):
-
-        facilities = (self.get_facilities_for_reporting())      
-
+        facilities = (self.get_facilities_for_reporting())
         inactive_alerts = []
+        complying_contacts = self.get_complying_contacts()
         
-        for facility in facilities:
+        defaulters = UserVerification.objects.\
+            filter(responded=False, contact__is_active=True,
+            contact__types=get_clinic_worker_type(), facility__in=facilities).distinct()
+       
+        defaulters = defaulters.exclude(contact__in=complying_contacts)
+        
+        def_facs = set(defa.facility for defa in defaulters)
+        
+        for facility in def_facs:
             days_late = 75
-            defaulters = UserVerification.objects.exclude(responded="True").\
-            filter(facility=facility, contact__is_active=True).distinct()
-
-            defaulters = defaulters.exclude(contact__in=self.get_complying_contacts())
-
-            if not defaulters:
+            fac_defaulters = defaulters.filter(facility=facility)
+            if not fac_defaulters:
                 continue
-
             msg = ("The following staff registered at %s have not been using "
              "Results160 for too long and have been unresponsive. "
              "The last time they used the system is "
@@ -475,7 +497,7 @@ class Alerter:
 
             contacts  = []
             temp = []
-            for defaulter in defaulters:
+            for defaulter in fac_defaulters:
                 contacts.append(defaulter.contact)
             for contact in set(contacts):
                 last_used = self.last_used_system(contact)
@@ -599,11 +621,10 @@ class Alerter:
             |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
         if self.reporting_facility:
             facs = facs.filter(slug=self.reporting_facility)
-        # TODO : use location.parent instead of relying on slug naming convetions
         elif self.reporting_district:
-            facs = facs.filter(slug__startswith=self.reporting_district[:4])
+            facs = facs.filter(parent__slug=self.reporting_district)
         elif self.reporting_province:
-            facs = facs.filter(slug__startswith=self.reporting_province[:2])
+            facs = facs.filter(parent__parent__slug=self.reporting_province)
         return facs.filter(supportedlocation__supported=True
                                        ).distinct()
 
@@ -614,22 +635,9 @@ class Alerter:
             return [payloads[0].source]
         return []
 
-    def get_distinct_parents(self, locations):
-        if not locations:
-            return []
-        parents = []
-        for location in locations:
-            parents.append(location.parent)
-        return list(set(parents))
-    
-    def get_rpt_facilities(self, user):
-        self.user = user
-        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
-
-    def get_rpt_districts(self, user):
-        self.user = user
-        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
-
-    def get_rpt_provinces(self, user):
-        self.user = user
-        return self.get_distinct_parents(self.get_rpt_districts(user))
+    def _get_reporting_ids(self):
+        ids = ", ".join("%s" % fac.id for fac in self.get_facilities_for_reporting())
+        if not ids:
+            ids = '-1'
+            
+        return ids

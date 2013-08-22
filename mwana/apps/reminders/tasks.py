@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.util import get_clinic_or_default
 from mwana.apps.translator.util import Translator
 import datetime
 import logging
@@ -91,6 +92,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     patient_trace.name = patient_event.patient.name[:50]
     patient_trace.patient_event = patient_event
     patient_trace.status = 'new'
+    patient_trace.clinic = get_clinic_or_default(patient_event.patient)
     patient_trace.initiator = patienttracing.get_initiator_automated()
     patient_trace.save()
 

@@ -58,27 +58,7 @@ class MessageFilter:
         else:
             return Location.objects.all()
 
-    def get_rpt_provinces(self, user):
-        self.user = user
-        return self.get_distinct_parents(self.get_rpt_districts(user))
-
-    def get_distinct_parents(self, locations):
-        if not locations:
-            return []
-        parents = []
-        for location in locations:
-            parents.append(location.parent)
-        return list(set(parents))
-
-    def get_rpt_districts(self, user):
-        self.user = user
-        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
-
-    def get_rpt_facilities(self, user):
-        self.user = user
-        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
-
-
+   
     def get_active_facilities(self):
         return self.user_facilities().filter(lab_results__notification_status__in=
                                              ['sent']).distinct()
@@ -93,9 +73,9 @@ class MessageFilter:
         if self.reporting_facility:
                 facs = facs.filter(slug=self.reporting_facility)
         elif self.reporting_district:
-            facs = facs.filter(slug__startswith=self.reporting_district[:4])
+            facs = facs.filter(parent__slug=self.reporting_district)
         elif self.reporting_province:
-            facs = facs.filter(slug__startswith=self.reporting_province[:2])
+            facs = facs.filter(parent__parent__slug=self.reporting_province)
         return facs.filter(supportedlocation__supported=True
                            ).distinct()
 
