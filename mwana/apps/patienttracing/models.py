@@ -40,7 +40,7 @@ class PatientTrace(models.Model):
     INITIATOR_CHOICES = (
                          ("admin", "Admin"),
                          ("clinic_worker", "Clinic worker"),
-                         ("automated_task", "Automated Task"),
+                         ("automated_task", "Sytem Initiated"),
                          ("cba", "CBA"),
                          )
 
@@ -77,7 +77,7 @@ class PatientTrace(models.Model):
         super(PatientTrace, self).save(*args, ** kwargs)
 
     def __unicode__(self):
-        return "%s patient trace for %s" % (self.initiator, self.name)
+        return "%s patient trace for %s" % (self.get_initiator_display(), self.name)
 
 def get_status_new():
     return PatientTrace.STATUS_CHOICES[0][0]
@@ -114,3 +114,11 @@ def get_type_6month():
     return PatientTrace.TYPE_CHOICES[3][0]
 def get_type_unrecognized():
     return PatientTrace.TYPE_CHOICES[4][0]
+
+
+class CorrectedTrace(models.Model):
+    copied_from = models.ForeignKey(PatientTrace, related_name="source_patient_trace")
+    copied_to = models.ForeignKey(PatientTrace)
+
+    def __unicode__(self):
+        return "Source: %s. Destination: %s" % (self.copied_from, self.copied_to)
