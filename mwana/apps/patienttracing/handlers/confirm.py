@@ -109,7 +109,9 @@ class ConfirmHandler(KeywordHandler):
         #update patienttrace entry data
         patient.confirmed_date = datetime.now()
         patient.status = patienttracing.get_status_confirmed()
-        patient.messenger = self.msg.connection.contact
+        if not patient.messenger:
+            patient.messenger = self.msg.connection.contact
+        patient.confirmed_by = self.msg.connection.contact
         
         patient.save()
         self.respond_confirmed_thankyou(pat_name)
