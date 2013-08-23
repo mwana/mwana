@@ -48,7 +48,7 @@ def get_payload_data():
     return "\n".join(entry['source'].split('/')[1].title().replace(
         'Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')
         + ":" + str(entry['id__count']) + "/"+
-        str(results.filter(payload__source=entry['source']).count()) for entry in p)
+        str(results.filter(payload__source__icontains=entry['source']).count()) for entry in p)
 
 def get_results_data():
     sent_today = Result.objects.filter(notification_status='sent',
