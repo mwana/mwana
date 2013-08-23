@@ -155,6 +155,7 @@ def monthly_birth_trends(request):
                               )
 
 def monthly_scheduled_visit_trends(request):
+    visit_type = read_request(request, "visit_type") or "6 day"
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
@@ -164,7 +165,7 @@ def monthly_scheduled_visit_trends(request):
     time_ranges, data = service.get_monthly_scheduled_visit_trends(start_date, end_date,
                                                             rpt_provinces
                                             , rpt_districts,
-                                            rpt_facilities)
+                                            rpt_facilities, visit_type)
 
     for k, v in reversed(sorted(data.items())):
         rpt_object = Expando()
@@ -175,8 +176,8 @@ def monthly_scheduled_visit_trends(request):
     return render_to_response('graphs/lab_submissions.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'6 Day Visit Trend'",
-                              "sub_title": "'Period: %s  to %s. **Note that TOLD and CONFIRMED may be under reported'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "title": "'%s Visit Trend'" % visit_type.title(),
+                              "sub_title": "'**Note that TOLD and CONFIRMED may be under-reported'",
                               "label_y_axis": "'Days'",
                               "report_data": report_data,
                               "skip_total": True,

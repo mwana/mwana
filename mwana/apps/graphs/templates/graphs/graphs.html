@@ -22,6 +22,29 @@
 <script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
 
 <script type="text/javascript">
+
+    function updateExtras(values){
+        document.getElementById("extras").value = document.getElementById("extras").value + '&' + values;
+    }
+
+    function clearExtras(){
+        document.getElementById("extras").value = "";
+    }
+
+    function build_input_element(name, type, options){
+        toReturn = "";
+        if(type === 'select'){
+            
+            toReturn =  name[0].toUpperCase()+ name.substring(1).replace(/_/g,' ') + ': <select onchange="updateExtras(\'' + name + '=\'+' + 'this.options[this.selectedIndex].value)" class="extra_'+ type +'">';
+            
+            for(item in options){
+                var tokens = options[item].split(':')
+                toReturn = toReturn +  '<option value="'+ tokens[0].trim() +'">' + tokens[1].trim() +'</option>';
+            }
+            toReturn = toReturn + '</select>'
+        }
+        return toReturn;
+    }
     function getReport(id){
         document.getElementById("graph").innerHTML = '<div align="center">\n\
     <img src="{{ MEDIA_URL }}reports/images/spinner.gif" align="left" style="padding: 5em 1em 5em 5em; vertical-align: middle"/>\n\
@@ -36,7 +59,8 @@
             document.getElementById("rpt_provinces").value+"&rpt_districts="+
             document.getElementById("rpt_districts").value+"&rpt_facilities="+
             document.getElementById("rpt_facilities").value+"&monthrange="+
-            document.getElementById("monthrange").value
+            document.getElementById("monthrange").value +
+            document.getElementById("extras").value
         , function(data) {
             $('#graph')[0].innerHTML=data;
             checkIfLoggedOutAndRefresh()
@@ -53,12 +77,24 @@
 
     $(document).ready(function() {
         $('.report').bind('click', function () {
-            
+            clearExtras()
             element_id = this.id;
             var showStartDate = false;
             var showEndDate = false;
             var showMonthRange = false;
+            var extra = $("#" + element_id)[0].getAttribute('extra');
+            var extra_ui='';
 
+            if(extra){
+                for(item in extra.split(';')){
+                    name = (extra.split('-')[0])
+                    type = (extra.split('-')[1])
+                    options = (extra.split('-')[2])
+                                    
+                    extra_ui= build_input_element(name, type, options.split(','))
+                }
+            }
+            
             try{
                 showStartDate = $("#" + element_id)[0].getAttribute('startdate') !== null;
             }catch(error){
@@ -88,13 +124,14 @@
             }
             
             if(showMonthRange){
-                html = html + 'Range: <select id="monthRange" name="monthRange">\
+                html = html + '&nbsp;Range: <select id="monthRange" name="monthRange">\
                                 <option value="12">12 months</option>\
                                 <option value="6">6 months</option>\
                                 <option value="3">3 months</option>\
                                </select>'
             }
-            html = html + '</div>'
+            html = html + '<br>' + extra_ui;
+            html = html + '</div>';
             $(html
         ).dialog({
                 draggable: false,
@@ -207,6 +244,7 @@
                     <div >
                         <div id="wait" align="center" style="display: none">
                             <input type="hidden" id="monthrange" value="" />
+                            <input type="hidden" id="extras" value="" />
                             Wait while chart loads
                         </div>
                         <div id="active-links">
@@ -218,7 +256,7 @@
                             | <a class="report" id="monthly_birth_trends" enddate="" monthrange="" >Birth Trends</a>
                             | <a class="report" id="monthly_turnaround_trends" enddate="" monthrange="" >Turnaround Trends</a>
                             | <a class="report" id="monthly_results_retrival_trends" enddate="" monthrange="" >Results Retrieval Trends</a>
-                            | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" >6 Day Visit Trends</a>
+                            | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" extra="visit_type-select-6 day:6 Day, 6 week:6 Week, 6 month:6 Month" >Postnatal Visit Trends</a>
                         </div>
                     </div>
                 </td>
