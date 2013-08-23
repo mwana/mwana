@@ -75,8 +75,8 @@
             var html = "<div><p>This report uses default date parameters</div>"
             var myStartDate = document.getElementById("startdate").value;
             var myEndDate = document.getElementById("enddate").value;
-            var startDateField = 'Start Date: <input type="text" name="startDate" class="datefield" size="10" value="'+ myStartDate + '" />'
-            var endDateField = 'End Date: <input type="text" name="endDate" class="datefield" size="10" value="'+ myEndDate + '" />'
+            var startDateField = 'Start Date: <input type="text" name="startDate" class="datefield" size="11" style="text-align:center; " value="'+ myStartDate + '" />'
+            var endDateField = 'End Date: <input type="text" name="endDate" class="datefield" size="11" style="text-align:center;" value="'+ myEndDate + '" />'
             if(showStartDate && showEndDate){
                 html = '<div align="center"><p>' + startDateField + endDateField
             }
@@ -218,6 +218,7 @@
                             | <a class="report" id="monthly_birth_trends" enddate="" monthrange="" >Birth Trends</a>
                             | <a class="report" id="monthly_turnaround_trends" enddate="" monthrange="" >Turnaround Trends</a>
                             | <a class="report" id="monthly_results_retrival_trends" enddate="" monthrange="" >Results Retrieval Trends</a>
+                            | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" >6 Day Visit Trends</a>
                         </div>
                     </div>
                 </td>
