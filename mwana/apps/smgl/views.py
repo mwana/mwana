@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
 import urllib
 import datetime
-
+import inspect
 from operator import itemgetter
+
 
 from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
@@ -32,16 +33,31 @@ from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates)
 
 
+def fetch_initial(initial, session):
+    """We will use the inspect module to figure out which function (view method) called this
+    function to get the form data we had saved under that function name, Just a fancy way of 
+    reducing the code that we would have to write in each view"""
+    form_data = session.get('%s_form_data'%inspect.stack()[1][3])
+    if form_data:
+        initial.update(form_data)
+    return initial 
+
+
+def save_form_data(cleaned_data, session):
+    session['%s_form_data'%inspect.stack()[1][3]] = cleaned_data
+
+
 def mothers(request):
     province = district = facility = zone = None
     start_date, end_date = get_default_dates()
     edd_start_date = edd_end_date = None
-
     mothers = PregnantMother.objects.all()
-
     if request.GET:
         form = MotherStatsFilterForm(request.GET)
         if form.is_valid():
+            #Save the cleaned data into the session
+            save_form_data(form.cleaned_data, request.session)
+
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
@@ -54,8 +70,8 @@ def mothers(request):
         initial = {
                     'start_date': start_date,
                     'end_date': end_date,
-                  }
-        form = MotherStatsFilterForm(initial=initial)
+                    }
+        form = MotherStatsFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -187,6 +203,7 @@ def statistics(request, id=None):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
@@ -216,7 +233,7 @@ def statistics(request, id=None):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
     for place in records_for:
         locations = Location.objects.all()
@@ -377,6 +394,7 @@ def reminder_stats(request):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
@@ -387,7 +405,7 @@ def reminder_stats(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
     for key in record_types:
         mothers = PregnantMother.objects.all()
@@ -469,6 +487,7 @@ def report(request):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             start_date = form.cleaned_data.get('start_date', start_date)
@@ -478,7 +497,7 @@ def report(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
     if province:
         # districts are direct children
@@ -678,6 +697,7 @@ def notifications(request):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
 #            province = form.cleaned_data.get('province')
 #            district = form.cleaned_data.get('district')
 #            facility = form.cleaned_data.get('facility')
@@ -688,7 +708,7 @@ def notifications(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
 #    # filter by location if needed...
 #    locations = Location.objects.all()
@@ -738,6 +758,7 @@ def referrals(request):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
@@ -748,7 +769,7 @@ def referrals(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -808,6 +829,7 @@ def sms_records(request):
     if request.GET:
         form = SMSRecordsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
@@ -819,7 +841,7 @@ def sms_records(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = SMSRecordsFilterForm(initial=initial)
+        form = SMSRecordsFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -887,6 +909,7 @@ def sms_users(request):
     if request.GET:
         form = SMSUsersFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             c_type = form.cleaned_data.get('c_type')
@@ -897,7 +920,7 @@ def sms_users(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = SMSUsersFilterForm(initial=initial)
+        form = SMSUsersFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -992,6 +1015,7 @@ def sms_user_statistics(request, id):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
     else:
@@ -999,7 +1023,7 @@ def sms_user_statistics(request, id):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=initial)
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
     mothers = PregnantMother.objects.filter(contact=contact)
     # filter by created_date
@@ -1102,6 +1126,7 @@ def help(request):
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
