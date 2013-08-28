@@ -16,10 +16,10 @@
   <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
   <script>
       $(function() {
-        $( "#id_start_date" ).datepicker();
-        $( "#id_end_date" ).datepicker();
-        $( "#id_edd_start_date" ).datepicker();
-        $( "#id_edd_end_date" ).datepicker();
+        $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_end_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_edd_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_edd_end_date" ).datepicker({ dateFormat: "yy-mm-dd" });
     });
   </script>
 {% endblock %}
