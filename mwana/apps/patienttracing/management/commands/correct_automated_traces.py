@@ -12,6 +12,8 @@ from mwana.apps.patienttracing.models import CorrectedTrace
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reminders.models import PatientEvent
 from mwana.util import get_clinic_or_default
+import string
+from rapidsms.models import Contact
 
 class Command(LabelCommand):
     help = """Corrects PatientTrace objects that were system initiated"""
@@ -46,7 +48,7 @@ def correct_tolds():
         name = pt.name
         clinic = get_clinic_or_default(messenger)
 
-        for auto_pt in PatientTrace.objects.filter(initiator="automated_task",
+        for auto_pt in PatientTrace.objects.filter(initiator__in=["automated_task"],
                                                    status='new',
                                                    start_date__gte=date_ago,
                                                    start_date__lte=reminded_date,
@@ -57,6 +59,19 @@ def correct_tolds():
             auto_pt.status = pt.status
             auto_pt.save()
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=auto_pt)
+            count += 1
+
+        for my_pt in PatientTrace.objects.filter(initiator__in=["clinic_worker"],
+                                                   status='new',
+                                                   start_date__gte=date_ago,
+                                                   start_date__lte=reminded_date,
+                                                   name__iexact=name.strip(),
+                                                   clinic=clinic):
+            my_pt.messenger = messenger
+            my_pt.reminded_date = reminded_date
+            my_pt.status = pt.status
+            my_pt.save()
+            CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
             count += 1
 
     print "corrected %s records with told" % count
@@ -91,15 +106,58 @@ def correct_confirms():
 
             count += 1
 
+        for my_pt in PatientTrace.objects.filter(initiator="clinic_worker",
+                                                   status__in=['new', 'told'],
+                                                   start_date__gte=date_ago,
+                                                   start_date__lte=reminded_date,
+                                                   name__iexact=name,
+                                                   clinic=clinic):
+            my_pt.messenger = messenger
+            if not my_pt.reminded_date:
+                my_pt.reminded_date = reminded_date
+            my_pt.confirmed_date = confirmed_date
+            my_pt.status = pt.status
+            my_pt.confirmed_by = pt.confirmed_by or pt.messenger
+            my_pt.save()
+
+            CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
+
+            count += 1
+
     print "corrected %s records with confirm" % count
 
 def cleanup():
     # TODO: clear CBA initiated traces that have been mapped to system initiated ones
     pass
 
+def _clean(name):
+    return name.translate(string.maketrans("",""), string.punctuation).strip().title()
+
 def clean_names():
     count = 0
-    # clean patient event's name
+    for token in string.punctuation:
+        pts = PatientTrace.objects.filter(name__contains=token)
+        for pt in pts:
+            pt.name = pt.name.replace(token, "").strip().title()
+            pt.save()
+            count += 1
+
+        contacts = Contact.objects.filter(name__contains=token)
+        for contact in contacts:
+            contact.name = contact.name.replace(token, "").strip().title()
+            contact.save()
+            count =+ 1
+
+    for pt in PatientTrace.objects.filter(name__startswith=" "):
+        pt.name = pt.name.strip().title()
+        pt.save()
+        count += 1
+        
+    for contact in Contact.objects.filter(name__startswith=" "):
+        contact.name = contact.name.strip().title()
+        contact.save()
+        count =+ 1
+
     for pe in PatientEvent.objects.filter(patient__name__iregex='\d\d .*'):
         patient = pe.patient
         name = re.sub(r"\d\d", "", patient.name).lower().strip()
@@ -118,8 +176,7 @@ def clean_names():
         patient.name = name
         patient.save()
         count += 1
-
-    # clean name in patient trace
+    
     for pt in PatientTrace.objects.filter(name__iregex='\d\d .*'):
         name = re.sub(r"\d\d", "", pt.name).lower().strip().title()
         name = re.sub(r"\s+", " ", name)
