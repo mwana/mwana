@@ -46,7 +46,6 @@ AMB_RESPONSE_NOT_AVAILABLE = _("No Emergency vehicle was available to address re
 AMB_RESPONSE_ORIGINATING_LOCATION_INFO = _("We want to let you know that emergency vehicle is: %(response)s regarding referral for mother %(unique_id)s")
 AMB_RESPONSE_ALREADY_HANDLED = _("The ambulance for this request has been already marked as %(response)s by %(person)s. No action has been taken.")
 AMB_OUTCOME_MSG_RECEIVED = _("Thanks for your message! We have marked the patient with unique_id %(unique_id)s as outcome: %(outcome)s")
-AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient outcome for patient with unique_id: %(unique_id)s. Outcome: %(outcome)s")
 AMB_OUTCOME_FILED = _("A patient outcome for an Emergency Response for Patient (%(unique_id)s) has been filed by %(name)s (%(contact_type)s)")
 ER_TO_CLINIC_WORKER = _("Emergency Response has occured for Mother with Unique ID: %(unique_id)s. Expect a patient.")
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")

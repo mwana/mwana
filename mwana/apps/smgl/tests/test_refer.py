@@ -206,6 +206,33 @@ class SMGLReferTest(SMGLSetUp):
         self.assertTrue(ref.responded)
         self.assertFalse(ref.mother_showed)
 
+    def testReferralEmergencyOutcomeNoResponse(self):
+        d = {
+            "unique_id": '1234',
+            "from_location": 'Mawaya',
+            "sender_phone_number": self.user_number
+        }
+        tnnum = '222222'
+        script = """
+            %(num)s > refer 1234 804024 hbp 1200 em
+            %(num)s < %(resp)s
+            %(tnnum)s < %(tn_notif)s
+            %(amnum)s < %(am_notif)s
+        """ % {"num": self.user_number, "amnum": "666555", "tnnum": tnnum,
+               "resp": INITIAL_AMBULANCE_RESPONSE,
+               "tn_notif": ER_TO_TRIAGE_NURSE % d,
+               "am_notif": ER_TO_DRIVER % d}
+        self.runScript(script)
+        self.assertSessionSuccess()
+        resp = const.AMB_OUTCOME_ORIGINATING_LOCATION_INFO % {"unique_id": "1234", "outcome": "stb"}
+        script = """
+            %(num)s > refout 1234 stb stb vag
+            %(num)s < %(resp)s
+
+        """ % {"num": self.user_number, "resp": resp}
+        self.runScript(script)
+        self.assertSessionSuccess()
+
     def testReferralOutcomeNoRef(self):
         resp = const.REFERRAL_NOT_FOUND % {"unique_id": "1234"}
         script = """
@@ -340,7 +367,7 @@ class SMGLReferTest(SMGLSetUp):
         self.assertEqual("666555", amb_req.ambulance_driver.default_connection.identity)
         self.assertEqual(tnnum, amb_req.triage_nurse.default_connection.identity)
 
-        # Test OTW Response
+        # test OTW Response
         self.assertEqual(0, AmbulanceResponse.objects.count())
         d = {
             "unique_id": '1234',

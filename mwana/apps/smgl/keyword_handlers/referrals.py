@@ -14,7 +14,7 @@ from mwana.apps.smgl.app import (get_value_from_form, send_msg, ER_TO_DRIVER,
     ER_TO_TRIAGE_NURSE, ER_STATUS_UPDATE,
     INITIAL_AMBULANCE_RESPONSE, _get_allowed_ambulance_workflow_contact,
     NOT_REGISTERED_TO_CONFIRM_ER, ER_CONFIRM_SESS_NOT_FOUND, ER_TO_CLINIC_WORKER,
-    AMB_OUTCOME_ORIGINATING_LOCATION_INFO, AMB_OUTCOME_FILED, FACILITY_NOT_RECOGNIZED,
+    AMB_OUTCOME_FILED, FACILITY_NOT_RECOGNIZED,
     AMB_RESPONSE_ORIGINATING_LOCATION_INFO, AMB_RESPONSE_NOT_AVAILABLE,
     AMB_RESPONSE_ALREADY_HANDLED)
 
@@ -129,15 +129,17 @@ def referral_outcome(session, xform, router):
     ref.save()
 
     if ref.amb_req:
-        if ref.amb_req.ambulanceresponse_set.all().order_by('-responded_on')[0].response != 'na':
+        responses = ref.amb_req.ambulanceresponse_set
+        if responses.count() == 0 or responses.all().order_by('-responded_on')[0].response != 'na':
             session.template_vars.update({"contact_type": contact.types.all()[0],
                                           "name": contact.name})
 
             if xform.xpath("form/mode_of_delivery") == 'noamb':
                 _broadcast_to_ER_users(ref.amb_req, session, xform,
                                        message=_(AMB_OUTCOME_FILED), router=router)
-            return respond_to_session(router, session, AMB_OUTCOME_ORIGINATING_LOCATION_INFO,
-                                      **session.template_vars)
+            return respond_to_session(router, session, const.AMB_OUTCOME_ORIGINATING_LOCATION_INFO,
+                                      unique_id=session.template_vars['unique_id'],
+                                      outcome=ref.mother_outcome)
     else:
         # also notify folks at the referring facility about the outcome
         for c in _get_people_to_notify_outcome(ref):
