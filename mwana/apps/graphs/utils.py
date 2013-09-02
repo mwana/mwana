@@ -130,12 +130,18 @@ class GraphServive:
 
         return month_ranges, data
 
-    def get_monthly_scheduled_visit_trends(self, start_date, end_date, province_slug, district_slug, facility_slug, visit_type="6 day"):
+    def get_monthly_scheduled_visit_trends(self, start_date, end_date,
+    province_slug, district_slug, facility_slug, visit_type="6 day", data_type="count"):
         facs = get_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
 
-        trend_items = ['Mother not Reminded by CBA', 'Mother just reminded',
-                        'Mother has gone to clinic', ' Total Appointments']
+        trend_map = {'Mother not Reminded by CBA': ['new'],
+                        'Mother just reminded': ['told'],
+                        'Mother has gone to clinic': ['confirmed'],
+                        ' Total Appointments': ['new', 'told', 'confirmed'],
+                        }
+        trend_items = [key for key in trend_map]
+        
         reminders = PatientTrace.objects.filter(Q(start_date__gte=start),
                                              Q(start_date__lt=end),
                                              Q(initiator='automated_task'),
@@ -149,24 +155,26 @@ class GraphServive:
         for item in sorted(trend_items):
             data[item] = []
 
-        trend_map = {'Mother not Reminded by CBA': ['new'],
-                        'Mother just reminded': ['told'],
-                        'Mother has gone to clinic': ['confirmed'],
-                        ' Total Appointments': ['new', 'told', 'confirmed'],
-                        }
-
         month_ranges = []
+
         while my_date <= end_date:
+            divisor = 1
+            if data_type.lower() == "percentage":
+                divisor = reminders.filter(
+                                  start_date__year=my_date.year,
+                                  start_date__month=my_date.month,
+                                  status__in=['new', 'told', 'confirmed']
+                                  ).count()/100.0
             for item in sorted(trend_items):
-                data[item].append(reminders.filter(
+                data[item].append(round(reminders.filter(
                                   start_date__year=my_date.year,
                                   start_date__month=my_date.month,
                                   status__in=trend_map[item]
-                                  ).count())
+                                  ).count()/(divisor or 1), 1))
 
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
-
+        
         return month_ranges, data
 
     def get_monthly_turnaround_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):

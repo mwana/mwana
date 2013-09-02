@@ -86,12 +86,14 @@
             var extra_ui='';
 
             if(extra){
+
                 for(item in extra.split(';')){
-                    name = (extra.split('-')[0])
-                    type = (extra.split('-')[1])
-                    options = (extra.split('-')[2])
+                    token = extra.split(';')[item]
+                    name = (token.split('-')[0])
+                    type = (token.split('-')[1])
+                    options = (token.split('-')[2])
                                     
-                    extra_ui= build_input_element(name, type, options.split(','))
+                    extra_ui += build_input_element(name, type, options.split(','))
                 }
             }
             
@@ -256,7 +258,7 @@
                             | <a class="report" id="monthly_birth_trends" enddate="" monthrange="" >Birth Trends</a>
                             | <a class="report" id="monthly_turnaround_trends" enddate="" monthrange="" >Turnaround Trends</a>
                             | <a class="report" id="monthly_results_retrival_trends" enddate="" monthrange="" >Results Retrieval Trends</a>
-                            | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" extra="visit_type-select-6 day:6 Day, 6 week:6 Week, 6 month:6 Month" >Postnatal Visit Trends</a>
+                            | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" extra="visit_type-select-6 day:6 Day, 6 week:6 Week, 6 month:6 Month;data_type-select-count:Count, percentage:Percentage" >Postnatal Visit Trends</a>
                         </div>
                     </div>
                 </td>
