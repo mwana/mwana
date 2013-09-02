@@ -33,6 +33,12 @@ class Command(LabelCommand):
        
        
 def correct_missing_clinic():
+    for pe in PatientEvent.objects.filter(patient__location=None).\
+    exclude(cba_conn__contact__location=None):
+        patient = pe.patient
+        patient.location = pe.cba_conn.contact.location
+        patient.save()
+        
     for pt in PatientTrace.objects.filter(clinic=None, initiator='automated_task'):
         pt.clinic = get_clinic_or_default(pt.patient_event.patient)
         pt.save()
@@ -81,7 +87,7 @@ def correct_tolds(days_ago):
                                                    start_date__gte=date_ago,
                                                    start_date__lte=reminded_date,
                                                    patient_event__patient__location__parent=clinic).order_by("-start_date"):
-                if names_tally(name, my_pt.name):
+                if _names_tally(name, my_pt.name):
                     my_pt.messenger = messenger
                     my_pt.reminded_date = reminded_date
                     my_pt.status = pt.status
@@ -109,7 +115,7 @@ def correct_tolds(days_ago):
                                                  start_date__gte=date_ago,
                                                  start_date__lte=reminded_date,
                                                  clinic=clinic).order_by("-start_date"):
-                if names_tally(name, my_pt.name):
+                if _names_tally(name, my_pt.name):
                     my_pt.messenger = messenger
                     my_pt.reminded_date = reminded_date
                     my_pt.status = pt.status
@@ -159,7 +165,7 @@ def correct_confirms(days_ago=7):
                                                    start_date__gte=date_ago,
                                                    start_date__lte=reminded_date,
                                                    patient_event__patient__location__parent=clinic).order_by("-start_date"):
-                if names_tally(name, my_pt.name):
+                if _names_tally(name, my_pt.name):
                     my_pt.messenger = messenger
                     if not my_pt.reminded_date:
                         my_pt.reminded_date = reminded_date
@@ -196,7 +202,7 @@ def correct_confirms(days_ago=7):
                                                  start_date__gte=date_ago,
                                                  start_date__lte=reminded_date,
                                                  clinic=clinic).order_by("-start_date"):
-                if names_tally(name, my_pt.name):
+                if _names_tally(name, my_pt.name):
                     my_pt.messenger = messenger
                     if not my_pt.reminded_date:
                         my_pt.reminded_date = reminded_date
@@ -219,7 +225,7 @@ def cleanup():
 def _clean(name):
     return name.translate(string.maketrans("", ""), string.punctuation).strip().title()
 
-def names_tally(first, second):
+def _names_tally(first, second):
     name1, name2 = first.strip().lower(), second.strip().lower()
     if name1 == name2:
         return True
@@ -234,12 +240,17 @@ def names_tally(first, second):
             return True
     except UnicodeEncodeError:
         return False
-    
+    # check for e.g. Trevor M Sinkala against Sinkala Trevor, Sara Daka vs Sarah Daka
+    if len(name1) > 8 and len(name2) > 8 and " " in name1 and " " in name2:
+        if all(item in name1 for item in name2.split()):            
+            return True
+        if all(item in name2 for item in name1.split()):            
+            return True
+
     return False
 
 
-def clean_names(days_ago=7):
-    count = 0
+def _remove_punctuation(count):
     for token in string.punctuation:
         pts = PatientTrace.objects.filter(name__contains=token)
         for pt in pts:
@@ -252,22 +263,32 @@ def clean_names(days_ago=7):
             contact.name = contact.name.replace(token, "").strip().title()
             contact.save()
             count = + 1
+    return count
 
+
+def _remove_leading_space(count):
     for pt in PatientTrace.objects.filter(name__startswith=" "):
         pt.name = pt.name.strip().title()
         pt.save()
         count += 1
 
-    for pt in PatientTrace.objects.filter(name__contains="  "):
-        pt.name = re.sub(r"\s+", " ", pt.name).strip().title()
-        pt.save()
-        count += 1
-        
     for contact in Contact.objects.filter(name__startswith=" "):
         contact.name = contact.name.strip().title()
         contact.save()
         count = + 1
 
+    return count
+
+
+def _remove_extra_spaces(count):
+    for pt in PatientTrace.objects.filter(name__contains="  "):
+        pt.name = re.sub(r"\s+", " ", pt.name).strip().title()
+        pt.save()
+        count += 1
+    return count
+
+
+def _remove_date_numbers(count):
     for pe in PatientEvent.objects.filter(patient__name__iregex='\d\d .*'):
         patient = pe.patient
         name = re.sub(r"\d\d", "", patient.name).lower().strip()
@@ -286,40 +307,77 @@ def clean_names(days_ago=7):
         patient.name = name
         patient.save()
         count += 1
-    
     for pt in PatientTrace.objects.filter(name__iregex='\d\d .*'):
         name = re.sub(r"\d\d", "", pt.name).lower().strip().title()
         name = re.sub(r"\s+", " ", name)
         pt.name = name
         pt.save()
+        count += 1
+    return count
 
+
+def _remove_locationtype_specifier(count):
     for pt in PatientTrace.objects.filter(name__istartswith='f '):
         pt.name = pt.name[2:].strip().title()
         pt.save()
         count += 1
-
     for pt in PatientTrace.objects.filter(name__istartswith='h '):
         pt.name = pt.name[2:].strip().title()
         pt.save()
         count += 1
+    return count
 
-    for pt in PatientTrace.objects.filter(name__istartswith='mwana '):
-        pt.name = pt.name[6:].strip().title()
+
+def _remove_clinic_data(count):
+    for pt in PatientTrace.objects.filter(name__icontains='clinic',
+                                          initiator__in=['cba', 'clinic_worker']):
+        pt.name = " ".join(pt.name.split()[:2]).title()
         pt.save()
         count += 1
+    return count
 
+
+def _remove_visit_type(count):
     for pt in PatientTrace.objects.filter(Q(name__contains='6'),
                                           Q(name__icontains='day') |
-                                          Q(name__icontains='week') |
-                                          Q(name__icontains='month')):
+                                                  Q(name__icontains='week') |
+                                                  Q(name__icontains='month')):
         name = pt.name.strip().lower()
         for item in ['6days', '6 days', '6weeks', '6 weeks', '6months', '6 months',
-            "6day", "6 day", "6week", "6 week", "6month", "6 month"]:
+                     "6day", "6 day", "6week", "6 week", "6month", "6 month"]:
             name = name.replace(item, "")
 
         pt.name = name.strip().title()
         pt.save()
         count += 1
+    return count
+
+
+def _remove_extraneous_words(count):
+    for pt in PatientTrace.objects.filter(name__istartswith='mwana '):
+        pt.name = pt.name[6:].strip().title()
+        pt.save()
+        count += 1
+    return count
+
+
+def clean_names():
+    count = 0
+    count = _remove_punctuation(count)
+
+    count = _remove_leading_space(count)
+
+    count = _remove_extra_spaces(count)
+
+    count = _remove_date_numbers(count)
+
+    count = _remove_locationtype_specifier(count)
+
+    count = _remove_extraneous_words(count)
+
+    count = _remove_clinic_data(count)
+
+    count = _remove_visit_type(count)
 
     print "Made %s corrections to names" % count
 
