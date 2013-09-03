@@ -66,7 +66,7 @@ msgid ""
 "Thank you %(name)s! You have successfully registered as a RemindMi Agent for "
 "zone %(zone)s of %(clinic)s."
 msgstr ""
-" Ndalumba ba%(name)s! Mwakozya kulembya mbuli mugwasyi wa RemindMi wa %(zone)s ku %(clinic)s."
+"Ndalumba ba %(name)s! Mwakozya kulembya mbuli mugwasyi wa RemindMi wa %(zone)s ku %(clinic)s."
 
 #: .\apps\agents\handlers\agent.py:136 .\apps\labresults\handlers\join.py:363
 msgid "Sorry, I didn't understand that."
@@ -205,7 +205,7 @@ msgid ""
 "Thank you %(cba)s! After you confirm %(patient)s has visited the clinic, "
 "please send: CONFIRM %(patient)s."
 msgstr ""
-"Ndalumba ba %(cba)s!Mwamana kusyomezya na %(patient)s bakauunka ku kkiliniki, "
+"Ndalumba ba %(cba)s!Mwamana kusyomezya na %(patient)s bakauunka ku kiliniki, "
 "ndakomba mutume : CONFIRM %(patient)s."
 
 #: .\apps\reminders\app.py:29
@@ -269,7 +269,7 @@ msgid ""
 "Hi %(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Mwapona %(cba)s. %(patient)s welede kuunka ku kkiliniki %(type)s a %(date)s. "
+"Mwapona %(cba)s. %(patient)s welede kuunka ku kiliniki %(type)s a %(date)s. "
 "Nakomba  amuyezye kuunka ku %(clinic)s, mwa mana mulembe kuti: TOLD  %(patient)s."
 
 #: .\apps\reminders\tasks.py:72
@@ -278,7 +278,7 @@ msgid ""
 "Hi%(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Mwapona %(cba)s. %(patient)s welede kuunka ku kkiliniki %(type)s a %(date)s. "
+"Mwapona %(cba)s. %(patient)s welede kuunka ku kiliniki %(type)s a %(date)s. "
 "Nakomba  amuyezye kuunka ku %(clinic)s, mwa mana mulembe kuti: TOLD  %(patient)s."
 
 #: .\apps\reminders\handlers\BirthNotice.py:38
