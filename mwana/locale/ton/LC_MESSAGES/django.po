@@ -215,7 +215,7 @@ msgid ""
 "optional and is logged as TODAY if left out."
 msgstr ""
 "Kubika %(event_lower)s, mutumye : %(event_upper)s <DATE> <NAME>. buzuba tabuli "
-"tabuketi mulandu.pesi na kwina date nga mwalemba TODAY"
+"tabuketi mulandu. Pesi na kwina date nga mwalemba TODAY"
 
 #: .\apps\reminders\app.py:162
 msgid ""
@@ -318,6 +318,8 @@ msgid ""
 "Thank you, %(name)s. You helped about %(helps)s mothers in your community in "
 "%(month)s %(year)s. Keep up the good work, reminding mothers saves lives."
 msgstr ""
+"Ndalumba, %(name)s. Mwagwasya %(helps)s bamatumbu mu %(month)s %(year)s. "
+"Amwindilizye a milimo mibotu, kuyezya bamatumba kukwabilila bumi."
 
 #: .\apps\reports\tasks.py:28
 #, python-format
@@ -325,6 +327,8 @@ msgid ""
 "Hello %(name)s. Remember to register births in your community and to remind "
 "mothers go to the clinic. Reminding mothers saves lives."
 msgstr ""
+"Mwapona %(name)s. Muyeye kulembya kuzyalwa mu munzi a kuyezya batumbu "
+"kuunka ku kkiliniki. Kuyezya  bamatumbu kukwabilila bumi"
 
 #: .\zambia\settings_country.py:52
 msgid "Bemba"
