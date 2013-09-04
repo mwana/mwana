@@ -156,7 +156,7 @@ def monthly_birth_trends(request):
 
 def monthly_scheduled_visit_trends(request):
     visit_type = read_request(request, "visit_type") or "6 day"
-    data_type = read_request(request, "data_type") or "count"
+    data_type = read_request(request, "data_type") or "percentage"
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
