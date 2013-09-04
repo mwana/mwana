@@ -136,9 +136,9 @@ class GraphServive:
         start, end = get_datetime_bounds(start_date, end_date)
 
         trend_map = {'Mother not Reminded by CBA': ['new'],
-                        'Mother just reminded': ['told'],
-                        'Mother has gone to clinic': ['confirmed'],
-                        ' Total Appointments': ['new', 'told', 'confirmed'],
+                        'Mother  reminded by CBA': ['told', 'confirmed'],
+                        'Mother  has gone to clinic': ['confirmed'],
+                        " Total Births": ['new', 'told', 'confirmed'],
                         }
         trend_items = [key for key in trend_map]
         
