@@ -1,12 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.locations.models import Location
 from mwana.apps.help.models import HelpRequest
+from mwana.apps.locations.models import Location
 from mwana.util import get_clinic_or_default
 from mwana.util import get_contact_type_slug
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
-from mwana.util import get_clinic_or_default
 
 _ = lambda s: s
 
@@ -43,7 +42,8 @@ class HelpHandler(KeywordHandler):
             params["name"] = "%s (%s)" % (self.msg.connection.contact.name,
                                           get_contact_type_slug(self.msg.contact))
             if self.msg.connection.contact.location:
-                params["location"] = get_clinic_or_default(self.msg.contact)
+                params["location"] = "%s(%s)" % (get_clinic_or_default(self.msg.contact),
+                                                 get_clinic_or_default(self.msg.contact).slug)
                 resp_template = CON_LOC_FORWARD
             else: 
                 resp_template = CONTACT_FORWARD

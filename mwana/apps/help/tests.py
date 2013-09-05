@@ -62,7 +62,7 @@ class TestApp(TestScript):
             0974 < Someone has requested help. Please call them at unknown.
             unknown < Sorry you're having trouble. Your help request has been forwarded to a support team member and they will call you soon.
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital has requested help. Please call them at 0971.
+            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
         """
         self.runScript(script)
@@ -89,7 +89,7 @@ class TestApp(TestScript):
 
         script = """
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital has requested help. Please call them at 0971.
+            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
         """
         self.runScript(script)

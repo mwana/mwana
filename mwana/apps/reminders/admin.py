@@ -28,7 +28,7 @@ admin.site.register(reminders.Appointment, AppointmentAdmin)
 
 class PatientEventAdmin(admin.ModelAdmin):
     list_display = ('clinic','patient', 'event', 'date','date_logged','cba',
-    'cba_conn','notification_status','notification_sent_date',)
+    'cba_conn','notification_status','notification_sent_date', 'event_location_type')
     list_filter = ('event', 'event_location_type', 'date_logged','notification_status',)
     date_hierarchy = 'date_logged'
     search_fields = ('patient__name', 'cba_conn__identity','patient__location__parent__name',)

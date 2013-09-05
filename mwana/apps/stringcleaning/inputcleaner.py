@@ -101,7 +101,7 @@ DIGIT_FOR_LETTER = {'i': '1', 'l': '1', 'o': '0', 'I':'1', 'O':'0',
 }
 
 class InputCleaner:
-    def soundex(self, name, len=4):
+    def soundex(self, name, length=4):
         name = str(name)#make sure its a string--Trevor
         """ soundex module conforming to Knuth's algorithm
             implementation 2000-12-24 by Gregory Jorgensen
@@ -128,8 +128,8 @@ class InputCleaner:
         # remove all 0s from the soundex code
         sndx = sndx.replace('0', '')
 
-        # return soundex code padded to len characters
-        return (sndx + (len * '0'))[:len]
+        # return soundex code padded to length characters
+        return (sndx + (length * '0'))[:length]
 
     def remove_double_spaces(self, text):
         """

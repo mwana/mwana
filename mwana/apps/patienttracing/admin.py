@@ -12,7 +12,7 @@ class PatientTraceAdmin(admin.ModelAdmin):
 admin.site.register(PatientTrace, PatientTraceAdmin)
 
 class CorrectedTracesAdmin(admin.ModelAdmin):
-    list_display = ('copied_to', 'copied_from', 'copied_to_start_date',
+    list_display = ('id','copied_to', 'copied_from', 'copied_to_start_date',
     'copied_from_start_date', 'copied_to_told_date', 'copied_from_told_date','time_difference')
     search_fields = ('copied_from__patient_event__patient__name', 'copied_to__patient_event__patient__name')
 

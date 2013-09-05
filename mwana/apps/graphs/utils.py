@@ -8,6 +8,7 @@ from django.db.models import Q
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
+from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reminders.models import PatientEvent
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Backend
@@ -129,6 +130,53 @@ class GraphServive:
 
         return month_ranges, data
 
+    def get_monthly_scheduled_visit_trends(self, start_date, end_date,
+    province_slug, district_slug, facility_slug, visit_type="6 day", data_type="count"):
+        facs = get_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        trend_map = {'Mother not Reminded by CBA': ['new'],
+                        'Mother  reminded by CBA': ['told', 'confirmed'],
+                        'Mother  has gone to clinic': ['confirmed'],
+                        " Total Births": ['new', 'told', 'confirmed'],
+                        }
+        trend_items = [key for key in trend_map]
+        
+        reminders = PatientTrace.objects.filter(Q(start_date__gte=start),
+                                             Q(start_date__lt=end),
+                                             Q(initiator='automated_task'),
+                                             Q(type=visit_type),
+                                             (Q(patient_event__patient__location__parent__in=facs) |
+                                             Q(patient_event__patient__location__in=facs))
+                                             )
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(trend_items):
+            data[item] = []
+
+        month_ranges = []
+
+        while my_date <= end_date:
+            divisor = 1
+            if data_type.lower() == "percentage":
+                divisor = reminders.filter(
+                                  start_date__year=my_date.year,
+                                  start_date__month=my_date.month,
+                                  status__in=['new', 'told', 'confirmed']
+                                  ).count()/100.0
+            for item in sorted(trend_items):
+                data[item].append(round(reminders.filter(
+                                  start_date__year=my_date.year,
+                                  start_date__month=my_date.month,
+                                  status__in=trend_map[item]
+                                  ).count()/(divisor or 1), 1))
+
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+        
+        return month_ranges, data
+
     def get_monthly_turnaround_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
@@ -224,17 +272,17 @@ class GraphServive:
                                     result_sent_date__month=my_date.month
                                     )
             neg_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month,
-                                    result='N'
-                                    ).count()
+                                     result_sent_date__month=my_date.month,
+                                     result='N'
+                                     ).count()
             pos_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month,
-                                    result='P'
-                                    ).count()
+                                     result_sent_date__month=my_date.month,
+                                     result='P'
+                                     ).count()
             rej_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month,
-                                    result__in=['R', 'I', 'X']
-                                    ).count()
+                                     result_sent_date__month=my_date.month,
+                                     result__in=['R', 'I', 'X']
+                                     ).count()
 
             data['Negative'].append(neg_res)
             data['Positive'].append(pos_res)
@@ -373,7 +421,7 @@ def get_sms_facilities(province_slug, district_slug, facility_slug):
     if facility_slug:
         facs = facs.filter(Q(slug=facility_slug) | Q(parent__slug=facility_slug))
     elif district_slug:
-        facs = facs.filter(Q(parent__parent__slug=district_slug) |Q(parent__slug=district_slug) | Q(slug=district_slug))
+        facs = facs.filter(Q(parent__parent__slug=district_slug) | Q(parent__slug=district_slug) | Q(slug=district_slug))
     elif province_slug:
         facs = facs.filter(Q(parent__parent__parent__slug=province_slug) | Q(parent__parent__slug=province_slug) | Q(parent__slug=province_slug) | Q(slug=province_slug))
     return facs
