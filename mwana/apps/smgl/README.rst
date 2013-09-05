@@ -83,8 +83,7 @@ Alternatively, if you are just setting up a server you can use the read-only URL
 
 #. Update the submodules::
 
-    git submodule init
-    git submodule update
+    git submodule update --init --recursive
 
 #. Create local settings file and initialize a development database::
 
