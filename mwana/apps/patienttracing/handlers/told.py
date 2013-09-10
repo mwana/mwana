@@ -6,6 +6,7 @@ from mwana.apps.patienttracing import models as patienttracing
 from datetime import datetime
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
+from datetime import timedelta
 from mwana import const
 _ = lambda s: s
 
@@ -84,10 +85,12 @@ class ToldHandler(KeywordHandler):
         '''
 
         #Check to see if there are any patients being traced by the given name        
-        patients = PatientTrace.objects.filter(name__iexact=pat_name) \
-                                        .filter(status=patienttracing.get_status_new()) \
-                                        .filter(clinic = get_clinic_or_default(self.msg.contact)
-                                        )
+        time_ago = datetime.today() - timedelta(days=45)
+        patients = PatientTrace.objects.filter(name__iexact=pat_name,
+                                                start_date__gte=time_ago,#don't include old appointments from previous births
+                                                status=patienttracing.get_status_new(),
+                                                clinic=get_clinic_or_default(self.msg.contact)
+                                               )
         
         if len(patients) == 0:
 #            self.respond("patient "+pat_name+" not found! Making a new one!")

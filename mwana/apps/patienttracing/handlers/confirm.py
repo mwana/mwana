@@ -1,10 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.util import get_clinic_or_default
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
 from datetime import datetime
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
+from datetime import timedelta
 from mwana import const
 _ = lambda s: s
 
@@ -86,10 +88,13 @@ class ConfirmHandler(KeywordHandler):
         Respond to CONFIRM message, update PatientTrace db entry status to 'CONFIRM'
         '''
 
-        #Check to see if there are any patients being traced by the given name        
-        patients = PatientTrace.objects.filter(name__iexact=pat_name)\
-                                        .filter(status=patienttracing.get_status_told())\
-                                        .filter(clinic=self.msg.connection.contact.location.parent)
+        #Check to see if there are any patients being traced by the given name
+        time_ago = datetime.today() - timedelta(days=45)
+        patients = PatientTrace.objects.filter(name__iexact=pat_name,
+                                                start_date__gte=time_ago,#don't include old appointments from previous births
+                                                status=patienttracing.get_status_told(),
+                                                clinic=get_clinic_or_default(self.msg.contact)
+                                               )
         
         #If patient not found (a name mismatch?) then just deal with it by creating a new 'confirmed' trace entry and thanking the user.
         if len(patients) == 0:

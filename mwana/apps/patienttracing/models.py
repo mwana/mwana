@@ -74,6 +74,7 @@ class PatientTrace(models.Model):
     def save(self, * args, ** kwargs):
         if not self.pk:
             self.start_date = datetime.datetime.now()
+            self.name = self.name.strip().title()
         super(PatientTrace, self).save(*args, ** kwargs)
 
     def __unicode__(self):

@@ -67,12 +67,12 @@ class MessageHandler(BroadcastHandler):
         if self.msg.contact is None or \
             self.msg.contact.location is None:
                 self.respond(UNREGISTERED)
-                return
+                return True
         if set(self.msg.contact.types.all()).isdisjoint(set(self.broadcaster_types)):
             self.respond("You are not allowed to send broadcast messages. If "
                          "you think this message is a mistake please reply with"
                          " keyword HELP")
-            return
+            return True
 
         location = get_clinic_or_default(self.msg.contact)
 
@@ -89,7 +89,7 @@ class MessageHandler(BroadcastHandler):
         if not self.ismatch_sender_group(group_name):
             self.respond("'%s' is not a valid message group for you. %s" % \
                          (group_name, self.get_help_text()))
-            return
+            return True
 
         contacts = None
         if group_name == "CLINIC":
@@ -110,7 +110,7 @@ class MessageHandler(BroadcastHandler):
             contacts = Contact.active.location(location)\
                 .exclude(id=self.msg.contact.id)
         if contacts:
-            return self.broadcast(msg_part, contacts)
+            return self.broadcast(msg_part, contacts, self.msg.connection)
         else:
             self.respond("There is no one in the group '%s' to send a message to." % group_name)
         
