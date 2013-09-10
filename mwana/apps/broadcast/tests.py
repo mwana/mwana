@@ -1,6 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from rapidsms.contrib.handlers.app import App as handler_app
-from rapidsms.contrib.messagelog.app import App as logger_app
 from mwana.apps.locations.models import LocationType, Location
 from rapidsms.models import Contact, Connection
 from rapidsms.tests.scripted import TestScript
@@ -11,7 +9,7 @@ from mwana.apps.broadcast.models import BroadcastMessage, BroadcastResponse
 import mwana.const as const
 import time
 from mwana.const import (get_province_worker_type, get_clinic_worker_type,
-get_cba_type, get_zone_type, get_hub_worker_type, get_district_worker_type)
+get_cba_type, get_hub_worker_type, get_district_worker_type)
 
 class TestApp(TestScript):
 
@@ -67,8 +65,6 @@ class TestApp(TestScript):
     def create_msg_workers(self):
         dho = self.create_contact(name="dho", location=self.district,
                                             types=[get_district_worker_type()])
-        dho = self.create_contact(name="dho", location=self.district,
-                                            types=[get_district_worker_type()])
         dho2 = self.create_contact(name="dho2", location=self.district,
                                             types=[get_district_worker_type()])
 
@@ -101,12 +97,15 @@ class TestApp(TestScript):
         self.runScript(script)
 
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'dho' and \
+                                             msg.text == "Your message has been sent to 3 people")]
+        self.assertEqual(len(response), 1, msgs)
 
-        self.assertEqual(3,len(msgs))
-        expected_recipients = ["dho2","clinic_worker","clinic_worker2"]
+        self.assertEqual(4, len(msgs), msgs)
+        expected_recipients = ["dho2", "clinic_worker", "clinic_worker2"]
         actual_recipients = []
 
-        for msg in msgs:
+        for msg in filter(lambda x:x not in response, msgs):
             self.assertEqual(msg.text,"testing dho blasting [from dho to ALL]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
@@ -120,8 +119,8 @@ class TestApp(TestScript):
         msgs=self.receiveAllMessages()
 
         # no extra msgs sent
-        self.assertEqual(1, len(msgs))
-        self.assertEqual('dho2', msgs[0].contact.name)
+        self.assertEqual(2, len(msgs))
+        self.assertEqual('dho2', filter(lambda msg: not msg.text.startswith("Your messages has been sent"), msgs)[0].contact.name)
         self.assertEqual(msgs[0].text, 'testing dho blasting [from dho to DHO]')
 
         script="""
@@ -130,13 +129,16 @@ class TestApp(TestScript):
 
         self.runScript(script)
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'dho' and \
+                                             msg.text == "Your message has been sent to 2 people")]
+        self.assertEqual(len(response), 1, msgs)
 
-        self.assertEqual(2,len(msgs))
-        expected_recipients = ["clinic_worker","clinic_worker2"]
+        self.assertEqual(3,len(msgs))
+        expected_recipients = ["clinic_worker", "clinic_worker2"]
         actual_recipients = []
 
-        for msg in msgs:
-            self.assertEqual(msg.text,"testing dho blasting [from dho to CLINIC]")
+        for msg in filter(lambda x:x not in response, msgs):
+            self.assertEqual(msg.text, "testing dho blasting [from dho to CLINIC]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
         self.assertEqual([], difference)
@@ -159,12 +161,15 @@ class TestApp(TestScript):
         self.runScript(script)
 
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'clinic_worker' and\
+             msg.text == "Your message has been sent to 3 people")]
+        self.assertEqual(len(response), 1)
 
-        self.assertEqual(3,len(msgs))
-        expected_recipients = ["cba","cba2","clinic_worker2"]
+        self.assertEqual(4, len(msgs))
+        expected_recipients = ["cba", "cba2", "clinic_worker2"]
         actual_recipients = []
 
-        for msg in msgs:
+        for msg in filter(lambda x:x not in response, msgs):
             self.assertEqual(msg.text,"testing msg all [from clinic_worker to ALL]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
@@ -178,8 +183,8 @@ class TestApp(TestScript):
         msgs=self.receiveAllMessages()
 
         # no extra msgs sent
-        self.assertEqual(1, len(msgs))
-        self.assertEqual('clinic_worker2', msgs[0].contact.name)
+        self.assertEqual(2, len(msgs))
+        self.assertEqual('clinic_worker2', filter(lambda msg: not msg.text.startswith("Your messages has been sent"), msgs)[0].contact.name)
         self.assertEqual(msgs[0].text, 'sending from clinic_worker to clinic [from clinic_worker to CLINIC]')
 
         script="""
@@ -188,13 +193,16 @@ class TestApp(TestScript):
 
         self.runScript(script)
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'clinic_worker' and\
+             msg.text == "Your message has been sent to 2 people")]
+        self.assertEqual(len(response), 1)
 
-        self.assertEqual(2,len(msgs))
-        expected_recipients = ["cba","cba2"]
+        self.assertEqual(3, len(msgs))
+        expected_recipients = ["cba", "cba2"]
         actual_recipients = []
 
-        for msg in msgs:
-            self.assertEqual(msg.text,"testing clinic to cba [from clinic_worker to CBA]")
+        for msg in filter(lambda x:x not in response, msgs):
+            self.assertEqual(msg.text, "testing clinic to cba [from clinic_worker to CBA]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
         self.assertEqual([], difference)
@@ -205,13 +213,16 @@ class TestApp(TestScript):
 
         self.runScript(script)
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'clinic_worker' and\
+             msg.text == "Your message has been sent to 2 people")]
+        self.assertEqual(len(response), 1)
         
-        self.assertEqual(2,len(msgs))
-        expected_recipients = ["dho","dho2"]
+        self.assertEqual(3,len(msgs), msgs)
+        expected_recipients = ["dho", "dho2"]
         actual_recipients = []
 
-        for msg in msgs:
-            self.assertEqual(msg.text,"testing clinic to dho [from clinic_worker to DHO]")
+        for msg in filter(lambda x:x not in response, msgs):
+            self.assertEqual(msg.text, "testing clinic to dho [from clinic_worker to DHO]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
         self.assertEqual([], difference)
@@ -236,12 +247,15 @@ class TestApp(TestScript):
         self.runScript(script)
 
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'cba' and\
+             msg.text == "Your message has been sent to 3 people")]
+        self.assertEqual(len(response), 1)
 
-        self.assertEqual(3,len(msgs))
-        expected_recipients = ["cba2","clinic_worker","clinic_worker2"]
+        self.assertEqual(4,len(msgs))
+        expected_recipients = ["cba2", "clinic_worker", "clinic_worker2"]
         actual_recipients = []
 
-        for msg in msgs:
+        for msg in filter(lambda x:x not in response, msgs):
             self.assertEqual(msg.text,"testing msg all [from cba to ALL]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
@@ -255,8 +269,8 @@ class TestApp(TestScript):
         msgs=self.receiveAllMessages()
 
         # no extra msgs sent
-        self.assertEqual(1, len(msgs))
-        self.assertEqual('cba2', msgs[0].contact.name)
+        self.assertEqual(2, len(msgs))
+        self.assertEqual('cba2', filter(lambda msg: not msg.text.startswith("Your messages has been sent"), msgs)[0].contact.name)
         self.assertEqual(msgs[0].text, 'sending from cbc to cba [from cba to CBA]')
 
         script="""
@@ -265,13 +279,16 @@ class TestApp(TestScript):
 
         self.runScript(script)
         msgs=self.receiveAllMessages()
+        response = [msg for msg in msgs if (msg.connection.identity == 'cba' and\
+             msg.text == "Your message has been sent to 2 people")]
+        self.assertEqual(len(response), 1)
 
-        self.assertEqual(2,len(msgs))
-        expected_recipients = ["clinic_worker","clinic_worker2"]
+        self.assertEqual(3, len(msgs))
+        expected_recipients = ["clinic_worker", "clinic_worker2"]
         actual_recipients = []
 
-        for msg in msgs:
-            self.assertEqual(msg.text,"testing cba to clinic [from cba to CLINIC]")
+        for msg in filter(lambda x:x not in response, msgs):
+            self.assertEqual(msg.text, "testing cba to clinic [from cba to CLINIC]")
             actual_recipients.append(msg.contact.name)
         difference = list(set(actual_recipients).difference(set(expected_recipients)))
         self.assertEqual([], difference)
@@ -288,7 +305,7 @@ class TestApp(TestScript):
             for contact in self.all:
                 for keyword, recipients in self.expected_keyword_to_groups.items():
                     running_count += 1
-                    message_body = "what up fools!"
+                    message_body = "what's up people!"
                     response = "not much G!"
                     self.sendMessage(contact.default_connection.identity, "%s %s" %\
                                      (keyword, message_body))
