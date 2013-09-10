@@ -4,7 +4,7 @@ from mwana.apps.broadcast.models import BroadcastMessage
 from django.contrib import admin
 
 class BroadcastMessageAdmin(admin.ModelAdmin):
-    list_display = ('location', 'contact', 'group', 'text', 'date')
+    list_display = ( 'contact','location', 'group', 'text', 'logger_message', 'date')
     list_filter = ('group', 'date', 'contact', )
     search_fields = ('contact__name', 'text',
     'contact__location__name',
