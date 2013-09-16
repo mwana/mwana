@@ -194,16 +194,16 @@ class App (rapidsms.apps.base.AppBase):
             r.save()
 
         clinic = results[0].clinic
-        contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).distinct().\
-            order_by('pk')
+        contacts = Contact.active.filter(Q(location=clinic) |
+                                         Q(location__parent=clinic),
+                                         Q(types=const.get_clinic_worker_type())
+                                         ).distinct().order_by('pk')
         if SYSTEM_LOCALE == LOCALE_MALAWI:
             for res in results:
                 if len(res.requisition_id) > 10:
-                    NUIDS =+ ", ".join(str(res.clinic_care_no))
+                    NUIDS += ", ".join(str(res.clinic_care_no))
                 else:
-                    NUIDS =+ ", ".join(str(res.requisition_id))
+                    NUIDS += ", ".join(str(res.requisition_id))
         else:
             NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
