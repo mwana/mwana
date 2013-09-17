@@ -77,9 +77,25 @@ class TestApp(TestScript):
                                              types=[get_clinic_worker_type()])
         hub_worker = self.create_contact(name="hub_worker", location=self.clinic,
                                              types=[get_hub_worker_type()])
+    def testIgnoringExtraneousPunctuation(self):
+
+        self.create_msg_workers()
+
+        script="""
+        dho > msg dho. hello sir
+        dho2 < hello sir [from dho to DHO]
+        """
+        self.runScript(script)
+
+        script="""
+        cba > msg cba, hello sir
+        cba2 < hello sir [from cba to CBA]
+        """
+        self.runScript(script)
+        
     def testMsgByDho(self):
 
-        self.create_msg_workers()        
+        self.create_msg_workers()
 
         script="""
         dho > msg my own way
@@ -349,7 +365,7 @@ class TestApp(TestScript):
 
         finally:
             self.stopRouter()
-    
+
     def create_contact(self, name, location, types):
         contact = Contact.objects.create(alias=name, name=name,
                                          location=location)

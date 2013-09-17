@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_patient_type
 import re
 from django.db.models import Q
 from mwana.apps.broadcast.handlers.base import BroadcastHandler
@@ -21,7 +22,7 @@ class MessageHandler(BroadcastHandler):
     HELP_TEXT = ("To send a message SEND: MSG <GROUP> <your message>. The groups"
                  " you can send to are: %s")
 
-    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\s+)(.{1,})$", re.IGNORECASE)
+    PATTERN = re.compile(r"^(all|cba|clinic|dho)(\,|\.|\s+)(.{1,})$", re.IGNORECASE)
 
     workertype_group_mapping = {
     'cba':('cba', 'clinic', 'all'),
@@ -83,7 +84,7 @@ class MessageHandler(BroadcastHandler):
 
         tokens = group.groups()
 
-        msg_part = text[len(tokens[0]):].strip()
+        msg_part = tokens[-1].strip()
         group_name = tokens[0].upper()
         self.group_name = group_name
         if not self.ismatch_sender_group(group_name):
@@ -108,7 +109,9 @@ class MessageHandler(BroadcastHandler):
                                             .filter(types = get_district_worker_type).distinct()            
         elif group_name == "ALL":
             contacts = Contact.active.location(location)\
-                .exclude(id=self.msg.contact.id)
+                .exclude(id=self.msg.contact.id).exclude(types=get_patient_type())
+
+        contacts = contacts.exclude(connection=None)
         if contacts:
             return self.broadcast(msg_part, contacts, self.msg.connection)
         else:
