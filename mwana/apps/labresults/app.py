@@ -199,8 +199,9 @@ class App (rapidsms.apps.base.AppBase):
                                          Q(types=const.get_clinic_worker_type())
                                          ).distinct().order_by('pk')
         if SYSTEM_LOCALE == LOCALE_MALAWI:
+            NUIDS = ''
             for res in results:
-                if len(res.requisition_id) > 10:
+                if len(res.requisition_id) < 9:
                     NUIDS += ", ".join(str(res.clinic_care_no))
                 else:
                     NUIDS += ", ".join(str(res.requisition_id))
