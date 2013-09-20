@@ -259,11 +259,12 @@ class JoinHandler(KeywordHandler):
             return zone
         
     def handle_zone(self, text):
+        my_text =  text.lower().replace(' zone ', ' ')
         PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
         HELP_TEXT = _("To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
 
-        m = PATTERN.search(text)
+        m = PATTERN.search(my_text)
         if m is not None:
             clinic_slug = m.group('clinic').strip()
             zone_slug = m.group('zone').strip()
