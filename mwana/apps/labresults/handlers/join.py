@@ -243,15 +243,18 @@ class JoinHandler(KeywordHandler):
     def _get_or_create_zone(self, clinic, name):
             # create the zone if it doesn't already exist
             zone_type, _ = LocationType.objects.get_or_create(slug=const.ZONE_SLUGS[0])
+            # since slug is always lower cased when saved, but get_unique_value
+            # not take care of case
+            lowered_name = name.lower()
             try:
                 # get_or_create does not work with iexact
-                zone = Location.objects.get(name__iexact=name,
+                zone = Location.objects.get(name__iexact=lowered_name,
                                             parent=clinic,
                                             type=zone_type)
             except Location.DoesNotExist:
-                zone = Location.objects.create(name=name,
+                zone = Location.objects.create(name=lowered_name,
                                                parent=clinic,
-                                               slug=get_unique_value(Location.objects, "slug", name),
+                                               slug=get_unique_value(Location.objects, "slug", lowered_name),
                                                type=zone_type)
             return zone
         
