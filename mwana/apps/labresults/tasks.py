@@ -22,9 +22,10 @@ from mwana.apps.tlcprinters.models import MessageConfirmation
 logger = logging.getLogger(__name__)
 
 verified = Q(lab_results__verified__isnull=True) |\
-           Q(lab_results__verified=True)
+    Q(lab_results__verified=True)
 
 send_live_results = Q(lab_results__clinic__send_live_results=True)
+
 
 def send_results_notification(router):
     logger.debug('in send_results_notification')
@@ -32,7 +33,8 @@ def send_results_notification(router):
         new_notified = Q(lab_results__notification_status__in=
                          ['new', 'notified'])
         clinics_with_results =\
-          Location.objects.filter(new_notified & verified & send_live_results).distinct()
+            Location.objects.filter(
+                new_notified & verified & send_live_results).distinct()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)
@@ -41,13 +43,15 @@ def send_results_notification(router):
         logger.info('not notifying any clinics of new results because '
                     'settings.SEND_LIVE_LABRESULTS is False')
 
+
 def send_changed_records_notification(router):
     logger.debug('in send_changed_records_notification')
     if settings.SEND_LIVE_LABRESULTS:
         updated_notified = Q(lab_results__notification_status__in=
                              ['updated', 'notified'])
         clinics_with_results =\
-          Location.objects.filter(updated_notified & verified & send_live_results).distinct()
+            Location.objects.filter(
+                updated_notified & verified & send_live_results).distinct()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of changed results' % clinic)
@@ -79,7 +83,8 @@ def clean_up_unconfirmed_results():
     ago = 1
     if today.weekday() == 0:
         ago = 3
-    date_back = datetime(today.year,today.month,today.day) - timedelta(days=ago)
+    date_back = datetime(
+        today.year, today.month, today.day) - timedelta(days=ago)
 
     messages = MessageConfirmation.objects.filter(confirmed=False,
                                                   sent_at__gte=date_back,
