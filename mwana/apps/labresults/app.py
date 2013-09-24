@@ -199,12 +199,9 @@ class App (rapidsms.apps.base.AppBase):
                                          Q(types=const.get_clinic_worker_type())
                                          ).distinct().order_by('pk')
         if SYSTEM_LOCALE == LOCALE_MALAWI:
-            NUIDs = ''
-            for res in results:
-                if len(res.requisition_id) < 9:
-                    NUIDs += ", ".join(str(res.clinic_care_no))
-                else:
-                    NUIDs += ", ".join(str(res.requisition_id))
+            NUIDs = ", ".join(
+                [str(r.requisition_id) if len(str(r.requisition_id)) > 9 else
+                 str(r.clinic_care_no) for r in results])
         else:
             NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
@@ -294,7 +291,10 @@ class App (rapidsms.apps.base.AppBase):
         """
         Sends new results to printers at clinics.
         """
-        results = self._pending_results(clinic, True)
+        if SYSTEM_LOCALE == LOCALE_MALAWI:
+            results = self._pending_results(clinic, True, True)
+        else:
+            results = self._pending_results(clinic, True)
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
