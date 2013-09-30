@@ -162,7 +162,7 @@ class MockResultUtility(LoggerMixin):
     def fake_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms, except
            this is fake!"""
-        contacts = Contact.active.filter(types=const.get_clinic_worker_type()).location(clinic)
+        contacts = Contact.active.filter(types=const.get_clinic_worker_type(), location=clinic)
         results = get_fake_results(3, clinic)
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection,
