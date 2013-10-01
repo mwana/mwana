@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from django.contrib.auth.models import User
 from rapidsms.models import Contact
 from mwana.apps.locations.models import Location
