@@ -205,7 +205,7 @@ def send_cba_encouragement(router):
             continue
         name = worker.name
 
-        msg = (CBA_REMINDER_MSG % {'name':name})
+        msg = (CBA_REMINDER_MSG % {'name': name})
 
         CbaEncouragement.objects.create(contact=worker, facility=location,
                                         type='M')
