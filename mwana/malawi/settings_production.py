@@ -20,49 +20,25 @@ TEMPLATE_DIRS = (
 
 XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
-# Modify INSTALLED_APPS if you like, e.g., add an app that disables the project
-# only on the production or production server, so that development can continue
-# locally:
-#INSTALLED_APPS.insert(INSTALLED_APPS.index("rapidsms"),
-#                      "mwana.apps.whitelist")
-#WHITELIST_RESPONSE = "I'm sorry, Results160 and RemindMi are still in testing "\
-#                     "phase. We will notify you when the system is live."
+DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
+ MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
+ Send HELP for more information'''
 
-DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
-
-# You can also customize RAPIDSMS_TABS like so:
+# RAPIDSMS_TABS:
 RAPIDSMS_TABS = [
-    # ('rapidsms.views.dashboard', 'Dashboard'),
-    # ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
-    # ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-    # ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.reports.views.malawi_graphs', 'Results160 Analysis'),
     ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('growth_index', 'AnthroWatch Reports'),
     ('growth_graphs', 'AnthroWatch Analysis'),
-    # ('xforms', 'XForms'),
 ]
 
-# Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
-#INSTALLED_BACKENDS.update({
-#    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
-#               "port": "/dev/ttyUSB0",
-#               'baudrate': '115200',
-#               'rtscts': '1',
-#               'timeout': 10}
-#})
-
-# Add the kannel backends for Zain and TNM
+# Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
-    "zain": {
-        "ENGINE":  "rapidsms.backends.kannel",
-        "host": "127.0.0.1",
-        "port": 8081,
+    "airtel": {
+        "ENGINE":  "threadless_router.backends.kannel.outgoing",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "zain-modem",
                            "from": "+265999279085",  # will be overridden;
@@ -73,9 +49,7 @@ INSTALLED_BACKENDS.update({
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
     },
     "tnm": {
-        "ENGINE":  "rapidsms.backends.kannel",
-        "host": "127.0.0.1",
-        "port": 8082,
+        "ENGINE":  "threadless_router.backends.kannel.outgoing",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "tnm-smpp",
                            "from": "88160",  # not set automatically by SMSC
@@ -109,8 +83,8 @@ LOG_LEVEL = "DEBUG"
 LOG_FILE = "/var/log/rapidsms/rapidsms.route.log"
 DJANGO_LOG_FILE = "/var/log/rapidsms/rapidsms.django.log"
 LOG_FORMAT = "[%(asctime)s] [%(name)s] [%(levelname)s]: %(message)s"
-LOG_SIZE = 1000000 # in bytes
-LOG_BACKUPS = 256     # number of logs to keep around
+LOG_SIZE = 1000000  # in bytes
+LOG_BACKUPS = 256  # number of logs to keep around
 
 # Configure email-based logging for errors & exceptions:
 from mwana.logconfig import init_email_handler
