@@ -29,10 +29,10 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
 
     def record_notification(appointment, patient_event, connection):
         reminders.SentNotification.objects.create(
-                appointment=appointment,
-                patient_event=patient_event,
-                recipient=connection,
-                date_logged=datetime.datetime.now())
+            appointment=appointment,
+            patient_event=patient_event,
+            recipient=connection,
+            date_logged=datetime.datetime.now())
 
     if pronouns is None:
         pronouns = {}
@@ -41,17 +41,17 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     logger.info('Sending appointment reminder for %s' % patient)
     if patient.location:
         logger.debug('using patient location (%s) to find CBAs' %
-                      patient.location)
+                     patient.location)
         # if the cba was registered, we'll have a location on
         # the patient and can use that information to find the CBAs to whom
         # we should send the appointment reminders
         # TODO: also check child locations?
         connections = list(Connection.objects.filter(
-                                         contact__types__slug=const.CBA_SLUG,
-                                         contact__location=patient.location,
-                                         contact__is_active=True))
+            contact__types__slug=const.CBA_SLUG,
+            contact__location=patient.location,
+            contact__is_active=True))
         logger.debug('found %d CBAs to deliver reminders to' %
-                      len(connections))
+                     len(connections))
     elif default_conn:
         logger.debug('no patient location; using default_conn')
         # if the CBA was not registered, just send the notification to the
@@ -59,7 +59,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
         connections = [default_conn]
     else:
         logger.debug('no patient location or default_conn; not sending any '
-                      'reminders')
+                     'reminders')
 
     for connection in connections:
         lang_code = None
@@ -77,18 +77,19 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
         else:
             clinic_name = 'the clinic'
         appt_date = patient_event.date +\
-                    datetime.timedelta(days=appointment.num_days)
+            datetime.timedelta(days=appointment.num_days)
 
         if SYSTEM_LOCALE == LOCALE_MALAWI:
             # filter appointments which have custom messages
             # get messages for hsa and send
             hsa_msgs = appointment.messages.filter(recipient_type='hsa')
             for msg in hsa_msgs:
-                hsa_msg = OutgoingMessage(connection, _(msg.content),
-                                  cba=cba_name, patient=patient.name,
-                                  date=appt_date.strftime('%d/%m/%Y'),
-                                  clinic=clinic_name,
-                                  type=translator.translate(lang_code, type))
+                hsa_msg = OutgoingMessage(
+                    connection, _(msg.content),
+                    cba=cba_name, patient=patient.name,
+                    date=appt_date.strftime('%d/%m/%Y'),
+                    clinic=clinic_name,
+                    type=translator.translate(lang_code, type))
                 hsa_msg.send()
                 record_notification(appointment, patient_event, connection)
             # get messages for mother and send
@@ -96,11 +97,12 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             client_msgs = appointment.messages.filter(recipient_type='client')
             if client_conn and client_msgs:
                 for msg in client_msgs:
-                    client_msg = OutgoingMessage(client_conn, _(msg.content),
-                                     cba=cba_name, patient=patient.name,
-                                     date=appt_date.strftime('%d/%m/%Y'),
-                                     clinic=clinic_name,
-                                     type=translator.translate(lang_code, type))
+                    client_msg = OutgoingMessage(
+                        client_conn, _(msg.content),
+                        cba=cba_name, patient=patient.name,
+                        date=appt_date.strftime('%d/%m/%Y'),
+                        clinic=clinic_name,
+                        type=translator.translate(lang_code, type))
                     client_msg.send()
                     record_notification(appointment, patient_event, client_conn)
         else:
@@ -137,7 +139,7 @@ def send_notifications(router):
         # the date before which a patient event must have occurred in order
         # to trigger a reminder
         date = datetime.datetime.now() -\
-               datetime.timedelta(days=total_days)
+            datetime.timedelta(days=total_days)
         # the beginning of that day
         start_date = date.replace(minute=0, second=0, hour=0)
         # the end of that day

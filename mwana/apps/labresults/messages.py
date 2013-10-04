@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
 from django.conf import settings
-from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_MALAWI
 from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
 
@@ -23,7 +23,7 @@ RIMINDMI_DEMO_FAIL     = "Sorry you must be registered with a location or specif
 PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 PRINTER_RESULTS_MW = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\nHCC: %(clinic_care_no)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
 CHANGED_PRINTER_RESULTS   = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
-CHANGED_PRINTER_RESULTS_MW = "%(clinic)s.\r\nPatient ID: %(req_id)s.\r\nHCC: %(clinic_care_no)s.\r\n%(test_type)s:\r\n%(result)s.\r\nApproved by %(lab_name)s."
+CHANGED_PRINTER_RESULTS_MW = "%(clinic)s.\r\nOld ID: %(old_req_id)s.Old result: %(old_result)s\r\nHCC: %(clinic_care_no)s.\r\n%(test_type)s:\r\nNew result: %(new_result)s.\r\nApproved by %(lab_name)s."
 CLINIC_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are CHECK, RESULT, SENT, TRACE, MSG CBA, MSG CLINIC, MSG ALL and MSG DHO. Respond with any keyword or HELP for more information"
 HUB_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are RECEIVED and SENT. Respond with any keyword or HELP for more information"
 CBA_DEFAULT_RESPONSE = _("Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information.")
@@ -36,6 +36,7 @@ HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(c
 
 TEST_TYPE = "HIV-DNAPCR Result"
 
+
 def urgent_requisitionid_update(result):
     """
     Returns True if there has been a critical update in requisition id. That is
@@ -47,6 +48,7 @@ def urgent_requisitionid_update(result):
             toreturn = True
     return toreturn
 
+
 def build_printer_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting
@@ -57,17 +59,19 @@ def build_printer_results_messages(results):
     for res in results:
         if urgent_requisitionid_update(res):
             if SYSTEM_LOCALE == LOCALE_MALAWI:
-                msg = (CHANGED_PRINTER_RESULTS_MW % {"clinic": res.clinic.name,
-                            "old_req_id": res.old_value.split(":")[0],
-                            "old_result": res.get_old_result_text(),
-                            "new_req_id": res.requisition_id,
-                            "new_result": res.get_result_text(),
-                            "clinic_care_no": res.clinic_care_no,
-                            "test_type": TEST_TYPE,
-                            "lab_name": settings.ADH_LAB_NAME,
-                            "sms_date": date.isoformat(date.today())})
+                msg = (CHANGED_PRINTER_RESULTS_MW % {
+                    "clinic": res.clinic.name,
+                    "old_req_id": res.old_value.split(":")[0],
+                    "old_result": res.get_old_result_text(),
+                    "new_req_id": res.requisition_id,
+                    "new_result": res.get_result_text(),
+                    "clinic_care_no": res.clinic_care_no,
+                    "test_type": TEST_TYPE,
+                    "lab_name": settings.ADH_LAB_NAME,
+                    "sms_date": date.isoformat(date.today())})
             else:
-                msg = (CHANGED_PRINTER_RESULTS % {"clinic": res.clinic.name,
+                msg = (CHANGED_PRINTER_RESULTS % {
+                    "clinic": res.clinic.name,
                     "old_req_id": res.old_value.split(":")[0],
                     "old_result": res.get_old_result_text(),
                     "new_req_id": res.requisition_id,
@@ -77,20 +81,22 @@ def build_printer_results_messages(results):
                     "sms_date": date.isoformat(date.today())})
         else:
             if SYSTEM_LOCALE == LOCALE_MALAWI:
-                msg = (PRINTER_RESULTS_MW % {"clinic": res.clinic.name,
-                        "req_id": res.requisition_id,
-                        "clinic_care_no": res.clinic_care_no,
-                        "result": res.get_result_text(),
-                        "test_type": TEST_TYPE,
-                        "lab_name": settings.ADH_LAB_NAME,
-                        "sms_date": date.isoformat(date.today())})
+                msg = (PRINTER_RESULTS_MW % {
+                    "clinic": res.clinic.name,
+                    "req_id": res.requisition_id,
+                    "clinic_care_no": res.clinic_care_no,
+                    "result": res.get_result_text(),
+                    "test_type": TEST_TYPE,
+                    "lab_name": settings.ADH_LAB_NAME,
+                    "sms_date": date.isoformat(date.today())})
             else:
-                msg = (PRINTER_RESULTS % {"clinic": res.clinic.name,
-                   "req_id": res.requisition_id,
-                   "result": res.get_result_text(),
-                   "test_type": TEST_TYPE,
-                   "lab_name": settings.ADH_LAB_NAME,
-                   "sms_date": date.isoformat(date.today())})
+                msg = (PRINTER_RESULTS % {
+                    "clinic": res.clinic.name,
+                    "req_id": res.requisition_id,
+                    "result": res.get_result_text(),
+                    "test_type": TEST_TYPE,
+                    "lab_name": settings.ADH_LAB_NAME,
+                    "sms_date": date.isoformat(date.today())})
         result_strings.append(msg)
 
     return result_strings
@@ -109,10 +115,10 @@ def build_results_messages(results):
             if SYSTEM_LOCALE == LOCALE_MALAWI:
                 if len(res.old_value.split(":")[0]) > 10:
                     result_strings.append("**** %s;%s changed to %s;%s" % (
-                                  res.old_value.split(":")[0],
-                                  res.get_old_result_text(),
-                                  res.requisition_id,
-                                  res.get_result_text()))
+                        res.old_value.split(":")[0],
+                        res.get_old_result_text(),
+                        res.requisition_id,
+                        res.get_result_text()))
                 else:
                     result_strings.append("**** %s;%s changed to %s;%s" % (
                         res.old_value.split(":")[0],
@@ -122,14 +128,17 @@ def build_results_messages(results):
         else:
             if SYSTEM_LOCALE == LOCALE_MALAWI:
                 if len(res.requisition_id) > 10:
-                    result_strings.append("**** %s;%s" % (res.requisition_id,
-                                                      res.get_result_text()))
+                    result_strings.append("**** %s;%s" % (
+                        res.requisition_id,
+                        res.get_result_text()))
                 else:
-                    result_strings.append("**** %s;%s" % (res.clinic_care_no,
-                                                          res.get_result_text()))
+                    result_strings.append("**** %s;%s" % (
+                        res.clinic_care_no,
+                        res.get_result_text()))
             else:
-                result_strings.append("**** %s;%s" % (res.requisition_id,
-                                  res.get_result_text()))
+                result_strings.append("**** %s;%s" % (
+                    res.requisition_id,
+                    res.get_result_text()))
 
     result_text, remainder = combine_to_length(result_strings,
                                                length=max_len - len(RESULTS))
