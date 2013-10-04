@@ -49,7 +49,10 @@ INSTALLED_APPS = [
     "django_nose",
     "djtables",
     "rapidsms",
-
+    # router and task queues
+    "threadless_router.backends.kannel",
+    "djcelery",
+    "threadless_router.celery",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
     # "rapidsms.contrib.ajax",
@@ -114,9 +117,11 @@ RAPIDSMS_TABS = [
 ]
 
 
-# TODO: make a better default response, include other apps, and maybe 
+# TODO: make a better default response, include other apps, and maybe
 # this dynamic?
-DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
+DEFAULT_RESPONSE = '''Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK,
+ RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for
+ more information.'''
 
 
 # -------------------------------------------------------------------- #
@@ -157,12 +162,12 @@ SITE_ID = 1
 
 
 # the default log settings are very noisy.
-LOG_LEVEL   = "DEBUG"
-LOG_FILE    = "logs/rapidsms.log"
-LOG_FORMAT  = "[%(name)s]: %(message)s"
-LOG_SIZE    = 8192 # 8192 bytes = 64 kb
-LOG_BACKUPS = 256 # number of logs to keep
-DJANGO_LOG_FILE  = 'logs/django.log'
+LOG_LEVEL = "DEBUG"
+LOG_FILE = "logs/rapidsms.log"
+LOG_FORMAT = "[%(name)s]: %(message)s"
+LOG_SIZE = 8192  # 8192 bytes = 64 kb
+LOG_BACKUPS = 256  # number of logs to keep
+DJANGO_LOG_FILE = 'logs/django.log'
 
 
 MIDDLEWARE_CLASSES = [
@@ -234,12 +239,12 @@ ON_LIVE_SERVER = False
 # local environment.  You will almost certainly want to customize these in
 # your country-level settings file.
 RESULTS160_SLUGS = {
-# contact types:
+    # contact types:
     'CBA_SLUG': 'cba',
     'PATIENT_SLUG': 'patient',
     'CLINIC_WORKER_SLUG': 'clinic-worker',
     'DISTRICT_WORKER_SLUG': 'district-worker',
-# location types:
+    # location types:
     'CLINIC_SLUGS': ('clinic',),
     'ZONE_SLUGS': ('zone',),
     'DISTRICT_SLUGS': ('district',),

@@ -42,19 +42,11 @@ urlpatterns = patterns(
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
-
+    (r'^backend/', include('threadless_router.backends.kannel.urls')),
     #Kwabi: quick fix to provide a passsword change form to non admins
     #(r'^changepassword/$', 'nonauth.views.password_change',
     # {'template_name': 'accounts/password_change_form.html'}),
 
-)
-
-
-from django.contrib import auth
-urlpatterns += patterns('',
-    #Kwabi: quick fix to provide a passsword change form to non admins
-    #url(r'^changepassword$', 'auth.views.password_change', name='change-password'),
-    #(r'^changepassword/$', 'auth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
 )
 
 if settings.DEBUG:
