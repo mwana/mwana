@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.malawi.settings_country import *
 
-DEBUG = True 
+DEBUG = True
 
 ADMINS = (
     ('Tobias McNulty', 'mwana@caktusgroup.com'),
@@ -14,7 +14,8 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-staging] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
-TEMPLATE_DIRS = ("/home/mwana/staging-environment/code_root/mwana/malawi/templates",)
+TEMPLATE_DIRS = (
+    "/home/mwana/staging-environment/code_root/mwana/malawi/templates",)
 
 #XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
@@ -30,19 +31,19 @@ TEMPLATE_DIRS = ("/home/mwana/staging-environment/code_root/mwana/malawi/templat
 
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
-#    ('rapidsms.views.dashboard', 'Dashboard'),
+    # ('rapidsms.views.dashboard', 'Dashboard'),
     ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
-#    ('mwana.apps.locations.views.dashboard', 'Map'),
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-#    ('mwana.apps.labresults.views.dashboard', 'Results160'),
+    # ('mwana.apps.locations.views.dashboard', 'Map'),
+    # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+    # ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
     ('growth_index', 'AnthroWatch Reports'),
     ('growth_graphs', 'AnthroWatch Analysis'),
-#    ('xforms', 'XForms'),
+    # ('xforms', 'XForms'),
 ]
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS

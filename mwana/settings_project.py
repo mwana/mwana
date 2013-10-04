@@ -31,8 +31,8 @@ INSTALLED_BACKENDS = {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
     #},
-    "message_tester": {
-        "ENGINE": "rapidsms.backends.bucket",
+    "httptester": {
+        "ENGINE": "threadless_router.backends.httptester.backend",
     }
 }
 
@@ -52,7 +52,7 @@ INSTALLED_APPS = [
 
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
-    "rapidsms.contrib.ajax",
+    # "rapidsms.contrib.ajax",
 
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
@@ -65,12 +65,13 @@ INSTALLED_APPS = [
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.export",
-    "rapidsms.contrib.httptester",
-#    "mwana.apps.locations",
-    "rapidsms.contrib.messagelog",
+    "threadless_router.backends.httptester",
+    # "rapidsms.contrib.httptester",
+    # "mwana.apps.locations",
+    # "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-#    "rapidsms.contrib.registration",
-    "rapidsms.contrib.scheduler",
+    # "rapidsms.contrib.registration",
+    # "rapidsms.contrib.scheduler",
     "mwana.apps.echo",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
@@ -78,9 +79,9 @@ INSTALLED_APPS = [
     "mwana.apps.broadcast",
     "mwana.apps.labresults",
     "mwana.apps.reminders",
-#    "mwana.apps.birth_reminders",
+    # "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
-#    "mwana.apps.supply",
+    # "mwana.apps.supply",
     "mwana.apps.reports",
     "mwana.apps.training",
     "mwana.apps.help",
@@ -91,7 +92,8 @@ INSTALLED_APPS = [
     "mwana.apps.stringcleaning",
     "mwana.apps.translator",
 
-# This app should always come last to prevent it from hijacking other apps that handle default messages
+    # This app should always come last to prevent it from
+    # hijacking other apps that handle default messages
     "rapidsms.contrib.default",
 ]
 
@@ -100,13 +102,13 @@ INSTALLED_APPS = [
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
     ('rapidsms.views.dashboard', 'Dashboard'),
-    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    ('httptester-index', 'Message Tester'),
     ('mwana.apps.locations.views.dashboard', 'Map'),
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-#    ('rapidsms.contrib.registration.views.registration', 'Registration'),
-#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-#    ('mwana.apps.supply.views.dashboard', 'Supplies'),
+    # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
+    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+    # ('rapidsms.contrib.registration.views.registration', 'Registration'),
+    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+    # ('mwana.apps.supply.views.dashboard', 'Supplies'),
     ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
 ]
@@ -192,8 +194,8 @@ TEST_EXCLUDED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "rapidsms",
-    "rapidsms.contrib.ajax",
-    "rapidsms.contrib.httptester",
+    # "rapidsms.contrib.ajax",
+    # "rapidsms.contrib.httptester",
 ]
 
 

@@ -3,7 +3,8 @@ from django.conf.urls.defaults import *
 from mwana.apps.reports import views
 from mwana.apps.reminders import views as remindmi
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # global project URLs:
     (r'^', include('mwana.urls')),
     # custom URL additions for Malawi:

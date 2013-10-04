@@ -5,7 +5,8 @@ from django.contrib import admin
 
 admin.autodiscover()
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # Example:
     # (r'^my-project/', include('my_project.foo.urls')),
 
@@ -22,22 +23,29 @@ urlpatterns = patterns('',
     (r'^labresults/', include('mwana.apps.labresults.urls')),
     (r'^alerts/', include('mwana.apps.alerts.urls')),
     (r'^websms/', include('mwana.apps.websmssender.urls')),
-    #(r'^supplies/', include('mwana.apps.supply.urls')),
-    #url(r"^reports/$", mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
-    #url(r'^$', mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
+    # (r'^supplies/', include('mwana.apps.supply.urls')),
+    # url(r"^reports/$",
+    # mwana.apps.labresults.views.mwana_reports,
+    # name="mwana_reports"),
+    # url(r'^$',
+    # mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
     (r'^export/', include('rapidsms.contrib.export.urls')),
-    (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
+    url(r'^httptester/$',
+        'threadless_router.backends.httptester.views.generate_identity',
+        {'backend_name': 'httptester'}, name='httptester-index'),
+    (r'^httptester/', include('threadless_router.backends.httptester.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
-    (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
-#    (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
-#    (r'^registration/', include('rapidsms.contrib.registration.urls')),
-    (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
+    # (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
+    # (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
+    # (r'^registration/', include('rapidsms.contrib.registration.urls')),
+    # (r'^scheduler/', include('rapidsms.contrib.scheduler.urls')),
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
 
     #Kwabi: quick fix to provide a passsword change form to non admins
-    #(r'^changepassword/$', 'nonauth.views.password_change', {'template_name': 'accounts/password_change_form.html'}),
+    #(r'^changepassword/$', 'nonauth.views.password_change',
+    # {'template_name': 'accounts/password_change_form.html'}),
 
 )
 
@@ -50,7 +58,8 @@ urlpatterns += patterns('',
 )
 
 if settings.DEBUG:
-    urlpatterns += patterns('',
+    urlpatterns += patterns(
+        '',
         # helper URLs file that automatically serves the 'static' folder in
         # INSTALLED_APPS via the Django static media server (NOT for use in
         # production)

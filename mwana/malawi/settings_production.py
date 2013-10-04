@@ -14,7 +14,9 @@ EMAIL_SUBJECT_PREFIX = '[mwana-malawi-production] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'no-reply@projectmwana.org'
 
-TEMPLATE_DIRS = ("/home/mwana/production-environment/code_root/mwana/malawi/templates",)
+TEMPLATE_DIRS = (
+    "/home/mwana/production-environment/code_root/mwana/malawi/templates",
+)
 
 XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
@@ -30,20 +32,20 @@ DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA f
 
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
-#    ('rapidsms.views.dashboard', 'Dashboard'),
-#    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
-#    ('mwana.apps.locations.views.dashboard', 'Map'),
+    # ('rapidsms.views.dashboard', 'Dashboard'),
+    # ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    # ('mwana.apps.locations.views.dashboard', 'Map'),
     ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-#    ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-#    ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-#    ('mwana.apps.labresults.views.dashboard', 'Results160'),
+    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
+    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
+    # ('mwana.apps.labresults.views.dashboard', 'Results160'),
     ('mwana.apps.reports.views.malawi_reports', 'Results160'),
     ('mwana.apps.reports.views.malawi_graphs', 'Results160 Analysis'),
     ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
     ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
     ('growth_index', 'AnthroWatch Reports'),
     ('growth_graphs', 'AnthroWatch Analysis'),
-#    ('xforms', 'XForms'),
+    # ('xforms', 'XForms'),
 ]
 
 # Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
@@ -57,20 +59,20 @@ RAPIDSMS_TABS = [
 
 # Add the kannel backends for Zain and TNM
 INSTALLED_BACKENDS.update({
-    "zain" : {
+    "zain": {
         "ENGINE":  "rapidsms.backends.kannel",
         "host": "127.0.0.1",
         "port": 8081,
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "zain-modem",
-                           "from": "+265999279085", # will be overridden; set for consistency
+                           "from": "+265999279085",  # will be overridden; set for consistency
                            "username": "rapidsms",
-                           "password": ""}, # set password in localsettings.py
+                           "password": ""},  # set password in localsettings.py
         "coding": 0,
         "charset": "ascii",
-        "encode_errors": "ignore", # strip out unknown (unicode) characters
+        "encode_errors": "ignore",  # strip out unknown (unicode) characters
     },
-    "tnm" : {
+    "tnm": {
         "ENGINE":  "rapidsms.backends.kannel",
         "host": "127.0.0.1",
         "port": 8082,
