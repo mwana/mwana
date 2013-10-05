@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     # router and task queues
     "threadless_router.backends.kannel",
     "djcelery",
+    "kombu.transport.django",
     "threadless_router.celery",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",

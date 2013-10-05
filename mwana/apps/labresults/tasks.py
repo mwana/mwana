@@ -2,11 +2,12 @@
 import logging
 from datetime import datetime
 from datetime import timedelta
-from django.conf import settings
+from celery import task
+from threadless_router.router import Router
 
+from django.conf import settings
 from django.db.models import Q
 from django.db import transaction
-from django.conf import settings
 
 from mwana import const
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
@@ -27,7 +28,8 @@ verified = Q(lab_results__verified__isnull=True) |\
 send_live_results = Q(lab_results__clinic__send_live_results=True)
 
 
-def send_results_notification(router):
+@task
+def send_results_notification():
     logger.debug('in send_results_notification')
     if settings.SEND_LIVE_LABRESULTS:
         new_notified = Q(lab_results__notification_status__in=
@@ -35,6 +37,7 @@ def send_results_notification(router):
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
+        router = Router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)
@@ -44,7 +47,8 @@ def send_results_notification(router):
                     'settings.SEND_LIVE_LABRESULTS is False')
 
 
-def send_changed_records_notification(router):
+@task
+def send_changed_records_notification():
     logger.debug('in send_changed_records_notification')
     if settings.SEND_LIVE_LABRESULTS:
         updated_notified = Q(lab_results__notification_status__in=
@@ -52,6 +56,7 @@ def send_changed_records_notification(router):
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
+        router = Router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of changed results' % clinic)
@@ -61,8 +66,9 @@ def send_changed_records_notification(router):
                     'settings.SEND_LIVE_LABRESULTS is False')
 
 
+@task
 @transaction.commit_manually
-def process_outstanding_payloads(router):
+def process_outstanding_payloads():
     logger.debug('in process_outstanding_payloads')
     for payload in Payload.objects.filter(parsed_json=True,
                                           validated_schema=False):
@@ -102,12 +108,14 @@ def clean_up_unconfirmed_results():
             msg.confirmed = True
             msg.save()
         except (Result.DoesNotExist, Result.MultipleObjectsReturned):
-            logger.info("Failed to find result for unconfirmed printer message"\
-                        " : %s, %s, %s" % (msg.id, req_id, clinic.name))
+            logger.info("Failed to find result for unconfirmed printer"
+                        " message : %s, %s, %s"
+                        % (msg.id, req_id, clinic.name))
             continue
 
 
-def send_results_to_printer(router):
+@task
+def send_results_to_printer():
     logger.debug('in tasks.send_results_to_printer')
     if settings.SEND_LIVE_LABRESULTS:
         if SYSTEM_LOCALE == LOCALE_ZAMBIA:
@@ -119,6 +127,7 @@ def send_results_to_printer(router):
             Location.objects.filter(Q(has_independent_printer=True)
                                     & new_notified
                                     & verified & send_live_results).distinct()
+        router = Router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('sending new results to printer at %s' % clinic)

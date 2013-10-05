@@ -70,7 +70,9 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
 RAPIDSMS_TABS.append(('growth_index', 'AnthroWatch Reports'))
 RAPIDSMS_TABS.append(('growth_graphs', 'AnthroWatch Analysis'))
 
-#DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
+DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
+ MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
+ Send HELP for more information'''
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions
@@ -83,3 +85,18 @@ SOUTH_MIGRATION_MODULES = {
 # reduce noise in logs
 LOG_LEVEL = "INFO"
 #XFORMS_HOST = '127.0.0.1:8000'
+
+# Django celery
+import djcelery
+
+djcelery.setup_loader()
+
+BROKER_URL = 'redis://localhost:6379/0'
+REDIS_DB = 0
+REDIS_CONNECT_RETRY = True
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TASK_RESULT_EXPIRES = 10
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
+BROKER_BACKEND = "redis"
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
+CELERY_TIMEZONE = 'Africa/Blantyre'

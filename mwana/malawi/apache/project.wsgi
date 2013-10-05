@@ -3,6 +3,10 @@ from os.path import dirname
 import sys
 import site
 
+import djcelery
+
+djcelery.setup_loader()
+
 # Calculate various paths based on the location of the WSGI script, assuming
 # __file__ lives at <root>/mwana/<country/apache/project.wsgi
 APACHE_DIR = dirname(__file__)

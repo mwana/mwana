@@ -2,6 +2,8 @@
 from mwana.apps.translator.util import Translator
 import datetime
 import logging
+from celery import task
+from threadless_router.router import Router
 
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -26,6 +28,9 @@ logger = logging.getLogger('mwana.apps.reminders.tasks')
 
 def send_appointment_reminder(patient_event, appointment, default_conn=None,
                               pronouns=None):
+
+    router = Router()
+
 
     def record_notification(appointment, patient_event, connection):
         reminders.SentNotification.objects.create(
@@ -90,7 +95,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                     date=appt_date.strftime('%d/%m/%Y'),
                     clinic=clinic_name,
                     type=translator.translate(lang_code, type))
-                hsa_msg.send()
+                router.outgoing(hsa_msg)
                 record_notification(appointment, patient_event, connection)
             # get messages for mother and send
             client_conn = patient.default_connection
@@ -130,7 +135,8 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     patient_trace.save()
 
 
-def send_notifications(router):
+@task
+def send_notifications():
     logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
         # the number of days after a patient event that we want to send a
