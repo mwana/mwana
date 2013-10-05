@@ -57,7 +57,7 @@ def staging():
     env.hosts = ['10.3.1.10']
     env.user = 'mwana'
     env.home = '/home/mwana'
-    env.repos['mwana']['branch'] = 'feature/nutritionreports'
+    env.repos['mwana']['branch'] = 'feature/http-router'
     setup_path()
 
 
