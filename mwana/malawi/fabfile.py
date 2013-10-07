@@ -75,17 +75,23 @@ def production():
 
 def create_virtualenv():
     args = '--clear --distribute'
-    run('rm -rf %s' % env.virtualenv_root)
+    # run('rm -rf %s' % env.virtualenv_root)
     run('virtualenv %s %s' % (args, env.virtualenv_root))
 
 
+def activate_virtualenv():
+    run('source ./bin/activate')
+
+
 def update_requirements():
+    activate_virtualenv()
     with cd(PATH_SEP.join([env.code_root, env.project, 'requirements'])):
-        for file_name in ['libs.txt', 'pygsm.txt']:
+        # run('source ../../../python_env/bin/activate')
+        for file_name in ['libs.txt', ]:
             cmd = ['pip install']
-            cmd += ['-q -E %(virtualenv_root)s' % env]
-            cmd += ['--no-deps']
-            cmd += ['--requirement %s' % file_name]
+            # cmd += ['-q -e %(virtualenv_root)s' % env]
+            # cmd += ['--no-deps']
+            cmd += ['-r %s' % file_name]
             run(' '.join(cmd))
 
 
@@ -249,7 +255,7 @@ def bootstrap():
     for the other more granular methods.
     """
     create_virtualenv()
-    install_init_script()
+    # install_init_script()
     if not files.exists(env.code_root):
         clone_all()
         #deploy_from_local()

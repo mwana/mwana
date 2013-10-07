@@ -3,9 +3,6 @@ from os.path import dirname
 import sys
 import site
 
-import djcelery
-
-djcelery.setup_loader()
 
 # Calculate various paths based on the location of the WSGI script, assuming
 # __file__ lives at <root>/mwana/<country/apache/project.wsgi
@@ -35,6 +32,10 @@ try:
                       settings.LOG_BACKUPS, settings.LOG_LEVEL,
                       settings.LOG_FORMAT)
     import django.core.handlers.wsgi
+    import djcelery
+
+    djcelery.setup_loader()
+
     django_app = django.core.handlers.wsgi.WSGIHandler()
 except:
     import traceback
