@@ -190,7 +190,7 @@ class GraphServive:
         for item in sorted(trend_items):
             data[item] = []
 
-        results = Result.objects.filter(clinic__in=facs)
+        results = Result.objects.filter(clinic__in=facs, notification_status='sent')
 
         month_ranges = []
         while my_date <= end_date:
@@ -365,6 +365,7 @@ def _turnaround_query(start_date, end_date, province_slug, district_slug, facili
             where collected_on <= processed_on
             and entered_on <= processed_on
             and arrival_date >= processed_on
+            and notification_status <> 'obsolete'
             and extract(year from result_sent_date) = %s
             and extract(month from result_sent_date) = %s
             and facility.id in (''' + ids + ''')
