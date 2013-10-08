@@ -2,7 +2,6 @@
 
 from django.conf.urls.defaults import *
 from mwana.apps.labresults import views
-from mwana.apps.reports import views as export
 
 
 urlpatterns = patterns('',

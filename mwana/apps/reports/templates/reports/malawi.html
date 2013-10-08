@@ -7,7 +7,7 @@
 
 {% block javascripts %}
 {{ block.super }}
-<script type="text/javascript" src="{{ MEDIA_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/datepicker.js"></script>
 <script type="text/javascript">
     // <![CDATA[     
        
@@ -51,14 +51,14 @@
 {% block stylesheets %}
 {{ block.super }}
 <link type="text/css" rel="stylesheet" 
-      href="{{ MEDIA_URL }}stylesheets/modules.css" />
+      href="{{ STATIC_URL }}stylesheets/modules.css" />
 <link type="text/css" rel="stylesheet" 
-      href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+      href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
 <link type="text/css" rel="stylesheet" 
-      href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+      href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
 <link type="text/css" rel="stylesheet" 
-      href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
-<link rel="stylesheet" href="{{ MEDIA_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+      href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
 {% endblock %}
 
 {% block content %}
@@ -219,7 +219,7 @@
         {{column}}&nbsp;
         {% else %}
         {% if column %}
-        <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF" 
+        <img src="{{ STATIC_URL }}labresults/images/green-bar.GIF" 
 	     alt="missing bar" height="10"
              width="{% widthratio column single_bar_length 100 %}" /> 
 	{{column}}

@@ -73,7 +73,8 @@ def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None)
 def dashboard(request):
     locations = Location.objects.all()
     return render_to_response("labresults/dashboard.html",
-                              {"locations": locations },context_instance=RequestContext(request))
+                              {"locations": locations},
+                              context_instance=RequestContext(request))
 
 
 @csrf_exempt

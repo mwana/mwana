@@ -5,11 +5,11 @@
 
 {% block stylesheets %}
 {{ block.super }}
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
-<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}reports/stylesheets/chosen.css" />
 
 {% endblock %}
 
@@ -17,9 +17,9 @@
 {% block javascripts %}
 {{ block.super }}
 
-<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
-<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ STATIC_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ STATIC_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ STATIC_URL }}reports/javascripts/location_selector.js" ></script>
 
 {% endblock %}
 

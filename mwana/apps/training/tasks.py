@@ -2,7 +2,7 @@
 import logging
 import datetime
 from celery import task
-from threadless_router.router import Router
+# from threadless_router.router import Router
 from mwana.apps.training.models import TrainingSession
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
@@ -28,11 +28,11 @@ def send_endof_training_notification():
             msg = "Training has been stopped at %s: %s" % (
                 training.location.name, training.location.slug)
             for help_admin in Contact.active.filter(is_help_admin=True):
-                router = Router()
+                # router = Router()
                 if help_admin.default_connection is not None:
                     ha_msg = OutgoingMessage(
                         help_admin.default_connection, msg)
-                    router.outgoing(ha_msg)
+                    ha_msg
 
             continue
 
@@ -41,7 +41,7 @@ def send_endof_training_notification():
                 training.trainer.default_connection,
                 DELAYED_TRAINING_TRAINER_MSG %
                 (training.trainer.name, training.location.name))
-            router.outgoing(trainer_msg)
+            trainer_msg.send()
         for help_admin in Contact.active.filter(is_help_admin=True):
             if help_admin.default_connection is not None:
                 admin_msg = OutgoingMessage(
@@ -50,4 +50,4 @@ def send_endof_training_notification():
                     (training.trainer.name,
                      training.trainer.default_connection.identity,
                      training.location.name, training.location.slug))
-                router.outgoing(admin_msg)
+                admin_msg.send()

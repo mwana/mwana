@@ -2,6 +2,9 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns 
+from rapidsms.backends.http.views import GenericHttpBackendView
+from rapidsms.backends.kannel.views import KannelBackendView
 
 admin.autodiscover()
 
@@ -29,11 +32,16 @@ urlpatterns = patterns(
     # name="mwana_reports"),
     # url(r'^$',
     # mwana.apps.labresults.views.mwana_reports, name="mwana_reports"),
-    (r'^export/', include('rapidsms.contrib.export.urls')),
-    url(r'^httptester/$',
-        'threadless_router.backends.httptester.views.generate_identity',
-        {'backend_name': 'httptester'}, name='httptester-index'),
-    (r'^httptester/', include('threadless_router.backends.httptester.urls')),
+    # (r'^export/', include('rapidsms.contrib.export.urls')),
+
+    # url(r'^httptester/$',  # for threadless router
+    #     'threadless_router.backends.httptester.views.generate_identity',
+    #     {'backend_name': 'httptester'}, name='httptester-index'),
+    (r'^httptester/', include('rapidsms.contrib.httptester.urls')),
+
+
+
+
     (r'^locations/', include('mwana.apps.locations.urls')),
     # (r'^messagelog/', include('rapidsms.contrib.messagelog.urls')),
     # (r'^messaging/', include('rapidsms.contrib.messaging.urls')),
@@ -42,7 +50,12 @@ urlpatterns = patterns(
     (r'^locations/', include('mwana.apps.locations.urls')),
     (r'^contacts/', include('mwana.apps.contactsplus.urls')),
     (r'^status/', include('mwana.apps.echo.urls')),
-    (r'^backend/', include('threadless_router.backends.kannel.urls')),
+    url(r"^backend/airtel/$",
+        KannelBackendView.as_view(backend_name="airtel")),
+    url(r"^backend/tnm/$",
+        KannelBackendView.as_view(backend_name="tnm")),
+    url(r'^backend/httptester/$',
+        GenericHttpBackendView.as_view(backend_name='httptester')),
     #Kwabi: quick fix to provide a passsword change form to non admins
     #(r'^changepassword/$', 'nonauth.views.password_change',
     # {'template_name': 'accounts/password_change_form.html'}),
@@ -50,10 +63,4 @@ urlpatterns = patterns(
 )
 
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
-        # helper URLs file that automatically serves the 'static' folder in
-        # INSTALLED_APPS via the Django static media server (NOT for use in
-        # production)
-        (r'^', include('rapidsms.urls.static_media')),
-    )
+    urlpatterns += staticfiles_urlpatterns()

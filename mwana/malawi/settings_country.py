@@ -51,24 +51,29 @@ LANGUAGE_CODE = 'eng-us'
 LOCATION_CODE_CLASS = 'mwana.malawi.locations.LocationCode'
 
 MALAWI_ROOT = os.path.abspath(os.path.dirname(__file__))
-TEMPLATE_DIRS = (os.path.join(MALAWI_ROOT, "templates"),)
+STATICFILES_DIRS += (os.path.join(MALAWI_ROOT, "static"),)
+TEMPLATE_DIRS += (os.path.join(MALAWI_ROOT, "templates"),)
 ROOT_URLCONF = 'mwana.malawi.urls'
 
-# Add XForms app + navigation and webreports:
+# INSTALLED APPS
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
 INSTALLED_APPS.insert(-1, 'eav')
 INSTALLED_APPS.insert(-1, 'uni_form')
 INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
+INSTALLED_APPS.insert(-1, 'people')
+INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
+
+# RAPIDSMS_TABS
 RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
 RAPIDSMS_TABS.append(('mwana_graphs', 'Results160 Analysis'))
 RAPIDSMS_TABS.append(('remindmi_reports', 'RemindMi'))
+RAPIDSMS_TABS.append(('growth_index', 'AnthroWatch Reports'))
+RAPIDSMS_TABS.append(('growth_graphs', 'AnthroWatch Analysis'))
+
+
 
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
-INSTALLED_APPS.insert(-1, 'people')
-INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
-RAPIDSMS_TABS.append(('growth_index', 'AnthroWatch Reports'))
-RAPIDSMS_TABS.append(('growth_graphs', 'AnthroWatch Analysis'))
 
 DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
  MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
@@ -100,3 +105,5 @@ BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
 BROKER_BACKEND = "redis"
 CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERY_TIMEZONE = 'Africa/Blantyre'
+
+WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"

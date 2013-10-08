@@ -32,7 +32,7 @@ TEMPLATE_DIRS = (
 # You can also customize RAPIDSMS_TABS like so:
 RAPIDSMS_TABS = [
     # ('rapidsms.views.dashboard', 'Dashboard'),
-    ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
+    # ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
     # ('mwana.apps.locations.views.dashboard', 'Map'),
     # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
     # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
@@ -55,12 +55,10 @@ RAPIDSMS_TABS = [
 #               'timeout': 10}
 #})
 
-# Add the kannel backends for Zain and TNM
+# Add the kannel backends for Airtel and TNM
 # INSTALLED_BACKENDS.update({
-#     "zain": {
+#     "airtel": {
 #         "ENGINE":  "rapidsms.backends.kannel",
-#         "host": "127.0.0.1",
-#         "port": 8081,
 #         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
 #         "sendsms_params": {"smsc": "zain-modem",
 #                            "from": "+265999279085",  # will be overridden; set for consistency
@@ -72,8 +70,6 @@ RAPIDSMS_TABS = [
 #     },
 #     "tnm": {
 #         "ENGINE":  "rapidsms.backends.kannel",
-#         "host": "127.0.0.1",
-#         "port": 8082,
 #         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
 #         "sendsms_params": {"smsc": "tnm-smpp",
 #                            "from": "88160",  # not set automatically by SMSC

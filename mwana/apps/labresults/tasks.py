@@ -3,7 +3,6 @@ import logging
 from datetime import datetime
 from datetime import timedelta
 from celery import task
-from threadless_router.router import Router
 
 from django.conf import settings
 from django.db.models import Q
@@ -15,6 +14,7 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.views import process_payload
 from mwana.apps.labresults.messages import TEST_TYPE
 from mwana.apps.labresults.models import Result
+from rapidsms.router.blocking import BlockingRouter as Router
 
 from mwana.apps.locations.models import Location
 

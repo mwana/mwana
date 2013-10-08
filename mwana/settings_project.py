@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 # encoding=utf-8
-
+import os
 # -------------------------------------------------------------------- #
 #                        PROJECT CONFIGURATION                         #
 # -------------------------------------------------------------------- #
@@ -11,6 +11,13 @@
 # Customization for a country or specific server environment should be done
 # in the mwana/malawi/ or mwana/zambia/ directories, respectively.
 
+# The top directory for this project.
+# PROJECT_ROOT = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+# The country level directory with that country project's templates,
+# settings, urls, static dir, wsgi.py, fixtures, etc.
+# PROJECT_PATH = os.path.join(PROJECT_ROOT, '<country>')
 
 # the rapidsms backend configuration is designed to resemble django's
 # database configuration, as a nested dict of (name, configuration).
@@ -32,7 +39,7 @@ INSTALLED_BACKENDS = {
     #    "PORT": "/dev/ttyUSB1"
     #},
     "httptester": {
-        "ENGINE": "threadless_router.backends.httptester.backend",
+        "ENGINE": "rapidsms.contrib.httptester.backend",
     }
 }
 
@@ -50,10 +57,11 @@ INSTALLED_APPS = [
     "djtables",
     "rapidsms",
     # router and task queues
-    "threadless_router.backends.kannel",
+    # "threadless_router.backends.kannel",
+    "rapidsms.backends.kannel",
     "djcelery",
     "kombu.transport.django",
-    "threadless_router.celery",
+    # "threadless_router.celery",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
     # "rapidsms.contrib.ajax",
@@ -66,10 +74,11 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.contenttypes",
+    "django.contrib.staticfiles",
 
     # the rapidsms contrib apps.
     "rapidsms.contrib.export",
-    "threadless_router.backends.httptester",
+    # "threadless_router.backends.httptester",
     # "rapidsms.contrib.httptester",
     # "mwana.apps.locations",
     # "rapidsms.contrib.messagelog",
@@ -106,8 +115,8 @@ INSTALLED_APPS = [
 # to add it here, also, to expose it in the rapidsms ui.
 RAPIDSMS_TABS = [
     ('rapidsms.views.dashboard', 'Dashboard'),
-    ('httptester-index', 'Message Tester'),
-    ('mwana.apps.locations.views.dashboard', 'Map'),
+    # ('httptester-index', 'Message Tester'),
+    # ('mwana.apps.locations.views.dashboard', 'Map'),
     # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
     # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
     # ('rapidsms.contrib.registration.views.registration', 'Registration'),
@@ -145,12 +154,6 @@ LOGIN_REDIRECT_URL = "/"
 # modules which django does not find automatically, and importing them
 # all manually is tiresome and error-prone.
 #TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
-
-
-# for some reason this setting is blank in django's global_settings.py,
-# but it is needed for static assets to be linkable.
-MEDIA_URL = "/static/"
-
 
 # URL for admin media (also defined in apache configuration)
 ADMIN_MEDIA_PREFIX = '/admin-media/'
@@ -190,8 +193,42 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "django.core.context_processors.media",
     "django.core.context_processors.request",
     "django.core.context_processors.csrf",
+    'django.core.context_processors.static',
 ]
 
+TEMPLATE_DIRS = (os.path.join(PROJECT_ROOT, "templates"),)
+
+# Absolute filesystem path to the directory that will hold user-uploaded files.
+# Example: "/home/media/media.lawrence.com/public/media/"
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'public', 'media')
+
+# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# trailing slash.
+# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+MEDIA_URL = '/media/'
+
+# Absolute path to the directory static files should be collected to.
+# Don't put anything in this directory yourself; store your static files
+# in apps' "static/" subdirectories and in STATICFILES_DIRS.
+# Example: "/home/media/media.lawrence.com/public/static/"
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'public', 'static')
+
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
+
+# Additional locations of static files to collect
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'static'),
+)
+
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
 
 # these apps should not be started by rapidsms in your tests, however,
 # the models and bootstrap will still be available through django.

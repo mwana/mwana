@@ -38,7 +38,8 @@ RAPIDSMS_TABS = [
 # Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
     "airtel": {
-        "ENGINE":  "threadless_router.backends.kannel.outgoing",
+        # "ENGINE":  "threadless_router.backends.kannel.outgoing",
+        "ENGINE":  "rapidsms.backends.kannel",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "zain-modem",
                            "from": "+265999279085",  # will be overridden;
@@ -49,7 +50,7 @@ INSTALLED_BACKENDS.update({
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
     },
     "tnm": {
-        "ENGINE":  "threadless_router.backends.kannel.outgoing",
+        "ENGINE":  "rapidsms.backends.kannel",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "tnm-smpp",
                            "from": "88160",  # not set automatically by SMSC

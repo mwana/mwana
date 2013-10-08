@@ -1,0 +1,79 @@
+
+#wrapper {
+    width: 94%;
+    background: #fff;
+    margin: 0.5em auto 0 auto;
+
+    /* a little pretty for the 10/dec demo */
+    -moz-box-shadow: 4px 4px 8px #aaa;
+    box-shadow: 4px 4px 8px #aaa;
+    -moz-border-radius-bottomright: 1em;
+    -moz-border-radius-bottomleft: 1em;
+}
+
+    /* no scaling for ie6 */
+    * html #wrapper {
+        width: 94%; }
+
+    #branding h1 {
+        background: url("../images/malawi-moh-logo.png") no-repeat 100% 50%;
+        height: 65px;
+        color: #fff;
+        margin: 0;
+    }
+
+/* nutrition cutoffs */
+.unusual, .very-tall, .obese {
+    background:#9c8aa5;
+}
+
+.overweight {
+    background:#0077bb;
+}
+
+.normal, .low-normal {
+    background:#00cd00;
+}
+
+.mild {
+    background:#fee01e;
+}
+
+.moderate {
+    background:#dd7500;
+}
+
+.severe, .oedema  {
+    background:#cd0000;
+}
+
+.pagination {
+    padding:16px 0 16px 8px;
+    font-size:13px;
+}
+
+  /* nutrition table styles.*/
+  td, th {
+  padding: 0.5em;
+  border: 1px solid #aaa;
+  
+  /* reset the "look" of headers to match regular cells,
+  * since they can appear anywhere (col or row scope) */
+  font-weight: normal;
+  text-align: left;
+  }
+
+  tbody th, tbody td {
+  border-color: #aaa;
+  }
+  tbody tr:first-child th, tbody tr:first-child td {
+  border-top-color: #aaa;
+  }
+  tbody th:first-child, tbody td:first-child {
+  border-left-color: #aaa;
+  }
+  /* restore the dark outer borders of the tbody */
+  tbody tr:first-child th, tbody tr:first-child td { border-top-color:    #aaa; }
+  tbody th:last-child,     tbody td:last-child     { border-right-color:  #aaa; }
+  tbody tr:last-child th,  tbody tr:last-child td  { border-bottom-color: #aaa; }
+  tbody th:first-child,    tbody td:first-child    { border-left-color:   #aaa; }

@@ -3,7 +3,7 @@ from mwana.apps.translator.util import Translator
 import datetime
 import logging
 from celery import task
-from threadless_router.router import Router
+# from rapidsms.router.blocking import BlockingRouter as Router
 
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -29,8 +29,7 @@ logger = logging.getLogger('mwana.apps.reminders.tasks')
 def send_appointment_reminder(patient_event, appointment, default_conn=None,
                               pronouns=None):
 
-    router = Router()
-
+    # router = Router()
 
     def record_notification(appointment, patient_event, connection):
         reminders.SentNotification.objects.create(
@@ -95,7 +94,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                     date=appt_date.strftime('%d/%m/%Y'),
                     clinic=clinic_name,
                     type=translator.translate(lang_code, type))
-                router.outgoing(hsa_msg)
+                hsa_msg.send()
                 record_notification(appointment, patient_event, connection)
             # get messages for mother and send
             client_conn = patient.default_connection
@@ -109,7 +108,8 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                         clinic=clinic_name,
                         type=translator.translate(lang_code, type))
                     client_msg.send()
-                    record_notification(appointment, patient_event, client_conn)
+                    record_notification(appointment, patient_event,
+                                        client_conn)
         else:
             msg = OutgoingMessage(connection,
                                   _("Hi%(cba)s.%(patient)s is due for "
