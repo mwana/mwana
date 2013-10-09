@@ -2,18 +2,17 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 from . import views
 
 
-urlpatterns = patterns('',
-
- 
+urlpatterns = patterns(
+    '',
     # mini dashboard for this app
     url(r'^(?:(?P<location_pk>\d+)/)?$',
         views.dashboard,
         name="locations"),
-    
+
     # list of all messages sent to contacts at this location (or, if a zone,
     # its immediate parent)
     url(r'^(?P<location_pk>\d+)/messages/$',

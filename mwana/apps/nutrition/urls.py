@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
-from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url
 
 import views as v
 
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     # mini dashboard for this app
     url(r'^graphs/$', v.graphs, name='growth_graphs'),
     url(r'^$', v.assessments, name="growth_index"),

@@ -5,7 +5,6 @@ import datetime
 import logging
 
 from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
 from datetime import datetime,timedelta

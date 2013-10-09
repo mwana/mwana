@@ -50,7 +50,7 @@
 {% render_table table %}
 
 <div class="toolbar">
-    <a href="{% url growth_assessments %}?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+    <a href="{% url 'growth_assessments' %}?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}" class="export">{% trans "Export Analyzed Surveys" %}</a>
 </div>
 </div>  
 
@@ -68,7 +68,7 @@ li.next {float:right; margin-left:350px; margin-right:20px;}
 <h2>Raw Survey Entries</h2>
 
 <div class="toolbar">
-   	<a href="{% url growth_surveyentries %}" class="export">{% trans "Export Raw Survey Entries" %}</a>
+   	<a href="{% url 'growth_surveyentries' %}" class="export">{% trans "Export Raw Survey Entries" %}</a>
 </div>
 
 </div>  

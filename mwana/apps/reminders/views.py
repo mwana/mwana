@@ -3,8 +3,8 @@ import csv
 
 from django.http import HttpResponse
 from django.template import RequestContext
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.views.generic import list_detail
+from django.shortcuts import render_to_response
+from django.views.generic.list import ListView
 from django.db.models import Q
 
 from mwana.apps.nutrition.views import DISTRICTS, get_report_criteria

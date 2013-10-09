@@ -28,7 +28,7 @@
         <tbody>{% for srequest in location.active_requests %}
             <tr>
                 <th scope="row">{{ srequest.type.name }}</th>
-                <td><a href="{% url supply_request_details srequest.pk %}">{{ srequest.get_status_display }}</a> {% ifequal srequest.status "requested" %} by {{ srequest.requested_by|default:"UNKNOWN" }}{% endifequal %} on {{ srequest.modified|date:"d M Y" }}</td>
+                <td><a href="{% url 'supply_request_details srequest.pk' %}">{{ srequest.get_status_display }}</a> {% ifequal srequest.status "requested" %} by {{ srequest.requested_by|default:"UNKNOWN" }}{% endifequal %} on {{ srequest.modified|date:"d M Y" }}</td>
             </tr>{% empty %}
             <tr class="no-data">
                 <td colspan="3">

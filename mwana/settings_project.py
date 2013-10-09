@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'south',
     # the essentials.
     "django_nose",
+    "django_tables2",
+    "selectable",
     "djtables",
     "rapidsms",
     # router and task queues
@@ -64,8 +66,6 @@ INSTALLED_APPS = [
     # "threadless_router.celery",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
-    # "rapidsms.contrib.ajax",
-
     # enable the django admin using a little shim app (which includes
     # the required urlpatterns), and a bunch of undocumented apps that
     # the AdminSite seems to explode without.
@@ -75,17 +75,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
-
     # the rapidsms contrib apps.
-    "rapidsms.contrib.export",
+    # "rapidsms.contrib.export",
     # "threadless_router.backends.httptester",
-    # "rapidsms.contrib.httptester",
     # "mwana.apps.locations",
-    # "rapidsms.contrib.messagelog",
+    "rapidsms.contrib.httptester",
+    "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
     # "rapidsms.contrib.registration",
     # "rapidsms.contrib.scheduler",
-    "mwana.apps.echo",
+    # "mwana.apps.echo",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.agents",
@@ -104,7 +103,6 @@ INSTALLED_APPS = [
     "mwana.apps.hub_workflow",
     "mwana.apps.stringcleaning",
     "mwana.apps.translator",
-
     # This app should always come last to prevent it from
     # hijacking other apps that handle default messages
     "rapidsms.contrib.default",
@@ -187,7 +185,8 @@ MIDDLEWARE_CLASSES = [
 # these weird dependencies should be handled by their respective apps,
 # but they're not, so here they are. most of them are for django admin.
 TEMPLATE_CONTEXT_PROCESSORS = [
-    "django.core.context_processors.auth",
+    "django.contrib.auth.context_processors.auth",
+    "django.contrib.messages.context_processors.messages",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
     "django.core.context_processors.media",

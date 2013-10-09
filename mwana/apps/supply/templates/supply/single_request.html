@@ -6,7 +6,7 @@
 {% block left %}
 <div class="module">
     <h2>Supply Details</h2>
-    <p>Location: <a href="{% url locations sreq.location.pk %}">{{ sreq.location.name }}</a></p>
+    <p>Location: <a href="{% url 'locations sreq.location.pk' %}">{{ sreq.location.name }}</a></p>
     <p>Requested: {{ sreq.type }}</p>
     <p>Requested by: {{ sreq.requested_by|default:"UNKNOWN" }} on {{ sreq.created|date:"D d M Y" }}</p>
     

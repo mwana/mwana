@@ -38,4 +38,7 @@ pygrowup-0.4.tar.gz
 south-0.7.3.tar.gz
 # django-celery>=3.0
 django-celery-with-redis>=3.0
-
+# Django-Selectable
+django_selectable
+# Django-tables2
+django-tables2

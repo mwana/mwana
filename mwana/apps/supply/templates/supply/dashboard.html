@@ -28,9 +28,9 @@
         </thead>
         <tbody>{% for srequest in active_requests %}
             <tr lat="{{ srequest.location.point.latitude }}" lng="{{ srequest.location.point.longitude }}" slug="{{ srequest.location.slug|upper }}" name="{{ srequest.location.name }}">
-                <th scope="row"><a href="{% url supply_location_details srequest.location.pk %}">{{ srequest.location.name }}</a></th>
+                <th scope="row"><a href="{% url 'supply_location_details srequest.location.pk' %}">{{ srequest.location.name }}</a></th>
                 <td>{{ srequest.type.name }}</td>
-                <td><a href="{% url supply_request_details srequest.pk %}">{{ srequest.get_status_display }}</a></td>
+                <td><a href="{% url 'supply_request_details srequest.pk' %}">{{ srequest.get_status_display }}</a></td>
             </tr>{% empty %}
             <tr class="no-data">
                 <td colspan="3">

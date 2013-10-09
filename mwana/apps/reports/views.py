@@ -6,7 +6,7 @@ from mwana.apps.reports.models import Login
 from datetime import datetime, timedelta, date
 import csv
 
-from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
@@ -318,8 +318,7 @@ def get_admin_email_address():
         return "Admin's email address"
 
 
-@csrf_response_exempt
-@csrf_view_exempt
+@csrf_exempt
 def group_facility_mapping(request):
 
     navigation = read_request(request, "navigate")

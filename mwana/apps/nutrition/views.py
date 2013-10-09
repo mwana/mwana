@@ -11,8 +11,8 @@ from django.http import HttpResponse
 from django.db.models import Q
 
 from django.template import RequestContext
-from django.shortcuts import redirect, get_object_or_404, render_to_response
-from django.views.generic import list_detail
+from django.shortcuts import render_to_response
+from django.views.generic.list import ListView
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 
 from .models import *

@@ -106,4 +106,4 @@ BROKER_BACKEND = "redis"
 CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERY_TIMEZONE = 'Africa/Blantyre'
 
-WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
+# WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
