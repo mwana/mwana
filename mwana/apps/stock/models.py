@@ -68,6 +68,12 @@ class Transaction(models.Model):
     date = models.DateTimeField(default=datetime.now)
     reference = models.ForeignKey(ConfirmationCode, null=False, blank=False)
     type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
+    valid = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
+
+
 
     def __unicode__(self):
         return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
@@ -83,6 +89,37 @@ class Threshold(models.Model):
         for t in Threshold.objects.filter(end_date=None, start_date__lte=self.start_date, account=self.account).exclude(pk=self.pk):
             t.end_date = date.today()
             t.save()
+class StockTransaction(models.Model):
+    amount = models.IntegerField(default=0, null=False, blank=False)
+    transaction = models.ForeignKey(Transaction, null=False, blank=False)
+
+#    def save(self, *args, **kwargs):
+#        if not self.pk:
+#            p_trans= self.transaction
+#            if p_trans.type == 'd':
+#                account_from = p_trans.account_from
+#                account_from.amount -= abs(self.amount)
+#                account_from.save()
+#            if p_trans.type == 'f_f':
+#                account_from = p_trans.account_from
+#                account_from.amount -= abs(self.amount)
+#                account_from.save()
+#
+#                account_to = p_trans.account_to
+#                account_to.amount += abs(self.amount)
+#                account_to.save()
+#
+#            if p_trans.type == 'd_f':
+#                account_from = p_trans.account_from
+#                account_from.amount -= abs(self.amount)
+#                account_from.save()
+#
+#                account_to = p_trans.account_to
+#                account_to.amount += abs(self.amount)
+#                account_to.save()
+#
+#        super(StockAccount, self).save(*args, **kwargs)
+
 
 
 

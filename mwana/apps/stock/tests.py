@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import Transaction
 from datetime import timedelta
 from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
@@ -27,33 +28,35 @@ class TestApp(TestScript):
                                         slug="403000", type=dst)
         luapula = Location.objects.create(name="Luapula",
                                           slug="400000", type=prv)
-        script = """
-            lost   > join
-            lost   < To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
-            rb     > join clinic kdh rupiah banda 123q
-            rb     < Sorry, 123q wasn't a valid pin code. Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>.
-            tk     > join clinic kdh tizie kays -1000"""
+        script = """            
+            rb     > join clinic kdh rupiah banda 1234
+            tk     > join clinic kdh tizie kays 1000
+            """
 
         self.runScript(script)
+        
+        self.stock = Stock.objects.create(abbr='DRG-123', code='DRG-123', name='My Drug')
+        self.stock2 = Stock.objects.create(abbr='DRG-124', code='DRG-124', name='Sondashi Formula')
+        self.assertEqual(Stock.objects.all().count(), 2)
 
     def tearDown(self):
         super(TestApp, self).tearDown()
         Contact.objects.all().delete()
         Threshold.objects.all().delete()
-        
+
+class TestThreshold(TestApp):
+    
     def test_threshold_addition(self):
         self.assertEqual(Threshold.objects.count(), 0)
 
-        stock = Stock.objects.create(abbr='DRG-123', code='DRG_123', name='My Drug')
-        self.assertEqual(Stock.objects.all().count(), 1)
-
+        
         acc = StockAccount()
         acc.location = self.central_clinic
-        acc.stock = stock
+        acc.stock = self.stock
         acc.save()
         self.assertEqual(StockAccount.objects.all().count(), 1)
 
-        acc2 = StockAccount.objects.create(stock=stock, location=self.kdh)
+        acc2 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
 
         t = Threshold()
         t.level = 6
@@ -73,3 +76,54 @@ class TestApp(TestScript):
         self.assertEqual(Threshold.objects.filter(end_date=None).count(), 2)
         self.assertEqual(t2.end_date, None)
         self.assertEqual(Threshold.objects.get(pk=1).end_date, date.today())
+
+
+class TestStockAtFacility(TestApp):
+
+    def test_new_stock_invalid_msgs(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+        script = """
+            rb > New Stock Bad-Drug 17
+            rb < Sorry, I don't know stock with code BAD-DRUG. Please check your spelling and try again. If you think this message is a mistake send HELP.
+            rb > New Stock DRG-123 23t
+            rb < Sorry, 23T is not a valid number. Enter only numbers for quantity.
+            rb > New Stock DRG-123 23, DRG-123 3, DRG-124 24
+            rb < Sorry, drug ID(s) DRG-123 appears more than once in your message
+        """
+
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+    def test_new_stock_default_response(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+        script = """
+            rb > New Stock
+            rb < To add new stock, send NEW STOCK <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g NEW STOCK DG99 100, DG80 15
+            rb > New Stock
+            rb < To add new stock, send NEW STOCK <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g NEW STOCK DG99 100, DG80 15
+            rb > New Stock 123
+            rb < To add new stock, send NEW STOCK <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g NEW STOCK DG99 100, DG80 15
+            unknown > NEW STOCK DG99 100
+            unknown < Sorry, you must be register to add new stock. Reply with HELP if you need assistance.
+            unknown > NEW STOCK 100
+            unknown < Sorry, you must be register to add new stock. Reply with HELP if you need assistance.
+        """
+
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+    def test_new_stock_addition(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+
+        script = """
+            rb > New Stock DRG-123 23
+            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 23
+        """
+
+
