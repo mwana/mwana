@@ -21,16 +21,16 @@ from mwana.apps.labresults.mocking import MockResultUtility
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.labresults.util import is_eligible_for_results
-from mwana.apps.locations.models import Location
 from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 from mwana.util import get_clinic_or_default
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
-from rapidsms.contrib.scheduler.models import EventSchedule
+# from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Connection
 from rapidsms.models import Contact
 
 logger = logging.getLogger(__name__)
+
 
 class App (rapidsms.apps.base.AppBase):
 
@@ -51,14 +51,14 @@ class App (rapidsms.apps.base.AppBase):
 
     # regex format stolen from KeywordHandler
     CHECK_KEYWORD = "CHECK|CHEK|CHEC|CHK"
-    CHECK_REGEX   = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (CHECK_KEYWORD)
+    CHECK_REGEX = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (CHECK_KEYWORD)
 
-    def start (self):
-        """Configure your app in the start phase."""
-        self.schedule_change_notification_task()
-        self.schedule_notification_task()
-        self.schedule_process_payloads_tasks()
-        self.schedule_send_results_to_printer_task()
+    # def start (self):
+        # """Configure your app in the start phase."""
+        # self.schedule_change_notification_task()
+        # self.schedule_notification_task()
+        # self.schedule_process_payloads_tasks()
+        # self.schedule_send_results_to_printer_task()
 
     def pop_pending_connection(self,connection):
         self.waiting_for_pin.pop(connection)
@@ -135,7 +135,7 @@ class App (rapidsms.apps.base.AppBase):
         clinic  = get_clinic_or_default(message.contact)
         if not results:
             # how did this happen?
-            self.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
+            logger.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
                        (clinic, message.connection.contact))
             message.respond("Sorry, there are no new EID results for %s." % clinic)
 #            self.waiting_for_pin.pop(message.connection)
@@ -185,8 +185,8 @@ class App (rapidsms.apps.base.AppBase):
             for resp in responses:
                 msg = msgcls(connection, resp)
                 msg.send()
-                if SYSTEM_LOCALE == LOCALE_MALAWI:
-                    time.sleep(2)
+                # if SYSTEM_LOCALE == LOCALE_MALAWI:
+                    # time.sleep(2)
 
         for r in results:
             r.notification_status = 'sent'
@@ -226,42 +226,42 @@ class App (rapidsms.apps.base.AppBase):
         if len(message) > 0:
             yield message
 
-    def _get_schedule(self, key, default=None):
-        schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
-        return schedules.get(key, default)
+    # def _get_schedule(self, key, default=None):
+    #     schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
+    #     return schedules.get(key, default)
 
-    def schedule_notification_task(self):
-        callback = 'mwana.apps.labresults.tasks.send_results_notification'
-        # remove existing schedule tasks; reschedule based on the current setting
-        EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule(callback.split('.')[-1],
-                                      {'hours': [11], 'minutes': [30],
-                                      'days_of_week': [0, 1, 2, 3, 4]})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+    # def schedule_notification_task(self):
+    #     callback = 'mwana.apps.labresults.tasks.send_results_notification'
+    #     # remove existing schedule tasks; reschedule based on the current setting
+    #     EventSchedule.objects.filter(callback=callback).delete()
+    #     schedule = self._get_schedule(callback.split('.')[-1],
+    #                                   {'hours': [11], 'minutes': [30],
+    #                                   'days_of_week': [0, 1, 2, 3, 4]})
+    #     EventSchedule.objects.create(callback=callback, ** schedule)
 
-    def schedule_change_notification_task(self):
-        callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
-        # remove existing schedule tasks; reschedule based on the current setting
-        EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule(callback.split('.')[-1],
-                                      {'hours': [11], 'minutes': [0],
-                                      'days_of_week': [0, 1, 2, 3, 4]})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+    # def schedule_change_notification_task(self):
+    #     callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
+    #     # remove existing schedule tasks; reschedule based on the current setting
+    #     EventSchedule.objects.filter(callback=callback).delete()
+    #     schedule = self._get_schedule(callback.split('.')[-1],
+    #                                   {'hours': [11], 'minutes': [0],
+    #                                   'days_of_week': [0, 1, 2, 3, 4]})
+    #     EventSchedule.objects.create(callback=callback, ** schedule)
 
-    def schedule_process_payloads_tasks(self):
-        callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
-        # remove existing schedule tasks; reschedule based on the current setting
-        EventSchedule.objects.filter(callback=callback).delete()
-        schedule = self._get_schedule(callback.split('.')[-1],
-                                      {'minutes': [0], 'hours': '*'})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+    # def schedule_process_payloads_tasks(self):
+    #     callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
+    #     # remove existing schedule tasks; reschedule based on the current setting
+    #     EventSchedule.objects.filter(callback=callback).delete()
+    #     schedule = self._get_schedule(callback.split('.')[-1],
+    #                                   {'minutes': [0], 'hours': '*'})
+    #     EventSchedule.objects.create(callback=callback, ** schedule)
 
-    def schedule_send_results_to_printer_task(self):
-        callback = 'mwana.apps.labresults.tasks.send_results_to_printer'
-        # remove existing schedule tasks; reschedule based on the current setting
-        EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[8, 10, 14, 16], minutes=[50],
-                                     days_of_week=[0, 1, 2, 3, 4])
+    # def schedule_send_results_to_printer_task(self):
+    #     callback = 'mwana.apps.labresults.tasks.send_results_to_printer'
+    #     # remove existing schedule tasks; reschedule based on the current setting
+    #     EventSchedule.objects.filter(callback=callback).delete()
+    #     EventSchedule.objects.create(callback=callback, hours=[8, 10, 14, 16], minutes=[50],
+    #                                  days_of_week=[0, 1, 2, 3, 4])
 
     def notify_clinic_pending_results(self, clinic):
         """
@@ -440,7 +440,7 @@ class App (rapidsms.apps.base.AppBase):
         '''
         contacts = \
         Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).distinct()
+            Q(types=const.get_clinic_worker_type())).distinct()
         if not contacts:
             self.warning("No contacts registered to receiver results at %s! "
                          "These will go unreported until clinic staff "

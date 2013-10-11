@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4
 
-
+import logging
 import re
 import rapidsms
 from models import *
 
+
+loggger = logging.getLogger(__name__)
 
 class App(rapidsms.apps.base.AppBase):
     PATTERN = re.compile(r"^(.+)\b(?:at)\b(.+?)$")
@@ -44,5 +46,5 @@ class App(rapidsms.apps.base.AppBase):
 #            msg.text = m.group(1)
 #
 #            # we should probably log this crazy behavior...
-#            self.info("Stripped Location code: %s" % text)
-#            self.info("Message is now: %s" % msg.text)
+#            logger.info("Stripped Location code: %s" % text)
+#            logger.info("Message is now: %s" % msg.text)

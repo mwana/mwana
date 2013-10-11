@@ -16,6 +16,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
 from mwana.apps.reminders.models import PatientEvent
+from mwana.apps.nutrition import cg
 
 
 class ReportGMHandler(KeywordHandler):
@@ -25,11 +26,11 @@ class ReportGMHandler(KeywordHandler):
     def help(self):
         self.respond(REPORT_HELP)
 
-    def start(self):
+    # def start(self):
         # initialize childgrowth, which loads WHO tables
         # TODO is this the best place for this??
         # TODO make childgrowth options configurable via config.py
-        self.cg = childgrowth(False, False)
+        # self.cg = childgrowth(False, False)
 
     def __get_or_create_patient(self, **kwargs):
         self.debug("finding patient...")

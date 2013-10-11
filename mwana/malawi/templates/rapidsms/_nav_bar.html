@@ -1,6 +1,24 @@
 {% load url from future %}
-
+<li class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">AnthroWatch
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="{% url 'growth_index' %}">Reports</a></li>
+    <li><a href="{% url 'growth_graphs' %}">Analysis</a></li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">Results160
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="{% url 'mwana_reports' %}">Reports</a></li>
+    <li><a href="{% url 'mwana_graphs' %}">Analysis</a></li>
+  </ul>
+</li>
+<li><a href="{% url 'remindmi_reports' %}">RemindMI</a></li>
 <li><a href="{% url 'message_log' %}">Message Log</a></li>
-{# <!-- <li><a href="{% url 'registration' %}">Registration</a></li> --> #}
+{% comment %} <!-- <li><a href="{% url 'registration' %}">Registration</a></li>
 <li><a href="{% url 'messaging' %}">Messaging</a></li>
-<li><a href="{% url 'httptester-index' %}">Message Tester</a></li>
+<li><a href="{% url 'httptester-index' %}">Message Tester</a></li>-->{% endcomment %}

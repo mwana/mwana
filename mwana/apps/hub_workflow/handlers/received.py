@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 import re
+import logging
 from django.conf import settings
 from mwana.apps.hub_workflow.models import HubSampleNotification
 from mwana.apps.locations.models import Location
@@ -10,6 +11,8 @@ UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS sam
 SENT          = "Hello %(name)s! We received your notification that you received %(count)s  DBS samples today from %(clinic)s."
 HELP          = "To report DBS samples received, send RECEIVED <NUMBER OF SAMPLES> <CLINIC-CODE>"
 SORRY         = "Sorry, we didn't understand that message."
+logger = logging.getLogger(__name__)
+
 
 class ReceivedHandler(KeywordHandler):
     """
@@ -66,7 +69,7 @@ class ReceivedHandler(KeywordHandler):
                     self.respond("%s %s" % (SORRY, HELP))
                     return
             else:
-                self.info("Converted %s to %s" % (original_text_count, text))
+                logger.info("Converted %s to %s" % (original_text_count, text))
                 count = int(count)
                 count = abs(count) #just in case we change our general cleaning routine
 

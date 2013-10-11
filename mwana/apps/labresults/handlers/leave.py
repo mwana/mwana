@@ -6,15 +6,16 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 # our text.
 _ = lambda s: s
 
-BYE_MSG   = _("You have successfully unregistered, %(name)s. We're sorry to see you go.")
-ERROR_MSG = _("Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us.")
+BYE_MSG = ("You have successfully unregistered, %(name)s. We're sorry to see you go.")
+ERROR_MSG = ("Whoops - you tried to unregister from the system but I don't know who you are! Don't worry, you won't be receiving any messages from us.")
+
 
 class UnregisterHandler(KeywordHandler):
     """
     """
 
-    keyword = "leave|unregister|unreg"
-    
+    keyword = "leave"
+
     def help(self):
         # Because we want to process this with just an empty keyword, rather
         # than respond with a help message, just call the handle method from
@@ -24,7 +25,7 @@ class UnregisterHandler(KeywordHandler):
     def handle(self, text):
         if self.msg.connection.contact:
             name = self.msg.connection.contact.name
-            # we just deactivate the contact, but don't delete it, because 
+            # we just deactivate the contact, but don't delete it, because
             # there could be all kinds of useful foreign key goodies attached.
             self.msg.connection.contact.is_active = False
             self.msg.connection.contact.save()
@@ -34,4 +35,3 @@ class UnregisterHandler(KeywordHandler):
             self.respond(BYE_MSG, name=name)
         else:
             self.respond(ERROR_MSG)
-            

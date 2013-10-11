@@ -2,18 +2,16 @@
 python-memcached-1.45.tar.gz
 # django==1.5.4
 Django-1.5.4.tar.gz
-# nose>=0.11.2
-nose-0.11.2.tar.gz
-# django-nose>=0.1.2
-django-nose-0.1.2.tar.gz
+# nose>=1.3.0
+nose-1.3.0.tar.gz
+# django-nose>=1.1
+django-nose-1.1.tar.gz
 # djtables>=0.1.1
 djtables-0.1.1.tar.gz
 # djappsettings>=0.1.0
 djappsettings-0.1.0.tar.gz
-# RapidSMS:
-# rapidsms-rapidsms-v0.9.6a-17-gd80f038.tar.gz
-# RapidSMS==0.12.0
-RapidSMS-0.12.0.tar.gz
+RapidSMS==0.15.0
+# RapidSMS-0.15.0.tar.gz
 # pytz:
 pytz-2010l.tar.gz
 # pygsm must be installed separately because it requires that pytz be
@@ -40,5 +38,7 @@ south-0.7.3.tar.gz
 django-celery-with-redis>=3.0
 # Django-Selectable
 django_selectable
-# Django-tables2
-django-tables2
+# Django-tables2==0.13.0
+django-tables2.0.13.0.tar.gz
+# requests
+requests

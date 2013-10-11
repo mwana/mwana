@@ -6,6 +6,9 @@ from mwana.apps.supply.models import SupplyType
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.registration.handlers.register import RegisterHandler
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 class StatusHandler(KeywordHandler):
     """
@@ -59,4 +62,4 @@ class StatusHandler(KeywordHandler):
                 else:
                     self.respond("Request for %s by %s not found" % (supply_type, self.msg.contact))
         except Exception, e:
-            self.error(e)
+            logger.error(e)

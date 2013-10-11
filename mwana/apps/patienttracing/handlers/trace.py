@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 import re
+import logging
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace
 from datetime import datetime
@@ -11,8 +12,9 @@ from mwana.const import get_cba_type
 from mwana.apps.patienttracing import models as patienttracing
 from mwana.apps.labresults.util import is_already_valid_connection_type as is_valid_connection
 from mwana import const
-_ = lambda s: s
 
+_ = lambda s: s
+logger = logging.getLogger(__name__)
 
 class TraceHandler(KeywordHandler):
     '''
@@ -123,14 +125,14 @@ class TraceHandler(KeywordHandler):
         
         for contact in contacts:
             if contact.default_connection is None:
-                self.info("Can't send to %s as they have no connections" % contact)
+                logger.info("Can't send to %s as they have no connections" % contact)
             else:
                 OutgoingMessage(contact.default_connection, message_body,
                                 **{"text": (text % (contact.name, patient_name, patient_name))}).send()
         
         logger_msg = getattr(self.msg, "logger_msg", None) 
         if not logger_msg:
-            self.error("No logger message found for %s. Do you have the message log app running?" %\
+            logger.error("No logger message found for %s. Do you have the message log app running?" %\
                        self.msg)
         bmsg = BroadcastMessage.objects.create(logger_message=logger_msg,
                                                contact=self.msg.contact,

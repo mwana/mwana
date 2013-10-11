@@ -50,7 +50,7 @@ class App (rapidsms.apps.base.AppBase):
             keyword = msgtxt.split()[0].lower()
             if keyword in broadcast_keywords:
                 message.text = msgtxt
-                self.info('Skipping string cleaning for %s message' % msgtxt.split()[0])
+                logger.info('Skipping string cleaning for %s message' % msgtxt.split()[0])
                 return
 
         # replace separation marks with a space
@@ -96,9 +96,9 @@ class App (rapidsms.apps.base.AppBase):
         # remove periods, keep decimal points
         msgtxt = self.period_vs_decimal(msgtxt)
 
-        self.info("string cleaning! featherduster!")
-        self.info("original: " + message.text)
-        self.info("shiny new: " + msgtxt)
+        logger.info("string cleaning! featherduster!")
+        logger.info("original: " + message.text)
+        logger.info("shiny new: " + msgtxt)
 
         # give the message clean text
         message.text = msgtxt
@@ -155,7 +155,7 @@ class App (rapidsms.apps.base.AppBase):
                 # replace each of the letters with its appropriate numeral
                 numeralized = numeralized.replace(g, gaffes[g])
             except Exception, e:
-                self.info(e)
+                logger.info(e)
         # return the string once all gaffes have been replaced
         return numeralized
 

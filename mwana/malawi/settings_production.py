@@ -39,7 +39,7 @@ RAPIDSMS_TABS = [
 INSTALLED_BACKENDS.update({
     "airtel": {
         # "ENGINE":  "threadless_router.backends.kannel.outgoing",
-        "ENGINE":  "rapidsms.backends.kannel",
+        "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "zain-modem",
                            "from": "+265999279085",  # will be overridden;
@@ -48,9 +48,10 @@ INSTALLED_BACKENDS.update({
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
+        "delivery_report_url": "http://127.0.0.1:8000",
     },
     "tnm": {
-        "ENGINE":  "rapidsms.backends.kannel",
+        "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
         "sendsms_params": {"smsc": "tnm-smpp",
                            "from": "88160",  # not set automatically by SMSC
@@ -59,6 +60,7 @@ INSTALLED_BACKENDS.update({
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
+        "delivery_report_url": "http://127.0.0.1:8000",
     }
 })
 

@@ -14,7 +14,7 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.views import process_payload
 from mwana.apps.labresults.messages import TEST_TYPE
 from mwana.apps.labresults.models import Result
-from rapidsms.router.blocking import BlockingRouter as Router
+from rapidsms.router import get_router
 
 from mwana.apps.locations.models import Location
 
@@ -37,7 +37,7 @@ def send_results_notification():
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
-        router = Router()
+        router = get_router()()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)
@@ -56,7 +56,7 @@ def send_changed_records_notification():
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
-        router = Router()
+        router = get_router()()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of changed results' % clinic)
@@ -127,7 +127,7 @@ def send_results_to_printer():
             Location.objects.filter(Q(has_independent_printer=True)
                                     & new_notified
                                     & verified & send_live_results).distinct()
-        router = Router()
+        router = get_router()()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('sending new results to printer at %s' % clinic)

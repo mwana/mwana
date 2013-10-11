@@ -3,6 +3,7 @@ from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 import datetime
 import mwana.const as const
 import random
+import logging
 from datetime import date
 from datetime import timedelta
 from django.conf import settings
@@ -31,6 +32,8 @@ from mwana.const import get_clinic_worker_type
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
+
+logger = logging.getLogger(__name__)
 
 
 class MockResultUtility(LoggerMixin):
@@ -82,7 +85,7 @@ class MockResultUtility(LoggerMixin):
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
-                self.info("Initiating a demo sequence to clinic: %s" % clinic)
+                logger.info("Initiating a demo sequence to clinic: %s" % clinic)
                 self.fake_pending_results(clinic)
             return True
         elif message.connection in self.waiting_for_pin \
@@ -139,7 +142,7 @@ class MockResultUtility(LoggerMixin):
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
-                self.info("Initiating a printer demo to clinic: %s" % clinic)
+                logger.info("Initiating a printer demo to clinic: %s" % clinic)
                 self.fake_sending_results_to_printer(clinic)
             return True
 
@@ -221,7 +224,7 @@ class MockSMSReportsUtility(LoggerMixin):
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
-                self.info("Initiating demo reports to clinic: %s" % clinic)
+                logger.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_send_dbs_recvd_at_lab_notification(clinic)
                 self.fake_sending_hub_reports(clinic)
             return True
@@ -234,7 +237,7 @@ class MockSMSReportsUtility(LoggerMixin):
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
-                self.info("Initiating demo reports to clinic: %s" % clinic)
+                logger.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_sending_dho_reports(clinic)
             return True
         elif message.text.strip().upper().startswith("PHODEMO"):
@@ -246,7 +249,7 @@ class MockSMSReportsUtility(LoggerMixin):
             else:
                 # Fake like we need to prompt their clinic for results, as a means
                 # to conduct user testing.  The mocker does not touch the database
-                self.info("Initiating demo reports to clinic: %s" % clinic)
+                logger.info("Initiating demo reports to clinic: %s" % clinic)
                 self.fake_sending_pho_reports(clinic)
             return True
 

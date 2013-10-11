@@ -38,8 +38,8 @@ INSTALLED_BACKENDS = {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
     #},
-    "httptester": {
-        "ENGINE": "rapidsms.contrib.httptester.backend",
+    "message_tester": {
+        "ENGINE": "rapidsms.backends.database.DatabaseBackend",
     }
 }
 
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     # this has to come before the handlers app because of the CONFIRM handler
     # in patienttracing
     "mwana.apps.tlcprinters",
+    "mwana.apps.labresults",
     'south',
     # the essentials.
     "django_nose",
@@ -58,12 +59,10 @@ INSTALLED_APPS = [
     "selectable",
     "djtables",
     "rapidsms",
-    # router and task queues
-    # "threadless_router.backends.kannel",
     "rapidsms.backends.kannel",
+    "rapidsms.backends.database",
     "djcelery",
     "kombu.transport.django",
-    # "threadless_router.celery",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
     # enable the django admin using a little shim app (which includes
@@ -76,24 +75,14 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     # the rapidsms contrib apps.
-    # "rapidsms.contrib.export",
-    # "threadless_router.backends.httptester",
-    # "mwana.apps.locations",
     "rapidsms.contrib.httptester",
     "rapidsms.contrib.messagelog",
     "rapidsms.contrib.messaging",
-    # "rapidsms.contrib.registration",
-    # "rapidsms.contrib.scheduler",
-    # "mwana.apps.echo",
     "mwana.apps.contactsplus",
     "mwana.apps.registration",
     "mwana.apps.agents",
-    "mwana.apps.broadcast",
-    "mwana.apps.labresults",
     "mwana.apps.reminders",
-    # "mwana.apps.birth_reminders",
     "mwana.apps.location_importer",
-    # "mwana.apps.supply",
     "mwana.apps.reports",
     "mwana.apps.training",
     "mwana.apps.help",
@@ -108,28 +97,11 @@ INSTALLED_APPS = [
     "rapidsms.contrib.default",
 ]
 
-# this rapidsms-specific setting defines which views are linked by the
-# tabbed navigation. when adding an app to INSTALLED_APPS, you may wish
-# to add it here, also, to expose it in the rapidsms ui.
-RAPIDSMS_TABS = [
-    ('rapidsms.views.dashboard', 'Dashboard'),
-    # ('httptester-index', 'Message Tester'),
-    # ('mwana.apps.locations.views.dashboard', 'Map'),
-    # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-    # ('rapidsms.contrib.registration.views.registration', 'Registration'),
-    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-    # ('mwana.apps.supply.views.dashboard', 'Supplies'),
-    ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-]
-
-
 # TODO: make a better default response, include other apps, and maybe
 # this dynamic?
-DEFAULT_RESPONSE = '''Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK,
- RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for
- more information.'''
+# DEFAULT_RESPONSE = '''Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK,
+# RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for
+# more information.'''
 
 
 # -------------------------------------------------------------------- #
@@ -164,13 +136,65 @@ SITE_ID = 1
 
 
 # the default log settings are very noisy.
-LOG_LEVEL = "DEBUG"
-LOG_FILE = "logs/rapidsms.log"
-LOG_FORMAT = "[%(name)s]: %(message)s"
-LOG_SIZE = 8192  # 8192 bytes = 64 kb
-LOG_BACKUPS = 256  # number of logs to keep
-DJANGO_LOG_FILE = 'logs/django.log'
+# LOG_LEVEL = "DEBUG"
+# LOG_FILE = "logs/rapidsms.log"
+# LOG_FORMAT = "[%(name)s]: %(message)s"
+# LOG_SIZE = 8192  # 8192 bytes = 64 kb
+# LOG_BACKUPS = 256  # number of logs to keep
+# DJANGO_LOG_FILE = 'logs/django.log'
 
+
+# A sample logging configuration.
+# This logs all rapidsms messages to the file `rapidsms.log`
+# in the project directory.  It also sends an email to
+# the site admins on every HTTP 500 error when DEBUG=False.
+# See http://docs.djangoproject.com/en/dev/topics/logging for
+# more details on how to customize your logging configuration.
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'formatters': {
+        'basic': {
+            'format': '%(asctime)s %(name)-20s %(levelname)-8s %(message)s',
+        },
+    },
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'basic',
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'basic',
+            'filename': os.path.join(PROJECT_ROOT, 'logs', 'rapidsms.log'),
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'rapidsms': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    }
+}
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.common.CommonMiddleware',

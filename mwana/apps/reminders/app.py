@@ -5,7 +5,6 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule
 
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
@@ -39,20 +38,20 @@ class App(rapidsms.apps.base.AppBase):
         '%d%m',
     )
 
-    def start(self):
-        self.schedule_notification_task()
+    # def start(self):
+        # self.schedule_notification_task()
 
-    def schedule_notification_task(self):
-        """
-        Resets (removes and re-creates) the task in the scheduler app that is
-        used to send notifications to CBAs.
-        """
-        callback = 'mwana.apps.reminders.tasks.send_notifications'
+    # def schedule_notification_task(self):
+    #     """
+    #     Resets (removes and re-creates) the task in the scheduler app that is
+    #     used to send notifications to CBAs.
+    #     """
+    #     callback = 'mwana.apps.reminders.tasks.send_notifications'
 
-        #remove existing schedule tasks; reschedule based on the current setting from config
-        EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[12],
-                                     minutes=[0])
+    #     #remove existing schedule tasks; reschedule based on the current setting from config
+    #     EventSchedule.objects.filter(callback=callback).delete()
+    #     EventSchedule.objects.create(callback=callback, hours=[12],
+    #                                  minutes=[0])
 
     def _parse_date(self, date_str):
         """

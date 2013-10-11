@@ -18,6 +18,7 @@ urlpatterns = patterns(
     url(r"^csv/child-count/", remindmi.csv_child_count,
         name="csv_child_count"),
     url(r"^remindmi", remindmi.malawi_reports, name="remindmi_reports"),
+    url(r'^kannel/', include('rapidsms.backends.kannel.urls')),
     (r'^', include('rapidsms_xforms.urls')),  # needs top level formList url
     (r'^growth/', include('mwana.apps.nutrition.urls')),
 )

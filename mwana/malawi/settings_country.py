@@ -63,15 +63,6 @@ INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
 
-# RAPIDSMS_TABS
-RAPIDSMS_TABS.append(('mwana_reports', 'Reports'))
-RAPIDSMS_TABS.append(('mwana_graphs', 'Results160 Analysis'))
-RAPIDSMS_TABS.append(('remindmi_reports', 'RemindMi'))
-RAPIDSMS_TABS.append(('growth_index', 'AnthroWatch Reports'))
-RAPIDSMS_TABS.append(('growth_graphs', 'AnthroWatch Analysis'))
-
-
-
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
 
@@ -107,3 +98,15 @@ CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERY_TIMEZONE = 'Africa/Blantyre'
 
 # WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
+
+RAPIDSMS_HANDLERS = [
+    "rapidsms.contrib.handlers.KeywordHandler",
+    "rapidsms.contrib.handlers.PatternHandler",
+    # "mwana.apps.help.handlers.CodeHandler",
+    # "mwana.apps.help.handlers.ContactsHandler",
+    # "mwana.apps.labresults.handlers.JoinHandler",
+    # "mwana.apps.labresults.handlers.UnregisterHandler",
+    # "mwana.apps.labresults.handlers.PrinterHandler",
+    # "mwana.apps.labresults.handlers.ResultsHandler",
+    # "mwana.apps.labresults.handlers.SentHandler",
+]

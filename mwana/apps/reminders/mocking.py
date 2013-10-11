@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+import logging
 from mwana.apps.translator.util import Translator
 from datetime import date
 from datetime import timedelta
@@ -11,6 +12,8 @@ from rapidsms.models import Contact
 from mwana.apps.reminders.models import PatientEvent
 
 _ = lambda x: x
+
+logger = logging.getLogger(__name__)
 
 translator = Translator()
 
@@ -28,7 +31,7 @@ class MockRemindMiUtility(LoggerMixin):
             if not clinic:
                 message.respond(RIMINDMI_DEMO_FAIL)
             else:
-                self.info("Initiating demo remindmi to clinic: %s" % clinic)
+                logger.info("Initiating demo remindmi to clinic: %s" % clinic)
                 self.fake_sending_six_day_notification(clinic)
             return True
 
