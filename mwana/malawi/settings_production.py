@@ -70,7 +70,8 @@ DATABASES = {
         "NAME": "mwana_production",
         "USER": "mwana",
         "PASSWORD": "",  # configure in localsettings.py
-        "HOST": "localhost",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
         "TEST_DATABASE_NAME": "test_mwana_production",
     }
 }
