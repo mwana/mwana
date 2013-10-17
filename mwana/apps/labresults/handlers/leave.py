@@ -32,6 +32,6 @@ class UnregisterHandler(KeywordHandler):
             # we also disassociate the contact from the connection
             self.msg.connection.contact = None
             self.msg.connection.save()
-            self.respond(BYE_MSG, name=name)
+            self.respond(BYE_MSG % dict(name=name))
         else:
             self.respond(ERROR_MSG)

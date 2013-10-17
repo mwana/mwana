@@ -6,7 +6,7 @@ from rapidsms.models import Contact
 from rapidsms.models import Connection
 from rapidsms.models import Backend
 from rapidsms.admin import ContactAdmin
-# from rapidsms.contrib.messagelog.models import Message
+from rapidsms.contrib.messagelog.models import Message
 
 from mwana.apps.contactsplus import models as contactsplus
 
@@ -59,12 +59,12 @@ class ContactTypeAdmin(admin.ModelAdmin):
 admin.site.register(contactsplus.ContactType, ContactTypeAdmin)
 
 
-# admin.site.unregister(Message)
-# class MessageAdmin(admin.ModelAdmin):
-#     list_display = ("text", "direction", "who", "date",)
-#     list_filter = ("direction", "date", "contact",)
-#     search_fields = ("text",)
-# admin.site.register(Message, MessageAdmin)
+admin.site.unregister(Message)
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ("text", "direction", "who", "date",)
+    list_filter = ("direction", "date", "contact",)
+    search_fields = ("text", "who",)
+admin.site.register(Message, MessageAdmin)
 
 
 def create_action(backend):

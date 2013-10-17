@@ -3,6 +3,7 @@ import re
 from mwana import const
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
+from rapidsms.router import send
 from mwana.apps.locations.models import Location, LocationType
 from rapidsms.models import Contact
 from mwana.apps.labresults.util import is_already_valid_connection_type
@@ -185,8 +186,8 @@ class JoinHandler(KeywordHandler):
                                             type__slug__in=location_type)
             if self.msg.connection.contact is not None \
                and self.msg.connection.contact.is_active:
-                # this means they were already registered and active, but not yet
-                # receiving results.
+                # this means they were already registered and active,
+                # but not yet receiving results.
                 clinic = get_clinic_or_default(self.msg.connection.contact)
                 if clinic != location:
                     self.respond(self.ALREADY_REGISTERED,
@@ -352,10 +353,12 @@ class JoinHandler(KeywordHandler):
                 self.msg.connection.save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
-            msg = self.respond(_("Thank you %(name)s! You have successfully "
-                                 "registered as a RemindMi Agent for zone "
-                                 "%(zone)s of %(clinic)s."), name=cba.name,
-                                 zone=zone.name, clinic=clinic.name)
+                msg = self.respond(
+                    _("Thank you %(name)s! You have successfully "
+                      "registered as a RemindMi Agent for zone "
+                      "%(zone)s of %(clinic)s." % {
+                          'name': cba.name, 'zone': zone.name,
+                          'clinic': clinic.name}))
 
             if SYSTEM_LOCALE == LOCALE_ZAMBIA:
                 notify_text, kwargs = self._get_notify_text()

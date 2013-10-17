@@ -2,11 +2,9 @@
 from datetime import date, datetime
 import decimal
 from decimal import Decimal as D
-import time
-import gettext
+import logging
 
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from django.db.models import F
+from django.core.exceptions import ObjectDoesNotExist
 
 from pygrowup.pygrowup import *
 from people.models import PersonType
@@ -16,8 +14,9 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.nutrition.messages import *
 from mwana.apps.nutrition.models import *
 from mwana.apps.reminders.models import PatientEvent
-from mwana.apps.nutrition import cg
 
+
+logger = logging.getLogger(__name__)
 
 class ReportGMHandler(KeywordHandler):
 
@@ -26,39 +25,34 @@ class ReportGMHandler(KeywordHandler):
     def help(self):
         self.respond(REPORT_HELP)
 
-    # def start(self):
-        # initialize childgrowth, which loads WHO tables
-        # TODO is this the best place for this??
-        # TODO make childgrowth options configurable via config.py
-        # self.cg = childgrowth(False, False)
-
     def __get_or_create_patient(self, **kwargs):
-        self.debug("finding patient...")
+        logger.debug("finding patient...")
         # Person model requires a PersonType, rather than rock the boat and
         # alter how People work, make sure that a Patient PersonType exists.
         # Also this seems sensible if this code gets refactored it will be
         # easier to port old data...
-        person_type, created = PersonType.objects.get_or_create(singular='Patient', plural='Patients')
+        person_type, created = PersonType.objects.get_or_create(
+            singular='Patient', plural='Patients')
         kwargs.update({'type': person_type})
 
         try:
             # first try to look up patient using only id
             # we don't want to use bday and gender in case this is an update
-            # or correction to an already known patient (get_or_create would make
-            # a new patient)
+            # or correction to an already known patient (get_or_create would
+            # make a new patient)
             patient_args = kwargs.copy()
-            self.debug(patient_args)
+            logger.debug(patient_args)
             ids = ['code']
             has_ids = [patient_args.has_key(id) for id in ids]
-            self.debug(has_ids)
+            logger.debug(has_ids)
             if False not in has_ids:
-                self.debug("has ids...")
+                logger.debug("has ids...")
                 id_kwargs = {}
                 [id_kwargs.update({id: patient_args.pop(id)}) for id in ids]
-                self.debug(id_kwargs)
+                logger.debug(id_kwargs)
                 # next line should bump us into the exception if we have a new kid
                 patient = Person.objects.get(**id_kwargs)
-                self.debug("patient!")
+                logger.debug("patient!")
                 # compare reported gender and bday to data on file
                 # and update + notify if necessary
                 bday_on_file = patient.date_of_birth
@@ -76,31 +70,32 @@ class ReportGMHandler(KeywordHandler):
                 return patient, False
         except ObjectDoesNotExist, IndexError:
             # patient doesnt already exist, so create with all arguments
-            self.debug("new patient!")
+            logger.debug("new patient!")
             patient, created = Person.objects.get_or_create(**kwargs)
             return patient, created
 
     def _validate_date(self, potential_date):
-        self.debug("validate date...")
-        self.debug(potential_date)
+        logger.debug("validate date...")
+        logger.debug(potential_date)
         try:
             #matches = re.match( self.datepattern, potential_date, re.IGNORECASE)
-            #self.debug(matches)
+            #logger.debug(matches)
             #if matches is not None:
             #    date = matches.group(0)
-            self.debug(potential_date)
-            good_date_str, good_date_obj = helpers.get_good_date(potential_date)
-            self.debug(good_date_str)
+            logger.debug(potential_date)
+            good_date_str, good_date_obj = helpers.get_good_date(
+                potential_date)
+            logger.debug(good_date_str)
             return good_date_str, good_date_obj
             #else:
             #    return None, None
         except Exception, e:
-            self.exception('problem validating date')
+            self.exception('problem validating date: %s' % e)
             return None, None
 
     def _validate_sex(self, potential_sex):
-        self.debug("validate sex...")
-        self.debug(potential_sex)
+        logger.debug("validate sex...")
+        logger.debug(potential_sex)
         try:
             gender = helpers.get_good_sex(potential_sex)
             if gender is not None:
@@ -108,11 +103,11 @@ class ReportGMHandler(KeywordHandler):
             else:
                 return None
         except Exception, e:
-            self.exception('problem validating sex')
+            self.exception('problem validating sex: %s' % e)
 
     def _validate_bool(self, potential_bool):
-        self.debug("validate bool...")
-        self.debug(potential_bool)
+        logger.debug("validate bool...")
+        logger.debug(potential_bool)
         try:
             if potential_bool is not None:
                 if potential_bool[0].upper() in ["Y", "YES", "O", "OUI"]:
@@ -124,10 +119,10 @@ class ReportGMHandler(KeywordHandler):
             else:
                 return None, 0
         except Exception, e:
-            self.exception('problem validating bool')
+            self.exception('problem validating bool: %s' % e)
 
     def _validate_ids(self, id_dict):
-        self.debug("validate ids...")
+        logger.debug("validate ids...")
         try:
             valid_ids = {}
             invalid_ids = {}
@@ -138,10 +133,10 @@ class ReportGMHandler(KeywordHandler):
                     invalid_ids.update({k: v})
             return valid_ids, invalid_ids
         except Exception, e:
-            self.exception('problem validating ids')
+            self.exception('problem validating ids: %s' % e)
 
     def _validate_measurements(self, height, weight, muac):
-        self.debug("validate measurements...")
+        logger.debug("validate measurements...")
         valid_height = False
         valid_weight = False
         valid_muac = False
@@ -165,11 +160,11 @@ class ReportGMHandler(KeywordHandler):
                 valid_muac = True
             return valid_height, valid_weight, valid_muac
         except Exception, e:
-            self.exception('problem validating measurements')
+            self.exception('problem validating measurements: %s' % e)
 
     def _validate_action_taken(self, action_taken):
-        self.debug("validate action taken ...")
-        self.debug(action_taken)
+        logger.debug("validate action taken ...")
+        logger.debug(action_taken)
         if action_taken is not None:
             if action_taken[:2].upper() in ['NR', 'OF', 'OT', 'RG', 'SF']:
                 return action_taken[:2]
@@ -179,7 +174,7 @@ class ReportGMHandler(KeywordHandler):
             return None
 
     def __identify_healthworker(self):
-        # if healthworker is already registered on this connection, return him/her
+        # return the healthworker if already registered on this connection
         try:
             healthworker = self.msg.connection.contact
             return healthworker
@@ -187,14 +182,15 @@ class ReportGMHandler(KeywordHandler):
             return None
 
     def handle(self, text):
-        self.debug("reporting...")
-        try:
-            survey = Survey.objects.get(begin_date__lte=datetime.now().date(),\
-                end_date__gte=datetime.now().date())
-        except ObjectDoesNotExist, MultipleObjectsReturned:
-            return self.respond("No active survey at this date")
+        logger.debug("reporting...")
+        # try:
+        #     survey = Survey.objects.get(
+        #         begin_date__lte=datetime.now().date(),
+        #         end_date__gte=datetime.now().date())
+        # except ObjectDoesNotExist, MultipleObjectsReturned:
+        #     return self.respond("No active survey at this date")
 
-        self.debug("initialising separate childgrowth instance..")
+        logger.debug("initialising separate childgrowth instance..")
         cg = childgrowth(False, False)
 
         # find out who is submitting this report
@@ -206,7 +202,8 @@ class ReportGMHandler(KeywordHandler):
 
         PATTERN = re.compile(r'(?P<child_id>\d+)\s+(?P<gender>[M|F])\s+(?P<date_of_birth>\d{6})\D*(?P<weight>\d{2}\.\d{1})\D*(?P<height>\d{2}\.\d{1})\D*(?P<oedema>[Y|N])\D*(?P<muac>\d{2}\.\d{1})', re.IGNORECASE)
 
-        token_labels = ['child_id', 'date_of_birth', 'gender', 'weight', 'height', 'oedema', 'muac', 'action_taken']
+        token_labels = ['child_id', 'date_of_birth', 'gender', 'weight',
+                        'height', 'oedema', 'muac', 'action_taken']
 
         token_data = text.split()
 
@@ -218,7 +215,7 @@ class ReportGMHandler(KeywordHandler):
 
         try:
             if len(token_data) > 8:
-                self.debug("too much data")
+                logger.debug("too much data")
                 self.respond(TOO_MANY_TOKENS)
 
             tokens = dict(zip(token_labels, token_data))
@@ -233,15 +230,17 @@ class ReportGMHandler(KeywordHandler):
             survey_entry = SurveyEntry(**tokens)
             survey_entry.healthworker = healthworker
             # save age in months for raw data as well
-            raw_dob_str, raw_dob_obj = self._validate_date(survey_entry.date_of_birth)
+            raw_dob_str, raw_dob_obj = self._validate_date(
+                survey_entry.date_of_birth)
             if raw_dob_obj is not None:
-                survey_entry.age_in_months = helpers.date_to_age_in_months(raw_dob_obj)
+                survey_entry.age_in_months = helpers.date_to_age_in_months(
+                    raw_dob_obj)
             survey_entry.save()
             # you cannot monitor a child who is not yet born.
         except Exception, e:
             self.exception()
-            self.respond(INVALID_MEASUREMENT %\
-                (survey_entry.child_id))
+            self.respond(INVALID_MEASUREMENT %
+                         (survey_entry.child_id))
 
         # check that id codes are numbers
         valid_ids, invalid_ids = self._validate_ids(
@@ -258,7 +257,7 @@ class ReportGMHandler(KeywordHandler):
             if v.upper().startswith('X'):
                 tokens.update({k: None})
 
-        self.debug("getting patient...")
+        logger.debug("getting patient...")
         # begin collecting valid patient arguments
         patient_kwargs = {'code': survey_entry.child_id}
 
@@ -269,7 +268,7 @@ class ReportGMHandler(KeywordHandler):
         else:
             dob_str, dob_obj = self._validate_date(survey_entry.date_of_birth)
             if dob_obj is not None:
-                self.debug(dob_obj)
+                logger.debug(dob_obj)
                 patient_kwargs.update({'date_of_birth': dob_obj})
             else:
                 patient_kwargs.update({'date_of_birth': ""})
@@ -278,7 +277,7 @@ class ReportGMHandler(KeywordHandler):
         # make sure reported gender is valid
         good_sex = self._validate_sex(survey_entry.gender)
         if good_sex is not None:
-            self.debug(good_sex)
+            logger.debug(good_sex)
             patient_kwargs.update({'gender': good_sex})
         else:
             patient_kwargs.update({'gender': ""})
@@ -289,7 +288,7 @@ class ReportGMHandler(KeywordHandler):
         # check if action taken is valid
         action_taken = self._validate_action_taken(survey_entry.action_taken)
         if action_taken is not None:
-            self.debug(action_taken)
+            logger.debug(action_taken)
             patient_kwargs.update({'action_taken': action_taken})
         else:
             patient_kwargs.update({'action_taken': 'XX'})
@@ -297,7 +296,7 @@ class ReportGMHandler(KeywordHandler):
 
         try:
             # find patient or create a new one
-            self.debug(patient_kwargs)
+            logger.debug(patient_kwargs)
             patient, created = self.__get_or_create_patient(**patient_kwargs)
         except Exception, e:
             self.exception('problem saving patient')
@@ -305,63 +304,66 @@ class ReportGMHandler(KeywordHandler):
         # we must have a patient to update
         if patient is not None:
             try:
-                # update age separately (should be the only volitile piece of info)
-                self.debug(survey_entry.age_in_months)
+                # update age separately
+                # (should be the only volatile piece of info)
+                logger.debug(survey_entry.age_in_months)
                 if survey_entry.age_in_months is not None:
                     patient.age_in_months = int(survey_entry.age_in_months)
                 else:
-                    patient.age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
-                self.debug(patient.age_in_months)
+                    patient.age_in_months = helpers.date_to_age_in_months(
+                        patient.date_of_birth)
+                logger.debug(patient.age_in_months)
                 patient.save()
             except Exception, e:
                 self.exception('problem saving age')
                 return self.respond("There was a problem saving the age.")
 
-        # calculate age based on reported date of birth
-        # respond if calcualted age differs from reported age
-        # by more than 3 months TODO make this configurable
-        #self.debug("getting sloppy age...")
-        #sloppy_age_in_months = helpers.date_to_age_in_months(patient.date_of_birth)
-        #self.debug(sloppy_age_in_months)i
-        #if (abs(int(sloppy_age_in_months) - int(patient.age_in_months)) > 3):
-        #    message.respond("Date of birth indicates Child ID %s's age (in months) is %s, which does not match the reported age (in months) of %s" % (patient.code, sloppy_age_in_months, patient.age_in_months))
-
         try:
-            self.debug("making assessment...")
+            logger.debug("making assessment...")
             # create nutritional assessment entry
-            self.debug(survey_entry.height)
-            self.debug(survey_entry.weight)
-            self.debug(survey_entry.muac)
+            logger.debug(survey_entry.height)
+            logger.debug(survey_entry.weight)
+            logger.debug(survey_entry.muac)
 
-            measurements = {"height": survey_entry.height,\
-                "weight": survey_entry.weight, "muac": survey_entry.muac}
+            measurements = {"height": survey_entry.height,
+                            "weight": survey_entry.weight,
+                            "muac": survey_entry.muac}
 
-            human_oedema, bool_oedema = self._validate_bool(survey_entry.oedema)
-            valid_height, valid_weight, valid_muac = self._validate_measurements(\
-                measurements['height'], measurements['weight'], measurements['muac'])
+            human_oedema, bool_oedema = self._validate_bool(
+                survey_entry.oedema)
+            valid_height,
+            valid_weight,
+            valid_muac = self._validate_measurements(
+                measurements['height'],
+                measurements['weight'],
+                measurements['muac'])
 
-            self.debug(valid_height)
-            self.debug(valid_weight)
-            self.debug(valid_muac)
+            logger.debug(valid_height)
+            logger.debug(valid_weight)
+            logger.debug(valid_muac)
 
             if valid_height or valid_weight or valid_muac:
-                ass = Assessment(healthworker=healthworker, patient=patient,\
-                        height=measurements['height'], weight=measurements['weight'],\
-                        muac=measurements['muac'], oedema=bool_oedema, survey=survey)
+                ass = Assessment(
+                    healthworker=healthworker, patient=patient,
+                    height=measurements['height'],
+                    weight=measurements['weight'],
+                    muac=measurements['muac'], oedema=bool_oedema,
+                    survey=survey)
             else:
-                self.debug("have null values for height, weight and muac.")
-                ass = Assessment(healthworker=healthworker, patient=patient,\
-                             oedema=bool_oedema, survey=survey)
+                logger.debug("have null values for height, weight and muac.")
+                ass = Assessment(healthworker=healthworker,
+                                 patient=patient,
+                                 oedema=bool_oedema, survey=survey)
 
             ass.save()
-            self.debug("saved assessment")
+            logger.debug("saved assessment")
             # process assessment
             # perform analysis based on cg instance from start()
             # TODO add to Assessment save method?
             if ass is not None:
                 results = ass.analyze(cg)
-                self.debug('assessment analyzed!')
-                self.debug(results)
+                logger.debug('assessment analyzed!')
+                logger.debug(results)
                 # categorise child status based on results of zscores.
                 if ass.weight4age is not None:
                     if (ass.weight4age >= D(str(3.00))):
@@ -424,8 +426,7 @@ class ReportGMHandler(KeywordHandler):
 #                    import pdb
 #                    pdb.set_trace()
                     sam_date = date.today()
-                    # this is one for a ... moment, create an alternate patient!
-                    if healthworker and healtworker.location:
+                    if healthworker and healthworker.location:
                         child, created = Contact.objects.get_or_create(
                             name=patient.code,
                             location=healthworker.location)
@@ -437,64 +438,61 @@ class ReportGMHandler(KeywordHandler):
 
                     # finally create the SAM event
                     PatientEvent(event=event,
-                                date=sam_date,
-                                cba_conn=healthworker.default_connection,
-                                notification_status="sam")
+                                 date=sam_date,
+                                 cba_conn=healthworker.default_connection,
+                                 notification_status="sam")
 
             try:
-                #response_map = {
-                #    'weight4age'    : 'Oops. I think weight or age is incorrect',
-                #    'height4age'    : 'Oops. I think height or age is incorrect',
-                #    'weight4height' : 'Oops. I think weight or height is incorrect'
-                #}
-                self.debug('updating averages...')
+                logger.debug('updating averages...')
                 average_zscores = survey.update_avg_zscores()
-                self.debug(average_zscores)
+                logger.debug(average_zscores)
                 context = decimal.getcontext()
                 for ind, z in results.iteritems():
-                    self.debug(str(ind) + " " + str(z))
+                    logger.debug(str(ind) + " " + str(z))
                     if z is not None:
                         survey_avg = average_zscores[ind]
-                        self.debug(survey_avg)
+                        logger.debug(survey_avg)
                         # TODO plus or minus!
                         survey_avg_limit = survey.average_limit
                         if survey_avg is not None:
-                            survey_avg_limit = context.add(survey.average_limit, abs(survey_avg))
+                            survey_avg_limit = context.add(
+                                survey.average_limit, abs(survey_avg))
                         if abs(z) > survey_avg_limit:
-                            self.debug('BIG Z: ' + ind)
-                            self.debug('sample z: ' + str(z))
-                            self.debug('avg z: ' + str(survey_avg_limit))
+                            logger.debug('BIG Z: ' + ind)
+                            logger.debug('sample z: ' + str(z))
+                            logger.debug('avg z: ' + str(survey_avg_limit))
                             # add one to healthworker's error tally
                             healthworker.errors = healthworker.errors + 1
                             healthworker.save()
-                            # mark both the entry and the assessment as 'suspect'
+                            # mark the entry and the assessment as 'suspect'
                             survey_entry.flag = 'S'
                             survey_entry.save()
                             ass.status = 'S'
                             ass.save()
                             #message.respond(response_map[ind])
-                            return self.respond(INVALID_MEASUREMENT %\
-                                (patient.code))
+                            return self.respond(INVALID_MEASUREMENT %
+                                                (patient.code))
             except Exception, e:
                 self.exception('problem with analysis')
 
             else:
-                self.debug('there is no assessment saved to analyse')
+                logger.debug('there is no assessment saved to analyse')
 
         except Exception, e:
             self.exception("problem making assessment")
             self.respond(INVALID_MEASUREMENT % (survey_entry.child_id))
 
         try:
-            self.debug('constructing confirmation')
+            logger.debug('constructing confirmation')
             confirmation = ASSESS_CONFIRM %\
-                (healthworker.name, ass.get_wasting_display(), ass.get_underweight_display(), ass.get_stunting_display())
-            self.debug('confirmation constructed')
+                (healthworker.name, ass.get_wasting_display(),
+                 ass.get_underweight_display(), ass.get_stunting_display())
+            logger.debug('confirmation constructed')
                     # send confirmation AFTER any error messages
             if confirmation is not None:
                 self.respond(confirmation)
-                self.debug('sent confirmation')
+                logger.debug('sent confirmation')
             else:
-                self.debug('there was a problem building the confirmation message')
+                logger.debug('confinmation message was not built properly')
         except Exception, e:
-            self.exception('problem constructing confirmation')
+            self.exception('problem constructing confirmation: %s' % e)
