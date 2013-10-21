@@ -79,7 +79,14 @@ DATABASES = {
 SEND_LIVE_LABRESULTS = True
 SEND_LIVE_BIRTH_REMINDERS = False
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
+# CACHE_BACKEND = 'memcached://127.0.0.1:11211/?timeout=60'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 
 # Override the default log settings:
