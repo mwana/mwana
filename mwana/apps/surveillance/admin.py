@@ -1,32 +1,71 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.surveillance.models import Separator
-from mwana.apps.surveillance.models import Report
+from mwana.apps.surveillance.models import AgeGroup
+from django.contrib import admin
 from mwana.apps.surveillance.models import Alias
 from mwana.apps.surveillance.models import Incident
-from django.contrib import admin
+from mwana.apps.surveillance.models import Report
+from mwana.apps.surveillance.models import Separator
+from django.contrib.admin.views.main import ChangeList
+from django.db.models import Sum, Avg
 
 class IncidentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'indicator_id', 'abbr', 'type')
-    list_filter = ('type', )
+    list_display = ('name', 'indicator_id', 'type')
+    list_filter = ('type',)
     search_fields = ('name', 'indicator_id', 'abbr')
 admin.site.register(Incident, IncidentAdmin)
 
 
 class AliasAdmin(admin.ModelAdmin):
     list_display = ('incident', 'name')
-    list_filter = ('incident',)
+    list_filter = ('incident', )
     search_fields = ('incident__name', 'incident__abbr', 'incident__indicator_id', 'name')
 admin.site.register(Alias, AliasAdmin)
 
 
+class ReportTotalAveragesChangeList(ChangeList):
+    #provide the list of fields that we need to calculate averages and totals
+    fields_to_total = ['value']
+
+    def get_total_values(self, queryset):
+        """
+        Get the totals
+        """
+        #basically the total parameter is an empty instance of the given model
+        total =  Report()
+        total.incident = Incident(name="**Total**")
+        for field in self.fields_to_total:
+            setattr(total, field, queryset.aggregate(Sum(field)).items()[0][1])
+        return total
+
+    def get_results(self, request):
+        """
+        The model admin gets queryset results from this method
+        and then displays it in the template
+        """
+        super(ReportTotalAveragesChangeList, self).get_results(request)
+        #first get the totals from the current changelist
+        total = self.get_total_values(self.query_set)
+        #small hack. in order to get the objects loaded we need to call for
+        #queryset results once so simple len function does it
+        len(self.result_list)
+        #and finally we add our custom rows to the resulting changelist
+        self.result_list._result_cache.append(total)
+
+
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('incident', 'value', 'date', 'logged_on', 'reporter', 'year', 'month', 'year', 'location')
-    list_filter = ('incident', 'date', 'year', 'month', 'year', 'logged_on', 'reporter', 'location')
-    #search_fields = ('incident', 'value', 'date', 'logged_on', 'reporter', , 'year', 'month', 'year', 'location')
+    list_display = ('incident',  'value', 'date', 'age_group', 'sex', 'reporter', 'logged_on',
+                    'day', 'month', 'year', 'location', 'raw_value', 'message')
+    list_filter = ('date', 'day', 'month', 'year', 'incident', 'logged_on', 'location', 'reporter')
+    search_fields = ('incident__alias__name', 'location__name', 'location__parent__name', 'location__parent__parent__name')
     date_hierarchy = 'date'
+
+    def get_changelist(self, request, **kwargs):
+        return ReportTotalAveragesChangeList
+    
 admin.site.register(Report, ReportAdmin)
 
 admin.site.register(Separator)
+admin.site.register(AgeGroup)
 
 
 
