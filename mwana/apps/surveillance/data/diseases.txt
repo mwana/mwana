@@ -1,0 +1,79 @@
+Acute flaccid paralysis (suspected poliomyelitis)	|||NTF05
+Cholera	|||NTF10
+Measles	|||NTF15
+Meningitis	|||NTF20
+Neonatal tetanus	|||NTF25
+Plague	|||NTF30
+Rabies	|||NTF35
+Dysentery	|||NTF40
+Typhoid fever	|||NTF45
+Yellow fever	|||NTF50
+Viral Hemorrhagic fever	|||NTF55
+Anthrax	|||NTF60
+Avian influenza (Human)	|||NTF65
+Trypanosomiasis 	|||NTF70
+Malaria case provided with anti malarial treatment	|||MLR01
+Clinical case of malaria	|||MLR05
+Confirmed case of malaria 	|||MLR10
+Clinical malaria in pregnancy	|||MLR15
+Confirmed malaria in pregnancy	|||MLR20
+Malaria laboratory tests (slide/RDT)	|||MLR25
+Ear Diseases	|||ENT05
+Nose Diseases	|||ENT10
+Throat Diseases	|||ENT15
+Asthma	|||CRN05
+Cardio-vascular diseases	|||CRN10
+Diabetes	|||CRN15
+Hypertension	|||CRN20
+Epilepsy	|||CRN25
+Sickle Cell Anaemia	|||CRN30
+Cryptococcal meningitis	|||RVD05
+Herpes zoster	|||RVD10
+Karposi sarcoma	|||RVD15
+Pneumocystic Carnii Pneumonia (PCP)	|||RVD20
+Anaemia	|||D05
+Dental Carries	|||D10
+Dental diseases: Other	|||D15
+Diarrhoea (non-bloody) 	|||D20
+Digestive system: (not infectious)	|||D25
+Eye Disease: Glaucoma	|||D30
+Eye Disease: Refractory Errors	|||D35
+Eye Disease: Spring Cattarah	|||D40
+Eye diseases (infectious)	|||D45
+Genital-Urinary diseases (except STI)	|||D50
+Intestinal worms	|||D55
+Mental Health ( Neurosis))	|||D60
+Mental Health ( Psychosis)	|||D65
+Muscular skeletal and connective tissue (not trauma)	|||D70
+Neoplasm (All types)	|||D75
+Nervous System Disorders: Other	|||D80
+Poisoning	|||D85
+Pulmonary diseases (not infectious)	|||D90
+Pyrexia of Unknown Origin (PUO)	|||D95
+Respiratory Infection: non-pneumonia	|||D100
+Respiratory Infection: pneumonia	|||D105
+Severe Diarrhoea with dehydration 	|||D110
+Severe malnutrition (new case)	|||D115
+Skin Diseases (not infectious)	|||D120
+Skin Diseases (infectious)	|||D125
+Snake Bite 	|||D130
+Substance Abuse	|||D135
+TB	|||D140
+Trauma: Road traffic accident	|||D141
+Trauma: Burns 	|||D142
+Trauma: Other Injuries, wounds	|||D144
+Bilharzia	|||D150
+Delivery Complications - sepsis	|||OBS05
+Pregnancy Complications - abortion	|||OBS10
+Genital ulcer	|||STI05
+Genital warts	|||STI10
+Inguinal bubo	|||STI15
+Male Urethritis Syndrome	|||STI20
+Pelvic Inflammatory Disease	|||STI25
+Vaginal discharge	|||STI26
+STI partner notification slips issued	|||STI30
+STI partner treated (new case)	|||STI35
+Woman newly diagnosed with breast cancer	|||CNS05
+Woman newly diagnosed with cervical cancer	|||CNS10
+Neonatal infections (all)	|||NN05
+Neonatal Prematurity	|||NN10

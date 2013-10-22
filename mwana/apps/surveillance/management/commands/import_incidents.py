@@ -38,10 +38,10 @@ class Command(LabelCommand):
             count_tt += 1
             tokens = line.split('|')
             #allow different number of columns in inout file
-            name = tokens[0].strip()
-            type = "".join(tokens[1:2])
-            abbr = "".join(tokens[2:3])
-            indicator_id = "".join(tokens[3:4])            
+            name = tokens[0].strip() or None
+            type = "".join(tokens[1:2]) or None
+            abbr = "".join(tokens[2:3]) or None
+            indicator_id = "".join(tokens[3:4]) or None
 
             incident = Incident()
             try:
@@ -55,10 +55,13 @@ class Command(LabelCommand):
                 if indicator_id: incident.indicator_id = indicator_id
 
                 incident.save()
-                count += count
+                count += 1
 
             if not Alias.objects.filter(name__iexact=incident.name):
                 Alias.objects.create(name=incident.name, incident=incident)
+                alias_count += 1
+            if incident.indicator_id and not Alias.objects.filter(name__iexact=incident.indicator_id):
+                Alias.objects.create(name=incident.indicator_id, incident=incident)
                 alias_count += 1
 
         print ("Added %s incidents from %s specified in file. %s already exist."

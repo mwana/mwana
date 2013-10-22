@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.surveillance.handlers.survey_cases import SurveyCaseHandler
 from mwana.apps.help.handlers.help import HelpHandler
 from mwana.apps.patienttracing.handlers.trace import TraceHandler
 import rapidsms
@@ -41,6 +42,7 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(MessageHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(TraceHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(HelpHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SurveyCaseHandler.keyword.split('|')))
 
         # remove leading/trailing whitespace
         # get out your featherduster
