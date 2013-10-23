@@ -4,6 +4,7 @@ from mwana.apps.locations.models import Location
 from django.db import models
 from datetime import datetime
 from datetime import date
+from datetime import timedelta
 from rapidsms.models import Contact
 from mwana.util import get_clinic_or_default
 
@@ -84,10 +85,11 @@ class Report(models.Model):
     sex = models.CharField(max_length=1, blank=True, null=True, choices=GENDER_CHOICES)
     age_group = models.ForeignKey(AgeGroup, blank=True, null=True)
     raw_value = models.CharField(max_length=60, null=False, blank=False, editable=False)
-    date = models.DateField(default=date.today, blank=False, null=False)
+    date = models.DateField(blank=False, null=False)
     logged_on = models.DateTimeField(default=datetime.now, blank=False, null=False, editable=False)
     reporter = models.ForeignKey(Contact, blank=True, null=True)
     #Somehow redundant fields but useful for easy and faster reporting
+    week_of_year = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)# does not use isocalendar
     year = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
     month = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
     day = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
@@ -98,10 +100,24 @@ class Report(models.Model):
         return "%s - %s" % (self.incident, self.date)
 
     def save(self, *args, **kwargs):
+        
+        self.location = get_clinic_or_default(self.reporter)
+        if not self.date and not self.week_of_year:
+            self.date = date.today()
+            self.week_of_year = int(self.date.strftime('%U'))
+        elif self.date and not self.week_of_year:
+            self.week_of_year = int(self.date.strftime('%U'))
+        elif self.week_of_year and not self.date:
+            today = date.today()
+            this_jan = date(today.year, 1, 1)
+            days_ago = (today - this_jan).days
+            for i in range(days_ago):
+                if int((today - timedelta(days=i)).strftime('%U')) == self.week_of_year :
+                    self.date = today - timedelta(days=i)
+                    break
         self.year = self.date.year
         self.month = self.date.month
         self.day = self.date.day
-        self.location = get_clinic_or_default(self.reporter)
         super(Report, self).save(*args, **kwargs)
 
     class Meta:

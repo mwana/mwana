@@ -43,7 +43,7 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case
-            rb < To report cases, send CASE <DATE> <CASE-ONE> <VALUE-ONE>, <CASE-TWO> <VALUE-TWO>, e.g. CASE 17 10 2013, Malaria 12, Diarrhoea 12.
+            rb < To report cases, send CASE <DATE or WEEK_OF_YEAR> <CASE-1> <VALUE-1>, <CASE-2> <VALUE-2>, e.g. CASE 17 10 2013, TB 12, D20 12. or Case 44, TB 12, D20 12
             unknown > case DG99 100
             unknown < Sorry, you must be registered with Results160 before you can start reporting cases. Reply with HELP if you need assistance.
         """
@@ -57,9 +57,9 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case 10 10 2013, malaria 10, cholera 12
-            rb < Thank you Rupiah Banda for the report.
-            rb > case malaria 11
-            rb < Thank you Rupiah Banda for the report.
+            rb < Thank you Rupiah Banda for the report for week 40.
+            rb > case 40, malaria 11
+            rb < Thank you Rupiah Banda for the report for week 40.
         """
         self.runScript(script)
 
