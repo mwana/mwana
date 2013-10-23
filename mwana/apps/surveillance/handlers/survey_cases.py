@@ -1,3 +1,4 @@
+# vim: ai ts=4 sts=4 et sw=4
 from datetime import datetime
 from mwana.apps.surveillance.models import Report
 from mwana.apps.surveillance.models import Alias
