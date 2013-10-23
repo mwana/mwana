@@ -76,13 +76,10 @@ class SurveyCaseHandler(KeywordHandler):
             
             incident_text = " ".join(case_values[:-1]).strip()
             incident = None
-            if Incident.objects.filter(name__iexact=incident_text):
-                incident = Incident.objects.get(name__iexact=incident_text)
-            elif Incident.objects.filter(alias__name__iexact=incident_text):
+            if Incident.objects.filter(alias__name__iexact=incident_text):
                 incident = Incident.objects.get(alias__name__iexact=incident_text)
             else:
                 incident = Incident.objects.create(name=incident_text)
-                Alias.objects.create(name=incident.name, incident=incident)
 
             report = Report()
             report.incident = incident

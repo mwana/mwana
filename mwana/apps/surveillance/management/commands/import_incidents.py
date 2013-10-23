@@ -11,7 +11,6 @@ from mwana.apps.surveillance.models import Incident
 import os
 
 
-
 class Command(LabelCommand):
     help = ("Import Incidents from a given pipe separated file")
 
@@ -26,17 +25,16 @@ class Command(LabelCommand):
 
         self.load_diseases(file_path)
 
-
     def load_diseases(self, path):
         file = open(path, 'r')
 
         count = 0
         count_old = 0
         count_tt = 0
-        alias_count = 0
+        alias_count = Alias.objects.count()
         for line in file:
             count_tt += 1
-            tokens = line.split('|')
+            tokens = line.strip().split('|')
             #allow different number of columns in inout file
             name = tokens[0].strip() or None
             type = "".join(tokens[1:2]) or None
@@ -48,7 +46,6 @@ class Command(LabelCommand):
                 incident = Incident.objects.get(name__iexact=name)
                 count_old += 1
             except Incident.DoesNotExist:
-#                incident = Incident()
                 incident.name = name
                 if type: incident.type = type
                 if abbr: incident.abbr = abbr
@@ -57,16 +54,8 @@ class Command(LabelCommand):
                 incident.save()
                 count += 1
 
-            if not Alias.objects.filter(name__iexact=incident.name):
-                Alias.objects.create(name=incident.name, incident=incident)
-                alias_count += 1
-            if incident.indicator_id and not Alias.objects.filter(name__iexact=incident.indicator_id):
-                Alias.objects.create(name=incident.indicator_id, incident=incident)
-                alias_count += 1
-
         print ("Added %s incidents from %s specified in file. %s already exist."
-        " Created %s aliases" % (count, count_tt, count_old, alias_count))
-
+        " Created %s aliases" % (count, count_tt, count_old, Alias.objects.count() - alias_count))
 
     def __del__(self):
         pass

@@ -34,6 +34,11 @@ class Incident(models.Model):
         if not self.abbr or self.abbr.strip() == "": self.abbr = None
         if not self.indicator_id or self.indicator_id.strip() == "": self.indicator_id = None
         super(Incident, self).save(*args, **kwargs)
+        Alias.create_alias(self, self.name)
+        if self.abbr:
+            Alias.create_alias(self, self.abbr)
+        if self.indicator_id:
+            Alias.create_alias(self, self.indicator_id)
 
     class Meta:
         ordering = ["name"]
@@ -44,7 +49,12 @@ class Alias(models.Model):
     Helper class, more or less like a dictionary for alias of Incidents
     """
     incident = models.ForeignKey(Incident, blank=False, null=False)
-    name = models.CharField(max_length=100, null=False,blank=False, unique=True)
+    name = models.CharField(max_length=100, null=False, blank=False, unique=True)
+
+    @classmethod
+    def create_alias(cls, incident, name):
+        if not Alias.objects.filter(incident=incident, name__iexact=name):
+            Alias.objects.create(incident=incident, name=name)
 
     def __unicode__(self):
         return "%s - %s" % (self.name, self.incident)
@@ -53,10 +63,17 @@ class Alias(models.Model):
         verbose_name_plural = "Aliases"
 
     def save(self, *args, **kwargs):
+        if Alias.objects.filter(incident=self.incident, name__iexact=self.name):
+            return
         if self.name == self.name.lower():
             self.name = self.name.title()
 
         super(Alias, self).save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["incident"]
+        verbose_name = "Incident Alias"
+        verbose_name_plural = "Incident Aliases"
 
 GENDER_CHOICES = (
     ('f', 'Female'),
@@ -122,6 +139,7 @@ class Report(models.Model):
 
     class Meta:
         ordering = ["incident"]
+        verbose_name = "Incident Report"
 
 class Separator(models.Model):
     """

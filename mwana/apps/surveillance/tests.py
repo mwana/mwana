@@ -56,7 +56,7 @@ class TestIncindetReport(TestApp):
         self.assertEqual(Alias.objects.count(), 0)
 
         script = """
-            rb > case 10 10 2013, malaria 10, cholera 12
+            rb > case 10 10 2013, malaria 10, cholera=12
             rb < Thank you Rupiah Banda for the report for week 40.
             rb > case 40, malaria 11
             rb < Thank you Rupiah Banda for the report for week 40.
@@ -73,3 +73,27 @@ class TestIncindetReport(TestApp):
 
         self.assertEqual(Alias.objects.filter(name__iexact='malaria').count(), 1)
         self.assertEqual(Alias.objects.filter(name__iexact='cholera').count(), 1)
+
+    def test_existing_incident(self):
+        self.assertEqual(Incident.objects.count(), 0)
+        self.assertEqual(Report.objects.count(), 0)
+        self.assertEqual(Alias.objects.count(), 0)
+
+        Incident.objects.create(name="Malaria", indicator_id='Mal')
+
+        script = """
+            rb > case 10 10 2013, malaria=12,
+            rb < Thank you Rupiah Banda for the report for week 40.
+            rb > case 40, mal 11
+            rb < Thank you Rupiah Banda for the report for week 40.
+        """
+        self.runScript(script)
+
+        self.assertEqual(Incident.objects.count(), 1, Incident.objects.all())
+        self.assertEqual(Report.objects.count(), 2, Report.objects.all())
+        self.assertEqual(Alias.objects.count(), 2)
+
+        self.assertEqual(Report.objects.filter(incident__name__iexact='malaria', value=12).count(), 1)
+        self.assertEqual(Report.objects.filter(incident__name__iexact='malaria', value=11).count(), 1)
+
+        self.assertEqual(Alias.objects.filter(incident__name__iexact='malaria').count(), 2)
