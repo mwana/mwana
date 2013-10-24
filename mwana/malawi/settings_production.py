@@ -24,17 +24,6 @@ DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
  MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
  Send HELP for more information'''
 
-# RAPIDSMS_TABS:
-RAPIDSMS_TABS = [
-    ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    ('mwana.apps.reports.views.malawi_reports', 'Results160'),
-    ('mwana.apps.reports.views.malawi_graphs', 'Results160 Analysis'),
-    ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
-    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('growth_index', 'AnthroWatch Reports'),
-    ('growth_graphs', 'AnthroWatch Analysis'),
-]
-
 # Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
     "airtel": {
