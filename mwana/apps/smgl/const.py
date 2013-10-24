@@ -33,7 +33,7 @@ UNKOWN_ZONE = _("There is no zone with code %(zone)s. Please check your code and
 NOT_REGISTERED=_("This phone number is not registered in the system.")
 NOT_REGISTERED_FOR_DATA_ASSOC = _("Sorry, this number is not registered. Please register with the JOIN keyword and try again")
 NOT_A_DATA_ASSOCIATE = _("You are not registered as a Data Associate and are not allowed to register mothers!")
-MOTHER_NOT_FOUND = _("The mother's ID was not recognized, please check and send again. If the mother was not registered enter 'none' in the place of the ID.")
+MOTHER_NOT_FOUND = _("The mother's ID: %(unique_id)s was not recognized, please check and send again. If the mother was not registered enter 'none' in the place of the ID.")
 GENERAL_ERROR = _("Your message is either incomplete or incorrect. Please check and send again.")
 
 # pregnancy messages

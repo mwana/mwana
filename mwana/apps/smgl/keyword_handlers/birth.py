@@ -33,7 +33,7 @@ def birth_registration(session, xform, router):
     try:
         mom = mom_or_none(xform.xpath("form/unique_id").lower())
     except PregnantMother.DoesNotExist:
-        return respond_to_session(router, session, const.MOTHER_NOT_FOUND,
+        return respond_to_session(router, session, const.MOTHER_NOT_FOUND %{"unique_id": xform.xpath("form/unique_id")},
                                   is_error=True)
 
     contact = session.connection.contact
@@ -50,4 +50,4 @@ def birth_registration(session, xform, router):
                             facility=contact.get_current_facility())
     reg.save()
     return respond_to_session(router, session, BIRTH_REG_RESPONSE,
-                               **{"name": name})
+                               **{"name": name, "unique_id": xform.xpath("form/unique_id").lower()})
