@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
-from datetime import datetime, date, timedelta
 import decimal
 from decimal import Decimal as D
 
 from django.db import models
 from django.db.models.aggregates import Avg
-from django.core.exceptions import ObjectDoesNotExist
-
-from pygrowup.pygrowup import helpers
 
 from rapidsms.models import Contact
 from people.models import Person
