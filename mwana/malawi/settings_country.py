@@ -118,6 +118,7 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.district.DistrictHandler",
     "mwana.apps.broadcast.handlers.hsa.HSAHandler",
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
-    "mwana.apps.nutrition.handlers.report.ReportGMHandler",
+    # "mwana.apps.nutrition.handlers.report.ReportGMHandler",
+    "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
 ]
