@@ -26,11 +26,11 @@ DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
 
 # Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
-    "airtel": {
+    "zain": {
         # "ENGINE":  "threadless_router.backends.kannel.outgoing",
         "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "zain-modem",
+        "sendsms_params": {"smsc": "airtel-modem",
                            "from": "+265999279085",  # will be overridden;
                            "username": "rapidsms",
                            "password": ""},  # set password in localsettings.py
