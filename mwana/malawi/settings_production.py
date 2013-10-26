@@ -37,7 +37,7 @@ INSTALLED_BACKENDS.update({
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
-        "delivery_report_url": "https://127.0.0.1",
+        "delivery_report_url": "http://127.0.0.1",
     },
     "tnm": {
         "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
@@ -49,7 +49,7 @@ INSTALLED_BACKENDS.update({
         "coding": 0,
         "charset": "ascii",
         "encode_errors": "ignore",  # strip out unknown (unicode) characters
-        "delivery_report_url": "https://127.0.0.1",
+        "delivery_report_url": "http://127.0.0.1",
     }
 })
 
