@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "rapidsms",
     "rapidsms.backends.kannel",
     "rapidsms.backends.database",
+    "rapidsms.router.db",
     "djcelery",
     "kombu.transport.django",
     # common dependencies (which don't clutter up the ui).
