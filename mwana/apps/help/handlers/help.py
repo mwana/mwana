@@ -4,6 +4,7 @@ from mwana.util import get_clinic_or_default
 from mwana.util import get_contact_type_slug
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
+from rapidsms.router import send
 from rapidsms.models import Contact
 _ = lambda s: s
 
@@ -51,5 +52,9 @@ class HelpHandler(KeywordHandler):
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
         self.respond(RESPONSE % {'person': person_arg})
 
+        connections = []
+        help_notice = resp_template % params
         for help_admin in Contact.active.filter(is_help_admin=True):
-            OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
+            connections.append(help_admin.default_connection)
+
+        send(help_notice, connections)
