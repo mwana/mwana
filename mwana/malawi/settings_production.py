@@ -30,7 +30,7 @@ INSTALLED_BACKENDS.update({
         # "ENGINE":  "threadless_router.backends.kannel.outgoing",
         "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
         "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "airtel-modem",
+        "sendsms_params": {"smsc": "zain",
                            "from": "+265999279085",  # will be overridden;
                            "username": "rapidsms",
                            "password": ""},  # set password in localsettings.py
