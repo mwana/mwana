@@ -184,11 +184,11 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
+        #'django.request': {
+        #   'handlers': ['mail_admins'],
+        #  'level': 'ERROR',
+        # 'propagate': True,
+        #},
         'rapidsms': {
             'handlers': ['file'],
             'level': 'DEBUG',
