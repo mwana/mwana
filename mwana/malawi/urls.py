@@ -2,9 +2,19 @@
 from django.conf.urls import patterns, url, include
 from mwana.apps.reports import views
 from mwana.apps.reminders import views as remindmi
+from rapidsms.backends.http.views import GenericHttpBackendView
+from rapidsms.backends.kannel.views import KannelBackendView
 
 urlpatterns = patterns(
     '',
+    # Backend urls
+    url(r"^backend/zain/$",
+        KannelBackendView.as_view(backend_name="zain")),
+    url(r"^backend/tnm/$",
+        KannelBackendView.as_view(backend_name="tnm")),
+    url(r'^backend/httptester/$',
+        GenericHttpBackendView.as_view(backend_name='httptester')),
+    url(r'^kannel/', include('rapidsms.backends.kannel.urls')),
     # global project URLs:
     (r'^', include('mwana.urls')),
     # custom URL additions for Malawi:
@@ -18,7 +28,6 @@ urlpatterns = patterns(
     url(r"^csv/child-count/", remindmi.csv_child_count,
         name="csv_child_count"),
     url(r"^remindmi", remindmi.malawi_reports, name="remindmi_reports"),
-    url(r'^kannel/', include('rapidsms.backends.kannel.urls')),
     (r'^', include('rapidsms_xforms.urls')),  # needs top level formList url
     (r'^growth/', include('mwana.apps.nutrition.urls')),
 )
