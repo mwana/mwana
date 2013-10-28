@@ -22,15 +22,13 @@ class BroadcastHandler(KeywordHandler):
         raise NotImplementedError("subclasses must override this property!")
     
     def broadcast(self, text, contacts):
-        message_body = "%(text)s [from %(user)s to %(group)s]"
+        vars = dict(user = self.msg.contact.name, text = text, group = self.group_name)
+        message_body = "%(text)s [from %(user)s to %(group)s]" % vars
         for contact in contacts.exclude(types=get_hub_worker_type()):
             if contact.default_connection is None:
                 logger.info("Can't send to %s as they have no connections" % contact)
             else:
-                OutgoingMessage(contact.default_connection, message_body,
-                                **{"text": text, 
-                                   "user": self.msg.contact.name, 
-                                   "group": self.group_name}).send()
+                OutgoingMessage([contact.default_connection], message_body).send()
         
         logger_msg = getattr(self.msg, "logger_msg", None) 
         if not logger_msg:
