@@ -4,6 +4,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_hub_worker_type
+from rapidsms.router import send
 
 HELP_TEXT = "To send a message to %(group)s send keyword %(keyword)s followed by the contents of your message."
 UNREGISTERED = "You must be registered with a clinic to use the broadcast feature. Please ask your clinic team how to register, or respond with keyword 'HELP'" 
@@ -22,15 +23,16 @@ class BroadcastHandler(KeywordHandler):
         raise NotImplementedError("subclasses must override this property!")
 
     def broadcast(self, text, contacts):
-        vars = dict(user = self.msg.contact.name, text = text, group = self.group_name)
+        vars = dict(user=self.msg.contact.name,
+                    text=text, group=self.group_name)
         message_body = "%(text)s [from %(user)s to %(group)s]" % vars
         for contact in contacts.exclude(types=get_hub_worker_type()):
             if contact.default_connection is None:
                 logger.info("Can't send to %s as they have no connections" % contact)
             else:
-                OutgoingMessage([contact.default_connection], message_body).send()
+                send(message_body, [contact.default_connection])
 
-        logger_msg = getattr(self.msg, "logger_msg", None) 
+        logger_msg = getattr(self.msg, "logger_msg", None)
         if not logger_msg:
             logger.error("No logger message found for %s. Do you have the message log app running?" %\
                        self.msg)

@@ -175,27 +175,27 @@ class JoinHandler(KeywordHandler):
             location_type = clinic_code.get_location_type()
             slug = clinic_code.slug
 
-        if is_already_valid_connection_type(self.msg.connection, worker_type):
+        if is_already_valid_connection_type(self.msg.connections[0], worker_type):
             # refuse re-registration if they're still active and eligible
             self.respond(self.ALREADY_REGISTERED,
-                         name=self.msg.connection.contact.name,
-                         location=self.msg.connection.contact.location)
+                         name=self.msg.connections[0].contact.name,
+                         location=self.msg.connections[0].contact.location)
             return False
         try:
             location = Location.objects.get(slug__iexact=slug,
                                             type__slug__in=location_type)
-            if self.msg.connection.contact is not None \
-               and self.msg.connection.contact.is_active:
+            if self.msg.connections[0].contact is not None \
+               and self.msg.connections[0].contact.is_active:
                 # this means they were already registered and active,
                 # but not yet receiving results.
-                clinic = get_clinic_or_default(self.msg.connection.contact)
+                clinic = get_clinic_or_default(self.msg.connections[0].contact)
                 if clinic != location:
                     self.respond(self.ALREADY_REGISTERED,
-                                 name=self.msg.connection.contact.name,
+                                 name=self.msg.connections[0].contact.name,
                                  location=clinic)
                     return True
                 else:
-                    contact = self.msg.contact
+                    contact = self.msg.connections[0].contact
             else:
                 contact = Contact(location=location)
                 clinic = get_clinic_or_default(contact)
@@ -207,8 +207,8 @@ class JoinHandler(KeywordHandler):
                 if not contact.types.filter(slug=const.get_cba_type()).exists():
                     contact.types.add(const.get_cba_type())
 
-            self.msg.connection.contact = contact
-            self.msg.connection.save()
+            self.msg.connections[0].contact = contact
+            self.msg.connections[0].save()
 
             self.respond(self.get_response_message(worker_type, name, clinic.name, pin))
         except Location.DoesNotExist:
@@ -288,16 +288,15 @@ class JoinHandler(KeywordHandler):
                 clinic = Location.objects.get(slug__iexact=clinic_slug,
                                              type__slug__in=const.CLINIC_SLUGS)
             except Location.DoesNotExist:
-                self.respond(_("Sorry, I don't know about a clinic with code "
-                             "%(code)s. Please check your code and try again."),
-                             code=clinic_slug)
+                self.respond("Sorry, I don't know about a clinic with code %(code)s. Please check your code and try again." % dict(
+                    code=clinic_slug))
                 return
             zone = self._get_or_create_zone(clinic, zone_slug)
             contact_clinic, contact_zone =\
-              self._get_clinic_and_zone(self.msg.contact)
+              self._get_clinic_and_zone(self.msg.connections[0].contact)
 
             #prepare identity id for interviewer_id
-            identity_id = str(self.msg.connection.identity)
+            identity_id = str(self.msg.connections[0].identity)
             if len(identity_id) > MAX_IDENTITY_ID:
                 identity_id = identity_id[-9:]
             else:
@@ -305,26 +304,22 @@ class JoinHandler(KeywordHandler):
 
             if contact_zone == zone:
                 # don't let agents register twice for the same zone
-                self.respond(_("Hello %(name)s! You are already registered as "
-                             "a Mobile Agent for zone %(zone)s of %(clinic)s."),
-                             name=self.msg.contact.name, zone=zone.name,
-                             clinic=clinic.name)
+                self.respond("Hello %(name)s! You are already registered as a Mobile Agent for zone %(zone)s of %(clinic)s." % dict(
+                             name=self.msg.connections[0].contact.name, zone=zone.name,
+                             clinic=clinic.name))
                 return
             elif contact_clinic and contact_clinic != clinic:
                 # force agents to leave if they appear to be switching clinics
-                self.respond(_("Hello %(name)s! You are already registered as "
-                             "a Mobile Agent for %(old_clinic)s. To leave "
-                             "your current clinic and join %(new_clinic)s, "
-                             "reply with LEAVE and then re-send your message."),
-                             name=self.msg.contact.name,
+                self.respond("Hello %(name)s! You are already registered as a Mobile Agent for %(old_clinic)s. To leave your current clinic and join %(new_clinic)s, reply with LEAVE and then re-send your message." % dict(
+                             name=self.msg.connections[0].contact.name,
                              old_clinic=contact_clinic.name,
-                             new_clinic=clinic.name)
+                             new_clinic=clinic.name))
                 return
-            elif self.msg.contact:
+            elif self.msg.connections[0].contact:
                 # if the contact exists but wasn't registered at a location,
                 # or was registered at the clinic level instead of the zone
                 # level, update the record and save it
-                cba = self.msg.contact
+                cba = self.msg.connections[0].contact
                 cba.name = name
                 try:
                     cba.interviewer_id = identity_id
@@ -339,7 +334,7 @@ class JoinHandler(KeywordHandler):
 
                 if lang_code:
                     cba = Contact.objects.create(name=name, location=zone,
-                                                    language=lang_code)
+                                                 language=lang_code)
                 else:
                     cba = Contact.objects.create(name=name, location=zone)
 
@@ -349,23 +344,20 @@ class JoinHandler(KeywordHandler):
                 except AttributeError:
                     pass
 
-                self.msg.connection.contact = cba
-                self.msg.connection.save()
+                self.msg.connections[0].contact = cba
+                self.msg.connections[0].save()
             if not cba.types.filter(slug=const.CLINIC_WORKER_SLUG).count():
                 cba.types.add(const.get_cba_type())
-                msg = self.respond(
-                    _("Thank you %(name)s! You have successfully "
-                      "registered as a RemindMi Agent for zone "
-                      "%(zone)s of %(clinic)s." % {
+                msg = self.respond("Thank you %(name)s! You have successfully registered as a RemindMi Agent for zone %(zone)s of %(clinic)s." % {
                           'name': cba.name, 'zone': zone.name,
-                          'clinic': clinic.name}))
+                          'clinic': clinic.name})
 
             if SYSTEM_LOCALE == LOCALE_ZAMBIA:
                 notify_text, kwargs = self._get_notify_text()
                 if notify_text:
                     #msg.append(notify_text, **kwargs)
-                    msg.append(_("Please notify us next time there is a birth in your "
-                                 "zone."))
+                    msg.append("Please notify us next time there is a birth in your "
+                                 "zone.")
 
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
