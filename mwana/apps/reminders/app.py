@@ -5,6 +5,7 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
+from rapidsms.router import send
 
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
@@ -38,6 +39,7 @@ class App(rapidsms.apps.base.AppBase):
         '%d%m',
     )
 
+    UNREGISTERED = "Please register before reporting births or mothers. Send JOIN for more help."
     # def start(self):
         # self.schedule_notification_task()
 
@@ -176,17 +178,19 @@ class App(rapidsms.apps.base.AppBase):
             if date_str:
                 date = self._parse_date(date_str)
                 if not date:
-                    msg.respond(_("Sorry, I couldn't understand that date. "
-                                "Please enter the date like so: "
-                                "DDMMYY, for example: 271011"))
+                    msg_no_date = "Sorry, I couldn't understand that date. "\
+                                  "Please enter the date like so: "\
+                                  "DDMMYY, for example: 271011"
+                    msg.respond(msg_no_date)
                     return True
             else:
                 date = datetime.datetime.today()
 
             # make sure the birth date is not in the future
             if date > datetime.datetime.today():
-                msg.respond(_("Sorry, you can not register a %s with a date "
-                "after today's." % event.name.lower()))
+                msg_future = "Sorry, you can not register a %s with a date "
+                "after today's." % event.name.lower()
+                msg.respond(msg_future)
                 return True
 
             # fetch or create the patient
@@ -219,19 +223,16 @@ class App(rapidsms.apps.base.AppBase):
                 # the words facilty/home. Malawi/Zambia will have to agree on
                 # the words to use
                 if event_location_type:
-                    msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
-                        "%(name)s on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next clinic appointment."),
+                    msg_registered = """Thank you%(cba)s! You registered a %(descriptive_event)s for %(name)s on %(date)s. You will be notified when it is time for %(gender)s next clinic appointment.""" % dict(
                         cba=cba_name, gender=gender,
                         date=date.strftime('%d/%m/%Y'), name=patient.name,
                         descriptive_event=descriptive_event.lower())
+                    msg.respond(msg_registered)
                 else:
-                    msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
-                        "%(name)s on %(date)s. You will be notified when "
-                        "it is time for %(gender)s next appointment at the "
-                        "clinic."), cba=cba_name, gender=gender,
+                    msg_success = """Thank you%(cba)s! You have successfully registered a %(event)s for %(name)s on %(date)s. You will be notified when it is time for %(gender)s next appointment at the clinic.""" % dict(cba=cba_name, gender=gender,
                         event=event_name.lower(),
                         date=date.strftime('%d/%m/%Y'), name=patient.name)
+                    msg.respond(msg_success)
                 return True
 
             patient.patient_events.create(event=event, date=date,
@@ -243,27 +244,25 @@ class App(rapidsms.apps.base.AppBase):
             # the words facilty/home. Malawi/Zambia will have to agree on
             # the words to use
             if event_location_type:
-                msg.respond(_("Thank you%(cba)s! You registered a %(descriptive_event)s for "
-                    "%(name)s on %(date)s. You will be notified when "
-                    "it is time for %(gender)s next clinic appointment."),
+                r_msg = "Thank you%(cba)s! You registered a %(descriptive_event)s for %(name)s on %(date)s. You will be notified when it is time for %(gender)s next clinic appointment." % dict(
                     cba=cba_name, gender=gender,
                     date=date.strftime('%d/%m/%Y'), name=patient.name,
                     descriptive_event=descriptive_event.lower())
+                msg.respond(r_msg)
             else:
-                msg.respond(_("Thank you%(cba)s! You have successfully registered a %(event)s for "
-                    "%(name)s on %(date)s. You will be notified when "
-                    "it is time for %(gender)s next appointment at the "
-                        "clinic."), cba=cba_name, gender=gender,
+                r_msg = "Thank you%(cba)s! You have successfully registered a %(event)s for %(name)s on %(date)s. You will be notified when it is time for %(gender)s next appointment at the clinic." % dict(cba=cba_name, gender=gender,
                     event=event_name.lower(),
                     date=date.strftime('%d/%m/%Y'), name=patient.name)
+                msg.respond(r_msg)
         else:
             if event_slug == "mwana":
-                self.HELP_TEXT = _("To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>.")
-            msg.respond(_("Sorry, I didn't understand that. "
-                "To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>."
-                " The date is optional and is logged as TODAY if left out."),
+                self.HELP_TEXT = "To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>." % dict(event_upper = event_slug.upper())
+                msg.respond(self.HELP_TEXT)
+                return True
+            msg_error = "Sorry, I didn't understand that. To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is optional and is logged as TODAY if left out." % dict(
                 event_lower=event_name.lower(),
                 event_upper=translator.translate(lang_code, event.name, 1).upper())
+            msg.respond(msg_error)
         return True
 
     def handle_mayi(self, msg, event):
