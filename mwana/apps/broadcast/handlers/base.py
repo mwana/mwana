@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 
 class BroadcastHandler(KeywordHandler):
     """Broadcast handler"""
-    
+
     def help(self):
         self.respond(HELP_TEXT, group=self.group_name,
                      keyword=self.keyword.split('|')[0].upper())
-    
+
     @property
     def group_name(self):
         raise NotImplementedError("subclasses must override this property!")
-    
+
     def broadcast(self, text, contacts):
         vars = dict(user = self.msg.contact.name, text = text, group = self.group_name)
         message_body = "%(text)s [from %(user)s to %(group)s]" % vars
@@ -29,14 +29,14 @@ class BroadcastHandler(KeywordHandler):
                 logger.info("Can't send to %s as they have no connections" % contact)
             else:
                 OutgoingMessage([contact.default_connection], message_body).send()
-        
+
         logger_msg = getattr(self.msg, "logger_msg", None) 
         if not logger_msg:
             logger.error("No logger message found for %s. Do you have the message log app running?" %\
                        self.msg)
         bmsg = BroadcastMessage.objects.create(logger_message=logger_msg,
                                                contact=self.msg.contact,
-                                               text=text, 
+                                               text=text,
                                                group=self.group_name)
         bmsg.recipients = contacts
         bmsg.save()
