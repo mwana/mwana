@@ -112,6 +112,7 @@ class Report(models.Model):
     day = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
     location = models.ForeignKey(Location, editable=False, limit_choices_to = {'send_live_results':True})
     message = models.ForeignKey(Message, null=True, blank=True, editable=False)
+    parsed = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     
     def __unicode__(self):
         return "%s - %s" % (self.incident, self.date)

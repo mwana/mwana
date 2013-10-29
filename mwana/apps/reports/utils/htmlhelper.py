@@ -92,6 +92,19 @@ def get_facilities_dropdown_htmlb(id, facilities, selected_facility):
     code = code + '</select>'
     return code
 
+def get_incident_report_html_dropdown(id, cases, selected_case, include_default=True):
+    code = '<select name="%s"" onchange="fireChange(\'%s\')" id="%s" class="drop-down" size="1">\n' % (id, id, id)
+    if include_default:
+        code += '<option value="None">None</option>\n'
+    for case in cases:
+        if case.id == selected_case:
+            code = code + '<option selected value="%s">%s</option>\n' % (case.id, case.name)
+        else:
+            code = code + '<option value="%s">%s</option>\n' % (case.id, case.name)
+
+    code = code + '</select>'
+    return code
+
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
     code = '<select name="%s" id="%s" class="drop-down" size="1">\n' % (id, id)
