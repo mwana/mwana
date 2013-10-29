@@ -1,5 +1,5 @@
 from .birth import birth_registration
-from .contact import leave, make_active, out
+from .contact import leave, make_active, out, make_active_back
 from .death import death_registration
 from .postpartum import postpartum_visit
 from .pregnancy import pregnant_registration, follow_up, motherid_lookup

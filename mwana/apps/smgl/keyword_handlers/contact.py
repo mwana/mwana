@@ -55,6 +55,25 @@ def make_active(session, xform, router):
         return respond_to_session(router, session, const.IN_COMPLETE,
                                   **{'name': connection.contact.name})
 
+@registration_required        
+def make_active_back(session, xform, router):
+    """
+    Handler for Back Keyword
+    """
+    
+    logger.debug("Handling the BACK keyword form")
+    connection = session.connection
+    
+    if not connection.contact:
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True)
+    
+    connection.contact.is_active = True
+    connection.contact.return_date = None
+    connection.contact.save()
+    return respond_to_session(router, session, const.IN_COMPLETE,
+                                **{'name': connection.contact.name })
+
 @registration_required
 @is_active
 def out(session, xform, router):
