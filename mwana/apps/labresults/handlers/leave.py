@@ -23,15 +23,15 @@ class UnregisterHandler(KeywordHandler):
         self.handle("")
 
     def handle(self, text):
-        if self.msg.connection.contact:
-            name = self.msg.connection.contact.name
+        if self.connections[0].contact:
+            name = self.connections[0].contact.name
             # we just deactivate the contact, but don't delete it, because
             # there could be all kinds of useful foreign key goodies attached.
-            self.msg.connection.contact.is_active = False
-            self.msg.connection.contact.save()
+            self.connections[0].contact.is_active = False
+            self.connections[0].contact.save()
             # we also disassociate the contact from the connection
-            self.msg.connection.contact = None
-            self.msg.connection.save()
+            self.connections[0].contact = None
+            self.connections[0].save()
             self.respond(BYE_MSG % dict(name=name))
         else:
             self.respond(ERROR_MSG)
