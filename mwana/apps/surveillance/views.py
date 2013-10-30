@@ -26,7 +26,8 @@ def surveillance(request):
     districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts', location__supportedlocation__supported=True).distinct()]
     provinces = [str(loc.slug) for loc in Location.objects.filter(type__slug='provinces', location__location__supportedlocation__supported=True).distinct()]
     cases = Incident.objects.all().exclude(report=None)
-    selected_id = Report.objects.filter(value__gte=6).order_by('-date', '-value').values_list('incident')[0][0]
+    a = Report.objects.filter(value__gte=6).order_by('-date', '-value').values_list('incident')
+    selected_id = a[0][0] if a else "";
     reports = Report.objects.filter(date__gte=start_date, date__lte=end_date)
 
     return render_to_response('surveillance/surveillance.html',
