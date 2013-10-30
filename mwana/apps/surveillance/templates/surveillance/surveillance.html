@@ -285,20 +285,17 @@
         var tt3 = 0;
         var tt4 = 0;
         var tt5 = 0;
-        prevalence_map = {};
+
         for (var i = 0; i < window.reportData.length; i ++) {
             var datum = window.reportData[i];
-            
+
             if((location_type === COUNTRY_TYPE )) {
                 region = "Nationwide";
                 key = datum.province_name;                
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-                key2 = datum.province_slug;
-                if(!(key2 in prevalence_map)){
-                    prevalence_map[key2] = 0;
-                }
+                
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -326,9 +323,7 @@
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
                 }
-                if(selectedDiseses.indexOf(datum.disease_id) >= 0){
-                    prevalence_map[key2] = prevalence_map[key2] + datum.value;
-                }
+                
                 
                 data[key] = [d1, d2, d3, d4, d5]
                 
@@ -339,10 +334,7 @@
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-                key2 = datum.district_slug;
-                if(!(key2 in prevalence_map)){
-                    prevalence_map[key2] = 0;
-                }
+                
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -369,10 +361,7 @@
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
                 }
-                data[key] = [d1, d2, d3, d4, d5]
-                if(selectedDiseses.indexOf(datum.disease_id) >= 0){
-                    prevalence_map[key2] = prevalence_map[key2] + datum.value;
-                }
+                data[key] = [d1, d2, d3, d4, d5]                
             }
             else if((location_type === DISTRICT_TYPE)
                 && (code === datum.district_slug )) {
@@ -381,10 +370,7 @@
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-                key2 = datum.facility_slug;
-                if(!(key2 in prevalence_map)){
-                    data[key2] = 0;
-                }
+               
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -411,28 +397,72 @@
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
                 }
-                if(selectedDiseses.indexOf(datum.disease_id) >= 0){
-                    prevalence_map[key2] = prevalence_map[key2] + datum.value;
-                }
+                
                 data[key] = [d1, d2, d3, d4, d5]                
             }
         }
         data['Total'] = [tt1, tt2, tt3, tt4, tt5]
-        var my_map = {};
-        var tt_sum = 0;
-        var tt_count = 0;
-        for(k in prevalence_map){
-            if(prevalence_map[k]>0){
-                my_map[k] = prevalence_map[k];
-                tt_sum = tt_sum + prevalence_map[k];
-                tt_count ++;
+        
+        return [region, data];
+    }
+    function getMapData(code, location_type){
+        var data = {};
+        var selectedDiseses = getSelectedDiseases();       
+        var region = "";
+        
+        prov_prevalence_map = {};
+        dist_prevalence_map = {};
+        for (var i = 0; i < window.reportData.length; i ++) {
+            var datum = window.reportData[i];
+
+            var province_key = datum.province_slug;
+            if(!(province_key in prov_prevalence_map)){
+                prov_prevalence_map[province_key] = 0;
             }
+            if(selectedDiseses.indexOf(datum.disease_id) >= 0){
+                prov_prevalence_map[province_key] = prov_prevalence_map[province_key] + datum.value;
+            }
+
+            var district_key = datum.district_slug;
+            if(!(district_key in dist_prevalence_map)){
+                dist_prevalence_map[district_key] = 0;
+            }
+            if(selectedDiseses.indexOf(datum.disease_id) >= 0){
+                dist_prevalence_map[district_key] = dist_prevalence_map[district_key] + datum.value;
+            }
+           
         }
+
+        _reduce = function(map){
+            var new_map = {};
+            var tt_sum = 0;
+            var tt_count = 0;
+            for(k in map){
+                if(map[k]>0){
+                    new_map[k] = map[k];
+                    tt_sum = tt_sum + map[k];
+                    tt_count ++;
+                }
+            }
+            return [new_map, tt_sum, tt_count]
+        }
+        var p_data = _reduce(prov_prevalence_map);
+        var my_map = p_data[0];
+        var tt_sum = p_data[1];
+        var tt_count = p_data[2];
         var avg = tt_sum / tt_count;
         var normal_threshold = avg / 2;
         var avg_threshold = avg * 1.5;
-        maps = my_map
-        return [region, data, my_map, normal_threshold, avg_threshold];
+
+        var d_data = _reduce(dist_prevalence_map);
+        var my_dist_map = d_data[0];
+        var dist_tt_sum = d_data[1];
+        var dist_tt_count = d_data[2];
+        var dist_avg = dist_tt_sum / dist_tt_count;
+        var dist_normal_threshold = dist_avg / 2;
+        var dist_avg_threshold = dist_avg * 1.5;
+
+        return [my_map, normal_threshold, avg_threshold, my_dist_map, dist_normal_threshold, dist_avg_threshold];
     }
 
     function mapOnMouseOver(str){
@@ -459,8 +489,10 @@
     }
 
     function clearHighlight() {      
-
         $('area').removeAttr("data-maphilight");
+        var code = ' ' + $("#Map_Area").html();
+        var map_area = document.getElementById('Map_Area').innerHTML = code;
+        map_area.innerHTML = code;
     }
     function highlightRegion(slug, color){
         
@@ -533,19 +565,6 @@
     function updateDisplay(str, location_type){
         clearHighlight();
 
-        var code = ' ' + $("#Map_Area").html();
-        var flip_direction = 'BOTTOM';
-        if(location_type === PROVINCE_TYPE){
-            flip_direction = 'LEFT';
-        }
-        var map_area = document.getElementById('Map_Area').innerHTML = code;
-        map_area.innerHTML = code;
-        //        $("#Map_Area").flippy({
-        //            duration: "500",
-        //            verso: code,
-        //            direction: flip_direction
-        //        });
-
         
         current_code = str;
         current_type = location_type;
@@ -553,8 +572,9 @@
         var all_table_data = getTableData(str, location_type);
         var table_data = all_table_data[1];
         var region = all_table_data[0];
-
-        highlightRegions(all_table_data[2], all_table_data[3], all_table_data[4])
+        var map_data = getMapData(str, location_type);
+        highlightRegions(map_data[0], map_data[1], map_data[2])
+        highlightRegions(map_data[3], map_data[4], map_data[5])
 
         html_code = '<table border="1" width="100%">';
         html_code = html_code + '<thead>';
