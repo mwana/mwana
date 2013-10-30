@@ -499,7 +499,7 @@
         $('.map').maphilight({fade: true});
 
         $("#" + slug).attr("data-maphilight", '{"fillColor":"'+ color + '", "fillOpacity":0.6, "strokeWidth":1,"fate":true, "strokeColor":"ff0000","alwaysOn":true}')
-        $("#" + slug).attr("title", color)
+        
         var data = $("#" + slug).data('maphilight') || {};
         data.alwaysOn = true;
         $("#"+ slug).data('maphilight', data).trigger('alwaysOn.maphilight');
