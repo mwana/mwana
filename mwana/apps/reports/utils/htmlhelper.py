@@ -95,7 +95,7 @@ def get_facilities_dropdown_htmlb(id, facilities, selected_facility):
 def get_incident_report_html_dropdown(id, cases, selected_case, include_default=True):
     code = '<select name="%s"" onchange="fireChange(\'%s\')" id="%s" class="drop-down" size="1">\n' % (id, id, id)
     if include_default:
-        code += '<option value="None">None</option>\n'
+        code += '<option value="None">(None)</option>\n'
     for case in cases:
         if case.id == selected_case:
             code = code + '<option selected value="%s">%s</option>\n' % (case.id, case.name)
