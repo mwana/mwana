@@ -143,7 +143,7 @@ class TestStockAtFacility(TestApp):
 
         script = """
             rb > New Stock DRG-123 10, DRG-124 20
-            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 10 DRG-124 20"
+            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 10 DRG-124 20
             rb > New Stock DRG-123 5, DRG-124 15
             rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 15 DRG-124 35
         """
