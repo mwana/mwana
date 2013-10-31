@@ -53,7 +53,7 @@ PP_NVD_REQUIRED = _("Sorry, the mother with ID %(unique_id) has had only %(num)s
 PP_COMPLETE = _("Thanks %(name)s! Post Partum visit for Mother ID %(unique_id)s is complete!")
 
 # "told" messages
-TOLD_COMPLETE = _("Thanks %(name)s for reminding mother.")
+TOLD_COMPLETE = _("Thanks %(name)s for reminding mother with ID %(unique_id).")
 TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already delivered')
 TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
 TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
