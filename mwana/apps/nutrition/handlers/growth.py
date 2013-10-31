@@ -404,6 +404,11 @@ class GrowthHandler(KeywordHandler):
             if v.upper() in ['X', 'XX', 'XXX']:
                 tokens.update({k: None})
 
+        # a child_id cannot be empty
+        if tokens['child_id'] is None:
+            msg_no_id = "Please provide a child ID, it cannot be empty."
+            return self.respond(msg_no_id)
+
         # validate all inputs, return tokens dict with valid data types
         # and validation errors
         data, errors = self._validate_tokens(tokens)
