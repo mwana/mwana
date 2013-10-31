@@ -100,8 +100,6 @@ CELERY_TIMEZONE = 'Africa/Blantyre'
 # WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
 
 RAPIDSMS_HANDLERS = [
-    # "rapidsms.contrib.handlers.KeywordHandler",
-    # "rapidsms.contrib.handlers.PatternHandler",
     "mwana.apps.help.handlers.help.HelpHandler",
     "mwana.apps.help.handlers.facilitycode.CodeHandler",
     "mwana.apps.help.handlers.facilitycontacts.ContactsHandler",
@@ -118,7 +116,6 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.district.DistrictHandler",
     "mwana.apps.broadcast.handlers.hsa.HSAHandler",
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
-    # "mwana.apps.nutrition.handlers.report.ReportGMHandler",
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
 ]
