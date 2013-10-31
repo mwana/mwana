@@ -107,8 +107,10 @@ class GrowthHandler(KeywordHandler):
             good_date_obj = date_field.clean(potential_date)
             if good_date_obj:
                 return good_date_obj.__str__(), good_date_obj
-        except forms.ValidationError, e:
-            self.respond(e[0])
+        except forms.ValidationError:
+            bad_date = "Sorry, I don't understand %s. Please \
+            send the date in the format: DDMMYY" % potential_date
+            self.respond(bad_date)
             return None, None
 
     def _validate_sex(self, potential_sex):
