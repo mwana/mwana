@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
+from datetime import datetime
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that makemessages finds
@@ -28,6 +29,10 @@ class UnregisterHandler(KeywordHandler):
             # we just deactivate the contact, but don't delete it, because
             # there could be all kinds of useful foreign key goodies attached.
             self.msg.connections[0].contact.is_active = False
+            left_at = str(datetime.today())
+            for c in ['-', ':', ' ', '.']:
+                left_at = str(left_at).replace(c, '')
+            self.msg.connections[0].contact.alias = left_at
             self.msg.connections[0].contact.save()
             # we also disassociate the contact from the connection
             self.msg.connections[0].contact = None
