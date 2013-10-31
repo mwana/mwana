@@ -43,13 +43,13 @@ NEW_MOTHER_NOTIFICATION = _("A new mother named %(mother)s with ID # %(unique_id
 DUPLICATE_REGISTRATION = _("A mother with ID %(unique_id)s is already registered. Please check the ID and try again.")
 
 # pregnancy follow up messages
-FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number and try again or register her first.")
+FUP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to follow up is not registered in the system. Check the safe motherhood number ( %(unique_id) ) and try again or register her first.")
 FOLLOW_UP_COMPLETE = _("Thanks %(name)s! Follow up for Mother ID %(unique_id)s is complete!")
 
 # pregnancy postpartum visit messages
-PP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to provide post partum data for is not registered in the system. Check the safe motherhood number and try again or register her first.")
-PP_MOTHER_HAS_NOT_DELIVERED = _("Sorry, the mother you are trying to provide post partum data for has no birth registered.")
-PP_NVD_REQUIRED = _("Sorry, the mother has had only %(num)s post partum followup(s). 3 are required and the NVD is missing.")
+PP_MOTHER_DOES_NOT_EXIST = _("Sorry, the mother you are trying to provide post partum data for is not registered in the system. Check the safe motherhood ID ( %(unique_id) ) and try again or register her first.")
+PP_MOTHER_HAS_NOT_DELIVERED = _("Sorry, the mother with ID %(unique_id) you are trying to provide post partum data for has no birth registered.")
+PP_NVD_REQUIRED = _("Sorry, the mother with ID %(unique_id) has had only %(num)s post partum followup(s). 3 are required and the NVD is missing.")
 PP_COMPLETE = _("Thanks %(name)s! Post Partum visit for Mother ID %(unique_id)s is complete!")
 
 # "told" messages
