@@ -45,4 +45,6 @@ def death_registration(session, xform, router):
                             )
     reg.save()
     return respond_to_session(router, session, const.DEATH_REG_RESPONSE,
-                              **{"name": name})
+                              **{"name": name,
+                                 "unique_id":unique_id}
+                              )

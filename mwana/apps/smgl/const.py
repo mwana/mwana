@@ -76,8 +76,8 @@ AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient 
 AMB_OUTCOME_NO_OUTCOME = _("Kindly register OUTCOME for Mother :%(unique_id)s.  Please send an outcome!")
 
 # death registration
-DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death has been registered.")
-DEATH_ALREADY_REGISTERED = ("Death for mother with ID  %(unique_id)s and type  %(person)s has already been registered")
+DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death for mother with ID %(unique_id) has been registered.")
+DEATH_ALREADY_REGISTERED = ("Death for mother with ID %(unique_id)s and type  %(person)s has already been registered")
 
 # reminders
 REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
