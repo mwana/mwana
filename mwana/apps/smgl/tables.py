@@ -132,7 +132,7 @@ class SummaryReportTable(Table):
 
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
-    user_name = NamedColumn(col_name="User Name", value= lambda cell: cell.object.connection.contact.name.title())
+    user_name = NamedColumn(link=lambda cell: reverse("sms-user-history", args=[cell.object.connection.contact.id]), col_name="User Name", value= lambda cell: cell.object.connection.contact.name.title())
     msg_type = NamedColumn(col_name="Type",
                       value=lambda cell: cell.object.text.split(' ')[0].upper(),
                       sortable=False
