@@ -73,10 +73,9 @@ class Transaction(models.Model):
     def __unicode__(self):
         return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
 
-
-
-    def __unicode__(self):
-        return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
+#
+#    def __unicode__(self):
+#        return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
 
 class Threshold(models.Model):
     account = models.ForeignKey(StockAccount, null=False, blank=False)
@@ -92,6 +91,13 @@ class Threshold(models.Model):
 class StockTransaction(models.Model):
     amount = models.IntegerField(default=0, null=False, blank=False)
     transaction = models.ForeignKey(Transaction, null=False, blank=False)
+    stock = models.ForeignKey(Stock, null=False, blank=False)
+
+    def __unicode__(self):
+        return "%s > %s %s" % (self.stock, self.transaction, self.amount)
+
+    class Meta:
+        unique_together = (('stock', 'transaction'),)
 
 #    def save(self, *args, **kwargs):
 #        if not self.pk:

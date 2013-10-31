@@ -109,9 +109,9 @@ class TestStockAtFacility(TestApp):
             rb > New Stock 123
             rb < To add new stock, send NEW STOCK <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g NEW STOCK DG99 100, DG80 15
             unknown > NEW STOCK DG99 100
-            unknown < Sorry, you must be register to add new stock. Reply with HELP if you need assistance.
+            unknown < Sorry, you must be registered to add new stock. Reply with HELP if you need assistance.
             unknown > NEW STOCK 100
-            unknown < Sorry, you must be register to add new stock. Reply with HELP if you need assistance.
+            unknown < Sorry, you must be registered to add new stock. Reply with HELP if you need assistance.
         """
 
         self.runScript(script)
@@ -120,10 +120,35 @@ class TestStockAtFacility(TestApp):
 
     def test_new_stock_addition(self):
         self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+        acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
 
         script = """
             rb > New Stock DRG-123 23
             rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 23
         """
 
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+
+    def test_new_stock_addition_multiple(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+        acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
+        acc2 = StockAccount.objects.create(stock=self.stock2, location=self.kdh)
+
+        script = """
+            rb > New Stock DRG-123 10, DRG-124 20
+            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 10 DRG-124 20"
+            rb > New Stock DRG-123 5, DRG-124 15
+            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 15 DRG-124 35
+        """
+
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 2)
+        self.assertEqual(Transaction.objects.count(), 2)
 
