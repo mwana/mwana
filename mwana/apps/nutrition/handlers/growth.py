@@ -107,7 +107,7 @@ class GrowthHandler(KeywordHandler):
             good_date_obj = date_field.clean(potential_date)
             if good_date_obj:
                 return good_date_obj.__str__(), good_date_obj
-        except ValidationError, e:
+        except forms.ValidationError, e:
             self.respond(e[0])
             return None, None
 
