@@ -182,45 +182,12 @@
 </script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
-
-<!--<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>-->
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.flippy.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/excanvas.min.js" ></script>
-
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.maphilight.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.flippy.min.js" ></script>
-<script type="text/javascript">
-    //    $(function() {
-    //        $('.map').maphilight({fade: false});
-    //        {% autoescape off %}
-    //        var sd = {{districts}};
-    //        var sp = {{provinces}};
-    //        {% endautoescape %}
-    //        var colorChoices = ['FF0000', 'FFA500', '00FF00'];
-    //        if(sd){
-    //            for(var i in sd){
-    //                elem_id = sd[i]
-    //                $("#" + elem_id).attr("data-maphilight", '{"fillColor":"'+ colorChoices[Math.floor(Math.random() * colorChoices.length)]+ '", "fillOpacity":0.6,"alwaysOn":true}')
-    //                //            $("#" + elem_id).attr("title", sd[i] + ': Mwana not yet deployed here')
-    //                var data = $("#" + elem_id).data('maphilight') || {};
-    //                data.alwaysOn = true;
-    //                $("#"+ elem_id).data('maphilight', data).trigger('alwaysOn.maphilight');
-    //            }
-    //        }
-    //        if(sp){
-    //            for(var i in sp){
-    //                elem_id = sp[i]
-    //                $("#" + elem_id).attr("data-maphilight", '{"fillColor":"'+ colorChoices[Math.floor(Math.random() * colorChoices.length)]+ '","fillOpacity":0.6,"alwaysOn":true}')
-    //                //            $("#" + elem_id).attr("title", sp[i] + ': Mwana not yet deployed here')
-    //                var data = $("#" + elem_id).data('maphilight') || {};
-    //                data.alwaysOn = true;
-    //                $("#"+ elem_id).data('maphilight', data).trigger('alwaysOn.maphilight');
-    //            }
-    //        }
 
-    //    });
-</script>
 
 <script type="text/javascript">
     var data = [];
