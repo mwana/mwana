@@ -96,6 +96,16 @@ class AgeGroup(models.Model):
     def __unicode__(self):
         return "%s (%s - %s %s)" % (self.name, self.minimum, self.maximum, self.units)
 
+
+class Source(models.Model):
+    message = models.ForeignKey(Message, null=True, blank=True, editable=False)
+    parsed = models.DecimalField(max_digits=4, decimal_places=3, blank=True, null=True)
+    logged_on = models.DateTimeField(default=datetime.now, blank=False, null=False, editable=False)
+
+    def __unicode__(self):
+        return "%s. %s" % (self.parsed, self.message)
+
+
 class Report(models.Model):
     incident = models.ForeignKey(Incident, null=False, blank=False)
     value = models.PositiveSmallIntegerField(null=False, blank=False)
@@ -103,7 +113,6 @@ class Report(models.Model):
     age_group = models.ForeignKey(AgeGroup, blank=True, null=True)
     raw_value = models.CharField(max_length=60, null=False, blank=False, editable=False)
     date = models.DateField(blank=False, null=False)
-    logged_on = models.DateTimeField(default=datetime.now, blank=False, null=False, editable=False)
     reporter = models.ForeignKey(Contact, blank=True, null=True)
     #Somehow redundant fields but useful for easy and faster reporting
     week_of_year = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)# does not use isocalendar
@@ -111,8 +120,7 @@ class Report(models.Model):
     month = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
     day = models.PositiveSmallIntegerField(null=False, blank=False, editable=False)
     location = models.ForeignKey(Location, editable=False, limit_choices_to = {'send_live_results':True})
-    message = models.ForeignKey(Message, null=True, blank=True, editable=False)
-    parsed = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    source = models.ForeignKey(Source, null=True, blank=True, editable=False)
     
     def __unicode__(self):
         return "%s - %s" % (self.incident, self.date)
@@ -151,3 +159,4 @@ class Separator(models.Model):
 
     def __unicode__(self):
         return self.text
+

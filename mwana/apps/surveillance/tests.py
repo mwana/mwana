@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from decimal import Decimal
+from mwana.apps.surveillance.models import Source
 from mwana.apps.surveillance.models import Alias
 from mwana.apps.surveillance.models import Report
 from mwana.apps.surveillance.models import Incident
@@ -49,6 +51,8 @@ class TestIncindetReport(TestApp):
         """
 
         self.runScript(script)
+        
+        self.assertEqual(Source.objects.count(), 0)
 
     def test_new_incident(self):
         self.assertEqual(Incident.objects.count(), 0)
@@ -97,3 +101,31 @@ class TestIncindetReport(TestApp):
         self.assertEqual(Report.objects.filter(incident__name__iexact='malaria', value=11).count(), 1)
 
         self.assertEqual(Alias.objects.filter(incident__name__iexact='malaria').count(), 2)
+
+    def test_handling_multiple_incidents(self):
+        self.assertEqual(Incident.objects.count(), 0)
+        self.assertEqual(Report.objects.count(), 0)
+        self.assertEqual(Alias.objects.count(), 0)
+        self.assertEqual(Source.objects.count(), 0)
+
+        script = """
+            rb > case 10 10 2013, malaria 10, cholera=12, TB
+            rb < Thank you Rupiah Banda for the report for week 40.
+            rb > case 40, malaria 11, BP
+            rb < Thank you Rupiah Banda for the report for week 40.
+        """
+        self.runScript(script)
+
+        self.assertEqual(Incident.objects.count(), 2, Incident.objects.all())
+        self.assertEqual(Report.objects.count(), 3, Report.objects.all())
+        self.assertEqual(Alias.objects.count(), 2)
+        self.assertEqual(Source.objects.count(), 2)
+        self.assertEqual(Source.objects.filter(parsed=Decimal('0.5')).count(), 1)
+        self.assertEqual(Source.objects.filter(parsed=Decimal('0.667')).count(), 1)
+
+        self.assertEqual(Report.objects.filter(incident__name__iexact='malaria', value=10).count(), 1)
+        self.assertEqual(Report.objects.filter(incident__name__iexact='malaria', value=11).count(), 1)
+        self.assertEqual(Report.objects.filter(incident__name__iexact='cholera', value=12).count(), 1)
+
+        self.assertEqual(Alias.objects.filter(name__iexact='malaria').count(), 1)
+        self.assertEqual(Alias.objects.filter(name__iexact='cholera').count(), 1)

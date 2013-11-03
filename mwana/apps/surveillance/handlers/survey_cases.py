@@ -1,7 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
+from decimal import Decimal
+from mwana.apps.surveillance.models import Source
 from datetime import datetime
 from mwana.apps.surveillance.models import Report
-from mwana.apps.surveillance.models import Alias
 from mwana.apps.surveillance.models import Incident
 import re
 from datetime import date
@@ -69,11 +70,20 @@ class SurveyCaseHandler(KeywordHandler):
             cases = tokens[1:]
 
         success = False
+        source = Source.objects.create(parsed=0)
+        now = datetime.now()
+        start_date = now - timedelta(seconds=5)
+        msgs =  Message.objects.filter(direction='I', text=self.msg.raw_text, contact=self.msg.contact, date__gt=start_date, date__lt=now )
+
+        if msgs:
+            source.message =  msgs[0]
+            source.save()
+        num = 0.0
         for case_rpt in cases:
             case_values = re.split("[\s|=|-|:]", case_rpt)
-            if len(case_values) < 2:
+            if len(case_values) < 2 or not case_values[-1].isdigit():
                 continue
-            
+            num += 1
             incident_text = " ".join(case_values[:-1]).strip()
             incident = None
             if Incident.objects.filter(alias__name__iexact=incident_text):
@@ -88,12 +98,10 @@ class SurveyCaseHandler(KeywordHandler):
                     report.date = rpr_time
                 elif isinstance(rpr_time, int):
                     report.week_of_year = rpr_time
-            now = datetime.now()
-            start_date = now - timedelta(seconds=5)
+            
             msgs =  Message.objects.filter(direction='I', text=self.msg.raw_text, contact=self.msg.contact, date__gt=start_date, date__lt=now )
-#                       
-            if msgs:
-                report.message =  msgs[0]
+                       
+            report.source =  source
             report.raw_value = case_rpt
 
             report.reporter = self.msg.contact
@@ -111,8 +119,11 @@ class SurveyCaseHandler(KeywordHandler):
             success = True
         
         if success:
+            source.parsed = Decimal(str((num/len(cases))))
+            source.save()
             self.respond("Thank you %s for the report for week %s." % (self.msg.contact, report.week_of_year))
         else:
+            source.delete()
             self.help()
         
         return True
