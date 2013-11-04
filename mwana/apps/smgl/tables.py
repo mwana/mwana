@@ -129,13 +129,31 @@ class SummaryReportTable(Table):
     data = Column(sortable=False)
     value = Column(sortable=False)
 
-
+message_types = {
+             'REG':'Pregnancy',
+             'REFOUT':'Ref. Outcome',
+             'RESP':'Ref. Response',
+             'REFER':'Referral',
+             'REG':'Pregnancy',
+             'LOOK': 'Lookup',
+             'FUP':'ANC',
+             'JOIN':'User'
+             }
+def get_msg_type(message_type):
+    try:
+        title = message_types[message_type.upper()]
+    except KeyError:
+        title = message_type
+    finally:
+        return title
+    
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(col_name="Phone Number", value= lambda cell: cell.object.connection.identity)
     user_name = NamedColumn(link=lambda cell: reverse("sms-user-history", args=[cell.object.connection.contact.id]), col_name="User Name", value= lambda cell: cell.object.connection.contact.name.title())
     msg_type = NamedColumn(col_name="Type",
-                      value=lambda cell: cell.object.text.split(' ')[0].upper(),
+                      #value=lambda cell: cell.object.text.split(' ')[0].upper(),
+                      value=lambda cell: get_msg_type(cell.object.text.split(' ')[0]),
                       sortable=False
                     )
     facility = Column(value=lambda cell: cell.object.connection.contact.location if cell.object.connection.contact else '')
