@@ -31,7 +31,8 @@ class SMGLBirthRegTest(SMGLSetUp):
     # TODO: beef these up. Just testing the basic workflow
     def testBasicBirthReg(self):
         self.assertEqual(0, BirthRegistration.objects.count())
-        resp = BIRTH_REG_RESPONSE % {"name": self.name}
+        resp = BIRTH_REG_RESPONSE % {"name": self.name,
+                                     "unique_id": "1234"}
         script = """
             %(num)s > birth 1234 01 01 2012 bo h yes t2
             %(num)s < %(resp)s
@@ -84,7 +85,8 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertSessionSuccess()
 
     def testNoMother(self):
-        resp = BIRTH_REG_RESPONSE % {"name": self.name}
+        resp = BIRTH_REG_RESPONSE % {"name": self.name,
+                                     "unique_id": "none"}
         script = """
             %(num)s > birth none 01 01 2012 gi f yes
             %(num)s < %(resp)s
@@ -96,7 +98,7 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertSessionSuccess()
 
     def testBadMotherId(self):
-        resp = const.MOTHER_NOT_FOUND
+        resp = const.MOTHER_NOT_FOUND %{"unique_id": "12345"}
         script = """
             %(num)s > birth 12345 01 01 2012 gi f yes
             %(num)s < %(resp)s

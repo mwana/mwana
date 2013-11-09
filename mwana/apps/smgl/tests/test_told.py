@@ -26,7 +26,7 @@ class SMGLToldTestCase(SMGLSetUp):
         create_facility_visit(data={'mother': mom})
         create_referral(data={'mother': mom})
 
-        resp = const.TOLD_COMPLETE % {"name": self.name}
+        resp = const.TOLD_COMPLETE % {"name": self.name, "unique_id":mom.uid}
         for told_type in TOLD_TYPE_CHOICES:
             script = """
                 %(num)s > told %(muid)s %(type)s
