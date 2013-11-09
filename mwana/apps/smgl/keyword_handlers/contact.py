@@ -33,7 +33,6 @@ def leave(session, xform, router):
                                   **{'name': connection.contact.name})
 
 @registration_required
-@is_active
 def make_active(session, xform, router):
     """
     Handler for IN keyword (Used to re-activate the user early).
