@@ -21,7 +21,7 @@ class PrinterHandler(KeywordHandler):
     '''
 
     keyword = 'printer'
-    
+
     def help(self):
         # Because we want to process this with just an empty keyword, rather
         # than respond with a help message, just call the handle method from
@@ -56,26 +56,27 @@ class PrinterHandler(KeywordHandler):
         if phone.startswith('0') and hasattr(settings, 'COUNTRY_CODE'):
             phone = settings.COUNTRY_CODE + phone[1:]
         if action == 'add':
-            contact = Contact.objects.create(name='Printer in %s' % location.name,
-                                             location=location)
+            contact = Contact.objects.create(
+                name='Printer in %s' % location.name,
+                location=location)
             conn, _ = Connection.objects.get_or_create(identity=phone,
                                                        backend=backend)
             conn.contact = contact
             conn.save()
             contact.types.add(const.get_dbs_printer_type())
-            conf_msg = TLCOutgoingMessage(conn, 'You have successfully '
-                                          'registered this printer at '
-                                          '%(location)s. You will receive '
-                                          'results as soon as they are '
-                                          'available.', location=location.name)
+            msg_registered = """You have successfully registered this printer
+                at %(location)s. You will receive results as soon
+                as they are available.""" % dict(location=location.name)
+            conf_msg = TLCOutgoingMessage([conn], msg_registered)
             conf_msg.send()
             self.respond('Printer added successfully.')
         elif action == 'remove':
             try:
-                conn = Connection.objects.get(identity=phone, backend=backend,
-                                              contact__types=const.get_dbs_printer_type(),
-                                              contact__location=location,
-                                              contact__is_active=True)
+                conn = Connection.objects.get(
+                    identity=phone, backend=backend,
+                    contact__types=const.get_dbs_printer_type(),
+                    contact__location=location,
+                    contact__is_active=True)
             except Connection.DoesNotExist:
                 self.respond('No active printer found with that backend and phone number at that location.')
                 return
@@ -84,9 +85,9 @@ class PrinterHandler(KeywordHandler):
             contact.save()
             conn.contact = None
             conn.save()
-            conf_msg = TLCOutgoingMessage(conn, 'This printer has been '
-                                          'deregistered from %(location)s. You '
-                                          'will no longer receive results.',
-                                          location=location.name)
+            msg_unregistered = """This printer has been deregistered from
+            %(location)s. You will no longer receive results.""" % dict(
+                location=location.name)
+            conf_msg = TLCOutgoingMessage([conn], msg_unregistered)
             conf_msg.send()
             self.respond('Printer removed successfully.')
