@@ -51,7 +51,7 @@ ER_TO_CLINIC_WORKER = _("Emergency Response has occured for Mother with Unique I
 ER_STATUS_UPDATE = _("The Emergency Request for Mother with Unique ID: %(unique_id)s has been marked %(status)s by %(name)s (%(confirm_type)s)")
 
 
-BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth with Mother ID: %(unique_id) has been registered.")
+BIRTH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community birth with Mother ID: %(unique_id)s has been registered.")
 
 
 logger = logging.getLogger(__name__)

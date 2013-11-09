@@ -53,7 +53,7 @@ PP_NVD_REQUIRED = _("Sorry, the mother with ID %(unique_id) has had only %(num)s
 PP_COMPLETE = _("Thanks %(name)s! Post Partum visit for Mother ID %(unique_id)s is complete!")
 
 # "told" messages
-TOLD_COMPLETE = _("Thanks %(name)s for reminding mother with ID %(unique_id).")
+TOLD_COMPLETE = _("Thanks %(name)s for reminding mother with ID %(unique_id)s.")
 TOLD_MOTHER_HAS_ALREADY_DELIVERED = _('Mother ID %(unique_id)s has already delivered')
 TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
 TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
@@ -76,7 +76,7 @@ AMB_OUTCOME_ORIGINATING_LOCATION_INFO = _("We have been notified of the patient 
 AMB_OUTCOME_NO_OUTCOME = _("Kindly register OUTCOME for Mother :%(unique_id)s.  Please send an outcome!")
 
 # death registration
-DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death for mother with ID %(unique_id) has been registered.")
+DEATH_REG_RESPONSE = _("Thanks %(name)s! the Facility/Community death for mother with ID %(unique_id)s has been registered.")
 DEATH_ALREADY_REGISTERED = ("Death for mother with ID %(unique_id)s and type  %(person)s has already been registered")
 
 # reminders
