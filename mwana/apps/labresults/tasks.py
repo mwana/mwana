@@ -37,7 +37,7 @@ def send_results_notification():
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
-        router = get_router()()
+        router = get_router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)
@@ -56,7 +56,7 @@ def send_changed_records_notification():
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
-        router = get_router()()
+        router = get_router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of changed results' % clinic)
