@@ -589,10 +589,10 @@ def csv_report_one(request):
     district, startdate, enddate = get_report_criteria(request)
     file_name = district.replace(' ', '_') + "_" + str(startdate)\
                 + "_" + str(enddate) + ".csv"
-    headers = ["Sample ID", "Req ID", "Clinic", "Result", "Processed on",
+    headers = ["Sample ID", "Req ID", "Clinic Care No", "Clinic", "Result", "Processed on",
                "Arrived at server", "Notification status", "Verified",
            "Result sent date"]
-    keys = ['sample_id', 'requisition_id', 'clinic', 'result', 'processed_on',
+    keys = ['sample_id', 'requisition_id', 'clinic_care_no', 'clinic', 'result', 'processed_on',
         'arrival_date', 'notification_status', 'verified', 'result_sent_date']
     response = HttpResponse(mimetype='text/csv')
     response['Content-Disposition'] = 'attachment; filename=%s' % file_name
