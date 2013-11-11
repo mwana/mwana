@@ -82,6 +82,9 @@ SOUTH_MIGRATION_MODULES = {
 LOG_LEVEL = "INFO"
 #XFORMS_HOST = '127.0.0.1:8000'
 
+# paginator configuration
+PAGINATOR_OBJECTS_PER_PAGE = 50
+
 # Django celery
 import djcelery
 
