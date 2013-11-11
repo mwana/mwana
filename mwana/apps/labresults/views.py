@@ -89,7 +89,7 @@ def accept_results(request):
     if request.META['CONTENT_TYPE'] != 'text/json':
         logger.warn('incoming post does not have text/json content type')
 
-    content = request.raw_post_data
+    content = request.body
 
     payload_date = datetime.now()
     payload_user = request.user
