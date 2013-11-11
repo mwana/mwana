@@ -127,7 +127,7 @@ def send_results_to_printer():
             Location.objects.filter(Q(has_independent_printer=True)
                                     & new_notified
                                     & verified & send_live_results).distinct()
-        router = get_router()()
+        router = get_router()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('sending new results to printer at %s' % clinic)
