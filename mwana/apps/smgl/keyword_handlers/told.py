@@ -69,4 +69,5 @@ def told(session, xform, router):
                             type=reminder_type,
                             )
         return respond_to_session(router, session, TOLD_COMPLETE, 
-                                  **{'name': connection.contact.name})
+                                  **{'name': connection.contact.name,
+                                     'unique_id': unique_id})

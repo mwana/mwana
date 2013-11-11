@@ -283,7 +283,8 @@ class SMGLPregnancyTest(SMGLSetUp):
         visit.save()
 
         # but report a birth which should prevent the need
-        resp = BIRTH_REG_RESPONSE % {"name": self.name}
+        resp = BIRTH_REG_RESPONSE % {"name": self.name,
+                                     "unique_id": mom.uid}
         script = """
             %(num)s > birth %(id)s %(earlier)s bo h yes t2
             %(num)s < %(resp)s

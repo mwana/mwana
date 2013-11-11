@@ -134,7 +134,7 @@ def follow_up(session, xform, router):
     try:
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
-        return respond_to_session(router, session, const.FUP_MOTHER_DOES_NOT_EXIST)
+        return respond_to_session(router, session, const.FUP_MOTHER_DOES_NOT_EXIST, **{"unique_id":unique_id})
 
     edd_date, error_msg = make_date(xform, "edd_dd", "edd_mm", "edd_yy", is_optional=True)
     if error_msg:
