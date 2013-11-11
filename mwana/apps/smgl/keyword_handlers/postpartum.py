@@ -40,14 +40,14 @@ def postpartum_visit(session, xform, router):
         mother = PregnantMother.objects.get(uid=unique_id)
     except ObjectDoesNotExist:
         return respond_to_session(router, session, const.PP_MOTHER_DOES_NOT_EXIST,
-                                  is_error=True)
+                                  is_error=True, **{"unique_id":unique_id})
 
     # Ensure mother has delivered
     try:
         BirthRegistration.objects.get(mother=mother)
     except ObjectDoesNotExist:
-        return respond_to_session(router, session, const.PP_MOTHER_HAS_NOT_DELIVERED,
-                                  is_error=True)
+        return respond_to_session(router, session, const.PP_MOTHER_HAS_NOT_DELIVERED ,
+                                  is_error=True, **{"unique_id":unique_id})
 
     next_visit, error_msg = make_date(xform,
                         "next_visit_dd", "next_visit_mm", "next_visit_yy",
@@ -66,7 +66,8 @@ def postpartum_visit(session, xform, router):
         pos_visits = FacilityVisit.objects.filter(mother=mother, visit_type="pos")
         if pos_visits.count() < 2:
             return respond_to_session(router, session, const.PP_NVD_REQUIRED,
-                                      is_error=True, **{"num": pos_visits.count()})
+                                      is_error=True, **{"num": pos_visits.count(),
+                                                        "unique_id":unique_id})
 
     mother_status = get_value_from_form('mother_status', xform)
     baby_status = get_value_from_form('baby_status', xform)
