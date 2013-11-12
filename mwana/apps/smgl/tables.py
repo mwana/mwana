@@ -118,11 +118,12 @@ class StatisticsLinkTable(StatisticsTable):
 
 
 class ReminderStatsTable(Table):
-    reminder_type = NamedColumn(sortable=False, header_class="reminder-type", col_name="Number Of Mothers With:")
-    reminders = NamedColumn(sortable=False, col_name="Reminders")
-    showed_up = NamedColumn(sortable=False, col_name="Showed Up")
-    told = NamedColumn(sortable=False, col_name="Told")
-    told_and_showed = NamedColumn(sortable=False, col_name="Showed Up Due to Told")
+    scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
+    sent_reminders = NamedColumn(sortable=False, col_name='Sent')
+    received_told = NamedColumn(sortable=False, col_name='Received Told')
+    follow_up_visit = NamedColumn(sortable=False, col_name='Follow Up visits')
+    told_and_showed = NamedColumn(sortable=False, col_name='Told and showed')
+    showed_on_time = NamedColumn(sortable=False, col_name='Showed on Time')
 
 
 class SummaryReportTable(Table):
