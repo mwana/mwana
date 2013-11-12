@@ -8,17 +8,17 @@ from django.conf import settings
 from django.db.models import Q
 from django.db import transaction
 
-from mwana import const
 from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.views import process_payload
 from mwana.apps.labresults.messages import TEST_TYPE
 from mwana.apps.labresults.models import Result
-from rapidsms.router import get_router
+from rapidsms.apps.base import AppBase
 
 from mwana.apps.locations.models import Location
 
 from mwana.apps.tlcprinters.models import MessageConfirmation
+from mwana.apps.labresults.app import App as LabResults
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +37,7 @@ def send_results_notification():
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
-        router = get_router()
-        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+        labresults_app = LabResults(AppBase)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)
             labresults_app.notify_clinic_pending_results(clinic)
@@ -56,8 +55,8 @@ def send_changed_records_notification():
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
-        router = get_router()
-        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+
+        labresults_app = LabResults(AppBase)
         for clinic in clinics_with_results:
             logger.info('notifying %s of changed results' % clinic)
             labresults_app.notify_clinic_of_changed_records(clinic)
@@ -127,8 +126,7 @@ def send_results_to_printer():
             Location.objects.filter(Q(has_independent_printer=True)
                                     & new_notified
                                     & verified & send_live_results).distinct()
-        router = get_router()
-        labresults_app = router.get_app(const.LAB_RESULTS_APP)
+        labresults_app = LabResults(AppBase)
         for clinic in clinics_with_results:
             logger.info('sending new results to printer at %s' % clinic)
             labresults_app.send_printers_pending_results(clinic)
