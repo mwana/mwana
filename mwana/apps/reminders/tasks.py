@@ -3,7 +3,6 @@ from mwana.apps.translator.util import Translator
 import datetime
 import logging
 from celery import task
-# from rapidsms.router.blocking import BlockingRouter as Router
 
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -21,15 +20,13 @@ _ = lambda s: s
 
 translator = Translator()
 
-NOTIFICATION_NUM_DAYS = 2  # send reminders 2 days before scheduled appointments
+NOTIFICATION_NUM_DAYS = 2  # days before scheduled appointments
 
 logger = logging.getLogger('mwana.apps.reminders.tasks')
 
 
 def send_appointment_reminder(patient_event, appointment, default_conn=None,
                               pronouns=None):
-
-    # router = Router()
 
     def record_notification(appointment, patient_event, connection):
         reminders.SentNotification.objects.create(
@@ -89,11 +86,11 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             hsa_msgs = appointment.messages.filter(recipient_type='hsa')
             for msg in hsa_msgs:
                 hsa_msg = OutgoingMessage(
-                    connection, _(msg.content),
-                    cba=cba_name, patient=patient.name,
-                    date=appt_date.strftime('%d/%m/%Y'),
-                    clinic=clinic_name,
-                    type=translator.translate(lang_code, type))
+                    connection, msg.content % dict(
+                        cba=cba_name, patient=patient.name,
+                        date=appt_date.strftime('%d/%m/%Y'),
+                        clinic=clinic_name,
+                        type=translator.translate(lang_code, type)))
                 hsa_msg.send()
                 record_notification(appointment, patient_event, connection)
             # get messages for mother and send
@@ -102,24 +99,24 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             if client_conn and client_msgs:
                 for msg in client_msgs:
                     client_msg = OutgoingMessage(
-                        client_conn, _(msg.content),
-                        cba=cba_name, patient=patient.name,
-                        date=appt_date.strftime('%d/%m/%Y'),
-                        clinic=clinic_name,
-                        type=translator.translate(lang_code, type))
+                        client_conn, msg.content % dict(
+                            cba=cba_name, patient=patient.name,
+                            date=appt_date.strftime('%d/%m/%Y'),
+                            clinic=clinic_name,
+                            type=translator.translate(lang_code, type)))
                     client_msg.send()
                     record_notification(appointment, patient_event,
                                         client_conn)
         else:
-            msg = OutgoingMessage(connection,
-                                  _("Hi%(cba)s.%(patient)s is due for "
-                                    "%(type)s clinic visit on %(date)s.Please "
-                                    "remind them to visit %(clinic)s, then "
-                                    "reply with TOLD %(patient)s"),
+            visit_msg = _("Hi%(cba)s.%(patient)s is due for "
+                          "%(type)s clinic visit on %(date)s.Please "
+                          "remind them to visit %(clinic)s, then "
+                          "reply with TOLD %(patient)s")
+            msg = OutgoingMessage(connection, visit_msg % dict(
                                   cba=cba_name, patient=patient.name,
                                   date=appt_date.strftime('%d/%m/%Y'),
                                   clinic=clinic_name,
-                                  type=translator.translate(lang_code, type))
+                                  type=translator.translate(lang_code, type)))
 
             msg.send()
 
