@@ -26,7 +26,7 @@
 	width:33%;
 }
 .module {
-    background: #f8f8f8;
+    /* background: #f8f8f8; */
 }
 
 .module.map {
@@ -45,10 +45,6 @@
     margin: 0.5em 0;
     overflow-y: auto;
     overflow-x: auto;
-
-    /*height: 24em;
-     * just for the demo: */
-    height: 290px;
 }
 
 .module li {
@@ -66,18 +62,18 @@
 .module li div.caption {
 }
 
-.module li div.report {
+.module li div.report span {
     font-size: 2em;
     line-height: 1.2;
-    border-bottom: 1px dotted #eee;
-    margin-bottom: 0.25em;
-    padding-bottom: 0.25em;
+    border-right: 1px dotted #eee;
+    margin-right: 0.25em;
+    padding-right: 0.25em;
 }
 
 ul.reports {
 }
 
-ul.reports div.report strong {
+ul.reports div.report span strong {
     font-weight: normal;
     background: #ffd;
 }
@@ -88,12 +84,12 @@ ul.reports div.meta {
 
 
 ul.stats {
-    text-align: center;
+    text-align: left;
 }
 
 ul.stats li span {
     font-size: 50%;
-    color: #aaa;
+    color: #444;
 }
 
 ul.stats li span.total {
@@ -102,4 +98,31 @@ ul.stats li span.total {
 
 .split-3, .split-2 {
     margin-top: 1em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+h1 {
+   font-size: 24px;
+}
+h2 {
+   font-size: 21px;
+}
+h3 {
+   font-size: 18px;
+}
+h4 {
+   font-size: 15px;
+} 
+h5 {
+   font-size: 13px;
+}
+h6 {
+   font-size: 12px;
+}
+
+div.module div.toolbar a, div.module div.toolbar span {
+   color: #444;
 }

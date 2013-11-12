@@ -11,6 +11,7 @@ mwana/db.sqlite3
 mwana/*.bak
 mwana/build/*
 mwana/.idea/*
+mwana/public/*
 work*
 *.bat
 nbproject/*

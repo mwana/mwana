@@ -14,8 +14,9 @@
 /* wrap both of the google maps in
  * something vaugely rapidsms-looking */
 div.map {
-	border: 1px solid #636363;
-	border-top: none;
+   border: 1px solid #636363;
+   border-top: none;
+   border-left: none;
 }
 
 	div.map div.label {
@@ -27,7 +28,7 @@ div.map {
 
 	div#map {
 		background: #f8f8ff;
-		height: 50em;
+		height: 52em;
 	}
 
 

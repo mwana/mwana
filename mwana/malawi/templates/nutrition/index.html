@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% load i18n %}
+{% block title %}AnthroWatch Reports - RapidSMS for Health{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>AnthroWatch Reports</h1>
+</div>
+<div class="module">
+
+<h2>Analyzed Surveys</h2>
+<table width="100%">
+  <thead>
+    <tr>
+      <th>Date Submitted</th>
+      <th>Facility</th>
+      <th>Interviewer Name</th>
+      <th>Child ID</th>
+      <th>Sex</th>
+      <th>Date of Birth</th>
+      <th>Age</th>
+      <th>Height</th>
+      <th>Weight</th>
+      <th>Oedema</th>
+      <th>MUAC</th>
+      <th>Height for age z-score</th>
+      <th>Weight for age z-score</th>
+      <th>Weight for height z-score</th>
+      <th>Data Quality</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for assessment in assessments %}
+    <tr>
+      <td>{{assessment.date|date:"d-m-y H:m:s"}}</td>
+      <td>{{assessment.location}}</td>
+      <td>{{assessment.interviewer_name}}</td>
+      <td>{{assessment.child_id}}</td>
+      <td>{{assessment.sex}}</td>
+      <td>{{assessment.date_of_birth|date:"d-m-y"}}</td>
+      <td>{{assessment.age_in_months}}</td>
+      <td>{{assessment.height}}</td>
+      <td>{{assessment.weight}}</td>
+      <td>{{assessment.oedema|yesno:"Y,N"}}</td>
+      <td>{{assessment.muac}}</td>
+      <td>{{assessment.height4age}}</td>
+      <td>{{assessment.weight4age}}</td>
+      <td>{{assessment.weight4height}}</td>
+      <td>{{assessment.human_status}}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="toolbar">
+  <a href="{% url 'growth_assessments' %}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+</div>
+
+</div>
+{% endblock %}

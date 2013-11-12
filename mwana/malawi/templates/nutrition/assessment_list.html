@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}AnthroWatch Reports - RapidSMS for Health{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}malawi/stylesheets/malawi.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}malawi/stylesheets/datepicker.css" />
+<style type="text/css" media="screen">
+    span.x {
+    color:#bbbbbb;
+    background:transparent;
+    display:block;
+    text-align: center;
+    }
+
+    ul{
+        border:0; margin:0; padding:0;
+    }
+
+    #pagination-clean li{
+        border:0; margin:0; padding:0;
+        font-size:11px;
+        list-style:none;
+    }
+    #pagination-clean li, #pagination-clean a{
+        border:solid 1px #DEDEDE
+        margin-right:2px;
+    }
+
+    #pagination-clean .next a,
+    #pagination-clean .previous a {
+        font-weight:bold;
+        font-size: 13px;
+        border:solid 1px #FFFFFF;
+    }
+    #pagination-clean .active{
+        color:#00000
+        font-weight:bold;
+        display:block;
+       float:left;
+        padding:0px 5px;
+    }
+    #pagination-clean a:link,
+    #pagination-clean a:visited {
+        color:#0033CC
+        display:block;
+        float:left;
+        padding:3px 5px;
+        text-decoration:none;
+    }
+    #pagination-clean a:hover{
+        text-decoration:none;
+    }
+
+    /* style the current page */
+    #pagination-clean .active a:link,
+   #pagination-clean .active a:visited {
+        color:#0033CC
+        display:block;
+        float:left;
+        padding:3px 5px;
+        text-decoration:none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    #pagination-clean .active a:hover{
+        text-decoration:none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+ </style>  
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[     
+       
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
+{% endblock javascripts %}
+
+{% block content %}
+<div class="page-header">
+  <h1>AnthroWatch Reports</h1>
+</div>
+<div class="module">
+
+<h2>Analyzed Growth Monitor Surveys by period and location</h2>
+<br />
+<form name="getValues" method="GET" action="">
+    <p>Select Period:
+    <input type="text" name="startdate" value="{{ startdate }}" size="12"  class="dateformat-Y-ds-m-ds-d" />
+    To
+    <input type="text" name="enddate" value="{{ enddate }}" size="12"  class="dateformat-Y-ds-m-ds-d" />
+    Location:
+    <select name="location" value="{{ location }}">
+        <option value="All Districts"
+                {% ifequal selected_location "All Districts" %}
+                selected="selected"
+                {% endifequal %} >All Districts
+        </option>
+        {% for facility in locations %}
+        <option value="{{ facility }}"
+                {% ifequal facility selected_location %}
+                selected="selected"
+                {% endifequal %} >
+                {{ facility }}
+        </option>
+        {% endfor %}
+    </select>
+    Status:
+    <select name="status" value="{{ status }}" id="">
+        {% for option in  stat_options %}
+            <option value="{{ option }}"
+            {% ifequal option selected_status %}
+                selected="selected"
+            {% endifequal %}>{{ option }}</option>
+        {% endfor %}
+    </select>
+    Action taken:
+    <select name="action_taken" id="" value="{{ action_taken }}">
+        {% for action in action_options %}
+            <option value="{{ action }}"
+            {% ifequal action selected_action %}
+                 selected="selected"
+             {% endifequal %}>{{ action }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" name="SubmitValues" value="Ok" />
+    </p>
+</form>
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date Submitted</th><th>Facility</th><th>District</th><th>Healthworker</th><th>Child ID</th><th>Sex</th><th>Date of Birth</th><th>Age</th><th>Height</th><th>Weight</th><th>Oedema</th><th>MUAC</th><th>Weight for Height Z</th><th>Wasting</th><th>Weight for Age Z</th><th>Underweight</th><th>Height for Age Z</th><th>Stunting</th><th>Data Quality</th><th>Action Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ass in ass_list.object_list %}
+            <tr>
+                <td>{{ ass.date|date:"Y-m-d" }}</td>
+                <td>{{ ass.healthworker.clinic }}</td>
+                <td>{{ ass.healthworker.clinic.parent.name }}</td>
+                <td title="Contact on {{ ass.healthworker.default_connection.identity }}">{{ ass.healthworker.name }}</td>
+                <td>{{ ass.patient.code }}</td>
+                <td>{{ ass.patient.gender }}</td>
+                <td>{{ ass.patient.date_of_birth }}</td>
+                <td>{{ ass.patient.age_in_months }}</td>
+                <td>{{ ass.height|default:"<span class='x'>X</span>" }}</td>
+                <td>{{ ass.weight|default:"<span class='x'>X</span>" }}</td>
+                <td {% if ass.oedema %}class="oedema"{% endif %}>{{ ass.oedema|yesno:"Yes,No, " }}</td>
+                <td {% if ass.muac %}class="{{ ass.get_wasting_display|slugify }}"{% endif %}>{{ ass.muac|default:"<span class='x'>X</span>" }}</td>
+                <td {% if ass.weight4height %}class="{{ ass.get_wasting_display|slugify }}"{% endif %}>{{ ass.weight4height|default:"<span class='x'>X</span>" }}</td>
+                <td class="{{ ass.get_wasting_display|slugify }}">{{ ass.get_wasting_display|default:"<span class='x'>X</span>" }}</td>
+                <td class="{{ ass.get_underweight_display|slugify }}">{{ ass.weight4age|default:"<span class='x'>X</span>" }}</td>
+                <td class="{{ ass.get_underweight_display|slugify }}">{{ ass.get_underweight_display|default:"<span class='x'>X</span>" }}</td>
+                <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.height4age|default:"<span class='x'>X</span>" }}</td>
+                <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display|default:"<span class='x'>X</span>" }}</td>
+                <td>{{ ass.get_status_display }}</td>
+                <td>{% if ass.action_taken == 'XX' %} <span class='x'>X</span> {% else %} {{ ass.get_action_taken_display }} {% endif %}</td> 
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="20">&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+    <div>
+        <ul id="pagination-clean">
+        {% if ass_list.has_previous %}
+            <li class="previous"><a href="?page={{ass_list.previous_page_number }}&location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}&action_taken={{ selected_action }}&status={{ selected_status }}">Previous</a></li>
+        {% endif %}
+        {% for pg in ass_list.paginator.page_range %}
+            {% if ass_list.number == pg %}
+              <li class="active"><a href="?page={{ pg }}&location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}&action_taken={{ selected_action }}&status={{ selected_status }}">{{ pg }}</a></li>
+            {% else %}
+              <li><a href="?page={{ pg }}&location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}&action_taken={{ selected_action }}&status={{ selected_status }}">{{ pg }}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if ass_list.has_next %}
+            <li class="next"><a href="?page={{ass_list.next_page_number }}&location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}&action_taken={{ selected_action }}&status={{ selected_status }}">Next</a></li>
+        {% endif %}
+        </ul>
+    </div>
+</div>
+<div class="toolbar">
+    <a href="/growth/csv/assessments/?location={{ selected_location }}&startdate={{ startdate }}&enddate={{ enddate }}&action_taken={{ selected_action }}&status={{ selected_status }}" class="export">Export Analyzed Surveys</a>
+</div>
+<h3>Legend</h3>
+  <p>
+    C-R = Counseling to reinforce good practices
+    <br />
+    C-OFP = Counseling to optimal feeding practices
+    <br />
+    R-SFP = Refer to supplementary Feeding Programme
+    <br />
+    R-OTP = Refer to Outpatient Therapeutic Programme
+    <br />
+    R-NRU = Refer to Nutrition Rehabilitation Unit
+    <br />
+    X = Indicator was not reported on
+  </p>
+</div>
+
+<div class="module">
+<h2>Raw Survey Entries</h2>
+
+<div class="toolbar">
+   	<a href="/growth/csv/surveyentries/" class="export">Export Raw Survey Entries</a>
+</div>
+
+</div>
+{% endblock %}

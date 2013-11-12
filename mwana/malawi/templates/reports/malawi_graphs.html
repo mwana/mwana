@@ -1,0 +1,237 @@
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+{% extends "base.html" %}
+{% load forms_tags %}
+{% load labresults_tags %}
+
+{% block title %}Results160 Analysis - RapidSMS for Health{% endblock %}
+
+{% block javascripts %}
+  {{ block.super }}
+  <script type="text/javascript"
+  src="http://www.google.com/jsapi"></script>
+
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+    </script>
+    <script type="text/javascript">
+      function drawVisualization() {
+          drawPositivity();
+          drawReportOne();
+          drawReportTwo();
+          drawSentResults();
+      }
+
+      function drawPositivity() {
+        // Create and populate the data table.
+
+        var data = google.visualization.arrayToDataTable([
+          ['Samples', 'Count'],
+          ['Positive', {{ tt_positive|safe }}],
+          ['Negative', {{ tt_negative|safe }}],
+          ['Rejected', {{ tt_rejected|safe }}]
+        ]);
+
+        // Create and draw the visualization.
+        new google.visualization.PieChart(document.getElementById('positivity')).
+            draw(data, {title:"Percentage positivity", colors:
+        ['#dc3912', '#109618', '#dddddd']});
+      }
+
+
+      function drawReportOne() {
+        // Create and populate the data table.
+        var data = google.visualization.arrayToDataTable([
+          ['Selected period', 'Positive', 'Negative', 'Rejected', 'Tested', 'Verified', 'Retrieved'],
+          ['{{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}', {{ tt_positive|safe }}, {{ tt_negative|safe }}, {{ tt_rejected|safe }}, {{ tt_tested|safe }}, {{ tt_verified|safe }}, {{ tt_retrieved|safe}}],
+
+        ]);
+
+        // Create and draw the visualization.
+        new google.visualization.ColumnChart(document.getElementById('report_one')).
+            draw(data,
+                 {title:"Results in selected period for {{ selected_location }}",
+                  width:600, height:400,
+                  hAxis: {title: "Selected period"},
+                  colors: ['#dc3912', '#109618', '#dddddd', '#3366cc', '#ff9900', '#990099']}
+            );
+      }
+
+      function drawReportTwo() {
+        // Create and populate the data table.
+        var data = google.visualization.arrayToDataTable([
+          ['Selected period', 'New', 'Notified', 'Updated', 'Unprocessed', 'Total Pending'],
+          ['{{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}', {{ tt_new|safe }}, {{ tt_notified|safe }}, {{ tt_updated|safe }}, {{ tt_unprocessed|safe }}, {{ tt_pending|safe }}],
+
+        ]);
+
+        // Create and draw the visualization.
+        new google.visualization.ColumnChart(document.getElementById('report_two')).
+            draw(data,
+                 {title:"Results in selected period for {{ selected_location }}",
+                  width:600, height:400,
+                  hAxis: {title: "Selected period"}}
+            );
+      }
+
+      function drawSentResults() {
+        var data = google.visualization.arrayToDataTable({{ graph_data|safe }});
+
+        new google.visualization.BarChart(document.getElementById('sent_results')).
+            draw(data,
+                 {title:"Sent Results",
+                  width:'700', height: '800',
+                  hAxis: {title: "Results sent"},
+                  vAxis: {title: "Date"}}
+                );
+      }
+
+      google.setOnLoadCallback(drawVisualization);
+    </script>
+
+<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/datepicker.js"></script>
+<script type="text/javascript">
+    // <![CDATA[
+
+    datePickerController.addEvent(window, "load", function() {
+          var start_opts = {
+            // The ID of the associated form element
+            id:"startdate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          var end_opts = {
+            // The ID of the associated form element
+            id:"enddate",
+            // The date format to use
+            format:"Y-ds-m-ds-d",
+
+            // Do we hide the today button
+            noToday:true,
+            // Do we show weeks along the left hand side
+            showWeeks:true,
+
+            // Do we fill the entire grid with dates
+            fillGrid:true,
+          };
+          datePickerController.createDatePicker(start_opts);
+          datePickerController.createDatePicker(end_opts);
+    });
+
+    // ]]>
+</script>
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet"
+      href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+<link rel="stylesheet" href="{{ STATIC_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+{% endblock %}
+
+{% block content %}
+{# TODO: Find a better way of displaying the reports to avoid repeating code #}
+<div class="page-header">
+  <h1>Results160 Analysis</h1>
+</div>
+<div>
+  <div class="left">
+    <div class="module">
+       <h2>Results160 Reports in period {{startdate}} to {{enddate}}</h2>
+      <br>
+      <form name="getValues" action="" method="GET">
+        <p>Select Period
+          <input type="text" name="startdate" size="9" value='{{ startdate|date:"Y-m-d" }}' />
+          to
+          <input type="text" name="enddate" size="9" value="{{ enddate|date:"Y-m-d"  }}" />
+      Location:
+      <select name="location" value="{{ location }}">
+        <option value="All Districts"
+            {% ifequal selected_location "All districts" %}
+            selected="selected"
+            {% endifequal %}>
+          All Districts</option>
+        {% for location in districts %}
+        <option value="{{ location }}"
+            {% ifequal selected_location location %}
+            selected="selected"
+            {% endifequal %}>
+          {{ location }}</option>
+        {% endfor %}
+      </select>
+          <input type="submit" value="Ok" name="SubmitValues" /></form>
+
+      <p>Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b>
+    by <b>{{ user.username|title }}</b></p>
+
+      <div>
+         <h3>Percentage (%) Positivity of selected sample data for {{total_dbs}} samples processed from
+		{{startdate}} to {{enddate}}</h3>
+         <div id="positivity" style="width: 700px; height: 400px;">
+
+        </div>
+        <p align="center"><h3>Results160 Report 1 - Results
+            Tested By Lab and Received By Facilities between
+        StartDate: {{startdate}} Enddate: {{enddate}} |
+<a href="{% url 'csv_report_one' %}?location={{selected_location}}&start_date={{startdate}}&end_date={{enddate}}">Export CSV</a></h3>
+    <p><b>DEFINITION  - Tested - means processed by lab
+        and result recorded,  Verified – means lab have
+        approved its release,  Received - means facilities
+        have successfully received the results via
+        SMS</b></p>
+    <p></p>
+    <div id="report_one" style="width: 700px; height: 400px;">
+
+    </div>
+    <br>
+          <h3>Results160 Report 2 - Pending Results for Clinics between
+        StartDate: {{startdate}} Enddate: {{enddate}}
+      </h3>
+    <p></p>
+    <p><b>DEFINITION  -  Shows the number of samples recorded as received
+        at laboratory,  but not yet received by facility via SMS. New -
+        A fresh result from the lab, Notified - Clinic has been notified of
+        new result, Updated - record has been updated from the lab,
+        Unprocessed - At lab, not processed yet.</b></p>
+    <br>
+    <div id="report_two" style="width: 700px; height: 400px;">
+
+    </div>
+
+    <br>
+        <h3>Results160 Report 3 - Trends of Result Retrieval in period between
+      StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+    <br>
+    <p><b>DEFINITION  -  Shows the frequency of result retrieval over the
+        selected period</b></p>
+    <p>
+          Showing a total of {{ tt_in_graph }} results received in the
+          period {{startdate|date:"j M Y"}} to {{enddate|date:"j M Y"}}
+        </p>
+
+    <div id="sent_results" style="width: 700px; height: 800px;">
+
+    </div>
+
+      </div>
+
+    </div>
+  </div>
+  <div class="clear-hack"></div>
+</div>
+
+</div>
+{% endblock %}

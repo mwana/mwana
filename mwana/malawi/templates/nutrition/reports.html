@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load django_tables2 %}
+
+{% block title %}AnthroWatch Reports - RapidSMS for Health{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" 
+      href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" />
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>AnthroWatch Reports</h1>
+</div>
+<div class="module">
+
+<h2>Analyzed Growth Monitor Surveys by period and location</h2>
+<br />
+<form name="getValues" method="GET" action="">
+    <p>Select Period: 
+    <input type="text" name="startdate" value="{{ startdate }}" size="12"/>
+    To
+    <input type="text" name="enddate" value="{{ enddate }}" size="12"/>
+    Location:
+    <select name="location" value="{{ location }}">
+        <option value="All Districts"
+                {% ifequal selected_location "All Districts" %}
+                selected="selected"
+                {% endifequal %} >All Districts
+        </option>
+        {% for facility in locations %}
+        <option value="{{ facility }}"
+                {% ifequal facility selected_location %}
+                selected="selected"
+                {% endifequal %} >
+                {{ facility }}
+        </option>
+        {% endfor %}
+    </select>
+    <input type="submit" name="SubmitValues" value="Ok" />
+    </p>
+</form>
+
+{% render_table table %}
+
+<div class="toolbar">
+    <a href="{% url 'growth_assessments' %}?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}" class="export">{% trans "Export Analyzed Surveys" %}</a>
+</div>
+</div>  
+
+<style type="text/css" media="screen">
+ul.pagination {
+border:0; margin:0; padding:5px; list-style-type:none; 
+text-align:center; width:940px; margin-top:8px;}
+ul.pagination li {font-size:12px; font-weight:bold; display:inline;}
+li.previous {margin-left:-35px; margin-right:350px;}
+li.current {}
+li.next {float:right; margin-left:350px; margin-right:20px;} 
+</style>
+
+<div class="module">
+<h2>Raw Survey Entries</h2>
+
+<div class="toolbar">
+   	<a href="{% url 'growth_surveyentries' %}" class="export">{% trans "Export Raw Survey Entries" %}</a>
+</div>
+
+</div>  
+{% endblock %}
