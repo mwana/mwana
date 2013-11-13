@@ -163,7 +163,45 @@ class SMSRecordsTable(Table):
     class Meta:
         order_by = "-date"
 
+class ANCDeliveryTable(Table):
+    pregnant = NamedColumn(col_name='Pregnant Women')
+    two_anc = NamedColumn(col_name='2 ANC')
+    three_anc = NamedColumn(col_name='3 ANC')
+    four_anc = NamedColumn(col_name='4+ ANC')
+    facility = NamedColumn(col_name='Facility')
+    home = NamedColumn(col_name='Unknown')
+    gestational_age = NamedColumn(col_name='Gestational Age @ First ANC')
+    
+class PNCReport(Table):
+    registered_deliveries = NamedColumn(col_name='Registered Deliveries')
+    facility = NamedColumn(col_name='Facility')
+    community = NamedColumn(col_name='Community')
+    six_hour_pnc = NamedColumn(col_name='6 Hour PNC')
+    six_day_pnc = NamedColumn(col_name='6 Day PNC')
+    six_week_pnc = NamedColumn(col_name='6 Week PNC')
+    complete_pnc = NamedColumn(col_name='Complete PNC')
+    mmr = NamedColumn(col_name='MMR')
+    nmr = NamedColumn(col_name='NMR')
+    
+class ReferralReport(Table):
+    emergent_referrals = NamedColumn(col_name='Emergent Referrals')
+    emergent_responses = NamedColumn(col_name='Referrals w/ Response')
+    emergent_response_outcome = NamedColumn(col_name='Referrals w/ response outcome')
+    transport_with_ambulance = NamedColumn(col_name='Transport by Ambulance')
+    average_turnaround_time = NamedColumn(col_name='Average Turnaround Time')
+    common_complication = NamedColumn(col_name='Common Obstetric Complication')
 
+class UserReport(Table):
+    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Registered')
+    clinic_workers_active = NamedColumn(col_name='Clinic Workers Active')
+    data_clerks_registered = NamedColumn(col_name='Data Clerks Registered')
+    data_clerks_active = NamedColumn(col_name='Data Clerks Active')
+    cbas_registered = NamedColumn(col_name='CBAs Registered')
+    cbas_active = NamedColumn(col_name='CBAs Active')
+    error_rate_clinic_workers = NamedColumn(col_name='Error Rate: Clinic Workers')
+    error_rate_clinic_workers = NamedColumn(col_name='Error Rate: Data Clerks')
+    error_rate_cbas = NamedColumn(col_name='Error Rate: CBAS')
+    
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y m d ")
     name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.id]))
