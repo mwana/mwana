@@ -137,7 +137,8 @@ message_types = {
              'REG':'Pregnancy',
              'LOOK': 'Lookup',
              'FUP':'ANC',
-             'JOIN':'User'
+             'JOIN':'User',
+             'PP': 'PNC'
              }
 def get_msg_type(message_type):
     try:
