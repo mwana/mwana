@@ -1205,3 +1205,8 @@ def help_manager(request, id):
          "form": form
         },
         context_instance=RequestContext(request))
+    
+def home_page(request):
+    return render_to_response(
+        "smgl/home.html",
+        )
