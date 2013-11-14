@@ -137,23 +137,28 @@ message_types = {
              'REG':'Pregnancy',
              'LOOK': 'Lookup',
              'FUP':'ANC',
-             'JOIN':'User'
+             'JOIN':'User',
+             'PP': 'PNC'
              }
-def get_msg_type(message_type):
-    try:
-        title = message_types[message_type.upper()]
-    except KeyError:
-        title = message_type
-    finally:
-        return title
+def get_msg_type(message):
+    if message.direction == "I":
+        keyword = message.text.split(' ')[0]
+        try:
+            title = message_types[keyword.upper()]
+        except KeyError:
+            title = keyword
+        finally:
+            return title
+    else:
+        #This will need to be filled a little more to so that we can distinguish between valid and error messages.
+        return 'Response'
     
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(col_name="Phone Number", value= lambda cell: cell.object.connection.identity)
     user_name = NamedColumn(link=lambda cell: reverse("sms-user-history", args=[cell.object.connection.contact.id]), col_name="User Name", value= lambda cell: cell.object.connection.contact.name.title())
     msg_type = NamedColumn(col_name="Type",
-                      #value=lambda cell: cell.object.text.split(' ')[0].upper(),
-                      value=lambda cell: get_msg_type(cell.object.text.split(' ')[0]),
+                      value=lambda cell: get_msg_type(cell.object),
                       sortable=False
                     )
     facility = Column(value=lambda cell: cell.object.connection.contact.location if cell.object.connection.contact else '')
