@@ -316,7 +316,7 @@ class GrowthHandler(KeywordHandler):
         ass.save()
         return ass
 
-    def _check_wasting(self, ass):
+    def _check_wasting(self, ass, healthworker):
         """Creates a patient event for SAM if child is wasting"""
         if (ass.wasting == 'S'):
             event = "RUTF"
@@ -466,7 +466,7 @@ class GrowthHandler(KeywordHandler):
             ass = self._get_who_categories(ass, survey)
 
             # check for wasting
-            self._check_wasting(ass)
+            self._check_wasting(ass, healthworker)
 
             # update survey averages
             self._update_survey_averages(ass, survey, survey_entry, results)
