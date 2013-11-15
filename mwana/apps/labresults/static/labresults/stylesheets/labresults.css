@@ -130,3 +130,11 @@ div.module div.toolbar a, div.module div.toolbar span {
 div.toolbar {
     clear:both;
 }
+
+div.flush {
+   margin-left: -15px;
+}
+
+form {
+   border: 0;
+}

@@ -118,5 +118,9 @@ form div.map-shim-hack {
 		}
 
 .flush {
-    margin-left: 0; 
+    margin-left: -15px; 
+}
+
+form {
+   border: 0;
 }
