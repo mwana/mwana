@@ -29,8 +29,8 @@ from mwana.apps.nutrition.models import Assessment
 from mwana.apps.nutrition.models import Contact
 from mwana.apps.nutrition.models import Survey, SurveyEntry
 
-from mwana.apps.reminders.models import PatientEvent
-
+from mwana.apps.reminders.models import PatientEvent, Event
+from mwana import const
 
 logger = logging.getLogger(__name__)
 
@@ -316,12 +316,20 @@ class GrowthHandler(KeywordHandler):
         ass.save()
         return ass
 
-    def _check_wasting(self, ass, healthworker):
+    def _get_event(self, slug):
+        """
+        Returns a single matching event based on the slug, allowing for
+        multiple |-separated slugs in the "slug" field in the database.
+        """
+        for event in Event.objects.filter(slug__icontains=slug):
+            keywords = [k.strip().lower() for k in event.slug.split('|')]
+            if slug in keywords:
+                return event
+
+    def _check_wasting(self, ass, healthworker, patient):
         """Creates a patient event for SAM if child is wasting"""
         if (ass.wasting == 'S'):
-            event = "RUTF"
-            # import pdb
-            # pdb.set_trace()
+            event = self._get_event('rutf')
             sam_date = date.today()
             if healthworker and healthworker.location:
                 child, created = Contact.objects.get_or_create(
@@ -466,7 +474,7 @@ class GrowthHandler(KeywordHandler):
             ass = self._get_who_categories(ass, survey)
 
             # check for wasting
-            self._check_wasting(ass, healthworker)
+            self._check_wasting(ass, healthworker, patient)
 
             # update survey averages
             self._update_survey_averages(ass, survey, survey_entry, results)
