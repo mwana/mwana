@@ -233,6 +233,155 @@ def anc_delivery_report(request):
         },
         context_instance=RequestContext(request))
 
+def pnc_report(request):
+    records = []
+    facility_parent = None
+    start_date, end_date = get_default_dates()
+
+    province = district = facility = None
+
+    visits = FacilityVisit.objects.all()
+    records_for = Location.objects.filter(type__singular='district')
+
+    if id:
+        facility_parent = get_object_or_404(Location, id=id)
+        # Prepopulate the district
+        if not request.GET:
+            update = {u'district_0': facility_parent.name,
+                      u'district_1': facility_parent.id,
+                      u'start_date': start_date,
+                      u'end_date': end_date
+                      }
+            request.GET = request.GET.copy()
+            request.GET.update(update)
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+        # determine what location(s) to include in the report
+        if id:
+            # get district facilities
+            records_for = get_location_tree_nodes(facility_parent, None)
+            if district:
+                records_for = get_location_tree_nodes(district, None, ~Q(type__slug='zone'))
+                if facility_parent != district:
+                    redirect_url = reverse('district-stats',
+                                            args=[district.id])
+                    params = urllib.urlencode(request.GET)
+                    full_redirect_url = '%s?%s' % (redirect_url, params)
+                    return HttpResponseRedirect(full_redirect_url)
+            if facility:
+                records_for = [facility]
+        else:
+            if province:
+                records_for = Location.objects.filter(parent=province)
+            if district:
+                records_for = [district]
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    for place in records_for:
+        locations = Location.objects.all()
+        if not id:
+            reg_filter = {'district': place}
+            visit_filter = {'location__in': [x for x in locations \
+                                if get_current_district(x) == place]}
+        else:
+            reg_filter = {'location': place}
+            visit_filter = {'location': place}
+
+        # Get PregnantMother count for each place
+        if not id:
+            district_facilities = [x for x in locations \
+                                if get_current_district(x) == place]
+            pregnancies = PregnantMother.objects \
+                            .filter(location__in=district_facilities)
+        else:
+            pregnancies = PregnantMother.objects.filter(location=place)
+
+        pregnancies = filter_by_dates(pregnancies, 'created_date',
+                                 start=start_date, end=end_date)
+
+        r = {'location': place.name}
+
+        r['location_id'] = place.id
+        births = BirthRegistration.objects.filter(**reg_filter)
+
+        # utilize start/end date if supplied
+        births = filter_by_dates(births, 'date',
+                                 start=start_date, end=end_date)
+        r['births_com'] = births.filter(place='h').count()
+        r['births_fac'] = births.filter(place='f').count()
+        r['births_total'] = r['births_com'] + r['births_fac']
+
+        deaths = DeathRegistration.objects.filter(**reg_filter)
+        deaths = filter_by_dates(deaths, 'date',
+                                 start=start_date, end=end_date)
+
+
+        pos_visits = mothers.filter(facility_visits__visit_type='pos') \
+                            .annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
+
+        r['pos1'] = r['pos2'] = r['pos3'] = 0
+        num_visits = {}
+        for num in pos_visits:
+            if num in num_visits:
+                num_visits[num] += 1
+            else:
+                num_visits[num] = 1
+        for i in range(1, 4):
+            key = 'pos{0}'.format(i)
+            if i in num_visits:
+                r[key] = num_visits[i]
+
+        records.append(r)
+    mmr = ''
+    nmr = '' 
+    # handle sorting, since djtables won't sort on non-Model based tables.
+    records = sorted(records, key=itemgetter('location'))
+    if request.GET.get('order_by'):
+        sort = False
+        attr = request.GET.get('order_by')
+        if attr.startswith('-'):
+            sort = True
+        attr = attr.strip('-')
+        try:
+            records = sorted(records, key=itemgetter(attr))
+        except KeyError:
+            pass
+        if sort:
+            records.reverse()
+
+  
+
+    statistics_table = StatisticsLinkTable(records,
+                                           request=request)
+    # disable the link column if on district stats view
+    if id:
+        statistics_table = StatisticsTable(records,
+                                           request=request)
+    return render_to_response(
+        "smgl/statistics.html",
+        {"statistics_table": statistics_table,
+         "district": facility_parent,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+  
+def referral_report(request):
+    referrals = Referral.objects.all()
+    
     
 
 def mothers(request):
