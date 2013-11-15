@@ -1,10 +1,10 @@
-{% extends "layout.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 {% block title %}AnthroWatch Analysis - RapidSMS for Health{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
-<link rel="stylesheet" href="{{ STATIC_URL }}malawi/stylesheets/datepicker.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="{{ STATIC_URL }}malawi/stylesheets/daterangepicker-bs2.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="{{ STATIC_URL }}labresults/stylesheets/labresults.css" type="text/css" media="screen" />
 <style type="text/css" media="print">
     div.pagebreak {
@@ -180,102 +180,91 @@
 
 </script>
 
-<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/datepicker.js"></script>
-<script type="text/javascript">
-    // <![CDATA[     
-       
-    datePickerController.addEvent(window, "load", function() {
-          var start_opts = {
-            // The ID of the associated form element
-            id:"startdate",
-            // The date format to use
-            format:"Y-ds-m-ds-d",
-
-            // Do we hide the today button
-            noToday:true,
-            // Do we show weeks along the left hand side
-            showWeeks:true,
-
-            // Do we fill the entire grid with dates
-            fillGrid:true,
-          };
-          var end_opts = {
-            // The ID of the associated form element
-            id:"enddate",
-            // The date format to use
-            format:"Y-ds-m-ds-d",
-
-            // Do we hide the today button
-            noToday:true,
-            // Do we show weeks along the left hand side
-            showWeeks:true,
-
-            // Do we fill the entire grid with dates
-            fillGrid:true,
-          };
-          datePickerController.createDatePicker(start_opts);
-          datePickerController.createDatePicker(end_opts);
-    });
-
-    // ]]>
-</script>
+<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/moment.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/daterangepicker.js"></script>
 {% endblock javascripts %}
 
 {% block content %}
+<div class="span12">
+
 <div class="page-header">
   <h1>AnthroWatch Analysis</h1>
 </div>
+<!-- <h3>Report Options</h3> -->
+<form method="GET" id="remindmi_options" action="">
+<div class="well flush row-fluid">
+  <div class="span12">
+    <!-- Legend ? -->
+    <div class="row-fluid">
+      <div class="span4">
+	<!-- r1c1 -->
+	<label for="location">Location:</label>
+	<select name="location" id="location" value="{{location}}" class="pull-right">
+          <option value="All Districts"  
+                  {% ifequal selected_location "All Districts" %}
+                  selected="selected" 
+                  {% endifequal %}>All Districts</option>
+          {% for location in districts %}
+          <option value="{{ location }}"
+		  {% ifequal selected_location location %} 
+		  selected="selected" 
+		  {% endifequal %}>{{ location }}</option>
+	  {% endfor %}
+        </select>	
+	<div class="row-fluid">
+	  <div class="span12">
+	    <br />
+	    <!-- r2c1 -->
+	    <label for="startage">Age from (months):</label>
+	    <input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" class="pull-right"/>
+	  </div>
+	</div>
+      </div>
+      <div class="span4">
+	<!-- r1c2 -->
+	<label for="gender">Gender:</label>
+	<select name="gender" id="gender" value="" class="pull-right">
+	  {% for key, value in gender_opts.items %}
+	  <option value="{{ value }}"
+	          {% ifequal selected_gender value %}
+	          selected="selected"
+	          {% endifequal %}>{{ key }}</option>
+	  {% endfor %}
+	</select>
+	<div class="row-fluid">
+	  <div class="span12">
+	    <br />
+	    <!-- r2c2 -->
+	    <label for="endage">Age to (months):</label>
+	    <input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" class="pull-right"/>
+	  </div>
+	</div>
+      </div>
+      <div class="span4">
+	<!-- r1c3 -->
+	<div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
+	  <i class="glyphicon glyphicon-calendar icon-calendar icon-large"></i>
+	  <span></span> <b class="caret"></b>
+	</div>
+	<script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/reportrange.js"></script>
+	<div class="row-fluid">
+	  <div class="span12">
+	    <br />
+	    <!-- r2c3 -->
+	    <input type="hidden" name="startdate" value='{{startdate}}' id="startdate" />
+	    <input type="hidden" name="enddate" value='{{enddate}}' id="enddate" />
+	    <button type="submit" class="btn btn-primary pull-right" id="update_report" name="update_report">Update Report</button>
+	  </div>
+	</div>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+ 
 	<div class="module">
 	  
 	<div id="graphs" class="module">
-	  <h2>Report Options</h2>
-	  <form method="GET" id="options" action="">
-	    <table width="700px" cellspacing="0" cellpadding="0" border="0">
-	      <tr>
-	        <td><label for="startdate">From:</label></td>
-	        <td><input type="textbox" name="startdate" value='{{startdate}}' id="startdate" class="dateformat-Y-ds-m-ds-d" /></td>
-	        <td><label for="enddate">To:</label></td>
-	        <td><input type="textbox" name="enddate" value='{{enddate}}' id="enddate" class="dateformat-Y-ds-m-ds-d" /></td>
-	        <td><label for="location">District:</label></td>
-	        <td>
-	          <select name="location" id="location" value="{{location}}">
-	            <option value="All Districts"  
-	                    {% ifequal selected_location "All Districts" %}
-	                    selected="selected" 
-	                    {% endifequal %}>All Districts</option>
-	            {% for location in districts %}
-	            <option value="{{ location }}"
-			    {% ifequal selected_location location %} 
-			    selected="selected" 
-			    {% endifequal %}>{{ location }}</option>
-		    {% endfor %}
-	          </select>
-	        </td>
-	      </tr>
-	      <tr>
-	          <td><label for="gender">Gender:</label></td>
-	          <td>
-	              <select name="gender" id="gender" value="">
-	                  {% for key, value in gender_opts.items %}
-	                  <option value="{{ value }}"
-	                          {% ifequal selected_gender value %}
-	                          selected="selected"
-	                          {% endifequal %}>{{ key }}</option>
-	                  {% endfor %}
-	              </select>
-	          </td>
-	          <td><label for="startage">Age from:</label></td>
-	          <td><input type="textbox" name="startage" value="{{ startage }}" id="{{startage}}" /></td>
-	          <td><label for="endage">Age to:</label></td>
-	          <td><input type="textbox" name="endage" value="{{ endage }}" id="{{endage}}" /></td>
-	      </tr>
-	     <tr>
-	        <td>&nbsp;</td>
-	        <td colspan="5"><input type="submit" name="submit" value="View Report" /></td>
-	      </tr>
-	      
-	    </table>
-	  </form>
 	</div> 
 	<div class="pagebreak"></div>
 
@@ -285,5 +274,6 @@
 	</div>
 
 	<p>Categorization is according to <a href="http://www.who.int/childgrowth/en/">WHO Child Growth Standards</a></p>
+	</div>
 	</div>
 {% endblock content %}

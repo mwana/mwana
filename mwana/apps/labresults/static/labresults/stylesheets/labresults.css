@@ -40,7 +40,7 @@
 }
 
 .module ul {
-    padding: 0.5em;
+    /* padding: 0.5em; */
     padding-top: 0;
     margin: 0.5em 0;
     overflow-y: auto;
@@ -49,9 +49,9 @@
 
 .module li {
     display: block;
-    border: 1px solid #ddd;
-    margin-top: 0.5em;
-    padding: 0.5em;
+    /* border: 1px solid #ddd; */
+    /* margin-top: 0.5em; */
+    /* padding: 0.5em; */
     background: #fff;
 }
 
@@ -125,4 +125,8 @@ h6 {
 
 div.module div.toolbar a, div.module div.toolbar span {
    color: #444;
+}
+
+div.toolbar {
+    clear:both;
 }

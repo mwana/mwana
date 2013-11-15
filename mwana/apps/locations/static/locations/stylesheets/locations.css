@@ -116,3 +116,7 @@ form div.map-shim-hack {
 			padding: 0.5em;
 			color: #4bd;
 		}
+
+.flush {
+    margin-left: 0; 
+}

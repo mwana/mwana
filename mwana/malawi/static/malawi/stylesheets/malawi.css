@@ -47,10 +47,10 @@
     background:#cd0000;
 }
 
-.pagination {
-    padding:16px 0 16px 8px;
-    font-size:13px;
-}
+/* .pagination { */
+    /* padding:16px 0 16px 8px; */
+    /* font-size:13px; */
+/* } */
 
   /* nutrition table styles.*/
   td, th {
@@ -77,3 +77,11 @@
   tbody th:last-child,     tbody td:last-child     { border-right-color:  #aaa; }
   tbody tr:last-child th,  tbody tr:last-child td  { border-bottom-color: #aaa; }
   tbody th:first-child,    tbody td:first-child    { border-left-color:   #aaa; }
+
+label {
+    font-weight: 700;
+}
+label, input[type="text"] {
+    float: left;
+    display: block;
+}

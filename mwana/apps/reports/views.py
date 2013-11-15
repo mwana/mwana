@@ -22,7 +22,6 @@ from mwana.apps.reports.webreports.reportcreator import MalawiReports
 from mwana.localsettings import DISTRICTS
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from django.shortcuts import redirect
-from django.contrib.auth.models import User
 
 
 def get_int(val):
@@ -176,7 +175,6 @@ def malawi_graphs(request, location=None):
     percent_rejected_district, tt_positive, tt_negative, \
     tt_rejected = r.dbsr_positivity_data(startdate, enddate, district)
 
-#    pdb.set_trace()
 
     return render_to_response('reports/malawi_graphs.html',
         {'startdate': startdate,
@@ -240,7 +238,7 @@ def dashboard_malawi(request):
     all_msgs = Message.objects.filter(direction__exact='I', text__startswith='All', date__gte=startdate).count()
     return render_to_response("reports/malawi_home.html",
                               {"locations": locations, "results": results,
-                               "startdate": startdate,
+                               "startdate": startdate, "enddate": enddate,
                                'ass_count': ass_count, 'ass_suspect': ass_suspect,
                                'ass_severe': ass_urgent, 'res_count': results.count(),
                                'mothers_registered': mothers,
@@ -564,12 +562,12 @@ def contacts_report(request):
 def get_report_criteria(request):
     today = datetime.today().date()
     try:
-        startdate = text_date(request.REQUEST['start_date'])
+        startdate = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
         startdate = today - timedelta(days=30)
 
     try:
-        enddate = text_date(request.REQUEST['end_date'])
+        enddate = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):
         enddate = datetime.today().date()
 
