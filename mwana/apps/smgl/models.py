@@ -6,6 +6,7 @@ from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
+import datetime
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
@@ -77,6 +78,20 @@ class PregnantMother(models.Model):
 
     reminded = models.BooleanField(default=False)
 
+    @property
+    def has_delivered(self):
+        if not self.edd:
+            return False
+        
+        before_edd = self.edd - datetime.timedelta(days=45)
+        after_edd = self.edd + datetime.timedelta(days=45)
+        try:
+            birth = self.birthregistrationset.filter(date__range=[before_edd, after_edd])[0]
+        except IndexError:
+            return False
+        else:
+            return True
+        
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
