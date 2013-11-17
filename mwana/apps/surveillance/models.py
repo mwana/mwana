@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import ReportingGroup
+from django.contrib.auth.models import User
+from mwana.apps.broadcast.models import BroadcastMessage
 from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.locations.models import Location
 from django.db import models
@@ -19,6 +22,7 @@ class Incident(models.Model):
     An event such as a disease
     """
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
+    lowered_name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     indicator_id = models.CharField(max_length=8, null=True, blank=True, unique=True)
     abbr = models.CharField(max_length=8, null=True, blank=True)
     type = models.CharField(max_length=3, choices=INCIDENT_TYPES, default='dis')
@@ -29,6 +33,7 @@ class Incident(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        self.lowered_name = self.name.lower()
         if self.name == self.name.lower():
             self.name = self.name.title()
         if not self.abbr or self.abbr.strip() == "": self.abbr = None
@@ -39,6 +44,8 @@ class Incident(models.Model):
             Alias.create_alias(self, self.abbr)
         if self.indicator_id:
             Alias.create_alias(self, self.indicator_id)
+        if self.indicator_id:
+            Alias.create_alias(self, self.indicator_id.replace('-', ''))
 
     class Meta:
         ordering = ["name"]
@@ -111,7 +118,7 @@ class Report(models.Model):
     value = models.PositiveSmallIntegerField(null=False, blank=False)
     sex = models.CharField(max_length=1, blank=True, null=True, choices=GENDER_CHOICES)
     age_group = models.ForeignKey(AgeGroup, blank=True, null=True)
-    raw_value = models.CharField(max_length=60, null=False, blank=False, editable=False)
+    raw_value = models.CharField(max_length=120, null=False, blank=False, editable=False)
     date = models.DateField(blank=False, null=False)
     reporter = models.ForeignKey(Contact, blank=True, null=True)
     #Somehow redundant fields but useful for easy and faster reporting
@@ -144,6 +151,8 @@ class Report(models.Model):
         self.year = self.date.year
         self.month = self.date.month
         self.day = self.date.day
+        if Report.objects.filter(date=self.date, incident=self.incident, value=self.value, location=self.location):
+            return
         super(Report, self).save(*args, **kwargs)
 
     class Meta:
@@ -160,3 +169,11 @@ class Separator(models.Model):
     def __unicode__(self):
         return self.text
 
+
+class ImportedReport(models.Model):
+    source_message = models.ForeignKey(BroadcastMessage)
+    report = models.ForeignKey(Report, null=True, blank=True)
+    unparsed = models.CharField(max_length=500, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s => %s" % (self.source_message.text[:100], self.report)

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.surveillance.models import ImportedReport
 from mwana.apps.surveillance.models import Source
 from mwana.apps.surveillance.models import AgeGroup
 from django.contrib import admin
@@ -75,6 +76,11 @@ admin.site.register(Source, SourceAdmin)
 
 admin.site.register(Separator)
 admin.site.register(AgeGroup)
+class ImportedReportAdmin(admin.ModelAdmin):
+    list_display = ('source_message', 'report', 'unparsed')
+    #list_filter = ('source_message', 'report', 'unparsed')
+    #search_fields = ('source_message', 'report', 'unparsed')
 
+admin.site.register(ImportedReport, ImportedReportAdmin)
 
 
