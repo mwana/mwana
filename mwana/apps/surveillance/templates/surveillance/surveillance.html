@@ -14,6 +14,18 @@
         margin: 0.5em auto 0;
         width: 90%;
     }
+    #table-wrapper {
+        position:relative;
+    }
+    #table-scroll {
+        height:150px;
+        overflow:auto;
+        margin-top:20px;
+    }
+    .button {
+        padding: 4px 12px;
+        border-radius: 4px;
+    }
 </style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
@@ -34,7 +46,7 @@
         </tr>
     </thead>
     <tbody>
-    <form name="getValues" action="" method="GET">
+    <form name="getValues" action="" method="POST">{% csrf_token %}
         <tr>
 
             <td ><a id="li_tab1" onclick="tab('tab1')">Show Provinces</a></td>
@@ -50,8 +62,7 @@
             </td>
             <td><input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
             <td><input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
-                <input  style="padding: 4px 12px;  border-radius: 4px;" type="submit" value="Ok" name="SubmitValues" /></td>
-
+                <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" /></td>
         </tr> </form>
 </tbody>
 </table>
@@ -160,24 +171,54 @@
                 <div class="module" id="toupdate">
                     <div id="mousemovemessage">
                     </div>
-                    <div id="spacer"><br>&nbsp;</div>
+                    <div id="incident_edit">
+                        <div title="spacer">
+                            <p>&nbsp;</p>
+                            <p>&nbsp;</p>
+                        </div>
+                        <a onclick="show('table-scroll')" href="#">Edit Diseases {{user_name}} can view</a>
+                        <div id="table-wrapper">
+                            <div id="table-scroll" style="display: none"><form name="postValues" action="" method="POST">{% csrf_token %}
+                                    <input id="cancel-btn" class="button" type="submit" value="Cancel" name="Cancel" onclick="hide('table-scroll')" />
 
+                                    <input class="button" type="submit" value="Save" name="Save" />
+                                    <table border="1">
+                                        <tbody>
+                                            {% autoescape off %}
+                                            {{ incident_grid_select }}
+                                            {% endautoescape %}
+                                        </tbody>
+                                    </table>
+                                    <input id="cancel-btn2" class="button" type="submit" value="Cancel" name="Cancel2" onclick="hide('table-scroll')" />
+                                    <input class="button" type="submit" value="Save" name="Save" />
+                            </div>
+                        </div>
+                    </div>
+                    <div id="spacer"><br>&nbsp;</div>
                 </div>
             </td>
         </tr>
     </tbody>
+
 </table>
-
-
+<input type="hidden" name="update_user_incidents" id="update_user_incidents">
+<input type="hidden" name="{% csrf_token %}" id="csrf_token" value="{% csrf_token %}" >
+</form>
 
 <script type="text/javascript">
     function tab(tab) {
         showNationalData();
         document.getElementById('tab1').style.display = 'none';
         document.getElementById('tab2').style.display = 'none';
-        document.getElementById('li_tab1').setAttribute("class", "");
-        document.getElementById('li_tab2').setAttribute("class", "");
         document.getElementById(tab).style.display = 'block';
+    }
+    function hide(id) {
+        document.getElementById('update_user_incidents').value = '';
+        document.getElementById(id).style.display = 'none';
+    }
+    function show(id) {
+        document.getElementById('update_user_incidents').value = 'True';
+        document.getElementById(id).style.display = 'block';
     }
 </script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
@@ -289,11 +330,9 @@
                 else if(datum.disease_id === disease5){
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
-                }
+                }                
                 
-                
-                data[key] = [d1, d2, d3, d4, d5]
-                
+                data[key] = [d1, d2, d3, d4, d5]                
             }
             else if(((location_type === PROVINCE_TYPE) && (code === datum.province_slug ))) {
                 region = datum.province_name;
@@ -483,10 +522,8 @@
             else if(value < normal_threshold){
                 color = colorChoices[2];
             }
-
             highlightRegion(slug, color);
         }
-
     }
     
 
@@ -531,7 +568,6 @@
     }
     function updateDisplay(str, location_type){
         clearHighlight();
-
         
         current_code = str;
         current_type = location_type;
@@ -543,7 +579,7 @@
         highlightRegions(map_data[0], map_data[1], map_data[2])
         highlightRegions(map_data[3], map_data[4], map_data[5])
 
-        html_code = '<table border="1" width="100%">';
+        html_code = '<table border="1" width="100%" id="data-table">';
         html_code = html_code + '<thead>';
         html_code = html_code + '<tr>';
         html_code = html_code + '<td colspan="6" bgcolor="#eeeeee">' + region + '</td>';
@@ -575,8 +611,13 @@
             html_code = html_code + "</tr>";            
         }
         
-        html_code = html_code + "</table>";
+        html_code = html_code + "</table>\n";
+        html_code = html_code + '<form name="postValues" action="export_to_csv/?filename=SurveyData.csv&my_table=" method="POST">';
+        html_code = html_code + document.getElementById('csrf_token').value
+        html_code = html_code + '<input id="export-to-csv-btn" class="button" type="submit" value="Export to csv" name="export-to-csv-btn" onclick="exportToCsv(\'data-table\')" />';
+        html_code = html_code + '<input type="hidden" name="csv_text" id="csv_text">';
         html_code = html_code + "<p>";
+        html_code = html_code + '</form>';
         var other_diseases = getAvailableCases(str, location_type);
         if(other_diseases.length > 0){
             html_code = html_code + "You can also try the following cases:";
@@ -601,10 +642,23 @@
         }
         catch(error){
             //do something
-        }
-
-                
+        }                
     }
+
+    function stopDefAction(evt) {
+        evt.preventDefault();
+    }
+
+    document.getElementById('cancel-btn').addEventListener(
+    'click', stopDefAction, false
+);
+    document.getElementById('cancel-btn2').addEventListener(
+    'click', stopDefAction, false
+);
+
+    function exportToCsv(table_id) {
+        $("#csv_text").val(document.getElementById('data-table').innerHTML);
+    } 
 
 </script>
 
@@ -628,5 +682,3 @@
 
 </script>
 {% endblock %}
-
-

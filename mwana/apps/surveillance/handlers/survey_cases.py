@@ -33,7 +33,7 @@ class SurveyCaseHandler(KeywordHandler):
             if week_of_year > 53:
                 return None
             # don't go back too far
-            if week_of_year < int((date.today().strftime('%U'))) - 4:
+            if week_of_year < int((date.today().strftime('%U'))) - 6:
                 return None
 
             return week_of_year
@@ -99,7 +99,6 @@ class SurveyCaseHandler(KeywordHandler):
                 elif isinstance(rpr_time, int):
                     report.week_of_year = rpr_time
             
-            msgs =  Message.objects.filter(direction='I', text=self.msg.raw_text, contact=self.msg.contact, date__gt=start_date, date__lt=now )
                        
             report.source =  source
             report.raw_value = case_rpt

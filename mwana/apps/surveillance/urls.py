@@ -5,4 +5,5 @@ from mwana.apps.surveillance import views
 
 urlpatterns = patterns('',
     url(r"^$", views.surveillance, name="surveillance"),
+    url(r"^export_to_csv/$", views.export_to_csv, name="export_to_csv"),
 )

@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.surveillance.models import GroupIncident
+from mwana.apps.surveillance.models import UserIncident
 from mwana.apps.surveillance.models import ImportedReport
 from mwana.apps.surveillance.models import Source
 from mwana.apps.surveillance.models import AgeGroup
@@ -84,3 +86,15 @@ class ImportedReportAdmin(admin.ModelAdmin):
 admin.site.register(ImportedReport, ImportedReportAdmin)
 
 
+class UserIncidentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'incident')
+    list_filter = ('user', 'incident')
+    search_fields = ('user', 'incident')
+admin.site.register(UserIncident, UserIncidentAdmin)
+
+class GroupIncidentAdmin(admin.ModelAdmin):
+    list_display = ('group', 'incident')
+    list_filter = ('group', 'incident')
+    search_fields = ('group', 'incident')
+
+admin.site.register(GroupIncident, GroupIncidentAdmin)

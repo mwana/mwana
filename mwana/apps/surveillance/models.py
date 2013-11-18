@@ -177,3 +177,29 @@ class ImportedReport(models.Model):
 
     def __unicode__(self):
         return "%s => %s" % (self.source_message.text[:100], self.report)
+
+
+class UserIncident(models.Model):
+    """
+    Web user can decide what 'indicators' they want to view apart from those
+    defined at group level
+    """
+    user = models.ForeignKey(User)
+    incident = models.ForeignKey(Incident)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.user, self.incident)
+
+    class Meta:
+        unique_together = (('user', 'incident',),)
+
+
+class GroupIncident(models.Model):
+    group = models.ForeignKey(ReportingGroup)
+    incident = models.ForeignKey(Incident)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.group, self.incident)
+
+    class Meta:
+        unique_together = (('group', 'incident',),)
