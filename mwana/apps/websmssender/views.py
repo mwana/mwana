@@ -14,10 +14,8 @@ from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
 from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
 from mwana.apps.reports.views import read_request
 from mwana.apps.websmssender.smssender import SMSSender
-from django.views.decorators.csrf import csrf_exempt
 
 
-@csrf_exempt
 def send_sms(request):
 
     today = datetime.today().date()
@@ -63,7 +61,8 @@ def send_sms(request):
         if confirmed == 'yes':
             count = sender.send_sms()
             confirmed = "no"
-            meta_infor = "Your message is being sent to %s users" % count
+            meta_infor = "This message has been sent to %s users: %s" % (count, message)
+            message = ""
 
         else:
             get_only_select = True
@@ -73,18 +72,12 @@ def send_sms(request):
             Cancel to quit." % (recipients_count, facs_count))
             confirmed = "yes"
 
-        
-
 
     return render_to_response('websmssender/sendsms.html',
-                              {
-                              
+                              {                              
                               'today': today,
-
                               'formattedtoday': today.strftime("%d %b %Y"),
-                              'formattedtime': datetime.today().strftime("%I:%M %p"),
-
-                              
+                              'formattedtime': datetime.today().strftime("%I:%M %p"),                              
                               'confirm_message': confirm_message,
                               'confirmed': confirmed,
                               'recipients_count': recipients_count,
