@@ -1,13 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
 import csv
+from datetime import datetime, timedelta, date
 
 from django.http import HttpResponse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from django.views.generic.list import ListView
 from django.db.models import Q
 
-from mwana.apps.nutrition.views import DISTRICTS, get_report_criteria
+from mwana.apps.nutrition.views import DISTRICTS
 from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.locations.models import Location
 
@@ -55,8 +55,9 @@ def malawi_reports(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     locations = sorted(DISTRICTS)
-    remindmis = PatientEvent.objects.filter(Q(date_logged__gte=startdate),
-                                        Q(date_logged__lte=enddate)).order_by('-date')
+    remindmis = PatientEvent.objects.filter(
+        Q(date_logged__gte=startdate),
+        Q(date_logged__lte=enddate)).order_by('-date')
     mothers = remindmis.filter(event__name="Care program")
     children = remindmis.filter(event__name="Birth")
     if selected_location == "All Districts":
@@ -70,7 +71,7 @@ def malawi_reports(request):
                'selected_location': selected_location, 'startdate': startdate,
                'enddate': enddate, 'districts': locations}
     return render_to_response(template_name, context,
-        context_instance=RequestContext(request))
+                              context_instance=RequestContext(request))
 
 
 def csv_mother_count(request):
@@ -125,3 +126,37 @@ def export(headers, keys, objects, file_name):
         writer.writerow(row)
 
     return response
+
+
+def get_report_criteria(request):
+    today = datetime.today().date()
+    try:
+        startdate = text_date(request.REQUEST['startdate'])
+    except (KeyError, ValueError, IndexError):
+        startdate = today - timedelta(days=30)
+
+    try:
+        enddate = text_date(request.REQUEST['enddate'])
+    except (KeyError, ValueError, IndexError):
+        enddate = datetime.today().date()
+
+    #startdate = min(startdate1, enddate1, datetime.today().date())
+    #enddate = min(max(enddate1, startdate1), datetime.today().date())
+
+    try:
+        district = request.REQUEST['location']
+    except (KeyError, ValueError, IndexError):
+        district = "All Districts"
+
+    return district, startdate, enddate
+
+
+def text_date(text):
+    delimiters = ('-', '/')
+    for delim in delimiters:
+        text = text.replace(delim, ' ')
+    a, b, c = text.split()
+    if len(a) == 4:
+        return date(int(a), int(b), int(c))
+    else:
+        return date(int(c), int(b), int(a))
