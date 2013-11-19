@@ -1,20 +1,21 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.surveillance.models import UserIncident
+import csv
 from datetime import date
 from datetime import timedelta
+import htmlentitydefs as ht
+import re
 
+from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from mwana.apps.reports.utils.htmlhelper import get_incident_grid_selector
 from mwana.apps.locations.models import Location
+from mwana.apps.reports.utils.htmlhelper import get_incident_grid_selector
 from mwana.apps.reports.utils.htmlhelper import get_incident_report_html_dropdown
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.apps.surveillance.models import Incident
 from mwana.apps.surveillance.models import Report
+from mwana.apps.surveillance.models import UserIncident
 from mwana.const import MWANA_ZAMBIA_START_DATE
-import csv
-from django.http import HttpResponse
-import re
 
 
 def assign_new_indicators(user, ids):
@@ -26,18 +27,30 @@ def assign_new_indicators(user, ids):
     for incident in incidents:
         UserIncident.objects.get_or_create(user=user, incident=incident)
 
+def htmltable_to_rows(html_table):
+    # Found it more satisfactory to do my own implementation.
+    # Had trouble having BeautifulSoup to work on local machine. table2CSV.js
+    # had shortcomings
+    to_return = []
+    a = html_table.replace('</td>', '|').replace('</th>', '|').replace('</tr>', '\n')    
+    c = re.sub('<.*?>', '', a)
+    for k, v in ht.name2codepoint.items():
+        c = c.replace("&%s;" % k, unichr(int(v)))
+    
+    for t in c.split('\n'):
+        to_return.append(t.split('|')[:-1])
+    return to_return
+
 def export_to_csv(request):
     file_name = dict(request.REQUEST).get('filename') or "somefilename.csv"
     data = dict(request.REQUEST).get('csv_text') or ""    
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="%s"' % file_name
 
-    writer = csv.writer(response)
-    # found it more satisfactory to do my own implementation
-    a = data.replace('</td>', '|').replace('</th>', '|').replace('</tr>', '\n')
-    c= re.sub('<.*?>', '', a)
-    for t in c.split('\n'):
-        writer.writerow(t.split('|')[:-1])
+    writer = csv.writer(response, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    
+    for row in htmltable_to_rows(data):
+        writer.writerow(row)
         
     return response
 
