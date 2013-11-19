@@ -61,9 +61,9 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case 10 10 2013, malaria 10, cholera=12
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
             rb > case 40, malaria 11
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
         """
         self.runScript(script)
 
@@ -87,9 +87,9 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case 10 10 2013, malaria=12,
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
             rb > case 40, mal 11
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
         """
         self.runScript(script)
 
@@ -110,9 +110,9 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case 10 10 2013, malaria 10, cholera=12, TB
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
             rb > case 40, malaria 11, BP
-            rb < Thank you Rupiah Banda for the report for week 40.
+            rb < Thank you Rupiah Banda for the report.
         """
         self.runScript(script)
 

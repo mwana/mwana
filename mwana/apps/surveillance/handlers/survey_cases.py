@@ -120,7 +120,7 @@ class SurveyCaseHandler(KeywordHandler):
         if success:
             source.parsed = Decimal(str((num/len(cases))))
             source.save()
-            self.respond("Thank you %s for the report for week %s." % (self.msg.contact, report.week_of_year))
+            self.respond("Thank you %s for the report." % (self.msg.contact))
         else:
             source.delete()
             self.help()
