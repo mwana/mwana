@@ -121,4 +121,5 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
+    "mwana.apps.reminders.handlers.mayi.MayiHandler",
 ]
