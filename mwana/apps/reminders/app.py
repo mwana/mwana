@@ -5,7 +5,6 @@ import rapidsms
 import datetime
 
 from rapidsms.models import Contact
-from rapidsms.router import send
 
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
@@ -40,20 +39,6 @@ class App(rapidsms.apps.base.AppBase):
     )
 
     UNREGISTERED = "Please register before reporting births or mothers. Send JOIN for more help."
-    # def start(self):
-        # self.schedule_notification_task()
-
-    # def schedule_notification_task(self):
-    #     """
-    #     Resets (removes and re-creates) the task in the scheduler app that is
-    #     used to send notifications to CBAs.
-    #     """
-    #     callback = 'mwana.apps.reminders.tasks.send_notifications'
-
-    #     #remove existing schedule tasks; reschedule based on the current setting from config
-    #     EventSchedule.objects.filter(callback=callback).delete()
-    #     EventSchedule.objects.create(callback=callback, hours=[12],
-    #                                  minutes=[0])
 
     def _parse_date(self, date_str):
         """
@@ -123,18 +108,6 @@ class App(rapidsms.apps.base.AppBase):
             if slug in keywords:
                 return event
 
-    def _validate_cell(self, num):
-        if len(num) == 10:
-            if num[:2] == '08':
-                backend_id = 3
-            else:
-                backend_id = 4
-            valid_cell = True
-        else:
-            backend_id = None
-            valid_cell = False
-        return backend_id, valid_cell
-
     def handle(self, msg):
         """
         Handles the actual adding of events.  Other simpler commands are done
@@ -158,15 +131,10 @@ class App(rapidsms.apps.base.AppBase):
         if not event:
             return False
 
-        # handle mayi messages differently.
-        if event_slug == "mayi":
-            self.handle_mayi(msg, event)
-            return True
-
         lang_code = None
-        if msg.contact:
-            cba_name = ' %s' % msg.contact.name
-            lang_code = msg.contact.language
+        if msg.connections[0].contact:
+            cba_name = ' %s' % msg.connections[0].contact.name
+            lang_code = msg.connections[0].contact.language
         else:
             cba_name = ''
 
@@ -188,16 +156,16 @@ class App(rapidsms.apps.base.AppBase):
 
             # make sure the birth date is not in the future
             if date > datetime.datetime.today():
-                msg_future = "Sorry, you can not register a %s with a date "
-                "after today's." % event.name.lower()
+                msg_future = "Sorry, you can not register a %s with a date "\
+                             "after today's." % event.name.lower()
                 msg.respond(msg_future)
                 return True
 
             # fetch or create the patient
-            if msg.contact and msg.contact.location:
+            if msg.connections[0].contact and msg.connections[0].contact.location:
                 patient, created = Contact.objects.get_or_create(
                                             name=patient_name,
-                                            location=msg.contact.location)
+                                            location=msg.connections[0].contact.location)
             else:
                 patient = Contact.objects.create(name=patient_name)
 
@@ -263,93 +231,4 @@ class App(rapidsms.apps.base.AppBase):
                 event_lower=event_name.lower(),
                 event_upper=translator.translate(lang_code, event.name, 1).upper())
             msg.respond(msg_error)
-        return True
-
-    def handle_mayi(self, msg, event):
-        """Handles continuum of care submissions.
-        """
-
-        # Only allow registered HSA's to register mothers for care
-        if not msg.contact:
-            msg.respond(_("Please register as a Mobile agent to register mothers for care."
-                          " send JOIN <HSA> <CLINIC CODE> <ZONE #> <YOUR NAME>"))
-            return True
-
-        if (len(msg.text.split()) > 4):
-            part_msg, cell_number = msg.text.rsplit(" ", 1)
-            msg.text = part_msg
-            date_str, patient_name = self._parse_message(msg)
-            msg.text = " ".join([part_msg, cell_number])
-        else:
-            date_str, patient_name = self._parse_message(msg)
-            cell_number = "x"
-
-        if patient_name:  # the date is not optional
-            if date_str:
-                date = self._parse_date(date_str)
-                if not date:
-                    msg.respond(_("Sorry, I couldn't understand that date. "
-                                "Please enter the date like so: "
-                                "DDMMYY, for example: 271011"))
-                    return True
-            else:
-                msg.respond(_("Sorry, a date is required to register a mother."
-                              "Please calculate the expected date of delivery "
-                              "using the mothers LMP."))
-                return True
-            # fetch or create the patient
-            if msg.contact and msg.contact.location:
-                patient, created = Contact.objects.get_or_create(
-                                            name=patient_name,
-                                            location=msg.contact.location)
-
-            # make sure the contact has the correct type (patient)
-            patient_t = const.get_patient_type()
-            if not patient.types.filter(pk=patient_t.pk).count():
-                patient.types.add(patient_t)
-
-            # validate mothers cell number
-            backend_id, valid_cell = self._validate_cell(cell_number)
-            # create patient_conn
-            if valid_cell:
-                cell_number = "+265" + cell_number[1:]
-                patient_conn = Connection(backend_id=backend_id,
-                                          identity=cell_number,
-                                          contact_id=patient.id)
-            else:
-                patient_conn = None
-
-            # make sure we don't create a duplicate patient event
-            if msg.contact:
-                cba_name = ' %s' % msg.contact.name
-            else:
-                cba_name = ''
-            rsms_id = "Mi" + str(py_cupom.encode(patient.id, 5, True))
-            if patient.patient_events.filter(event=event, date=date).count():
-                #There's no need to tell the sender we already have them in the system.  Might as well just send a thank
-                #you and get on with it.
-                msg.respond(_("Thanks! You have registered "
-                        "%(name)s's LMP as %(date)s. Her RemindMi_ID is %(remind_id)s, you will be notified for "
-                              "%(gender)s next clinic appointment."), gender=event.possessive_pronoun,
-                        date=date.strftime('%d/%m/%Y'), name=patient.name, remind_id=patient.remind_id)
-                return True
-            patient_event = patient.patient_events.create(event=event,
-                                                  date=date,
-                                                  cba_conn=msg.connection,
-                                                  notification_status="cooc")
-            if patient_conn is not None:
-                patient_event.patient_conn=patient_conn
-                patient_event.save()
-            gender = event.possessive_pronoun
-            msg.respond(_("Thanks! You have registered "
-                        "%(name)s's LMP as %(date)s. Her RemindMi_ID is %(rsms_id)s, you will be notified for "
-                        "%(gender)s next clinic appointment."), gender=gender,
-                        rsms_id=rsms_id,
-                        date=date.strftime('%d/%m/%Y'), name=patient.name)
-            patient.remind_id = rsms_id
-            patient.save()
-        else:
-            msg.respond(_("Sorry, I didn't understand that. To register a mother for care, send "
-                      "MAYI <DELIVERY_DATE> <MOTHERS_NAME> <OPTIONAL_MOTHERS_CELL_NUMBER>"))
-
         return True
