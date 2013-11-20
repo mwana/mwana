@@ -172,7 +172,7 @@ class App (rapidsms.apps.base.AppBase):
 
         for connection in connections:
             for resp in responses:
-                msg = msgcls(connection, resp)
+                msg = msgcls([connection], resp)
                 msg.send()
 
         for r in results:

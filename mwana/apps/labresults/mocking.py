@@ -32,6 +32,7 @@ from mwana.const import get_clinic_worker_type
 from rapidsms.log.mixin import LoggerMixin
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
+from rapidsms.router import send
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +99,7 @@ class MockResultUtility(LoggerMixin):
                     for resp in responses:
                         message.respond(resp)
 
-                    message.respond(INSTRUCTIONS, name=message.connection.contact.name)
+                    message.respond(INSTRUCTIONS % dict(name=message.connection.contact.name))
 
                     self.waiting_for_pin.pop(message.connection)
 
@@ -111,8 +112,8 @@ class MockResultUtility(LoggerMixin):
                     for conn in clinic_connections:
                         if conn in self.waiting_for_pin:
                             self.waiting_for_pin.pop(conn)
-                            OutgoingMessage(conn, RESULTS_PROCESSED,
-                                            name=message.connection.contact.name).send()
+                            OutgoingMessage([conn], RESULTS_PROCESSED % dict(
+                                name=message.connection.contact.name)).send()
 
                     self.last_collectors[message.connection.contact.location] = message.connection.contact
                     return True
@@ -156,23 +157,27 @@ class MockResultUtility(LoggerMixin):
             and message.connection.contact.location in self.last_collectors \
             and message.text.strip().upper() == message.connection.contact.pin.upper():
                 if message.connection.contact == self.last_collectors[message.connection.contact.location]:
-                    message.respond(SELF_COLLECTED, name=message.connection.contact.name)
+                    message.respond(SELF_COLLECTED % dict(
+                        name=message.connection.contact.name))
                 else:
-                    message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
-                                    collector=self.last_collectors[message.connection.contact.location])
+                    message.respond(ALREADY_COLLECTED % dict(
+                        name=message.connection.contact.name,
+                        collector=self.last_collectors[message.connection.contact.location]))
                 return True
 
     def fake_pending_results(self, clinic):
         """Notifies clinic staff that results are ready via sms, except
            this is fake!"""
-        contacts = Contact.active.filter(types=const.get_clinic_worker_type()).location(clinic)
+        contacts = Contact.active.filter(
+            types=const.get_clinic_worker_type()).location(clinic)
         results = get_fake_results(3, clinic)
         for contact in contacts:
-            msg = OutgoingMessage(connection=contact.default_connection,
-                                  template=RESULTS_READY,
-                                  name=contact.name, count=len(results))
-            msg.send()
-            self._mark_results_pending(results, msg.connection)
+            msg = RESULTS_READY % dict(
+                name=contact.name,
+                count=len(results))
+            if contact.default_connection is not None:
+                send(msg, [contact.default_connection])
+                self._mark_results_pending(results, contact.default_connection)
 
 
     def _mark_results_pending(self, results, connection):
@@ -322,4 +327,3 @@ class MockSMSReportsUtility(LoggerMixin):
             msg = ("Demo report:\n%s, %s %s EID & Birth Samples\n DBS Totals sent: %s ***\nDBS "
             "Results received; %s ***\nBirths registered; 34" %(name,month,district_name,samples,results))
             OutgoingMessage(hub_woker.default_connection, msg).send()
-
