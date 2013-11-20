@@ -78,12 +78,12 @@ class App (rapidsms.apps.base.AppBase):
             # than wait for them to be initiated by us on a schedule
             results = self._pending_results(clinic, True)
             if results:
-                message.respond(RESULTS_READY, name=message.contact.name,
-                                count=results.count())
-                self._mark_results_pending(results, [message.connection])
+                message.respond(RESULTS_READY % dict(name=message.contact.name,
+                                                     count=results.count()))
+                self._mark_results_pending(results, [message.connections[0]])
             else:
-                message.respond(NO_RESULTS, name=message.contact.name,
-                                clinic=clinic.name)
+                message.respond(NO_RESULTS % dict(name=message.contact.name,
+                                                  clinic=clinic.name))
             return True
         elif message.connection in self.waiting_for_pin \
             and message.connection.contact:
@@ -119,10 +119,12 @@ class App (rapidsms.apps.base.AppBase):
             and clinic in self.last_collectors \
             and message.text.strip().upper() == message.contact.pin.upper():
                 if message.contact == self.last_collectors[clinic]:
-                    message.respond(SELF_COLLECTED, name=message.connection.contact.name)
+                    message.respond(SELF_COLLECTED % dict(
+                        name=message.connection.contact.name))
                 else:
-                    message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
-                                    collector=self.last_collectors[clinic])
+                    message.respond(ALREADY_COLLECTED % dict(
+                        name=message.connection.contact.name,
+                        collector=self.last_collectors[clinic]))
                 return True
         return self.mocker.default(message)
 
@@ -142,7 +144,8 @@ class App (rapidsms.apps.base.AppBase):
             self. pop_pending_connection(message.connection)
         else:
             self.send_results([message.connection], results)
-            message.respond(INSTRUCTIONS, name=message.connection.contact.name)
+            message.respond(INSTRUCTIONS % dict(
+                name=message.connection.contact.name))
 
 #            self.waiting_for_pin.pop(message.connection)
             self. pop_pending_connection(message.connection)

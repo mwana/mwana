@@ -175,11 +175,12 @@ class JoinHandler(KeywordHandler):
             location_type = clinic_code.get_location_type()
             slug = clinic_code.slug
 
-        if is_already_valid_connection_type(self.msg.connections[0], worker_type):
+        if is_already_valid_connection_type(self.msg.connections[0],
+                                            worker_type):
             # refuse re-registration if they're still active and eligible
-            self.respond(self.ALREADY_REGISTERED,
-                         name=self.msg.connections[0].contact.name,
-                         location=self.msg.connections[0].contact.location)
+            self.respond(self.ALREADY_REGISTERED % dict(
+                name=self.msg.connections[0].contact.name,
+                location=self.msg.connections[0].contact.location))
             return False
         try:
             location = Location.objects.get(slug__iexact=slug,
@@ -190,9 +191,9 @@ class JoinHandler(KeywordHandler):
                 # but not yet receiving results.
                 clinic = get_clinic_or_default(self.msg.connections[0].contact)
                 if clinic != location:
-                    self.respond(self.ALREADY_REGISTERED,
+                    self.respond(self.ALREADY_REGISTERED % dict(
                                  name=self.msg.connections[0].contact.name,
-                                 location=clinic)
+                                 location=clinic))
                     return True
                 else:
                     contact = self.msg.connections[0].contact
@@ -204,16 +205,20 @@ class JoinHandler(KeywordHandler):
             contact.save()
             contact.types.add(worker_type)
             if SYSTEM_LOCALE == LOCALE_MALAWI:
-                if not contact.types.filter(slug=const.get_cba_type()).exists():
+                if not contact.types.filter(
+                        slug=const.get_cba_type()).exists():
                     contact.types.add(const.get_cba_type())
 
             self.msg.connections[0].contact = contact
             self.msg.connections[0].save()
 
-            self.respond(self.get_response_message(worker_type, name, clinic.name, pin))
+            self.respond(self.get_response_message(worker_type, name,
+                                                   clinic.name, pin))
         except Location.DoesNotExist:
-            self.respond(_("Sorry, I don't know about a location with code %(code)s. Please check your code and try again."),
-                         code=slug)
+            no_location = "Sorry, I don't know about a location with"\
+                          "code %(code)s. Please check your code and"\
+                          "try again." % {'code': slug}
+            self.respond(no_location)
 
     def _get_notify_text(self):
         events = reminders.Event.objects.values_list('name', flat=True)
