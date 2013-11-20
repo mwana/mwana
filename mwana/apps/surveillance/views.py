@@ -69,8 +69,8 @@ def surveillance(request):
     end_date = min(max(enddate1, MWANA_ZAMBIA_START_DATE), date.today())
 
     districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts', location__supportedlocation__supported=True).distinct()]
-    provinces = [str(loc.slug) for loc in Location.objects.filter(type__slug='provinces', location__location__supportedlocation__supported=True).distinct()]
-    cases = Incident.objects.all().exclude(report=None)
+    provinces = [str(loc.slug) for loc in Location.objects.filter(type__slug='provinces', location__location__supportedlocation__supported=True).distinct()]    
+    cases = Incident.objects.filter(report__value__gt=0)
     # if user is None all incidents/cases will be returned
     user_incidents = cases.filter(userincident__user=request.user)
     group_incidents = cases.filter(groupincident__group__groupusermapping__user=request.user)
