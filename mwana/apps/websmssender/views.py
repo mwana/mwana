@@ -58,7 +58,7 @@ def send_sms(request):
                            message=message,worker_types=contact_types,
                            phone_pattern=phone_pattern)
 
-        if confirmed == 'yes':
+        if confirmed == 'yes' and request.method == 'POST':
             count = sender.send_sms()
             confirmed = "no"
             meta_infor = "This message has been sent to %s users: %s" % (count, message)
