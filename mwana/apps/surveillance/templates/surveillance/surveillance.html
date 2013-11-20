@@ -612,7 +612,9 @@
         }
         
         html_code = html_code + "</table>\n";
-        html_code = html_code + '<form name="postValues" action="export_to_csv/?filename=SurveyData.csv&my_table=" method="POST">';
+        var d = new Date();
+        var filename = region + '_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + "_" + d.getHours() + d.getMinutes() + '_' + d.getSeconds() + '.csv';
+        html_code = html_code + '<form name="postValues" action="export_to_csv/?filename=' + filename + '&my_table=" method="POST">';
         html_code = html_code + document.getElementById('csrf_token').value
         html_code = html_code + '<input id="export-to-csv-btn" class="button" type="submit" value="Export to csv" name="export-to-csv-btn" onclick="exportToCsv(\'data-table\')" />';
         html_code = html_code + '<input type="hidden" name="csv_text" id="csv_text">';
