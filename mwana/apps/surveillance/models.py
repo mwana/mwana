@@ -173,7 +173,7 @@ class Separator(models.Model):
 class ImportedReport(models.Model):
     source_message = models.ForeignKey(BroadcastMessage)
     report = models.ForeignKey(Report, null=True, blank=True)
-    unparsed = models.CharField(max_length=500, null=True, blank=True)
+    unparsed = models.CharField(max_length=1500, null=True, blank=True)
 
     def __unicode__(self):
         return "%s => %s" % (self.source_message.text[:100], self.report)

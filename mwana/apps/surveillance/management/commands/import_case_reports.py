@@ -32,10 +32,11 @@ class Command(LabelCommand):
         loc=Location.objects.get(slug='403012')
 
         count = 0
+        missing_incident = open("missing_incidents.txt", 'w')
         for bm in BroadcastMessage.objects.filter(importedreport=None, group='DHO', text__iregex='\d\s*,'):
             separators = [sep.text for sep in Separator.objects.all()] or [',']
             sep = "|".join(separators)
-
+            print(bm)
             # @type bm BroadcastMessage
             tokens = re.split(sep, b.strip_non_ascii(re.sub(r"\s+", " ", bm.text)))
             cases = tokens
@@ -63,8 +64,10 @@ class Command(LabelCommand):
                 if Incident.objects.filter(alias__name__iexact=incident_text):
                     incident = Incident.objects.get(alias__name__iexact=incident_text)
                 else:
-                    incident = Incident.objects.create(name=incident_text)
-
+                    missing_incident.write("%s\n" % incident_text)
+#                    incident = Incident.objects.create(name=incident_text)
+                if not incident:
+                    continue
                 report = Report()
                 report.incident = incident
                 report.date = bm.date.date()               
