@@ -5,11 +5,11 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 
-from rapidsms.models import Contact, Connection
+from rapidsms.models import Contact, Connection, Backend
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 from mwana.apps.reminders import models as reminders
-from mwana.malawi.lib import py_cupom
+# from mwana.malawi.lib import py_cupom
 from mwana import const
 
 
@@ -64,16 +64,16 @@ class MayiHandler(KeywordHandler):
             # register no number if not valid number
             return None, False
         # only accept 10 digit numbers for now
-        if len(num) == 10:
-            if num[:2] == '08':
-                backend_id = 3
-            elif num[:2] == '09':
-                backend_id = 4
+        if len(str(num)) == 9:
+            if str(num)[:1] == '8':
+                backend_name = 'tnm'
+            elif str(num)[:1] == '9':
+                backend_name = 'zain'
             valid_cell = True
         else:
-            backend_id = None
+            backend_name = None
             valid_cell = False
-        return backend_id, valid_cell
+        return backend_name, valid_cell
 
     def _validate_tokens(self, tokens):
         """ Check that tokens sent are valid"""
@@ -105,11 +105,12 @@ class MayiHandler(KeywordHandler):
 
         # pass on name checking
         # check phone number
+        from pudb import set_trace; set_trace()
         try:
-            backend_id, valid_cell = self._validate_cell(tokens['phone'])
+            backend_name, valid_cell = self._validate_cell(tokens['phone'])
             if valid_cell:
                 tokens['phone'] = "+265" + tokens['phone'][1:]
-                tokens['backend_id'] = backend_id
+                tokens['backend_name'] = backend_name
             else:
                 tokens['phone'] = None
         except:
@@ -133,6 +134,10 @@ class MayiHandler(KeywordHandler):
             keywords = [k.strip().lower() for k in event.slug.split('|')]
             if slug in keywords:
                 return event
+
+    def _get_backend(self, backend_name):
+        """Returns a matching backend based on the name."""
+        return Backend.objects.filter(name__iexact=backend_name)[0]
 
     def handle(self, text):
         """Handle the mayi submission."""
@@ -164,16 +169,13 @@ class MayiHandler(KeywordHandler):
                 name=data['name'], location=healthworker.location
             )
 
-            if created:
-                rsms_id = "Mi" + str(py_cupom.encode(patient.id, 5, True))
-                patient.remind_id = rsms_id
-                patient.save()
-            patient_t = const.get_patient_type()
-            if not patient.types.filter(pk=patient_t.pk).count():
-                patient.types.add(patient_t)
+        patient_t = const.get_patient_type()
+        if not patient.types.filter(pk=patient_t.pk).count():
+            patient.types.add(patient_t)
 
         if data['phone'] is not None:
-            patient_conn = Connection(backend_id=data['backend_id'],
+            backend = self._get_backend(data['backend_name'])
+            patient_conn = Connection(backend=backend,
                                       identity=data['phone'],
                                       contact_id=patient.id)
         else:
@@ -183,14 +185,14 @@ class MayiHandler(KeywordHandler):
             hsa_name = ' %s' % healthworker.name
         if patient.patient_events.filter(event=event,
                                          date=data['edd']).count():
-            # send thank you message
+            # send thank you message although patient
+            # already has event registered
             thanks_msg = "Thanks%(hsa_name)s! You have registered %(name)s's"\
-                         " expected delivery date as %(date)s. Her "\
-                         "RemindMI_ID is %(remind_id)s, you will be"\
-                         " notified for her next clinic appointment."\
+                         " expected delivery date as %(date)s. You will be "\
+                         "notified for her next clinic appointment."\
                          % dict(name=patient.name,
                                 date=data['edd'].strftime('%d/%m/%Y'),
-                                remind_id=patient.remind_id, hsa_name=hsa_name)
+                                hsa_name=hsa_name)
             self.msg.respond(thanks_msg)
             return True
 
@@ -202,11 +204,11 @@ class MayiHandler(KeywordHandler):
         if patient_conn is not None:
             patient_event.patient_conn = patient_conn
             patient_event.save()
+
         new_mayi = "Thanks%(hsa_name)s! You have registered %(name)s's "\
-                   "expected delivery date as %(date)s. Her RemindMI_ID is"\
-                   " %(remind_id)s, you will be notified for her next clinic"\
-                   " appointment." % dict(
+                   "expected delivery date as %(date)s. You will be notified"\
+                   " for her next clinic appointment." % dict(
                        name=data['name'],
                        date=data['edd'].strftime('%d/%m/%Y'),
-                       remind_id=rsms_id, hsa_name=hsa_name)
+                       hsa_name=hsa_name)
         return self.msg.respond(new_mayi)
