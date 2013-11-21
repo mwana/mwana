@@ -12,11 +12,54 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.contrib.messagelog.models import Message, DIRECTION_CHOICES
 from mwana.apps.smgl import const
 import string
+import xlwt
+
 NONE_VALUES = ['none', 'n', None, '']
 
 
 class DateFormatError(ValueError):  pass
 
+def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected_level='Province', additional_filters=[], selected_timeframe=[]):    
+    font = xlwt.Font()
+    font.bold = True
+    
+    bold_style = xlwt.easyxf('font: bold 1')
+    
+
+    
+    date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+    
+    heading_style = xlwt.easyxf('font: bold 1, height 350; align: vert center; align: horiz center;')
+    
+    
+    worksheet.write_merge(row_index, row_index, 0, 1, 'mUbumi Data Export', heading_style)
+    
+    worksheet.col(0).width = 30*256#The the 30 should probably be dynamically selected based on the biggest string in column 0
+    worksheet.col(1).width = 22*256
+    worksheet.row(row_index).height = 500 
+    
+    row_index += 2
+    worksheet.write(row_index, 0, 'Export Date:', bold_style)
+    worksheet.write(row_index, 1, datetime.datetime.now().date(), date_format)
+    
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Indicators:', bold_style)
+    worksheet.write(row_index, 1, ",".join(selected_indicators))
+    
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Level:', bold_style)
+    worksheet.write(row_index, 1, selected_level, )
+    
+    if additional_filters:
+        row_index += 1
+        worksheet.write(row_index, 0, 'Additional Filters:', bold_style)
+        worksheet.write(row_index, 1, ';'.join(additional_filters))
+        
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Timeframe:', bold_style)
+    worksheet.write(row_index, 1, " - ".join([x.strftime("%m/%d/%Y") for x in selected_timeframe]), date_format)
+    
+    return worksheet, row_index
 
 def get_date(form, day_field, month_field, year_field):
     parts = [form.xpath('form/%s' % field) for field in (day_field, month_field, year_field)]
