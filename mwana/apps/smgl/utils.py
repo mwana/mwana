@@ -61,6 +61,12 @@ def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected
     
     return worksheet, row_index
 
+def write_excel_columns(worksheet, row_index, column_headers):
+    for column_header, index in column_headers:
+        worksheet.write(row_index, index, column_header)
+        
+    return worksheet, row_index
+
 def get_date(form, day_field, month_field, year_field):
     parts = [form.xpath('form/%s' % field) for field in (day_field, month_field, year_field)]
     for p in parts:
