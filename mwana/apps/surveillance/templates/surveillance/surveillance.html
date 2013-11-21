@@ -277,7 +277,7 @@
         data.push($('#cases5').select().val());
         return data;
     }
-    
+
     function getTableData(code, location_type){
         var data = {};
         var selectedDiseses = getSelectedDiseases();
@@ -299,11 +299,11 @@
 
             if((location_type === COUNTRY_TYPE )) {
                 region = "Nationwide";
-                key = datum.province_name;                
+                key = datum.province_name;
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-                
+
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -330,9 +330,9 @@
                 else if(datum.disease_id === disease5){
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
-                }                
-                
-                data[key] = [d1, d2, d3, d4, d5]                
+                }
+
+                data[key] = [d1, d2, d3, d4, d5]
             }
             else if(((location_type === PROVINCE_TYPE) && (code === datum.province_slug ))) {
                 region = datum.province_name;
@@ -340,7 +340,7 @@
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-                
+
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -367,7 +367,7 @@
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
                 }
-                data[key] = [d1, d2, d3, d4, d5]                
+                data[key] = [d1, d2, d3, d4, d5]
             }
             else if((location_type === DISTRICT_TYPE)
                 && (code === datum.district_slug )) {
@@ -376,7 +376,7 @@
                 if(!(key in data)){
                     data[key] = [0, 0, 0, 0, 0];
                 }
-               
+
                 var old_values = data[key];
                 var d1 = old_values[0];
                 var d2 = old_values[1];
@@ -403,19 +403,19 @@
                     d5 = d5 + datum.value;
                     tt5 = tt5 + d5;
                 }
-                
-                data[key] = [d1, d2, d3, d4, d5]                
+
+                data[key] = [d1, d2, d3, d4, d5]
             }
         }
         data['Total'] = [tt1, tt2, tt3, tt4, tt5]
-        
+
         return [region, data];
     }
     function getMapData(code, location_type){
         var data = {};
-        var selectedDiseses = getSelectedDiseases();       
+        var selectedDiseses = getSelectedDiseases();
         var region = "";
-        
+
         prov_prevalence_map = {};
         dist_prevalence_map = {};
         for (var i = 0; i < window.reportData.length; i ++) {
@@ -436,7 +436,7 @@
             if(selectedDiseses.indexOf(datum.disease_id) >= 0){
                 dist_prevalence_map[district_key] = dist_prevalence_map[district_key] + datum.value;
             }
-           
+
         }
 
         _reduce = function(map){
@@ -478,7 +478,7 @@
     function mapOnMouseOut(str){
 
     }
-    
+
     function showNationalData(){
         updateDisplay(COUNTRY_CODE, COUNTRY_TYPE);
     }
@@ -487,25 +487,39 @@
     function loadNationalData(){
         updateDisplay(COUNTRY_CODE, COUNTRY_TYPE)
     }
+    function getProvCodeFromDistCode(code){
+         for (var i = 0; i < window.reportData.length; i ++) {
+            var datum = window.reportData[i];
+            if(datum.district_slug === code){
+                return datum.province_slug;
+            }
+         }
+    }
     function mapOnClick(str){
-        updateDisplay(str, DISTRICT_TYPE)
+        if (event.ctrlKey==1)
+        {
+            updateDisplay(getProvCodeFromDistCode(str), PROVINCE_TYPE);
+        }
+        else{
+            updateDisplay(str, DISTRICT_TYPE)
+        }
     }
     function mapOnClickProvince(str){
         updateDisplay(str, PROVINCE_TYPE);
     }
 
-    function clearHighlight() {      
+    function clearHighlight() {
         $('area').removeAttr("data-maphilight");
         var code = ' ' + $("#Map_Area").html();
         var map_area = document.getElementById('Map_Area').innerHTML = code;
         map_area.innerHTML = code;
     }
     function highlightRegion(slug, color){
-        
+
         $('.map').maphilight({fade: true});
 
         $("#" + slug).attr("data-maphilight", '{"fillColor":"'+ color + '", "fillOpacity":0.6, "strokeWidth":1,"fate":true, "strokeColor":"ff0000","alwaysOn":true}')
-        
+
         var data = $("#" + slug).data('maphilight') || {};
         data.alwaysOn = true;
         $("#"+ slug).data('maphilight', data).trigger('alwaysOn.maphilight');
@@ -525,7 +539,7 @@
             highlightRegion(slug, color);
         }
     }
-    
+
 
     function getAvailableCases(code, location_type){
         var diseases = [];
@@ -534,7 +548,7 @@
             var datum = window.reportData[i];
             var addDisease = false;
             var select_diseases = getSelectedDiseases();
-            
+
             if(select_diseases.indexOf(datum.disease_id) >= 0){
                 continue;
 
@@ -556,7 +570,7 @@
                 }
             }
         }
-        
+
         toReturn = [];
         if(diseases.length > 0){
             toReturn = diseases.slice(0,15)
@@ -568,10 +582,10 @@
     }
     function updateDisplay(str, location_type){
         clearHighlight();
-        
+
         current_code = str;
         current_type = location_type;
-       
+
         var all_table_data = getTableData(str, location_type);
         var table_data = all_table_data[1];
         var region = all_table_data[0];
@@ -587,10 +601,10 @@
         html_code = html_code + '<tr>';
         html_code = html_code + '<th>Location</th>';
 
-        for(dis in [1, 2, 3, 4, 5]){            
+        for(dis in [1, 2, 3, 4, 5]){
             html_code = html_code + '<th>' + $("#cases"+ (1 + parseInt(dis)) +" option:selected").text()  +' </th>'
-        }           
-                    
+        }
+
         html_code = html_code + '</tr>';
         html_code = html_code + '</thead>';
         var counter = 0;
@@ -608,9 +622,9 @@
             html_code = html_code + "<td>" + table_data[key][2] + "</td>";
             html_code = html_code + "<td>" + table_data[key][3] + "</td>";
             html_code = html_code + "<td>" + table_data[key][4] + "</td>";
-            html_code = html_code + "</tr>";            
+            html_code = html_code + "</tr>";
         }
-        
+
         html_code = html_code + "</table>\n";
         var d = new Date();
         var filename = region + '_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + "_" + d.getHours() + d.getMinutes() + '_' + d.getSeconds() + '.csv';
@@ -629,7 +643,7 @@
             }
             html_code = html_code + "</ul>";
         }
-        
+
         document.getElementById("mousemovemessage").innerHTML = html_code
         try{
             var flip_direction = 'BOTTOM';
@@ -644,7 +658,7 @@
         }
         catch(error){
             //do something
-        }                
+        }
     }
 
     function stopDefAction(evt) {
@@ -660,7 +674,7 @@
 
     function exportToCsv(table_id) {
         $("#csv_text").val(document.getElementById('data-table').innerHTML);
-    } 
+    }
 
 </script>
 
