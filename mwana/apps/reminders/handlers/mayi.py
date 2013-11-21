@@ -105,7 +105,6 @@ class MayiHandler(KeywordHandler):
 
         # pass on name checking
         # check phone number
-        from pudb import set_trace; set_trace()
         try:
             backend_name, valid_cell = self._validate_cell(tokens['phone'])
             if valid_cell:
