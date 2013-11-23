@@ -2,6 +2,8 @@ from django.core.urlresolvers import reverse
 
 from djtables import Table, Column
 from djtables.column import DateColumn
+from .models import BirthRegistration, DeathRegistration, FacilityVisit, PregnantMother, ToldReminder
+from utils import get_time_range
 
 
 class NamedColumn(Column):
@@ -134,12 +136,12 @@ message_types = {
              'REFOUT':'Ref. Outcome',
              'RESP':'Ref. Response',
              'REFER':'Referral',
-             'REG':'Pregnancy',
              'LOOK': 'Lookup',
              'FUP':'ANC',
              'JOIN':'User',
              'PP': 'PNC'
              }
+
 def get_msg_type(message):
     if message.direction == "I":
         keyword = message.text.split(' ')[0]
@@ -153,6 +155,83 @@ def get_msg_type(message):
         #This will need to be filled a little more to so that we can distinguish between valid and error messages.
         return 'Response'
     
+#For now we can only map messages that contain the session id
+mapped = {
+          'BIRTH': BirthRegistration,
+          }
+
+def get_keyword_mother_id(message):
+    #This function makes the slightly dangerous assumption that the keyword handlers we are processing all have the mother id as the 
+    #second item in a message
+    try:
+        keyword = message.text.split(' ')[0]
+        mother_id = message.text.split(' ')[1]
+    except IndexError:
+        return None
+    return keyword.upper(), mother_id
+
+def get_facility_visit(mother_id, limit_time):
+    #Returns a facility visit given a motherid and some time to limit against
+    time_range = get_time_range(limit_time, seconds=3600)
+    try:
+        facility_visit = FacilityVisit.objects.filter(mother__uid=mother_id, created_date__range=time_range)[0]
+    except IndexError:
+        return None
+    else:
+        return facility_visit
+    
+def get_pregnant_mother(mother_id, limit_time):
+    time_range = get_time_range(limit_time, seconds=3600)
+    try:
+        pregnant_mother = PregnantMother.objects.filter(uid=mother_id, created_date__range=time_range)[0]
+    except IndexError:
+        return None
+    else:
+        return pregnant_mother
+    
+def get_death_registration(mother_id):
+    try:
+        death_registration = DeathRegistration.objects.filter(unique_id=mother_id)[0]
+    except IndexError:
+        return None
+    else:
+        return death_registration
+    
+def get_told_reminders(mother_id):
+    try:
+        told_reminder = ToldReminder.objects.filter(mother__uid=mother_id)[0]
+    except IndexError:
+        return None
+    else:
+        return told_reminder
+
+def map_message_fields(message):
+    #Returns an incoming message text with the various fields mapped to value. Some of the keywords have database objects that easily map to
+    #session id and we can easily find the associated object, others require a little more work. 
+    text = message.text
+    if message.direction == "I":#only process the incoming messages, outgoing messages will continue just using the message text.
+        database_obj = None
+        keyword, mother_id = get_keyword_mother_id(message)
+        if not mother_id:
+            return text
+        if keyword == 'FUP' or keyword == 'PP':
+            database_obj = get_facility_visit(mother_id, message.date)
+        elif keyword == 'REG':
+            database_obj = get_pregnant_mother(mother_id, message.date)
+        elif keyword == 'DEATH':
+            database_obj = get_death_registration(mother_id)
+        elif keyword == 'TOLD':
+            database_obj = get_told_reminders(mother_id) 
+        else:
+            model = mapped.get(keyword, None)
+            if model:
+                database_obj = model.objects.get(session__message_incoming=message)
+                
+        if database_obj:
+            text = database_obj.get_field_value_mapping()
+    
+    return text
+    
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(col_name="Phone Number", value= lambda cell: cell.object.connection.identity)
@@ -162,7 +241,7 @@ class SMSRecordsTable(Table):
                       sortable=False
                     )
     facility = Column(value=lambda cell: cell.object.connection.contact.location if cell.object.connection.contact else '')
-    text = NamedColumn(col_name="Message")
+    text = NamedColumn(col_name="Message", value=lambda cell:map_message_fields(cell.object))
 
     class Meta:
         order_by = "-date"
