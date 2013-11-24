@@ -7,6 +7,11 @@ from mwana.apps.smgl.models import (SyphilisTest, SyphilisTreatment,
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
 
+@registration_required
+@is_active
+def syphilis_deprecation(session, xform, router):
+    msg = "We are no longer collecting Syphilis information. If you have questions, contact Misheck Bwalya on 0971255414."
+    return respond_to_session(router, session, msg)
 
 @registration_required
 @is_active
