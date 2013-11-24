@@ -2,6 +2,7 @@ from django.core.urlresolvers import reverse
 
 from djtables import Table, Column
 from djtables.column import DateColumn
+from smsforms.models import XFormsSession
 from .models import BirthRegistration, DeathRegistration, FacilityVisit, PregnantMother, ToldReminder
 from utils import get_time_range
 
@@ -153,7 +154,13 @@ def get_msg_type(message):
             return title
     else:
         #This will need to be filled a little more to so that we can distinguish between valid and error messages.
-        return 'Response'
+        try:
+            XFormsSession.objects.get(message_outgoing=message, has_error=True)
+        except XFormsSession.DoesNotExist:
+            return 'Response'
+        else:
+            return 'Error Response'
+
     
 #For now we can only map messages that contain the session id
 mapped = {
