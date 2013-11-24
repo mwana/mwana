@@ -81,16 +81,15 @@ class PregnantMother(models.Model):
     @property
     def has_delivered(self):
         if not self.edd:
-            return False
-        
-        before_edd = self.edd - datetime.timedelta(days=45)
-        after_edd = self.edd + datetime.timedelta(days=45)
+            return 'Unknown'
+        before_edd = self.edd - datetime.timedelta(days=60)
+        after_edd = self.edd + datetime.timedelta(days=60)
         try:
-            birth = self.birthregistrationset.filter(date__range=[before_edd, after_edd])[0]
+            birth = self.birthregistration_set.filter(date__range=[before_edd, after_edd])[0]
         except IndexError:
-            return False
+            return 'Not Delivered'
         else:
-            return True
+            return 'Delivered'
         
     @property
     def name(self):
