@@ -25,7 +25,7 @@ class PregnantMotherTable(Table):
     risks = Column(value=lambda cell: ", ".join([x.upper() \
                                      for x in cell.object.get_risk_reasons()]),
                    sortable=False)
-    Status = Column(value=lambda cell:cell.object.has_delivered)
+    Status = Column(value=lambda cell:"Delivered" if cell.object.has_delivered else 'Not Delivered')
 
     class Meta:
         order_by = "-created_date"
