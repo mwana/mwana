@@ -1823,7 +1823,7 @@
     "model": "smgl.xformkeywordhandler",
     "fields": {
       "keyword": "syp",
-      "function_path": "mwana.apps.smgl.keyword_handlers.syphilis"
+      "function_path": "mwana.apps.smgl.keyword_handlers.syphilis_deprecation"
     }
   },
   {
