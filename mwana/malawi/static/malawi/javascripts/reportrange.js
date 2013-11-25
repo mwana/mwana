@@ -3,9 +3,9 @@ $(document).ready(function() {
      {
         startDate: moment().subtract('days', 29),
         endDate: moment(),
-        minDate: '01/01/2012',
+        minDate: '01/01/2010',
         maxDate: moment(),
-        dateLimit: { days: 180 },
+        dateLimit: { days: 1095 },
         showDropdowns: true,
         showWeekNumbers: true,
         timePicker: false,
