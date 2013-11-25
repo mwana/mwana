@@ -76,7 +76,18 @@ class PregnantMother(models.Model):
     risk_reason_none = models.BooleanField(default=False)
 
     reminded = models.BooleanField(default=False)
-
+    
+    def get_field_value_mapping(self):
+        mapped_text = "MotherID={self.uid}, Name={self.first_name} {self.last_name},\
+         LMP={lmp}, EDD={edd}, NVD={nvd}, Visit Reason={visit_reasons}, Risk Reason={risk_reasons}, Location={self.location},  Zone={self.zone.name}".format(self=self,
+                                                                      visit_reasons=self.get_reason_for_visit_display(),
+                                                                      risk_reasons=", ".join(self.get_risk_reasons()),
+                                                                      lmp=self.lmp.strftime('%d %b %Y') if self.lmp else None,
+                                                                      edd=self.edd.strftime('%d %b %Y') if self.edd else None,
+                                                                      nvd=self.next_visit.strftime('%d %b %Y') if self.next_visit else None
+                                                                      )
+        return mapped_text
+        
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
@@ -164,6 +175,30 @@ class FacilityVisit(models.Model):
                                      choices=POS_STATUS_CHOICES,
                                      null=True, blank=True)
     referred = models.BooleanField(default=False)
+    
+    def get_field_value_mapping(self):
+        #The edd only makes sense for ANC visits and if not set on the facility visit object, we will look at the mother edd.
+        if self.visit_type.lower() == "anc":
+            edd = self.edd or self.mother.edd
+            data = {'self':self,
+                   'visit_type':self.get_visit_type_display(),
+                   'visit_reason':self.get_reason_for_visit_display(),
+                   'nvd':self.next_visit.strftime('%d %b %Y') if self.next_visit else None,
+                   'visit_date':self.visit_date.strftime('%d %b %Y'),
+                   'edd':edd.strftime('%d %b %Y') if edd else ' '}                                                                                                    
+            mapped_text="MotherID={self.mother.uid}, Location={self.location},  Visit Type={visit_type}, Reason for Visit={visit_reason},\
+            Visit Date={visit_date}, Next Visit Date={nvd}, EDD={edd}".format(**data)
+        else:
+            data = {'self':self,
+                   'visit_type':self.get_visit_type_display(),
+                   'mother_status':self.get_mother_status_display(),
+                   'baby_status':self.get_baby_status_display(),
+                   'visit_date':self.visit_date.strftime('%d %b %Y') if self.visit_date else None,
+                   'nvd':self.next_visit.strftime('%d %b %Y') if self.next_visit else None,
+                   }        
+            mapped_text="MotherID={self.mother.uid}, Location={self.location}, Visit Date={visit_date}, Visit Type={visit_type},\
+            Mother Status={mother_status}, Baby Status={baby_status}, Next Visit Date={nvd}, Referred={self.referred}".format(**data)
+        return mapped_text
 
     def is_latest_for_mother(self):
         return FacilityVisit.objects.filter(mother=self.mother)\
@@ -345,8 +380,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
             else:
                 return 'no-resp-no-out'
         return ''
-
-
+    
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
         ('en', 'English'),
@@ -397,7 +431,20 @@ class BirthRegistration(FormReferenceBase):
                                  related_name='birth_facility')
     location = models.ForeignKey(Location, null=True,
                                  related_name='birth_location')
-
+    
+    def get_field_value_mapping(self):
+        if self.mother:
+            mother_id = self.mother.uid
+        else:
+            mother_id = None
+            
+        mapped_text = 'MotherID={smh_id}, Gender={gender}, Date={date}, Place of Birth={place},\
+         Complications={self.location}, Number of Children={self.number}'.format(self=self,
+                                                                                               smh_id=mother_id,
+                                                                                               date=self.date.strftime('%d %b %Y'),
+                                                                                               gender=self.get_gender_display().title(),
+                                                                                               place=self.get_place_display().title())
+        return mapped_text
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
@@ -419,14 +466,24 @@ class DeathRegistration(FormReferenceBase):
     location = models.ForeignKey(Location, null=True,
                                  related_name='death_location')
 
-
+    def get_field_value_mapping(self):
+        text = 'Date={date}, Person={person}, Place of Death={place}'.format(date=self.date.strftime('%d %b %Y'),
+                                                                                        person=self.get_person_display().title(),
+                                                                                        place=self.get_place_display().title(),
+                                                                                       )
+        
+        if self.unique_id:
+            text = "MotherID={unique_id}, {text}".format(unique_id=self.unique_id, text=text)
+        
+        return text
+            
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("pos", "POS Next Visit Date"),
                          ("em_ref", "Emergency Referral"),
                          ("nem_ref", "Non-Emergency Referral"),
                          ("edd_14", "Expected Delivery, 14 days before"),
                          ("syp", "Syphilis Treatment"))
-
+    
 
 class ReminderNotification(MotherReferenceBase):
     """
@@ -455,6 +512,11 @@ class ToldReminder(FormReferenceBase, MotherReferenceBase):
     contact = models.ForeignKey(Contact, null=True)
     date = models.DateTimeField()
     type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)
+    
+    def get_field_value_mapping(self):
+        return "MotherID={mother_id}, date={date_told}, Told Type={told_type}".format(mother_id=self.mother.uid,
+                                                            date_told=self.date.strftime('%d %b %Y'),
+                                                            told_type=self.get_type_display())
 
 
 SYPHILIS_TEST_RESULT_CHOICES = (
