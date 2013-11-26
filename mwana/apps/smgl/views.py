@@ -1749,56 +1749,50 @@ def help(request):
     help_reqs = filter_by_dates(help_reqs, 'requested_on',
                              start=start_date, end=end_date)
 
-    # render as CSV if export
     if form.data.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['id', 'requested_on', 'phone', 'name', 'facility',
-                'additional_text', 'resolved_by', 'status']
-        records = []
-        for req in help_reqs:
-            requested_on = req.requested_on.strftime('%Y-%m-%d') \
-                        if req.requested_on else None
-            records.append({
-                    'id': req.id,
-                    'requested_on': requested_on,
-                    'phone': req.requested_by.identity,
-                    'name': req.requested_by.contact.name if req.requested_by.contact else None,
-                    'facility': req.requested_by.contact.location if req.requested_by.contact else None,
-                    'additional_text': req.additional_text,
-                    'resolved_by': req.resolved_by,
-                    'status': req.get_status_display
-                })
-        filename = 'help_request_report'
-        date_range = ''
-        if start_date:
-            date_range = '_from{0}'.format(start_date)
-        if start_date:
-            date_range = '{0}_to{1}'.format(date_range, end_date)
-        filename = '{0}{1}'.format(filename, date_range)
-
-        return export_as_csv(records, keys, filename)
-
-    if export:
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('Help')
-        worksheet, row_index = excel_export_header(worksheet)
-        row_index += 1
         
+        selected_level = facility or district or province
         column_headers = ['Date', 'Time', 'User Number', 'User Name', 'User Type', 'District', 'Facility', 'Zone', 'Message', 
                           'Resolved Status', 'Date Resolved', 'Time Resolved', 'Resolved by']
+        worksheet, row_index = excel_export_header(worksheet, 
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
+        row_index += 1
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(10).width = worksheet.col(11).width = 11 *256 #Resolved Date and Time Columns
+        worksheet.col(2).width = 15*256 
+        worksheet.col(3).width = 20*256
+        worksheet.col(4).width = 20*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
         for help_req in help_reqs:
-            worksheet.write(row_index, 0, help_req.requested_on.date)
-            worksheet.write(row_index, 1, help_req.requested_on.time)
+            district, facility, zone = get_district_facility_zone(help_req.requested_by.contact.location)
+            worksheet.write(row_index, 0, help_req.requested_on.date(), date_format)
+            worksheet.write(row_index, 1, help_req.requested_on.time(), time_format)
             worksheet.write(row_index, 2, help_req.requested_by.identity)
             worksheet.write(row_index, 3, help_req.requested_by.contact.name)
-            worksheet.write(row_index, 4, ", ".join(help_req.requested_by.contact.types.all()))
-            #locations
-            worksheet.write(row_index, 8, help_req.message_text)
-            worksheet.write(row_index, 8, help_req.get_status_display())
-            worksheet.write(row_index, 9, help_req.addressed_on.date)
-            worksheet.write(row_index, 10, help_req.addressed_on.time)
-            worksheet.write(row_index, 11, help_req.addressed_by)
+            worksheet.write(row_index, 4, ", ".join([contact_type.name for contact_type in help_req.requested_by.contact.types.all()]))
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, help_req.additional_text)
+            worksheet.write(row_index, 9, help_req.get_status_display)
+            worksheet.write(row_index, 10, help_req.addressed_on.date() if help_req.addressed_on else '', date_format)
+            worksheet.write(row_index, 11, help_req.addressed_on.time() if help_req.addressed_on else '', time_format)
+            worksheet.write(row_index, 12, help_req.resolved_by)
+            row_index += 1
+        fname = 'help-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
             
 
     helpreqs_table = HelpRequestTable(help_reqs, request=request)
