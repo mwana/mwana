@@ -27,11 +27,12 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
-                     HelpRequestTable)
+                     HelpRequestTable, get_msg_type)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates)
+    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
 from smsforms.models import XFormsSession
 import xlwt
+
 
 
 def fetch_initial(initial, session):
