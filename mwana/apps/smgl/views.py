@@ -652,47 +652,39 @@ def mother_history(request, id):
     messages = Message.objects.filter(text__icontains=mother.uid,
                                       direction='I')
 
-    # render as CSV if export
     if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'msg_type', 'sender', 'facility', 'message']
-        records = []
-        for msg in messages:
-            text = msg.text
-            msg_type = text.split(' ')[0].upper()
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'msg_type': msg_type,
-                    'sender': msg.contact,
-                    'facility': msg.contact.location.name if msg.contact else '',
-                    'message': text
-                })
-        filename = 'mother{0}_messages_report'.format(mother.uid)
-
-        return export_as_csv(records, keys, filename)
-    
-    
-    if export:
+        messages = messages.filter(direction='I') #only show incoming messages.
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Mother's Page")
-        worksheet, row_index = excel_export_header(worksheet)
-        row_index += 1
-            
         column_headers = ['Date', 'Time', 'Type', 'SMH', 'Sender Number', 'District', 'Facility', 'Zone', 'Message']
+        worksheet, row_index = excel_export_header(
+                                                   worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
-        row_index += 1   
-        
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(3).width = worksheet.col(4).width = 15*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
         for message in messages:
-            worksheet.write(row_index, 0, message.date)
-            worksheet.write(row_index, 1, message.date.time)
-            worksheet.write(row_index, 2, message.type)
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.date.time(), time_format)
+            worksheet.write(row_index, 2, "Type")
             worksheet.write(row_index, 3, mother.uid)
             worksheet.write(row_index, 4, message.connection.identity)
-            worksheet.write(row_index, 4, mother.location)
-            worksheet.write(row_index, 5, mother.location)
-            worksheet.write(row_index, 6, mother.location)         
-            worksheet.write(row_index, 7, message.text)
-        
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, message.text)
+            row_index += 1
+        fname = 'Mother-history-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/mother_history.html",
