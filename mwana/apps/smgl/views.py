@@ -1530,21 +1530,45 @@ def sms_users(request):
         contacts = [x for x in contacts if x.latest_sms_date.date() <= end_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
-    # render as CSV if export
-    if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['created_date', 'name', 'number', 'last_active', 'location']
-        records = []
-        for c in contacts:
-            records.append({
-                    'created_date': c.created_date.strftime('%Y-%m-%d') if c.created_date else None,
-                    'name': c.name.encode('utf-8'),
-                    'number': c.default_connection.identity if c.default_connection else None,
-                    'last_active': c.latest_sms_date,
-                    'location': c.location.name.encode('utf-8') if c.location else '',
-                })
-        filename = 'sms_users_report'
-        return export_as_csv(records, keys, filename)
+    if form.data.get('export'):
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS Users Page')
+        selected_level = district or province
+        column_headers = column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'District',
+                                           'Facility', 'Zone', 'Last Active', 'Date Registration', 'Active Status']
+        contact_type = "Contact Type: %s"%(c_type if c_type else 'All')
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date,
+                                                   additional_filters=contact_type
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(2).width = 15*256
+        worksheet.col(4).width = worksheet.col(5).width = worksheet.col(6).width = 30*256
+
+        for contact in contacts:
+            district, facility, zone = get_district_facility_zone(contact.location)
+            worksheet.write(row_index, 0, contact.created_date, date_format)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
+            worksheet.write(row_index, 4, district)
+            worksheet.write(row_index, 5, facility)
+            worksheet.write(row_index, 6, zone)
+            worksheet.write(row_index, 7, contact.latest_sms_date, date_format)
+            worksheet.write(row_index, 8, contact.created_date, date_format)
+            worksheet.write(row_index, 9, 'Yes' if contact.is_active else 'No')
+            row_index += 1
+        fname = 'sms-users-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     search_form = SMSUsersSearchForm()
     if request.method == 'POST':
