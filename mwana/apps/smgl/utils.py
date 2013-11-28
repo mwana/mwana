@@ -19,7 +19,8 @@ NONE_VALUES = ['none', 'n', None, '']
 
 class DateFormatError(ValueError):  pass
 
-def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected_level=None, additional_filters=[], start_date=None, end_date=None):    
+def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected_level=None,
+                        additional_filters=None, start_date=None, end_date=None):
     if selected_level:
         location_level = "%s: %s" %(selected_level.type.singular.title(), selected_level.name)
     else:
@@ -32,7 +33,7 @@ def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected
     heading_style = xlwt.easyxf('font: bold 1, height 350; align: vert center; align: horiz center;')
     worksheet.write_merge(row_index, row_index, 0, 1, 'mUbumi Data Export', heading_style)
     
-    worksheet.col(0).width = 30*256#The the 30 should probably be dynamically selected based on the biggest string in column 0
+    worksheet.col(0).width = 30*256
     worksheet.col(1).width = 22*256
     worksheet.row(row_index).height = 500 
     
@@ -42,7 +43,7 @@ def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected
     
     row_index += 1
     worksheet.write(row_index, 0, 'Selected Indicators:', bold_style)
-    worksheet.write(row_index, 1, ",".join(selected_indicators))
+    worksheet.write(row_index, 1, ", ".join(selected_indicators))
     
     row_index += 1
     worksheet.write(row_index, 0, 'Selected Level:', bold_style)
@@ -51,7 +52,7 @@ def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected
     if additional_filters:
         row_index += 1
         worksheet.write(row_index, 0, 'Additional Filters:', bold_style)
-        worksheet.write(row_index, 1, ';'.join(additional_filters))
+        worksheet.write(row_index, 1, additional_filters)
         
     row_index += 1
     worksheet.write(row_index, 0, 'Selected Timeframe:', bold_style)
