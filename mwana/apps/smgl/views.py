@@ -1594,22 +1594,40 @@ def sms_user_history(request, id):
     messages = Message.objects.filter(contact=contact,
                                       direction='I')
 
-    # render as CSV if export
     if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'msg_type', 'message']
-        records = []
-        for msg in messages:
-            text = msg.text
-            msg_type = text.split(' ')[0].upper()
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'msg_type': msg_type,
-                    'message': text
-                })
-        filename = 'sms_user_{0}_messages_report'.format(contact.name)
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS User Page')
+        column_headers = column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'Type',
+                                           'Message Accepted', 'Message']
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
 
-        return export_as_csv(records, keys, filename)
+        worksheet.col(2).width = 15*256
+        worksheet.col(6).width = 100*256
+        for message in messages:
+            try:
+                XFormsSession.objects.get(message_incoming=message, has_error=True)
+            except XFormsSession.DoesNotExist:
+                is_accepted='Yes'
+            else:
+                is_accepted='No'
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
+            worksheet.write(row_index, 4, "Type")
+            worksheet.write(row_index, 5, is_accepted)
+            worksheet.write(row_index, 6, message.text)
+            row_index += 1
+        fname = 'Single-User-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/sms_user_history.html",
