@@ -1242,37 +1242,42 @@ def notifications(request):
     messages = filter_by_dates(messages, 'date',
                              start=start_date, end=end_date)
 
-    # render as CSV if export
-    if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'facility', 'message']
-        records = []
-        for msg in messages:
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'facility': msg.contact.location.name if msg.contact else '',
-                    'message': msg.text
-                })
-        filename = 'notifications_report'
-        return export_as_csv(records, keys, filename)
     
-    if export:
+    if request.GET.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Notifications")
-        worksheet, row_index = excel_export_header(worksheet)
+        column_headers = ['Date', 'User Number', 'User Name', 'User Type', 'District', 'Facility',
+                           'Zone', 'Type of Notification', 'Message']
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
         row_index += 1
-            
-        column_headers = ['Date', 'Type', 'SMH', 'Sender Number', 'District', 'Facility', 'Zone', 'Type of Notification', 'Message']
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
         row_index += 1   
-        for notification in notifications:
-            worksheet.write(row_index, 0, notification.date)
-            worksheet.write(row_index, 1, notification.requested_by.identity)
-            worksheet.write(row_index, 2, notification.requested_by.contact.name)
-            worksheet.write(row_index, 3, ", ".join(notification.recipient.types.all()))
-            #locations
-            worksheet.write(row_index, 7, notification.get_type_display()) 
-            #message       
+        worksheet.col(1).width = 15*256
+        worksheet.col(2).width = 20*256
+        worksheet.col(4).width = worksheet.col(5).width = worksheet.col(6).width = 20*256
+        worksheet.col(8).width = 100*256
+        for message in messages:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.connection.identity)
+            worksheet.write(row_index, 2, message.contact.name)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 4, district)
+            worksheet.write(row_index, 5, facility)
+            worksheet.write(row_index, 6, zone)
+            worksheet.write(row_index, 7, 'Type')
+            worksheet.write(row_index, 8, message.text)
+            row_index += 1
+        fname = 'notifications-export.xls'
+        response = HttpResponse(mimetype="applicatins/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/notifications.html",
