@@ -1431,54 +1431,51 @@ def sms_records(request):
     if keyword:
         sms_records = sms_records.filter(text__istartswith=keyword)
 
-    # render as CSV if export
-    if form.data.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'id', 'phone_number', 'msg_type', 'facility', 'text']
-        records = []
-        for rec in sms_records:
-            date = rec.date.strftime('%Y-%m-%d') \
-                        if rec.date else None
-            records.append({
-                    'date': date,
-                    'id': rec.id,
-                    'phone_number': rec.connection.identity,
-                    'msg_type': rec.text.split(' ')[0].upper(),
-                    'facility': rec.connection.contact.location if rec.connection.contact else None,
-                    'text': (rec.text or '').encode('utf-8'),
-                })
-        filename = 'sms_records_report'
-        date_range = ''
-        if start_date:
-            date_range = '_from{0}'.format(start_date)
-        if start_date:
-            date_range = '{0}_to{1}'.format(date_range, end_date)
-        filename = '{0}{1}'.format(filename, date_range)
 
-        return export_as_csv(records, keys, filename)
-    
-    if export:
+    if form.data.get('export'):
+        #import ipdb;ipdb.set_trace()
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('SMS Users Page')
-        worksheet, row_index = excel_export_header(worksheet)
+        selected_level = facility or district or province
+        column_headers = column_headers = ['Date', 'Type', 'Incoming or Outgoing', 'User Number', 'User Name',
+                                           'User Type', 'District', 'Facility', 'Zone', 'Message']
+        keyword = "Keyword: %s"%(keyword if keyword else 'None')
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date,
+                                                   additional_filters=keyword
+                                                   )
         row_index += 1
-        
-        column_headers = column_headers = ['Date', 'Time', 'User Number', 'User Name', 'User Type', 'District', 'Facility', 'Zone', 'Type of Notification', 'Message', 
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
-        for message in messages:
-            worksheet.write(row_index, 0, message.date)
-            worksheet.write(row_index, 1, message.type)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(3).width = 15*256
+        worksheet.col(5).width = 20*256
+        worksheet.col(6).width = worksheet.col(7).width = worksheet.col(8).width = 30*256
+        worksheet.col(9).width = 100*256
+
+        for message in sms_records:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            message_type = get_msg_type(message.text.split(' ')[0].upper())
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message_type)
             worksheet.write(row_index, 2, message.get_direction_display())
             worksheet.write(row_index, 3, message.connection.identity)
             worksheet.write(row_index, 4, message.connection.contact.name)
-            worksheet.write(row_index, 5, ", ".join(message.connection.contact.types))
-            #locations
-            col_index = 9
-            for message_part in message.text.split(" "):
-                worksheet.write(row_index, col_index, message_part)
-                col_index += 1
+            worksheet.write(row_index, 5, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 6, district)
+            worksheet.write(row_index, 7, facility)
+            worksheet.write(row_index, 8, zone)
+            worksheet.write(row_index, 9, message.text)
             row_index += 1
-            
+        fname = 'sms-records-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+
     records_table = SMSRecordsTable(sms_records, request=request)
 
     
