@@ -1,6 +1,8 @@
 #Values that are used to indicate 'no answer' in fields of a form (especially in the case of optional values)
 import csv
 import datetime
+import urllib
+from django.core.urlresolvers import reverse
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
@@ -17,6 +19,12 @@ NONE_VALUES = ['none', 'n', None, '']
 
 class DateFormatError(ValueError):  pass
 
+def build_url(*args, **kwargs):
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
 
 def get_date(form, day_field, month_field, year_field):
     parts = [form.xpath('form/%s' % field) for field in (day_field, month_field, year_field)]
@@ -56,6 +64,13 @@ def make_date(form, dd, mm, yy, is_optional=False):
         return None, const.DATE_YEAR_INCORRECTLY_FORMATTED
 
     return date, None
+
+def get_time_range(limit_time, seconds):
+    #Returns seconds after and before a given datetime
+    time_back = limit_time - datetime.timedelta(seconds=seconds)
+    time_ahead = limit_time + datetime.timedelta(seconds=seconds)
+    
+    return time_back, time_ahead
 
 
 def get_location(slug):
