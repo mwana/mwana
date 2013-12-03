@@ -212,6 +212,14 @@ def get_told_reminders(mother_id):
     else:
         return told_reminder
 
+def get_birth_registrations(mother_id):
+    try:
+        birth = BirthRegistration.objects.filter(mother__uid=mother_id)[0]
+    except IndexError:
+        return None
+    else:
+        return birth
+
 def map_message_fields(message):
     #Returns an incoming message text with the various fields mapped to value. Some of the keywords have database objects that easily map to
     #session id and we can easily find the associated object, others require a little more work. 
@@ -229,10 +237,8 @@ def map_message_fields(message):
             database_obj = get_death_registration(mother_id)
         elif keyword == 'TOLD':
             database_obj = get_told_reminders(mother_id) 
-        else:
-            model = mapped.get(keyword, None)
-            if model:
-                database_obj = model.objects.get(session__message_incoming=message)
+        elif keyword == "BIRTH":
+            database_obj = get_birth_registrations(mother_id)
                 
         if database_obj:
             text = database_obj.get_field_value_mapping()
