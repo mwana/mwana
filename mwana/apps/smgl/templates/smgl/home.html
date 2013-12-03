@@ -3,10 +3,10 @@
 
 {% block stylesheets %}
 {{ block.super }}
+<link href='http://fonts.googleapis.com/css?family=Junge' rel='stylesheet' type='text/css'>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}smgl/css/statistics.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-
+<link rel="stylesheet" href="{{ STATIC_URL }}smgl/css/zcahrd_style.css">
 <style type="text/css">
 	#branding h1 a span{
 		font-size: 1.6em;
@@ -17,11 +17,123 @@
 		text-decoration: none;
 		text-align:center;
 	}
+	#intro-text P{
+		font-family:'Junge' serif;
+		font-size: 16px;
+	}
+	#map-canvas{
+		width: 95%;
+		height: 300px;
+		padding-right:10px;
+	}
+
 </style>
 {{ form.media.css }}
 
 {% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJlmUB29Ovc3xPkP9itrM0cNcAgk-SIwM&sensor=false"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(e){
+		$.get('/smgl', function(data){
+			var name_data_pairs = [];
+			$(data).each(function(index, element){
+				name_data_pairs.push({'name':element[0], 'data':[element[1]]});
+			});
+			$('#chart-container').highcharts({
+				credits:{
+					enabled:false
+				},
+				title:{
+					text: 'Complications'
+				},
+				series: [{
+					type: 'pie',
+					data: data
+				}]
+			});
+		});
+	});
+	
+	var map;
+	function initialize(){
+		var mapOptions = {
+			center: new google.maps.LatLng(-17.033397,26.48502),
+			zoom:14
+		};
+		var map = new google.maps.Map(document.getElementById('map-canvas'),
+		mapOptions);
+	};
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script> 
+
+{% endblock %}
  
 {% block content %}
+<div class="container-fluid">
+	<div class="row">
+		<img src="{{ STATIC_URL }}smgl/images/mubumi_logo.png" id="header-image"/>
+	</div>
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1" id="intro-text">
+			<p>The birth of a baby is a central event to human nature, and one that has a great impact on 
+				the life of women and their families. Remarkable progresses were made over the last century 
+				in the safety and comfort of human labour and birth, but this area has been receiving less attention 
+				in more recent times.
+				</p>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-8">
+			<div class="row" id="images">
+				<div class="col-md-4">
+					<div id="left-image">
+						<h3 class="image-text">Antenatal</h3>
+						<img src="{{ STATIC_URL }}smgl/images/antenatal.png" class="nav-image"/>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="row">
+						<div id="middle-top-image">
+							<h3 class="image-text">Intrapartum</h3>
+							<img src="{{ STATIC_URL }}smgl/images/intra.png" class="nav-image"/>
+						</div>
+					</div>
+					<div class="row">
+						<div id="middle-bottom-image">
+							<h3  class="image-text">Emergencies</h3>
+							<img src="{{ STATIC_URL }}smgl/images/emerg.png" class="nav-image" />
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div id="right-image">
+						<h3  class="image-text">Post Partum</h3>
+						<img src="{{ STATIC_URL }}smgl/images/post_partum.png" class="nav-image"/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="row">
+				<div id="chart-container"></div>
+			</div>
+			<div class="row">
+				<div id="map-canvas"></div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6" id="footer-logos">
+			<img src="{{ STATIC_URL }}smgl/images/smgl_logo.jpg" />
+			<img src="{{ STATIC_URL }}smgl/images/zcahrd_logo.png"/>
+			<img src="{{ STATIC_URL }}smgl/images/grz_coat_of_arms.png"/>
+		</div>
+	</div>
+	
+</div>
 
 {% endblock %}
