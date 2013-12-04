@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 from rapidsms.messages.outgoing import OutgoingMessage
+from rapidsms.router import send
 from datetime import datetime
 import time
 
@@ -23,7 +24,8 @@ class TLCOutgoingMessage(OutgoingMessage):
             seq_num += 1
         seq_num_hex = '{0:02x}'.format(seq_num)
         self.text = seq_num_hex + self.text
-        message_sent = super(TLCOutgoingMessage, self).send()
+        # message_sent = super(TLCOutgoingMessage, self).send()
+        message_sent = send(self.text, self.connections[0])
         if message_sent:
             MessageConfirmation.objects.create(connection=self.connections[0],
                                                text=self.text,

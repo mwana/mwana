@@ -453,7 +453,8 @@ class App (rapidsms.apps.base.AppBase):
         for contact in contacts:
             msg = OutgoingMessage([contact.default_connection],
                                   RESULTS_READY % dict(
-                                  name=contact.name, count=results.count()))
+                                      name=contact.name,
+                                      count=results.count()))
             all_msgs.append(msg)
 
         return all_msgs
