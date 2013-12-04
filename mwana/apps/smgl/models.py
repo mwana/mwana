@@ -391,6 +391,7 @@ class PreRegistration(models.Model):
         (const.CTYPE_LAYCOUNSELOR, 'Community Based Agent'),
         (const.CTYPE_TRIAGENURSE, 'Triage Nurse'),
         (const.CTYPE_DATACLERK, 'Data Clerk'),
+        (const.CTYPE_INCHARGE, 'In Charge'),
         ('worker', 'Clinic Worker'),
         ('DHO', 'District Health Officer'),
         ('DMHO', 'District mHealth Officer'),
