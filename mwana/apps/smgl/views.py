@@ -1,12 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
 import urllib
 import datetime
+import json
 from operator import itemgetter
 
 
 from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
 
@@ -1205,3 +1206,21 @@ def help_manager(request, id):
          "form": form
         },
         context_instance=RequestContext(request))
+    
+def home_page(request):
+    if request.is_ajax():
+        conditions = {}
+        conditions['C-section'] = PregnantMother.objects.filter(risk_reason_csec=True).count()
+        conditions['Comp. during previous'] = PregnantMother.objects.filter(risk_reason_cmp=True).count()
+        conditions['Gestational Disease'] = PregnantMother.objects.filter(risk_reason_gd=True).count()
+        conditions['High Blood Pressure'] = PregnantMother.objects.filter(risk_reason_hbp=True).count()
+        conditions['Previous Still born'] = PregnantMother.objects.filter(risk_reason_psb=True).count()
+        conditions['Other'] = PregnantMother.objects.filter(risk_reason_oth=True).count()
+        conditions['None'] = PregnantMother.objects.filter(risk_reason_none=True).count()
+    
+        return HttpResponse(json.dumps(conditions.items()), content_type='application/json')
+    
+    return render_to_response(
+        "smgl/home.html",
+        context_instance=RequestContext(request)
+        )
