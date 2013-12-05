@@ -1210,13 +1210,12 @@ def help_manager(request, id):
 def home_page(request):
     if request.is_ajax():
         conditions = {}
-        conditions['C-section'] = PregnantMother.objects.filter(risk_reason_csec=True).count()
+        conditions['C-Section'] = PregnantMother.objects.filter(risk_reason_csec=True).count()
         conditions['Comp. during previous'] = PregnantMother.objects.filter(risk_reason_cmp=True).count()
         conditions['Gestational Disease'] = PregnantMother.objects.filter(risk_reason_gd=True).count()
         conditions['High Blood Pressure'] = PregnantMother.objects.filter(risk_reason_hbp=True).count()
         conditions['Previous Still born'] = PregnantMother.objects.filter(risk_reason_psb=True).count()
         conditions['Other'] = PregnantMother.objects.filter(risk_reason_oth=True).count()
-        conditions['None'] = PregnantMother.objects.filter(risk_reason_none=True).count()
     
         return HttpResponse(json.dumps(conditions.items()), content_type='application/json')
     
