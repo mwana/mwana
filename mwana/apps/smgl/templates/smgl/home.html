@@ -50,8 +50,14 @@
 				title:{
 					text: 'Complications'
 				},
+				plotOptions:{
+					pie:{
+						size: "80%"
+					}
+				},
 				series: [{
 					type: 'pie',
+					name: 'Mothers',
 					data: data
 				}]
 			});
