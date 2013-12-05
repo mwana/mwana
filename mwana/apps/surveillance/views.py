@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.surveillance.models import MissingIncident
 import csv
 from datetime import date
 from datetime import timedelta
@@ -70,7 +71,7 @@ def surveillance(request):
 
     districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts', location__supportedlocation__supported=True).distinct()]
     provinces = [str(loc.slug) for loc in Location.objects.filter(type__slug='provinces', location__location__supportedlocation__supported=True).distinct()]    
-    cases = Incident.objects.filter(report__value__gt=0)
+    cases = Incident.objects.filter(report__value__gt=0).distinct()
     # if user is None all incidents/cases will be returned
     user_incidents = cases.filter(userincident__user=request.user)
     group_incidents = cases.filter(groupincident__group__groupusermapping__user=request.user)
@@ -94,5 +95,28 @@ def surveillance(request):
                               "reports": reports,
                               "user_name": user_name,
                               "incident_grid_select": get_incident_grid_selector(id, cases, my_incidents, 2)
+                              }, context_instance=RequestContext(request)
+                              )
+
+def edit_missing_incident(request):
+    sep = "_"
+    values = dict(request.POST).get('incident') or []
+    for mi_values in (filter(lambda x: (sep in x) and x[0:x.index(sep)].isdigit() and x[x.index(sep)+1:].isdigit(), values)):
+        alias_text_id, incident_id = mi_values.split("_")
+        mi = MissingIncident.objects.get(id=int(alias_text_id))
+        # @type mi MissingIncident
+        mi.incident = Incident.objects.get(id=int(incident_id))
+        mi.save()
+
+    values_to_delete = dict(request.POST).get('delete_incident') or []
+    
+    for mi_values in values_to_delete:
+        MissingIncident.objects.filter(id=int(mi_values)).delete()
+
+
+    return render_to_response('surveillance/missing_incident_editor.html',
+                              {
+                              "missing_incidents": MissingIncident.objects.filter(incident=None)[:50],
+                              "incidents": Incident.objects.all()
                               }, context_instance=RequestContext(request)
                               )

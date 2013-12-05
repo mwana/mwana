@@ -488,12 +488,12 @@
         updateDisplay(COUNTRY_CODE, COUNTRY_TYPE)
     }
     function getProvCodeFromDistCode(code){
-         for (var i = 0; i < window.reportData.length; i ++) {
+        for (var i = 0; i < window.reportData.length; i ++) {
             var datum = window.reportData[i];
             if(datum.district_slug === code){
                 return datum.province_slug;
             }
-         }
+        }
     }
     function mapOnClick(str){
         if (event.ctrlKey==1)
@@ -690,11 +690,15 @@
 </script>
 <script type="text/javascript">
     $(".drop-down").chosen();
-    $(".chzn-single").css('width','207px');
-    $(".chzn-drop").css('width','205px');
-    $(".chzn-search input").css('width','170px');
-    $(".chzn-container").css('width','220px');
-
+    var screenWidth = screen.width;
+    var single = Math.round(207 * screenWidth/1950);
+    var drop = Math.round(205 * screenWidth/1950);
+    var input = Math.round(170 * screenWidth/1950);
+    var container = Math.round(220 * screenWidth/1950);
+    $(".chzn-single").css('width', single + 'px');
+    $(".chzn-drop").css('width', drop + 'px');
+    $(".chzn-search input").css('width', input + 'px');
+    $(".chzn-container").css('width', container + 'px');
 
 </script>
 {% endblock %}

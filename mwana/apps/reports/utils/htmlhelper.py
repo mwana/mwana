@@ -112,9 +112,9 @@ def get_incident_grid_selector(id, cases, selected_cases, width=3):
         if column % width == 1:
             code += '<tr>'
         if case in selected_cases:
-            code = code + '<td><input type="checkbox" name="_select_case" value="%s" checked="checked" />%s</td>\n' % ( case.id, case.name)
+            code = code + '<td><input type="checkbox" name="_select_case" value="%s" checked="checked" />%s (%s)</td>\n' % ( case.id, case.name, case.indicator_id)
         else:
-            code = code + '<td><input type="checkbox" name="_select_case" value="%s" />%s</td>\n' % ( case.id, case.name)
+            code = code + '<td><input type="checkbox" name="_select_case" value="%s" />%s (%s)</td>\n' % ( case.id, case.name, case.indicator_id)
         if column % width == 0:
             code += '</tr>'
         column += 1
