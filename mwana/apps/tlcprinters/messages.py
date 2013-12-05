@@ -25,9 +25,9 @@ class TLCOutgoingMessage(OutgoingMessage):
         seq_num_hex = '{0:02x}'.format(seq_num)
         self.text = seq_num_hex + self.text
         # message_sent = super(TLCOutgoingMessage, self).send()
-        message_sent = send(self.text, self.connections[0])
+        message_sent = send(self.text, self.connections)
         if message_sent:
-            MessageConfirmation.objects.create(connection=self.connections[0],
+            MessageConfirmation.objects.create(connection=self.connections,
                                                text=self.text,
                                                sent_at=datetime.today(),
                                                seq_num=seq_num)
