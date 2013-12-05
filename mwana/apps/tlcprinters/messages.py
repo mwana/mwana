@@ -27,7 +27,7 @@ class TLCOutgoingMessage(OutgoingMessage):
         # message_sent = super(TLCOutgoingMessage, self).send()
         message_sent = send(self.text, self.connections)
         if message_sent:
-            MessageConfirmation.objects.create(connection=self.connections,
+            MessageConfirmation.objects.create(connection=self.connections[0],
                                                text=self.text,
                                                sent_at=datetime.today(),
                                                seq_num=seq_num)
