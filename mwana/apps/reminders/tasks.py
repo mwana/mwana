@@ -86,7 +86,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             hsa_msgs = appointment.messages.filter(recipient_type='hsa')
             for msg in hsa_msgs:
                 hsa_msg = OutgoingMessage(
-                    connection, msg.content % dict(
+                    [connection], msg.content % dict(
                         cba=cba_name, patient=patient.name,
                         date=appt_date.strftime('%d/%m/%Y'),
                         clinic=clinic_name,
@@ -99,7 +99,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             if client_conn and client_msgs:
                 for msg in client_msgs:
                     client_msg = OutgoingMessage(
-                        client_conn, msg.content % dict(
+                        [client_conn], msg.content % dict(
                             cba=cba_name, patient=patient.name,
                             date=appt_date.strftime('%d/%m/%Y'),
                             clinic=clinic_name,
@@ -112,7 +112,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
                           "%(type)s clinic visit on %(date)s.Please "
                           "remind them to visit %(clinic)s, then "
                           "reply with TOLD %(patient)s")
-            msg = OutgoingMessage(connection, visit_msg % dict(
+            msg = OutgoingMessage([connection], visit_msg % dict(
                                   cba=cba_name, patient=patient.name,
                                   date=appt_date.strftime('%d/%m/%Y'),
                                   clinic=clinic_name,
