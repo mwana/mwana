@@ -1,14 +1,19 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.const import get_province_worker_type, get_hub_worker_type, get_district_worker_type, get_clinic_worker_type, get_cba_type
-from mwana.apps.training.models import Trained
-from mwana.apps.training.forms import TrainedForm
-from mwana.apps.issuetracking.issuehelper import IssueHelper
-from datetime import datetime, date
-from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
+from datetime import date
 
-from django.template import RequestContext
+from django.contrib.csrf.middleware import csrf_response_exempt
+from django.contrib.csrf.middleware import csrf_view_exempt
 from django.shortcuts import render_to_response
+from django.template import RequestContext
+from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.apps.training.forms import TrainedForm
+from mwana.apps.training.models import Trained
+from mwana.const import get_cba_type
+from mwana.const import get_clinic_worker_type
+from mwana.const import get_district_worker_type
+from mwana.const import get_hub_worker_type
+from mwana.const import get_province_worker_type
 
 
 
@@ -34,7 +39,7 @@ def get_facility_name(slug):
 
 def get_next_navigation(text):
     try:
-        return {"Next":1,"Previous":-1}[text]
+        return {"Next":1, "Previous":-1}[text]
     except:
         return 0
 
@@ -52,21 +57,21 @@ def text_date(text):
 
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templates
-    code ='<select name="%s" id="%s" class="drop-down" size="1">\n'%(id, id)
-    code +='<option value="All">All</option>\n'
+    code = '<select name="%s" id="%s" class="drop-down" size="1">\n' % (id, id)
+    code += '<option value="All">All</option>\n'
     for group in ReportingGroup.objects.all():
         if str(group.id) == selected_group:
-            code = code + '<option selected value="%s">%s</option>\n'%(group.id,group.name)
+            code = code + '<option selected value="%s">%s</option>\n' % (group.id, group.name)
         else:
-            code = code + '<option value="%s">%s</option>\n'%(group.id,group.name)
+            code = code + '<option value="%s">%s</option>\n' % (group.id, group.name)
 
-    code = code +'</select>'
+    code = code + '</select>'
     return code
 
-def read_request(request,param):
+def read_request(request, param):
     try:
         value = request.REQUEST[param].strip()
-        if value =='All':
+        if value == 'All':
             value = None
     except:
         value = None
@@ -108,29 +113,36 @@ def get_trained_data(type):
         trainer_labels.append(a)
         trainer_values.append(len(dict[a]))
 
-    return "[%s]"%','.join("'%s'" % i for i in trainer_labels), trainer_values, total
+    return "[%s]" % ','.join("'%s'" % i for i in trainer_labels), trainer_values, total
 
 @csrf_response_exempt
 @csrf_view_exempt
 def trained(request):
-    order = read_request(request, "o")
-    dir = read_request(request, "ot")
+    name_dir = phone_dir = email_dir = location_dir = type_dir = trained_by_dir = date_dir = additional_text_dir = "asc"
+
+    sort = request.REQUEST.get("o", "date")
+    order = request.REQUEST.get("ot", "ass")
+    direction = {'asc':'', 'desc':'-'}.get(order, '')
+    
+    if sort == 'name': name_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'phone': phone_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'email': email_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'location': location_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'type': type_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'trained_by': trained_by_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'date': date_dir = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+    elif sort == 'additional_text': additional_text = {'asc':'desc', 'desc':'asc'}.get(order, 'asc')
+
     navigation = read_request(request, "navigate")
     page = read_request(request, "page")
-    sort = "location"
-    direction = ""
-    try:
-        sort = {'1':'name', '2':'location', '3':'type', '4':'email', '5':'phone', '6':'date', '7':'trained_by', '8':'additional_text'}[order]
-        direction = {'asc':'', 'desc':'-'}[dir]
-    except:
-        pass
+    
 
 
     page = get_default_int(page)
     page = page + get_next_navigation(navigation)
     confirm_message = ""
 
-    form =  TrainedForm() # An unbound form
+    form = TrainedForm() # An unbound form
     if request.method == 'POST': # If the form has been submitted...
         form = TrainedForm(request.POST) # A form bound to the POST data
         if form.is_valid():
@@ -142,13 +154,13 @@ def trained(request):
             date = form.cleaned_data['date']
             location = form.cleaned_data['location']
             additional_text = form.cleaned_data['additional_text']
-            if not email:email=None
-            if not additional_text:additional_text=None
+            if not email:email = None
+            if not additional_text:additional_text = None
 
 
             model = Trained(name=name, phone=phone, email=email,
-            trained_by=trained_by, type=type, date=date, location=location,
-            additional_text=additional_text)
+                            trained_by=trained_by, type=type, date=date, location=location,
+                            additional_text=additional_text)
 
 
             model.save()
@@ -162,7 +174,7 @@ def trained(request):
 
     issueHelper = IssueHelper()
 
-    (query_set, num_pages, number, has_next, has_previous), max_per_page = issueHelper.get_trained_people("%s%s"% (direction, sort), page)
+    (query_set, num_pages, number, has_next, has_previous), max_per_page = issueHelper.get_trained_people("%s%s" % (direction, sort), page)
 
     offset = max_per_page * (number - 1)
  
@@ -199,6 +211,15 @@ def trained(request):
                               'dho_total': dho_total,
                               'cba_total': cba_total,
                               'clinic_total': clinic_total,
+                              'name_dir': name_dir,
+                              'phone_dir': phone_dir,
+                              'email_dir': email_dir,
+                              'location_dir': location_dir,
+                              'type_dir': type_dir,
+                              'trained_by_dir': trained_by_dir,
+                              'date_dir': date_dir,
+                              'additional_text_dir': additional_text_dir,
+
                               }, context_instance=RequestContext(request)
                               )
 
