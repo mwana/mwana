@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}labresults/stylesheets/labresults.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+
+{% endblock %}
+
+
+{% block javascripts %}
+{{ block.super }}
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+
+{% endblock %}
+
+{% block content %}
+
+
+<div class="left">
+    <form name="getValues" action="" method="POST">{% csrf_token %}
+        <div class="module">
+            <h2>Missing Incidents</h2>
+
+            <div>
+
+                <br>
+                <table>
+
+
+                    {% for mi in missing_incidents %}
+                    <tr>
+                        <td>{{ mi.alias_text}}</td>
+                        <td><select name="incident" id="{{ mi.id}}">
+                                <option value="">-----</option>
+                                {% for incident in incidents %}
+                                <option value="{{ mi.id }}_{{ incident.id }}">{{ incident.name }}</option>
+                                {% endfor %}
+                            </select> </td>
+                            <td>Just delete<input name="delete_incident" id="del_{{ mi.id}}" type="checkbox" name="delete" value="{{ mi.id}}" /></td>
+                            <td> <input type="submit" value="Submit" /> </td>
+                    </tr>
+
+                    {% endfor %}
+                </table>
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+        
+    </form>
+
+</div>
+<script type="text/javascript">
+    $("select").chosen();
+</script>
+
+{% endblock %}
