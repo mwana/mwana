@@ -586,7 +586,7 @@ class FileUpload(models.Model):
     suggestion = models.ForeignKey(Suggestion, related_name="attached_files")
     posted_by = models.ForeignKey(User)
     created_time = models.DateTimeField(auto_now_add=True)
-    file = models.FileField(max_length=255,upload_to="downloads", null=True)
+    file = models.FileField(max_length=255,upload_to="attachments", null=True)
 
     def __unicode__(self):
         return self.original_name()
