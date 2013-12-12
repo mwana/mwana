@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}mUbumi Development - {{ block.super }}{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link href='http://fonts.googleapis.com/css?family=Junge' rel='stylesheet' type='text/css'>
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}smgl/css/statistics.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+<link rel="stylesheet" href="{{ STATIC_URL }}smgl/css/zcahrd_style.css">
+<style type="text/css">
+	#branding h1 a span{
+		font-size: 1.6em;
+		text-align:center;
+	}
+	
+	#branding h1 a:hover{
+		text-decoration: none;
+		text-align:center;
+	}
+	.suggestion-item{
+		padding-top:7px;
+	}
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center;">Development</h2>
+<div class="row">
+	<div class="col-md-10 col-md-offset-1">
+		<ol>
+			{% for suggestion in suggestions %}
+			<li>
+				<b class="suggestion-item"><a href="{% url suggestions-detail suggestion.id %}">{{ suggestion.title }}</a></b>
+				<p style="margin:0 0 0 10px;">{{ suggestion.text|truncatewords:30 }}</p><b>Authors:</b> {{ suggestion.get_authors_names }} | 
+					<b>Last Edited</b>: {{ suggestion.last_edited_time }}  | <a href="{% url suggestions-edit suggestion.id %}">edit</a>
+			</li>
+			<br />
+			{% endfor %}
+		</ol>
+		<a href="{% url suggestions-add %}" class="btn btn-default">Add Suggestion</a>
+	</div>
+</div>
+{% endblock %}
