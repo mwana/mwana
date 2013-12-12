@@ -164,6 +164,7 @@ STATICFILES_DIRS = (
     ("formdesigner", FORMDESIGNER_PATH),
 )
 MEDIA_URL = "/media/"
+MEDIA_ROOT = "../downloads"
 STATIC_URL = "/static/"
 STATIC_ROOT = "../STATICFILES/"
 STATIC_DOC_ROOT = "../static_docs/"
