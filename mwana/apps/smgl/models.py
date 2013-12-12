@@ -1,11 +1,13 @@
 from rapidsms.models import Contact, Connection
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
+import ntpath
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
@@ -559,3 +561,36 @@ class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
         return SyphilisTreatment.objects.filter(mother=self.mother)\
             .order_by("-date")[0] == self
 
+class Suggestion(models.Model):
+    """
+    Database representation of a story that also acts as a comment when attatched to an
+    existing story"""
+    title = models.CharField(max_length=255)
+    authors = models.ManyToManyField(User)
+    created_time = models.DateTimeField(auto_now_add=True)
+    last_edited_time = models.DateTimeField(auto_now=True)
+    parent_suggestion = models.ForeignKey('self', null=True, blank=True)
+    text = models.TextField()
+    
+    def get_authors_names(self):
+    
+        return ", ".join([user.username for user in self.authors.all()])
+    
+    class Meta:
+        ordering = ('-last_edited_time', '-created_time', )
+        
+    def __unicode__(self):
+        return self.title
+    
+class FileUpload(models.Model):
+    suggestion = models.ForeignKey(Suggestion, related_name="attached_files")
+    posted_by = models.ForeignKey(User)
+    created_time = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(max_length=255,upload_to="downloads", null=True)
+
+    def __unicode__(self):
+        return self.original_name()
+
+    def original_name(self):
+        head,tail = ntpath.split(self.file.file.name)
+        return tail or ntpath.basename(head)

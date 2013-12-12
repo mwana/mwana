@@ -10,6 +10,11 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template.context import RequestContext
+from django.views import generic
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import DetailView, DeleteView
+
+from extra_views import CreateWithInlinesView, UpdateWithInlinesView, InlineFormSet
 
 from rapidsms.models import Contact
 from rapidsms.contrib.messagelog.models import Message
@@ -20,10 +25,10 @@ from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
     MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm, SMSRecordsFilterForm,
-    HelpRequestManagerForm)
+    HelpRequestManagerForm, SuggestionForm, FileUploadForm)
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit, Referral, ToldReminder,
-                        ReminderNotification, SyphilisTest)
+                        ReminderNotification, SyphilisTest, Suggestion, FileUpload)
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
@@ -1224,3 +1229,83 @@ def home_page(request):
         "smgl/home.html",
         context_instance=RequestContext(request)
         )
+
+class SuggestionList(generic.ListView):
+    template_name = 'suggestions_list.html'
+    model = Suggestion
+    context_object_name = "suggestions"
+    
+class FileUploadInline(InlineFormSet):
+    model = FileUpload
+    extra = 1
+    def __init__(self, *args, **kwargs):
+        self.form_class = FileUploadForm
+        return super(FileUploadInline, self).__init__(*args, **kwargs)
+
+class SuggestionEdit(UpdateWithInlinesView):
+    template_name = 'smgl/suggestion_form.html'
+    model = Suggestion
+    form_class = SuggestionForm
+    success_url = '/smgl/suggestions'
+    inlines = [FileUploadInline,]
+
+    def forms_valid(self, form, inlines):
+        form.instance.authors.add(self.request.user)
+        for formset in inlines:
+            for formset_form in formset.forms:
+                formset_form.instance.posted_by = self.request.user
+        return super(SuggestionEdit, self).forms_valid(form, inlines)
+    
+    def construct_inlines(self):
+        inlines = super(SuggestionEdit, self).construct_inlines()
+        for formset in inlines:
+            for form in formset.forms:
+                form.empty_permitted = True
+        return inlines
+    
+    def get_context_data(self, *args, **kwargs):
+        context = super(SuggestionEdit, self).get_context_data(*args, **kwargs)
+        context['suggestion'] = self.object
+        return context
+
+class SuggestionAdd(CreateWithInlinesView):
+    template_name = 'smgl/suggestion_form.html'
+    model = Suggestion
+    form_class = SuggestionForm
+    success_url = '/smgl/suggestions'
+    inlines = [FileUploadInline,]
+
+    def forms_valid(self, form, inlines):
+        instance = form.instance
+        instance.save()
+        instance.authors.add(self.request.user)
+        for formset in inlines:
+            for formset_form in formset.forms:
+                formset_form.instance.posted_by = self.request.user
+                formset_form.instance.suggestion = form.instance
+                formset_form.save()
+        return super(SuggestionAdd, self).forms_valid(form, inlines)
+
+    def form_valid(self, form):
+
+        return super(SuggestionAdd, self).form_valid(form)
+    
+    def construct_inlines(self):
+        inlines = super(SuggestionAdd, self).construct_inlines()
+        for formset in inlines:
+            for form in formset.forms:
+                form.empty_permitted = True
+        return inlines
+    
+class SuggestionDetail(DetailView):
+    model = Suggestion
+    context_object_name = "suggestion"
+    
+class SuggestionDelete(DeleteView):
+    model = Suggestion
+    success_url = '/smgl/suggestions'
+    
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super(SuggestionDelete, self).dispatch(*args, **kwargs)
+    
