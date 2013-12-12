@@ -26,16 +26,21 @@ from mwana.apps.locations.models import Location
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
     MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm, SMSRecordsFilterForm,
     HelpRequestManagerForm, SuggestionForm, FileUploadForm)
+
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
-                        FacilityVisit, Referral, ToldReminder,
+                        FacilityVisit,AmbulanceResponse, Referral, ToldReminder,
                         ReminderNotification, SyphilisTest, Suggestion, FileUpload)
+
 from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
-                     HelpRequestTable)
+                     HelpRequestTable, get_msg_type)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates)
+    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
+from smsforms.models import XFormsSession
+import xlwt
+
 
 
 def fetch_initial(initial, session):
@@ -46,6 +51,483 @@ def fetch_initial(initial, session):
 
 def save_form_data(cleaned_data, session):
     session['form_data'] = cleaned_data
+    
+def anc_delivery_report(request):  
+    records = []
+    facility_parent = None
+    start_date, end_date = get_default_dates()
+
+    province = district = facility = None
+
+    visits = FacilityVisit.objects.all()
+    records_for = Location.objects.filter(type__singular='district')
+    start_date, end_date = get_default_dates()
+    if id:
+        facility_parent = get_object_or_404(Location, id=id)
+        # Prepopulate the district
+        if not request.GET:
+            update = {u'district_0': facility_parent.name,
+                      u'district_1': facility_parent.id,
+                      u'start_date': start_date,
+                      u'end_date': end_date
+                      }
+            request.GET = request.GET.copy()
+            request.GET.update(update)
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+            filter_option = form.cleaned_data.get('date_filter_option')
+        # determine what location(s) to include in the report
+        if id:
+            # get district facilities
+            records_for = get_location_tree_nodes(facility_parent, None)
+            if district:
+                records_for = get_location_tree_nodes(district, None, ~Q(type__slug='zone'))
+                if facility_parent != district:
+                    redirect_url = reverse('district-stats',
+                                            args=[district.id])
+                    params = urllib.urlencode(request.GET)
+                    full_redirect_url = '%s?%s' % (redirect_url, params)
+                    return HttpResponseRedirect(full_redirect_url)
+            if facility:
+                records_for = [facility]
+        else:
+            if province:
+                records_for = Location.objects.filter(parent=province)
+            if district:
+                records_for = [district]
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    for place in records_for:
+        locations = Location.objects.all()
+        if not id:
+            reg_filter = {'district': place}
+            visit_filter = {'location__in': [x for x in locations \
+                                if get_current_district(x) == place]}
+        else:
+            reg_filter = {'location': place}
+            visit_filter = {'location': place}
+
+        # Get PregnantMother count for each place
+        if not id:
+            district_facilities = [x for x in locations \
+                                if get_current_district(x) == place]
+            pregnancies = PregnantMother.objects \
+                            .filter(location__in=district_facilities)
+        else:
+            pregnancies = PregnantMother.objects.filter(location=place)
+
+        if filter_option == 'option_1':
+            # Option 1 should show All women who have Pregnancy registrations AND gave birth OR had EDD scheduled within our 
+            #specified time frame
+            mothers_reg = filter_by_dates(mothers, 'created_date',
+                             start=start_date, end=end_date)
+            births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+                            start=start_date, end=end_date)
+            #Get all mothers with birth registrations within the specified time frame.
+            mothers_births = mothers_reg.filter(id__in=births.values_list('mother'))
+            #Get all mothers with edd within the specified time frame
+            mothers_edd = filter_by_dates(mothers, 'edd',
+                             start=start_date, end=end_date)
+            #Combine the two querysets
+            mothers = mothers_births | mothers_edd
+        else:
+            # All women who gave birth or had EDD within specified time frame 
+            mothers_edd = filter_by_dates(mothers, 'edd',
+                             start=start_date, end=end_date)
+            
+            births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+                            start=start_date, end=end_date)
+            #Get all mothers with birth registrations within the specified time frame.
+            mothers_births = mothers.filter(id__in=births.values_list('mother'))
+            mothers = mothers_edd | mothers_births
+     
+        r = {'location': place.name}
+
+        r['location_id'] = place.id
+        births = BirthRegistration.objects.filter(**reg_filter)
+
+        # utilize start/end date if supplied
+        births = filter_by_dates(births, 'date',
+                                 start=start_date, end=end_date)
+        r['births_com'] = births.filter(place='h').count()
+        r['births_fac'] = births.filter(place='f').count()
+
+        # Aggregate ANC visits by Mother and # of visits
+        place_visits = visits.filter(**visit_filter)
+        place_visits = filter_by_dates(place_visits, 'visit_date',
+                                  start=start_date, end=end_date)
+
+        mother_ids = place_visits.distinct('mother') \
+                            .values_list('mother', flat=True)
+        mothers = PregnantMother.objects.filter(id__in=mother_ids)
+
+        anc_visits = mothers.filter(facility_visits__visit_type='anc') \
+                            .annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
+
+        r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
+        # ANC1 is PregnantMother registrations
+        r['pregnancies'] = pregnancies.count()
+        r['anc1'] = pregnancies.count()
+        num_visits = {}
+        for num in anc_visits:
+            if num in num_visits:
+                num_visits[num] += 1
+            else:
+                num_visits[num] = 1
+        for i in range(1, 4):
+            key = 'anc{0}'.format(i + 1)
+            if i in num_visits:
+                r[key] = num_visits[i]
+
+    # handle sorting, since djtables won't sort on non-Model based tables.
+    records = sorted(records, key=itemgetter('location'))
+    if request.GET.get('order_by'):
+        sort = False
+        attr = request.GET.get('order_by')
+        if attr.startswith('-'):
+            sort = True
+        attr = attr.strip('-')
+        try:
+            records = sorted(records, key=itemgetter(attr))
+        except KeyError:
+            pass
+        if sort:
+            records.reverse()
+
+    # render as CSV if export
+    if form.data.get('export'):
+        # expunge location_id field
+        [x.pop('location_id') for x in records]
+        # The keys must be ordered for the exporter
+        keys = ['location', 'pregnancies', 'births_com',
+                'births_fac', 'births_total',
+                'infant_deaths_com', 'infant_deaths_fac',
+                'infant_deaths_total', 'mother_deaths_com',
+                'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
+                'anc3', 'anc4', 'pos1', 'pos2', 'pos3']
+        filename = 'national_statistics' if not id else 'district_statistics'
+        date_range = ''
+        if start_date:
+            date_range = '_from{0}'.format(start_date)
+        if start_date:
+            date_range = '{0}_to{1}'.format(date_range, end_date)
+        filename = '{0}{1}'.format(filename, date_range)
+        return export_as_csv(records, keys, filename)
+
+    statistics_table = StatisticsLinkTable(records,
+                                           request=request)
+    # disable the link column if on district stats view
+    if id:
+        statistics_table = StatisticsTable(records,
+                                           request=request)
+    return render_to_response(
+        "smgl/statistics.html",
+        {"statistics_table": statistics_table,
+         "district": facility_parent,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+
+def pnc_report(request):
+    records = []
+    facility_parent = None
+    start_date, end_date = get_default_dates()
+
+    province = district = facility = None
+
+    visits = FacilityVisit.objects.all()
+    records_for = Location.objects.filter(type__singular='district')
+
+    if id:
+        facility_parent = get_object_or_404(Location, id=id)
+        # Prepopulate the district
+        if not request.GET:
+            update = {u'district_0': facility_parent.name,
+                      u'district_1': facility_parent.id,
+                      u'start_date': start_date,
+                      u'end_date': end_date
+                      }
+            request.GET = request.GET.copy()
+            request.GET.update(update)
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+        # determine what location(s) to include in the report
+        if id:
+            # get district facilities
+            records_for = get_location_tree_nodes(facility_parent, None)
+            if district:
+                records_for = get_location_tree_nodes(district, None, ~Q(type__slug='zone'))
+                if facility_parent != district:
+                    redirect_url = reverse('district-stats',
+                                            args=[district.id])
+                    params = urllib.urlencode(request.GET)
+                    full_redirect_url = '%s?%s' % (redirect_url, params)
+                    return HttpResponseRedirect(full_redirect_url)
+            if facility:
+                records_for = [facility]
+        else:
+            if province:
+                records_for = Location.objects.filter(parent=province)
+            if district:
+                records_for = [district]
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    for place in records_for:
+        locations = Location.objects.all()
+        if not id:
+            reg_filter = {'district': place}
+            visit_filter = {'location__in': [x for x in locations \
+                                if get_current_district(x) == place]}
+        else:
+            reg_filter = {'location': place}
+            visit_filter = {'location': place}
+
+        # Get PregnantMother count for each place
+        if not id:
+            district_facilities = [x for x in locations \
+                                if get_current_district(x) == place]
+            pregnancies = PregnantMother.objects \
+                            .filter(location__in=district_facilities)
+        else:
+            pregnancies = PregnantMother.objects.filter(location=place)
+
+        pregnancies = filter_by_dates(pregnancies, 'created_date',
+                                 start=start_date, end=end_date)
+
+        r = {'location': place.name}
+
+        r['location_id'] = place.id
+        births = BirthRegistration.objects.filter(**reg_filter)
+
+        # utilize start/end date if supplied
+        births = filter_by_dates(births, 'date',
+                                 start=start_date, end=end_date)
+        r['births_com'] = births.filter(place='h').count()
+        r['births_fac'] = births.filter(place='f').count()
+        r['births_total'] = r['births_com'] + r['births_fac']
+
+        deaths = DeathRegistration.objects.filter(**reg_filter)
+        deaths = filter_by_dates(deaths, 'date',
+                                 start=start_date, end=end_date)
+
+
+        pos_visits = mothers.filter(facility_visits__visit_type='pos') \
+                            .annotate(Count('facility_visits')) \
+                            .values_list('facility_visits__count', flat=True)
+
+        r['pos1'] = r['pos2'] = r['pos3'] = 0
+        num_visits = {}
+        for num in pos_visits:
+            if num in num_visits:
+                num_visits[num] += 1
+            else:
+                num_visits[num] = 1
+        for i in range(1, 4):
+            key = 'pos{0}'.format(i)
+            if i in num_visits:
+                r[key] = num_visits[i]
+
+        records.append(r)
+    mmr = ''
+    nmr = '' 
+    # handle sorting, since djtables won't sort on non-Model based tables.
+    records = sorted(records, key=itemgetter('location'))
+    if request.GET.get('order_by'):
+        sort = False
+        attr = request.GET.get('order_by')
+        if attr.startswith('-'):
+            sort = True
+        attr = attr.strip('-')
+        try:
+            records = sorted(records, key=itemgetter(attr))
+        except KeyError:
+            pass
+        if sort:
+            records.reverse()
+
+  
+
+    statistics_table = StatisticsLinkTable(records,
+                                           request=request)
+    # disable the link column if on district stats view
+    if id:
+        statistics_table = StatisticsTable(records,
+                                           request=request)
+    return render_to_response(
+        "smgl/statistics.html",
+        {"statistics_table": statistics_table,
+         "district": facility_parent,
+         "form": form
+        },
+        context_instance=RequestContext(request))
+  
+def referral_report(request):
+    start_date, end_date = get_default_dates()
+    province = district = facility = None
+    referrals = Referral.objects.all()
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    referrals = referrals.filter(from_facility__in=locations)
+
+    # filter by created_date
+    referrals = filter_by_dates(referrals, 'date',
+                             start=start_date, end=end_date)
+
+    referrals_with_response = AmbulanceResponse.objects.filter(referral__in=referrals)
+    ref_with_outcome = referrals.objects.filter(responded=True)
+    referral_amb = referrals_with_response
+    average_turnaround_time = ''
+    most_common_obstetric_complication = ''
+    
+def reminder_report(request):
+    reminders_scheduled
+    reminders_sent
+    told_sent
+    followup_visits
+    visit_after_told
+    timely_visit_after_told
+    
+    
+def user_report(request):
+    start_date, end_date = get_default_dates()
+    contacts = Contact.objects.all()
+    province = district = facility = None
+    if request.GET:
+        form = SMSUsersFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            c_type = form.cleaned_data.get('c_type')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = SMSUsersFilterForm(initial=fetch_initial(initial, request.session))
+
+    registered_cbas = ContactType.objects.get(slug='cba').contacts.all()
+    active_cbas = [cba for cba in registered_cbas if cba.active_status]
+    registered_cbas = filter_by_dates(registered_cbas, 'created_date',
+                           start=start_date, end=end_date)
+    
+    registered_clerks = ContactType.objects.get(slug='dc').contacts.all()
+    active_clerks = [clerk for clerk in registered_clerks if clerk.active_status]
+    registered_clerks = filter_by_dates(registered_clerks, 'created_date',
+                             start=start_date, end=end_date)
+    
+    registered_workers = ContactType.objects.get(slug='worker').contacts.all()
+    active_workers = [worker for worker in registered_workers in worker.active_status]
+    registered_workers = filter_by_dates(registered_workers, 'created_date',
+                              start=start_date, end=end_date)
+    
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = [facility]
+    
+    if locations:
+        registered_workers = [x for x in registered_cbas if x.get_current_district() in locations]
+        registered_clerks = [x for x in registered_clerks if x.get_current_district() in locations]
+        registered_workers = [x for x in registered_workers if x.get_current_district() in locations]
+        
+    #Error rates
+    cba_sessions = XFormsSession.objects.filter(connection__contact__types__slug='cba')
+    cba_errors = cba_sessions.objects.filter(has_error=True)
+    
+    workers_sessions = XFormsSession.objects.filter(connection__contact__types__slug='worker')
+    workers_errors = cba_sessions.objects.filter(has_error=True)
+    
+    data_clerk_sessions = XFormsSession.objects.filter(connection__contact__types__slug='dc')
+    data_clerk_errors = data_clerk_sessions.objects.filter(has_error=True)
+
+    try:
+        cbas = cbas.count()
+        clerks = clerks.count()
+        workers = workers.count()
+    except TypeError:
+        cbas = len(cbas)
+        clerks = len(clerks)
+        workers = len(workers)
+        
+    if export:
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS Users Page')
+        worksheet, row_index = excel_export_header(worksheet)
+        row_index += 1
+        
+        column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'District', 'Facility', 'Zone', 'Last Active', 'Date Registration', 'Active Status']
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        for contact in contacts:
+            worksheet.write(row_index, 0, contact.date)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, "".join(contact.types.all()))
+            worksheet.write(row_index, 4, contact.location)
+            worksheet.write(row_index, 5, contact.location)
+            worksheet.write(row_index, 6, contact.location)
+            worksheet.write(row_index, 7, contact.last_active)
+            worksheet.write(row_index, 8, contact.registration)
+            worksheet.write(row_index, 9, contact.is_active)
+            row_index += 1
+        workbook.save()
+
+    
 
 def mothers(request):
     province = district = facility = zone = None
@@ -92,7 +574,33 @@ def mothers(request):
     # filter by EDD
     mothers = filter_by_dates(mothers, 'edd',
                              start=edd_start_date, end=edd_end_date)
-
+    """
+    if export:
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("Mother's Page")
+        worksheet, row_index = excel_export_header(worksheet)
+        row_index += 1
+        
+        column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD', 
+                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date', 'Actual third ANC Date',
+                      'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC']
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        row_index += 1
+         
+        for mother in mothers:
+            worksheet.write(row_index, 0, mother.created_date)
+            worksheet.write(row_index, 1, mother.uid),
+            worksheet.write(row_index, 2, mother.name),
+            worksheet.write(row_index, 4, mother.location)
+            worksheet.write(row_index, 5, mother.location)
+            worksheet.write(row_index, 6, mother.location)
+            worksheet.write(row_index, 7, 'Yes' if mother.get_risk_reasons() else 'No')
+            worksheet.write(row_index, 8, mother.lmp),
+            worksheet.write(row_index, 9, mother.edd),
+            worksheet.write(row_index, 10, mother.gestational_age),
+            #not complete 
+             
+    """
     # render as CSV if export
     if form.data.get('export'):
         # The keys must be ordered for the exporter
@@ -123,6 +631,8 @@ def mothers(request):
         filename = '{0}{1}{2}'.format(filename, date_range, edd_date_range)
 
         return export_as_csv(records, keys, filename)
+    
+        
 
     search_form = MotherSearchForm()
     if request.method == 'POST':
@@ -150,24 +660,39 @@ def mother_history(request, id):
     messages = Message.objects.filter(text__icontains=mother.uid,
                                       direction='I')
 
-    # render as CSV if export
     if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'msg_type', 'sender', 'facility', 'message']
-        records = []
-        for msg in messages:
-            text = msg.text
-            msg_type = text.split(' ')[0].upper()
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'msg_type': msg_type,
-                    'sender': msg.contact,
-                    'facility': msg.contact.location.name if msg.contact else '',
-                    'message': text
-                })
-        filename = 'mother{0}_messages_report'.format(mother.uid)
-
-        return export_as_csv(records, keys, filename)
+        messages = messages.filter(direction='I') #only show incoming messages.
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("Mother's Page")
+        column_headers = ['Date', 'Time', 'Type', 'SMH', 'Sender Number', 'District', 'Facility', 'Zone', 'Message']
+        worksheet, row_index = excel_export_header(
+                                                   worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(3).width = worksheet.col(4).width = 15*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
+        for message in messages:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.date.time(), time_format)
+            worksheet.write(row_index, 2, get_msg_type(message))
+            worksheet.write(row_index, 3, mother.uid)
+            worksheet.write(row_index, 4, message.connection.identity)
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, message.text)
+            row_index += 1
+        fname = 'Mother-history-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/mother_history.html",
@@ -428,7 +953,7 @@ def reminder_stats(request):
                                             mother__in=reminded_mothers
                                             )
         told_mothers = tolds.values_list('mother', flat=True)
-
+        scheduled_reminders = ''
         if key == 'edd':
             showed_up = BirthRegistration.objects.filter(
                                                 mother__in=reminded_mothers
@@ -725,19 +1250,42 @@ def notifications(request):
     messages = filter_by_dates(messages, 'date',
                              start=start_date, end=end_date)
 
-    # render as CSV if export
+    
     if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'facility', 'message']
-        records = []
-        for msg in messages:
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'facility': msg.contact.location.name if msg.contact else '',
-                    'message': msg.text
-                })
-        filename = 'notifications_report'
-        return export_as_csv(records, keys, filename)
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("Notifications")
+        column_headers = ['Date', 'User Number', 'User Name', 'User Type', 'District', 'Facility',
+                           'Zone', 'Type of Notification', 'Message']
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        row_index += 1   
+        worksheet.col(1).width = 15*256
+        worksheet.col(2).width = 20*256
+        worksheet.col(4).width = worksheet.col(5).width = worksheet.col(6).width = 20*256
+        worksheet.col(8).width = 100*256
+        for message in messages:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.connection.identity)
+            worksheet.write(row_index, 2, message.contact.name)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 4, district)
+            worksheet.write(row_index, 5, facility)
+            worksheet.write(row_index, 6, zone)
+            worksheet.write(row_index, 7, get_msg_type(message))
+            worksheet.write(row_index, 8, message.text)
+            row_index += 1
+        fname = 'notifications-export.xls'
+        response = HttpResponse(mimetype="applicatins/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/notifications.html",
@@ -809,7 +1357,37 @@ def referrals(request):
                 })
         filename = 'referrals_report'
         return export_as_csv(records, keys, filename)
-
+    """
+    if export:
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("Referral Export")
+        worksheet, row_index = excel_export_header(worksheet)
+        row_index += 1
+            
+        col_headers = ['Date', 'System Timestamp', 'SMH', 'From Facility', 'To Facility', 'Time of Referal', 'Response', 
+                       'Resp User', 'Confirm AMB', 'Pick', 'Drop', 'Outcome', 'Date Refout', 'Outcome Mother', 'Outcome Baby', 'Mode of Delivery']
+        
+        col_headers[5:5] = ['Cond %s'%cond for cond in REFERRAL_REASONS.keys()]#Insert the condition columns next to facility
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        row_index += 1  
+        for referral in referrals:
+            worksheet.write(row_index, 0, referral.date())
+            worksheet.write(row_index, 0, datetime.datetime.now())
+            worksheet.write(row_index, 0, referral.smh_id)
+            worksheet.write(row_index, 0, referral.from_facility)
+            worksheet.write(row_index, 0, referral.facility)
+            worksheet.write(row_index, 0, '')#condition
+            worksheet.write(row_index, 0, referral.time())
+            worksheet.write(row_index, 0, "Yes" if ref.responded else "No",)
+            worksheet.write(row_index, 0, referral.ambulance_response.responder.name if referral.ambulance_response else '')
+            worksheet.write(row_index, 0, referral.ambulance_response)
+            worksheet.write(row_index, 0, )#pick
+            worksheet.write(row_index, 0, )#drop
+            worksheet.write(row_index, 0, referral.outcome)
+            worksheet.write(row_index, 0, referral.get_mother_outcome_display())
+            worksheet.write(row_index, 0, referral.get_baby_outcome_display())
+            worksheet.write(row_index, 0, referral.get_mode_of_delivery_display()))
+    """
     return render_to_response(
         "smgl/referrals.html",
         {"message_table": ReferralsTable(referrals,
@@ -862,34 +1440,53 @@ def sms_records(request):
     if keyword:
         sms_records = sms_records.filter(text__istartswith=keyword)
 
-    # render as CSV if export
-    if form.data.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'id', 'phone_number', 'msg_type', 'facility', 'text']
-        records = []
-        for rec in sms_records:
-            date = rec.date.strftime('%Y-%m-%d') \
-                        if rec.date else None
-            records.append({
-                    'date': date,
-                    'id': rec.id,
-                    'phone_number': rec.connection.identity,
-                    'msg_type': rec.text.split(' ')[0].upper(),
-                    'facility': rec.connection.contact.location if rec.connection.contact else None,
-                    'text': (rec.text or '').encode('utf-8'),
-                })
-        filename = 'sms_records_report'
-        date_range = ''
-        if start_date:
-            date_range = '_from{0}'.format(start_date)
-        if start_date:
-            date_range = '{0}_to{1}'.format(date_range, end_date)
-        filename = '{0}{1}'.format(filename, date_range)
 
-        return export_as_csv(records, keys, filename)
+    if form.data.get('export'):
+        #import ipdb;ipdb.set_trace()
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS Users Page')
+        selected_level = facility or district or province
+        column_headers = column_headers = ['Date', 'Type', 'Incoming or Outgoing', 'User Number', 'User Name',
+                                           'User Type', 'District', 'Facility', 'Zone', 'Message']
+        keyword = "Keyword: %s"%(keyword if keyword else 'None')
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date,
+                                                   additional_filters=keyword
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(3).width = 15*256
+        worksheet.col(5).width = 20*256
+        worksheet.col(6).width = worksheet.col(7).width = worksheet.col(8).width = 30*256
+        worksheet.col(9).width = 100*256
+
+        for message in sms_records:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, get_msg_type(message))
+            worksheet.write(row_index, 2, message.get_direction_display())
+            worksheet.write(row_index, 3, message.connection.identity)
+            worksheet.write(row_index, 4, message.connection.contact.name)
+            worksheet.write(row_index, 5, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 6, district)
+            worksheet.write(row_index, 7, facility)
+            worksheet.write(row_index, 8, zone)
+            worksheet.write(row_index, 9, message.text)
+            row_index += 1
+        fname = 'sms-records-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     records_table = SMSRecordsTable(sms_records, request=request)
 
+    
     return render_to_response(
         "smgl/sms_records.html",
         {"records_table": records_table,
@@ -941,21 +1538,45 @@ def sms_users(request):
         contacts = [x for x in contacts if x.latest_sms_date.date() <= end_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
-    # render as CSV if export
-    if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['created_date', 'name', 'number', 'last_active', 'location']
-        records = []
-        for c in contacts:
-            records.append({
-                    'created_date': c.created_date.strftime('%Y-%m-%d') if c.created_date else None,
-                    'name': c.name.encode('utf-8'),
-                    'number': c.default_connection.identity if c.default_connection else None,
-                    'last_active': c.latest_sms_date,
-                    'location': c.location.name.encode('utf-8') if c.location else '',
-                })
-        filename = 'sms_users_report'
-        return export_as_csv(records, keys, filename)
+    if form.data.get('export'):
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS Users Page')
+        selected_level = district or province
+        column_headers = column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'District',
+                                           'Facility', 'Zone', 'Last Active', 'Date Registration', 'Active Status']
+        contact_type = "Contact Type: %s"%(c_type if c_type else 'All')
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date,
+                                                   additional_filters=contact_type
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(2).width = 15*256
+        worksheet.col(4).width = worksheet.col(5).width = worksheet.col(6).width = 30*256
+
+        for contact in contacts:
+            district, facility, zone = get_district_facility_zone(contact.location)
+            worksheet.write(row_index, 0, contact.created_date, date_format)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
+            worksheet.write(row_index, 4, district)
+            worksheet.write(row_index, 5, facility)
+            worksheet.write(row_index, 6, zone)
+            worksheet.write(row_index, 7, contact.latest_sms_date, date_format)
+            worksheet.write(row_index, 8, contact.created_date, date_format)
+            worksheet.write(row_index, 9, 'Yes' if contact.is_active else 'No')
+            row_index += 1
+        fname = 'sms-users-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     search_form = SMSUsersSearchForm()
     if request.method == 'POST':
@@ -981,22 +1602,40 @@ def sms_user_history(request, id):
     messages = Message.objects.filter(contact=contact,
                                       direction='I')
 
-    # render as CSV if export
     if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'msg_type', 'message']
-        records = []
-        for msg in messages:
-            text = msg.text
-            msg_type = text.split(' ')[0].upper()
-            records.append({
-                    'date': msg.date.strftime('%Y-%m-%d') if msg.date else None,
-                    'msg_type': msg_type,
-                    'message': text
-                })
-        filename = 'sms_user_{0}_messages_report'.format(contact.name)
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS User Page')
+        column_headers = column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'Type',
+                                           'Message Accepted', 'Message']
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
 
-        return export_as_csv(records, keys, filename)
+        worksheet.col(2).width = 15*256
+        worksheet.col(6).width = 100*256
+        for message in messages:
+            try:
+                XFormsSession.objects.get(message_incoming=message, has_error=True)
+            except XFormsSession.DoesNotExist:
+                is_accepted='Yes'
+            else:
+                is_accepted='No'
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
+            worksheet.write(row_index, 4, get_msg_type(message))
+            worksheet.write(row_index, 5, is_accepted)
+            worksheet.write(row_index, 6, message.text)
+            row_index += 1
+        fname = 'Single-User-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     return render_to_response(
         "smgl/sms_user_history.html",
@@ -1154,34 +1793,51 @@ def help(request):
     help_reqs = filter_by_dates(help_reqs, 'requested_on',
                              start=start_date, end=end_date)
 
-    # render as CSV if export
     if form.data.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['id', 'requested_on', 'phone', 'name', 'facility',
-                'additional_text', 'resolved_by', 'status']
-        records = []
-        for req in help_reqs:
-            requested_on = req.requested_on.strftime('%Y-%m-%d') \
-                        if req.requested_on else None
-            records.append({
-                    'id': req.id,
-                    'requested_on': requested_on,
-                    'phone': req.requested_by.identity,
-                    'name': req.requested_by.contact.name if req.requested_by.contact else None,
-                    'facility': req.requested_by.contact.location if req.requested_by.contact else None,
-                    'additional_text': req.additional_text,
-                    'resolved_by': req.resolved_by,
-                    'status': req.get_status_display
-                })
-        filename = 'help_request_report'
-        date_range = ''
-        if start_date:
-            date_range = '_from{0}'.format(start_date)
-        if start_date:
-            date_range = '{0}_to{1}'.format(date_range, end_date)
-        filename = '{0}{1}'.format(filename, date_range)
-
-        return export_as_csv(records, keys, filename)
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('Help')
+        
+        selected_level = facility or district or province
+        column_headers = ['Date', 'Time', 'User Number', 'User Name', 'User Type', 'District', 'Facility', 'Zone', 'Message', 
+                          'Resolved Status', 'Date Resolved', 'Time Resolved', 'Resolved by']
+        worksheet, row_index = excel_export_header(worksheet, 
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(10).width = worksheet.col(11).width = 11 *256 #Resolved Date and Time Columns
+        worksheet.col(2).width = 15*256 
+        worksheet.col(3).width = 20*256
+        worksheet.col(4).width = 20*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
+        for help_req in help_reqs:
+            district, facility, zone = get_district_facility_zone(help_req.requested_by.contact.location)
+            worksheet.write(row_index, 0, help_req.requested_on.date(), date_format)
+            worksheet.write(row_index, 1, help_req.requested_on.time(), time_format)
+            worksheet.write(row_index, 2, help_req.requested_by.identity)
+            worksheet.write(row_index, 3, help_req.requested_by.contact.name)
+            worksheet.write(row_index, 4, ", ".join([contact_type.name for contact_type in help_req.requested_by.contact.types.all()]))
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, help_req.additional_text)
+            worksheet.write(row_index, 9, help_req.get_status_display)
+            worksheet.write(row_index, 10, help_req.addressed_on.date() if help_req.addressed_on else '', date_format)
+            worksheet.write(row_index, 11, help_req.addressed_on.time() if help_req.addressed_on else '', time_format)
+            worksheet.write(row_index, 12, help_req.resolved_by)
+            row_index += 1
+        fname = 'help-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+            
 
     helpreqs_table = HelpRequestTable(help_reqs, request=request)
 
