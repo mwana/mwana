@@ -18,3 +18,5 @@ django-selectable==0.6.2
 # these are busted on windows so put them last
 lxml==2.2.4
 psycopg2==2.4.2
+django-extra-views==0.6.3
+
