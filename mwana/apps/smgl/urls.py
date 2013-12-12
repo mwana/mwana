@@ -21,4 +21,9 @@ urlpatterns = patterns('',
     url(r"^sms-users/(?P<id>[\d]+)/statistics/$", views.sms_user_statistics, name="sms-user-statistics"),
     url(r"^help/(?P<id>[\d]+)/$", views.help_manager, name="help-manager"),
     url(r"^help/$", views.help, name="help"),
+    url(r"^suggestions/$", views.SuggestionList.as_view(), name="suggestions-list"),
+    url(r"^suggestion/add/$", views.SuggestionAdd.as_view(), name="suggestions-add"),
+    url(r"^suggestion/edit/(?P<pk>[\d]+)/$", views.SuggestionEdit.as_view(), name="suggestions-edit"),
+    url(r"^suggestion/detail/(?P<pk>[\d]+)/$", views.SuggestionDetail.as_view(), name="suggestions-detail"),
+    url(r"^suggestion/delete/(?P<pk>[\d]+)/$", views.SuggestionDelete.as_view(), name="suggestions-delete")
 )

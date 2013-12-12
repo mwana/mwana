@@ -1,0 +1,94 @@
+{% extends  "layout.html" %}
+{% load djtables_tags %}
+
+{% block title %}User Report - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
+<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+{{ form.media.css }}
+
+{% endblock %}
+
+{% block javascripts %}
+  <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
+  <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
+  <script>
+      $(function() {
+        $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_end_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+    });
+  </script>
+{% endblock %}
+
+{% block page_tabs %}
+ {% include "smgl/includes/statistics_subnav.html" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="statistics module">
+  <h2>Filtering</h2>
+  <form action="" method="GET" >
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">Period</th>
+          <th colspan="2">Location</th>
+        </tr>
+        <tr>
+          <th>Start</th>
+          <th>End</th>
+          {% if not district %}
+          <th>Province</th>
+          {% endif %}
+          <th>District</th>
+          {% if district %}
+          <th>Facility</th>
+          {% endif %}
+
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            {{ form.start_date.errors}}
+            {{ form.start_date }}
+          </td>
+          <td>
+            {{ form.end_date.errors}}
+            {{ form.end_date }}
+          </td>
+          <td>
+            {{ form.province.errors}}
+            {{ form.province }}
+          </td>
+          <td>
+            {{ form.district.errors}}
+            {{ form.district }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+      <input type="submit" class="btn" name="filter" value="Filter" />
+      <input type="submit" class="btn" name="export" value="Export" />
+  </form>
+  {{ form.media.js }}
+  <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
+  <div id="records">
+    {{ user_report_table.as_html }}
+  </div>
+</div>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+        function newDistrictParameters(query) {
+            query.province = $('#id_province_1').val();
+        }
+        $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
+
+    });
+</script>
+
+{% endblock %}

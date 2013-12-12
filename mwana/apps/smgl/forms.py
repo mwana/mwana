@@ -4,7 +4,7 @@ from django import forms
 
 from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.help.models import HelpRequest
-from mwana.apps.smgl.models import XFormKeywordHandler
+from mwana.apps.smgl.models import XFormKeywordHandler, Suggestion, FileUpload
 
 from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
@@ -99,4 +99,26 @@ class HelpRequestManagerForm(forms.ModelForm):
     class Meta:
         model = HelpRequest
         fields = ('notes',)
+        
+class SuggestionForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(SuggestionForm, self).__init__(*args, **kwargs)
+        self.fields['title'].widget.attrs['class'] = 'form-control'
+        self.fields['title'].widget.attrs['placeholder'] = 'Suggestion Title'
+        
+        self.fields['text'].widget.attrs['class'] = 'form-control'
+        self.fields['text'].widget.attrs['placeholder'] = 'Describe your suggestion, you can add images/files below.'
+        
+    class Meta:
+        model = Suggestion
+        fields = ('title', 'text')
+        
+class FileUploadForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(FileUploadForm, self).__init__(*args, **kwargs)
+        self.fields['file'].widget.attrs['class'] = 'form-control'
+        
+    class Meta:
+        model = FileUpload
+        fields = ('file',)
 

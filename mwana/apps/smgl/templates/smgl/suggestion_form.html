@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% block title %}mUbumi Development - {{ block.super }}{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{{ STATIC_URL }}smgl/css/zcahrd_style.css">
+<style type="text/css">
+	#branding h1 a span{
+		font-size: 1.6em;
+		text-align:center;
+	}
+</style>
+{% endblock %}
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript">
+
+</script>
+{% endblock %}
+{% block content %}
+<form class="form-horizontal" role="form" method="POST" action="" enctype="multipart/form-data">{% csrf_token %}
+<h2 style="text-align: center;">Development Suggestion</h2>
+	 {{ form.non_field_errors }}
+	 {% for field in form %}	 
+	 	<br />
+	 	<div class="form-group">
+	 		<label for="id_{{ field.html_name }}" class="col-sm-2 control-label">{{ field.label }}</label>
+	 		<div class="col-sm-8">
+      			{{ field }}
+    		</div>
+    		{% for error in field.errors %}
+    			<div class="col-sm-2 alert alert-danger">{{ error }}</div>
+    		{% endfor %}
+	 	</div>
+	 {% endfor %}
+	 <h4 style="text-align: center;">File Uploads</h4>
+	 {% for formset in inlines %}
+	 	{{ formset.management_form }}
+	 	{% for form in formset %}
+	 		{{ form.id }}
+	 		{{ form.non_field_errors }}
+	 		{% for field in form.visible_fields %}
+	 			<div class="form-group">
+	 				<label for="id_{{ field.html_name }}" class="col-sm-2 control-label">{{ field.label }}</label>
+	 				<div class="col-sm-4">
+	 					{{ field }}
+	 				</div>
+    			{% for error in field.errors %}
+    				<div class="col-sm-2 alert alert-danger">{{ error }}</div>
+    			{% endfor %}
+	 			</div>
+	 		{% endfor %}
+	 		<br />
+	 	{% endfor %}
+	{%  endfor %}
+	{% if suggestion %}
+		<a href="{% url suggestions-delete suggestion.id %}" class="btn btn-danger col-sm-6">Delete</a>
+		<button type="submit" class="btn btn-success col-sm-6" name="submit">Save</button>
+	{% else %}
+		<button type="submit" class="btn btn-success btn-block" name="submit">Save</button>
+	{% endif %}
+</form>
+
+{% endblock %}
