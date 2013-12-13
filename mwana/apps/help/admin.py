@@ -4,6 +4,7 @@ from django import forms
 from django.db import models
 
 from mwana.apps.help import models as help
+from mwana.apps.labresults.actions import export_as_csv_action
 
 
 class HelpRequestAdmin(admin.ModelAdmin):
@@ -15,6 +16,7 @@ class HelpRequestAdmin(admin.ModelAdmin):
                      'additional_text',
                      'requested_by__contact__location__parent__name',
                      'requested_by__contact__types__name',)
+    actions = [export_as_csv_action("Export selected requests to CSV.")]
 
     def save_model(self, request, obj, form, change):
         if getattr(obj, 'resolved_by', None) is None:
