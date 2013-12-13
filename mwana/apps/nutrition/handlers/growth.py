@@ -169,8 +169,11 @@ class GrowthHandler(KeywordHandler):
     def __identify_healthworker(self):
         # return the healthworker if already registered on this connection
         try:
-            healthworker = self.msg.connections[0].contact
-            return healthworker
+            if self.msg.connections[0].contact is not None:
+                healthworker = self.msg.connections[0].contact
+                return healthworker
+            else:
+                return None
         except ObjectDoesNotExist:
             return None
 

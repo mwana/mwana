@@ -141,9 +141,10 @@ class MayiHandler(KeywordHandler):
     def handle(self, text):
         """Handle the mayi submission."""
         # only allow registered users to submit
-        try:
+
+        if self.msg.connections[0].contact is not None:
             healthworker = self.msg.connections[0].contact
-        except ObjectDoesNotExist:
+        else:
             self.respond(UNREGISTERED)
             return True
 
