@@ -193,6 +193,12 @@ class MayiHandler(KeywordHandler):
                                 date=data['edd'].strftime('%d/%m/%Y'),
                                 hsa_name=hsa_name)
             self.msg.respond(thanks_msg)
+            if patient_conn is not None:
+                mayi_msg = "Dear %(name)s, you have been registered to"\
+                           " receive reminders for care by %(hsa_name)s. You "\
+                           "will be notified of your next clinic appointments."\
+                           % dict(name=patient.name, hsa_name=hsa_name)
+                self.msg.respond(mayi_msg)
             return True
 
         patient_event = patient.patient_events.create(
@@ -203,6 +209,11 @@ class MayiHandler(KeywordHandler):
         if patient_conn is not None:
             patient_event.patient_conn = patient_conn
             patient_event.save()
+            mayi_msg = "Dear %(name)s, you have been registered to"\
+                       " receive reminders for care by %(hsa_name)s. You "\
+                       "will be notified of your next clinic appointments."\
+                       % dict(name=patient.name, hsa_name=hsa_name)
+            self.msg.respond(mayi_msg)
 
         new_mayi = "Thanks%(hsa_name)s! You have registered %(name)s's "\
                    "expected delivery date as %(date)s. You will be notified"\
