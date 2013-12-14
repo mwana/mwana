@@ -35,10 +35,11 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
-                     HelpRequestTable, get_msg_type)
+                     HelpRequestTable, UserReport, get_msg_type)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
 from smsforms.models import XFormsSession
+from reminders import SEND_REMINDER_LOWER_BOUND
 import xlwt
 
 
@@ -429,15 +430,7 @@ def referral_report(request):
     average_turnaround_time = ''
     most_common_obstetric_complication = ''
     
-def reminder_report(request):
-    reminders_scheduled
-    reminders_sent
-    told_sent
-    followup_visits
-    visit_after_told
-    timely_visit_after_told
-    
-    
+
 def user_report(request):
     start_date, end_date = get_default_dates()
     contacts = Contact.objects.all()
@@ -458,20 +451,21 @@ def user_report(request):
                   }
         form = SMSUsersFilterForm(initial=fetch_initial(initial, request.session))
 
-    registered_cbas = ContactType.objects.get(slug='cba').contacts.all()
-    active_cbas = [cba for cba in registered_cbas if cba.active_status]
-    registered_cbas = filter_by_dates(registered_cbas, 'created_date',
+    cbas_registered = ContactType.objects.get(slug='cba').contacts.all()
+    cbas_registered = filter_by_dates(cbas_registered, 'created_date',
                            start=start_date, end=end_date)
+    cbas_active = [cba for cba in cbas_registered if cba.active_status == "active"]
     
-    registered_clerks = ContactType.objects.get(slug='dc').contacts.all()
-    active_clerks = [clerk for clerk in registered_clerks if clerk.active_status]
-    registered_clerks = filter_by_dates(registered_clerks, 'created_date',
+    data_clerks_registered = ContactType.objects.get(slug='dc').contacts.all()
+    data_clerks_registered = filter_by_dates(data_clerks_registered, 'created_date',
                              start=start_date, end=end_date)
+    data_clerks_active = [clerk for clerk in data_clerks_registered if clerk.active_status == "active"]
     
-    registered_workers = ContactType.objects.get(slug='worker').contacts.all()
-    active_workers = [worker for worker in registered_workers in worker.active_status]
-    registered_workers = filter_by_dates(registered_workers, 'created_date',
+    clinic_worker_types = ContactType.objects.filter(slug__in=['worker'])
+    clinic_workers_registered = Contact.objects.filter(types__in=clinic_worker_types)
+    clinic_workers_registered = filter_by_dates(clinic_workers_registered, 'created_date',
                               start=start_date, end=end_date)
+    clinic_workers_active = [worker for worker in clinic_workers_registered if worker.active_status == "active"]
     
     locations = Location.objects.all()
     if province:
@@ -480,53 +474,71 @@ def user_report(request):
         locations = get_location_tree_nodes(district)
     if facility:
         locations = [facility]
-    
+
     if locations:
-        registered_workers = [x for x in registered_cbas if x.get_current_district() in locations]
-        registered_clerks = [x for x in registered_clerks if x.get_current_district() in locations]
-        registered_workers = [x for x in registered_workers if x.get_current_district() in locations]
+        cbas_registered = [x for x in cbas_registered if x.get_current_district() in locations]
+        data_clerks_registered = [x for x in data_clerks_registered if x.get_current_district() in locations]
+        clinic_workers_registered = [x for x in clinic_workers_registered if x.get_current_district() in locations]
         
     #Error rates
     cba_sessions = XFormsSession.objects.filter(connection__contact__types__slug='cba')
-    cba_errors = cba_sessions.objects.filter(has_error=True)
+    cba_errors = cba_sessions.filter(has_error=True)
     
-    workers_sessions = XFormsSession.objects.filter(connection__contact__types__slug='worker')
-    workers_errors = cba_sessions.objects.filter(has_error=True)
+    workers_sessions = XFormsSession.objects.filter(connection__contact__types__in=clinic_worker_types)
+    workers_errors = workers_sessions.filter(has_error=True)
     
     data_clerk_sessions = XFormsSession.objects.filter(connection__contact__types__slug='dc')
-    data_clerk_errors = data_clerk_sessions.objects.filter(has_error=True)
+    data_clerk_errors = data_clerk_sessions.filter(has_error=True)
+
+
+    cbas_error_rate = percentage(cba_errors.count(), cba_sessions.count())
+    clinic_workers_error_rate = percentage(workers_errors.count(), workers_sessions.count())
+    data_clerks_error_rate = percentage(data_clerk_errors.count(), data_clerk_sessions.count())
+    
 
     try:
-        cbas = cbas.count()
-        clerks = clerks.count()
-        workers = workers.count()
+        cbas_registered = cbas_registered.count()
+        data_clerks_registered = data_clerks_registered.count()
+        clinic_workers_registered = clinic_workers_registered.count()
     except TypeError:
-        cbas = len(cbas)
-        clerks = len(clerks)
-        workers = len(workers)
-        
-    if export:
-        workbook = xlwt.Workbook(encoding='utf-8')
-        worksheet = workbook.add_sheet('SMS Users Page')
-        worksheet, row_index = excel_export_header(worksheet)
-        row_index += 1
-        
-        column_headers = ['Join Date', 'User Name', 'User Number', 'User Type', 'District', 'Facility', 'Zone', 'Last Active', 'Date Registration', 'Active Status']
-        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
-        for contact in contacts:
-            worksheet.write(row_index, 0, contact.date)
-            worksheet.write(row_index, 1, contact.name)
-            worksheet.write(row_index, 2, contact.default_connection.identity)
-            worksheet.write(row_index, 3, "".join(contact.types.all()))
-            worksheet.write(row_index, 4, contact.location)
-            worksheet.write(row_index, 5, contact.location)
-            worksheet.write(row_index, 6, contact.location)
-            worksheet.write(row_index, 7, contact.last_active)
-            worksheet.write(row_index, 8, contact.registration)
-            worksheet.write(row_index, 9, contact.is_active)
-            row_index += 1
-        workbook.save()
+        cbas_registered = len(cbas_registered)
+        data_clerks_registered = len(data_clerks_registered)
+        clinic_workers_registered = len(clinic_workers_registered)
+    
+    user_report_table = UserReport([{
+               'clinic_workers_registered':clinic_workers_registered,
+               'clinic_workers_active': len(clinic_workers_active),
+               'data_clerks_registered':data_clerks_registered,
+               'data_clerks_active': len(data_clerks_active),
+               'cbas_registered': cbas_registered,
+               'cbas_active': len(cbas_active),
+               'cbas_error_rate': cbas_error_rate,
+               'clinic_workers_error_rate': clinic_workers_error_rate,
+               'data_clerks_error_rate': data_clerks_error_rate
+               }],
+               request
+               )
 
+    return render_to_response(
+        "smgl/user_report.html",
+        {"user_report_table": user_report_table,
+         "form": form,
+         "start_date": start_date,
+         "end_date": end_date
+        },
+        context_instance=RequestContext(request))
+    
+    
+ 
+def get_four_anc_visits(mother):
+    mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
+    #we should have 3 anc visits if not, we will pad the list of anc visits with 
+    #null values
+    mother_visit_list = list(mother_visits)
+    if mother_visits.count() < 3:
+        for num in range(mother_visits.count(), 3):
+            mother_visit_list.append(None)
+    return mother_visit_list
     
 
 def mothers(request):
@@ -574,32 +586,75 @@ def mothers(request):
     # filter by EDD
     mothers = filter_by_dates(mothers, 'edd',
                              start=edd_start_date, end=edd_end_date)
-    """
-    if export:
+    
+    if form.data.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Mother's Page")
-        worksheet, row_index = excel_export_header(worksheet)
-        row_index += 1
-        
         column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD', 
-                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date', 'Actual third ANC Date',
-                      'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC']
-        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date', 
+                      'Actual third ANC Date', 'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC']
+        selected_level = zone or facility or district
+        worksheet, row_index = excel_export_header(
+                                                   worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
         row_index += 1
-         
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        worksheet.col(3).width = worksheet.col(4).width = worksheet.col(5).width = 20*256
         for mother in mothers:
-            worksheet.write(row_index, 0, mother.created_date)
+            anc_visits = get_four_anc_visits(mother)
+            district, facility, zone = get_district_facility_zone(mother.location)
+            worksheet.write(row_index, 0, mother.created_date, date_format)
             worksheet.write(row_index, 1, mother.uid),
             worksheet.write(row_index, 2, mother.name),
-            worksheet.write(row_index, 4, mother.location)
-            worksheet.write(row_index, 5, mother.location)
-            worksheet.write(row_index, 6, mother.location)
-            worksheet.write(row_index, 7, 'Yes' if mother.get_risk_reasons() else 'No')
-            worksheet.write(row_index, 8, mother.lmp),
-            worksheet.write(row_index, 9, mother.edd),
-            worksheet.write(row_index, 10, mother.gestational_age),
-            #not complete 
-             
+            worksheet.write(row_index, 3, district)
+            worksheet.write(row_index, 4, facility)
+            worksheet.write(row_index, 5, zone)
+            worksheet.write(row_index, 6, 'Yes' if mother.has_risk_reasons() else 'No')
+            worksheet.write(row_index, 7, mother.lmp, date_format),
+            worksheet.write(row_index, 8, mother.edd, date_format),
+            worksheet.write(row_index, 9, ''),    
+            second_anc = anc_visits[0]
+            if second_anc:
+                worksheet.write(row_index, 10, "")
+                worksheet.write(row_index, 11, second_anc.visit_date, date_format)
+                worksheet.write(row_index, 12, 'Yes')
+            else:
+                worksheet.write(row_index, 10, '')
+                worksheet.write(row_index, 11, '')
+                worksheet.write(row_index, 12, 'No')
+                
+            third_anc = anc_visits[1]
+            if third_anc:
+                worksheet.write(row_index, 13, second_anc.next_visit, date_format)
+                worksheet.write(row_index, 14, third_anc.visit_date, date_format)
+                worksheet.write(row_index, 15, 'Yes')
+            else:
+                worksheet.write(row_index, 13, '')
+                worksheet.write(row_index, 14, '')
+                worksheet.write(row_index, 15, 'No')
+                
+            fourth_anc = anc_visits[2]
+            if fourth_anc:
+                worksheet.write(row_index, 16, third_anc.next_visit, date_format)
+                worksheet.write(row_index, 27, third_anc.visit_date, date_format)
+                worksheet.write(row_index, 18, 'Yes')
+            else:
+                worksheet.write(row_index, 16, '')
+                worksheet.write(row_index, 17, '')
+                worksheet.write(row_index, 18, 'No')
+            row_index += 1
+                
+        fname = 'Mothers-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+         
     """
     # render as CSV if export
     if form.data.get('export'):
@@ -631,7 +686,7 @@ def mothers(request):
         filename = '{0}{1}{2}'.format(filename, date_range, edd_date_range)
 
         return export_as_csv(records, keys, filename)
-    
+    """
         
 
     search_form = MotherSearchForm()
@@ -912,9 +967,10 @@ def reminder_stats(request):
     province = district = facility = None
     start_date, end_date = get_default_dates()
 
-    record_types = ['edd', 'nvd', 'pos', 'ref']
-    field_mapper = {'edd': 'Expected Delivery Date', 'nvd': 'Next Visit Date',
-                    'pos': 'Post Partem', 'ref': 'Refferals'}
+    record_types = ['edd', 'anc', 'pos', 'ref']
+    field_mapper = {'edd': 'Expected Delivery Date', 'anc': 'Next Visit Date',
+                    'pos': 'Post Partum', 'ref': 'Referrals',
+                    }
 
     if request.GET:
         form = StatisticsFilterForm(request.GET)
@@ -953,30 +1009,62 @@ def reminder_stats(request):
                                             mother__in=reminded_mothers
                                             )
         told_mothers = tolds.values_list('mother', flat=True)
-        scheduled_reminders = ''
+        
         if key == 'edd':
+            #SEND_REMINDER_LOWER_BOUND =datetime.timedelta(days=2)
             showed_up = BirthRegistration.objects.filter(
                                                 mother__in=reminded_mothers
                                                 )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
+            
+            lower_envelop = start_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND 
+            higher_envelop = end_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND
+            scheduled_reminders = PregnantMother.objects.filter(
+                                                        edd__gte=lower_envelop,
+                                                        edd__lte=higher_envelop
+                                                            )
         elif key == 'ref':
             showed_up = Referral.objects.filter(mother_showed=True,
                                                 mother__in=told_mothers
                                                 )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
+            
 
-        else:
+        elif key == 'anc':
+            #calculate the scheduled reminders based on the same algorithm used
+            #to calculate the reminders to send.
+            anc_reminder_threshold = start_date + datetime.timedelta(days=14)
+            scheduled_reminders = FacilityVisit.objects.filter(
+                        next_visit__gte=anc_reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+                        next_visit__lte=end_date + datetime.timedelta(days=14),
+                        visit_type=key)
             showed_up = FacilityVisit.objects.filter(
                                                     mother__in=told_mothers,
                                                     visit_type=key
                                                     )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
+        
+        else:
+            pos_reminder_threshold = start_date + datetime.timedelta(days=3)
+            scheduled_reminders = FacilityVisit.objects.filter(
+                        next_visit__gte=pos_reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+                        next_visit__lte=end_date + datetime.timedelta(days=3),
+                        visit_type=key)
+            showed_up = FacilityVisit.objects.filter(
+                                                    mother__in=told_mothers,
+                                                    visit_type=key
+                                                    )
+            told_and_showed = showed_up.filter(mother__in=told_mothers)
+
+        
+        print reminders
         records.append({
                 'reminder_type': field_mapper[key],
-                'reminders': reminders.count(),
-                'showed_up': showed_up.count(),
-                'told': tolds.count(),
+                'scheduled_reminders': scheduled_reminders.count(),
+                'sent_reminders': reminders.count(),
+                'received_told': tolds.count(),
+                'follow_up_visits': showed_up.count(),
                 'told_and_showed': told_and_showed.count()
             })
 
@@ -1334,60 +1422,70 @@ def referrals(request):
     referrals = filter_by_dates(referrals, 'date',
                              start=start_date, end=end_date)
 
-    if request.GET.get('export'):
-        # The keys must be ordered for the exporter
-        keys = ['date', 'from_facility', 'sender', 'number', 'response',
-                'status', 'confirm_amb', 'outcome', 'message']
 
-        records = []
-        for ref in referrals:
-            contact = ref.session.connection.contact if ref.session.connection else ''
-            number = ref.session.connection.identity if ref.session.connection else ''
-            message = ref.session.message_incoming.text if ref.session.message_incoming else ''
-            records.append({
-                    'date': ref.date.strftime('%Y-%m-%d') if ref.date else '',
-                    'from_facility': ref.from_facility,
-                    'sender': contact,
-                    'number': number,
-                    'response': "Yes" if ref.responded else "No",
-                    'status': ref.status,
-                    'confirm_amb': ref.ambulance_response,
-                    'outcome': ref.outcome,
-                    'message': message
-                })
-        filename = 'referrals_report'
-        return export_as_csv(records, keys, filename)
-    """
-    if export:
+    if request.GET.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
-        worksheet = workbook.add_sheet("Referral Export")
-        worksheet, row_index = excel_export_header(worksheet)
+        time_format = xlwt.easyxf(num_format_str='HH:MM')
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        worksheet = workbook.add_sheet("Referrals")
+        column_headers = ['Date', 'System Timestamp', 'SMH', 'From Facility', 'To Facility', 'Time of Referral', 'Response', 
+                       'Resp User', 'Confirm AMB', 'Pick', 'Drop', 'Outcome', 'Date Refout', 'Outcome Mother', 'Outcome Baby', 
+                       'Mode of Delivery']
+        selected_level = facility or district or province
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
         row_index += 1
-            
-        col_headers = ['Date', 'System Timestamp', 'SMH', 'From Facility', 'To Facility', 'Time of Referal', 'Response', 
-                       'Resp User', 'Confirm AMB', 'Pick', 'Drop', 'Outcome', 'Date Refout', 'Outcome Mother', 'Outcome Baby', 'Mode of Delivery']
-        
-        col_headers[5:5] = ['Cond %s'%cond for cond in REFERRAL_REASONS.keys()]#Insert the condition columns next to facility
+        column_headers[5:5] = ['Cond %s'%cond.title() for cond in Referral.REFERRAL_REASONS.keys()]#Insert the condition columns
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
         row_index += 1  
         for referral in referrals:
-            worksheet.write(row_index, 0, referral.date())
-            worksheet.write(row_index, 0, datetime.datetime.now())
-            worksheet.write(row_index, 0, referral.smh_id)
-            worksheet.write(row_index, 0, referral.from_facility)
-            worksheet.write(row_index, 0, referral.facility)
-            worksheet.write(row_index, 0, '')#condition
-            worksheet.write(row_index, 0, referral.time())
-            worksheet.write(row_index, 0, "Yes" if ref.responded else "No",)
-            worksheet.write(row_index, 0, referral.ambulance_response.responder.name if referral.ambulance_response else '')
-            worksheet.write(row_index, 0, referral.ambulance_response)
-            worksheet.write(row_index, 0, )#pick
-            worksheet.write(row_index, 0, )#drop
-            worksheet.write(row_index, 0, referral.outcome)
-            worksheet.write(row_index, 0, referral.get_mother_outcome_display())
-            worksheet.write(row_index, 0, referral.get_baby_outcome_display())
-            worksheet.write(row_index, 0, referral.get_mode_of_delivery_display()))
-    """
+            worksheet.write(row_index, 0, referral.date, date_format)
+            worksheet.write(row_index, 1, datetime.datetime.now(), date_format)
+            worksheet.write(row_index, 2, referral.mother_uid)
+            worksheet.write(row_index, 3, referral.from_facility.name)
+            worksheet.write(row_index, 4, referral.facility.name)
+            #The conditions are a little special in their generation
+            column = 5
+            for cond in Referral.REFERRAL_REASONS.keys():
+                if referral.get_reason(cond):
+                    text = 'Yes'
+                else:
+                    text = 'No'
+                worksheet.write(row_index, column, text)
+                column += 1
+            worksheet.write(row_index, column, referral.time, time_format)
+            column += 1
+            worksheet.write(row_index, column, "Yes" if referral.responded else "No",)
+            column += 1
+            worksheet.write(row_index, column, referral.amb_responders())
+            column += 1
+            worksheet.write(row_index, column, referral.ambulance_response)
+            column += 1
+            worksheet.write(row_index, column, "")#pick
+            column += 1
+            worksheet.write(row_index, column, "")#drop
+            column += 1
+            worksheet.write(row_index, column, referral.outcome)
+            column += 1
+            worksheet.write(row_index, column, referral.date_outcome, date_format)
+            column += 1
+            worksheet.write(row_index, column, referral.get_mother_outcome_display())
+            column += 1
+            worksheet.write(row_index, column, referral.get_baby_outcome_display())
+            column += 1
+            worksheet.write(row_index, column, referral.get_mode_of_delivery_display())
+            row_index += 1
+            
+        fname = 'referral-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+    
     return render_to_response(
         "smgl/referrals.html",
         {"message_table": ReferralsTable(referrals,
@@ -1810,7 +1908,7 @@ def help(request):
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
         time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
-        worksheet.col(10).width = worksheet.col(11).width = 11 *256 #Resolved Date and Time Columns
+        worksheet.col(10).width = worksheet.col(11).width = 11 *256
         worksheet.col(2).width = 15*256 
         worksheet.col(3).width = 20*256
         worksheet.col(4).width = 20*256
@@ -1965,3 +2063,75 @@ class SuggestionDelete(DeleteView):
     def dispatch(self, *args, **kwargs):
         return super(SuggestionDelete, self).dispatch(*args, **kwargs)
     
+def error(request):
+    start_date, end_date = get_default_dates()
+    messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming')
+
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    # filter by location if needed...
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    messages = messages.filter(contact__location__in=locations)
+
+    messages = filter_by_dates(messages, 'date',
+                             start=start_date, end=end_date)
+
+    
+    if request.GET.get('export'):
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('SMS User Page')
+        column_headers = column_headers = ['Date', 'Type', 'User Number', 'User Name', 'User Type', 'District',
+                                           'Facility', 'Zone', 'Message']
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(2).width = 15*256
+        worksheet.col(6).width = 100*256
+        for message in messages:
+            contact=message.connection.contact
+            district, facility, zone = get_district_facility_zone(contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, contact.name)
+            worksheet.write(row_index, 2, contact.default_connection.identity)
+            worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
+            worksheet.write(row_index, 4, district)
+            worksheet.write(row_index, 5, facility)
+            worksheet.write(row_index, 6, zone)
+            worksheet.write(row_index, 7, message.text)
+            row_index += 1
+        fname = 'Error-Message-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+    
+    return render_to_response(
+                              "smgl/errors.html",
+                              {"errors":messages,
+                               "form":form},
+                              context_instance=RequestContext(request))

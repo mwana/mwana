@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
+from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 import ntpath
@@ -106,6 +107,13 @@ class PregnantMother(models.Model):
         for c in self.HI_RISK_REASONS:
             if self.get_risk_reason(c):
                 yield c
+                
+    def has_risk_reasons(self):
+        risk_reasons = [reason for reason in self.get_risk_reasons()]
+        if not risk_reasons or risk_reasons == ['none']:
+            return False
+        else:
+            return True
 
     def get_laycounselors(self):
         """
@@ -120,6 +128,10 @@ class PregnantMother(models.Model):
                 location=self.zone,
                 is_active=True)
 
+    def get_gestational_age(self):
+        pass
+        
+        
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
 
@@ -317,7 +329,7 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         for c in sorted(self.REFERRAL_REASONS.keys()):
             if self.get_reason(c):
                 yield c
-
+                
     @classmethod
     def non_emergencies(cls):
         return cls.objects.filter(status="nem")
@@ -382,7 +394,28 @@ class Referral(FormReferenceBase, MotherReferenceBase):
             else:
                 return 'no-resp-no-out'
         return ''
-    
+
+    def amb_responders(self):
+        try:
+            amb_responders = ", ".join(amb_resp.responder.name for amb_resp in self.amb_req.ambulanceresponse_set.all())
+        except AttributeError:
+            return ""
+        else:
+            return amb_responders
+
+    @property
+    def date_outcome(self):
+        if self.mother_outcome:
+            refout_message = "refout %s"%self.mother_uid
+            try:
+                message = Message.objects.filter(text__istartswith=refout_message)[0]
+            except IndexError:
+                return ""
+            else:
+                return message.date
+        else:
+            return ""
+        
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
         ('en', 'English'),

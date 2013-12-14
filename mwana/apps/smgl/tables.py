@@ -121,10 +121,11 @@ class StatisticsLinkTable(StatisticsTable):
 
 
 class ReminderStatsTable(Table):
+    reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
     scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
     sent_reminders = NamedColumn(sortable=False, col_name='Sent')
     received_told = NamedColumn(sortable=False, col_name='Received Told')
-    follow_up_visit = NamedColumn(sortable=False, col_name='Follow Up visits')
+    follow_up_visits = NamedColumn(sortable=False, col_name='Follow Up visits')
     told_and_showed = NamedColumn(sortable=False, col_name='Told and showed')
     showed_on_time = NamedColumn(sortable=False, col_name='Showed on Time')
 
@@ -289,15 +290,15 @@ class ReferralReport(Table):
     common_complication = NamedColumn(col_name='Common Obstetric Complication')
 
 class UserReport(Table):
-    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Registered')
+    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Reg.')
     clinic_workers_active = NamedColumn(col_name='Clinic Workers Active')
-    data_clerks_registered = NamedColumn(col_name='Data Clerks Registered')
+    data_clerks_registered = NamedColumn(col_name='Data Clerks Reg.')
     data_clerks_active = NamedColumn(col_name='Data Clerks Active')
-    cbas_registered = NamedColumn(col_name='CBAs Registered')
+    cbas_registered = NamedColumn(col_name='CBAs Reg.')
     cbas_active = NamedColumn(col_name='CBAs Active')
-    error_rate_clinic_workers = NamedColumn(col_name='Error Rate: Clinic Workers')
-    error_rate_clinic_workers = NamedColumn(col_name='Error Rate: Data Clerks')
-    error_rate_cbas = NamedColumn(col_name='Error Rate: CBAS')
+    clinic_workers_error_rate = NamedColumn(col_name='Error Rate: Clinic Workers')
+    data_clerks_error_rate = NamedColumn(col_name='Error Rate: Data Clerks')
+    cbas_error_rate = NamedColumn(col_name='Error Rate: CBAS')
     
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y m d ")
@@ -340,3 +341,13 @@ class HelpRequestTable(Table):
 
     class Meta:
         order_by = "-requested_on"
+        
+class ErrorTable(Table):
+    date = DateColumn(format='Y m d H:i ')
+    type = Column(value=lambda cell:"")
+    user_number = Column(value=lambda cell: cell.object.connection.identity)
+    user_name = Column(value=lambda cell: cell.object.connection.contact.name)
+    user_type = Column(value=lambda cell: ", ".join([x for x in cell.object.connection.contact.types.all()]))
+    district = Column(value=lambda cell: "")
+    facility = Column(value=lambda cell: "")
+    message = Column(value=lambda cell: "")
