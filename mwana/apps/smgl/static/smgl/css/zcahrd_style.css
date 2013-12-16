@@ -5904,8 +5904,8 @@ td.visible-print {
   border-bottom-right-radius: 20px;
   border-bottom-left-radius: 20px;
   height: 400px;
+  width: 100%;
   padding: 5px;
-  border: 1px solid;
 }
 #middle-top-image,
 #middle-bottom-image {
@@ -5914,7 +5914,12 @@ td.visible-print {
   border-bottom-right-radius: 20px;
   border-bottom-left-radius: 20px;
   height: 200px;
-  border: 1px solid;
+  width: 100%;
+}
+#left-image img,
+#right-image img {
+  width: 100%;
+  padding-top: 20%;
 }
 #images {
   padding-top: 15px;
@@ -5971,8 +5976,4 @@ td.visible-print {
 }
 #footer-logos img {
   padding-right: 10px;
-}
-#left-image .nav-image,
-#right-image .nav-image {
-  padding-top: 18%;
 }
