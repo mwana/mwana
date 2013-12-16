@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-{% block title %}SMGL{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -13,6 +12,11 @@
 		text-align:center;
 	}
 	
+	#branding h1 a{
+		float:none;
+		text-align:center;
+	}
+
 	#branding h1 a:hover{
 		text-decoration: none;
 		text-align:center;
@@ -22,11 +26,35 @@
 		font-size: 16px;
 	}
 	#map-canvas{
-		width: 95%;
-		height: 300px;
-		padding-right:10px;
+		width: 100%;
+		height: 400px;
+		padding-top:15px;
+		padding-bottom:15px;
 	}
-
+	#inner{
+		padding:0;
+	}
+	
+	#smgl_logo{
+		background:url('{{ STATIC_URL }}smgl/images/smgl_logo.jpg') no-repeat 50% 50%;
+		display:block;
+		width:100%;
+		height:75px;
+	}
+	
+	#zcahrd_logo{
+		background:url('{{ STATIC_URL }}smgl/images/zcahrd_logo.png') no-repeat 50% 50%;
+		display:block;
+		width:100%;
+		height:75px;
+	}
+	
+	#coat_of_arms{
+		background:url('{{ STATIC_URL }}smgl/images/grz_coat_of_arms.png') no-repeat 50% 50%;
+		display:block;
+		width:100%;
+		height:75px;
+	}
 </style>
 {{ form.media.css }}
 
@@ -39,26 +67,28 @@
 <script type="text/javascript">
 	$(document).ready(function(e){
 		$.get('/smgl', function(data){
-			var name_data_pairs = [];
-			$(data).each(function(index, element){
-				name_data_pairs.push({'name':element[0], 'data':[element[1]]});
-			});
 			$('#chart-container').highcharts({
 				credits:{
 					enabled:false
 				},
 				title:{
-					text: 'Complications'
+					text: 'Common Obstetric Complications'
+				},
+				tooltip:{
+					pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
+				},
+				subtitle:{
+					text: 'Total Number: '+ data['num_mothers']
 				},
 				plotOptions:{
 					pie:{
-						size: "80%"
+						size: "85%"
 					}
 				},
 				series: [{
 					type: 'pie',
-					name: 'Mothers',
-					data: data
+					name: 'No. Mothers',
+					data: data['conditions']
 				}]
 			});
 		});
@@ -67,7 +97,7 @@
 	var map;
 	function initialize(){
 		var mapOptions = {
-			center: new google.maps.LatLng(-17.033397,26.48502),
+			center: new google.maps.LatLng(-17.033397, 26.48502),
 			zoom:14
 		};
 		var map = new google.maps.Map(document.getElementById('map-canvas'),
@@ -80,10 +110,10 @@
  
 {% block content %}
 <div class="container-fluid">
-	<div class="row">
+	<div class="row-fluid">
 		<img src="{{ STATIC_URL }}smgl/images/mubumi_logo.png" id="header-image"/>
 	</div>
-	<div class="row">
+	<div class="row-fluid">
 		<div class="col-md-10 col-md-offset-1" id="intro-text">
 			<p>The birth of a baby is a central event to human nature, and one that has a great impact on 
 				the life of women and their families. Remarkable progresses were made over the last century 
@@ -92,54 +122,57 @@
 				</p>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-8">
-			<div class="row" id="images">
-				<div class="col-md-4">
-					<div id="left-image">
+	<div class="row-fluid">
+		<div class="col-md-7">
+			<div class="row-fluid" id="images">
+				<div class="col-md-4" style="padding-right:0;">
+					<div id="left-image" class="btn btn-default">
 						<h3 class="image-text">Antenatal</h3>
 						<img src="{{ STATIC_URL }}smgl/images/antenatal.png" class="nav-image"/>
 					</div>
 				</div>
-				<div class="col-md-4">
-					<div class="row">
-						<div id="middle-top-image">
+				<div class="col-md-4" style="padding-right:0;">
+					<div class="row-fluid">
+						<div class="btn btn-default" id="middle-top-image">
 							<h3 class="image-text">Intrapartum</h3>
 							<img src="{{ STATIC_URL }}smgl/images/intra.png" class="nav-image"/>
 						</div>
 					</div>
-					<div class="row">
-						<div id="middle-bottom-image">
+					<div class="row-fluid">
+						<div class="btn btn-default" id="middle-bottom-image">
 							<h3  class="image-text">Emergencies</h3>
 							<img src="{{ STATIC_URL }}smgl/images/emerg.png" class="nav-image" />
 						</div>
 					</div>
 				</div>
-				<div class="col-md-4">
-					<div id="right-image">
+				<div class="col-md-4" style="padding-right:0;">
+					<div class="btn btn-default" id="right-image">
 						<h3  class="image-text">Post Partum</h3>
 						<img src="{{ STATIC_URL }}smgl/images/post_partum.png" class="nav-image"/>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="col-md-4">
-			<div class="row">
+		<div class="col-md-5">
+			<div class="row-fluid">
 				<div id="chart-container"></div>
-			</div>
-			<div class="row">
-				<div id="map-canvas"></div>
 			</div>
 		</div>
 	</div>
-	<div class="row">
-		<div class="col-md-6" id="footer-logos">
-			<img src="{{ STATIC_URL }}smgl/images/smgl_logo.jpg" />
-			<img src="{{ STATIC_URL }}smgl/images/zcahrd_logo.png"/>
-			<img src="{{ STATIC_URL }}smgl/images/grz_coat_of_arms.png"/>
+	<div class="row-fluid">
+			<div id="map-canvas"></div>
+	</div>
+	<div class="row-fluid">
+		<div class="col-md-2 col-md-offset-3" id="footer-logos">
+			<a href="http://www.savingmothersgivinglife.org/" id="smgl_logo" title="SMGL"></a>
+		</div>
+		<div class="col-md-2">
+			<a href="http://www.bu.edu/cghd/about-us/country-programs/zambia-country-program/" id="zcahrd_logo" title="ZCAHRD"></a>
+		</div>
+		<div class="col-md-2">
+			<a href="http://www.moh.gov.zm" id="coat_of_arms"  title="Zambia MOH"></a>
 		</div>
 	</div>
 	
 </div>
-
 {% endblock %}

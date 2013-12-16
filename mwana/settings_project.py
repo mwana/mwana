@@ -139,9 +139,9 @@ SECRET_KEY = "SET_ME_TO_SOMETHING_UNIQUE"
 # development at the moment, and full stack traces are very useful
 # when reporting bugs. don't forget to turn this off in production.
 DEBUG = TEMPLATE_DEBUG = True
-
+TEMPLATE_DIRS = ('apps/smgl/templates/smgl/',)
 BASE_TEMPLATE_SPLIT_2 = "layout-split-2.html"
-BASE_TEMPLATE = "layout.html"
+BASE_TEMPLATE = "smgl/layout.html"
 # after login (which is handled by django.contrib.auth), redirect to the
 # dashboard rather than 'accounts/profile' (the default).
 LOGIN_REDIRECT_URL = "/"
