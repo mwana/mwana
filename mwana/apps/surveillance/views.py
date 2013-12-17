@@ -1,9 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.surveillance.models import MissingIncident
 import csv
 from datetime import date
 from datetime import timedelta
 import htmlentitydefs as ht
+import logging
 import re
 
 from django.http import HttpResponse
@@ -14,10 +14,12 @@ from mwana.apps.reports.utils.htmlhelper import get_incident_grid_selector
 from mwana.apps.reports.utils.htmlhelper import get_incident_report_html_dropdown
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.apps.surveillance.models import Incident
+from mwana.apps.surveillance.models import MissingIncident
 from mwana.apps.surveillance.models import Report
 from mwana.apps.surveillance.models import UserIncident
 from mwana.const import MWANA_ZAMBIA_START_DATE
 
+logger = logging.getLogger(__name__)
 
 def assign_new_indicators(user, ids):
     if not user:
@@ -60,9 +62,9 @@ def surveillance(request):
     try:
         update_user_incidents = request.POST['update_user_incidents']
         if update_user_incidents and update_user_incidents == 'True':
-            assign_new_indicators(request.user, map(int, dict(request.POST)["_select_case"]))
-    except KeyError:
-        pass
+            assign_new_indicators(request.user, map(int, dict(request.POST).get("_select_case", ['-1'])))
+    except KeyError, e:
+        logger.warn("KeyError: %s" % e)
 
     startdate1 = read_date_or_default(request, 'startdate', today - timedelta(days=30))
     enddate1 = read_date_or_default(request, 'enddate', today)
@@ -76,7 +78,11 @@ def surveillance(request):
     user_incidents = cases.filter(userincident__user=request.user)
     group_incidents = cases.filter(groupincident__group__groupusermapping__user=request.user)
     my_incidents = (user_incidents | group_incidents).distinct()
-    reports = Report.objects.filter(date__gte=start_date, date__lte=end_date, incident__in=my_incidents)
+    reports = Report.objects.filter(date__gte=start_date, date__lte=end_date,
+                                    incident__in=my_incidents,
+                                    value__gt=0,
+                                    location__parent__slug__in=districts
+                                    )
     a = reports.filter(value__gte=6).order_by('-date', '-value').values_list('incident')
     selected_id = a[0][0] if a else ""
     user_name = request.user or "I"
@@ -101,7 +107,7 @@ def surveillance(request):
 def edit_missing_incident(request):
     sep = "_"
     values = dict(request.POST).get('incident') or []
-    for mi_values in (filter(lambda x: (sep in x) and x[0:x.index(sep)].isdigit() and x[x.index(sep)+1:].isdigit(), values)):
+    for mi_values in (filter(lambda x: (sep in x) and x[0:x.index(sep)].isdigit() and x[x.index(sep) + 1:].isdigit(), values)):
         alias_text_id, incident_id = mi_values.split("_")
         mi = MissingIncident.objects.get(id=int(alias_text_id))
         # @type mi MissingIncident
