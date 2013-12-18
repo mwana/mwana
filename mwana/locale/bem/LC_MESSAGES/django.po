@@ -199,7 +199,7 @@ msgid ""
 "(date)s. You will be notified when it is time for %(gender)s next clinic "
 "appointment."
 msgstr ""
-"Natoteela ba%(cba)s! Mwalembesha  %(descriptive_event)s ukwaba %(name)s pa %"
+"Natoteela ba%(cba)s! Mwalembesha %(descriptive_event)s ukwaba %(name)s pa %"
 "(date)s. Mukebwa inshita %(gender)s ngayafika iyakuya ku chipatala."
 
 #: .\apps\reminders\app.py:214 .\apps\reminders\app.py:240
