@@ -119,7 +119,7 @@
         <p align="center"><h3>Results160 Report 1 - Results
             Tested By Lab and Received By Facilities between 
 	    StartDate: {{startdate}} Enddate: {{enddate}} | 
-<a href="{% url 'csv_report_one' %}?location={{selected_location}}&start_date={{startdate}}&end_date={{enddate}}">Export CSV</a></h3>
+<a href="{% url 'csv_report_one' %}?location={{selected_location}}&start_date={{startdate|date:'Y-m-d'}}&end_date={{enddate|date:'Y-m-d'}}">Export CSV</a></h3>
 	<p><b>DEFINITION  - Tested - means processed by lab
 	    and result recorded,  Verified – means lab have
 	    approved its release,  Received - means facilities

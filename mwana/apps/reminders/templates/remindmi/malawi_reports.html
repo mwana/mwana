@@ -163,7 +163,7 @@
         {% endfor %}
       </tbody>
     </table>
-    <p><a href="/csv/child-count/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export data to Excel.</a></p>
+    <p><a href="/csv/child-count/?location={{selected_location}}&startdate={{startdate|date:'Y-m-d'}}&enddate={{enddate|date:'Y-m-d'}}">Export data to Excel.</a></p>
 </div>
 
 <div class="module">
@@ -187,7 +187,7 @@
           {% endfor %}
       </tbody>
   </table>
-  <p><a href="/csv/mother-count/?location={{selected_location}}&startdate={{startdate}}&enddate={{enddate}}">Export data to Excel.</a></p>
+  <p><a href="/csv/mother-count/?location={{selected_location}}&startdate={{startdate|date:'Y-m-d'}}&enddate={{enddate|date:'Y-m-d'}}">Export data to Excel.</a></p>
 </div>
 
 </div>
