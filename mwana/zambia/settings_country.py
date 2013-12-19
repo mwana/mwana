@@ -31,7 +31,7 @@ INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.webusers")
 INSTALLED_APPS.append("mwana.apps.graphs")
 INSTALLED_APPS.append("mwana.apps.surveillance")
-INSTALLED_APPS.append("mwana.apps.supply")
+INSTALLED_APPS.append("mwana.apps.zm_languages")
 
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 

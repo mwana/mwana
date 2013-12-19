@@ -128,8 +128,10 @@ class ToldHandler(KeywordHandler):
         '''
         Responds with a thank you message for telling the patient to come into the clinic,
         Informs the user about confirming the visit
-        '''
-        self.respond(self.response_told_thanks_txt % {'cba':self.msg.connection.contact.name, 'patient':pat_name})
+        '''        
+        self.respond(self.response_told_thanks_txt,
+                     cba=self.msg.connection.contact.name,
+                     patient=pat_name)
         
  
     def help(self):

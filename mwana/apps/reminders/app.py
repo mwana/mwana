@@ -16,7 +16,7 @@ from mwana import const
 # finds our text.
 _ = lambda s: s
 
-translator = Translator()
+
 
 class App(rapidsms.apps.base.AppBase):
     queryset = reminders.Event.objects.values_list('slug', flat=True)
@@ -130,7 +130,7 @@ class App(rapidsms.apps.base.AppBase):
         handler with dynamic keywords, the API doesn't give you a way to see
         what keyword was actually typed by the user.
         """
-        
+        translator = Translator()
         mocker = MockRemindMiUtility()
 
         if mocker.handle(msg):
@@ -168,8 +168,8 @@ class App(rapidsms.apps.base.AppBase):
 
             # make sure the birth date is not in the future
             if date > today:
-                msg.respond(_("Sorry, you can not register a %s with a date "
-                "after today's." % event.name.lower()))
+                msg.respond(_("Sorry, you can not register a %(event)s with a date "
+                "after today's."), event=event_name.lower())
                 return True
 
             # make sure the date is not unreasonably too old

@@ -17,15 +17,14 @@ class Translator:
 
 
     def __init__(self):
-        # when running unit tests this will be called before the database tables are created
         try:
             for obj in Dictionary.objects.all():
                 self.dictionary["%s:%s" % (obj.language.slug.lower(), obj.key_phrase.lower())] = obj.translation
 
             for obj in Dictionary.objects.all().exclude(alt_translations_one=None):
                 self.dictionary_one["%s:%s" % (obj.language.slug.lower(), obj.key_phrase.lower())] = obj.alt_translations_one
-        except:
-            pass
+        except Exception, e:
+            logger.waring("%s" % e)
 
     def translate(self, language_code, key_phrase, alternate=0):
         if not (language_code and key_phrase):
