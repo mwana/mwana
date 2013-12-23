@@ -152,3 +152,19 @@ class TestStockAtFacility(TestApp):
         self.assertEqual(StockAccount.objects.count(), 2)
         self.assertEqual(Transaction.objects.count(), 2)
 
+    def test_dispensed_stock(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
+        acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
+        acc1.amount=50
+
+        script = """
+            rb > DISP DRG-123 23
+            rb < Thank you. You have dispensed the following drugs: DRG-123 23
+        """
+
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+
