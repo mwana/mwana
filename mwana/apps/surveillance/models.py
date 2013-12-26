@@ -110,7 +110,7 @@ class Source(models.Model):
     logged_on = models.DateTimeField(default=datetime.now, blank=False, null=False, editable=False)
 
     def __unicode__(self):
-        return "%s. %s" % (self.parsed, self.message.text if self.message else "")
+        return "%s. %s (%s)" % (self.parsed, self.message.text if self.message else "", self.logged_on)
 
 
 class Report(models.Model):
@@ -130,7 +130,18 @@ class Report(models.Model):
     source = models.ForeignKey(Source, null=True, blank=True, editable=False)
     
     def __unicode__(self):
-        return "%s - %s" % (self.incident, self.date)
+        return "%s - %s : %s" % (self.incident, self.date, self.value)
+
+    @classmethod
+    def get_date(cls, week_of_year):
+        today = date.today()
+        this_jan = date(today.year, 1, 1)
+        days_ago = (today - this_jan).days
+        for i in range(days_ago):
+            if int((today - timedelta(days=i)).strftime('%U')) == week_of_year:
+                return today - timedelta(days=i)
+
+        return today
 
     def save(self, *args, **kwargs):
         
@@ -141,13 +152,7 @@ class Report(models.Model):
         elif self.date and not self.week_of_year:
             self.week_of_year = int(self.date.strftime('%U'))
         elif self.week_of_year and not self.date:
-            today = date.today()
-            this_jan = date(today.year, 1, 1)
-            days_ago = (today - this_jan).days
-            for i in range(days_ago):
-                if int((today - timedelta(days=i)).strftime('%U')) == self.week_of_year :
-                    self.date = today - timedelta(days=i)
-                    break
+            self.date = self.get_date(self.week_of_year)
         self.year = self.date.year
         self.month = self.date.month
         self.day = self.date.day
@@ -168,6 +173,15 @@ class Separator(models.Model):
 
     def __unicode__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+
+        if not self.text:
+            return
+        if self.text.strip() in ['', '.', '\.', '-', '/', '\-']:
+            return
+        super(Separator, self).save(*args, **kwargs)
+
 
 
 class ImportedReport(models.Model):

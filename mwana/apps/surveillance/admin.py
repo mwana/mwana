@@ -58,9 +58,9 @@ class ReportTotalAveragesChangeList(ChangeList):
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('incident',  'value', 'date', 'age_group', 'sex', 'reporter',
-                    'week_of_year', 'month', 'year', 'location', 'raw_value', 'source')
-    list_filter = ('date', 'week_of_year', 'month', 'year', 'incident', 'location', 'reporter')
+    list_display = ('id', 'incident', 'location', 'value', 'date', 'reporter',
+                    'week_of_year', 'month', 'year',  'raw_value', 'source')
+    list_filter = ('date', 'year', 'month', 'week_of_year', 'incident', 'location', 'reporter')
     search_fields = ('incident__alias__name', 'location__name', 'location__parent__name', 'location__parent__parent__name')
     date_hierarchy = 'date'
 

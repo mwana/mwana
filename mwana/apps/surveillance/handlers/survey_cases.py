@@ -21,9 +21,9 @@ class SurveyCaseHandler(KeywordHandler):
 
     keyword = "case|cases|survey|surveys|suvey|suveys|case.|cases.|survey.|surveys.|suvey.|suveys.|case,|cases,|survey,|surveys,|suvey,|suveys,|case;|cases;|survey;|surveys;|suvey;|suveys;"
  
-    HELP_TEXT = "To report cases, send CASE <DATE or WEEK_OF_YEAR> <CASE-1> <VALUE-1>, <CASE-2> <VALUE-2>, e.g. CASE 17 10 2013, TB 12, D20 12. or Case 44, TB 12, D20 12"
+    HELP_TEXT = "To report cases, send CASE <DATE or WEEK_OF_YEAR> <CASE-1> <VALUE-1>, <CASE-2> <VALUE-2>, e.g. CASE 17/10/2013, TB 12, D20 12. or Case 44, TB 12, D20 12"
     UNREGISTERED = "Sorry, you must be registered with Results160 before you can start reporting cases. Reply with HELP if you need assistance."
-        
+
     def help(self):
         self.respond(self.HELP_TEXT)    
         
@@ -33,14 +33,15 @@ class SurveyCaseHandler(KeywordHandler):
             if week_of_year > 53:
                 return None
             # don't go back too far
-            if week_of_year < int((date.today().strftime('%U'))) - 6:
-                return None
+#            if week_of_year < int((date.today().strftime('%U'))) - 6:
+#                return None
 
             return week_of_year
 
         text = date_str.strip()
         text = re.sub(r"\s+", " ", text)
-        tokens = re.split("[\s|-|/]", date_str)
+        tokens = re.split("[\s|\-|/|\.]", date_str.strip())
+        tokens = [t for t in tokens if t]
         
         if len(tokens) != 3:
             return None
@@ -58,17 +59,32 @@ class SurveyCaseHandler(KeywordHandler):
             self.respond(self.UNREGISTERED)
             return
 
-        separators = [sep.text for sep in Separator.objects.all()] or [',']
+        separators = [',', ';'] + [sep.text for sep in Separator.objects.all()] or [',']
         sep = "|".join(separators)
         
         tokens = re.split(sep, text)
         
         rpr_time = self._parse_time(tokens[0])
+
+        if rpr_time and isinstance(rpr_time, int):
+            given_date = Report.get_date(rpr_time)
+            today = date.today()
+            if given_date < today and (today - given_date).days > 30:
+                self.respond("Sorry, make sure you use the correct week or year")
+                return True
         
         cases = tokens
         if rpr_time:
             cases = tokens[1:]
 
+        if not cases:
+            self.help()
+            return
+
+        if cases[0].strip()[0].isdigit():
+            self.help()
+            return
+        
         success = False
         source = Source.objects.create(parsed=0)
         now = datetime.now()
