@@ -163,20 +163,18 @@ def get_msg_type(message):
         else:
             return 'Error Response'
 
-    
-#For now we can only map messages that contain the session id
-mapped = {
-          'BIRTH': BirthRegistration,
-          }
+class CanNotGetKeywordMotherID(Exception):
+    pass
 
 def get_keyword_mother_id(message):
-    #This function makes the slightly dangerous assumption that the keyword handlers we are processing all have the mother id as the 
-    #second item in a message
+   
+    if not message.text.strip():
+        raise CanNotGetKeywordMotherID
     try:
         keyword = message.text.split(' ')[0]
         mother_id = message.text.split(' ')[1]
     except IndexError:
-        return None
+        raise CanNotGetKeywordMotherID
     return keyword.upper(), mother_id
 
 def get_facility_visit(mother_id, limit_time):
@@ -188,7 +186,7 @@ def get_facility_visit(mother_id, limit_time):
         return None
     else:
         return facility_visit
-    
+
 def get_pregnant_mother(mother_id, limit_time):
     time_range = get_time_range(limit_time, seconds=3600)
     try:
@@ -197,7 +195,7 @@ def get_pregnant_mother(mother_id, limit_time):
         return None
     else:
         return pregnant_mother
-    
+
 def get_death_registration(mother_id):
     try:
         death_registration = DeathRegistration.objects.filter(unique_id=mother_id)[0]
@@ -205,7 +203,7 @@ def get_death_registration(mother_id):
         return None
     else:
         return death_registration
-    
+
 def get_told_reminders(mother_id):
     try:
         told_reminder = ToldReminder.objects.filter(mother__uid=mother_id)[0]
@@ -228,8 +226,9 @@ def map_message_fields(message):
     text = message.text
     if message.direction == "I":#only process the incoming messages, outgoing messages will continue just using the message text.
         database_obj = None
-        keyword, mother_id = get_keyword_mother_id(message)
-        if not mother_id:
+        try:
+            keyword, mother_id = get_keyword_mother_id(message)
+        except CanNotGetKeywordMotherID:
             return text
         if keyword == 'FUP' or keyword == 'PP':
             database_obj = get_facility_visit(mother_id, message.date)

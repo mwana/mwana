@@ -5,7 +5,7 @@ from mwana.apps.smgl import views
 
 
 urlpatterns = patterns('',
-    url(r"^$", views.home_page, name="home_page"),
+    url(r"^$", views.home_page, name="smgl-home"),
     url(r"^mothers/$", views.mothers, name="mothers"),
     url(r"^mother/(?P<id>[\d]+)/$", views.mother_history, name="mother-history"),
     url(r"^notifications/$", views.notifications, name="notifications"),
