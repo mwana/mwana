@@ -373,7 +373,7 @@ def pnc_report(request):
         if sort:
             records.reverse()
 
-  
+
 
     statistics_table = StatisticsLinkTable(records,
                                            request=request)
@@ -388,7 +388,7 @@ def pnc_report(request):
          "form": form
         },
         context_instance=RequestContext(request))
-  
+
 def referral_report(request):
     start_date, end_date = get_default_dates()
     province = district = facility = None
@@ -429,7 +429,7 @@ def referral_report(request):
     referral_amb = referrals_with_response
     average_turnaround_time = ''
     most_common_obstetric_complication = ''
-    
+
 
 def user_report(request):
     start_date, end_date = get_default_dates()
@@ -455,18 +455,18 @@ def user_report(request):
     cbas_registered = filter_by_dates(cbas_registered, 'created_date',
                            start=start_date, end=end_date)
     cbas_active = [cba for cba in cbas_registered if cba.active_status == "active"]
-    
+
     data_clerks_registered = ContactType.objects.get(slug='dc').contacts.all()
     data_clerks_registered = filter_by_dates(data_clerks_registered, 'created_date',
                              start=start_date, end=end_date)
     data_clerks_active = [clerk for clerk in data_clerks_registered if clerk.active_status == "active"]
-    
+
     clinic_worker_types = ContactType.objects.filter(slug__in=['worker'])
     clinic_workers_registered = Contact.objects.filter(types__in=clinic_worker_types)
     clinic_workers_registered = filter_by_dates(clinic_workers_registered, 'created_date',
                               start=start_date, end=end_date)
     clinic_workers_active = [worker for worker in clinic_workers_registered if worker.active_status == "active"]
-    
+
     locations = Location.objects.all()
     if province:
         locations = get_location_tree_nodes(province)
@@ -479,14 +479,14 @@ def user_report(request):
         cbas_registered = [x for x in cbas_registered if x.get_current_district() in locations]
         data_clerks_registered = [x for x in data_clerks_registered if x.get_current_district() in locations]
         clinic_workers_registered = [x for x in clinic_workers_registered if x.get_current_district() in locations]
-        
+
     #Error rates
     cba_sessions = XFormsSession.objects.filter(connection__contact__types__slug='cba')
     cba_errors = cba_sessions.filter(has_error=True)
-    
+
     workers_sessions = XFormsSession.objects.filter(connection__contact__types__in=clinic_worker_types)
     workers_errors = workers_sessions.filter(has_error=True)
-    
+
     data_clerk_sessions = XFormsSession.objects.filter(connection__contact__types__slug='dc')
     data_clerk_errors = data_clerk_sessions.filter(has_error=True)
 
@@ -494,7 +494,7 @@ def user_report(request):
     cbas_error_rate = percentage(cba_errors.count(), cba_sessions.count())
     clinic_workers_error_rate = percentage(workers_errors.count(), workers_sessions.count())
     data_clerks_error_rate = percentage(data_clerk_errors.count(), data_clerk_sessions.count())
-    
+
 
     try:
         cbas_registered = cbas_registered.count()
@@ -504,7 +504,7 @@ def user_report(request):
         cbas_registered = len(cbas_registered)
         data_clerks_registered = len(data_clerks_registered)
         clinic_workers_registered = len(clinic_workers_registered)
-    
+
     user_report_table = UserReport([{
                'clinic_workers_registered':clinic_workers_registered,
                'clinic_workers_active': len(clinic_workers_active),
@@ -527,19 +527,19 @@ def user_report(request):
          "end_date": end_date
         },
         context_instance=RequestContext(request))
-    
-    
- 
+
+
+
 def get_four_anc_visits(mother):
     mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
-    #we should have 3 anc visits if not, we will pad the list of anc visits with 
+    #we should have 3 anc visits if not, we will pad the list of anc visits with
     #null values
     mother_visit_list = list(mother_visits)
     if mother_visits.count() < 3:
         for num in range(mother_visits.count(), 3):
             mother_visit_list.append(None)
     return mother_visit_list
-    
+
 
 def mothers(request):
     province = district = facility = zone = None
@@ -586,12 +586,12 @@ def mothers(request):
     # filter by EDD
     mothers = filter_by_dates(mothers, 'edd',
                              start=edd_start_date, end=edd_end_date)
-    
+
     if form.data.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Mother's Page")
-        column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD', 
-                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date', 
+        column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD',
+                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date',
                       'Actual third ANC Date', 'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC']
         selected_level = zone or facility or district
         worksheet, row_index = excel_export_header(
@@ -617,7 +617,7 @@ def mothers(request):
             worksheet.write(row_index, 6, 'Yes' if mother.has_risk_reasons() else 'No')
             worksheet.write(row_index, 7, mother.lmp, date_format),
             worksheet.write(row_index, 8, mother.edd, date_format),
-            worksheet.write(row_index, 9, ''),    
+            worksheet.write(row_index, 9, ''),
             second_anc = anc_visits[0]
             if second_anc:
                 worksheet.write(row_index, 10, "")
@@ -627,7 +627,7 @@ def mothers(request):
                 worksheet.write(row_index, 10, '')
                 worksheet.write(row_index, 11, '')
                 worksheet.write(row_index, 12, 'No')
-                
+
             third_anc = anc_visits[1]
             if third_anc:
                 worksheet.write(row_index, 13, second_anc.next_visit, date_format)
@@ -637,7 +637,7 @@ def mothers(request):
                 worksheet.write(row_index, 13, '')
                 worksheet.write(row_index, 14, '')
                 worksheet.write(row_index, 15, 'No')
-                
+
             fourth_anc = anc_visits[2]
             if fourth_anc:
                 worksheet.write(row_index, 16, third_anc.next_visit, date_format)
@@ -648,13 +648,13 @@ def mothers(request):
                 worksheet.write(row_index, 17, '')
                 worksheet.write(row_index, 18, 'No')
             row_index += 1
-                
+
         fname = 'Mothers-export.xls'
         response = HttpResponse(mimetype="applications/vnd.msexcel")
         response['Content-Disposition'] = 'attachment; filename=%s' %fname
         workbook.save(response)
         return response
-         
+
     """
     # render as CSV if export
     if form.data.get('export'):
@@ -687,7 +687,7 @@ def mothers(request):
 
         return export_as_csv(records, keys, filename)
     """
-        
+
 
     search_form = MotherSearchForm()
     if request.method == 'POST':
@@ -1009,15 +1009,15 @@ def reminder_stats(request):
                                             mother__in=reminded_mothers
                                             )
         told_mothers = tolds.values_list('mother', flat=True)
-        
+
         if key == 'edd':
             #SEND_REMINDER_LOWER_BOUND =datetime.timedelta(days=2)
             showed_up = BirthRegistration.objects.filter(
                                                 mother__in=reminded_mothers
                                                 )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
-            
-            lower_envelop = start_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND 
+
+            lower_envelop = start_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND
             higher_envelop = end_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND
             scheduled_reminders = PregnantMother.objects.filter(
                                                         edd__gte=lower_envelop,
@@ -1028,7 +1028,7 @@ def reminder_stats(request):
                                                 mother__in=told_mothers
                                                 )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
-            
+
 
         elif key == 'anc':
             #calculate the scheduled reminders based on the same algorithm used
@@ -1044,7 +1044,7 @@ def reminder_stats(request):
                                                     )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
-        
+
         else:
             pos_reminder_threshold = start_date + datetime.timedelta(days=3)
             scheduled_reminders = FacilityVisit.objects.filter(
@@ -1057,7 +1057,7 @@ def reminder_stats(request):
                                                     )
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
-        
+
         print reminders
         records.append({
                 'reminder_type': field_mapper[key],
@@ -1170,7 +1170,7 @@ def report(request):
     non_ems_refs = filter_by_dates(Referral.non_emergencies(), 'date',
                                    start=start_date, end=end_date)
     ems_refs = filter_by_dates(Referral.emergencies(), 'date',
-                                   start=start_date, end=end_date)
+                        start=start_date, end=end_date)
 
     outcomes = Q(mother_outcome__isnull=False) | Q(baby_outcome__isnull=False)
     positive_outcomes = Q(mother_outcome='stb') | Q(baby_outcome='stb')
@@ -1338,7 +1338,7 @@ def notifications(request):
     messages = filter_by_dates(messages, 'date',
                              start=start_date, end=end_date)
 
-    
+
     if request.GET.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Notifications")
@@ -1352,7 +1352,7 @@ def notifications(request):
         row_index += 1
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
-        row_index += 1   
+        row_index += 1
         worksheet.col(1).width = 15*256
         worksheet.col(2).width = 20*256
         worksheet.col(4).width = worksheet.col(5).width = worksheet.col(6).width = 20*256
@@ -1428,8 +1428,8 @@ def referrals(request):
         time_format = xlwt.easyxf(num_format_str='HH:MM')
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
         worksheet = workbook.add_sheet("Referrals")
-        column_headers = ['Date', 'System Timestamp', 'SMH', 'From Facility', 'To Facility', 'Time of Referral', 'Response', 
-                       'Resp User', 'Confirm AMB', 'Pick', 'Drop', 'Outcome', 'Date Refout', 'Outcome Mother', 'Outcome Baby', 
+        column_headers = ['Date', 'System Timestamp', 'SMH', 'From Facility', 'To Facility', 'Time of Referral', 'Response',
+                       'Resp User', 'Confirm AMB', 'Pick', 'Drop', 'Outcome', 'Date Refout', 'Outcome Mother', 'Outcome Baby',
                        'Mode of Delivery']
         selected_level = facility or district or province
         worksheet, row_index = excel_export_header(worksheet,
@@ -1441,7 +1441,7 @@ def referrals(request):
         row_index += 1
         column_headers[5:5] = ['Cond %s'%cond.title() for cond in Referral.REFERRAL_REASONS.keys()]#Insert the condition columns
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
-        row_index += 1  
+        row_index += 1
         for referral in referrals:
             worksheet.write(row_index, 0, referral.date, date_format)
             worksheet.write(row_index, 1, datetime.datetime.now(), date_format)
@@ -1479,13 +1479,13 @@ def referrals(request):
             column += 1
             worksheet.write(row_index, column, referral.get_mode_of_delivery_display())
             row_index += 1
-            
+
         fname = 'referral-export.xls'
         response = HttpResponse(mimetype="applications/vnd.msexcel")
         response['Content-Disposition'] = 'attachment; filename=%s' %fname
         workbook.save(response)
         return response
-    
+
     return render_to_response(
         "smgl/referrals.html",
         {"message_table": ReferralsTable(referrals,
@@ -1682,14 +1682,17 @@ def sms_users(request):
         search_form = SMSUsersSearchForm(request.POST)
         search_string = request.POST.get('search_string', None)
         if search_string:
-            contacts = contacts.filter(Q(name__icontains=search_string) | Q(connection__identity__icontains=search_string))
+            contacts = contacts.filter(
+                Q(name__icontains=search_string) |
+                Q(connection__identity__icontains=search_string)
+                )
 
     return render_to_response(
         "smgl/sms_users.html",
         {"users_table": SMSUsersTable(contacts,
-                                        request=request),
-         "search_form": search_form,
-         "form": form
+            request=request),
+            "search_form": search_form,
+            "form": form
         },
         context_instance=RequestContext(request))
 
@@ -1760,12 +1763,15 @@ def sms_user_statistics(request, id):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = StatisticsFilterForm(
+            initial=fetch_initial(initial, request.session)
+            )
 
     mothers = PregnantMother.objects.filter(contact=contact)
     # filter by created_date
     mothers = filter_by_dates(mothers, 'created_date',
-                             start=start_date, end=end_date)
+                             start=start_date,
+                             end=end_date)
 
     anc_visits = FacilityVisit.objects.filter(contact=contact, visit_type='anc')
     anc_visits = filter_by_dates(anc_visits, 'created_date',
@@ -1797,13 +1803,14 @@ def sms_user_statistics(request, id):
     # inspect the messagelog
     refs = Message.objects.filter(text__istartswith='REFER ', contact=contact,
                                   direction='I')
-    refs = filter_by_dates(refs, 'date',
-                             start=start_date, end=end_date)
+    refs = filter_by_dates(refs, 'date', start=start_date, end=end_date)
 
-    ref_outcomes = Message.objects.filter(text__istartswith='REFOUT', contact=contact,
-                                  direction='I')
+    ref_outcomes = Message.objects.filter(
+        text__istartswith='REFOUT',
+        contact=contact,
+        direction='I')
     ref_outcomes = filter_by_dates(ref_outcomes, 'date',
-                             start=start_date, end=end_date)
+                    start=start_date, end=end_date)
 
     records = [
          {'data': "Number of Pregnancies registered",
@@ -1894,11 +1901,11 @@ def help(request):
     if form.data.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('Help')
-        
+
         selected_level = facility or district or province
-        column_headers = ['Date', 'Time', 'User Number', 'User Name', 'User Type', 'District', 'Facility', 'Zone', 'Message', 
+        column_headers = ['Date', 'Time', 'User Number', 'User Name', 'User Type', 'District', 'Facility', 'Zone', 'Message',
                           'Resolved Status', 'Date Resolved', 'Time Resolved', 'Resolved by']
-        worksheet, row_index = excel_export_header(worksheet, 
+        worksheet, row_index = excel_export_header(worksheet,
                                                    selected_indicators=column_headers,
                                                    selected_level=selected_level,
                                                    start_date=start_date,
@@ -1909,7 +1916,7 @@ def help(request):
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
         time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
         worksheet.col(10).width = worksheet.col(11).width = 11 *256
-        worksheet.col(2).width = 15*256 
+        worksheet.col(2).width = 15*256
         worksheet.col(3).width = 20*256
         worksheet.col(4).width = 20*256
         worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
@@ -1935,7 +1942,7 @@ def help(request):
         response['Content-Disposition'] = 'attachment; filename=%s' %fname
         workbook.save(response)
         return response
-            
+
 
     helpreqs_table = HelpRequestTable(help_reqs, request=request)
 
@@ -1965,7 +1972,7 @@ def help_manager(request, id):
          "form": form
         },
         context_instance=RequestContext(request))
-    
+
 def home_page(request):
     if request.is_ajax():
         conditions = {}
@@ -1975,12 +1982,12 @@ def home_page(request):
         conditions['High Blood Pressure'] = PregnantMother.objects.filter(risk_reason_hbp=True).count()
         conditions['Previous Still Born'] = PregnantMother.objects.filter(risk_reason_psb=True).count()
         conditions['Other'] = PregnantMother.objects.filter(risk_reason_oth=True).count()
-        
+
         num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
-    
+
         return HttpResponse(json.dumps({'conditions':conditions.items(),
                                         'num_mothers':num_mothers}), content_type='application/json')
-    
+
     return render_to_response(
         "smgl/home.html",
         context_instance=RequestContext(request)
@@ -1990,7 +1997,7 @@ class SuggestionList(generic.ListView):
     template_name = 'suggestions_list.html'
     model = Suggestion
     context_object_name = "suggestions"
-    
+
 class FileUploadInline(InlineFormSet):
     model = FileUpload
     extra = 1
@@ -2011,14 +2018,14 @@ class SuggestionEdit(UpdateWithInlinesView):
             for formset_form in formset.forms:
                 formset_form.instance.posted_by = self.request.user
         return super(SuggestionEdit, self).forms_valid(form, inlines)
-    
+
     def construct_inlines(self):
         inlines = super(SuggestionEdit, self).construct_inlines()
         for formset in inlines:
             for form in formset.forms:
                 form.empty_permitted = True
         return inlines
-    
+
     def get_context_data(self, *args, **kwargs):
         context = super(SuggestionEdit, self).get_context_data(*args, **kwargs)
         context['suggestion'] = self.object
@@ -2045,26 +2052,26 @@ class SuggestionAdd(CreateWithInlinesView):
     def form_valid(self, form):
 
         return super(SuggestionAdd, self).form_valid(form)
-    
+
     def construct_inlines(self):
         inlines = super(SuggestionAdd, self).construct_inlines()
         for formset in inlines:
             for form in formset.forms:
                 form.empty_permitted = True
         return inlines
-    
+
 class SuggestionDetail(DetailView):
     model = Suggestion
     context_object_name = "suggestion"
-    
+
 class SuggestionDelete(DeleteView):
     model = Suggestion
     success_url = '/smgl/suggestions'
-    
+
     @csrf_exempt
     def dispatch(self, *args, **kwargs):
         return super(SuggestionDelete, self).dispatch(*args, **kwargs)
-    
+
 def error(request):
     start_date, end_date = get_default_dates()
     messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming')
@@ -2099,7 +2106,7 @@ def error(request):
     messages = filter_by_dates(messages, 'date',
                              start=start_date, end=end_date)
 
-    
+
     if request.GET.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('SMS User Page')
@@ -2131,7 +2138,7 @@ def error(request):
         response['Content-Disposition'] = 'attachment; filename=%s' %fname
         workbook.save(response)
         return response
-    
+
     return render_to_response(
                               "smgl/errors.html",
                               {"errors":messages,
