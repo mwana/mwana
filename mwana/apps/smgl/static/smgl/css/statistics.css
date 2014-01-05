@@ -42,7 +42,7 @@ button.ui-button-icon-only {
 .statistics col.location, .statistics col.reminder-type { width: 75px;}
 
 #mothers-form .ui-autocomplete-input {
-    width: 80px;
+    width: auto;
 }
 
 table tr td div.status {
