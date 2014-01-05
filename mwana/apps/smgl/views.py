@@ -37,7 +37,7 @@ def fetch_initial(initial, session):
     form_data = session.get('form_data')
     if form_data:
         initial.update(form_data)
-    return initial 
+    return initial
 
 def save_form_data(cleaned_data, session):
     session['form_data'] = cleaned_data
@@ -1206,22 +1206,32 @@ def help_manager(request, id):
          "form": form
         },
         context_instance=RequestContext(request))
-    
+
 def home_page(request):
     if request.is_ajax():
         conditions = {}
-        conditions['C-Section'] = PregnantMother.objects.filter(risk_reason_csec=True).count()
-        conditions['Comp. during previous'] = PregnantMother.objects.filter(risk_reason_cmp=True).count()
-        conditions['Gestational Disease'] = PregnantMother.objects.filter(risk_reason_gd=True).count()
-        conditions['High Blood Pressure'] = PregnantMother.objects.filter(risk_reason_hbp=True).count()
-        conditions['Previous Still Born'] = PregnantMother.objects.filter(risk_reason_psb=True).count()
-        conditions['Other'] = PregnantMother.objects.filter(risk_reason_oth=True).count()
-        
+        conditions['C-Section'] = PregnantMother.objects.filter(
+            risk_reason_csec=True).count()
+        conditions['Comp. during previous'] = PregnantMother.objects.filter(
+            risk_reason_cmp=True).count()
+        conditions['Gestational Disease'] = PregnantMother.objects.filter(
+            risk_reason_gd=True).count()
+        conditions['High Blood Pressure'] = PregnantMother.objects.filter(
+            risk_reason_hbp=True).count()
+        conditions['Previous Still Born'] = PregnantMother.objects.filter(
+            risk_reason_psb=True).count()
+        conditions['Other'] = PregnantMother.objects.filter(
+            risk_reason_oth=True).count()
+
         num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
-    
-        return HttpResponse(json.dumps({'conditions':conditions.items(),
-                                        'num_mothers':num_mothers}), content_type='application/json')
-    
+
+        return HttpResponse(json.dumps(
+            {
+            'conditions':conditions.items(),
+            'num_mothers':num_mothers
+            }),
+            content_type='application/json')
+
     return render_to_response(
         "smgl/home.html",
         context_instance=RequestContext(request)
