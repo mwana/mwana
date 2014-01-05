@@ -1223,10 +1223,22 @@ def home_page(request):
         conditions['Other'] = PregnantMother.objects.filter(
             risk_reason_oth=True).count()
 
+
+        ref_reasons = {}
+        for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
+            num = Referral.objects.filter(
+                **{'reason_%s'%short_reason:True }
+                ).count()
+            if num > 0: # Only get the ones over 0
+                ref_reasons[long_reason] = num
+
+        num_ref_reasons = sum([cond_num[1] for cond_num in ref_reasons.items()])
         num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
 
         return HttpResponse(json.dumps(
             {
+            'ref_reasons':ref_reasons.items(),
+            'num_ref_reasons':num_ref_reasons,
             'conditions':conditions.items(),
             'num_mothers':num_mothers
             }),
