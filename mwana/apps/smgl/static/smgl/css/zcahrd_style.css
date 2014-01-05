@@ -5977,3 +5977,18 @@ td.visible-print {
 #footer-logos img {
   padding-right: 10px;
 }
+#branding h1 a span {
+  font-size: 1.6em;
+  text-align: center;
+}
+#branding h1 a {
+  float: none;
+  text-align: center;
+}
+#branding h1 a:hover {
+  text-decoration: none;
+  text-align: center;
+}
+#inner {
+  padding: 0;
+}
