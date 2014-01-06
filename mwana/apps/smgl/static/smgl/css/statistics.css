@@ -9,9 +9,9 @@ button.ui-button-icon-only {
 .hasDatepicker {
     font-family: Verdana,Arial,sans-serif;
     font-size: 1.1em;
-    height: 12px;
+    height: auto;
     margin-top: 0.4em;
-    width: 80px;
+    width: 90px;
 }
 
 .statistics form {
@@ -42,7 +42,7 @@ button.ui-button-icon-only {
 .statistics col.location, .statistics col.reminder-type { width: 75px;}
 
 #mothers-form .ui-autocomplete-input {
-    width: 80px;
+    width: 90px;
 }
 
 table tr td div.status {

@@ -48,12 +48,12 @@ def fetch_initial(initial, session):
     form_data = session.get('form_data')
     if form_data:
         initial.update(form_data)
-    return initial 
+    return initial
 
 def save_form_data(cleaned_data, session):
     session['form_data'] = cleaned_data
-    
-def anc_delivery_report(request):  
+
+def anc_delivery_report(request):
     records = []
     facility_parent = None
     start_date, end_date = get_default_dates()
@@ -131,7 +131,7 @@ def anc_delivery_report(request):
             pregnancies = PregnantMother.objects.filter(location=place)
 
         if filter_option == 'option_1':
-            # Option 1 should show All women who have Pregnancy registrations AND gave birth OR had EDD scheduled within our 
+            # Option 1 should show All women who have Pregnancy registrations AND gave birth OR had EDD scheduled within our
             #specified time frame
             mothers_reg = filter_by_dates(mothers, 'created_date',
                              start=start_date, end=end_date)
@@ -145,16 +145,16 @@ def anc_delivery_report(request):
             #Combine the two querysets
             mothers = mothers_births | mothers_edd
         else:
-            # All women who gave birth or had EDD within specified time frame 
+            # All women who gave birth or had EDD within specified time frame
             mothers_edd = filter_by_dates(mothers, 'edd',
                              start=start_date, end=end_date)
-            
+
             births = filter_by_dates(BirthRegistration.objects.all(), 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
             mothers_births = mothers.filter(id__in=births.values_list('mother'))
             mothers = mothers_edd | mothers_births
-     
+
         r = {'location': place.name}
 
         r['location_id'] = place.id
@@ -357,7 +357,7 @@ def pnc_report(request):
 
         records.append(r)
     mmr = ''
-    nmr = '' 
+    nmr = ''
     # handle sorting, since djtables won't sort on non-Model based tables.
     records = sorted(records, key=itemgetter('location'))
     if request.GET.get('order_by'):
@@ -1584,7 +1584,7 @@ def sms_records(request):
 
     records_table = SMSRecordsTable(sms_records, request=request)
 
-    
+
     return render_to_response(
         "smgl/sms_records.html",
         {"records_table": records_table,
@@ -1976,17 +1976,39 @@ def help_manager(request, id):
 def home_page(request):
     if request.is_ajax():
         conditions = {}
-        conditions['C-Section'] = PregnantMother.objects.filter(risk_reason_csec=True).count()
-        conditions['Comp. during previous'] = PregnantMother.objects.filter(risk_reason_cmp=True).count()
-        conditions['Gestational Disease'] = PregnantMother.objects.filter(risk_reason_gd=True).count()
-        conditions['High Blood Pressure'] = PregnantMother.objects.filter(risk_reason_hbp=True).count()
-        conditions['Previous Still Born'] = PregnantMother.objects.filter(risk_reason_psb=True).count()
-        conditions['Other'] = PregnantMother.objects.filter(risk_reason_oth=True).count()
 
+        conditions['C-Section'] = PregnantMother.objects.filter(
+            risk_reason_csec=True).count()
+        conditions['Comp. during previous'] = PregnantMother.objects.filter(
+            risk_reason_cmp=True).count()
+        conditions['Gestational Disease'] = PregnantMother.objects.filter(
+            risk_reason_gd=True).count()
+        conditions['High Blood Pressure'] = PregnantMother.objects.filter(
+            risk_reason_hbp=True).count()
+        conditions['Previous Still Born'] = PregnantMother.objects.filter(
+            risk_reason_psb=True).count()
+        conditions['Other'] = PregnantMother.objects.filter(
+            risk_reason_oth=True).count()
+
+        ref_reasons = {}
+        for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
+            num = Referral.objects.filter(
+                **{'reason_%s'%short_reason:True }
+                ).count()
+            if num > 0: # Only get the ones over 0
+                ref_reasons[long_reason] = num
+
+        num_ref_reasons = sum([cond_num[1] for cond_num in ref_reasons.items()])
         num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
 
-        return HttpResponse(json.dumps({'conditions':conditions.items(),
-                                        'num_mothers':num_mothers}), content_type='application/json')
+        return HttpResponse(json.dumps(
+            {
+            'ref_reasons':ref_reasons.items(),
+            'num_ref_reasons':num_ref_reasons,
+            'conditions':conditions.items(),
+            'num_mothers':num_mothers
+            }),
+            content_type='application/json')
 
     return render_to_response(
         "smgl/home.html",
