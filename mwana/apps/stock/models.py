@@ -35,6 +35,7 @@ class StockAccount(models.Model):
     stock = models.ForeignKey(Stock, null=False, blank=False)
     location = models.ForeignKey(Location, limit_choices_to={"type__slug__iregex": "[^zone]"})
     amount = models.PositiveIntegerField(default=0, null=False, blank=False)
+    pending_amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     last_updated = models.DateTimeField(default=datetime.now, editable=False)
 
     def save(self, *args, **kwargs):
