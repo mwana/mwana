@@ -48,7 +48,7 @@ class Command(LabelCommand):
             
 
             # @type bm BroadcastMessage
-            tokens = re.split(sep, b.strip_non_ascii(re.sub(r"\s+", " ", bm.text)))
+            tokens = re.split(sep, b.strip_non_or_bad_ascii(re.sub(r"\s+", " ", bm.text)))
             cases = tokens
             source = Source.objects.create(parsed=0)
             now = bm.date + timedelta(hours=2) #change from utc

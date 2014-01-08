@@ -12,6 +12,7 @@ from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.surveillance.models import Separator
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from datetime import timedelta
+from mwana.apps.stringcleaning.inputcleaner import strip_non_or_bad_ascii
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 
@@ -62,7 +63,7 @@ class SurveyCaseHandler(KeywordHandler):
         separators = [',', ';'] + [sep.text for sep in Separator.objects.all()] or [',']
         sep = "|".join(separators)
         
-        tokens = re.split(sep, text)
+        tokens = re.split(sep, strip_non_or_bad_ascii(text))
         
         rpr_time = self._parse_time(tokens[0])
 

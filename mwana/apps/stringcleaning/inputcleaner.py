@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+
+import string
+
 """
 Provides utilities to cleanup text
 """
@@ -328,7 +331,13 @@ class InputCleaner:
             s = s.replace(c, '')
         return s
 
-    def strip_non_ascii(self, string):
-        ''' Returns the string without non ASCII characters'''
-        stripped = (c for c in string if 0 < ord(c) < 127)
+    def strip_non_or_bad_ascii(self, text):
+        ''' Returns the string without non ASCII or unnecessary characters'''
+        stripped = (c for c in text if c in string.printable)
         return ''.join(stripped)
+
+
+def strip_non_or_bad_ascii(text):
+    ''' Returns the string without non ASCII or unnecessary characters'''
+    stripped = (c for c in text if c in string.printable)
+    return ''.join(stripped)
