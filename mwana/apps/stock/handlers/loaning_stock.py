@@ -127,7 +127,7 @@ class LoaningStockHandler(KeywordHandler):
             if (drugs_below_threshold):
                 self.respond("You cannnot proceed with loan because your stock level will be below threshold for the following drugs: " +drugs_below_threshold)
             else:                                 
-                self.respond("Thank you. You have loaned %s the following drugs: " +drugs +"" %location_to)
+                self.respond("Thank you. You have loaned %s the following drugs: " %location_to +""+drugs)
                 staff = Contact.active.location(location_to)#.filter(types=get_clinic_worker_type())
                 print (staff)
                 self.broadcast(self.message_to_clinic, staff, "CLINIC", drugs, clinic_to, confirmation_code)
