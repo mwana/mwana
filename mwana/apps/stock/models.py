@@ -51,6 +51,7 @@ class StockAccount(models.Model):
 
 TRANSACTION_CHOICES = (
     ('p', 'Pending'),
+    ('f', 'Failed'),
     ('c', 'Completed'),
 )
 

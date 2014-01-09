@@ -14,6 +14,9 @@ from mwana.apps.stock.models import Transaction
 from mwana.apps.stock.models import Threshold
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
+from mwana.apps.broadcast.models import BroadcastMessage
+from rapidsms.messages.outgoing import OutgoingMessage
+from mwana.const import get_district_worker_type
 
 _ = lambda s: s
 
@@ -26,6 +29,7 @@ class DispensedStockHandler(KeywordHandler):
     keyword = "DISP|dispenced|disp|dispensed"
 
     HELP_TEXT = _("To report dispensed drugs, send DISP <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g DISP DG99 100, DG80 15")
+    message_to_dho = "Hi %s, %s are below threshold for the following drugs: %s."
     
     def help(self):
         self.respond(self.HELP_TEXT)
@@ -110,6 +114,33 @@ class DispensedStockHandler(KeywordHandler):
             self.respond("Thank you. You have dispensed the following drugs: " +drugs)
             if (drugs_below_threshold):
                 self.respond("Your stock level is below threshold for the following drugs: " +drugs_below_threshold)
+                dho_staff = Contact.active.location(location.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())
+                print (dho_staff)
+                self.broadcast(self.message_to_dho, dho_staff, "DHO", drugs_below_threshold, location)
+
+    def broadcast(self, text, contacts, group_name, drugs, clinic_to):
+
+        message_body = "%(text)s"
+
+        for contact in contacts:
+            if contact.default_connection is None:
+                self.info("Can't send to %s as they have no connections" % contact)
+            else:
+                OutgoingMessage(contact.default_connection, message_body,
+                                **{"text": (text % (contact.name, clinic_to, drugs))}).send()
+
+        logger_msg = getattr(self.msg, "logger_msg", None)
+        if not logger_msg:
+            self.error("No logger message found for %s. Do you have the message log app running?" %\
+                       self.msg)
+        bmsg = BroadcastMessage.objects.create(logger_message=logger_msg,
+                                               contact=self.msg.contact,
+                                               text=text,
+                                               group=group_name)
+        bmsg.recipients = contacts
+        bmsg.save()
+        return True
+
 
 
 

@@ -17,6 +17,7 @@ from mwana.apps.broadcast.models import BroadcastMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
+from mwana.const import get_district_worker_type
 
 _ = lambda s: s
 
@@ -26,10 +27,12 @@ class LoaningStockHandler(KeywordHandler):
     """
     """
 
-    keyword = "LOAN|loan|lon"
+    keyword = "LOAN|loan|lon|loaned|LOANED"
 
     HELP_TEXT = _("To loan drugs, send LOAN <location code> <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g LOAN 111111 DG99 100, DG80 15")
     message_to_clinic = "Hi %s, %s have loaned you the following drugs: %s. Confirm with code %s when you get the stock"
+    message_to_dho = "Hi %s, %s are below threshold for the following drugs: %s.%s"
+    
     def help(self):
         self.respond(self.HELP_TEXT)
 
@@ -126,11 +129,17 @@ class LoaningStockHandler(KeywordHandler):
             
             if (drugs_below_threshold):
                 self.respond("You cannnot proceed with loan because your stock level will be below threshold for the following drugs: " +drugs_below_threshold)
-            else:                                 
+                trans.status = "f"
+                trans.save()
+#                dho_staff = Contact.active.location(location_from.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())
+#                filler=""
+#                self.broadcast(self.message_to_dho, dho_staff, "DHO", drugs_below_threshold, location_from,filler)
+            else:
                 self.respond("Thank you. You have loaned %s the following drugs: " %location_to +""+drugs)
-                staff = Contact.active.location(location_to)#.filter(types=get_clinic_worker_type())
+                staff = Contact.active.location(location_to)#.filter(types=get_clinic_worker_type())                
                 print (staff)
                 self.broadcast(self.message_to_clinic, staff, "CLINIC", drugs, clinic_to, confirmation_code)
+                
 
 
     def broadcast(self, text, contacts, group_name, drugs, clinic_to, confirmation_code):

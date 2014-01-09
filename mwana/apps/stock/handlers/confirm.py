@@ -41,23 +41,27 @@ class ConfirmHandler(KeywordHandler):
 
         trans = Transaction.objects.get(reference=confirmation_code)
         trans_type = trans.type
-        if(trans_type == "f_f"):
-            acc_to = trans.account_to
-            acc_from = trans.account_from
-            lending_staff=trans.sms_user
-            if((acc_to.pending_amount > 0) and (acc_from.pending_amount > 0)):
-                acc_to.amount+=acc_to.pending_amount
-                acc_from.amount-=acc_from.pending_amount
-                acc_to.pending_amount=0
-                acc_from.pending_amount=0
-                clinic_to=acc_to.location
-                trans.status = "c"
-                acc_to.save()
-                acc_from.save()
-                trans.save()
+        if (trans.status == 'p'):
+            if(trans_type == "f_f"):
+                acc_to = trans.account_to
+                acc_from = trans.account_from
+                lending_staff=trans.sms_user
+                if((acc_to.pending_amount > 0) and (acc_from.pending_amount > 0)):
+                    acc_to.amount+=acc_to.pending_amount
+                    acc_from.amount-=acc_from.pending_amount
+                    acc_to.pending_amount=0
+                    acc_from.pending_amount=0
+                    clinic_to=acc_to.location
+                    trans.status = "c"
+                    acc_to.save()
+                    acc_from.save()
+                    trans.save()
 
-                self.respond("Thank you for confirming that you have received the drugs")
-                self.broadcast(self.message_to_lender, lending_staff, clinic_to,"CLINIC")
+                    self.respond("Thank you for confirming that you have received the drugs")
+                    self.broadcast(self.message_to_lender, lending_staff, clinic_to,"CLINIC")
+
+        else:
+            self.respond("A completed transaction cannot be confirm. Kindly ensure you have sent the correct confirmation code")
                 
 
     def broadcast(self, text, contact, clinic_to, group_name):
