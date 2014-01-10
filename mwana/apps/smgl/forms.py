@@ -90,6 +90,13 @@ class SMSUsersFilterForm(StatisticsFilterForm):
                                     required=False)
 
 
+class ANCReportForm(StatisticsFilterForm):
+    filter_option = forms.ChoiceField(choices=(
+        ('option_1', 'Option 1'),
+        ('option_2', 'Option 2')
+        ))
+
+
 class SMSUsersSearchForm(forms.Form):
 
     """

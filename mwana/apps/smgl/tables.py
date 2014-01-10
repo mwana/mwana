@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 
+
 from djtables import Table, Column
 from djtables.column import DateColumn
 from smsforms.models import XFormsSession
@@ -167,7 +168,7 @@ class CanNotGetKeywordMotherID(Exception):
     pass
 
 def get_keyword_mother_id(message):
-   
+
     if not message.text.strip():
         raise CanNotGetKeywordMotherID
     try:
@@ -222,7 +223,7 @@ def get_birth_registrations(mother_id):
 
 def map_message_fields(message):
     #Returns an incoming message text with the various fields mapped to value. Some of the keywords have database objects that easily map to
-    #session id and we can easily find the associated object, others require a little more work. 
+    #session id and we can easily find the associated object, others require a little more work.
     text = message.text
     if message.direction == "I":#only process the incoming messages, outgoing messages will continue just using the message text.
         database_obj = None
@@ -237,15 +238,15 @@ def map_message_fields(message):
         elif keyword == 'DEATH':
             database_obj = get_death_registration(mother_id)
         elif keyword == 'TOLD':
-            database_obj = get_told_reminders(mother_id) 
+            database_obj = get_told_reminders(mother_id)
         elif keyword == "BIRTH":
             database_obj = get_birth_registrations(mother_id)
-                
+
         if database_obj:
             text = database_obj.get_field_value_mapping()
-    
+
     return text
-    
+
 class SMSRecordsTable(Table):
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(col_name="Phone Number", value= lambda cell: cell.object.connection.identity)
@@ -261,32 +262,34 @@ class SMSRecordsTable(Table):
         order_by = "-date"
 
 class ANCDeliveryTable(Table):
-    pregnant = NamedColumn(col_name='Pregnant Women')
-    two_anc = NamedColumn(col_name='2 ANC')
-    three_anc = NamedColumn(col_name='3 ANC')
-    four_anc = NamedColumn(col_name='4+ ANC')
-    facility = NamedColumn(col_name='Facility')
-    home = NamedColumn(col_name='Unknown')
+    location = NamedColumn(col_name='Location')
+    pregnancies = NamedColumn(col_name='Pregnant Women')
+    anc2 = NamedColumn(col_name='2 ANC')
+    anc3 = NamedColumn(col_name='3 ANC')
+    anc4 = NamedColumn(col_name='4+ ANC')
+    facility = NamedColumn(col_name='Facility Births')
+    home = NamedColumn(col_name='Home Births')
+    unknown = NamedColumn(col_name='Birth Plc. Unknown')
     gestational_age = NamedColumn(col_name='Gestational Age @ First ANC')
-    
-class PNCReport(Table):
+
+class PNCReportTable(Table):
     registered_deliveries = NamedColumn(col_name='Registered Deliveries')
     facility = NamedColumn(col_name='Facility')
-    community = NamedColumn(col_name='Community')
+    home = NamedColumn(col_name='Community')
     six_hour_pnc = NamedColumn(col_name='6 Hour PNC')
     six_day_pnc = NamedColumn(col_name='6 Day PNC')
     six_week_pnc = NamedColumn(col_name='6 Week PNC')
     complete_pnc = NamedColumn(col_name='Complete PNC')
     mmr = NamedColumn(col_name='MMR')
     nmr = NamedColumn(col_name='NMR')
-    
-class ReferralReport(Table):
-    emergent_referrals = NamedColumn(col_name='Emergent Referrals')
-    emergent_responses = NamedColumn(col_name='Referrals w/ Response')
-    emergent_response_outcome = NamedColumn(col_name='Referrals w/ response outcome')
-    transport_with_ambulance = NamedColumn(col_name='Transport by Ambulance')
+
+class ReferralReportTable(Table):
+    referrals = NamedColumn(col_name='Emergent Referrals')
+    referral_responses = NamedColumn(col_name='Referrals w/ Response')
+    referral_response_outcome = NamedColumn(col_name='Referrals w/ response outcome')
+    transport_by_ambulance = NamedColumn(col_name='Transport by Ambulance')
     average_turnaround_time = NamedColumn(col_name='Average Turnaround Time')
-    common_complication = NamedColumn(col_name='Common Obstetric Complication')
+    most_common_reason = NamedColumn(col_name='Common Obstetric Complication')
 
 class UserReport(Table):
     clinic_workers_registered = NamedColumn(col_name='Clinic Workers Reg.')
@@ -298,7 +301,7 @@ class UserReport(Table):
     clinic_workers_error_rate = NamedColumn(col_name='Error Rate: Clinic Workers')
     data_clerks_error_rate = NamedColumn(col_name='Error Rate: Data Clerks')
     cbas_error_rate = NamedColumn(col_name='Error Rate: CBAS')
-    
+
 class SMSUsersTable(Table):
     created_date = DateColumn(format="Y m d ")
     name = Column(link=lambda cell: reverse("sms-user-history", args=[cell.object.id]))
@@ -340,7 +343,7 @@ class HelpRequestTable(Table):
 
     class Meta:
         order_by = "-requested_on"
-        
+
 class ErrorTable(Table):
     date = DateColumn(format='Y m d H:i ')
     type = Column(value=lambda cell:"")

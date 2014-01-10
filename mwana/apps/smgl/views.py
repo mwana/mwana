@@ -4,7 +4,6 @@ import datetime
 import json
 from operator import itemgetter
 
-
 from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -13,6 +12,7 @@ from django.template.context import RequestContext
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, DeleteView
+from django.core.exceptions import MultipleObjectsReturned
 
 from extra_views import CreateWithInlinesView, UpdateWithInlinesView, InlineFormSet
 
@@ -25,7 +25,7 @@ from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
     MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm, SMSRecordsFilterForm,
-    HelpRequestManagerForm, SuggestionForm, FileUploadForm)
+    HelpRequestManagerForm, SuggestionForm, FileUploadForm, ANCReportForm)
 
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit,AmbulanceResponse, Referral, ToldReminder,
@@ -35,7 +35,8 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      StatisticsLinkTable, ReminderStatsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
-                     HelpRequestTable, UserReport, get_msg_type)
+                     HelpRequestTable, UserReport, get_msg_type,
+                     PNCReportTable, ANCDeliveryTable, ReferralReportTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
 from smsforms.models import XFormsSession
@@ -53,16 +54,16 @@ def fetch_initial(initial, session):
 def save_form_data(cleaned_data, session):
     session['form_data'] = cleaned_data
 
-def anc_delivery_report(request):
+def anc_delivery_report(request, id=None):
     records = []
     facility_parent = None
     start_date, end_date = get_default_dates()
-
     province = district = facility = None
-
     visits = FacilityVisit.objects.all()
     records_for = Location.objects.filter(type__singular='district')
-    start_date, end_date = get_default_dates()
+    pregnancies = PregnantMother.objects.all()
+    filter_option = 'option_1'
+    """
     if id:
         facility_parent = get_object_or_404(Location, id=id)
         # Prepopulate the district
@@ -74,9 +75,9 @@ def anc_delivery_report(request):
                       }
             request.GET = request.GET.copy()
             request.GET.update(update)
-
+    """
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = ANCReportForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -84,16 +85,21 @@ def anc_delivery_report(request):
             facility = form.cleaned_data.get('facility')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
-            filter_option = form.cleaned_data.get('date_filter_option')
+            filter_option = form.cleaned_data.get('filter_option')
+            print filter_option
         # determine what location(s) to include in the report
         if id:
             # get district facilities
             records_for = get_location_tree_nodes(facility_parent, None)
             if district:
-                records_for = get_location_tree_nodes(district, None, ~Q(type__slug='zone'))
+                records_for = get_location_tree_nodes(
+                    district, None, ~Q(type__slug='zone')
+                    )
                 if facility_parent != district:
-                    redirect_url = reverse('district-stats',
-                                            args=[district.id])
+                    redirect_url = reverse(
+                        'district-stats',
+                        args=[district.id]
+                        )
                     params = urllib.urlencode(request.GET)
                     full_redirect_url = '%s?%s' % (redirect_url, params)
                     return HttpResponseRedirect(full_redirect_url)
@@ -105,17 +111,15 @@ def anc_delivery_report(request):
             if district:
                 records_for = [district]
     else:
-        initial = {
-                    'start_date': start_date,
-                    'end_date': end_date,
-                  }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        initial = {'start_date': start_date, 'end_date': end_date}
+        form = ANCReportForm(initial=fetch_initial(initial, request.session))
 
     for place in records_for:
         locations = Location.objects.all()
+        r = {}
         if not id:
             reg_filter = {'district': place}
-            visit_filter = {'location__in': [x for x in locations \
+            visit_filter = {'location__in': [x for x in locations\
                                 if get_current_district(x) == place]}
         else:
             reg_filter = {'location': place}
@@ -131,42 +135,57 @@ def anc_delivery_report(request):
             pregnancies = PregnantMother.objects.filter(location=place)
 
         if filter_option == 'option_1':
-            # Option 1 should show All women who have Pregnancy registrations AND gave birth OR had EDD scheduled within our
-            #specified time frame
-            mothers_reg = filter_by_dates(mothers, 'created_date',
-                             start=start_date, end=end_date)
+            # Option 1 should show All women who have Pregnancy registrations
+            #AND gave birth OR had EDD scheduled within our specified time frame
+            pregnancies_reg = filter_by_dates(pregnancies, 'created_date',
+                start=start_date, end=end_date)
+
             births = filter_by_dates(BirthRegistration.objects.all(), 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            mothers_births = mothers_reg.filter(id__in=births.values_list('mother'))
-            #Get all mothers with edd within the specified time frame
-            mothers_edd = filter_by_dates(mothers, 'edd',
+            birth_mothers = pregnancies_reg.filter(id__in=births.values_list('mother'))
+            #Get all mothers with edd and registration within the specified time frame
+            pregnancies_edd = filter_by_dates(pregnancies_reg, 'edd',
                              start=start_date, end=end_date)
             #Combine the two querysets
-            mothers = mothers_births | mothers_edd
+            pregnancies = birth_mothers | pregnancies_edd
         else:
             # All women who gave birth or had EDD within specified time frame
-            mothers_edd = filter_by_dates(mothers, 'edd',
+            pregnancies_edd = filter_by_dates(pregnancies, 'edd',
                              start=start_date, end=end_date)
-
             births = filter_by_dates(BirthRegistration.objects.all(), 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            mothers_births = mothers.filter(id__in=births.values_list('mother'))
-            mothers = mothers_edd | mothers_births
+            birth_mothers = pregnancies.filter(id__in=births.values_list('mother'))
+            pregnancies = pregnancies_edd | birth_mothers
 
-        r = {'location': place.name}
+        r['gestational_age'] = 0
+        gestational_ages = 0
+        pregnacies_to_calc = 0
+        for pregnancy in pregnancies:
+            if pregnancy.created_date and pregnancy.lmp:
+                gestational_age = pregnancy.created_date.date() - pregnancy.lmp
+                if gestational_age.days > 365:
+                    pass
+                else:
+                    gestational_ages += gestational_age.days
+                    pregnacies_to_calc += 1
+        if pregnacies_to_calc != 0:
+            gestational_age = float(gestational_ages)/float(pregnacies_to_calc)
+            r['gestational_age'] = "{0:.1f} Weeks".format((gestational_age/7))
 
+        r['location'] = place.name
         r['location_id'] = place.id
-        births = BirthRegistration.objects.filter(**reg_filter)
 
+        births = BirthRegistration.objects.filter(mother__in=birth_mothers)
+        births = births.filter(**reg_filter)
         # utilize start/end date if supplied
-        births = filter_by_dates(births, 'date',
-                                 start=start_date, end=end_date)
-        r['births_com'] = births.filter(place='h').count()
-        r['births_fac'] = births.filter(place='f').count()
+        r['home'] = births.filter(place='h').count() #home births
+        r['facility'] = births.filter(place='f').count() #facility births
+        r['unknown'] = births.exclude(place='h').exclude(place='f').count()
 
         # Aggregate ANC visits by Mother and # of visits
+        visits = visits.filter(mother__in=pregnancies)
         place_visits = visits.filter(**visit_filter)
         place_visits = filter_by_dates(place_visits, 'visit_date',
                                   start=start_date, end=end_date)
@@ -193,6 +212,8 @@ def anc_delivery_report(request):
             key = 'anc{0}'.format(i + 1)
             if i in num_visits:
                 r[key] = num_visits[i]
+
+        records.append(r)
 
     # handle sorting, since djtables won't sort on non-Model based tables.
     records = sorted(records, key=itemgetter('location'))
@@ -229,25 +250,24 @@ def anc_delivery_report(request):
         filename = '{0}{1}'.format(filename, date_range)
         return export_as_csv(records, keys, filename)
 
-    statistics_table = StatisticsLinkTable(records,
-                                           request=request)
+    anc_delivery_table = ANCDeliveryTable(records, request=request)
     # disable the link column if on district stats view
     if id:
-        statistics_table = StatisticsTable(records,
-                                           request=request)
+        anc_delivery_table = ANCDeliveryTable(records, request=request)
+
     return render_to_response(
-        "smgl/statistics.html",
-        {"statistics_table": statistics_table,
+        "smgl/anc_delivery_report.html",
+        {"anc_delivery_table": anc_delivery_table,
          "district": facility_parent,
          "form": form
         },
         context_instance=RequestContext(request))
 
-def pnc_report(request):
+def pnc_report(request, id=None):
     records = []
     facility_parent = None
-    start_date, end_date = get_default_dates()
-
+    #start_date, end_date = get_default_dates()
+    start_date, end_date = datetime.datetime(2013, 05, 01), datetime.datetime(2013, 12, 01)
     province = district = facility = None
 
     visits = FacilityVisit.objects.all()
@@ -325,39 +345,101 @@ def pnc_report(request):
         r = {'location': place.name}
 
         r['location_id'] = place.id
+
         births = BirthRegistration.objects.filter(**reg_filter)
 
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
                                  start=start_date, end=end_date)
-        r['births_com'] = births.filter(place='h').count()
-        r['births_fac'] = births.filter(place='f').count()
-        r['births_total'] = r['births_com'] + r['births_fac']
+        r['registered_deliveries'] = births.count()
+        visits = filter_by_dates(FacilityVisit.objects.filter(visit_type='pos'),
+                                'created_date', start=start_date, end=end_date)
+
+        def has_six_day_pnc(birth, visits):
+            birth_reg = birth.date
+            six_days_later = birth.date + datetime.timedelta(days=6)
+            visits = visits.filter(mother=birth.mother,
+                created_date__gte=six_days_later-datetime.timedelta(hours=24),
+                created_date__lte=six_days_later+datetime.timedelta(hours=24))
+            if visits:
+                return True
+            else:
+                return False
+
+        def has_six_week_pnc(birth, visits):
+            birth_reg = birth.date
+            six_weeks_later = birth.date + datetime.timedelta(days=42)
+            visits = visits.filter(mother=birth.mother,
+                created_date__gte=six_weeks_later-datetime.timedelta(days=7),
+                created_date__lte=six_weeks_later+datetime.timedelta(days=7))
+            if visits:
+                return True
+            else:
+                return False
+
+        def pnc_visits(births, visits):
+            six_hour_pnc_num = births.count()
+            six_day_pnc_num = 0
+            six_week_pnc_num = 0
+            complete_pnc_num = 0
+            for birth in births:
+                six_day_pnc = has_six_day_pnc(birth, visits)
+                six_week_pnc = has_six_week_pnc(birth, visits)
+                if six_day_pnc:
+                    six_day_pnc_num += 1
+                if six_week_pnc:
+                    six_week_pnc_num += 1
+                if six_day_pnc_num and six_week_pnc:
+                    complete_pnc_num += 1
+            return (six_hour_pnc_num, six_day_pnc_num, six_week_pnc_num,
+                complete_pnc_num)
+
+        r['six_hour_pnc'], r['six_day_pnc'], r['six_week_pnc'],\
+        r['complete_pnc'] = pnc_visits(births, visits)
 
         deaths = DeathRegistration.objects.filter(**reg_filter)
         deaths = filter_by_dates(deaths, 'date',
                                  start=start_date, end=end_date)
 
+        nmr_deaths = 0
+        for death in DeathRegistration.objects.filter(person='inf'):
+            try:
+                birth = births.filter(mother__uid=death.unique_id)[0]
+            except IndexError:
+                continue
+            time_between = death.date - birth.date
+            if time_between.days < 28:
+                nmr_deaths += 1
 
-        pos_visits = mothers.filter(facility_visits__visit_type='pos') \
-                            .annotate(Count('facility_visits')) \
-                            .values_list('facility_visits__count', flat=True)
 
-        r['pos1'] = r['pos2'] = r['pos3'] = 0
-        num_visits = {}
-        for num in pos_visits:
-            if num in num_visits:
-                num_visits[num] += 1
-            else:
-                num_visits[num] = 1
-        for i in range(1, 4):
-            key = 'pos{0}'.format(i)
-            if i in num_visits:
-                r[key] = num_visits[i]
+        if nmr_deaths > 0:
+            nmr = float(nmr_deaths)/float(births.count())
+            nmr = nmr * 1000
+            nmr = "{0:.2f}".format(nmr)
+        else:
+            nmr = '0'
+
+        mmr_deaths = 0
+        for death in DeathRegistration.objects.filter(person='ma'):
+            try:
+                mother = PregnantMother.objects.get(uid=death.unique_id)
+            except PregnantMother.DoesNotExist:
+                continue
+            if not mother.birthregistration_set.all():
+                mmr_deaths += 1
+
+        if mmr_deaths:
+            mmr_num = float(mmr_deaths)/float(births.count())
+
+        r['mmr'] = "{0:.1f}%".format((mmr_num * 100000))
+        r['nmr'] = nmr
+        r['home'] = births.filter(place='h').count() #home births
+        r['facility'] = births.filter(place='f').count() #facility births
+        r['unknown'] = births.exclude(place='h').exclude(place='f').count()
 
         records.append(r)
-    mmr = ''
-    nmr = ''
+
+
     # handle sorting, since djtables won't sort on non-Model based tables.
     records = sorted(records, key=itemgetter('location'))
     if request.GET.get('order_by'):
@@ -373,6 +455,7 @@ def pnc_report(request):
         if sort:
             records.reverse()
 
+    print records
 
 
     statistics_table = StatisticsLinkTable(records,
@@ -381,9 +464,11 @@ def pnc_report(request):
     if id:
         statistics_table = StatisticsTable(records,
                                            request=request)
+
+    pnc_report_table = PNCReportTable(records, request=request)
     return render_to_response(
-        "smgl/statistics.html",
-        {"statistics_table": statistics_table,
+        "smgl/pnc_report.html",
+        {"pnc_report_table": pnc_report_table,
          "district": facility_parent,
          "form": form
         },
@@ -415,20 +500,60 @@ def referral_report(request):
         locations = get_location_tree_nodes(province)
     if district:
         locations = get_location_tree_nodes(district)
-    if facility:
-        locations = get_location_tree_nodes(facility)
+
+    #if facility:
+    #    locations = get_location_tree_nodes(facility)
 
     referrals = referrals.filter(from_facility__in=locations)
 
     # filter by created_date
     referrals = filter_by_dates(referrals, 'date',
                              start=start_date, end=end_date)
+    ref = {}
+    ref_reasons = []
+    for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
+        if short_reason != 'oth':
+            ref_reasons.append(
+                (Referral.objects.filter(**{'reason_%s'%short_reason:True }).count(), long_reason)
+                )
 
-    referrals_with_response = AmbulanceResponse.objects.filter(referral__in=referrals)
-    ref_with_outcome = referrals.objects.filter(responded=True)
-    referral_amb = referrals_with_response
-    average_turnaround_time = ''
-    most_common_obstetric_complication = ''
+    sorted_ref_reasons = sorted(ref_reasons, key=lambda item:-item[0])
+    most_common_reason = sorted_ref_reasons[0]
+    ref['most_common_reason'] = most_common_reason[1]
+
+    ref['referrals'] = referrals.count()
+
+    ref['referral_responses'] = 0
+    for referral in referrals:
+        if referral.amb_req:
+            ref['referral_responses'] += referral.amb_req.ambulanceresponse_set.count()
+
+    ref_with_outcome = referrals.filter(
+        responded=True
+        )
+
+    ref['referral_response_outcome'] = 0
+    for referral in ref_with_outcome:
+        if referral.amb_req:
+            ref['referral_response_outcome'] += referral.amb_req.ambulanceresponse_set.count()
+
+    ambulance_responses = AmbulanceResponse.objects.filter(
+        ambulance_request__referral__in=referrals)
+    ambulance_responses = ambulance_responses.filter(response='otw')|ambulance_responses.filter(response='dl')
+    ref['transport_by_ambulance'] = ambulance_responses.count()
+
+    #average_turnaround_time = ''
+
+    referral_report_table = ReferralReportTable([ref], request=request)
+    referral_report_table.as_html()
+    return render_to_response(
+        "smgl/referral_report.html",
+        {"referral_report_table": referral_report_table,
+         "form": form,
+         "start_date": start_date,
+         "end_date": end_date
+        },
+        context_instance=RequestContext(request))
 
 
 def user_report(request):
@@ -441,6 +566,7 @@ def user_report(request):
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
             c_type = form.cleaned_data.get('c_type')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
@@ -467,33 +593,39 @@ def user_report(request):
                               start=start_date, end=end_date)
     clinic_workers_active = [worker for worker in clinic_workers_registered if worker.active_status == "active"]
 
+
+    #Error rates
+    cba_sessions = XFormsSession.objects.filter(connection__contact__types__slug='cba')
+    cba_session = cba_sessions.filter(connection__contact__in=cbas_registered)
+    cba_errors = cba_sessions.filter(has_error=True)
+
+    workers_sessions = XFormsSession.objects.filter(connection__contact__types__in=clinic_worker_types)
+    workers_sessions = workers_sessions.filter(connection__contact__in=clinic_workers_registered)
+    workers_errors = workers_sessions.filter(has_error=True)
+
+    data_clerk_sessions = XFormsSession.objects.filter(connection__contact__types__slug='dc')
+    data_clerk_sessions = data_clerk_sessions.filter(connection__contact__in=data_clerks_registered)
+    data_clerk_errors = data_clerk_sessions.filter(has_error=True)
+
     locations = Location.objects.all()
     if province:
         locations = get_location_tree_nodes(province)
     if district:
-        locations = get_location_tree_nodes(district)
+        cbas_registered = [x for x in cbas_registered if x.get_current_district() == district]
+        data_clerks_registered = [x for x in data_clerks_registered if x.get_current_district() == district]
+        clinic_workers_registered = [x for x in clinic_workers_registered if x.get_current_district() == district]
+        cba_errors = [x for x in cba_errors if x.connection.contact.get_current_district() == district]
+        workers_errors = [x for x in workers_errors if x.connection.contact.get_current_district() == district]
+        data_clerk_errors = [x for x in data_clerk_errors if x.connection.contact.get_current_district() == district]
     if facility:
-        locations = [facility]
-
-    if locations:
-        cbas_registered = [x for x in cbas_registered if x.get_current_district() in locations]
-        data_clerks_registered = [x for x in data_clerks_registered if x.get_current_district() in locations]
-        clinic_workers_registered = [x for x in clinic_workers_registered if x.get_current_district() in locations]
-
-    #Error rates
-    cba_sessions = XFormsSession.objects.filter(connection__contact__types__slug='cba')
-    cba_errors = cba_sessions.filter(has_error=True)
-
-    workers_sessions = XFormsSession.objects.filter(connection__contact__types__in=clinic_worker_types)
-    workers_errors = workers_sessions.filter(has_error=True)
-
-    data_clerk_sessions = XFormsSession.objects.filter(connection__contact__types__slug='dc')
-    data_clerk_errors = data_clerk_sessions.filter(has_error=True)
+        cbas_registered = [x for x in cbas_registered if x.get_current_facility() == facility]
+        data_clerks_registered = [x for x in data_clerks_registered if x.get_current_facility() == facility]
+        clinic_workers_registered = [x for x in clinic_workers_registered if x.get_current_facility() == facility]
 
 
-    cbas_error_rate = percentage(cba_errors.count(), cba_sessions.count())
-    clinic_workers_error_rate = percentage(workers_errors.count(), workers_sessions.count())
-    data_clerks_error_rate = percentage(data_clerk_errors.count(), data_clerk_sessions.count())
+    cbas_error_rate = percentage(len(cba_errors), len(cba_sessions))
+    clinic_workers_error_rate = percentage(len(workers_errors), len(workers_sessions))
+    data_clerks_error_rate = percentage(len(data_clerk_errors), len(data_clerk_sessions))
 
 
     try:
@@ -999,73 +1131,95 @@ def reminder_stats(request):
         if facility:
             locations = [facility]
         mothers = mothers.filter(location__in=locations)
-        reminders = ReminderNotification.objects.filter(type__icontains=key,
-                                                        mother__in=mothers)
-        # utilize start/end date if supplied
-        reminders = filter_by_dates(reminders, 'date',
-                                 start=start_date, end=end_date)
-        reminded_mothers = reminders.values_list('mother', flat=True)
-        tolds = ToldReminder.objects.filter(type=key,
-                                            mother__in=reminded_mothers
-                                            )
-        told_mothers = tolds.values_list('mother', flat=True)
 
+
+        # utilize start/end date if supplied
+        reminders = filter_by_dates(ReminderNotification.objects.all(), 'date',
+                                 start=start_date, end=end_date)
+        reminded_mothers = reminders.filter(
+            mother__in=mothers).values_list('mother', flat=True)
+
+        told_mothers = ToldReminder.objects.values_list('mother', flat=True)
+        referrals = filter_by_dates(Referral.objects.all(), 'date', start=start_date,
+            end=end_date)
+        births = BirthRegistration.objects.filter(mother__in=mothers)
+        births = filter_by_dates(births, 'date', end=end_date, start=start_date)
         if key == 'edd':
-            #SEND_REMINDER_LOWER_BOUND =datetime.timedelta(days=2)
-            showed_up = BirthRegistration.objects.filter(
-                                                mother__in=reminded_mothers
-                                                )
+            tolds = ToldReminder.objects.filter(type='edd',
+                                    mother__in=mothers
+                                    )
+            showed_up = births
+            told_mothers = tolds.values_list('mother', flat=True)
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
-            lower_envelop = start_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND
-            higher_envelop = end_date + datetime.timedelta(days=14) - SEND_REMINDER_LOWER_BOUND
+            lower_envelop = start_date - datetime.timedelta(days=13)
+            higher_envelop = end_date + datetime.timedelta(days=14)
             scheduled_reminders = PregnantMother.objects.filter(
                                                         edd__gte=lower_envelop,
                                                         edd__lte=higher_envelop
-                                                            )
+                                                             )
+            reminders = reminders.filter(type__icontains='edd_14',
+                                                        mother__in=mothers)
+            tolds_count = tolds.count()
         elif key == 'ref':
-            showed_up = Referral.objects.filter(mother_showed=True,
-                                                mother__in=told_mothers
+            showed_up = referrals.filter(mother_showed=True,
+                                                mother__in=mothers
                                                 )
+            scheduled_reminders = referrals
             told_and_showed = showed_up.filter(mother__in=told_mothers)
 
+            reminders= reminders.filter(type='em_ref', mother__in=mothers)
 
+            told_and_showed = showed_up.filter(mother__in=told_mothers)
+            tolds = ToldReminder.objects.filter(type='ref', mother__in=mothers)
+            tolds_count = tolds.count()
         elif key == 'anc':
+            tolds = ToldReminder.objects.filter(type='anc',
+                                    mother__in=mothers
+                                    )
+            showed_up = FacilityVisit.objects.filter(
+                mother__in=mothers,
+                visit_type='anc')
+
+            showed_up = filter_by_dates(showed_up, 'created_date', start=start_date,
+                end=end_date)
+            told_mothers = tolds.values_list('mother', flat=True)
             #calculate the scheduled reminders based on the same algorithm used
             #to calculate the reminders to send.
-            anc_reminder_threshold = start_date + datetime.timedelta(days=14)
             scheduled_reminders = FacilityVisit.objects.filter(
-                        next_visit__gte=anc_reminder_threshold - SEND_REMINDER_LOWER_BOUND,
-                        next_visit__lte=end_date + datetime.timedelta(days=14),
-                        visit_type=key)
-            showed_up = FacilityVisit.objects.filter(
-                                                    mother__in=told_mothers,
-                                                    visit_type=key
-                                                    )
+                        next_visit__gte=start_date-datetime.timedelta(days=7),
+                        next_visit__lte=end_date+datetime.timedelta(days=5),
+                        visit_type='anc')
+
             told_and_showed = showed_up.filter(mother__in=told_mothers)
-
-
+            reminders = reminders.filter(type='nvd', mother__in=mothers)
+            tolds_count = tolds.count()
         else:
-            pos_reminder_threshold = start_date + datetime.timedelta(days=3)
+            tolds = ToldReminder.objects.filter(type='pos', mother__in=mothers)
+            told_mothers = tolds.values_list('mother', flat=True)
             scheduled_reminders = FacilityVisit.objects.filter(
-                        next_visit__gte=pos_reminder_threshold - SEND_REMINDER_LOWER_BOUND,
+                        next_visit__gte=start_date - SEND_REMINDER_LOWER_BOUND,
                         next_visit__lte=end_date + datetime.timedelta(days=3),
-                        visit_type=key)
+                        visit_type='pos')
             showed_up = FacilityVisit.objects.filter(
-                                                    mother__in=told_mothers,
-                                                    visit_type=key
+                                                    mother__in=mothers,
+                                                    visit_type='pos'
                                                     )
+            showed_up = filter_by_dates(showed_up, 'created_date', start=start_date,
+                end=end_date)
             told_and_showed = showed_up.filter(mother__in=told_mothers)
+            reminders = reminders.filter(type='pos', mother__in=mothers)
+            tolds_count = tolds.count()
 
 
-        print reminders
         records.append({
                 'reminder_type': field_mapper[key],
                 'scheduled_reminders': scheduled_reminders.count(),
                 'sent_reminders': reminders.count(),
-                'received_told': tolds.count(),
+                'received_told': tolds_count,
                 'follow_up_visits': showed_up.count(),
-                'told_and_showed': told_and_showed.count()
+                'told_and_showed': told_and_showed.count(),
+                'showed_on_time':0
             })
 
     # render as CSV if export
@@ -1583,7 +1737,7 @@ def sms_records(request):
         return response
 
     records_table = SMSRecordsTable(sms_records, request=request)
-
+    records_table.as_html()
 
     return render_to_response(
         "smgl/sms_records.html",
@@ -2165,4 +2319,10 @@ def error(request):
                               "smgl/errors.html",
                               {"errors":messages,
                                "form":form},
+                              context_instance=RequestContext(request))
+
+
+def reports_main(request):
+    return render_to_response(
+                              "smgl/reports_main.html",
                               context_instance=RequestContext(request))
