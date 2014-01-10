@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.contactsplus.models import ContactType
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -330,6 +331,52 @@ class GraphServive:
                                         date__month=my_date.month,
                                         connection__backend__name=backend[0]
                                         ).count())
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
+    def get_monthly_messages_by_usertype(self, start_date, end_date, province_slug, district_slug, facility_slug, use_percentage=True):
+        """TODO: Optimize this function"""
+        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+
+        contact_types = ContactType.objects.exclude(slug='patient').values_list('slug').all().distinct()
+        messages = Message.objects.filter(date__gte=start,
+                                          date__lt=end)
+
+        if any([province_slug, district_slug, facility_slug]):
+            messages = Message.objects.filter(date__gte=start,
+                                              date__lt=end,
+                                              contact__location__in=facs)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(contact_types):
+            data[item[0]] = []
+        data['Not yet Registered'] = []
+        month_ranges = []
+        while my_date <= end_date:
+            sub_total = 1
+            if use_percentage:
+                sub_total = messages.filter(
+                                    date__year=my_date.year,
+                                    date__month=my_date.month,
+                                    ).count()/100.0
+            for item in sorted(contact_types):
+                data[item[0]].append(round(messages.filter(
+                                        date__year=my_date.year,
+                                        date__month=my_date.month,
+                                        contact__types__slug=item[0]
+                                        ).count()/(sub_total or 1), 1))
+
+            data['Not yet Registered'].append(round(messages.filter(
+                                    date__year=my_date.year,
+                                    date__month=my_date.month,
+                                    contact=None
+                                    ).count()/(sub_total or 1), 1))
+
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 

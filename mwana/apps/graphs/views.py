@@ -268,6 +268,32 @@ def messages(request):
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
+def messages_by_user_type(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_messages_by_usertype(start_date, end_date, rpt_provinces\
+                                            , rpt_districts,
+                                            rpt_facilities)
+
+    for k, v in data.items():
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/messages.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly SMS Messages'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Percentage'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
 
 def facility_vs_community(request):
     enddate1, district_slug, facility_slug, province_slug, startdate1, _ = get_report_parameters(request)
