@@ -1,2 +1,20 @@
 /* vim:set et ts=4 sw=4 */
+#header{
+	background: url("/static/smgl/images/header-purple-bg.jpg");
+}
 
+#tabs li a, #page-tabs li a{
+	background: #a58bae;
+	border:#baa6c1 1px solid;
+}
+
+#tabs li a:hover, #page-tabs li a:hover,
+#tabs li a:focus, #page-tabs li a:focus {
+    background-image: url("/static/smgl/images/tab-purple-bg.jpg");
+    text-shadow:  #a58bae 0 0 2px;
+    text-decoration: none;
+}
+
+#tabs li, #page-tabs li{
+	line-height: 26px;
+}

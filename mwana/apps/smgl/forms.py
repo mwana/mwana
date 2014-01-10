@@ -10,6 +10,7 @@ from .lookups import DistrictLookup, FacilityLookup, ProvinceLookup, ZoneLookup
 
 
 class StatisticsFilterForm(forms.Form):
+
     """
     A form to filter National Statistics
     """
@@ -42,6 +43,7 @@ class StatisticsFilterForm(forms.Form):
 
 
 class MotherSearchForm(forms.Form):
+
     """
     A Form to lookup mothers
     """
@@ -49,6 +51,7 @@ class MotherSearchForm(forms.Form):
 
 
 class MotherStatsFilterForm(StatisticsFilterForm):
+
     """
     A form to filter Mothers by various parameters
     """
@@ -67,15 +70,18 @@ class MotherStatsFilterForm(StatisticsFilterForm):
 
 
 class SMSRecordsFilterForm(StatisticsFilterForm):
+
     """
     A Form to filter SMS Records
     """
-    keyword = forms.ModelChoiceField(queryset=XFormKeywordHandler.objects.all(),
-                                    empty_label='(All)',
-                                    required=False)
+    keyword = forms.ModelChoiceField(
+        queryset=XFormKeywordHandler.objects.all(),
+        empty_label='(All)',
+        required=False)
 
 
 class SMSUsersFilterForm(StatisticsFilterForm):
+
     """
     A Form to filter SMS Users
     """
@@ -84,7 +90,15 @@ class SMSUsersFilterForm(StatisticsFilterForm):
                                     required=False)
 
 
+class ANCReportForm(StatisticsFilterForm):
+    filter_option = forms.ChoiceField(choices=(
+        ('option_1', 'Option 1'),
+        ('option_2', 'Option 2')
+        ))
+
+
 class SMSUsersSearchForm(forms.Form):
+
     """
     A Form to lookup SMS Users
     """
@@ -92,6 +106,7 @@ class SMSUsersSearchForm(forms.Form):
 
 
 class HelpRequestManagerForm(forms.ModelForm):
+
     """
     A Form to resolve Help Request
     """
@@ -99,26 +114,30 @@ class HelpRequestManagerForm(forms.ModelForm):
     class Meta:
         model = HelpRequest
         fields = ('notes',)
-        
+
+
 class SuggestionForm(forms.ModelForm):
+
     def __init__(self, *args, **kwargs):
         super(SuggestionForm, self).__init__(*args, **kwargs)
         self.fields['title'].widget.attrs['class'] = 'form-control'
         self.fields['title'].widget.attrs['placeholder'] = 'Suggestion Title'
-        
+
         self.fields['text'].widget.attrs['class'] = 'form-control'
-        self.fields['text'].widget.attrs['placeholder'] = 'Describe your suggestion, you can add images/files below.'
-        
+        self.fields['text'].widget.attrs['placeholder'] = \
+            'Describe your suggestion, you can add images/files below.'
+
     class Meta:
         model = Suggestion
         fields = ('title', 'text')
-        
+
+
 class FileUploadForm(forms.ModelForm):
+
     def __init__(self, *args, **kwargs):
         super(FileUploadForm, self).__init__(*args, **kwargs)
         self.fields['file'].widget.attrs['class'] = 'form-control'
-        
+
     class Meta:
         model = FileUpload
         fields = ('file',)
-
