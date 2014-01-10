@@ -1,7 +1,6 @@
 {% extends  "layout.html" %}
-{% load djtables_tags %}
 
-{% block title %}User Report - {{ block.super }}{% endblock %}
+{% block title %}ANC Report - {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -10,6 +9,7 @@
 {{ form.media.css }}
 
 {% endblock %}
+
 
 {% block javascripts %}
   <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
@@ -23,14 +23,14 @@
 {% endblock %}
 
 {% block page_tabs %}
- {% include "smgl/includes/statistics_subnav.html" %}
+ {% include "smgl/includes/message_panel_subnav.html" %}
 {% endblock %}
 
 {% block content %}
 
 <div class="statistics module">
-  <h2>Filtering</h2>
-  <form action="" method="GET" >
+<h2>ANC-Delivery Report</h2>
+  <form action="" method="GET" id="anc-delivery-form" >
     <table>
       <thead>
         <tr>
@@ -40,14 +40,10 @@
         <tr>
           <th>Start</th>
           <th>End</th>
-          {% if not district %}
           <th>Province</th>
-          {% endif %}
           <th>District</th>
-          {% if district %}
           <th>Facility</th>
-          {% endif %}
-
+          <th>Option</th>
         </tr>
       </thead>
       <tbody>
@@ -68,10 +64,14 @@
             {{ form.district.errors}}
             {{ form.district }}
           </td>
-          <td>
-            {{ form.facility.errors}}
-            {{ form.facility }}
-          </td>
+           <td>
+             {{ form.facility.errors}}
+             {{ form.facility }}
+           </td>
+           <td>
+             {{ form.filter_option.errors}}
+             {{ form.filter_option }}
+           </td>
         </tr>
       </tbody>
     </table>
@@ -79,10 +79,7 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   {{ form.media.js }}
-  <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
-  <div id="records">
-    {{ user_report_table.as_html }}
-  </div>
+{{ anc_delivery_table.as_html }}
 </div>
 
   <script type="text/javascript">
@@ -91,6 +88,10 @@
             query.province = $('#id_province_1').val();
         }
         $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
+        function newFacilityParameters(query) {
+            query.district = $('#id_district_1').val();
+        }
+        $('#id_facility_0').djselectable('option', 'prepareQuery', newFacilityParameters);
 
     });
 </script>
