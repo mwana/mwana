@@ -28,6 +28,7 @@ from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Connection
 from rapidsms.models import Contact
+from rapidsms.router import send
 
 logger = logging.getLogger(__name__)
 
@@ -197,10 +198,9 @@ class App (rapidsms.apps.base.AppBase):
             r.save()
 
         clinic = results[0].clinic
-        contacts = Contact.active.filter(Q(location=clinic) |
-                                         Q(location__parent=clinic),
-                                         Q(types=const.get_clinic_worker_type())
-                                         ).distinct().order_by('pk')
+        contacts = Contact.active.filter(
+            Q(location=clinic) | Q(location__parent=clinic),
+            Q(types=const.get_clinic_worker_type())).distinct().order_by('pk')
         if SYSTEM_LOCALE == LOCALE_MALAWI:
             NUIDs = ", ".join(
                 [str(r.requisition_id) if len(str(r.requisition_id)) > 9 else
@@ -211,8 +211,8 @@ class App (rapidsms.apps.base.AppBase):
             msg_text = (u"Hello {name}, {count} results sent to printer "
                         u"at {clinic}. IDs : {nuids}"
                         u"".format(name=contact.name, count=len(results),
-                        clinic=clinic.name, nuids=NUIDs))
-            OutgoingMessage(contact.default_connection, msg_text).send()
+                                   clinic=clinic.name, nuids=NUIDs))
+            send(msg_text, [contact.default_connection])
 
 
     def chunk_messages(self, content):
@@ -284,11 +284,12 @@ class App (rapidsms.apps.base.AppBase):
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
         else:
-            messages  = self.results_avail_messages(clinic, results)
+            messages = self.results_avail_messages(clinic, results)
             if messages:
                 self.send_messages(messages)
-                self._mark_results_pending(results, (msg.connection
-                                       for msg in messages))
+                self._mark_results_pending(
+                    results,
+                    [msg.connection for msg in messages])
 
     def send_printers_pending_results(self, clinic):
         """
@@ -439,10 +440,11 @@ class App (rapidsms.apps.base.AppBase):
 
     def results_avail_messages(self, clinic, results):
         '''
-        Returns clinic workers registered to receive results notification at this clinic.
+        Returns clinic workers registered to receive
+        results notification at this clinic.
         '''
-        contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+        contacts = Contact.active.filter(
+            Q(location=clinic) | Q(location__parent=clinic),
             Q(types=const.get_clinic_worker_type())).distinct()
         if not contacts:
             self.warning("No contacts registered to receiver results at %s! "
@@ -467,8 +469,9 @@ class App (rapidsms.apps.base.AppBase):
         else:
             return None
 
-    def send_messages (self, messages):
-        for msg in messages:  msg.send()
+    def send_messages(self, messages):
+        for msg in messages:
+            msg.send()
 
 def days_ago (d):
     return (date.today() - d).days
