@@ -83,7 +83,7 @@ DEATH_ALREADY_REGISTERED = ("Death for mother with ID %(unique_id)s and type  %(
 REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a follow-up visit.")
 REMINDER_NON_EMERGENCY_REFERRAL = _("Mother named %(name)s with ID # %(unique_id)s should visit hospital %(loc)s as referred.")
 REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother with ID %(unique_id)s referred on %(date)s from %(loc)s")
-REMINDER_UPCOMING_DELIVERY = "Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit."
+REMINDER_UPCOMING_DELIVERY = _("Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit.")
 REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a postpartum visit in %(num)s days.")
 REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue to visit health center %(loc)s for a postpartum visit.")
 REMINDER_SYP_TREATMENT_DUE = _("This is a reminder: Mother named %(name)s should visit the health center for follow-up on %(date)s")
@@ -105,4 +105,4 @@ SYP_TREATMENT_COMPLETE = _("Thanks %(name)s. A Syphilis Treatment has been recor
 
 # MISC OUTBOUND SCHEDULED MESSAGES
 INACTIVE_CONTACT = _("Our records indicate that you have not sent a single SMS for 14 days. You will be contacted on this matter soon by a representative")
-EXPECTED_EDDS = _("We want to inform you that according to our records, your clinic should expect %(edd_count)s of deliveries in the next 7 days. From SMGL/mUbumi")
+EXPECTED_EDDS = _("We want to inform you that according to our records, your clinic should expect %(edd_count)s deliveries in the next 7 days. From SMGL/mUbumi")

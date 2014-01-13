@@ -1,12 +1,15 @@
 from rapidsms.models import Contact, Connection
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 from mwana.apps.locations.models import Location
 from smscouchforms.models import FormReferenceBase
+from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
 import datetime
+import ntpath
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
@@ -90,6 +93,21 @@ class PregnantMother(models.Model):
 
     reminded = models.BooleanField(default=False)
 
+    def get_field_value_mapping(self):
+        mapped_text = "MotherID={self.uid}, Name={self.first_name} \
+        {self.last_name}, LMP={lmp}, EDD={edd}, NVD={nvd}, \
+        Visit Reason={visit_reasons}, Risk Reason={risk_reasons}, \
+        Location={self.location},  Zone={self.zone.name}".format(
+            self=self,
+            visit_reasons=self.get_reason_for_visit_display(),
+            risk_reasons=", ".join(self.get_risk_reasons()),
+            lmp=self.lmp.strftime('%d %b %Y') if self.lmp else None,
+            edd=self.edd.strftime('%d %b %Y') if self.edd else None,
+            nvd=self.next_visit.strftime('%d %b %Y') if self.next_visit else
+            None
+        )
+        return mapped_text
+
     @property
     def has_delivered(self):
         before_edd = self.edd - datetime.timedelta(days=60)
@@ -119,6 +137,13 @@ class PregnantMother(models.Model):
             if self.get_risk_reason(c):
                 yield c
 
+    def has_risk_reasons(self):
+        risk_reasons = [reason for reason in self.get_risk_reasons()]
+        if not risk_reasons or risk_reasons == ['none']:
+            return False
+        else:
+            return True
+
     def get_laycounselors(self):
         """
         Given a mother, get the lay counselors who should be notified about
@@ -132,10 +157,16 @@ class PregnantMother(models.Model):
             location=self.zone,
             is_active=True)
 
-    def __unicode__(self):
-        return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name,
-                                           self.uid)
 
+    def get_gestational_age(self):
+        pass
+
+    def __unicode__(self):
+        return 'Mother: %s %s, UID: %s' % (
+            self.first_name,
+            self.last_name,
+            self.uid
+        )
 
 class MotherReferenceBase(models.Model):
 
@@ -168,7 +199,6 @@ class FacilityVisit(models.Model):
     (Which facility she went to, when she did so, etc)
     """
     created_date = models.DateTimeField(null=True, blank=True)
-
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
     location = models.ForeignKey(
         Location, help_text="The location of this visit")
@@ -176,7 +206,6 @@ class FacilityVisit(models.Model):
         Location, help_text="The district for this location",
         null=True, blank=True,
         related_name="district_location")
-
     visit_date = models.DateField()
     visit_type = models.CharField(max_length=255, help_text="ANC or POS visit",
                                   choices=VISIT_TYPE_CHOICES,
@@ -199,6 +228,37 @@ class FacilityVisit(models.Model):
                                    choices=POS_STATUS_CHOICES,
                                    null=True, blank=True)
     referred = models.BooleanField(default=False)
+
+    def get_field_value_mapping(self):
+        # The edd only makes sense for ANC visits and if not set on the
+        # facility visit object, we will look at the mother edd.
+        if self.visit_type.lower() == "anc":
+            edd = self.edd or self.mother.edd
+            data = {'self': self,
+                    'visit_type': self.get_visit_type_display(),
+                    'visit_reason': self.get_reason_for_visit_display(),
+                    'nvd': self.next_visit.strftime('%d %b %Y')
+                    if self.next_visit else None,
+                    'visit_date': self.visit_date.strftime('%d %b %Y'),
+                    'edd': edd.strftime('%d %b %Y') if edd else ' '}
+            mapped_text = "MotherID={self.mother.uid}, Location={self.location}\
+            ,  Visit Type={visit_type}, Reason for Visit={visit_reason},\
+            Visit Date={visit_date}, Next Visit Date={nvd}, EDD={edd}".format(
+                **data
+            )
+        else:
+            data = {'self': self,
+                    'visit_type': self.get_visit_type_display(),
+                    'mother_status': self.get_mother_status_display(),
+                    'baby_status': self.get_baby_status_display(),
+                    'visit_date': self.visit_date.strftime('%d %b %Y')
+                    if self.visit_date else None,
+                    'nvd': self.next_visit.strftime('%d %b %Y')
+                    if self.next_visit else None,
+                    }
+            mapped_text = "MotherID={self.mother.uid}, Location={self.location}, Visit Date={visit_date}, Visit Type={visit_type},\
+            Mother Status={mother_status}, Baby Status={baby_status}, Next Visit Date={nvd}, Referred={self.referred}".format(**data)
+        return mapped_text
 
     def is_latest_for_mother(self):
         return FacilityVisit.objects.filter(mother=self.mother)\
@@ -244,7 +304,8 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
     )
 
     responded_on = models.DateTimeField(
-        auto_now_add=True, help_text="Date the response happened")
+        auto_now_add=True, help_text="Date the response happened"
+        )
     ambulance_request = models.ForeignKey(
         AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
@@ -317,7 +378,8 @@ class Referral(FormReferenceBase, MotherReferenceBase):
     amb_req = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
 
     def set_reason(self, code, val=True):
-        assert code in self.REFERRAL_REASONS, "%s is not a valid referral reason" % code
+        assert code in self.REFERRAL_REASONS, "%s is not a valid \
+        referral reason" % code
         setattr(self, "reason_%s" % code, val)
 
     def get_reason(self, code):
@@ -395,6 +457,29 @@ class Referral(FormReferenceBase, MotherReferenceBase):
                 return 'no-resp-no-out'
         return ''
 
+    def amb_responders(self):
+        try:
+            amb_responders = ", ".join(
+                amb_resp.responder.name for amb_resp in self.amb_req.ambulanceresponse_set.all())
+        except AttributeError:
+            return ""
+        else:
+            return amb_responders
+
+    @property
+    def date_outcome(self):
+        if self.mother_outcome:
+            refout_message = "refout %s" % self.mother_uid
+            try:
+                message = Message.objects.filter(
+                    text__istartswith=refout_message)[0]
+            except IndexError:
+                return ""
+            else:
+                return message.date
+        else:
+            return ""
+
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
@@ -406,6 +491,7 @@ class PreRegistration(models.Model):
         (const.CTYPE_LAYCOUNSELOR, 'Community Based Agent'),
         (const.CTYPE_TRIAGENURSE, 'Triage Nurse'),
         (const.CTYPE_DATACLERK, 'Data Clerk'),
+        (const.CTYPE_INCHARGE, 'In Charge'),
         ('worker', 'Clinic Worker'),
         ('DHO', 'District Health Officer'),
         ('DMHO', 'District mHealth Officer'),
@@ -425,7 +511,9 @@ class PreRegistration(models.Model):
     zone = models.CharField(
         max_length=20, help_text="User Zone (optional)", blank=True, null=True)
     language = models.CharField(
-        max_length=255, help_text="Preferred Language", default="english",
+        max_length=255,
+        help_text="Preferred Language",
+        default="english",
         choices=LANGUAGES_CHOICES)
     has_confirmed = models.BooleanField(
         default=False, help_text="Has this User confirmed their registration?")
@@ -454,6 +542,22 @@ class BirthRegistration(FormReferenceBase):
     location = models.ForeignKey(Location, null=True,
                                  related_name='birth_location')
 
+    def get_field_value_mapping(self):
+        if self.mother:
+            mother_id = self.mother.uid
+        else:
+            mother_id = None
+
+        mapped_text = "MotherID={smh_id}, Gender={gender}, Date={date},\
+         Place of Birth={place}, Complications={self.location}, \
+         Number of Children={self.number}".format(
+            self=self,
+            smh_id=mother_id,
+            date=self.date.strftime('%d %b %Y'),
+            gender=self.get_gender_display(
+            ).title(),
+            place=self.get_place_display().title())
+        return mapped_text
 
 PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
@@ -476,6 +580,18 @@ class DeathRegistration(FormReferenceBase):
     location = models.ForeignKey(Location, null=True,
                                  related_name='death_location')
 
+    def get_field_value_mapping(self):
+        text = 'Date={date}, Person={person}, Place of Death={place}'.format(
+            date=self.date.strftime('%d %b %Y'),
+            person=self.get_person_display().title(),
+            place=self.get_place_display().title(),
+        )
+
+        if self.unique_id:
+            text = "MotherID={unique_id}, {text}".format(
+                unique_id=self.unique_id, text=text)
+
+        return text
 
 REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
                          ("pos", "POS Next Visit Date"),
@@ -514,6 +630,13 @@ class ToldReminder(FormReferenceBase, MotherReferenceBase):
     contact = models.ForeignKey(Contact, null=True)
     date = models.DateTimeField()
     type = models.CharField(max_length=3, choices=TOLD_TYPE_CHOICES)
+
+    def get_field_value_mapping(self):
+        return "MotherID={mother_id}, date={date_told}, Told Type={told_type}"\
+            .format(mother_id=self.mother.uid,
+                    date_told=self.date.strftime('%d %b %Y'),
+                    told_type=self.get_type_display()
+                    )
 
 
 SYPHILIS_TEST_RESULT_CHOICES = (
@@ -558,3 +681,40 @@ class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
     def is_latest_for_mother(self):
         return SyphilisTreatment.objects.filter(mother=self.mother)\
             .order_by("-date")[0] == self
+
+
+class Suggestion(models.Model):
+
+    """
+    Database representation of a story that also acts as a comment when
+    attatched to an existing story"""
+    title = models.CharField(max_length=255)
+    authors = models.ManyToManyField(User)
+    created_time = models.DateTimeField(auto_now_add=True)
+    last_edited_time = models.DateTimeField(auto_now=True)
+    parent_suggestion = models.ForeignKey('self', null=True, blank=True)
+    text = models.TextField()
+
+    def get_authors_names(self):
+
+        return ", ".join([user.username for user in self.authors.all()])
+
+    class Meta:
+        ordering = ('-last_edited_time', '-created_time', )
+
+    def __unicode__(self):
+        return self.title
+
+
+class FileUpload(models.Model):
+    suggestion = models.ForeignKey(Suggestion, related_name="attached_files")
+    posted_by = models.ForeignKey(User)
+    created_time = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(max_length=255, upload_to="attachments", null=True)
+
+    def __unicode__(self):
+        return self.original_name()
+
+    def original_name(self):
+        head, tail = ntpath.split(self.file.file.name)
+        return tail or ntpath.basename(head)

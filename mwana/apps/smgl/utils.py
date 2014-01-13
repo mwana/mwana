@@ -1,6 +1,8 @@
 #Values that are used to indicate 'no answer' in fields of a form (especially in the case of optional values)
 import csv
 import datetime
+import urllib
+from django.core.urlresolvers import reverse
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.query import QuerySet
@@ -12,11 +14,70 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.contrib.messagelog.models import Message, DIRECTION_CHOICES
 from mwana.apps.smgl import const
 import string
+import xlwt
+
 NONE_VALUES = ['none', 'n', None, '']
 
 
 class DateFormatError(ValueError):  pass
 
+
+def build_url(*args, **kwargs):
+    get = kwargs.pop('get', {})
+    url = reverse(*args, **kwargs)
+    if get:
+        url += '?' + urllib.urlencode(get)
+    return url
+
+def excel_export_header(worksheet, row_index=0, selected_indicators=[], selected_level=None,
+                        additional_filters=None, start_date=None, end_date=None):
+    if selected_level:
+        location_level = "%s: %s" %(selected_level.type.singular.title(), selected_level.name)
+    else:
+        location_level = "National"
+    start_date = start_date.strftime('%m/%d/%y') if start_date else ''
+    end_date = end_date.strftime('%m/%d/%y') if end_date else ''
+    
+    bold_style = xlwt.easyxf('font: bold 1')
+    date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+    heading_style = xlwt.easyxf('font: bold 1, height 350; align: vert center; align: horiz center;')
+    worksheet.write_merge(row_index, row_index, 0, 1, 'mUbumi Data Export', heading_style)
+    
+    worksheet.col(0).width = 30*256
+    worksheet.col(1).width = 22*256
+    worksheet.row(row_index).height = 500 
+    
+    row_index += 2
+    worksheet.write(row_index, 0, 'Export Date:', bold_style)
+    worksheet.write(row_index, 1, datetime.datetime.now().date(), date_format)
+    
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Indicators:', bold_style)
+    worksheet.write(row_index, 1, ", ".join(selected_indicators))
+    
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Level:', bold_style)
+    worksheet.write(row_index, 1, location_level)
+    
+    if additional_filters:
+        row_index += 1
+        worksheet.write(row_index, 0, 'Additional Filters:', bold_style)
+        worksheet.write(row_index, 1, additional_filters)
+        
+    row_index += 1
+    worksheet.write(row_index, 0, 'Selected Timeframe:', bold_style)
+    worksheet.write(row_index, 1, " - ".join([start_date, end_date]))
+    
+    row_index += 1
+    return worksheet, row_index
+
+def write_excel_columns(worksheet, row_index, column_headers):
+    bold_style = xlwt.easyxf('font: bold 1')
+    for column_header, index in enumerate(column_headers):
+        worksheet.write(row_index, column_header, index, bold_style)
+    
+    row_index += 1  
+    return worksheet, row_index
 
 def get_date(form, day_field, month_field, year_field):
     parts = [form.xpath('form/%s' % field) for field in (day_field, month_field, year_field)]
@@ -34,7 +95,28 @@ def get_date(form, day_field, month_field, year_field):
     except ValueError as e:
         raise DateFormatError(str(e))
 
-
+def get_location_and_parents_types(location, facility_types={}):
+    """Returns a dictionary mapping the location to its type including 
+    all its ancestor locations mapped to their types in no particular order.
+    The returned dictionary has the location type slugs which are plural for province/district/zone
+    so expect {'districts': 'xxxx', 'provinces': 'yyyyy'}"""
+    facility_types[location.type.slug] = location.name
+    if location.parent:
+        return get_location_and_parents_types(location.parent, facility_types)
+    else:
+        return facility_types
+    
+def get_district_facility_zone(location):
+    facility = None
+    location_parents_types = get_location_and_parents_types(location)
+    facility = location_parents_types.get('rural_health_centre', None)
+    if not facility:
+        location_parents_types.get('urban_health_centre', None)
+        
+    zone = location_parents_types.get('zone', None)
+    district = location_parents_types.get('districts', None)
+    return district, facility, zone
+        
 def make_date(form, dd, mm, yy, is_optional=False):
     """
     Returns a tuple: (datetime.date, ERROR_MSG)
@@ -56,6 +138,13 @@ def make_date(form, dd, mm, yy, is_optional=False):
         return None, const.DATE_YEAR_INCORRECTLY_FORMATTED
 
     return date, None
+
+def get_time_range(limit_time, seconds):
+    #Returns seconds after and before a given datetime
+    time_back = limit_time - datetime.timedelta(seconds=seconds)
+    time_ahead = limit_time + datetime.timedelta(seconds=seconds)
+    
+    return time_back, time_ahead
 
 
 def get_location(slug):
