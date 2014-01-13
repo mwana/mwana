@@ -1,6 +1,6 @@
 {% extends  "layout.html" %}
 
-{% block title %}SMS Records - {{ block.super }}{% endblock %}
+{% block title %}PNC-Report- {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -29,14 +29,13 @@
 {% block content %}
 
 <div class="statistics module">
-<h2>SMS Records</h2>
-  <form action="" method="GET" id="sms-records-form" >
+<h2>PNC Report</h2>
+  <form action="" method="GET" id="anc-delivery-form" >
     <table>
       <thead>
         <tr>
           <th colspan="2">Period</th>
           <th colspan="3">Location</th>
-          <th>Message</th>
         </tr>
         <tr>
           <th>Start</th>
@@ -44,7 +43,7 @@
           <th>Province</th>
           <th>District</th>
           <th>Facility</th>
-          <th>Keyword</th>
+          <th>Option</th>
         </tr>
       </thead>
       <tbody>
@@ -70,8 +69,8 @@
              {{ form.facility }}
            </td>
            <td>
-             {{ form.keyword.errors}}
-             {{ form.keyword }}
+             {{ form.filter_option.errors}}
+             {{ form.filter_option }}
            </td>
         </tr>
       </tbody>
@@ -80,7 +79,7 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   {{ form.media.js }}
-{{ records_table.as_html }}
+{{ pnc_report_table.as_html }}
 </div>
 
   <script type="text/javascript">

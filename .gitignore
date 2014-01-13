@@ -15,3 +15,9 @@ STATICFILES/*
 static_files/*
 mwana/bu-dev/*
 .idea*
+mwana/help.xls
+mwana/npm-debug.log
+mwana/xforms/back_1.xml
+mwana/xforms/back_2.xml
+mwana/xforms/drop.xml
+mwana/xforms/pick.xml

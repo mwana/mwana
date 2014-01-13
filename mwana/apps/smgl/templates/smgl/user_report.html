@@ -1,6 +1,7 @@
 {% extends  "layout.html" %}
+{% load djtables_tags %}
 
-{% block title %}SMS Records - {{ block.super }}{% endblock %}
+{% block title %}User Report - {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -9,7 +10,6 @@
 {{ form.media.css }}
 
 {% endblock %}
-
 
 {% block javascripts %}
   <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
@@ -23,28 +23,31 @@
 {% endblock %}
 
 {% block page_tabs %}
- {% include "smgl/includes/message_panel_subnav.html" %}
+ {% include "smgl/includes/statistics_subnav.html" %}
 {% endblock %}
 
 {% block content %}
 
 <div class="statistics module">
-<h2>SMS Records</h2>
-  <form action="" method="GET" id="sms-records-form" >
+  <h2>Filtering</h2>
+  <form action="" method="GET" >
     <table>
       <thead>
         <tr>
           <th colspan="2">Period</th>
           <th colspan="3">Location</th>
-          <th>Message</th>
         </tr>
         <tr>
           <th>Start</th>
           <th>End</th>
+          {% if not district %}
           <th>Province</th>
+          {% endif %}
           <th>District</th>
+          {% if district %}
           <th>Facility</th>
-          <th>Keyword</th>
+          {% endif %}
+
         </tr>
       </thead>
       <tbody>
@@ -65,14 +68,10 @@
             {{ form.district.errors}}
             {{ form.district }}
           </td>
-           <td>
-             {{ form.facility.errors}}
-             {{ form.facility }}
-           </td>
-           <td>
-             {{ form.keyword.errors}}
-             {{ form.keyword }}
-           </td>
+          <td>
+            {{ form.facility.errors}}
+            {{ form.facility }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -80,7 +79,10 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   {{ form.media.js }}
-{{ records_table.as_html }}
+  <h2>Reporting Period From {{ start_date|date:"SHORT_DATE_FORMAT" }} To {{ end_date|date:"SHORT_DATE_FORMAT" }} </h2>
+  <div id="records">
+    {{ user_report_table.as_html }}
+  </div>
 </div>
 
   <script type="text/javascript">
@@ -89,10 +91,6 @@
             query.province = $('#id_province_1').val();
         }
         $('#id_district_0').djselectable('option', 'prepareQuery', newDistrictParameters);
-        function newFacilityParameters(query) {
-            query.district = $('#id_district_1').val();
-        }
-        $('#id_facility_0').djselectable('option', 'prepareQuery', newFacilityParameters);
 
     });
 </script>
