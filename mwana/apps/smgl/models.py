@@ -25,12 +25,18 @@ POS_STATUS_CHOICES = (
 
 
 class XFormKeywordHandler(models.Model):
+
     """
     System configuration that links xform keywords to functions for post
     processing.
     """
-    keyword = models.CharField(max_length=255, help_text="The keyword that you want to associate with this handler.")
-    function_path = models.CharField(max_length=255, help_text="The full path to the handler function. E.g: 'mwana.apps.smgl.app.birth_registration'")
+    keyword = models.CharField(
+        max_length=255,
+        help_text="The keyword that you want to associate with this handler.")
+    function_path = models.CharField(
+        max_length=255,
+        help_text="The full path to the handler function. E.g: \
+        'mwana.apps.smgl.app.birth_registration'")
 
     def __unicode__(self):
         return self.keyword.upper()
@@ -40,6 +46,7 @@ class XFormKeywordHandler(models.Model):
 
 
 class PregnantMother(models.Model):
+
     """
     Representation of a pregnant mother in SMGL.
     """
@@ -55,16 +62,21 @@ class PregnantMother(models.Model):
     }
 
     created_date = models.DateTimeField(null=True, blank=True)
-    contact = models.ForeignKey(Contact, help_text="The contact that registered this mother")
+    contact = models.ForeignKey(
+        Contact, help_text="The contact that registered this mother")
     location = models.ForeignKey(Location)
     first_name = models.CharField(max_length=160)
     last_name = models.CharField(max_length=160)
     uid = models.CharField(max_length=160, unique=True,
-                           help_text="The Unique Identifier associated with this mother")
-    lmp = models.DateField(null=True, blank=True, help_text="Last Menstrual Period")
-    edd = models.DateField(help_text="Estimated Date of Delivery", null=True, blank=True)
+                           help_text="The Unique Identifier associated with \
+                           this mother")
+    lmp = models.DateField(
+        null=True, blank=True, help_text="Last Menstrual Period")
+    edd = models.DateField(
+        help_text="Estimated Date of Delivery", null=True, blank=True)
     next_visit = models.DateField(help_text="Date of next visit")
-    reason_for_visit = models.CharField(max_length=160, choices=REASON_FOR_VISIT_CHOICES)
+    reason_for_visit = models.CharField(
+        max_length=160, choices=REASON_FOR_VISIT_CHOICES)
     zone = models.ForeignKey(Location, null=True, blank=True,
                              related_name="pregnant_mother_zones")
 
@@ -83,12 +95,13 @@ class PregnantMother(models.Model):
         before_edd = self.edd - datetime.timedelta(days=60)
         after_edd = self.edd + datetime.timedelta(days=60)
         try:
-            birth = self.birthregistration_set.filter(date__range=[before_edd, after_edd])[0]
+            birth = self.birthregistration_set.filter(
+                date__range=[before_edd, after_edd])[0]
         except IndexError:
             return False
         else:
             return True
-        
+
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
@@ -113,17 +126,19 @@ class PregnantMother(models.Model):
         """
         # TODO: determine exactly how this should work.
         return Contact.objects.filter(
-                types=ContactType.objects.get(
-                            slug__iexact=const.CTYPE_LAYCOUNSELOR
-                            ),
-                location=self.zone,
-                is_active=True)
+            types=ContactType.objects.get(
+                slug__iexact=const.CTYPE_LAYCOUNSELOR
+            ),
+            location=self.zone,
+            is_active=True)
 
     def __unicode__(self):
-        return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name, self.uid)
+        return 'Mother: %s %s, UID: %s' % (self.first_name, self.last_name,
+                                           self.uid)
 
 
 class MotherReferenceBase(models.Model):
+
     """
     An abstract base class to hold mothers. Provides some shared functionality
     and consistent field naming.
@@ -147,6 +162,7 @@ class MotherReferenceBase(models.Model):
 
 
 class FacilityVisit(models.Model):
+
     """
     This is a store used to indicate the visit activity of the mother
     (Which facility she went to, when she did so, etc)
@@ -154,27 +170,34 @@ class FacilityVisit(models.Model):
     created_date = models.DateTimeField(null=True, blank=True)
 
     mother = models.ForeignKey(PregnantMother, related_name="facility_visits")
-    location = models.ForeignKey(Location, help_text="The location of this visit")
-    district = models.ForeignKey(Location, help_text="The district for this location",
-                                 null=True, blank=True,
-                                 related_name="district_location")
+    location = models.ForeignKey(
+        Location, help_text="The location of this visit")
+    district = models.ForeignKey(
+        Location, help_text="The district for this location",
+        null=True, blank=True,
+        related_name="district_location")
 
     visit_date = models.DateField()
     visit_type = models.CharField(max_length=255, help_text="ANC or POS visit",
                                   choices=VISIT_TYPE_CHOICES,
                                   default='anc')
-    reason_for_visit = models.CharField(max_length=255, help_text="The reason the mother visited the clinic",
-                                        choices=REASON_FOR_VISIT_CHOICES)
-    edd = models.DateField(null=True, blank=True, help_text="Updated Mother's Estimated Date of Deliver")
+    reason_for_visit = models.CharField(
+        max_length=255, help_text="The reason the mother visited the clinic",
+        choices=REASON_FOR_VISIT_CHOICES)
+    edd = models.DateField(
+        null=True, blank=True,
+        help_text="Updated Mother's Estimated Date of Deliver")
     next_visit = models.DateField(null=True, blank=True)
-    contact = models.ForeignKey(Contact, help_text="The contact that sent the information for this mother")
+    contact = models.ForeignKey(
+        Contact,
+        help_text="The contact that sent the information for this mother")
     reminded = models.BooleanField(default=False)
     mother_status = models.CharField(max_length=4, help_text="Mother's Status",
                                      choices=POS_STATUS_CHOICES,
                                      null=True, blank=True)
     baby_status = models.CharField(max_length=4, help_text="Baby's Status",
-                                     choices=POS_STATUS_CHOICES,
-                                     null=True, blank=True)
+                                   choices=POS_STATUS_CHOICES,
+                                   null=True, blank=True)
     referred = models.BooleanField(default=False)
 
     def is_latest_for_mother(self):
@@ -195,12 +218,22 @@ class FacilityVisit(models.Model):
 
 
 class AmbulanceRequest(FormReferenceBase, MotherReferenceBase):
+
     """
     Bucket for ambulance request info
     """
-    ambulance_driver = models.ForeignKey(Contact, null=True, blank=True, help_text="The Ambulance Driver/Dispatcher who was contacted", related_name="ambulance_driver")
-    triage_nurse = models.ForeignKey(Contact, null=True, blank=True, help_text="The Triage Nurse who was contacted", related_name="triage_nurse")
-    other_recipient = models.ForeignKey(Contact, null=True, blank=True, help_text="Other Recipient of this ER", related_name="other_recipient")
+    ambulance_driver = models.ForeignKey(
+        Contact, null=True, blank=True,
+        help_text="The Ambulance Driver/Dispatcher who was contacted",
+        related_name="ambulance_driver")
+    triage_nurse = models.ForeignKey(
+        Contact, null=True, blank=True,
+        help_text="The Triage Nurse who was contacted",
+        related_name="triage_nurse")
+    other_recipient = models.ForeignKey(
+        Contact, null=True, blank=True,
+        help_text="Other Recipient of this ER",
+        related_name="other_recipient")
 
 
 class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
@@ -210,10 +243,13 @@ class AmbulanceResponse(FormReferenceBase, MotherReferenceBase):
         ('otw', 'On The Way'),
     )
 
-    responded_on = models.DateTimeField(auto_now_add=True, help_text="Date the response happened")
-    ambulance_request = models.ForeignKey(AmbulanceRequest, null=True, blank=True)
+    responded_on = models.DateTimeField(
+        auto_now_add=True, help_text="Date the response happened")
+    ambulance_request = models.ForeignKey(
+        AmbulanceRequest, null=True, blank=True)
     response = models.CharField(max_length=60, choices=ER_RESPONSE_CHOICES)
-    responder = models.ForeignKey(Contact, help_text="The contact that responded to this ER event")
+    responder = models.ForeignKey(
+        Contact, help_text="The contact that responded to this ER event")
 
 
 REFERRAL_STATUS_CHOICES = (("em", "emergent"), ("nem", "non-emergent"))
@@ -221,7 +257,7 @@ REFERRAL_OUTCOME_CHOICES = (("stb", "stable"), ("cri", "critical"),
                             ("dec", "deceased"), ("oth", "other"))
 DELIVERY_MODE_CHOICES = (("vag", "vaginal"), ("csec", "c-section"),
                          ("pp", "post-partum"), ("ref", "new_referral"),
-                            ("oth", "other"))
+                        ("oth", "other"))
 
 
 class Referral(FormReferenceBase, MotherReferenceBase):
@@ -333,7 +369,8 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         if self.status == 'em':
             if self.amb_req:
                 try:
-                    response = self.amb_req.ambulanceresponse_set.all()[0].response
+                    response = self.amb_req.ambulanceresponse_set.all()[
+                        0].response
                 except:
                     response = None
             else:
@@ -376,22 +413,29 @@ class PreRegistration(models.Model):
         ('AM', 'Ambulance'),
     )
     contact = models.ForeignKey(Contact, null=True, blank=True)
-    phone_number = models.CharField(max_length=255, help_text="User phone number", unique=True)
+    phone_number = models.CharField(
+        max_length=255, help_text="User phone number", unique=True)
     unique_id = models.CharField(max_length=255, unique=True,
                                  help_text="The user's Unique ID")
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255, null=True, blank=True)
     location = models.ForeignKey(Location)
-    title = models.CharField(max_length=255, help_text="User title", choices=PRE_REG_TITLE_CHOICES)
-    zone = models.CharField(max_length=20, help_text="User Zone (optional)", blank=True, null=True)
-    language = models.CharField(max_length=255, help_text="Preferred Language", default="english", choices=LANGUAGES_CHOICES)
-    has_confirmed = models.BooleanField(default=False, help_text="Has this User confirmed their registration?")
+    title = models.CharField(
+        max_length=255, help_text="User title", choices=PRE_REG_TITLE_CHOICES)
+    zone = models.CharField(
+        max_length=20, help_text="User Zone (optional)", blank=True, null=True)
+    language = models.CharField(
+        max_length=255, help_text="Preferred Language", default="english",
+        choices=LANGUAGES_CHOICES)
+    has_confirmed = models.BooleanField(
+        default=False, help_text="Has this User confirmed their registration?")
 
 GENDER_CHOICES = (("bo", "boy"), ("gi", "girl"))
 PLACE_CHOICES = (("h", "home"), ("f", "facility"))
 
 
 class BirthRegistration(FormReferenceBase):
+
     """
     Database representation of a birth registration form
     """
@@ -415,6 +459,7 @@ PERSON_CHOICES = (("ma", "mother"), ("inf", "infant"))
 
 
 class DeathRegistration(FormReferenceBase):
+
     """
     Database representation of a death registration form
     """
@@ -441,6 +486,7 @@ REMINDER_TYPE_CHOICES = (("nvd", "Next Visit Date"),
 
 
 class ReminderNotification(MotherReferenceBase):
+
     """
     Any notifications sent to user
     """
@@ -460,6 +506,7 @@ TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
 
 
 class ToldReminder(FormReferenceBase, MotherReferenceBase):
+
     """
     Database representation of a told reminder form. Tracks records
     of users telling/reminder Mothers of important data.
@@ -470,41 +517,44 @@ class ToldReminder(FormReferenceBase, MotherReferenceBase):
 
 
 SYPHILIS_TEST_RESULT_CHOICES = (
-                     ("p", 'Positive'),
-                     ("n", "Negative")
-                     )
+    ("p", 'Positive'),
+    ("n", "Negative")
+)
 
 SYPHILIS_SHOT_NUMBER_CHOICES = (
-                     ("s1", 'S1'),
-                     ("s2", "S2"),
-                     ("s3", 'S3')
-                     )
+    ("s1", 'S1'),
+    ("s2", "S2"),
+    ("s3", 'S3')
+)
 
 
 class SyphilisTest(FormReferenceBase, MotherReferenceBase):
+
     """
     Database representation of a syphilis test form. Tracks test results.
     """
     date = models.DateField()
     result = models.CharField(max_length=1,
                               choices=SYPHILIS_TEST_RESULT_CHOICES)
-    district = models.ForeignKey(Location, help_text="The district for this location",
-                                 null=True, blank=True)
+    district = models.ForeignKey(
+        Location, help_text="The district for this location",
+        null=True, blank=True)
 
 
 class SyphilisTreatment(FormReferenceBase, MotherReferenceBase):
+
     """
     Database representation of a syphilis treatment form. Tracks treatment
     """
     date = models.DateField()
     shot_number = models.CharField(max_length=2,
-                              choices=SYPHILIS_SHOT_NUMBER_CHOICES)
+                                   choices=SYPHILIS_SHOT_NUMBER_CHOICES)
     next_visit_date = models.DateField(null=True, blank=True)
     reminded = models.BooleanField(default=False)
-    district = models.ForeignKey(Location, help_text="The district for this location",
-                                 null=True, blank=True)
+    district = models.ForeignKey(
+        Location, help_text="The district for this location",
+        null=True, blank=True)
 
     def is_latest_for_mother(self):
         return SyphilisTreatment.objects.filter(mother=self.mother)\
             .order_by("-date")[0] == self
-
