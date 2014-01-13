@@ -2,82 +2,158 @@
 {% load forms_tags %}
 
 {% block title %}Send SMS Messages - {{ block.super }}{% endblock %}
-
-{% block javascripts %}
-<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
-{{ block.super }}
-{% endblock %}
-
 {% block stylesheets %}
 {{ block.super }}
+
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap.min.css" />
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+<script type="text/javascript">
+
+    function inform(){
+        return confirm('Are you sure you want to');
+    }
+    function showNumberOfCharactersTyped(){
+        var textArea = document.getElementById("message")
+        typed = textArea.textLength
+        remaining = 160 - typed
+        var msgLenghthDiv = document.getElementById("msgLenghthDiv")
+        start = "<div style='padding-bottom: 0.2em' id='msgLenghthDiv'>"
+        startBadge = "<span class='badge badge-success'>"
+        endBadge = "</span>"
+        end = "</div>"
+        if (remaining >=  0 && remaining < 140){
+            msgLenghthDiv.outerHTML =  start + startBadge + typed + endBadge
+                + " typed. " + startBadge + remaining + endBadge + " remaining." + end
+        }
+        else{
+            over = " over."
+            if(remaining > 0){
+                over = " remaining."
+            }
+            startBadge = "<span class='badge badge-warning'>"
+            msgLenghthDiv.outerHTML =  start + startBadge +  typed + endBadge
+                + " typed. " + startBadge + Math.abs(remaining) + endBadge + over + end
+        }
+
+
+    }
+    function limitCharacters(){
+        var textArea = document.getElementById("message")
+        typed = textArea.textLength
+        return typed <= 160
+
+    }
+
+    function checkform(form){
+        confirmed = document.getElementById("confirmed").value
+        if(form.message.value.trim() == ""){
+            alert("Please enter a message to send");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length > 160 && confirmed == 'None'){
+            alert("The message should not exceed 160 characters");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length < 15 && confirmed == 'None'){
+            return confirm('Your massage is too short. Are you sure?')
+        }
+        return confirm('Are you sure?');
+    }
+</script>
+
+{% endblock %}
+
+
 
 {% endblock %}
 
 {% block content %}
 
 <div class="left">
-    <form name="getValues" action="" method="POST" onsubmit="return checkform(this);">
+    <form name="getValues" action="" method="POST" onsubmit="return checkform(this);">{% csrf_token %}
         <div class="module">
 
             <h2>Send SMS Messages</h2>
             <br>
             <table border="0"  bgcolor="#F8F8F8"  width="100%">
-                
+
                 <tbody>
-                    <tr style="border: 0px;">
-                        <td style="border: 0px">Select worker type:</td>
-                        <td style="border: 0px">
-                            {% autoescape off %}
-                            {{worker_types}}
-                            {% endautoescape %}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 0px">Province:</td>
-                        <td style="border: 0px">{% autoescape off %}
-                            {{rpt_provinces}}
-                            {% endautoescape %}&nbsp;
-                            or District:{% autoescape off %}
-                            {{rpt_districts}}
-                            {% endautoescape %}&nbsp;
-                            or Facility:{% autoescape off %}
-                            {{rpt_facilities}}
-                            {% endautoescape %}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 0px">[Optional] Phone Pattern:</td>
-                        <td style="border: 0px">
-                            <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
-                            &nbsp;E.g. +26097, +26096, +260966700345</td>
-                    </tr>
-                    <tr>
-                        {% if is_report_admin %}
-                        <td style="border: 0px">Select Implementer:</td>
-                        <td style="border: 0px">{% autoescape off %}
-                            {{rpt_group}}
-                            {% endautoescape %}
-                        </td>
-                        {%endif%}
-                    </tr>
+                <thead>
+                <th>Worker Type</th>
+                <th>Province</th>
+                <th>District</th>
+                <th>Facility</th>
+                </thead>
+                <tr>
+
+                   <td>{% autoescape off %}
+                        {{ worker_types }}
+                        {% endautoescape %}
+                    </td>
+                   <td>{% autoescape off %}
+                        {{rpt_provinces}}
+                        {% endautoescape %}
+                    </td>
+                    <td>{% autoescape off %}
+                        {{rpt_districts}}
+                        {% endautoescape %}
+                    </td>
+                    <td>{% autoescape off %}
+                        {{rpt_facilities}}
+                        {% endautoescape %}
+                    </td>
+                </tr>
+                
+                <tr>                    
+                    
+                    <td style="border: 0px" colspan="4">[Optional] Phone Pattern:
+                        <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
+                        &nbsp;E.g. +26097, +26096, +260966700345.
+
+                    {% if is_report_admin %}
+                   
+                    &nbsp;&nbsp;&nbsp;&nbsp;Implementer: {% autoescape off %}
+                        {{rpt_group}}
+                        {% endautoescape %}
+                    
+                    {%endif%}                    
+                    </td>
+                </tr>
                 </tbody>
             </table>
-<p>
+            <p>
 
                 {%if confirm_message or meta_infor%}
-            <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: inherit">
+            <div id="confirm" style="background: #FFFFCC; border: 1px solid #DDDDDD; padding: 15px 5px">
                 {{confirm_message}}
                 {{ meta_infor}}
-                <input type="hidden" name="confirmed" value="{{ confirmed}}" />
+                <input type="hidden" id="confirmed" name="confirmed" value="{{ confirmed}}" />
             </div>
             {% endif %}
 
-            <p><textarea id="message" name="message" rows="4" cols="36">{{message}}</textarea> </p>
+            <p/>
+            <p>
+            <div style="padding-left: 0.3125em; padding-left: 0">
+                <textarea id="message" maxlength="160" required="" name="message" rows="4" style="width: 99%;" cols="36" onkeypress="limitCharacters" onkeyup="showNumberOfCharactersTyped()">{{message}}</textarea>
+                <div id="msgLenghthDiv"></div>
+            </div>
 
-            <input type="submit" value="     Ok     " name="SubmitValues"/>
-            <input type="submit" value="Cancel" name="cancel"/>
+            <input type="submit" class="btn btn-primary" value=" Send " name="SubmitValues"/>
+            <input type="reset" class="btn" value=" Clear " name="clear" {% ifequal confirmed "yes" %} disabled="yes"  {%  endifequal %}/>
+                   <input type="submit" class="btn" value="Cancel" name="cancel" {% ifequal confirmed "yes" %} {% else %}disabled="yes"  {%  endifequal %}/>
 
 
 
-            <div class="clear-hack"></div>
+                   <div class="clear-hack"></div>
         </div>
 
         <div class="pagination">
@@ -86,4 +162,7 @@
     </form>
 
 </div>
+<script type="text/javascript">
+    $("#rpt_group").chosen();
+</script>
 {% endblock %}

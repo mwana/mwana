@@ -227,7 +227,7 @@ SEND_LIVE_LABRESULTS = True
 
 # When set to True, incoming messages from non-standard phone numbers will be
 # ignored. E.g. +551, MTN, 440. See handle()in stringcleaning app.py
-ON_LIVE_SERVER = True
+ON_LIVE_SERVER = False
 
 # Miscellaneous slugs needed by Results160 and dependent on the data schema/
 # local environment.  You will almost certainly want to customize these in

@@ -1,0 +1,190 @@
+Acute flaccid paralysis (suspected poliomyelitis)	|||NTF05
+Cholera	|||NTF10
+Measles	|||NTF15
+Meningitis	|||NTF20
+Neonatal tetanus	|||NTF25
+Plague	|||NTF30
+Rabies	|||NTF35
+Dysentery	|||NTF40
+Typhoid fever	|||NTF45
+Yellow fever	|||NTF50
+Viral Hemorrhagic fever	|||NTF55
+Anthrax	|||NTF60
+Avian influenza (Human)	|||NTF65
+Trypanosomiasis 	|||NTF70
+Malaria case provided with anti malarial treatment	|||MLR01
+Clinical case of malaria	|||MLR05
+Confirmed case of malaria 	|||MLR10
+Clinical malaria in pregnancy	|||MLR15
+Confirmed malaria in pregnancy	|||MLR20
+Malaria laboratory tests (slide/RDT)	|||MLR25
+Ear Diseases	|||ENT05
+Nose Diseases	|||ENT10
+Throat Diseases	|||ENT15
+Asthma	|||CRN05
+Cardio-vascular diseases	|||CRN10
+Diabetes	|||CRN15
+Hypertension	|||CRN20
+Epilepsy	|||CRN25
+Sickle Cell Anaemia	|||CRN30
+Cryptococcal meningitis	|||RVD05
+Herpes zoster	|||RVD10
+Karposi sarcoma	|||RVD15
+Pneumocystic Carnii Pneumonia (PCP)	|||RVD20
+Anaemia	|||D05
+Dental Carries	|||D10
+Dental diseases: Other	|||D15
+Diarrhoea (non-bloody) 	|||D20
+Digestive system: (not infectious)	|||D25
+Eye Disease: Glaucoma	|||D30
+Eye Disease: Refractory Errors	|||D35
+Eye Disease: Spring Cattarah	|||D40
+Eye diseases (infectious)	|||D45
+Genital-Urinary diseases (except STI)	|||D50
+Intestinal worms	|||D55
+Mental Health ( Neurosis))	|||D60
+Mental Health ( Psychosis)	|||D65
+Muscular skeletal and connective tissue (not trauma)	|||D70
+Neoplasm (All types)	|||D75
+Nervous System Disorders: Other	|||D80
+Poisoning	|||D85
+Pulmonary diseases (not infectious)	|||D90
+Pyrexia of Unknown Origin (PUO)	|||D95
+Respiratory Infection: non-pneumonia	|||D100
+Respiratory Infection: pneumonia	|||D105
+Severe Diarrhoea with dehydration 	|||D110
+Severe malnutrition (new case)	|||D115
+Skin Diseases (not infectious)	|||D120
+Skin Diseases (infectious)	|||D125
+Snake Bite 	|||D130
+Substance Abuse	|||D135
+TB	|||D140
+Trauma: Road traffic accident	|||D141
+Trauma: Burns 	|||D142
+Trauma: Other Injuries, wounds	|||D144
+Bilharzia	|||D150
+Delivery Complications - sepsis	|||OBS05
+Pregnancy Complications - abortion	|||OBS10
+Genital ulcer	|||STI05
+Genital warts	|||STI10
+Inguinal bubo	|||STI15
+Male Urethritis Syndrome	|||STI20
+Pelvic Inflammatory Disease	|||STI25
+Vaginal discharge	|||STI26
+STI partner notification slips issued	|||STI30
+STI partner treated (new case)	|||STI35
+Woman newly diagnosed with breast cancer	|||CNS05
+Woman newly diagnosed with cervical cancer	|||CNS10
+Neonatal infections (all)	|||NN05
+Neonatal Prematurity	|||NN10
+Attendance child health <12 months male |||CHN1-005
+Attendance child health <12 months female |||CHN1-010
+Attendance child health 12-59 months male |||CHN1-015
+Attendance child health 12-59 months female |||CHN1-020
+Attendance from outside catchment's area |||CHN1-030
+Child 0 - 23 months weighed |||CHN2-005
+Child 24 - 59 months weighed |||CHN2-010
+Total Child <5 years |||CHN2-015
+Not gaining weight 0-23 months |||CHN2-020
+Not gaining weight 24-59 months |||CHN2-025
+Weight between -2Z & -3Z scores 0-23 months |||CHN2-035
+Weight between -2Z & -3Z scores 24-59 months |||CHN2-040
+Weight below -3Z scores 0-23 months |||CHN2-045
+Weight below -3Z scores 24-59 months |||CHN2-050
+Weight above +2Z scores 0-23 months |||CHN2-055
+Weight above +2Z scores 24-59 months |||CHN2-060
+Vitamin A supplement to 6-11 months infant |||CHN2-065
+Vitamin A supplement to 12-59 months child |||CHN2-070
+De worming dose to child 12-59 months |||CHN2-075
+Children who received insecticide-treated nets (ITNs) |||CHN2-080
+BCG dose (<1 Year) |||CHN3-005
+OPV 0 (<1 Year) |||CHN3-010
+OPV 1 (<1 Year) |||CHN3-015
+OPV 2 (<1 Year) |||CHN3-020
+OPV 3 (<1 Year) |||CHN3-025
+OPV 4 (<1 Year) |||CHN3-030
+DPT-Hib+HepB 1 (<1 Year) |||CHN3-035
+DPT-Hib+HepB 2 (<1 Year) |||CHN3-040
+DPT-Hib+HepB 3 (<1 Year) |||CHN3-045
+PCV 1 (<1 Year) |||CHN3-050
+PCV 2 (<1 Year) |||CHN3-055
+PCV 3 (<1 Year) |||CHN3-060
+RV 1 (<1 Year) |||CHN3-065
+RV 2 (<1 Year) |||CHN3-070
+Measles 1st dose (<1 Year) |||CHN3-075
+Fully Immunised (<1 Year) |||CHN3-080
+Measles 2nd dose at 18 months |||CHN3-085
+Number of days fridge non-functional |||CHN3-090
+Antenatal 1st visits total ...(Sum IRH1-015 + IRH1-020)|||IRH1-025
+Antenatal 1st visit by woman < age of 18 years|||IRH1-030
+Antenatal follow-up visits|||IRH1-035
+Total antenatal attendances ...(Sum IRH1-025 + IRH1-035)|||IRH1-040
+At least 4 ANC visits|||IRH1-045
+Antenatal attendance from outside catchment?s area|||IRH1-050
+Screened for anaemia at first ANC visit|||IRH1-055
+Antenatal client tested for syphilis|||IRH1-060
+Antenatal client tested positive for syphilis|||IRH1-065
+IPT 1|||IRH1-070
+IPT 2|||IRH1-075
+IPT 3|||IRH1-080
+ITN provided at ANC visit|||IRH1-085
+Deworning dose|||IRH1-090
+Ferrous Sulphate dose|||IRH1-095
+Folic acid dose|||IRH1-100
+Pregnancies protected by TT|||IRH1-105
+Postnatal care within 6 days of delivery|||IRH2-005
+Postnatal care between 6 days - 6 weeks|||IRH2-010
+Postnatal visits total ... ...(Sum IRH2-005 + IRH2-010)|||IRH2-115
+Vitamin A supplement to woman within 8 wks after delivery|||IRH2-120
+Attendance ANC and Postnatal total... (Sum IRH1-040 + IRH2-115)|||IRH2-125
+Attendance family planning -(New acceptors)|||IRH3-005
+Attendance family planning -Revisit|||IRH3-010
+Attendance family planning - other|||IRH3-015
+Total - Attendance family planning...(Sum IRH3-005 to IRH3-015)|||IRH3-020
+Male Condoms (# of pieces issued)|||IRH3-025
+Female Condoms (# of pieces issued)|||IRH3-030
+Combined Oral contraceptives (# of cycles issued)|||IRH3-035
+Progesterone only pill (# of cycles issued)|||IRH3-040
+Medroxyprogesterone injection|||IRH3-045
+Norethisteroneenanthate injection|||IRH3-050
+Implant|||IRH3-055
+IUCD inserted|||IRH3-060
+Sterilisation - female|||IRH3-065
+Sterilisation - male|||IRH3-070
+Normal deliveries in facility|||IRH4-005
+Assisted delivery in facility (Vacuum/Forceps)|||IRH4-010
+Caesarean section|||IRH4-015
+Institutional deliveries total ...(Sum IRH4-005 to IRH4-015)|||IRH4-020
+Deliveries by skilled personnel (Midwife/Obstetrician)|||IRH4-025
+Deliveries by other skilled personnel (Nurses, CO, ML, MO)|||IRH4-030
+Deliveries by skilled personnel (all) ...(Sum IRH4-025 to IRH4-035)|||IRH4-035
+Deliveries by other facility staff|||IRH4-040
+Deliveries in facility by trained TBA's|||IRH4-045
+Supervised deliveries total ...(IRH4-035 + IRH4-040 + IRH4-045)|||IRH4-050
+Home deliveries by trained TBA's|||IRH4-055
+Home deliveries by any TBA's|||IRH4-060
+Sepsis|||IRH4-065
+Obstructed labour|||IRH4-070
+Hypertensive disorders|||IRH4-075
+Haemorhage|||IRH4-080
+Abortion|||IRH4-085
+Ruptured uterus|||IRH4-090
+Retained placenta|||IRH4-095
+Obstetric Fistula|||IRH4-100
+Complications total ...(Sum IRH4-065 to IRH4-100)|||IRH4-105
+Maternal deaths in facility|||IRH4-110
+Manual Vacuum Aspiration for incomplete abortion|||IRH4-115
+Manual removal of placenta|||IRH4-120
+Magnesuim sulphate given for Pre-Eclampsia / Eclampsia|||IRH4-125
+IV antibiotics given for sepsis|||IRH4-130
+Live birth in facility <2500g|||IRH5-005
+Live birth in facility >=2500g|||IRH5-010
+Live births in facility total ...(Sum IRH5-005 + IRH5-010)|||IRH5-015
+Baby initiated to breast feed within an hour of birth|||IRH5-020
+Macerated still birth in facility|||IRH5-025
+Fresh still birth in facility|||IRH5-030
+Still births in facility total ... (Sum IRH5-025 + IRH5-030)|||IRH5-035
+Asphyxia|||IRH5-040
+Inpatient deaths 0 to 7days - early neonatal|||IRH5-045
+Inpatient deaths 8 to 28 days- late neonatal|||IRH5-050
+Neonatal deaths total ... (Sum IRH5-045 + IRH5-050)|||IRH5-055

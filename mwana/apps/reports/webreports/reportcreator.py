@@ -8,6 +8,7 @@ from datetime import date
 from datetime import datetime
 from datetime import timedelta
 from django.db import connection
+from django.db.models import F
 from django.db.models import Q
 from django.db.models import Sum
 from mwana import const
@@ -175,12 +176,10 @@ class Results160Reports:
                     notification_status='sent')
 
     def get_avg_dbs_turnaround_time(self, location):
-        results = Result.objects.filter(Q(collected_on__lt=self.dbsr_enddate) |
-                                        Q(collected_on=self.dbsr_enddate),
-                                        Q(result_sent_date__gt=self.dbsr_startdate)
-                                        | Q(result_sent_date=self.dbsr_startdate),
-                                        Q(result_sent_date__lt=self.dbsr_enddate) |
-                                        Q(result_sent_date=self.dbsr_enddate))\
+        results = Result.objects.filter(
+                                        result_sent_date__gte=self.dbsr_startdate,
+                                        result_sent_date__lte=self.dbsr_enddate,
+                                        collected_on__lte=F('result_sent_date'))\
             .filter(clinic=location,
                     notification_status='sent')
         if not results:
@@ -192,9 +191,9 @@ class Results160Reports:
 
     def get_avg_rsts_entering_time(self, location):
         results = Result.objects.filter(clinic=location,
-                                        processed_on__lte=self.dbsr_enddate,
                                         result_sent_date__gte=self.dbsr_startdate,
-                                        result_sent_date__lte=self.dbsr_enddate)
+                                        result_sent_date__lte=self.dbsr_enddate,
+                                        processed_on__lte=F('arrival_date'))
             
         if not results:
             return (0, None)
@@ -204,9 +203,9 @@ class Results160Reports:
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_retrieval_time(self, location):
-        results = Result.objects.filter(arrival_date__lte=self.dbsr_enddate,
-                                        result_sent_date__gte=self.dbsr_startdate,
-                                        result_sent_date__lte=self.dbsr_enddate)\
+        results = Result.objects.filter(result_sent_date__gte=self.dbsr_startdate,
+                                        result_sent_date__lte=self.dbsr_enddate,
+                                        arrival_date__lte=F('result_sent_date'))\
         .filter(clinic=location,
                 notification_status='sent')
         if not results:
@@ -217,9 +216,9 @@ class Results160Reports:
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_processing_time(self, location):
-        results = Result.objects.exclude(entered_on=None).\
-                                filter(processed_on__gte=self.dbsr_startdate,
-                                        processed_on__lte=self.dbsr_enddate) \
+        results = Result.objects.filter(processed_on__gte=self.dbsr_startdate,
+                                        processed_on__lte=self.dbsr_enddate,
+                                        entered_on__lte=F('processed_on')) \
         .filter(clinic=location)
         if not results:
             return (0, None)
@@ -229,12 +228,10 @@ class Results160Reports:
         return (results.count(), tt_diff / results.count())
 
     def get_avg_dbs_transport_time(self, location):
-        results = Result.objects.filter(Q(collected_on__lt=self.dbsr_enddate) |
-                                        Q(collected_on=self.dbsr_enddate),
-                                        Q(entered_on__gt=self.dbsr_startdate)
-                                        | Q(entered_on=self.dbsr_startdate),
-                                        Q(entered_on__lt=self.dbsr_enddate) |
-                                        Q(entered_on=self.dbsr_enddate))\
+        results = Result.objects.filter(
+                                        entered_on__gte=self.dbsr_startdate,
+                                        entered_on__lte=self.dbsr_enddate,
+                                        collected_on__lte=F('entered_on'))\
         .filter(clinic=location)
         if not results:
             return (0, None)

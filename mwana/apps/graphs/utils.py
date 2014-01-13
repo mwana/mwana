@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.db import connection
 from django.db.models import Count
+from django.db.models import F
 from django.db.models import Q
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
@@ -190,13 +191,14 @@ class GraphServive:
         for item in sorted(trend_items):
             data[item] = []
 
-        results = Result.objects.filter(clinic__in=facs)
+        results = Result.objects.filter(clinic__in=facs, notification_status='sent')
 
         month_ranges = []
         while my_date <= end_date:
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month
-                                    ).exclude(collected_on=None)
+                                    result_sent_date__month=my_date.month,
+                                    collected_on__lte=F('result_sent_date')
+                                    )
             tt_diff = 0.0
             tt = max(1, len(tt_res))
             for result in tt_res:
@@ -206,8 +208,9 @@ class GraphServive:
 
             #Transport Time
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month
-                                    ).exclude(collected_on=None).exclude(entered_on=None)
+                                    result_sent_date__month=my_date.month,
+                                    collected_on__lte=F('entered_on')
+                                    )
             tt_diff = 0.0
             tt = max(1, len(tt_res))
             for result in tt_res:
@@ -217,8 +220,9 @@ class GraphServive:
 
             #Processing Time
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month
-                                    ).exclude(entered_on=None).exclude(processed_on=None)
+                                    result_sent_date__month=my_date.month,
+                                    entered_on__lte=F('processed_on')
+                                    )
             tt_diff = 0.0
             tt = max(1, len(tt_res))
             for result in tt_res:
@@ -228,8 +232,9 @@ class GraphServive:
 
             #Delays at Lab
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month
-                                    ).exclude(processed_on=None).exclude(arrival_date=None)
+                                    result_sent_date__month=my_date.month,
+                                    processed_on__lte=F('arrival_date')
+                                    )
             tt_diff = 0.0
             tt = max(1, len(tt_res))
             for result in tt_res:
@@ -239,8 +244,9 @@ class GraphServive:
 
             #Retrieval Time
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month
-                                    ).exclude(arrival_date=None)
+                                    result_sent_date__month=my_date.month,
+                                    arrival_date__lte=F('result_sent_date')
+                                    )
             tt_diff = 0.0
             tt = max(1, len(tt_res))
             for result in tt_res:
@@ -357,10 +363,10 @@ def _turnaround_query(start_date, end_date, province_slug, district_slug, facili
             join locations_location as facility on facility.id=clinic_id
             join locations_location as district on district.id = facility.parent_id
             join locations_location as province on province.id = district.parent_id
-            where collected_on is not null
-            and entered_on is not null
-            and processed_on is not null
-            and arrival_date is not null
+            where collected_on <= processed_on
+            and entered_on <= processed_on
+            and arrival_date >= processed_on
+            and notification_status <> 'obsolete'
             and extract(year from result_sent_date) = %s
             and extract(month from result_sent_date) = %s
             and facility.id in (''' + ids + ''')
