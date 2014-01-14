@@ -1,10 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.utils.htmlhelper import get_month_end
 from django.db import models
 from mwana.apps.locations.models import Location
 #from rapidsms.models import Connection
 from rapidsms.models import Contact
 from datetime import datetime
 from django.contrib.auth.models import User
+from datetime import date
 
 class Turnaround(models.Model):
     """
@@ -131,3 +133,30 @@ class Login(models.Model):
 
     def __unicode__(self):
         return "%s: Ever logged in? %s" % (self.user, "Yes" if self.ever_logged_in else "No")
+
+
+class MessageByLocationByUserType(models.Model):
+    count = models.PositiveIntegerField()
+    province = models.CharField(max_length=30, null=True, blank=True)
+    district = models.CharField(max_length=30, null=True, blank=True)
+    facility = models.CharField(max_length=50, null=True, blank=True)
+    worker_type = models.CharField(max_length=30)
+    year = models.PositiveSmallIntegerField()
+    month = models.PositiveSmallIntegerField()
+    province_slug = models.CharField(max_length=6, null=True, blank=True)
+    district_slug = models.CharField(max_length=6, null=True, blank=True)
+    facility_slug = models.CharField(max_length=6, null=True, blank=True)
+    absolute_location = models.ForeignKey(Location)
+    min_date = models.DateField(null=True, blank=True)
+    max_date = models.DateField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        my_date = date(self.year, self.month, 1)
+        if not self.min_date:
+            self.min_date = my_date
+        if not self.max_date:
+            self.max_date = get_month_end(my_date)
+        super(MessageByLocationByUserType, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together=("absolute_location", "year", "month", "worker_type")
