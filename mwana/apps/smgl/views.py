@@ -844,8 +844,16 @@ def mothers(request):
 def mother_history(request, id):
     mother = get_object_or_404(PregnantMother, id=id)
 
-    messages = Message.objects.filter(text__icontains=mother.uid,
+    similar_messages = Message.objects.filter(text__icontains=mother.uid,
                                       direction='I')
+
+    #We need to filter out the motherIDs that may be similar to the wanted one
+    messages =[]
+    for message in similar_messages:
+        uid = message.text.split(" ")[1]
+        if uid == mother.uid:
+            messages.append(message)
+
 
     if request.GET.get('export'):
         messages = messages.filter(direction='I') #only show incoming messages.
