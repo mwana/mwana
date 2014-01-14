@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-
+{% block title %}Home - {{ block.super }}{% endblock %}
 {% block stylesheets %}
 {{ block.super }}
 <link href='http://fonts.googleapis.com/css?family=Junge' rel='stylesheet' type='text/css'>
@@ -72,7 +72,11 @@
 					enabled:false
 				},
 				title:{
-					text: 'Common Obstetric Complications'
+					text: 'Common Obstetric Complications',
+					style: {
+						'font-weight':'bold',
+						'text-decoration':'underline',
+					}
 				},
 				tooltip:{
 					pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
@@ -97,7 +101,11 @@
 					enabled:false
 				},
 				title:{
-					text: 'Common Referral Reasons'
+					text: '<b>Common Referral Reasons</b>',
+					style: {
+						'font-weight':'bold',
+						'text-decoration':'underline',
+					}
 				},
 				tooltip:{
 					pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
