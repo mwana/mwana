@@ -8,6 +8,7 @@ from smscouchforms.models import FormReferenceBase
 from rapidsms.contrib.messagelog.models import Message
 from mwana.apps.smgl import const
 from mwana.apps.contactsplus.models import ContactType
+import datetime
 import ntpath
 
 REASON_FOR_VISIT_CHOICES = (
@@ -37,8 +38,8 @@ class XFormKeywordHandler(models.Model):
         help_text="The keyword that you want to associate with this handler.")
     function_path = models.CharField(
         max_length=255,
-        help_text="The full path to the handler function. \
-        E.g: 'mwana.apps.smgl.app.birth_registration'")
+        help_text="The full path to the handler function. E.g: \
+        'mwana.apps.smgl.app.birth_registration'")
 
     def __unicode__(self):
         return self.keyword.upper()
@@ -70,8 +71,8 @@ class PregnantMother(models.Model):
     first_name = models.CharField(max_length=160)
     last_name = models.CharField(max_length=160)
     uid = models.CharField(max_length=160, unique=True,
-                           help_text="The Unique Identifier \
-                           associated with this mother")
+                           help_text="The Unique Identifier associated with \
+                           this mother")
     lmp = models.DateField(
         null=True, blank=True, help_text="Last Menstrual Period")
     edd = models.DateField(
@@ -106,6 +107,18 @@ class PregnantMother(models.Model):
             None
         )
         return mapped_text
+
+    @property
+    def has_delivered(self):
+        before_edd = self.edd - datetime.timedelta(days=60)
+        after_edd = self.edd + datetime.timedelta(days=60)
+        try:
+            birth = self.birthregistration_set.filter(
+                date__range=[before_edd, after_edd])[0]
+        except IndexError:
+            return False
+        else:
+            return True
 
     @property
     def name(self):
@@ -144,6 +157,7 @@ class PregnantMother(models.Model):
             location=self.zone,
             is_active=True)
 
+
     def get_gestational_age(self):
         pass
 
@@ -153,7 +167,6 @@ class PregnantMother(models.Model):
             self.last_name,
             self.uid
         )
-
 
 class MotherReferenceBase(models.Model):
 
