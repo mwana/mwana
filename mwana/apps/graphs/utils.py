@@ -357,7 +357,7 @@ class GraphServive:
         if any([province_slug, district_slug, facility_slug]):
             facs = get_sms_facilities(province_slug, district_slug, facility_slug)
             messages = MessageByLocationByUserType.objects.filter(min_date__gte=start,
-                                          min_date__lt=end, facility_slug__in=[fac.slug for fac in facs])
+                                          min_date__lt=end, absolute_location__in=facs)
 
 
         my_date = date(start_date.year, start_date.month, start_date.day)
