@@ -86,7 +86,12 @@ class NewStockHandler(KeywordHandler):
             trans.valid = True
 
             for drug in tokens:
-                 stock = Stock.objects.get(code=drug.split()[0])
+                 drug_code = drug.split()[0]
+                 delimeter = '-'
+                 for c in '_#$%@=/+:':
+                    drug_code = drug_code.replace(c, delimeter)
+                    print (drug_code)
+                 stock = Stock.objects.get(code=drug_code)
                  acc = StockAccount.objects.get(location=location,stock=stock)
                  acc.amount += int(drug.split()[1])
                  stk = StockTransaction.objects.create(transaction=trans,amount=int(drug.split()[1]), stock=stock)
@@ -97,8 +102,14 @@ class NewStockHandler(KeywordHandler):
             trans.status = "c"
             trans.save()
             drugs=""
+            last=1
             for drug in StockAccount.objects.filter(location=location):
-                 drugs += drug.stock.code +" "+str(drug.amount)+" "
+#                 drugs += drug.stock.code +" "+str(drug.amount)+" "
+                 
+                 if (last <=2):
+                     drugs += str(abs(drug.amount))+" units of "+drug.stock.code +", "
+                     ++last
+            drugs += "..."
 
             self.respond("Thank you. Your new levels for the added drugs are as follows: " +drugs)
 

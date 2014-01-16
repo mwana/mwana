@@ -103,8 +103,12 @@ class LoaningStockHandler(KeywordHandler):
             drugs=""
 
             for drug in tokens:
+                 drug_code = drug.split()[0]
+                 delimeter = '-'
+                 for c in '_-#$%@=/+:':
+                    drug_code = drug_code.replace(c, delimeter)
+                 stock = Stock.objects.get(code=drug_code)
                  amount = int(drug.split()[1])
-                 stock = Stock.objects.get(code=drug.split()[0])
                  acc_from = StockAccount.objects.get(location=location_from,stock=stock)
                  acc_from.pending_amount = amount #amount to be deducted when receiving clinic confirms.
                  acc_to = StockAccount.objects.get(location=location_to,stock=stock)
@@ -119,7 +123,7 @@ class LoaningStockHandler(KeywordHandler):
                  drugs += stock.code +" "+str(abs(amount))+" "
 
                  if((acc_from.amount-acc_from.pending_amount) <= threshold.level):
-                     drugs_below_threshold += stock.code +" "+str(abs(acc_from.amount))+" "
+                     drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
 
             trans.account_to =acc_to
             trans.account_from =acc_from
@@ -128,7 +132,7 @@ class LoaningStockHandler(KeywordHandler):
             
             
             if (drugs_below_threshold):
-                self.respond("You cannnot proceed with loan because your stock level will be below threshold for the following drugs: " +drugs_below_threshold)
+                self.respond("You cannnot proceed with loan because your stock will be below threshold by: " +drugs_below_threshold)
                 trans.status = "f"
                 trans.save()
 #                dho_staff = Contact.active.location(location_from.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())

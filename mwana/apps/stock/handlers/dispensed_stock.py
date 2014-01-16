@@ -29,7 +29,7 @@ class DispensedStockHandler(KeywordHandler):
     keyword = "DISP|dispenced|disp|dispensed"
 
     HELP_TEXT = _("To report dispensed drugs, send DISP <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g DISP DG99 100, DG80 15")
-    message_to_dho = "Hi %s, %s are below threshold for the following drugs: %s."
+    message_to_dho = "Hi %s, %s are below threshold by: %s."
     
     def help(self):
         self.respond(self.HELP_TEXT)
@@ -92,8 +92,14 @@ class DispensedStockHandler(KeywordHandler):
             trans.valid = True
             drugs_below_threshold=""
             drugs=""
+            stop = 1
+            last=1
             for drug in tokens:
-                 stock = Stock.objects.get(code=drug.split()[0])
+                 drug_code = drug.split()[0]
+                 delimeter = '-'
+                 for c in '_#$%@=/+:':
+                    drug_code = drug_code.replace(c, delimeter)
+                 stock = Stock.objects.get(code=drug_code)
                  acc = StockAccount.objects.get(location=location,stock=stock)
                  amount= int(drug.split()[1])
                  acc.amount -= amount
@@ -101,22 +107,32 @@ class DispensedStockHandler(KeywordHandler):
                  stk.save()
                  acc.save()
                  threshold=Threshold.objects.get(account=acc)
-               
-                 if(acc.amount <= threshold.level):
-                     drugs_below_threshold += stock.code +" "+str(abs(acc.amount))+" "
 
-                 drugs += stock.code +" "+str(abs(amount))+" "
+
+                 if(acc.amount <= threshold.level):
+#                     drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
+                     
+                     if (stop <=3):
+                         drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
+                         ++stop
+
+#                 drugs += str(abs(amount))+" units of "+stock.code +", "
+                 
+                 if (last <=2):
+                     drugs += str(abs(amount))+" units of "+drug_code +", "
+                     ++last
 
             trans.account_to =acc
             trans.status = "c"
-            trans.save()
-
-            self.respond("Thank you. You have dispensed the following drugs: " +drugs)
+            trans.save()       
+            
             if (drugs_below_threshold):
-                self.respond("Your stock level is below threshold for the following drugs: " +drugs_below_threshold)
+                self.respond("Your stock is below threshold by: " +drugs_below_threshold+"..." )
                 dho_staff = Contact.active.location(location.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())
                 print (dho_staff)
                 self.broadcast(self.message_to_dho, dho_staff, "DHO", drugs_below_threshold, location)
+            else:  
+                self.respond("Thank you. You have dispensed the following drugs: " +drugs +"...")
 
     def broadcast(self, text, contacts, group_name, drugs, clinic_to):
 
@@ -141,6 +157,7 @@ class DispensedStockHandler(KeywordHandler):
         bmsg.save()
         return True
 
+   
 
 
 
