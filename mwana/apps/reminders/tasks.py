@@ -123,7 +123,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             record_notification(appointment, patient_event, connection)
 
     patient_trace = PatientTrace()
-    patient_trace.type = appointment.name
+    patient_trace.type = "manual"
     patient_trace.start_date = datetime.datetime.now()
     patient_trace.name = patient_event.patient.name[:50]
     patient_trace.patient_event = patient_event

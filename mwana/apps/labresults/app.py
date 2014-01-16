@@ -214,7 +214,6 @@ class App (rapidsms.apps.base.AppBase):
                                    clinic=clinic.name, nuids=NUIDs))
             send(msg_text, [contact.default_connection])
 
-
     def chunk_messages(self, content):
         message = ''
         for piece in content:
@@ -391,16 +390,16 @@ class App (rapidsms.apps.base.AppBase):
                          "register at this clinic." % clinic)
             return
 
-        RESULTS_CHANGED     = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result and update your logbooks."
+        RESULTS_CHANGED     = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result, contact the lab to verify and update your logbooks."
         if len(changed_results) > 1:
-            RESULTS_CHANGED     = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
+            RESULTS_CHANGED     = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results, contact the lab to verify and update your logbooks."
 
         all_msgs = []
         help_msgs = []
 
         for contact in contacts:
-            msg = OutgoingMessage(connection=contact.default_connection,
-                                  template=RESULTS_CHANGED)
+            msg = OutgoingMessage([contact.default_connection],
+                                  RESULTS_CHANGED)
             all_msgs.append(msg)
 
         contact_details = []
@@ -447,16 +446,17 @@ class App (rapidsms.apps.base.AppBase):
             Q(location=clinic) | Q(location__parent=clinic),
             Q(types=const.get_clinic_worker_type())).distinct()
         if not contacts:
-            self.warning("No contacts registered to receiver results at %s! "
+            self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
 
         all_msgs = []
         for contact in contacts:
-            msg = OutgoingMessage([contact.default_connection],
-                                  RESULTS_READY % dict(
-                                      name=contact.name,
-                                      count=results.count()))
+            if contact.default_connection is not None:
+                msg = OutgoingMessage([contact.default_connection],
+                                      RESULTS_READY % dict(
+                                          name=contact.name,
+                                          count=results.count()))
             all_msgs.append(msg)
 
         return all_msgs
@@ -471,7 +471,8 @@ class App (rapidsms.apps.base.AppBase):
 
     def send_messages(self, messages):
         for msg in messages:
-            msg.send()
+            if msg.connection is not None:
+                msg.send()
 
 def days_ago (d):
     return (date.today() - d).days
