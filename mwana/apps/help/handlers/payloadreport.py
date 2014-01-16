@@ -82,7 +82,7 @@ payloads. If you think this message is a mistake, respond with keyword 'HELP'"
                          enddate=enddate.strftime("%d/%m/%Y"))
             return
 
-        #build formartted message
+        #build formatted message
         msg_header = 'PAYLOADS. Period: %s to %s. ' % (startdate.strftime("%d/%m/%Y")
                                                        , enddate.strftime("%d/%m/%Y"))
         msg_data = ' ****'.join(row[0] + ";" + str(row[1]) for row in rows)

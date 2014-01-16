@@ -314,7 +314,7 @@ class App (rapidsms.apps.base.AppBase):
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
         today = datetime.today()
         ago = today - timedelta(days=7)
-        if SYSTEM_LOCALE==LOCALE_ZAMBIA and not check:
+        if SYSTEM_LOCALE == LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
                 arrival_date__lte=ago)
