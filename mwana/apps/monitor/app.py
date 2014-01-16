@@ -20,6 +20,6 @@ class App (rapidsms.apps.base.AppBase):
     def schedule_cleanup_task(self):
         callback = 'mwana.apps.monitor.tasks.cleanup_data'
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[6, 11, 13, 16], minutes=[50],
+        EventSchedule.objects.create(callback=callback, hours=[6, 11, 13, 16, 20], minutes=[50],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])
         
