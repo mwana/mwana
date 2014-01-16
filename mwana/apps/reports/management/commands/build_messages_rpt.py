@@ -22,10 +22,10 @@ class Command(LabelCommand):
 
     def handle(self, * args, ** options):
         if args and args[0] == 'update':
-            update()
+            update_locations()
         else:
             rebuild_messages_data()
-            update()
+            update_locations()
 
 def __del__(self):
     pass
@@ -55,24 +55,103 @@ def get_prov_dist_fac(location):
 
         
 sql = '''
-INSERT  into reports_messagebylocationbyusertype (count, year, month, worker_type, absolute_location_id)
+INSERT  into reports_messagebylocationbyusertype ( year,
+month,
+absolute_location_id,
+worker_type,
+count,
+count_incoming,
+count_outgoing)
+
+
+select
+year,
+month,
+absolute_location,
+worker_type,
+count,
+count_incoming ,
+count_outgoing
+
+from
+(select
+counts.year,
+counts.month,
+counts.absolute_location,
+counts.worker_type,
+sum(counts.count) count,
+sum(count_incoming) count_incoming,
+sum(count_outgoing) count_outgoing
+
+from (
 
 SELECT count(messagelog_message.id),
 extract (year from messagelog_message.date)::INTEGER  as "year"
 ,extract (month from messagelog_message.date)::INTEGER  as "month"
 ,contactsplus_contacttype.slug as worker_type
-,location.id as absolute_location
-
+,case locations_locationtype.slug when 'zone' then location.parent_id else location.id end as absolute_location
+,location.parent_id
 
 from messagelog_message
 join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
 left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
 left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
 left join locations_location location on location.id = rapidsms_contact.location_id
+  left join locations_locationtype on locations_locationtype.id= location.type_id
 
-WHERE  extract (year from messagelog_message.date)::INTEGER = %s and extract (month from messagelog_message.date)::INTEGER = %s
+WHERE  extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
 
-group by "year", "month", worker_type, absolute_location;
+group by "year", "month", worker_type, absolute_location, parent_id) counts
+
+
+----
+left join (
+
+SELECT count(messagelog_message.id) as count_incoming,
+extract (year from messagelog_message.date)::INTEGER  as "year"
+,extract (month from messagelog_message.date)::INTEGER  as "month"
+,contactsplus_contacttype.slug as worker_type
+,case locations_locationtype.slug when 'zone' then location.parent_id else location.id end as absolute_location
+
+from messagelog_message
+join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
+left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
+left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
+left join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
+
+WHERE  direction = 'I'
+and extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
+
+group by "year", "month", worker_type, absolute_location) count_incoming
+on counts.absolute_location = count_incoming.absolute_location and counts.year=count_incoming.year and counts.month=count_incoming.month
+and counts.worker_type= count_incoming.worker_type
+--
+left join (
+
+SELECT count(messagelog_message.id) as count_outgoing,
+extract (year from messagelog_message.date)::INTEGER  as "year"
+,extract (month from messagelog_message.date)::INTEGER  as "month"
+,contactsplus_contacttype.slug as worker_type
+,case locations_locationtype.slug when 'zone' then location.parent_id else location.id end as absolute_location
+
+from messagelog_message
+join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
+left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
+left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
+left join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
+
+WHERE  direction = 'O'
+and extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
+
+group by "year", "month", worker_type, absolute_location) count_outgoing
+on counts.absolute_location = count_outgoing.absolute_location and counts.year=count_outgoing.year and counts.month=count_outgoing.month
+and counts.worker_type= count_outgoing.worker_type
+
+
+group by counts.year,
+counts.month,
+counts.absolute_location,
+counts.worker_type) table1;
 '''
 def rebuild_messages_data():
     today = date.today()
@@ -81,25 +160,34 @@ def rebuild_messages_data():
     first_msg = Message.objects.all().order_by("date")[0]
     start_year = first_msg.date.year
     start_month = first_msg.date.month
+    last_imported_year = start_year
+    last_imported_month = start_month - 1
 
     MessageByLocationByUserType.objects.filter(year=today.year, month=today.month).delete()
-    msgs = MessageByLocationByUserType.objects.exclude(max_date=None).order_by('-max_date')
+    MessageByLocationByUserType.objects.filter(absolute_location__name='Training Clinic').delete()
+    msgs = MessageByLocationByUserType.objects.all().order_by('-year')
     if msgs:
-        start_year = msgs[0].year
-        start_month = msgs[0].month
+        last_imported_year = msgs[0].year
+        last_imported_month = msgs.filter(year=last_imported_year).order_by('-month')[0].month
         
     cursor = connection.cursor()
 
     for year in years:
         for month in months:
-            if year <= start_year and month <= start_month:
+            if year < last_imported_year:
                 continue
-            cursor.execute(sql % (year, month))
+            if year == start_year and month < start_month:
+                continue
+            if year == last_imported_year and month <= last_imported_month:
+                continue
+            cursor.execute(sql.format(year=year, month=month))
             
     transaction.commit_unless_managed()
 
-def update():
+def update_locations():
     for mlt in MessageByLocationByUserType.objects.filter(province=None):
+
+        print mlt.absolute_location.slug, mlt.id
         # @type mlt MessageByLocationByUserType
         if mlt.absolute_location.type.slug == 'zone':
             mlt.facility_slug = mlt.absolute_location.parent.slug
@@ -120,7 +208,6 @@ def update():
             mlt.province = mlt.absolute_location.name
             mlt.save()
         else:
-            print mlt.absolute_location.slug
             mlt.facility_slug = mlt.absolute_location.slug
             mlt.district_slug = mlt.absolute_location.parent.slug
             mlt.province_slug = mlt.absolute_location.parent.parent.slug

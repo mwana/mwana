@@ -136,6 +136,9 @@ class Login(models.Model):
 
 
 class MessageByLocationByUserType(models.Model):
+    """
+    Reporting table.
+    """
     count = models.PositiveIntegerField()
     province = models.CharField(max_length=30, null=True, blank=True)
     district = models.CharField(max_length=30, null=True, blank=True)
@@ -148,7 +151,10 @@ class MessageByLocationByUserType(models.Model):
     facility_slug = models.CharField(max_length=6, null=True, blank=True)
     absolute_location = models.ForeignKey(Location)
     min_date = models.DateField(null=True, blank=True)
-    max_date = models.DateField(null=True, blank=True)
+    max_date = models.DateField(null=True, blank=True)    
+    month_year = models.CharField(max_length=8, null=True, blank=True)
+    count_incoming = models.PositiveIntegerField(default=0, null=True, blank=True)
+    count_outgoing = models.PositiveIntegerField(default=0, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         my_date = date(self.year, self.month, 1)
@@ -156,6 +162,8 @@ class MessageByLocationByUserType(models.Model):
             self.min_date = my_date
         if not self.max_date:
             self.max_date = get_month_end(my_date)
+        if not self.month_year:
+            self.month_year = my_date.strftime('%b %Y')
         super(MessageByLocationByUserType, self).save(*args, **kwargs)
 
     class Meta:

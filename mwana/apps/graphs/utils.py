@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import MessageByLocationByUserType
 from mwana.apps.contactsplus.models import ContactType
 from datetime import date
 from datetime import datetime
@@ -8,6 +9,7 @@ from django.db import connection
 from django.db.models import Count
 from django.db.models import F
 from django.db.models import Q
+from django.db.models import Sum
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
@@ -336,47 +338,54 @@ class GraphServive:
 
         return month_ranges, data
 
-    def get_monthly_messages_by_usertype(self, start_date, end_date, province_slug, district_slug, facility_slug, use_percentage=True):
-        """TODO: Optimize this function"""
-        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+    def get_monthly_messages_by_usertype(self, start_date, end_date,
+    province_slug, district_slug, facility_slug, data_type="count", direction='all'):
+        use_percentage = "count" != data_type
+        field = "count"
+        if direction == 'I':
+            field = "count_incoming"
+        elif direction == 'O':
+            field = "count_outgoing"
+
+
         start, end = get_datetime_bounds(start_date, end_date)
 
-
         contact_types = ContactType.objects.exclude(slug='patient').values_list('slug').all().distinct()
-        messages = Message.objects.filter(date__gte=start,
-                                          date__lt=end)
+        messages = MessageByLocationByUserType.objects.filter(min_date__gte=start,
+                                          min_date__lt=end)
 
         if any([province_slug, district_slug, facility_slug]):
-            messages = Message.objects.filter(date__gte=start,
-                                              date__lt=end,
-                                              contact__location__in=facs)
+            facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+            messages = MessageByLocationByUserType.objects.filter(min_date__gte=start,
+                                          min_date__lt=end, facility_slug__in=[fac.slug for fac in facs])
+
 
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
         for item in sorted(contact_types):
             data[item[0]] = []
-        data['Not yet Registered'] = []
+        data['Total'] = []
+
         month_ranges = []
+        
         while my_date <= end_date:
-            sub_total = 1
-            if use_percentage:
-                sub_total = messages.filter(
-                                    date__year=my_date.year,
-                                    date__month=my_date.month,
-                                    ).count()/100.0
-            for item in sorted(contact_types):
-                data[item[0]].append(round(messages.filter(
-                                        date__year=my_date.year,
-                                        date__month=my_date.month,
-                                        contact__types__slug=item[0]
-                                        ).count()/(sub_total or 1), 1))
+            denom = messages.filter(year=my_date.year,
+                        month=my_date.month).aggregate(sum=Sum(field))['sum'] or 0
+            for item in sorted(contact_types):                
+                if use_percentage:
+                    num = messages.filter(year=my_date.year,
+                    month=my_date.month,
+                    worker_type=item[0]).aggregate(sum=Sum(field))['sum'] or 0
 
-            data['Not yet Registered'].append(round(messages.filter(
-                                    date__year=my_date.year,
-                                    date__month=my_date.month,
-                                    contact=None
-                                    ).count()/(sub_total or 1), 1))
+                    data[item[0]].append(round(100.0 * num/(denom or 1), 1))
+                else:
+                    data[item[0]].append(
+                    messages.filter(year=my_date.year,
+                    month=my_date.month,
+                    worker_type=item[0]).aggregate(sum=Sum(field))['sum'] or 0)
 
+
+            
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 

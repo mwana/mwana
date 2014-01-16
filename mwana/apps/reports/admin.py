@@ -245,7 +245,7 @@ admin.site.register(User, UserAdmin)
 class MessageByLocationByUserTypeAdmin(admin.ModelAdmin):
     list_display = ('province', 'district', 'facility', 'worker_type', 'year',
     'month', 'province_slug', 'district_slug', 'facility_slug',
-    'absolute_location', 'count', 'min_date','max_date')
+    'absolute_location', 'count', 'count_incoming','count_outgoing', 'min_date','max_date', "month_year")
     list_filter = ('worker_type', 'year', 'month', 'province', 'district', 'facility', 'province_slug', 'district_slug', 'facility_slug', )
 #    search_fields = ('count', 'province', 'district', 'facility', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug',)
 
