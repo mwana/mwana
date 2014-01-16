@@ -24,7 +24,7 @@ class Translator:
             for obj in Dictionary.objects.all().exclude(alt_translations_one=None):
                 self.dictionary_one["%s:%s" % (obj.language.slug.lower(), obj.key_phrase.lower())] = obj.alt_translations_one
         except Exception, e:
-            logger.waring("%s" % e)
+            logger.warning("%s" % e)
 
     def translate(self, language_code, key_phrase, alternate=0):
         if not (language_code and key_phrase):
