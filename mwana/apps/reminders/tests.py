@@ -60,18 +60,18 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth 1/1/2013 maria
-            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1 1 2013 laura
-            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1-1-2013 anna
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1.1.2013 michelle
-            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1. 1. 2013 anne
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 01012013 heidi
-            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2013. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1/1/2014 maria
+            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1 1 2014 laura
+            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1-1-2014 anna
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1.1.2014 michelle
+            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 1. 1. 2014 anne
+            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            kk     > birth 01012014 heidi
+            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 1/1 rachel
             kk     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             kk     > birth 1 1 nancy
@@ -91,7 +91,7 @@ class EventRegistration(TestScript):
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
-            self.assertEqual(patient_event.date, datetime.date(2013, 1, 1))
+            self.assertEqual(patient_event.date, datetime.date(2014, 1, 1))
             self.assertEqual(patient_event.event.slug, "birth")
 
     def testTooOldDate(self):
@@ -99,7 +99,7 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth 1/1/1213 maria
-            kk     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in 2013.
+            kk     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in 2014.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')

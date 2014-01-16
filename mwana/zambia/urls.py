@@ -20,6 +20,7 @@ urlpatterns = patterns('',
     (r'^webusers/', include('mwana.apps.webusers.urls')),
     (r'^graphs/', include('mwana.apps.graphs.urls')),
     (r'^charts/', include('mwana.apps.graphs.urls')),
+    (r'^survey/', include('mwana.apps.surveillance.urls')),
     (r'^surveillance/', include('mwana.apps.surveillance.urls')),
     (r'^stock/', include('mwana.apps.stock.urls')),
 )

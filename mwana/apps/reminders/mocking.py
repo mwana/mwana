@@ -12,7 +12,7 @@ from mwana.apps.reminders.models import PatientEvent
 
 _ = lambda x: x
 
-translator = Translator()
+
 
 class MockRemindMiUtility(LoggerMixin):
     """
@@ -33,6 +33,7 @@ class MockRemindMiUtility(LoggerMixin):
             return True
 
     def fake_sending_six_day_notification(self, clinic):
+        translator = Translator()
         cbas = Contact.active.filter(types=get_cba_type(), location__parent=clinic)
         patients = PatientEvent.objects.filter(cba_conn__in=(cba.default_connection for cba in cbas)).distinct()
         

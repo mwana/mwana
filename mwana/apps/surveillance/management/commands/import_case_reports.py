@@ -2,6 +2,7 @@
 """
 Import Incident Reports (cases) from DHO broadcast messages
 """
+from mwana.apps.surveillance.models import MissingIncident
 from mwana.apps.locations.models import Location
 from decimal import Decimal
 from django.db.utils import DatabaseError
@@ -24,21 +25,30 @@ class Command(LabelCommand):
     help = ("Import Incident reports (cases) from DHO broadcast messages")
 
     def handle(self, * args, ** options):       
-
         self.import_cases()
 
     def import_cases(self):
         b = InputCleaner()
         loc=Location.objects.get(slug='403012')
 
+        Separator.objects.get_or_create(text=',')
+        Separator.objects.get_or_create(text='\.')
+        Separator.objects.get_or_create(text=':')
+        Separator.objects.get_or_create(text='and')
+        Separator.objects.filter(text='.').delete()
+
         count = 0
-        missing_incident = open("missing_incidents.txt", 'w')
-        for bm in BroadcastMessage.objects.filter(importedreport=None, group='DHO', text__iregex='\d\s*,'):
+
+        bms_1 = BroadcastMessage.objects.filter(importedreport=None, group='DHO', text__iregex='\d\s*,')
+        bms_2 = BroadcastMessage.objects.filter(importedreport__report=None, group='DHO', text__iregex='\d\s*,')
+        bms = bms_1 | bms_2
+        for bm in bms:
             separators = [sep.text for sep in Separator.objects.all()] or [',']
-            sep = "|".join(separators)
-            print(bm)
+            sep = str("|".join(separators))
+            
+
             # @type bm BroadcastMessage
-            tokens = re.split(sep, b.strip_non_ascii(re.sub(r"\s+", " ", bm.text)))
+            tokens = re.split(sep, b.strip_non_or_bad_ascii(re.sub(r"\s+", " ", bm.text)))
             cases = tokens
             source = Source.objects.create(parsed=0)
             now = bm.date + timedelta(hours=2) #change from utc
@@ -64,8 +74,7 @@ class Command(LabelCommand):
                 if Incident.objects.filter(alias__name__iexact=incident_text):
                     incident = Incident.objects.get(alias__name__iexact=incident_text)
                 else:
-                    missing_incident.write("%s\n" % incident_text)
-#                    incident = Incident.objects.create(name=incident_text)
+                    MissingIncident.objects.get_or_create(alias_text=incident_text)
                 if not incident:
                     continue
                 report = Report()

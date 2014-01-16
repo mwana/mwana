@@ -28,7 +28,7 @@ class BroadcastHandler(KeywordHandler):
             else:
                 OutgoingMessage(contact.default_connection, message_body,
                                 **{"text": text, 
-                                   "user": self.msg.contact.name, 
+                                   "user": "%s (%s) of %s" % (self.msg.contact.name, self.msg.contact.default_connection.identity, self.msg.contact.location),
                                    "group": self.group_name}).send()
 
         if recipients and sending_connection:

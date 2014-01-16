@@ -299,6 +299,11 @@ def delete_training_births():
     PatientEvent.objects.filter(patient__name__istartswith='lo').filter(patient__name__icontains='nes').filter(patient__name__icontains='bwal').delete()
 
     PatientEvent.objects.filter(patient__location__name__istartswith='Training').delete()
+    from datetime import datetime
+    if datetime.now().hour > 18:
+        for c in Contact.objects.filter(location__name__icontains='Training',is_active=True):
+            c.is_active = False
+            c.save()
 
 def close_open_old_training_sessions():
     logger.info("Closing obsolete training sessions")

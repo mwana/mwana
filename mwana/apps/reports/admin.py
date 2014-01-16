@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import MessageByLocationByUserType
 from django.contrib.auth.models import User
 from mwana.apps.reports.models import Login
 from mwana.apps.reports.models import CbaEncouragement
@@ -238,6 +239,15 @@ class UserAdmin(admin.ModelAdmin):
             'root_path': self.admin_site.root_path,
         }, context_instance=RequestContext(request))
 
-    
-
 admin.site.register(User, UserAdmin)
+
+
+class MessageByLocationByUserTypeAdmin(admin.ModelAdmin):
+    list_display = ('province', 'district', 'facility', 'worker_type', 'year',
+    'month', 'province_slug', 'district_slug', 'facility_slug',
+    'absolute_location', 'count', 'count_incoming','count_outgoing', 'min_date','max_date', "month_year")
+    list_filter = ('worker_type', 'year', 'month', 'province', 'district', 'facility', 'province_slug', 'district_slug', 'facility_slug', )
+#    search_fields = ('count', 'province', 'district', 'facility', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug',)
+
+admin.site.register(MessageByLocationByUserType, MessageByLocationByUserTypeAdmin)
+

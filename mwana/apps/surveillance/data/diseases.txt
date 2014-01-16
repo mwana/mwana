@@ -188,3 +188,959 @@ Asphyxia|||IRH5-040
 Inpatient deaths 0 to 7days - early neonatal|||IRH5-045
 Inpatient deaths 8 to 28 days- late neonatal|||IRH5-050
 Neonatal deaths total ... (Sum IRH5-045 + IRH5-050)|||IRH5-055
+Acute flaccid paralysis (suspected poliomyelitis) - OPD-FA-<1yr|dis|NTF05|NTF05-05
+Acute flaccid paralysis (suspected poliomyelitis) - OPD-FA-1-5yrs|dis|NTF05|NTF05-10
+Acute flaccid paralysis (suspected poliomyelitis) - OPD-FA->5yrs|dis|NTF05|NTF05-15
+Acute flaccid paralysis (suspected poliomyelitis) - OPD-FA-Total|dis|NTF05|NTF05-20
+Acute flaccid paralysis (suspected poliomyelitis) - IPD-Discharge-<1yr|dis|NTF05|NTF05-25
+Acute flaccid paralysis (suspected poliomyelitis) - IPD-Discharge-1-5yrs|dis|NTF05|NTF05-30
+Acute flaccid paralysis (suspected poliomyelitis) - IPD-Discharge->5yrs|dis|NTF05|NTF05-35
+Acute flaccid paralysis (suspected poliomyelitis) - IPD-Discharge-Total|dis|NTF05|NTF05-40
+Acute flaccid paralysis (suspected poliomyelitis) - Deaths-<1yr|dis|NTF05|NTF05-45
+Acute flaccid paralysis (suspected poliomyelitis) - Deaths-1-5yrs|dis|NTF05|NTF05-50
+Acute flaccid paralysis (suspected poliomyelitis) - Deaths->5yrs|dis|NTF05|NTF05-55
+Acute flaccid paralysis (suspected poliomyelitis) - Deaths-Total|dis|NTF05|NTF05-60
+Cholera - OPD-FA-<1yr|dis|NTF10|NTF10-05
+Cholera - OPD-FA-1-5yrs|dis|NTF10|NTF10-10
+Cholera - OPD-FA->5yrs|dis|NTF10|NTF10-15
+Cholera - OPD-FA-Total|dis|NTF10|NTF10-20
+Cholera - IPD-Discharge-<1yr|dis|NTF10|NTF10-25
+Cholera - IPD-Discharge-1-5yrs|dis|NTF10|NTF10-30
+Cholera - IPD-Discharge->5yrs|dis|NTF10|NTF10-35
+Cholera - IPD-Discharge-Total|dis|NTF10|NTF10-40
+Cholera - Deaths-<1yr|dis|NTF10|NTF10-45
+Cholera - Deaths-1-5yrs|dis|NTF10|NTF10-50
+Cholera - Deaths->5yrs|dis|NTF10|NTF10-55
+Cholera - Deaths-Total|dis|NTF10|NTF10-60
+Measles - OPD-FA-<1yr|dis|NTF15|NTF15-05
+Measles - OPD-FA-1-5yrs|dis|NTF15|NTF15-10
+Measles - OPD-FA->5yrs|dis|NTF15|NTF15-15
+Measles - OPD-FA-Total|dis|NTF15|NTF15-20
+Measles - IPD-Discharge-<1yr|dis|NTF15|NTF15-25
+Measles - IPD-Discharge-1-5yrs|dis|NTF15|NTF15-30
+Measles - IPD-Discharge->5yrs|dis|NTF15|NTF15-35
+Measles - IPD-Discharge-Total|dis|NTF15|NTF15-40
+Measles - Deaths-<1yr|dis|NTF15|NTF15-45
+Measles - Deaths-1-5yrs|dis|NTF15|NTF15-50
+Measles - Deaths->5yrs|dis|NTF15|NTF15-55
+Measles - Deaths-Total|dis|NTF15|NTF15-60
+Meningitis - OPD-FA-<1yr|dis|NTF20|NTF20-05
+Meningitis - OPD-FA-1-5yrs|dis|NTF20|NTF20-10
+Meningitis - OPD-FA->5yrs|dis|NTF20|NTF20-15
+Meningitis - OPD-FA-Total|dis|NTF20|NTF20-20
+Meningitis - IPD-Discharge-<1yr|dis|NTF20|NTF20-25
+Meningitis - IPD-Discharge-1-5yrs|dis|NTF20|NTF20-30
+Meningitis - IPD-Discharge->5yrs|dis|NTF20|NTF20-35
+Meningitis - IPD-Discharge-Total|dis|NTF20|NTF20-40
+Meningitis - Deaths-<1yr|dis|NTF20|NTF20-45
+Meningitis - Deaths-1-5yrs|dis|NTF20|NTF20-50
+Meningitis - Deaths->5yrs|dis|NTF20|NTF20-55
+Meningitis - Deaths-Total|dis|NTF20|NTF20-60
+Neonatal tetanus - OPD-FA-<1yr|dis|NTF25|NTF25-05
+Neonatal tetanus - OPD-FA-1-5yrs|dis|NTF25|NTF25-10
+Neonatal tetanus - OPD-FA->5yrs|dis|NTF25|NTF25-15
+Neonatal tetanus - OPD-FA-Total|dis|NTF25|NTF25-20
+Neonatal tetanus - IPD-Discharge-<1yr|dis|NTF25|NTF25-25
+Neonatal tetanus - IPD-Discharge-1-5yrs|dis|NTF25|NTF25-30
+Neonatal tetanus - IPD-Discharge->5yrs|dis|NTF25|NTF25-35
+Neonatal tetanus - IPD-Discharge-Total|dis|NTF25|NTF25-40
+Neonatal tetanus - Deaths-<1yr|dis|NTF25|NTF25-45
+Neonatal tetanus - Deaths-1-5yrs|dis|NTF25|NTF25-50
+Neonatal tetanus - Deaths->5yrs|dis|NTF25|NTF25-55
+Neonatal tetanus - Deaths-Total|dis|NTF25|NTF25-60
+Plague - OPD-FA-<1yr|dis|NTF30|NTF30-05
+Plague - OPD-FA-1-5yrs|dis|NTF30|NTF30-10
+Plague - OPD-FA->5yrs|dis|NTF30|NTF30-15
+Plague - OPD-FA-Total|dis|NTF30|NTF30-20
+Plague - IPD-Discharge-<1yr|dis|NTF30|NTF30-25
+Plague - IPD-Discharge-1-5yrs|dis|NTF30|NTF30-30
+Plague - IPD-Discharge->5yrs|dis|NTF30|NTF30-35
+Plague - IPD-Discharge-Total|dis|NTF30|NTF30-40
+Plague - Deaths-<1yr|dis|NTF30|NTF30-45
+Plague - Deaths-1-5yrs|dis|NTF30|NTF30-50
+Plague - Deaths->5yrs|dis|NTF30|NTF30-55
+Plague - Deaths-Total|dis|NTF30|NTF30-60
+Rabies - OPD-FA-<1yr|dis|NTF35|NTF35-05
+Rabies - OPD-FA-1-5yrs|dis|NTF35|NTF35-10
+Rabies - OPD-FA->5yrs|dis|NTF35|NTF35-15
+Rabies - OPD-FA-Total|dis|NTF35|NTF35-20
+Rabies - IPD-Discharge-<1yr|dis|NTF35|NTF35-25
+Rabies - IPD-Discharge-1-5yrs|dis|NTF35|NTF35-30
+Rabies - IPD-Discharge->5yrs|dis|NTF35|NTF35-35
+Rabies - IPD-Discharge-Total|dis|NTF35|NTF35-40
+Rabies - Deaths-<1yr|dis|NTF35|NTF35-45
+Rabies - Deaths-1-5yrs|dis|NTF35|NTF35-50
+Rabies - Deaths->5yrs|dis|NTF35|NTF35-55
+Rabies - Deaths-Total|dis|NTF35|NTF35-60
+Dysentery - OPD-FA-<1yr|dis|NTF40|NTF40-05
+Dysentery - OPD-FA-1-5yrs|dis|NTF40|NTF40-10
+Dysentery - OPD-FA->5yrs|dis|NTF40|NTF40-15
+Dysentery - OPD-FA-Total|dis|NTF40|NTF40-20
+Dysentery - IPD-Discharge-<1yr|dis|NTF40|NTF40-25
+Dysentery - IPD-Discharge-1-5yrs|dis|NTF40|NTF40-30
+Dysentery - IPD-Discharge->5yrs|dis|NTF40|NTF40-35
+Dysentery - IPD-Discharge-Total|dis|NTF40|NTF40-40
+Dysentery - Deaths-<1yr|dis|NTF40|NTF40-45
+Dysentery - Deaths-1-5yrs|dis|NTF40|NTF40-50
+Dysentery - Deaths->5yrs|dis|NTF40|NTF40-55
+Dysentery - Deaths-Total|dis|NTF40|NTF40-60
+Typhoid fever - OPD-FA-<1yr|dis|NTF45|NTF45-05
+Typhoid fever - OPD-FA-1-5yrs|dis|NTF45|NTF45-10
+Typhoid fever - OPD-FA->5yrs|dis|NTF45|NTF45-15
+Typhoid fever - OPD-FA-Total|dis|NTF45|NTF45-20
+Typhoid fever - IPD-Discharge-<1yr|dis|NTF45|NTF45-25
+Typhoid fever - IPD-Discharge-1-5yrs|dis|NTF45|NTF45-30
+Typhoid fever - IPD-Discharge->5yrs|dis|NTF45|NTF45-35
+Typhoid fever - IPD-Discharge-Total|dis|NTF45|NTF45-40
+Typhoid fever - Deaths-<1yr|dis|NTF45|NTF45-45
+Typhoid fever - Deaths-1-5yrs|dis|NTF45|NTF45-50
+Typhoid fever - Deaths->5yrs|dis|NTF45|NTF45-55
+Typhoid fever - Deaths-Total|dis|NTF45|NTF45-60
+Yellow fever - OPD-FA-<1yr|dis|NTF50|NTF50-05
+Yellow fever - OPD-FA-1-5yrs|dis|NTF50|NTF50-10
+Yellow fever - OPD-FA->5yrs|dis|NTF50|NTF50-15
+Yellow fever - OPD-FA-Total|dis|NTF50|NTF50-20
+Yellow fever - IPD-Discharge-<1yr|dis|NTF50|NTF50-25
+Yellow fever - IPD-Discharge-1-5yrs|dis|NTF50|NTF50-30
+Yellow fever - IPD-Discharge->5yrs|dis|NTF50|NTF50-35
+Yellow fever - IPD-Discharge-Total|dis|NTF50|NTF50-40
+Yellow fever - Deaths-<1yr|dis|NTF50|NTF50-45
+Yellow fever - Deaths-1-5yrs|dis|NTF50|NTF50-50
+Yellow fever - Deaths->5yrs|dis|NTF50|NTF50-55
+Yellow fever - Deaths-Total|dis|NTF50|NTF50-60
+Viral Hemorrhagic fever - OPD-FA-<1yr|dis|NTF55|NTF55-05
+Viral Hemorrhagic fever - OPD-FA-1-5yrs|dis|NTF55|NTF55-10
+Viral Hemorrhagic fever - OPD-FA->5yrs|dis|NTF55|NTF55-15
+Viral Hemorrhagic fever - OPD-FA-Total|dis|NTF55|NTF55-20
+Viral Hemorrhagic fever - IPD-Discharge-<1yr|dis|NTF55|NTF55-25
+Viral Hemorrhagic fever - IPD-Discharge-1-5yrs|dis|NTF55|NTF55-30
+Viral Hemorrhagic fever - IPD-Discharge->5yrs|dis|NTF55|NTF55-35
+Viral Hemorrhagic fever - IPD-Discharge-Total|dis|NTF55|NTF55-40
+Viral Hemorrhagic fever - Deaths-<1yr|dis|NTF55|NTF55-45
+Viral Hemorrhagic fever - Deaths-1-5yrs|dis|NTF55|NTF55-50
+Viral Hemorrhagic fever - Deaths->5yrs|dis|NTF55|NTF55-55
+Viral Hemorrhagic fever - Deaths-Total|dis|NTF55|NTF55-60
+Anthrax - OPD-FA-<1yr|dis|NTF60|NTF60-05
+Anthrax - OPD-FA-1-5yrs|dis|NTF60|NTF60-10
+Anthrax - OPD-FA->5yrs|dis|NTF60|NTF60-15
+Anthrax - OPD-FA-Total|dis|NTF60|NTF60-20
+Anthrax - IPD-Discharge-<1yr|dis|NTF60|NTF60-25
+Anthrax - IPD-Discharge-1-5yrs|dis|NTF60|NTF60-30
+Anthrax - IPD-Discharge->5yrs|dis|NTF60|NTF60-35
+Anthrax - IPD-Discharge-Total|dis|NTF60|NTF60-40
+Anthrax - Deaths-<1yr|dis|NTF60|NTF60-45
+Anthrax - Deaths-1-5yrs|dis|NTF60|NTF60-50
+Anthrax - Deaths->5yrs|dis|NTF60|NTF60-55
+Anthrax - Deaths-Total|dis|NTF60|NTF60-60
+Avian influenza (Human) - OPD-FA-<1yr|dis|NTF65|NTF65-05
+Avian influenza (Human) - OPD-FA-1-5yrs|dis|NTF65|NTF65-10
+Avian influenza (Human) - OPD-FA->5yrs|dis|NTF65|NTF65-15
+Avian influenza (Human) - OPD-FA-Total|dis|NTF65|NTF65-20
+Avian influenza (Human) - IPD-Discharge-<1yr|dis|NTF65|NTF65-25
+Avian influenza (Human) - IPD-Discharge-1-5yrs|dis|NTF65|NTF65-30
+Avian influenza (Human) - IPD-Discharge->5yrs|dis|NTF65|NTF65-35
+Avian influenza (Human) - IPD-Discharge-Total|dis|NTF65|NTF65-40
+Avian influenza (Human) - Deaths-<1yr|dis|NTF65|NTF65-45
+Avian influenza (Human) - Deaths-1-5yrs|dis|NTF65|NTF65-50
+Avian influenza (Human) - Deaths->5yrs|dis|NTF65|NTF65-55
+Avian influenza (Human) - Deaths-Total|dis|NTF65|NTF65-60
+Trypanosomiasis - OPD-FA-<1yr|dis| NTF70| NTF70-05
+Trypanosomiasis - OPD-FA-1-5yrs|dis| NTF70| NTF70-10
+Trypanosomiasis - OPD-FA->5yrs|dis| NTF70| NTF70-15
+Trypanosomiasis - OPD-FA-Total|dis| NTF70| NTF70-20
+Trypanosomiasis - IPD-Discharge-<1yr|dis| NTF70| NTF70-25
+Trypanosomiasis - IPD-Discharge-1-5yrs|dis| NTF70| NTF70-30
+Trypanosomiasis - IPD-Discharge->5yrs|dis| NTF70| NTF70-35
+Trypanosomiasis - IPD-Discharge-Total|dis| NTF70| NTF70-40
+Trypanosomiasis - Deaths-<1yr|dis| NTF70| NTF70-45
+Trypanosomiasis - Deaths-1-5yrs|dis| NTF70| NTF70-50
+Trypanosomiasis - Deaths->5yrs|dis| NTF70| NTF70-55
+Trypanosomiasis - Deaths-Total|dis| NTF70| NTF70-60
+Malaria case provided with anti malarial treatment - OPD-FA-<1yr|dis|MLR01|MLR01-05
+Malaria case provided with anti malarial treatment - OPD-FA-1-5yrs|dis|MLR01|MLR01-10
+Malaria case provided with anti malarial treatment - OPD-FA->5yrs|dis|MLR01|MLR01-15
+Malaria case provided with anti malarial treatment - OPD-FA-Total|dis|MLR01|MLR01-20
+Malaria case provided with anti malarial treatment - IPD-Discharge-<1yr|dis|MLR01|MLR01-25
+Malaria case provided with anti malarial treatment - IPD-Discharge-1-5yrs|dis|MLR01|MLR01-30
+Malaria case provided with anti malarial treatment - IPD-Discharge->5yrs|dis|MLR01|MLR01-35
+Malaria case provided with anti malarial treatment - IPD-Discharge-Total|dis|MLR01|MLR01-40
+Malaria case provided with anti malarial treatment - Deaths-<1yr|dis|MLR01|MLR01-45
+Malaria case provided with anti malarial treatment - Deaths-1-5yrs|dis|MLR01|MLR01-50
+Malaria case provided with anti malarial treatment - Deaths->5yrs|dis|MLR01|MLR01-55
+Malaria case provided with anti malarial treatment - Deaths-Total|dis|MLR01|MLR01-60
+Clinical case of malaria - OPD-FA-<1yr|dis|MLR05|MLR05-05
+Clinical case of malaria - OPD-FA-1-5yrs|dis|MLR05|MLR05-10
+Clinical case of malaria - OPD-FA->5yrs|dis|MLR05|MLR05-15
+Clinical case of malaria - OPD-FA-Total|dis|MLR05|MLR05-20
+Clinical case of malaria - IPD-Discharge-<1yr|dis|MLR05|MLR05-25
+Clinical case of malaria - IPD-Discharge-1-5yrs|dis|MLR05|MLR05-30
+Clinical case of malaria - IPD-Discharge->5yrs|dis|MLR05|MLR05-35
+Clinical case of malaria - IPD-Discharge-Total|dis|MLR05|MLR05-40
+Clinical case of malaria - Deaths-<1yr|dis|MLR05|MLR05-45
+Clinical case of malaria - Deaths-1-5yrs|dis|MLR05|MLR05-50
+Clinical case of malaria - Deaths->5yrs|dis|MLR05|MLR05-55
+Clinical case of malaria - Deaths-Total|dis|MLR05|MLR05-60
+Confirmed case of malaria - OPD-FA-<1yr|dis| MLR10| MLR10-05
+Confirmed case of malaria - OPD-FA-1-5yrs|dis| MLR10| MLR10-10
+Confirmed case of malaria - OPD-FA->5yrs|dis| MLR10| MLR10-15
+Confirmed case of malaria - OPD-FA-Total|dis| MLR10| MLR10-20
+Confirmed case of malaria - IPD-Discharge-<1yr|dis| MLR10| MLR10-25
+Confirmed case of malaria - IPD-Discharge-1-5yrs|dis| MLR10| MLR10-30
+Confirmed case of malaria - IPD-Discharge->5yrs|dis| MLR10| MLR10-35
+Confirmed case of malaria - IPD-Discharge-Total|dis| MLR10| MLR10-40
+Confirmed case of malaria - Deaths-<1yr|dis| MLR10| MLR10-45
+Confirmed case of malaria - Deaths-1-5yrs|dis| MLR10| MLR10-50
+Confirmed case of malaria - Deaths->5yrs|dis| MLR10| MLR10-55
+Confirmed case of malaria - Deaths-Total|dis| MLR10| MLR10-60
+Clinical malaria in pregnancy - OPD-FA-<1yr|dis|MLR15|MLR15-05
+Clinical malaria in pregnancy - OPD-FA-1-5yrs|dis|MLR15|MLR15-10
+Clinical malaria in pregnancy - OPD-FA->5yrs|dis|MLR15|MLR15-15
+Clinical malaria in pregnancy - OPD-FA-Total|dis|MLR15|MLR15-20
+Clinical malaria in pregnancy - IPD-Discharge-<1yr|dis|MLR15|MLR15-25
+Clinical malaria in pregnancy - IPD-Discharge-1-5yrs|dis|MLR15|MLR15-30
+Clinical malaria in pregnancy - IPD-Discharge->5yrs|dis|MLR15|MLR15-35
+Clinical malaria in pregnancy - IPD-Discharge-Total|dis|MLR15|MLR15-40
+Clinical malaria in pregnancy - Deaths-<1yr|dis|MLR15|MLR15-45
+Clinical malaria in pregnancy - Deaths-1-5yrs|dis|MLR15|MLR15-50
+Clinical malaria in pregnancy - Deaths->5yrs|dis|MLR15|MLR15-55
+Clinical malaria in pregnancy - Deaths-Total|dis|MLR15|MLR15-60
+Confirmed malaria in pregnancy - OPD-FA-<1yr|dis|MLR20|MLR20-05
+Confirmed malaria in pregnancy - OPD-FA-1-5yrs|dis|MLR20|MLR20-10
+Confirmed malaria in pregnancy - OPD-FA->5yrs|dis|MLR20|MLR20-15
+Confirmed malaria in pregnancy - OPD-FA-Total|dis|MLR20|MLR20-20
+Confirmed malaria in pregnancy - IPD-Discharge-<1yr|dis|MLR20|MLR20-25
+Confirmed malaria in pregnancy - IPD-Discharge-1-5yrs|dis|MLR20|MLR20-30
+Confirmed malaria in pregnancy - IPD-Discharge->5yrs|dis|MLR20|MLR20-35
+Confirmed malaria in pregnancy - IPD-Discharge-Total|dis|MLR20|MLR20-40
+Confirmed malaria in pregnancy - Deaths-<1yr|dis|MLR20|MLR20-45
+Confirmed malaria in pregnancy - Deaths-1-5yrs|dis|MLR20|MLR20-50
+Confirmed malaria in pregnancy - Deaths->5yrs|dis|MLR20|MLR20-55
+Confirmed malaria in pregnancy - Deaths-Total|dis|MLR20|MLR20-60
+Malaria laboratory tests (slide/RDT) - OPD-FA-<1yr|dis|MLR25|MLR25-05
+Malaria laboratory tests (slide/RDT) - OPD-FA-1-5yrs|dis|MLR25|MLR25-10
+Malaria laboratory tests (slide/RDT) - OPD-FA->5yrs|dis|MLR25|MLR25-15
+Malaria laboratory tests (slide/RDT) - OPD-FA-Total|dis|MLR25|MLR25-20
+Malaria laboratory tests (slide/RDT) - IPD-Discharge-<1yr|dis|MLR25|MLR25-25
+Malaria laboratory tests (slide/RDT) - IPD-Discharge-1-5yrs|dis|MLR25|MLR25-30
+Malaria laboratory tests (slide/RDT) - IPD-Discharge->5yrs|dis|MLR25|MLR25-35
+Malaria laboratory tests (slide/RDT) - IPD-Discharge-Total|dis|MLR25|MLR25-40
+Malaria laboratory tests (slide/RDT) - Deaths-<1yr|dis|MLR25|MLR25-45
+Malaria laboratory tests (slide/RDT) - Deaths-1-5yrs|dis|MLR25|MLR25-50
+Malaria laboratory tests (slide/RDT) - Deaths->5yrs|dis|MLR25|MLR25-55
+Malaria laboratory tests (slide/RDT) - Deaths-Total|dis|MLR25|MLR25-60
+Ear Diseases - OPD-FA-<1yr|dis|ENT05|ENT05-05
+Ear Diseases - OPD-FA-1-5yrs|dis|ENT05|ENT05-10
+Ear Diseases - OPD-FA->5yrs|dis|ENT05|ENT05-15
+Ear Diseases - OPD-FA-Total|dis|ENT05|ENT05-20
+Ear Diseases - IPD-Discharge-<1yr|dis|ENT05|ENT05-25
+Ear Diseases - IPD-Discharge-1-5yrs|dis|ENT05|ENT05-30
+Ear Diseases - IPD-Discharge->5yrs|dis|ENT05|ENT05-35
+Ear Diseases - IPD-Discharge-Total|dis|ENT05|ENT05-40
+Ear Diseases - Deaths-<1yr|dis|ENT05|ENT05-45
+Ear Diseases - Deaths-1-5yrs|dis|ENT05|ENT05-50
+Ear Diseases - Deaths->5yrs|dis|ENT05|ENT05-55
+Ear Diseases - Deaths-Total|dis|ENT05|ENT05-60
+Nose Diseases - OPD-FA-<1yr|dis|ENT10|ENT10-05
+Nose Diseases - OPD-FA-1-5yrs|dis|ENT10|ENT10-10
+Nose Diseases - OPD-FA->5yrs|dis|ENT10|ENT10-15
+Nose Diseases - OPD-FA-Total|dis|ENT10|ENT10-20
+Nose Diseases - IPD-Discharge-<1yr|dis|ENT10|ENT10-25
+Nose Diseases - IPD-Discharge-1-5yrs|dis|ENT10|ENT10-30
+Nose Diseases - IPD-Discharge->5yrs|dis|ENT10|ENT10-35
+Nose Diseases - IPD-Discharge-Total|dis|ENT10|ENT10-40
+Nose Diseases - Deaths-<1yr|dis|ENT10|ENT10-45
+Nose Diseases - Deaths-1-5yrs|dis|ENT10|ENT10-50
+Nose Diseases - Deaths->5yrs|dis|ENT10|ENT10-55
+Nose Diseases - Deaths-Total|dis|ENT10|ENT10-60
+Throat Diseases - OPD-FA-<1yr|dis|ENT15|ENT15-05
+Throat Diseases - OPD-FA-1-5yrs|dis|ENT15|ENT15-10
+Throat Diseases - OPD-FA->5yrs|dis|ENT15|ENT15-15
+Throat Diseases - OPD-FA-Total|dis|ENT15|ENT15-20
+Throat Diseases - IPD-Discharge-<1yr|dis|ENT15|ENT15-25
+Throat Diseases - IPD-Discharge-1-5yrs|dis|ENT15|ENT15-30
+Throat Diseases - IPD-Discharge->5yrs|dis|ENT15|ENT15-35
+Throat Diseases - IPD-Discharge-Total|dis|ENT15|ENT15-40
+Throat Diseases - Deaths-<1yr|dis|ENT15|ENT15-45
+Throat Diseases - Deaths-1-5yrs|dis|ENT15|ENT15-50
+Throat Diseases - Deaths->5yrs|dis|ENT15|ENT15-55
+Throat Diseases - Deaths-Total|dis|ENT15|ENT15-60
+Asthma - OPD-FA-<1yr|dis|CRN05|CRN05-05
+Asthma - OPD-FA-1-5yrs|dis|CRN05|CRN05-10
+Asthma - OPD-FA->5yrs|dis|CRN05|CRN05-15
+Asthma - OPD-FA-Total|dis|CRN05|CRN05-20
+Asthma - IPD-Discharge-<1yr|dis|CRN05|CRN05-25
+Asthma - IPD-Discharge-1-5yrs|dis|CRN05|CRN05-30
+Asthma - IPD-Discharge->5yrs|dis|CRN05|CRN05-35
+Asthma - IPD-Discharge-Total|dis|CRN05|CRN05-40
+Asthma - Deaths-<1yr|dis|CRN05|CRN05-45
+Asthma - Deaths-1-5yrs|dis|CRN05|CRN05-50
+Asthma - Deaths->5yrs|dis|CRN05|CRN05-55
+Asthma - Deaths-Total|dis|CRN05|CRN05-60
+Cardio-vascular diseases - OPD-FA-<1yr|dis|CRN10|CRN10-05
+Cardio-vascular diseases - OPD-FA-1-5yrs|dis|CRN10|CRN10-10
+Cardio-vascular diseases - OPD-FA->5yrs|dis|CRN10|CRN10-15
+Cardio-vascular diseases - OPD-FA-Total|dis|CRN10|CRN10-20
+Cardio-vascular diseases - IPD-Discharge-<1yr|dis|CRN10|CRN10-25
+Cardio-vascular diseases - IPD-Discharge-1-5yrs|dis|CRN10|CRN10-30
+Cardio-vascular diseases - IPD-Discharge->5yrs|dis|CRN10|CRN10-35
+Cardio-vascular diseases - IPD-Discharge-Total|dis|CRN10|CRN10-40
+Cardio-vascular diseases - Deaths-<1yr|dis|CRN10|CRN10-45
+Cardio-vascular diseases - Deaths-1-5yrs|dis|CRN10|CRN10-50
+Cardio-vascular diseases - Deaths->5yrs|dis|CRN10|CRN10-55
+Cardio-vascular diseases - Deaths-Total|dis|CRN10|CRN10-60
+Diabetes - OPD-FA-<1yr|dis|CRN15|CRN15-05
+Diabetes - OPD-FA-1-5yrs|dis|CRN15|CRN15-10
+Diabetes - OPD-FA->5yrs|dis|CRN15|CRN15-15
+Diabetes - OPD-FA-Total|dis|CRN15|CRN15-20
+Diabetes - IPD-Discharge-<1yr|dis|CRN15|CRN15-25
+Diabetes - IPD-Discharge-1-5yrs|dis|CRN15|CRN15-30
+Diabetes - IPD-Discharge->5yrs|dis|CRN15|CRN15-35
+Diabetes - IPD-Discharge-Total|dis|CRN15|CRN15-40
+Diabetes - Deaths-<1yr|dis|CRN15|CRN15-45
+Diabetes - Deaths-1-5yrs|dis|CRN15|CRN15-50
+Diabetes - Deaths->5yrs|dis|CRN15|CRN15-55
+Diabetes - Deaths-Total|dis|CRN15|CRN15-60
+Hypertension - OPD-FA-<1yr|dis|CRN20|CRN20-05
+Hypertension - OPD-FA-1-5yrs|dis|CRN20|CRN20-10
+Hypertension - OPD-FA->5yrs|dis|CRN20|CRN20-15
+Hypertension - OPD-FA-Total|dis|CRN20|CRN20-20
+Hypertension - IPD-Discharge-<1yr|dis|CRN20|CRN20-25
+Hypertension - IPD-Discharge-1-5yrs|dis|CRN20|CRN20-30
+Hypertension - IPD-Discharge->5yrs|dis|CRN20|CRN20-35
+Hypertension - IPD-Discharge-Total|dis|CRN20|CRN20-40
+Hypertension - Deaths-<1yr|dis|CRN20|CRN20-45
+Hypertension - Deaths-1-5yrs|dis|CRN20|CRN20-50
+Hypertension - Deaths->5yrs|dis|CRN20|CRN20-55
+Hypertension - Deaths-Total|dis|CRN20|CRN20-60
+Epilepsy - OPD-FA-<1yr|dis|CRN25|CRN25-05
+Epilepsy - OPD-FA-1-5yrs|dis|CRN25|CRN25-10
+Epilepsy - OPD-FA->5yrs|dis|CRN25|CRN25-15
+Epilepsy - OPD-FA-Total|dis|CRN25|CRN25-20
+Epilepsy - IPD-Discharge-<1yr|dis|CRN25|CRN25-25
+Epilepsy - IPD-Discharge-1-5yrs|dis|CRN25|CRN25-30
+Epilepsy - IPD-Discharge->5yrs|dis|CRN25|CRN25-35
+Epilepsy - IPD-Discharge-Total|dis|CRN25|CRN25-40
+Epilepsy - Deaths-<1yr|dis|CRN25|CRN25-45
+Epilepsy - Deaths-1-5yrs|dis|CRN25|CRN25-50
+Epilepsy - Deaths->5yrs|dis|CRN25|CRN25-55
+Epilepsy - Deaths-Total|dis|CRN25|CRN25-60
+Sickle Cell Anaemia - OPD-FA-<1yr|dis|CRN30|CRN30-05
+Sickle Cell Anaemia - OPD-FA-1-5yrs|dis|CRN30|CRN30-10
+Sickle Cell Anaemia - OPD-FA->5yrs|dis|CRN30|CRN30-15
+Sickle Cell Anaemia - OPD-FA-Total|dis|CRN30|CRN30-20
+Sickle Cell Anaemia - IPD-Discharge-<1yr|dis|CRN30|CRN30-25
+Sickle Cell Anaemia - IPD-Discharge-1-5yrs|dis|CRN30|CRN30-30
+Sickle Cell Anaemia - IPD-Discharge->5yrs|dis|CRN30|CRN30-35
+Sickle Cell Anaemia - IPD-Discharge-Total|dis|CRN30|CRN30-40
+Sickle Cell Anaemia - Deaths-<1yr|dis|CRN30|CRN30-45
+Sickle Cell Anaemia - Deaths-1-5yrs|dis|CRN30|CRN30-50
+Sickle Cell Anaemia - Deaths->5yrs|dis|CRN30|CRN30-55
+Sickle Cell Anaemia - Deaths-Total|dis|CRN30|CRN30-60
+Cryptococcal meningitis - OPD-FA-<1yr|dis|RVD05|RVD05-05
+Cryptococcal meningitis - OPD-FA-1-5yrs|dis|RVD05|RVD05-10
+Cryptococcal meningitis - OPD-FA->5yrs|dis|RVD05|RVD05-15
+Cryptococcal meningitis - OPD-FA-Total|dis|RVD05|RVD05-20
+Cryptococcal meningitis - IPD-Discharge-<1yr|dis|RVD05|RVD05-25
+Cryptococcal meningitis - IPD-Discharge-1-5yrs|dis|RVD05|RVD05-30
+Cryptococcal meningitis - IPD-Discharge->5yrs|dis|RVD05|RVD05-35
+Cryptococcal meningitis - IPD-Discharge-Total|dis|RVD05|RVD05-40
+Cryptococcal meningitis - Deaths-<1yr|dis|RVD05|RVD05-45
+Cryptococcal meningitis - Deaths-1-5yrs|dis|RVD05|RVD05-50
+Cryptococcal meningitis - Deaths->5yrs|dis|RVD05|RVD05-55
+Cryptococcal meningitis - Deaths-Total|dis|RVD05|RVD05-60
+Herpes zoster - OPD-FA-<1yr|dis|RVD10|RVD10-05
+Herpes zoster - OPD-FA-1-5yrs|dis|RVD10|RVD10-10
+Herpes zoster - OPD-FA->5yrs|dis|RVD10|RVD10-15
+Herpes zoster - OPD-FA-Total|dis|RVD10|RVD10-20
+Herpes zoster - IPD-Discharge-<1yr|dis|RVD10|RVD10-25
+Herpes zoster - IPD-Discharge-1-5yrs|dis|RVD10|RVD10-30
+Herpes zoster - IPD-Discharge->5yrs|dis|RVD10|RVD10-35
+Herpes zoster - IPD-Discharge-Total|dis|RVD10|RVD10-40
+Herpes zoster - Deaths-<1yr|dis|RVD10|RVD10-45
+Herpes zoster - Deaths-1-5yrs|dis|RVD10|RVD10-50
+Herpes zoster - Deaths->5yrs|dis|RVD10|RVD10-55
+Herpes zoster - Deaths-Total|dis|RVD10|RVD10-60
+Karposi sarcoma - OPD-FA-<1yr|dis|RVD15|RVD15-05
+Karposi sarcoma - OPD-FA-1-5yrs|dis|RVD15|RVD15-10
+Karposi sarcoma - OPD-FA->5yrs|dis|RVD15|RVD15-15
+Karposi sarcoma - OPD-FA-Total|dis|RVD15|RVD15-20
+Karposi sarcoma - IPD-Discharge-<1yr|dis|RVD15|RVD15-25
+Karposi sarcoma - IPD-Discharge-1-5yrs|dis|RVD15|RVD15-30
+Karposi sarcoma - IPD-Discharge->5yrs|dis|RVD15|RVD15-35
+Karposi sarcoma - IPD-Discharge-Total|dis|RVD15|RVD15-40
+Karposi sarcoma - Deaths-<1yr|dis|RVD15|RVD15-45
+Karposi sarcoma - Deaths-1-5yrs|dis|RVD15|RVD15-50
+Karposi sarcoma - Deaths->5yrs|dis|RVD15|RVD15-55
+Karposi sarcoma - Deaths-Total|dis|RVD15|RVD15-60
+Pneumocystic Carnii Pneumonia (PCP) - OPD-FA-<1yr|dis|RVD20|RVD20-05
+Pneumocystic Carnii Pneumonia (PCP) - OPD-FA-1-5yrs|dis|RVD20|RVD20-10
+Pneumocystic Carnii Pneumonia (PCP) - OPD-FA->5yrs|dis|RVD20|RVD20-15
+Pneumocystic Carnii Pneumonia (PCP) - OPD-FA-Total|dis|RVD20|RVD20-20
+Pneumocystic Carnii Pneumonia (PCP) - IPD-Discharge-<1yr|dis|RVD20|RVD20-25
+Pneumocystic Carnii Pneumonia (PCP) - IPD-Discharge-1-5yrs|dis|RVD20|RVD20-30
+Pneumocystic Carnii Pneumonia (PCP) - IPD-Discharge->5yrs|dis|RVD20|RVD20-35
+Pneumocystic Carnii Pneumonia (PCP) - IPD-Discharge-Total|dis|RVD20|RVD20-40
+Pneumocystic Carnii Pneumonia (PCP) - Deaths-<1yr|dis|RVD20|RVD20-45
+Pneumocystic Carnii Pneumonia (PCP) - Deaths-1-5yrs|dis|RVD20|RVD20-50
+Pneumocystic Carnii Pneumonia (PCP) - Deaths->5yrs|dis|RVD20|RVD20-55
+Pneumocystic Carnii Pneumonia (PCP) - Deaths-Total|dis|RVD20|RVD20-60
+Anaemia - OPD-FA-<1yr|dis|D05|D05-05
+Anaemia - OPD-FA-1-5yrs|dis|D05|D05-10
+Anaemia - OPD-FA->5yrs|dis|D05|D05-15
+Anaemia - OPD-FA-Total|dis|D05|D05-20
+Anaemia - IPD-Discharge-<1yr|dis|D05|D05-25
+Anaemia - IPD-Discharge-1-5yrs|dis|D05|D05-30
+Anaemia - IPD-Discharge->5yrs|dis|D05|D05-35
+Anaemia - IPD-Discharge-Total|dis|D05|D05-40
+Anaemia - Deaths-<1yr|dis|D05|D05-45
+Anaemia - Deaths-1-5yrs|dis|D05|D05-50
+Anaemia - Deaths->5yrs|dis|D05|D05-55
+Anaemia - Deaths-Total|dis|D05|D05-60
+Dental Carries - OPD-FA-<1yr|dis|D10|D10-05
+Dental Carries - OPD-FA-1-5yrs|dis|D10|D10-10
+Dental Carries - OPD-FA->5yrs|dis|D10|D10-15
+Dental Carries - OPD-FA-Total|dis|D10|D10-20
+Dental Carries - IPD-Discharge-<1yr|dis|D10|D10-25
+Dental Carries - IPD-Discharge-1-5yrs|dis|D10|D10-30
+Dental Carries - IPD-Discharge->5yrs|dis|D10|D10-35
+Dental Carries - IPD-Discharge-Total|dis|D10|D10-40
+Dental Carries - Deaths-<1yr|dis|D10|D10-45
+Dental Carries - Deaths-1-5yrs|dis|D10|D10-50
+Dental Carries - Deaths->5yrs|dis|D10|D10-55
+Dental Carries - Deaths-Total|dis|D10|D10-60
+Dental diseases: Other - OPD-FA-<1yr|dis|D15|D15-05
+Dental diseases: Other - OPD-FA-1-5yrs|dis|D15|D15-10
+Dental diseases: Other - OPD-FA->5yrs|dis|D15|D15-15
+Dental diseases: Other - OPD-FA-Total|dis|D15|D15-20
+Dental diseases: Other - IPD-Discharge-<1yr|dis|D15|D15-25
+Dental diseases: Other - IPD-Discharge-1-5yrs|dis|D15|D15-30
+Dental diseases: Other - IPD-Discharge->5yrs|dis|D15|D15-35
+Dental diseases: Other - IPD-Discharge-Total|dis|D15|D15-40
+Dental diseases: Other - Deaths-<1yr|dis|D15|D15-45
+Dental diseases: Other - Deaths-1-5yrs|dis|D15|D15-50
+Dental diseases: Other - Deaths->5yrs|dis|D15|D15-55
+Dental diseases: Other - Deaths-Total|dis|D15|D15-60
+Diarrhoea (non-bloody) - OPD-FA-<1yr|dis| D20| D20-05
+Diarrhoea (non-bloody) - OPD-FA-1-5yrs|dis| D20| D20-10
+Diarrhoea (non-bloody) - OPD-FA->5yrs|dis| D20| D20-15
+Diarrhoea (non-bloody) - OPD-FA-Total|dis| D20| D20-20
+Diarrhoea (non-bloody) - IPD-Discharge-<1yr|dis| D20| D20-25
+Diarrhoea (non-bloody) - IPD-Discharge-1-5yrs|dis| D20| D20-30
+Diarrhoea (non-bloody) - IPD-Discharge->5yrs|dis| D20| D20-35
+Diarrhoea (non-bloody) - IPD-Discharge-Total|dis| D20| D20-40
+Diarrhoea (non-bloody) - Deaths-<1yr|dis| D20| D20-45
+Diarrhoea (non-bloody) - Deaths-1-5yrs|dis| D20| D20-50
+Diarrhoea (non-bloody) - Deaths->5yrs|dis| D20| D20-55
+Diarrhoea (non-bloody) - Deaths-Total|dis| D20| D20-60
+Digestive system: (not infectious) - OPD-FA-<1yr|dis|D25|D25-05
+Digestive system: (not infectious) - OPD-FA-1-5yrs|dis|D25|D25-10
+Digestive system: (not infectious) - OPD-FA->5yrs|dis|D25|D25-15
+Digestive system: (not infectious) - OPD-FA-Total|dis|D25|D25-20
+Digestive system: (not infectious) - IPD-Discharge-<1yr|dis|D25|D25-25
+Digestive system: (not infectious) - IPD-Discharge-1-5yrs|dis|D25|D25-30
+Digestive system: (not infectious) - IPD-Discharge->5yrs|dis|D25|D25-35
+Digestive system: (not infectious) - IPD-Discharge-Total|dis|D25|D25-40
+Digestive system: (not infectious) - Deaths-<1yr|dis|D25|D25-45
+Digestive system: (not infectious) - Deaths-1-5yrs|dis|D25|D25-50
+Digestive system: (not infectious) - Deaths->5yrs|dis|D25|D25-55
+Digestive system: (not infectious) - Deaths-Total|dis|D25|D25-60
+Eye Disease: Glaucoma - OPD-FA-<1yr|dis|D30|D30-05
+Eye Disease: Glaucoma - OPD-FA-1-5yrs|dis|D30|D30-10
+Eye Disease: Glaucoma - OPD-FA->5yrs|dis|D30|D30-15
+Eye Disease: Glaucoma - OPD-FA-Total|dis|D30|D30-20
+Eye Disease: Glaucoma - IPD-Discharge-<1yr|dis|D30|D30-25
+Eye Disease: Glaucoma - IPD-Discharge-1-5yrs|dis|D30|D30-30
+Eye Disease: Glaucoma - IPD-Discharge->5yrs|dis|D30|D30-35
+Eye Disease: Glaucoma - IPD-Discharge-Total|dis|D30|D30-40
+Eye Disease: Glaucoma - Deaths-<1yr|dis|D30|D30-45
+Eye Disease: Glaucoma - Deaths-1-5yrs|dis|D30|D30-50
+Eye Disease: Glaucoma - Deaths->5yrs|dis|D30|D30-55
+Eye Disease: Glaucoma - Deaths-Total|dis|D30|D30-60
+Eye Disease: Refractory Errors - OPD-FA-<1yr|dis|D35|D35-05
+Eye Disease: Refractory Errors - OPD-FA-1-5yrs|dis|D35|D35-10
+Eye Disease: Refractory Errors - OPD-FA->5yrs|dis|D35|D35-15
+Eye Disease: Refractory Errors - OPD-FA-Total|dis|D35|D35-20
+Eye Disease: Refractory Errors - IPD-Discharge-<1yr|dis|D35|D35-25
+Eye Disease: Refractory Errors - IPD-Discharge-1-5yrs|dis|D35|D35-30
+Eye Disease: Refractory Errors - IPD-Discharge->5yrs|dis|D35|D35-35
+Eye Disease: Refractory Errors - IPD-Discharge-Total|dis|D35|D35-40
+Eye Disease: Refractory Errors - Deaths-<1yr|dis|D35|D35-45
+Eye Disease: Refractory Errors - Deaths-1-5yrs|dis|D35|D35-50
+Eye Disease: Refractory Errors - Deaths->5yrs|dis|D35|D35-55
+Eye Disease: Refractory Errors - Deaths-Total|dis|D35|D35-60
+Eye Disease: Spring Cattarah - OPD-FA-<1yr|dis|D40|D40-05
+Eye Disease: Spring Cattarah - OPD-FA-1-5yrs|dis|D40|D40-10
+Eye Disease: Spring Cattarah - OPD-FA->5yrs|dis|D40|D40-15
+Eye Disease: Spring Cattarah - OPD-FA-Total|dis|D40|D40-20
+Eye Disease: Spring Cattarah - IPD-Discharge-<1yr|dis|D40|D40-25
+Eye Disease: Spring Cattarah - IPD-Discharge-1-5yrs|dis|D40|D40-30
+Eye Disease: Spring Cattarah - IPD-Discharge->5yrs|dis|D40|D40-35
+Eye Disease: Spring Cattarah - IPD-Discharge-Total|dis|D40|D40-40
+Eye Disease: Spring Cattarah - Deaths-<1yr|dis|D40|D40-45
+Eye Disease: Spring Cattarah - Deaths-1-5yrs|dis|D40|D40-50
+Eye Disease: Spring Cattarah - Deaths->5yrs|dis|D40|D40-55
+Eye Disease: Spring Cattarah - Deaths-Total|dis|D40|D40-60
+Eye diseases (infectious) - OPD-FA-<1yr|dis|D45|D45-05
+Eye diseases (infectious) - OPD-FA-1-5yrs|dis|D45|D45-10
+Eye diseases (infectious) - OPD-FA->5yrs|dis|D45|D45-15
+Eye diseases (infectious) - OPD-FA-Total|dis|D45|D45-20
+Eye diseases (infectious) - IPD-Discharge-<1yr|dis|D45|D45-25
+Eye diseases (infectious) - IPD-Discharge-1-5yrs|dis|D45|D45-30
+Eye diseases (infectious) - IPD-Discharge->5yrs|dis|D45|D45-35
+Eye diseases (infectious) - IPD-Discharge-Total|dis|D45|D45-40
+Eye diseases (infectious) - Deaths-<1yr|dis|D45|D45-45
+Eye diseases (infectious) - Deaths-1-5yrs|dis|D45|D45-50
+Eye diseases (infectious) - Deaths->5yrs|dis|D45|D45-55
+Eye diseases (infectious) - Deaths-Total|dis|D45|D45-60
+Genital-Urinary diseases (except STI) - OPD-FA-<1yr|dis|D50|D50-05
+Genital-Urinary diseases (except STI) - OPD-FA-1-5yrs|dis|D50|D50-10
+Genital-Urinary diseases (except STI) - OPD-FA->5yrs|dis|D50|D50-15
+Genital-Urinary diseases (except STI) - OPD-FA-Total|dis|D50|D50-20
+Genital-Urinary diseases (except STI) - IPD-Discharge-<1yr|dis|D50|D50-25
+Genital-Urinary diseases (except STI) - IPD-Discharge-1-5yrs|dis|D50|D50-30
+Genital-Urinary diseases (except STI) - IPD-Discharge->5yrs|dis|D50|D50-35
+Genital-Urinary diseases (except STI) - IPD-Discharge-Total|dis|D50|D50-40
+Genital-Urinary diseases (except STI) - Deaths-<1yr|dis|D50|D50-45
+Genital-Urinary diseases (except STI) - Deaths-1-5yrs|dis|D50|D50-50
+Genital-Urinary diseases (except STI) - Deaths->5yrs|dis|D50|D50-55
+Genital-Urinary diseases (except STI) - Deaths-Total|dis|D50|D50-60
+Intestinal worms - OPD-FA-<1yr|dis|D55|D55-05
+Intestinal worms - OPD-FA-1-5yrs|dis|D55|D55-10
+Intestinal worms - OPD-FA->5yrs|dis|D55|D55-15
+Intestinal worms - OPD-FA-Total|dis|D55|D55-20
+Intestinal worms - IPD-Discharge-<1yr|dis|D55|D55-25
+Intestinal worms - IPD-Discharge-1-5yrs|dis|D55|D55-30
+Intestinal worms - IPD-Discharge->5yrs|dis|D55|D55-35
+Intestinal worms - IPD-Discharge-Total|dis|D55|D55-40
+Intestinal worms - Deaths-<1yr|dis|D55|D55-45
+Intestinal worms - Deaths-1-5yrs|dis|D55|D55-50
+Intestinal worms - Deaths->5yrs|dis|D55|D55-55
+Intestinal worms - Deaths-Total|dis|D55|D55-60
+Mental Health ( Neurosis)) - OPD-FA-<1yr|dis|D60|D60-05
+Mental Health ( Neurosis)) - OPD-FA-1-5yrs|dis|D60|D60-10
+Mental Health ( Neurosis)) - OPD-FA->5yrs|dis|D60|D60-15
+Mental Health ( Neurosis)) - OPD-FA-Total|dis|D60|D60-20
+Mental Health ( Neurosis)) - IPD-Discharge-<1yr|dis|D60|D60-25
+Mental Health ( Neurosis)) - IPD-Discharge-1-5yrs|dis|D60|D60-30
+Mental Health ( Neurosis)) - IPD-Discharge->5yrs|dis|D60|D60-35
+Mental Health ( Neurosis)) - IPD-Discharge-Total|dis|D60|D60-40
+Mental Health ( Neurosis)) - Deaths-<1yr|dis|D60|D60-45
+Mental Health ( Neurosis)) - Deaths-1-5yrs|dis|D60|D60-50
+Mental Health ( Neurosis)) - Deaths->5yrs|dis|D60|D60-55
+Mental Health ( Neurosis)) - Deaths-Total|dis|D60|D60-60
+Mental Health ( Psychosis) - OPD-FA-<1yr|dis|D65|D65-05
+Mental Health ( Psychosis) - OPD-FA-1-5yrs|dis|D65|D65-10
+Mental Health ( Psychosis) - OPD-FA->5yrs|dis|D65|D65-15
+Mental Health ( Psychosis) - OPD-FA-Total|dis|D65|D65-20
+Mental Health ( Psychosis) - IPD-Discharge-<1yr|dis|D65|D65-25
+Mental Health ( Psychosis) - IPD-Discharge-1-5yrs|dis|D65|D65-30
+Mental Health ( Psychosis) - IPD-Discharge->5yrs|dis|D65|D65-35
+Mental Health ( Psychosis) - IPD-Discharge-Total|dis|D65|D65-40
+Mental Health ( Psychosis) - Deaths-<1yr|dis|D65|D65-45
+Mental Health ( Psychosis) - Deaths-1-5yrs|dis|D65|D65-50
+Mental Health ( Psychosis) - Deaths->5yrs|dis|D65|D65-55
+Mental Health ( Psychosis) - Deaths-Total|dis|D65|D65-60
+Muscular skeletal and connective tissue (not trauma) - OPD-FA-<1yr|dis|D70|D70-05
+Muscular skeletal and connective tissue (not trauma) - OPD-FA-1-5yrs|dis|D70|D70-10
+Muscular skeletal and connective tissue (not trauma) - OPD-FA->5yrs|dis|D70|D70-15
+Muscular skeletal and connective tissue (not trauma) - OPD-FA-Total|dis|D70|D70-20
+Muscular skeletal and connective tissue (not trauma) - IPD-Discharge-<1yr|dis|D70|D70-25
+Muscular skeletal and connective tissue (not trauma) - IPD-Discharge-1-5yrs|dis|D70|D70-30
+Muscular skeletal and connective tissue (not trauma) - IPD-Discharge->5yrs|dis|D70|D70-35
+Muscular skeletal and connective tissue (not trauma) - IPD-Discharge-Total|dis|D70|D70-40
+Muscular skeletal and connective tissue (not trauma) - Deaths-<1yr|dis|D70|D70-45
+Muscular skeletal and connective tissue (not trauma) - Deaths-1-5yrs|dis|D70|D70-50
+Muscular skeletal and connective tissue (not trauma) - Deaths->5yrs|dis|D70|D70-55
+Muscular skeletal and connective tissue (not trauma) - Deaths-Total|dis|D70|D70-60
+Neoplasm (All types) - OPD-FA-<1yr|dis|D75|D75-05
+Neoplasm (All types) - OPD-FA-1-5yrs|dis|D75|D75-10
+Neoplasm (All types) - OPD-FA->5yrs|dis|D75|D75-15
+Neoplasm (All types) - OPD-FA-Total|dis|D75|D75-20
+Neoplasm (All types) - IPD-Discharge-<1yr|dis|D75|D75-25
+Neoplasm (All types) - IPD-Discharge-1-5yrs|dis|D75|D75-30
+Neoplasm (All types) - IPD-Discharge->5yrs|dis|D75|D75-35
+Neoplasm (All types) - IPD-Discharge-Total|dis|D75|D75-40
+Neoplasm (All types) - Deaths-<1yr|dis|D75|D75-45
+Neoplasm (All types) - Deaths-1-5yrs|dis|D75|D75-50
+Neoplasm (All types) - Deaths->5yrs|dis|D75|D75-55
+Neoplasm (All types) - Deaths-Total|dis|D75|D75-60
+Nervous System Disorders: Other - OPD-FA-<1yr|dis|D80|D80-05
+Nervous System Disorders: Other - OPD-FA-1-5yrs|dis|D80|D80-10
+Nervous System Disorders: Other - OPD-FA->5yrs|dis|D80|D80-15
+Nervous System Disorders: Other - OPD-FA-Total|dis|D80|D80-20
+Nervous System Disorders: Other - IPD-Discharge-<1yr|dis|D80|D80-25
+Nervous System Disorders: Other - IPD-Discharge-1-5yrs|dis|D80|D80-30
+Nervous System Disorders: Other - IPD-Discharge->5yrs|dis|D80|D80-35
+Nervous System Disorders: Other - IPD-Discharge-Total|dis|D80|D80-40
+Nervous System Disorders: Other - Deaths-<1yr|dis|D80|D80-45
+Nervous System Disorders: Other - Deaths-1-5yrs|dis|D80|D80-50
+Nervous System Disorders: Other - Deaths->5yrs|dis|D80|D80-55
+Nervous System Disorders: Other - Deaths-Total|dis|D80|D80-60
+Poisoning - OPD-FA-<1yr|dis|D85|D85-05
+Poisoning - OPD-FA-1-5yrs|dis|D85|D85-10
+Poisoning - OPD-FA->5yrs|dis|D85|D85-15
+Poisoning - OPD-FA-Total|dis|D85|D85-20
+Poisoning - IPD-Discharge-<1yr|dis|D85|D85-25
+Poisoning - IPD-Discharge-1-5yrs|dis|D85|D85-30
+Poisoning - IPD-Discharge->5yrs|dis|D85|D85-35
+Poisoning - IPD-Discharge-Total|dis|D85|D85-40
+Poisoning - Deaths-<1yr|dis|D85|D85-45
+Poisoning - Deaths-1-5yrs|dis|D85|D85-50
+Poisoning - Deaths->5yrs|dis|D85|D85-55
+Poisoning - Deaths-Total|dis|D85|D85-60
+Pulmonary diseases (not infectious) - OPD-FA-<1yr|dis|D90|D90-05
+Pulmonary diseases (not infectious) - OPD-FA-1-5yrs|dis|D90|D90-10
+Pulmonary diseases (not infectious) - OPD-FA->5yrs|dis|D90|D90-15
+Pulmonary diseases (not infectious) - OPD-FA-Total|dis|D90|D90-20
+Pulmonary diseases (not infectious) - IPD-Discharge-<1yr|dis|D90|D90-25
+Pulmonary diseases (not infectious) - IPD-Discharge-1-5yrs|dis|D90|D90-30
+Pulmonary diseases (not infectious) - IPD-Discharge->5yrs|dis|D90|D90-35
+Pulmonary diseases (not infectious) - IPD-Discharge-Total|dis|D90|D90-40
+Pulmonary diseases (not infectious) - Deaths-<1yr|dis|D90|D90-45
+Pulmonary diseases (not infectious) - Deaths-1-5yrs|dis|D90|D90-50
+Pulmonary diseases (not infectious) - Deaths->5yrs|dis|D90|D90-55
+Pulmonary diseases (not infectious) - Deaths-Total|dis|D90|D90-60
+Pyrexia of Unknown Origin (PUO) - OPD-FA-<1yr|dis|D95|D95-05
+Pyrexia of Unknown Origin (PUO) - OPD-FA-1-5yrs|dis|D95|D95-10
+Pyrexia of Unknown Origin (PUO) - OPD-FA->5yrs|dis|D95|D95-15
+Pyrexia of Unknown Origin (PUO) - OPD-FA-Total|dis|D95|D95-20
+Pyrexia of Unknown Origin (PUO) - IPD-Discharge-<1yr|dis|D95|D95-25
+Pyrexia of Unknown Origin (PUO) - IPD-Discharge-1-5yrs|dis|D95|D95-30
+Pyrexia of Unknown Origin (PUO) - IPD-Discharge->5yrs|dis|D95|D95-35
+Pyrexia of Unknown Origin (PUO) - IPD-Discharge-Total|dis|D95|D95-40
+Pyrexia of Unknown Origin (PUO) - Deaths-<1yr|dis|D95|D95-45
+Pyrexia of Unknown Origin (PUO) - Deaths-1-5yrs|dis|D95|D95-50
+Pyrexia of Unknown Origin (PUO) - Deaths->5yrs|dis|D95|D95-55
+Pyrexia of Unknown Origin (PUO) - Deaths-Total|dis|D95|D95-60
+Respiratory Infection: non-pneumonia - OPD-FA-<1yr|dis|D100|D100-05
+Respiratory Infection: non-pneumonia - OPD-FA-1-5yrs|dis|D100|D100-10
+Respiratory Infection: non-pneumonia - OPD-FA->5yrs|dis|D100|D100-15
+Respiratory Infection: non-pneumonia - OPD-FA-Total|dis|D100|D100-20
+Respiratory Infection: non-pneumonia - IPD-Discharge-<1yr|dis|D100|D100-25
+Respiratory Infection: non-pneumonia - IPD-Discharge-1-5yrs|dis|D100|D100-30
+Respiratory Infection: non-pneumonia - IPD-Discharge->5yrs|dis|D100|D100-35
+Respiratory Infection: non-pneumonia - IPD-Discharge-Total|dis|D100|D100-40
+Respiratory Infection: non-pneumonia - Deaths-<1yr|dis|D100|D100-45
+Respiratory Infection: non-pneumonia - Deaths-1-5yrs|dis|D100|D100-50
+Respiratory Infection: non-pneumonia - Deaths->5yrs|dis|D100|D100-55
+Respiratory Infection: non-pneumonia - Deaths-Total|dis|D100|D100-60
+Respiratory Infection: pneumonia - OPD-FA-<1yr|dis|D105|D105-05
+Respiratory Infection: pneumonia - OPD-FA-1-5yrs|dis|D105|D105-10
+Respiratory Infection: pneumonia - OPD-FA->5yrs|dis|D105|D105-15
+Respiratory Infection: pneumonia - OPD-FA-Total|dis|D105|D105-20
+Respiratory Infection: pneumonia - IPD-Discharge-<1yr|dis|D105|D105-25
+Respiratory Infection: pneumonia - IPD-Discharge-1-5yrs|dis|D105|D105-30
+Respiratory Infection: pneumonia - IPD-Discharge->5yrs|dis|D105|D105-35
+Respiratory Infection: pneumonia - IPD-Discharge-Total|dis|D105|D105-40
+Respiratory Infection: pneumonia - Deaths-<1yr|dis|D105|D105-45
+Respiratory Infection: pneumonia - Deaths-1-5yrs|dis|D105|D105-50
+Respiratory Infection: pneumonia - Deaths->5yrs|dis|D105|D105-55
+Respiratory Infection: pneumonia - Deaths-Total|dis|D105|D105-60
+Severe Diarrhoea with dehydration - OPD-FA-<1yr|dis| D110| D110-05
+Severe Diarrhoea with dehydration - OPD-FA-1-5yrs|dis| D110| D110-10
+Severe Diarrhoea with dehydration - OPD-FA->5yrs|dis| D110| D110-15
+Severe Diarrhoea with dehydration - OPD-FA-Total|dis| D110| D110-20
+Severe Diarrhoea with dehydration - IPD-Discharge-<1yr|dis| D110| D110-25
+Severe Diarrhoea with dehydration - IPD-Discharge-1-5yrs|dis| D110| D110-30
+Severe Diarrhoea with dehydration - IPD-Discharge->5yrs|dis| D110| D110-35
+Severe Diarrhoea with dehydration - IPD-Discharge-Total|dis| D110| D110-40
+Severe Diarrhoea with dehydration - Deaths-<1yr|dis| D110| D110-45
+Severe Diarrhoea with dehydration - Deaths-1-5yrs|dis| D110| D110-50
+Severe Diarrhoea with dehydration - Deaths->5yrs|dis| D110| D110-55
+Severe Diarrhoea with dehydration - Deaths-Total|dis| D110| D110-60
+Severe malnutrition (new case) - OPD-FA-<1yr|dis|D115|D115-05
+Severe malnutrition (new case) - OPD-FA-1-5yrs|dis|D115|D115-10
+Severe malnutrition (new case) - OPD-FA->5yrs|dis|D115|D115-15
+Severe malnutrition (new case) - OPD-FA-Total|dis|D115|D115-20
+Severe malnutrition (new case) - IPD-Discharge-<1yr|dis|D115|D115-25
+Severe malnutrition (new case) - IPD-Discharge-1-5yrs|dis|D115|D115-30
+Severe malnutrition (new case) - IPD-Discharge->5yrs|dis|D115|D115-35
+Severe malnutrition (new case) - IPD-Discharge-Total|dis|D115|D115-40
+Severe malnutrition (new case) - Deaths-<1yr|dis|D115|D115-45
+Severe malnutrition (new case) - Deaths-1-5yrs|dis|D115|D115-50
+Severe malnutrition (new case) - Deaths->5yrs|dis|D115|D115-55
+Severe malnutrition (new case) - Deaths-Total|dis|D115|D115-60
+Skin Diseases (not infectious) - OPD-FA-<1yr|dis|D120|D120-05
+Skin Diseases (not infectious) - OPD-FA-1-5yrs|dis|D120|D120-10
+Skin Diseases (not infectious) - OPD-FA->5yrs|dis|D120|D120-15
+Skin Diseases (not infectious) - OPD-FA-Total|dis|D120|D120-20
+Skin Diseases (not infectious) - IPD-Discharge-<1yr|dis|D120|D120-25
+Skin Diseases (not infectious) - IPD-Discharge-1-5yrs|dis|D120|D120-30
+Skin Diseases (not infectious) - IPD-Discharge->5yrs|dis|D120|D120-35
+Skin Diseases (not infectious) - IPD-Discharge-Total|dis|D120|D120-40
+Skin Diseases (not infectious) - Deaths-<1yr|dis|D120|D120-45
+Skin Diseases (not infectious) - Deaths-1-5yrs|dis|D120|D120-50
+Skin Diseases (not infectious) - Deaths->5yrs|dis|D120|D120-55
+Skin Diseases (not infectious) - Deaths-Total|dis|D120|D120-60
+Skin Diseases (infectious) - OPD-FA-<1yr|dis|D125|D125-05
+Skin Diseases (infectious) - OPD-FA-1-5yrs|dis|D125|D125-10
+Skin Diseases (infectious) - OPD-FA->5yrs|dis|D125|D125-15
+Skin Diseases (infectious) - OPD-FA-Total|dis|D125|D125-20
+Skin Diseases (infectious) - IPD-Discharge-<1yr|dis|D125|D125-25
+Skin Diseases (infectious) - IPD-Discharge-1-5yrs|dis|D125|D125-30
+Skin Diseases (infectious) - IPD-Discharge->5yrs|dis|D125|D125-35
+Skin Diseases (infectious) - IPD-Discharge-Total|dis|D125|D125-40
+Skin Diseases (infectious) - Deaths-<1yr|dis|D125|D125-45
+Skin Diseases (infectious) - Deaths-1-5yrs|dis|D125|D125-50
+Skin Diseases (infectious) - Deaths->5yrs|dis|D125|D125-55
+Skin Diseases (infectious) - Deaths-Total|dis|D125|D125-60
+Snake Bite - OPD-FA-<1yr|dis| D130| D130-05
+Snake Bite - OPD-FA-1-5yrs|dis| D130| D130-10
+Snake Bite - OPD-FA->5yrs|dis| D130| D130-15
+Snake Bite - OPD-FA-Total|dis| D130| D130-20
+Snake Bite - IPD-Discharge-<1yr|dis| D130| D130-25
+Snake Bite - IPD-Discharge-1-5yrs|dis| D130| D130-30
+Snake Bite - IPD-Discharge->5yrs|dis| D130| D130-35
+Snake Bite - IPD-Discharge-Total|dis| D130| D130-40
+Snake Bite - Deaths-<1yr|dis| D130| D130-45
+Snake Bite - Deaths-1-5yrs|dis| D130| D130-50
+Snake Bite - Deaths->5yrs|dis| D130| D130-55
+Snake Bite - Deaths-Total|dis| D130| D130-60
+Substance Abuse - OPD-FA-<1yr|dis|D135|D135-05
+Substance Abuse - OPD-FA-1-5yrs|dis|D135|D135-10
+Substance Abuse - OPD-FA->5yrs|dis|D135|D135-15
+Substance Abuse - OPD-FA-Total|dis|D135|D135-20
+Substance Abuse - IPD-Discharge-<1yr|dis|D135|D135-25
+Substance Abuse - IPD-Discharge-1-5yrs|dis|D135|D135-30
+Substance Abuse - IPD-Discharge->5yrs|dis|D135|D135-35
+Substance Abuse - IPD-Discharge-Total|dis|D135|D135-40
+Substance Abuse - Deaths-<1yr|dis|D135|D135-45
+Substance Abuse - Deaths-1-5yrs|dis|D135|D135-50
+Substance Abuse - Deaths->5yrs|dis|D135|D135-55
+Substance Abuse - Deaths-Total|dis|D135|D135-60
+TB - OPD-FA-<1yr|dis|D140|D140-05
+TB - OPD-FA-1-5yrs|dis|D140|D140-10
+TB - OPD-FA->5yrs|dis|D140|D140-15
+TB - OPD-FA-Total|dis|D140|D140-20
+TB - IPD-Discharge-<1yr|dis|D140|D140-25
+TB - IPD-Discharge-1-5yrs|dis|D140|D140-30
+TB - IPD-Discharge->5yrs|dis|D140|D140-35
+TB - IPD-Discharge-Total|dis|D140|D140-40
+TB - Deaths-<1yr|dis|D140|D140-45
+TB - Deaths-1-5yrs|dis|D140|D140-50
+TB - Deaths->5yrs|dis|D140|D140-55
+TB - Deaths-Total|dis|D140|D140-60
+Trauma: Road traffic accident - OPD-FA-<1yr|dis|D141|D141-05
+Trauma: Road traffic accident - OPD-FA-1-5yrs|dis|D141|D141-10
+Trauma: Road traffic accident - OPD-FA->5yrs|dis|D141|D141-15
+Trauma: Road traffic accident - OPD-FA-Total|dis|D141|D141-20
+Trauma: Road traffic accident - IPD-Discharge-<1yr|dis|D141|D141-25
+Trauma: Road traffic accident - IPD-Discharge-1-5yrs|dis|D141|D141-30
+Trauma: Road traffic accident - IPD-Discharge->5yrs|dis|D141|D141-35
+Trauma: Road traffic accident - IPD-Discharge-Total|dis|D141|D141-40
+Trauma: Road traffic accident - Deaths-<1yr|dis|D141|D141-45
+Trauma: Road traffic accident - Deaths-1-5yrs|dis|D141|D141-50
+Trauma: Road traffic accident - Deaths->5yrs|dis|D141|D141-55
+Trauma: Road traffic accident - Deaths-Total|dis|D141|D141-60
+Trauma: Burns - OPD-FA-<1yr|dis| D142| D142-05
+Trauma: Burns - OPD-FA-1-5yrs|dis| D142| D142-10
+Trauma: Burns - OPD-FA->5yrs|dis| D142| D142-15
+Trauma: Burns - OPD-FA-Total|dis| D142| D142-20
+Trauma: Burns - IPD-Discharge-<1yr|dis| D142| D142-25
+Trauma: Burns - IPD-Discharge-1-5yrs|dis| D142| D142-30
+Trauma: Burns - IPD-Discharge->5yrs|dis| D142| D142-35
+Trauma: Burns - IPD-Discharge-Total|dis| D142| D142-40
+Trauma: Burns - Deaths-<1yr|dis| D142| D142-45
+Trauma: Burns - Deaths-1-5yrs|dis| D142| D142-50
+Trauma: Burns - Deaths->5yrs|dis| D142| D142-55
+Trauma: Burns - Deaths-Total|dis| D142| D142-60
+Trauma: Other Injuries, wounds - OPD-FA-<1yr|dis|D144|D144-05
+Trauma: Other Injuries, wounds - OPD-FA-1-5yrs|dis|D144|D144-10
+Trauma: Other Injuries, wounds - OPD-FA->5yrs|dis|D144|D144-15
+Trauma: Other Injuries, wounds - OPD-FA-Total|dis|D144|D144-20
+Trauma: Other Injuries, wounds - IPD-Discharge-<1yr|dis|D144|D144-25
+Trauma: Other Injuries, wounds - IPD-Discharge-1-5yrs|dis|D144|D144-30
+Trauma: Other Injuries, wounds - IPD-Discharge->5yrs|dis|D144|D144-35
+Trauma: Other Injuries, wounds - IPD-Discharge-Total|dis|D144|D144-40
+Trauma: Other Injuries, wounds - Deaths-<1yr|dis|D144|D144-45
+Trauma: Other Injuries, wounds - Deaths-1-5yrs|dis|D144|D144-50
+Trauma: Other Injuries, wounds - Deaths->5yrs|dis|D144|D144-55
+Trauma: Other Injuries, wounds - Deaths-Total|dis|D144|D144-60
+Bilharzia - OPD-FA-<1yr|dis|D150|D150-05
+Bilharzia - OPD-FA-1-5yrs|dis|D150|D150-10
+Bilharzia - OPD-FA->5yrs|dis|D150|D150-15
+Bilharzia - OPD-FA-Total|dis|D150|D150-20
+Bilharzia - IPD-Discharge-<1yr|dis|D150|D150-25
+Bilharzia - IPD-Discharge-1-5yrs|dis|D150|D150-30
+Bilharzia - IPD-Discharge->5yrs|dis|D150|D150-35
+Bilharzia - IPD-Discharge-Total|dis|D150|D150-40
+Bilharzia - Deaths-<1yr|dis|D150|D150-45
+Bilharzia - Deaths-1-5yrs|dis|D150|D150-50
+Bilharzia - Deaths->5yrs|dis|D150|D150-55
+Bilharzia - Deaths-Total|dis|D150|D150-60
+Neonatal infections (all) - Treated-0-7days-M|dis|NN05|NN05-05
+Neonatal infections (all) - Treated-0-7days-F|dis|NN05|NN05-10
+Neonatal infections (all) - Treated-0-7days-Total|dis|NN05|NN05-15
+Neonatal infections (all) - Treated-8-28days-M|dis|NN05|NN05-20
+Neonatal infections (all) - Treated-8-28days-F|dis|NN05|NN05-25
+Neonatal infections (all) - Treated-8-28days-Total|dis|NN05|NN05-30
+Neonatal infections (all) - Treated->25yrs-M|dis|NN05|NN05-35
+Neonatal infections (all) - Treated->25yrs-F|dis|NN05|NN05-40
+Neonatal infections (all) - Treated->25yrs-Total|dis|NN05|NN05-45
+Neonatal infections (all) - Treated-M-Total|dis|NN05|NN05-50
+Neonatal infections (all) - Treated-F-Total|dis|NN05|NN05-55
+Neonatal infections (all) - Treated-Total|dis|NN05|NN05-60
+Neonatal infections (all) - Deaths-0-7days-M|dis|NN05|NN05-65
+Neonatal infections (all) - Deaths-0-7days-F|dis|NN05|NN05-70
+Neonatal infections (all) - Deaths-0-7days-Total|dis|NN05|NN05-75
+Neonatal infections (all) - Deaths-8-28days-M|dis|NN05|NN05-80
+Neonatal infections (all) - Deaths-8-28days-F|dis|NN05|NN05-85
+Neonatal infections (all) - Deaths-8-28days-Total|dis|NN05|NN05-90
+Neonatal infections (all) - Deaths->25yrs-M|dis|NN05|NN05-95
+Neonatal infections (all) - Deaths->25yrs-F|dis|NN05|NN05-100
+Neonatal infections (all) - Deaths->25yrs-Total|dis|NN05|NN05-105
+Neonatal infections (all) - Deaths-M-Total|dis|NN05|NN05-110
+Neonatal infections (all) - Deaths-F-Total|dis|NN05|NN05-115
+Neonatal infections (all) - Deaths-Total|dis|NN05|NN05-120
+Neonatal Prematurity - Treated-0-7days-M|dis|NN10|NN10-05
+Neonatal Prematurity - Treated-0-7days-F|dis|NN10|NN10-10
+Neonatal Prematurity - Treated-0-7days-Total|dis|NN10|NN10-15
+Neonatal Prematurity - Treated-8-28days-M|dis|NN10|NN10-20
+Neonatal Prematurity - Treated-8-28days-F|dis|NN10|NN10-25
+Neonatal Prematurity - Treated-8-28days-Total|dis|NN10|NN10-30
+Neonatal Prematurity - Treated->25yrs-M|dis|NN10|NN10-35
+Neonatal Prematurity - Treated->25yrs-F|dis|NN10|NN10-40
+Neonatal Prematurity - Treated->25yrs-Total|dis|NN10|NN10-45
+Neonatal Prematurity - Treated-M-Total|dis|NN10|NN10-50
+Neonatal Prematurity - Treated-F-Total|dis|NN10|NN10-55
+Neonatal Prematurity - Treated-Total|dis|NN10|NN10-60
+Neonatal Prematurity - Deaths-0-7days-M|dis|NN10|NN10-65
+Neonatal Prematurity - Deaths-0-7days-F|dis|NN10|NN10-70
+Neonatal Prematurity - Deaths-0-7days-Total|dis|NN10|NN10-75
+Neonatal Prematurity - Deaths-8-28days-M|dis|NN10|NN10-80
+Neonatal Prematurity - Deaths-8-28days-F|dis|NN10|NN10-85
+Neonatal Prematurity - Deaths-8-28days-Total|dis|NN10|NN10-90
+Neonatal Prematurity - Deaths->25yrs-M|dis|NN10|NN10-95
+Neonatal Prematurity - Deaths->25yrs-F|dis|NN10|NN10-100
+Neonatal Prematurity - Deaths->25yrs-Total|dis|NN10|NN10-105
+Neonatal Prematurity - Deaths-M-Total|dis|NN10|NN10-110
+Neonatal Prematurity - Deaths-F-Total|dis|NN10|NN10-115
+Neonatal Prematurity - Deaths-Total|dis|NN10|NN10-120
+Delivery Complications - sepsis - OPD-FA-0-14yrs|dis|OBS05|OBS05-05
+Delivery Complications - sepsis - OPD-FA-15-24yrs|dis|OBS05|OBS05-10
+Delivery Complications - sepsis - OPD-FA->25yrs|dis|OBS05|OBS05-15
+Delivery Complications - sepsis - OPD-FA-Total|dis|OBS05|OBS05-20
+Delivery Complications - sepsis - IPD-Discharge-0-14yrs|dis|OBS05|OBS05-25
+Delivery Complications - sepsis - IPD-Discharge-15-24yrs|dis|OBS05|OBS05-30
+Delivery Complications - sepsis - IPD-Discharge->25yrs|dis|OBS05|OBS05-35
+Delivery Complications - sepsis - IPD-Discharge-Total|dis|OBS05|OBS05-40
+Delivery Complications - sepsis - Deaths-0-14yrs|dis|OBS05|OBS05-45
+Delivery Complications - sepsis - Deaths-15-24yrs|dis|OBS05|OBS05-50
+Delivery Complications - sepsis - Deaths->25yrs|dis|OBS05|OBS05-55
+Delivery Complications - sepsis - Deaths-Total|dis|OBS05|OBS05-60
+Pregnancy Complications - abortion - OPD-FA-0-14yrs|dis|OBS10|OBS10-05
+Pregnancy Complications - abortion - OPD-FA-15-24yrs|dis|OBS10|OBS10-10
+Pregnancy Complications - abortion - OPD-FA->25yrs|dis|OBS10|OBS10-15
+Pregnancy Complications - abortion - OPD-FA-Total|dis|OBS10|OBS10-20
+Pregnancy Complications - abortion - IPD-Discharge-0-14yrs|dis|OBS10|OBS10-25
+Pregnancy Complications - abortion - IPD-Discharge-15-24yrs|dis|OBS10|OBS10-30
+Pregnancy Complications - abortion - IPD-Discharge->25yrs|dis|OBS10|OBS10-35
+Pregnancy Complications - abortion - IPD-Discharge-Total|dis|OBS10|OBS10-40
+Pregnancy Complications - abortion - Deaths-0-14yrs|dis|OBS10|OBS10-45
+Pregnancy Complications - abortion - Deaths-15-24yrs|dis|OBS10|OBS10-50
+Pregnancy Complications - abortion - Deaths->25yrs|dis|OBS10|OBS10-55
+Pregnancy Complications - abortion - Deaths-Total|dis|OBS10|OBS10-60
+Genital ulcer - 0-14yrs-M|dis|STI05|STI05-05
+Genital ulcer - 0-14yrs-F|dis|STI05|STI05-10
+Genital ulcer - 0-14yrs-Total|dis|STI05|STI05-15
+Genital ulcer - 15-24yrs-M|dis|STI05|STI05-20
+Genital ulcer - 15-24yrs-F|dis|STI05|STI05-25
+Genital ulcer - 15-24yrs-Total|dis|STI05|STI05-30
+Genital ulcer - >25yrs-M|dis|STI05|STI05-35
+Genital ulcer - >25yrs-F|dis|STI05|STI05-40
+Genital ulcer - >25yrs-Total|dis|STI05|STI05-45
+Genital ulcer - M-Total|dis|STI05|STI05-50
+Genital ulcer - F-Total|dis|STI05|STI05-55
+Genital ulcer - Total|dis|STI05|STI05-60
+Genital warts - 0-14yrs-M|dis|STI10|STI10-05
+Genital warts - 0-14yrs-F|dis|STI10|STI10-10
+Genital warts - 0-14yrs-Total|dis|STI10|STI10-15
+Genital warts - 15-24yrs-M|dis|STI10|STI10-20
+Genital warts - 15-24yrs-F|dis|STI10|STI10-25
+Genital warts - 15-24yrs-Total|dis|STI10|STI10-30
+Genital warts - >25yrs-M|dis|STI10|STI10-35
+Genital warts - >25yrs-F|dis|STI10|STI10-40
+Genital warts - >25yrs-Total|dis|STI10|STI10-45
+Genital warts - M-Total|dis|STI10|STI10-50
+Genital warts - F-Total|dis|STI10|STI10-55
+Genital warts - Total|dis|STI10|STI10-60
+Inguinal bubo - 0-14yrs-M|dis|STI15|STI15-05
+Inguinal bubo - 0-14yrs-F|dis|STI15|STI15-10
+Inguinal bubo - 0-14yrs-Total|dis|STI15|STI15-15
+Inguinal bubo - 15-24yrs-M|dis|STI15|STI15-20
+Inguinal bubo - 15-24yrs-F|dis|STI15|STI15-25
+Inguinal bubo - 15-24yrs-Total|dis|STI15|STI15-30
+Inguinal bubo - >25yrs-M|dis|STI15|STI15-35
+Inguinal bubo - >25yrs-F|dis|STI15|STI15-40
+Inguinal bubo - >25yrs-Total|dis|STI15|STI15-45
+Inguinal bubo - M-Total|dis|STI15|STI15-50
+Inguinal bubo - F-Total|dis|STI15|STI15-55
+Inguinal bubo - Total|dis|STI15|STI15-60
+Male Urethritis Syndrome - 0-14yrs-M|dis|STI20|STI20-05
+Male Urethritis Syndrome - 0-14yrs-Total|dis|STI20|STI20-10
+Male Urethritis Syndrome - 15-24yrs-M|dis|STI20|STI20-15
+Male Urethritis Syndrome - 15-24yrs-Total|dis|STI20|STI20-20
+Male Urethritis Syndrome - >25yrs-M|dis|STI20|STI20-25
+Male Urethritis Syndrome - >25yrs-Total|dis|STI20|STI20-30
+Male Urethritis Syndrome - M-Total|dis|STI20|STI20-35
+Male Urethritis Syndrome - Total|dis|STI20|STI20-40
+Pelvic Inflammatory Disease - 0-14yrs-M|dis|STI25|STI25-05
+Pelvic Inflammatory Disease - 0-14yrs-F|dis|STI25|STI25-10
+Pelvic Inflammatory Disease - 0-14yrs-Total|dis|STI25|STI25-15
+Pelvic Inflammatory Disease - 15-24yrs-M|dis|STI25|STI25-20
+Pelvic Inflammatory Disease - 15-24yrs-F|dis|STI25|STI25-25
+Pelvic Inflammatory Disease - 15-24yrs-Total|dis|STI25|STI25-30
+Pelvic Inflammatory Disease - >25yrs-M|dis|STI25|STI25-35
+Pelvic Inflammatory Disease - >25yrs-F|dis|STI25|STI25-40
+Pelvic Inflammatory Disease - >25yrs-Total|dis|STI25|STI25-45
+Pelvic Inflammatory Disease - M-Total|dis|STI25|STI25-50
+Pelvic Inflammatory Disease - F-Total|dis|STI25|STI25-55
+Pelvic Inflammatory Disease - Total|dis|STI25|STI25-60
+Vaginal discharge - 0-14yrs-F|dis|STI26|STI26-05
+Vaginal discharge - 0-14yrs-Total|dis|STI26|STI26-10
+Vaginal discharge - 15-24yrs-F|dis|STI26|STI26-15
+Vaginal discharge - 15-24yrs-Total|dis|STI26|STI26-20
+Vaginal discharge - >25yrs-F|dis|STI26|STI26-25
+Vaginal discharge - >25yrs-Total|dis|STI26|STI26-30
+Vaginal discharge - F-Total|dis|STI26|STI26-35
+Vaginal discharge - Total|dis|STI26|STI26-40
+STI partner notification slips issued - 0-14yrs-M|dis|STI30|STI30-05
+STI partner notification slips issued - 0-14yrs-F|dis|STI30|STI30-10
+STI partner notification slips issued - 0-14yrs-Total|dis|STI30|STI30-15
+STI partner notification slips issued - 15-24yrs-M|dis|STI30|STI30-20
+STI partner notification slips issued - 15-24yrs-F|dis|STI30|STI30-25
+STI partner notification slips issued - 15-24yrs-Total|dis|STI30|STI30-30
+STI partner notification slips issued - >25yrs-M|dis|STI30|STI30-35
+STI partner notification slips issued - >25yrs-F|dis|STI30|STI30-40
+STI partner notification slips issued - >25yrs-Total|dis|STI30|STI30-45
+STI partner notification slips issued - M-Total|dis|STI30|STI30-50
+STI partner notification slips issued - F-Total|dis|STI30|STI30-55
+STI partner notification slips issued - Total|dis|STI30|STI30-60
+STI partner treated (new case) - 0-14yrs-M|dis|STI35|STI35-05
+STI partner treated (new case) - 0-14yrs-F|dis|STI35|STI35-10
+STI partner treated (new case) - 0-14yrs-Total|dis|STI35|STI35-15
+STI partner treated (new case) - 15-24yrs-M|dis|STI35|STI35-20
+STI partner treated (new case) - 15-24yrs-F|dis|STI35|STI35-25
+STI partner treated (new case) - 15-24yrs-Total|dis|STI35|STI35-30
+STI partner treated (new case) - >25yrs-M|dis|STI35|STI35-35
+STI partner treated (new case) - >25yrs-F|dis|STI35|STI35-40
+STI partner treated (new case) - >25yrs-Total|dis|STI35|STI35-45
+STI partner treated (new case) - M-Total|dis|STI35|STI35-50
+STI partner treated (new case) - F-Total|dis|STI35|STI35-55
+STI partner treated (new case) - Total|dis|STI35|STI35-60
+Woman newly diagnosed with breast cancer - 0-14yrs-F|dis|CNS05|CNS05-05
+Woman newly diagnosed with breast cancer - 0-14yrs-Total|dis|CNS05|CNS05-10
+Woman newly diagnosed with breast cancer - 15-24yrs-F|dis|CNS05|CNS05-15
+Woman newly diagnosed with breast cancer - 15-24yrs-Total|dis|CNS05|CNS05-20
+Woman newly diagnosed with breast cancer - >25yrs-F|dis|CNS05|CNS05-25
+Woman newly diagnosed with breast cancer - >25yrs-Total|dis|CNS05|CNS05-30
+Woman newly diagnosed with breast cancer - F-Total|dis|CNS05|CNS05-35
+Woman newly diagnosed with breast cancer - Total|dis|CNS05|CNS05-40
+Woman newly diagnosed with cervical cancer - 0-14yrs-F|dis|CNS10|CNS10-05
+Woman newly diagnosed with cervical cancer - 0-14yrs-Total|dis|CNS10|CNS10-10
+Woman newly diagnosed with cervical cancer - 15-24yrs-F|dis|CNS10|CNS10-15
+Woman newly diagnosed with cervical cancer - 15-24yrs-Total|dis|CNS10|CNS10-20
+Woman newly diagnosed with cervical cancer - >25yrs-F|dis|CNS10|CNS10-25
+Woman newly diagnosed with cervical cancer - >25yrs-Total|dis|CNS10|CNS10-30
+Woman newly diagnosed with cervical cancer - F-Total|dis|CNS10|CNS10-35
+Woman newly diagnosed with cervical cancer - Total|dis|CNS10|CNS10-40

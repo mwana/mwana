@@ -10,6 +10,7 @@ from rapidsms.tests.scripted import TestScript
 from mwana.apps.locations.models import Location, LocationType
 
 from mwana import const
+from datetime import date
 
 
 class TestApp(TestScript):
@@ -45,7 +46,7 @@ class TestIncindetReport(TestApp):
 
         script = """
             rb > case
-            rb < To report cases, send CASE <DATE or WEEK_OF_YEAR> <CASE-1> <VALUE-1>, <CASE-2> <VALUE-2>, e.g. CASE 17 10 2013, TB 12, D20 12. or Case 44, TB 12, D20 12
+            rb < To report cases, send CASE <DATE or WEEK_OF_YEAR> <CASE-1> <VALUE-1>, <CASE-2> <VALUE-2>, e.g. CASE 17/10/2013, TB 12, D20 12. or Case 44, TB 12, D20 12
             unknown > case DG99 100
             unknown < Sorry, you must be registered with Results160 before you can start reporting cases. Reply with HELP if you need assistance.
         """
@@ -62,9 +63,9 @@ class TestIncindetReport(TestApp):
         script = """
             rb > case 10 10 2013, malaria 10, cholera=12
             rb < Thank you Rupiah Banda for the report.
-            rb > case 40, malaria 11
+            rb > case {case}, malaria 11
             rb < Thank you Rupiah Banda for the report.
-        """
+        """.format(case=date.today().strftime('%U'))
         self.runScript(script)
 
         self.assertEqual(Incident.objects.count(), 2)
@@ -88,9 +89,9 @@ class TestIncindetReport(TestApp):
         script = """
             rb > case 10 10 2013, malaria=12,
             rb < Thank you Rupiah Banda for the report.
-            rb > case 40, mal 11
+            rb > case {case}, mal 11
             rb < Thank you Rupiah Banda for the report.
-        """
+        """.format(case=date.today().strftime('%U'))
         self.runScript(script)
 
         self.assertEqual(Incident.objects.count(), 1, Incident.objects.all())
@@ -102,6 +103,26 @@ class TestIncindetReport(TestApp):
 
         self.assertEqual(Alias.objects.filter(incident__name__iexact='malaria').count(), 2)
 
+    def test_handling_dates(self):
+        self.assertEqual(Incident.objects.count(), 0)
+        self.assertEqual(Report.objects.count(), 0)
+        self.assertEqual(Alias.objects.count(), 0)
+
+        Incident.objects.create(name="Malaria", indicator_id='Mal')
+
+        script = """
+            rb > case 10 10 2013, malaria=10,
+            rb > case 11/10/2013, mal 11
+            rb > case 12-10-2013, mal 12
+            rb > case 13.10.2013, mal 13
+        """
+        self.runScript(script)
+
+        self.assertEqual(Report.objects.filter(date=date(2013,10,10)).count(), 1)
+        self.assertEqual(Report.objects.filter(date=date(2013,10,11)).count(), 1)
+        self.assertEqual(Report.objects.filter(date=date(2013,10,12)).count(), 1)
+        self.assertEqual(Report.objects.filter(date=date(2013,10,13)).count(), 1)
+
     def test_handling_multiple_incidents(self):
         self.assertEqual(Incident.objects.count(), 0)
         self.assertEqual(Report.objects.count(), 0)
@@ -111,9 +132,9 @@ class TestIncindetReport(TestApp):
         script = """
             rb > case 10 10 2013, malaria 10, cholera=12, TB
             rb < Thank you Rupiah Banda for the report.
-            rb > case 40, malaria 11, BP
+            rb > case {case}, malaria 11, BP
             rb < Thank you Rupiah Banda for the report.
-        """
+        """.format(case=date.today().strftime('%U'))
         self.runScript(script)
 
         self.assertEqual(Incident.objects.count(), 2, Incident.objects.all())

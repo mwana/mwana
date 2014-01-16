@@ -4,10 +4,10 @@ from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from mwana.apps.reports.utils.htmlhelper import get_month_end
-from mwana.apps.reports.utils.htmlhelper import get_month_start
 from mwana.apps.graphs.utils import GraphServive
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
+from mwana.apps.reports.utils.htmlhelper import get_month_end
+from mwana.apps.reports.utils.htmlhelper import get_month_start
 from mwana.apps.reports.utils.htmlhelper import get_rpt_districts
 from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities
 from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces
@@ -79,8 +79,8 @@ def lab_submissions(request):
     report_data = []
 
     time_ranges, data = service.get_lab_submissions(start_date, end_date, rpt_provinces\
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                    , rpt_districts,
+                                                    rpt_facilities)
     
     for k, v in data.items():
         rpt_object = Expando()
@@ -106,8 +106,8 @@ def monthly_lab_submissions(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_lab_submissions(start_date, end_date, rpt_provinces\
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                            , rpt_districts,
+                                                            rpt_facilities)
 
     for k, v in data.items():
         rpt_object = Expando()
@@ -134,9 +134,9 @@ def monthly_birth_trends(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_birth_trends(start_date, end_date,
-                                                            rpt_provinces
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                         rpt_provinces
+                                                         , rpt_districts,
+                                                         rpt_facilities)
 
     for k, v in sorted(data.items()):
         rpt_object = Expando()
@@ -164,9 +164,9 @@ def monthly_scheduled_visit_trends(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_scheduled_visit_trends(start_date, end_date,
-                                                            rpt_provinces
-                                            , rpt_districts,
-                                            rpt_facilities, visit_type, data_type)
+                                                                   rpt_provinces
+                                                                   , rpt_districts,
+                                                                   rpt_facilities, visit_type, data_type)
 
     for k, v in reversed(sorted(data.items())):
         rpt_object = Expando()
@@ -193,9 +193,9 @@ def monthly_turnaround_trends(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_turnaround_trends(start_date, end_date,
-                                                            rpt_provinces
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                              rpt_provinces
+                                                              , rpt_districts,
+                                                              rpt_facilities)
 
     for k, v in sorted(data.items()):
         rpt_object = Expando()
@@ -222,9 +222,9 @@ def monthly_results_retrival_trends(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_results_retrival_trends(start_date, end_date,
-                                                            rpt_provinces
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                                    rpt_provinces
+                                                                    , rpt_districts,
+                                                                    rpt_facilities)
 
     for k, v in sorted(data.items()):
         rpt_object = Expando()
@@ -250,8 +250,8 @@ def messages(request):
     report_data = []
 
     time_ranges, data = service.get_monthly_messages(start_date, end_date, rpt_provinces\
-                                            , rpt_districts,
-                                            rpt_facilities)
+                                                     , rpt_districts,
+                                                     rpt_facilities)
 
     for k, v in data.items():
         rpt_object = Expando()
@@ -265,6 +265,35 @@ def messages(request):
                               "title": "'Monthly SMS Messages'",
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'# of SMS Messages'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+def messages_by_user_type(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+    data_type = read_request(request, "data_type") or "percentage"
+    direction = read_request(request, "direction") or "all"
+    
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_messages_by_usertype(start_date,
+                                                                 end_date, rpt_provinces\
+                                                                 , rpt_districts,
+                                                                 rpt_facilities, data_type, direction)
+
+    for k, v in data.items():
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/lab_submissions.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly SMS Messages %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'%s'" % data_type,
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
@@ -302,7 +331,7 @@ def turnaround(request):
     service = GraphServive()
 
 
-    categories, transport, processing, delays, retrieving =  service.get_turnarounds(start_date, end_date, province_slug, district_slug, facility_slug)
+    categories, transport, processing, delays, retrieving = service.get_turnarounds(start_date, end_date, province_slug, district_slug, facility_slug)
 
     return render_to_response('graphs/turnaround.html',
                               {

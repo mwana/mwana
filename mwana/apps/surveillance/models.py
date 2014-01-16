@@ -23,8 +23,8 @@ class Incident(models.Model):
     """
     name = models.CharField(max_length=100, null=False, blank=False, unique=True)
     lowered_name = models.CharField(max_length=100, null=False, blank=False, unique=True)
-    indicator_id = models.CharField(max_length=8, null=True, blank=True, unique=True)
-    abbr = models.CharField(max_length=8, null=True, blank=True)
+    indicator_id = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    abbr = models.CharField(max_length=50, null=True, blank=True)
     type = models.CharField(max_length=3, choices=INCIDENT_TYPES, default='dis')
     
     def __unicode__(self):
@@ -40,8 +40,6 @@ class Incident(models.Model):
         if not self.indicator_id or self.indicator_id.strip() == "": self.indicator_id = None
         super(Incident, self).save(*args, **kwargs)
         Alias.create_alias(self, self.name)
-        if self.abbr:
-            Alias.create_alias(self, self.abbr)
         if self.indicator_id:
             Alias.create_alias(self, self.indicator_id)
         if self.indicator_id:
@@ -60,8 +58,10 @@ class Alias(models.Model):
 
     @classmethod
     def create_alias(cls, incident, name):
-        if not Alias.objects.filter(incident=incident, name__iexact=name):
-            Alias.objects.create(incident=incident, name=name)
+        if not Alias.objects.filter(incident=incident, name__iexact=name.strip()):
+            Alias.objects.create(incident=incident, name=name.strip())
+            return True
+        return False
 
     def __unicode__(self):
         return "%s - %s" % (self.name, self.incident)
@@ -110,7 +110,7 @@ class Source(models.Model):
     logged_on = models.DateTimeField(default=datetime.now, blank=False, null=False, editable=False)
 
     def __unicode__(self):
-        return "%s. %s" % (self.parsed, self.message)
+        return "%s. %s (%s)" % (self.parsed, self.message.text if self.message else "", self.logged_on)
 
 
 class Report(models.Model):
@@ -130,7 +130,18 @@ class Report(models.Model):
     source = models.ForeignKey(Source, null=True, blank=True, editable=False)
     
     def __unicode__(self):
-        return "%s - %s" % (self.incident, self.date)
+        return "%s - %s : %s" % (self.incident, self.date, self.value)
+
+    @classmethod
+    def get_date(cls, week_of_year):
+        today = date.today()
+        this_jan = date(today.year, 1, 1)
+        days_ago = (today - this_jan).days
+        for i in range(days_ago):
+            if int((today - timedelta(days=i)).strftime('%U')) == week_of_year:
+                return today - timedelta(days=i)
+
+        return today
 
     def save(self, *args, **kwargs):
         
@@ -141,13 +152,7 @@ class Report(models.Model):
         elif self.date and not self.week_of_year:
             self.week_of_year = int(self.date.strftime('%U'))
         elif self.week_of_year and not self.date:
-            today = date.today()
-            this_jan = date(today.year, 1, 1)
-            days_ago = (today - this_jan).days
-            for i in range(days_ago):
-                if int((today - timedelta(days=i)).strftime('%U')) == self.week_of_year :
-                    self.date = today - timedelta(days=i)
-                    break
+            self.date = self.get_date(self.week_of_year)
         self.year = self.date.year
         self.month = self.date.month
         self.day = self.date.day
@@ -164,10 +169,19 @@ class Separator(models.Model):
     Used to delimit/tokenize disease reports from a message sent. If this model
     is blank a default value will be used in the handlers
     """
-    text = models.CharField(max_length=2, unique=True)
+    text = models.CharField(max_length=3, unique=True)
 
     def __unicode__(self):
         return self.text
+
+    def save(self, *args, **kwargs):
+
+        if not self.text:
+            return
+        if self.text.strip() in ['', '.', '\.', '-', '/', '\-']:
+            return
+        super(Separator, self).save(*args, **kwargs)
+
 
 
 class ImportedReport(models.Model):
@@ -203,3 +217,22 @@ class GroupIncident(models.Model):
 
     class Meta:
         unique_together = (('group', 'incident',),)
+
+
+class MissingIncident(models.Model):
+    alias_text = models.CharField(max_length=200, editable=False)
+    incident = models.ForeignKey(Incident, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.alias_text, self.incident)
+
+    def save(self, *args, **kwargs):
+
+        if self.incident:
+            if Alias.create_alias(self.incident, self.alias_text):
+                super(MissingIncident, self).delete()
+            return
+        super(MissingIncident, self).save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["alias_text"]

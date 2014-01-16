@@ -33,7 +33,7 @@ INSTALLED_APPS.append("mwana.apps.graphs")
 INSTALLED_APPS.append("mwana.apps.stock")
 INSTALLED_APPS.append("mwana.apps.surveillance")
 INSTALLED_APPS.append("mwana.apps.stock")
-
+INSTALLED_APPS.append("mwana.apps.zm_languages")
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
 ADMINS = (
@@ -86,10 +86,11 @@ RAPIDSMS_TABS = [
     ('mwana.apps.reports.views.supported_sites', 'Sites'),
     ('mwana.apps.reports.views.contacts_report', 'SMS Users'),
     ('mwana.apps.webusers.views.webusers', 'Web Users'),
-    ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
+#    ('mwana.apps.issuetracking.views.list_issues', 'Issues'),
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
-    ('mwana.apps.training.views.trained', 'Trained People'),
+    ('mwana.apps.training.views.trained', 'Trained'),
     ('mwana.apps.graphs.views.graphs', 'Charts'),
+    ('mwana.apps.surveillance.views.surveillance', 'Survey'),
 #    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 

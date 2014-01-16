@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.surveillance.models import MissingIncident
 from mwana.apps.surveillance.models import GroupIncident
 from mwana.apps.surveillance.models import UserIncident
 from mwana.apps.surveillance.models import ImportedReport
@@ -13,7 +14,7 @@ from django.contrib.admin.views.main import ChangeList
 from django.db.models import Sum
 
 class IncidentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'indicator_id', 'type')
+    list_display = ('name', 'indicator_id', 'type', 'abbr')
     list_filter = ('type',)
     search_fields = ('name', 'indicator_id', 'abbr')
 admin.site.register(Incident, IncidentAdmin)
@@ -57,9 +58,9 @@ class ReportTotalAveragesChangeList(ChangeList):
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('incident',  'value', 'date', 'age_group', 'sex', 'reporter',
-                    'week_of_year', 'month', 'year', 'location', 'raw_value', 'source')
-    list_filter = ('date', 'week_of_year', 'month', 'year', 'incident', 'location', 'reporter')
+    list_display = ('id', 'incident', 'location', 'value', 'date', 'reporter',
+                    'week_of_year', 'month', 'year',  'raw_value', 'source')
+    list_filter = ('date', 'year', 'month', 'week_of_year', 'incident', 'location', 'reporter')
     search_fields = ('incident__alias__name', 'location__name', 'location__parent__name', 'location__parent__parent__name')
     date_hierarchy = 'date'
 
@@ -98,3 +99,12 @@ class GroupIncidentAdmin(admin.ModelAdmin):
     search_fields = ('group', 'incident')
 
 admin.site.register(GroupIncident, GroupIncidentAdmin)
+
+class MissingIncidentAdmin(admin.ModelAdmin):
+    list_display = ('alias_text', 'incident')
+    list_filter = ('incident',)
+    list_editable= ('incident',)
+    search_fields = ('alias_text',)
+
+admin.site.register(MissingIncident, MissingIncidentAdmin)
+
