@@ -254,7 +254,7 @@ admin.site.register(MessageByLocationByUserType, MessageByLocationByUserTypeAdmi
 
 class MessageByLocationByBackendAdmin(admin.ModelAdmin):
     list_display = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
-    list_filter = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location')
+    list_filter = ('backend', 'year', 'month', 'province', 'district', 'facility')
     #search_fields = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
     date_hierarchy = 'min_date'
 
