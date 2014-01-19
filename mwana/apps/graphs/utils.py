@@ -347,7 +347,6 @@ class GraphServive:
         elif direction == 'O':
             field = "count_outgoing"
 
-
         start, end = get_datetime_bounds(start_date, end_date)
 
         contact_types = ContactType.objects.exclude(slug='patient').values_list('slug').all().distinct()
@@ -364,7 +363,6 @@ class GraphServive:
         data = {}
         for item in sorted(contact_types):
             data[item[0]] = []
-        data['Total'] = []
 
         month_ranges = []
         
