@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
 from django.contrib.auth.models import User
 from mwana.apps.reports.models import Login
@@ -250,4 +251,13 @@ class MessageByLocationByUserTypeAdmin(admin.ModelAdmin):
 #    search_fields = ('count', 'province', 'district', 'facility', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug',)
 
 admin.site.register(MessageByLocationByUserType, MessageByLocationByUserTypeAdmin)
+
+class MessageByLocationByBackendAdmin(admin.ModelAdmin):
+    list_display = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
+    list_filter = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location')
+    #search_fields = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
+    date_hierarchy = 'min_date'
+
+admin.site.register(MessageByLocationByBackend, MessageByLocationByBackendAdmin)
+
 

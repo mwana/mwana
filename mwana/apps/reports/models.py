@@ -168,3 +168,50 @@ class MessageByLocationByUserType(models.Model):
 
     class Meta:
         unique_together=("absolute_location", "year", "month", "worker_type")
+
+
+class MessageByLocationByBackend(models.Model):
+    """
+    Reporting table.
+    """
+    count = models.PositiveIntegerField()
+    province = models.CharField(max_length=30, null=True, blank=True)
+    district = models.CharField(max_length=30, null=True, blank=True)
+    facility = models.CharField(max_length=50, null=True, blank=True)
+    backend = models.CharField(max_length=30)
+    year = models.PositiveSmallIntegerField()
+    month = models.PositiveSmallIntegerField()
+    province_slug = models.CharField(max_length=6, null=True, blank=True)
+    district_slug = models.CharField(max_length=6, null=True, blank=True)
+    facility_slug = models.CharField(max_length=6, null=True, blank=True)
+    absolute_location = models.ForeignKey(Location, null=True, blank=True)
+    min_date = models.DateField(null=True, blank=True)
+    max_date = models.DateField(null=True, blank=True)
+    month_year = models.CharField(max_length=8, null=True, blank=True)
+    count_incoming = models.PositiveIntegerField(default=0, null=True, blank=True)
+    count_outgoing = models.PositiveIntegerField(default=0, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        my_date = date(self.year, self.month, 1)
+        if not self.min_date:
+            self.min_date = my_date
+        if not self.max_date:
+            self.max_date = get_month_end(my_date)
+        if not self.month_year:
+            self.month_year = my_date.strftime('%b %Y')
+        super(MessageByLocationByBackend, self).save(*args, **kwargs)
+
+#    class Meta:
+#        unique_together=("absolute_location", "year", "month", "backend")
+
+class MsgByLocationByBackendBuildLog(models.Model):
+    message_id = models.IntegerField(null=True, blank=True, editable=False, default=0)
+    lock = models.IntegerField(unique=True)
+    
+    def __unicode__(self):
+        return "%s" % self.message_id
+
+    def save(self, *args, **kwargs):
+        if self.lock and self.lock != 1:
+            return
+        super(MsgByLocationByBackendBuildLog, self).save(*args, **kwargs)
