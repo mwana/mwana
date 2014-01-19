@@ -268,6 +268,7 @@ def messages(request):
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
+
 def messages_by_user_type(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
@@ -288,13 +289,14 @@ def messages_by_user_type(request):
         rpt_object.value = v
         report_data.append(rpt_object)
 
-    return render_to_response('graphs/lab_submissions.html',
+    return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
                               "title": "'Monthly SMS Messages %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'%s'" % data_type,
                               "report_data": report_data,
+                              "chart_type": "'spline'",
                               }, context_instance=RequestContext(request)
                               )
 
