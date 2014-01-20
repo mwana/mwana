@@ -61,7 +61,7 @@ class App (rapidsms.apps.base.AppBase):
         # self.schedule_process_payloads_tasks()
         # self.schedule_send_results_to_printer_task()
 
-    def pop_pending_connection(self,connection):
+    def pop_pending_connection(self, connection):
         self.waiting_for_pin.pop(connection)
         PendingPinConnections.objects.filter(connection=connection).delete()
 
@@ -153,16 +153,17 @@ class App (rapidsms.apps.base.AppBase):
 
             # remove pending contacts for this clinic and notify them it
             # was taken care of
-            clinic_connections = [contact.default_connection for contact in \
-                Contact.active.filter\
-                (Q(location=clinic) | Q(location__parent=clinic))]
+            clinic_connections = [contact.default_connection for contact in
+                                  Contact.active.filter(
+                                      Q(location=clinic) |
+                                      Q(location__parent=clinic))]
 
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
 #                    self.waiting_for_pin.pop(conn)
                     self. pop_pending_connection(conn)
-                    OutgoingMessage(conn, RESULTS_PROCESSED,
-                                    name=message.connection.contact.name).send()
+                    OutgoingMessage([conn], RESULTS_PROCESSED % dict(
+                        name=message.connection.contact.name)).send()
 
             self.last_collectors[clinic] = \
                 message.connection.contact
@@ -181,13 +182,14 @@ class App (rapidsms.apps.base.AppBase):
             r.result_sent_date = datetime.now()
             r.save()
 
-    def send_printer_results(self, connections, results, msgcls=OutgoingMessage):
+    def send_printer_results(self, connections, results,
+                             msgcls=OutgoingMessage):
         """Sends the specified results to the given contacts."""
         responses = build_printer_results_messages(results)
 
         for connection in connections:
             for resp in responses:
-                msg = msgcls(connection, resp)
+                msg = msgcls(connections=[connection], text=resp)
                 msg.send()
                 # if SYSTEM_LOCALE == LOCALE_MALAWI:
                     # time.sleep(2)
@@ -208,10 +210,17 @@ class App (rapidsms.apps.base.AppBase):
         else:
             NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
-            msg_text = (u"Hello {name}, {count} results sent to printer "
-                        u"at {clinic}. IDs : {nuids}"
-                        u"".format(name=contact.name, count=len(results),
-                                   clinic=clinic.name, nuids=NUIDs))
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                # Omit sending IDS as msgs for now are sent in large batches
+                msg_text = (u"Hello {name}, {count} results have been sent to "
+                            u" printer at {clinic}."
+                            u"".format(name=contact.name, count=len(results),
+                                       clinic=clinic.name))
+            else:
+                msg_text = (u"Hello {name}, {count} results have been sent to "
+                            u" printer at {clinic}. IDs: {nuids}"
+                            u"".format(name=contact.name, count=len(results),
+                                       clinic=clinic.name, nuids=NUIDs))
             send(msg_text, [contact.default_connection])
 
     def chunk_messages(self, content):
@@ -281,7 +290,8 @@ class App (rapidsms.apps.base.AppBase):
             return
 
         if printers.exists():
-            self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
+            self.send_printer_results(printers, results,
+                                      msgcls=TLCOutgoingMessage)
         else:
             messages = self.results_avail_messages(clinic, results)
             if messages:
@@ -300,7 +310,8 @@ class App (rapidsms.apps.base.AppBase):
             results = self._pending_results(clinic, True)
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
-            self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
+            self.send_printer_results(printers, results,
+                                      msgcls=TLCOutgoingMessage)
 
     def _result_verified(self):
         """
@@ -316,9 +327,10 @@ class App (rapidsms.apps.base.AppBase):
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
-            results = Result.objects.filter(clinic=clinic,
-                                            clinic__send_live_results=True,
-                                            notification_status__in=['new', 'notified'])
+            results = Result.objects.filter(
+                clinic=clinic,
+                clinic__send_live_results=True,
+                notification_status__in=['new', 'notified'])
             results = self.filterout(results, check)
             if SYSTEM_LOCALE == LOCALE_MALAWI and to_printer:
                 return results.filter(self._result_verified())
@@ -326,7 +338,6 @@ class App (rapidsms.apps.base.AppBase):
                 return results.filter(self._result_verified())[:9]
         else:
             return Result.objects.none()
-
 
     def filterout(self, results, check):
         """
@@ -339,7 +350,7 @@ class App (rapidsms.apps.base.AppBase):
         if SYSTEM_LOCALE == LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
-                arrival_date__lte=ago)
+                                          arrival_date__lte=ago)
         return results
 
     def _updated_results(self, clinic):
@@ -353,9 +364,10 @@ class App (rapidsms.apps.base.AppBase):
 
     def printers_for_clinic(self, clinic):
         """ Returns the active printer connections, if any, for a clinic. """
-        return Connection.objects.filter(contact__location=clinic,
-                                         contact__types=const.get_dbs_printer_type(),
-                                         contact__is_active=True)
+        return Connection.objects.filter(
+            contact__location=clinic,
+            contact__types=const.get_dbs_printer_type(),
+            contact__is_active=True)
 
     def notify_clinic_of_changed_records(self, clinic):
         """
@@ -377,13 +389,13 @@ class App (rapidsms.apps.base.AppBase):
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
             self.send_printer_results(printers, changed_results,
-                          msgcls=TLCOutgoingMessage)
+                                      msgcls=TLCOutgoingMessage)
             return
 
-        contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).\
-            distinct().order_by('pk')
+        contacts = Contact.active.filter(
+            Q(location=clinic) | Q(location__parent=clinic),
+            Q(types=const.get_clinic_worker_type())).distinct(
+            ).order_by('pk')
         if not contacts:
             self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
@@ -404,7 +416,9 @@ class App (rapidsms.apps.base.AppBase):
 
         contact_details = []
         for contact in contacts:
-            contact_details.append("%s:%s" % (contact.name, contact.default_connection.identity))
+            contact_details.append("%s:%s" % (
+                contact.name,
+                contact.default_connection.identity))
 
         if all_msgs:
             self.send_messages(all_msgs)
@@ -413,12 +427,13 @@ class App (rapidsms.apps.base.AppBase):
 
             for help_admin in Contact.active.filter(is_help_admin=True):
                 h_msg = OutgoingMessage(
-                                        help_admin.default_connection,
-                                        "Make a followup for changed results %s: %s. Contacts = %s" %
-                                        (clinic.name, ";****".join("ID=" + res.requisition_id + ", Result="
-                                        + res.result + ", old value=" + res.old_value for res in changed_results),
-                                        ", ".join(contact_detail for contact_detail in contact_details))
-                                        )
+                    [help_admin.default_connection],
+                    "Make a followup for changed results %s: %s. Contacts = %s" %
+                    (clinic.name, 
+                     ";****".join("ID=" + res.requisition_id +
+                    ", Result=" + res.result +
+                    " old value=" + res.old_value for res in changed_results),
+                     ", ".join(contact_detail for contact_detail in contact_details)))
                 help_msgs.append(h_msg)
             if help_msgs:
                 self.send_messages(help_msgs)
@@ -426,13 +441,12 @@ class App (rapidsms.apps.base.AppBase):
             else:
                 logger.info("There are no help admins")
 
-
-
     def _mark_results_pending(self, results, connections):
         for connection in connections:
             self.waiting_for_pin[connection] = results
             for res in results:
-                PendingPinConnections.objects.create(connection=connection, result=res)
+                PendingPinConnections.objects.create(connection=connection,
+                                                     result=res)
         for r in results:
             r.notification_status = 'notified'
             r.save()
