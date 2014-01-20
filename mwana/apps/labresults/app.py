@@ -457,7 +457,7 @@ class App (rapidsms.apps.base.AppBase):
                                       RESULTS_READY % dict(
                                           name=contact.name,
                                           count=results.count()))
-            all_msgs.append(msg)
+                all_msgs.append(msg)
 
         return all_msgs
 
