@@ -245,13 +245,17 @@ def monthly_results_retrival_trends(request):
 def messages(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+    data_type = read_request(request, "data_type") or "count"
+    direction = read_request(request, "direction") or "all"
 
     service = GraphServive()
     report_data = []
 
-    time_ranges, data = service.get_monthly_messages(start_date, end_date, rpt_provinces\
+    time_ranges, data = service.get_monthly_messages(start_date, end_date,
+                                                     rpt_provinces
                                                      , rpt_districts,
-                                                     rpt_facilities)
+                                                     rpt_facilities, data_type,
+                                                     direction)
 
     for k, v in data.items():
         rpt_object = Expando()
@@ -262,9 +266,9 @@ def messages(request):
     return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'Monthly SMS Messages'",
+                              "title": "'Monthly SMS\\'s by Backend '",# % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'# of SMS Messages'",
+                              "label_y_axis": "'%s of SMS Messages'" % data_type.title(),
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
@@ -292,9 +296,9 @@ def messages_by_user_type(request):
     return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'Monthly SMS Messages %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
+                              "title": "'Monthly SMS\\'s by User Type %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'%s'" % data_type,
+                              "label_y_axis": "'%s'" % data_type.title(),
                               "report_data": report_data,
                               "chart_type": "'spline'",
                               }, context_instance=RequestContext(request)

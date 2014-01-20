@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
 from mwana.apps.contactsplus.models import ContactType
 from datetime import date
@@ -307,36 +308,55 @@ class GraphServive:
 
         return month_ranges, data
 
-    def get_monthly_messages(self, start_date, end_date, province_slug, district_slug, facility_slug):
-        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+    def get_monthly_messages(self, start_date, end_date,
+    province_slug, district_slug, facility_slug, data_type="count", direction='all'):
+        use_percentage = "count" != data_type
+        field = "count"
+        if direction == 'I':
+            field = "count_incoming"
+        elif direction == 'O':
+            field = "count_outgoing"
+
         start, end = get_datetime_bounds(start_date, end_date)
 
-        backends = Backend.objects.exclude(name='message_tester').values_list('name').all().distinct()
-        messages = Message.objects.filter(date__gte=start,
-                                          date__lt=end)
+        groups = Backend.objects.exclude(name__iexact="Message_Tester").values_list('name').all().distinct()
+        messages = MessageByLocationByBackend.objects.filter(min_date__gte=start,
+                                          min_date__lt=end)
 
         if any([province_slug, district_slug, facility_slug]):
-            messages = Message.objects.filter(date__gte=start,
-                                              date__lt=end,
-                                              contact__location__in=facs)
+            facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+            messages = MessageByLocationByBackend.objects.filter(min_date__gte=start,
+                                          min_date__lt=end, absolute_location__in=facs)
+
 
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
-        for backend in sorted(backends):
-            data[backend[0]] = []
+        for item in sorted(groups):
+            data[item[0]] = []
 
         month_ranges = []
+
         while my_date <= end_date:
-            for backend in sorted(backends):
-                data[backend[0]].append(messages.filter(
-                                        date__year=my_date.year,
-                                        date__month=my_date.month,
-                                        connection__backend__name=backend[0]
-                                        ).count())
+            denom = messages.filter(year=my_date.year,
+                        month=my_date.month).aggregate(sum=Sum(field))['sum'] or 0
+            for item in sorted(groups):
+                if use_percentage:
+                    num = messages.filter(year=my_date.year,
+                    month=my_date.month,
+                    backend=item[0]).aggregate(sum=Sum(field))['sum'] or 0
+
+                    data[item[0]].append(round(100.0 * num/(denom or 1), 1))
+                else:
+                    data[item[0]].append(
+                    messages.filter(year=my_date.year,
+                    month=my_date.month,
+                    backend=item[0]).aggregate(sum=Sum(field))['sum'] or 0)
+
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
         return month_ranges, data
+
 
     def get_monthly_messages_by_usertype(self, start_date, end_date,
     province_slug, district_slug, facility_slug, data_type="count", direction='all'):
