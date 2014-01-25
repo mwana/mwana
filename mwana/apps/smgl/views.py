@@ -2259,7 +2259,7 @@ def error(request):
     start_date, end_date = get_default_dates()
     province = district = facility = None
     messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming', flat=True)
-    messages = Message.objects.filter(id__in=messages)
+    messages = Message.objects.filter(id__in=messages).order_by('-date')
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
