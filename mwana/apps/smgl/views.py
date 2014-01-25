@@ -723,7 +723,7 @@ def mothers(request):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet("Mother's Page")
         column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD',
-                      'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date',
+                      'Gestational Age', 'Has Delivered', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date',
                       'Actual third ANC Date', 'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC']
         selected_level = zone or facility or district
         worksheet, row_index = excel_export_header(
@@ -736,49 +736,64 @@ def mothers(request):
         row_index += 1
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
-        worksheet.col(3).width = worksheet.col(4).width = worksheet.col(5).width = 20*256
+        worksheet.col(2).width = worksheet.col(3).width = worksheet.col(4).width = worksheet.col(5).width = 20*256
+        worksheet.col(9).width = 14*256
         for mother in mothers:
             anc_visits = get_four_anc_visits(mother)
+            gestational_age = mother.get_gestational_age()
+            has_delivered = mother.has_delivered
             district, facility, zone = get_district_facility_zone(mother.location)
             worksheet.write(row_index, 0, mother.created_date, date_format)
-            worksheet.write(row_index, 1, mother.uid),
-            worksheet.write(row_index, 2, mother.name),
+            worksheet.write(row_index, 1, mother.uid)
+            worksheet.write(row_index, 2, mother.name)
             worksheet.write(row_index, 3, district)
             worksheet.write(row_index, 4, facility)
-            worksheet.write(row_index, 5, zone)
+            worksheet.write(row_index, 5, mother.zone.name)#somehow the zone fetched using the get_district_facility is wrong
             worksheet.write(row_index, 6, 'Yes' if mother.has_risk_reasons() else 'No')
-            worksheet.write(row_index, 7, mother.lmp, date_format),
-            worksheet.write(row_index, 8, mother.edd, date_format),
-            worksheet.write(row_index, 9, ''),
+            worksheet.write(row_index, 7, mother.lmp, date_format)
+            worksheet.write(row_index, 8, mother.edd, date_format)
+
+            if gestational_age:
+                if gestational_age > 365:
+                    worksheet.write(row_index, 9, "Error: Too many days")
+                else:
+                    worksheet.write(row_index, 9, "{0:.0f} Weeks".format(gestational_age/7)),
+            else:
+                if has_delivered:
+                    worksheet.write(row_index, 9, 'Has Delivered')
+                elif not mother.edd:
+                    worksheet.write(row_index, 9, 'Error')
+
+            worksheet.write(row_index, 10, 'Yes' if has_delivered else 'No')
             second_anc = anc_visits[0]
             if second_anc:
-                worksheet.write(row_index, 10, "")
-                worksheet.write(row_index, 11, second_anc.visit_date, date_format)
-                worksheet.write(row_index, 12, 'Yes')
+                worksheet.write(row_index, 11, mother.next_visit, date_format)
+                worksheet.write(row_index, 12, second_anc.visit_date, date_format)
+                worksheet.write(row_index, 13, 'Yes')
             else:
-                worksheet.write(row_index, 10, '')
-                worksheet.write(row_index, 11, '')
-                worksheet.write(row_index, 12, 'No')
+                worksheet.write(row_index, 11, 'N/A')
+                worksheet.write(row_index, 12, 'N/A')
+                worksheet.write(row_index, 13, 'No')
 
             third_anc = anc_visits[1]
             if third_anc:
-                worksheet.write(row_index, 13, second_anc.next_visit, date_format)
-                worksheet.write(row_index, 14, third_anc.visit_date, date_format)
-                worksheet.write(row_index, 15, 'Yes')
+                worksheet.write(row_index, 14, second_anc.next_visit, date_format)
+                worksheet.write(row_index, 15, third_anc.visit_date, date_format)
+                worksheet.write(row_index, 16, 'Yes')
             else:
-                worksheet.write(row_index, 13, '')
-                worksheet.write(row_index, 14, '')
-                worksheet.write(row_index, 15, 'No')
+                worksheet.write(row_index, 14, 'N/A')
+                worksheet.write(row_index, 15, 'N/A')
+                worksheet.write(row_index, 16, 'No')
 
             fourth_anc = anc_visits[2]
             if fourth_anc:
-                worksheet.write(row_index, 16, third_anc.next_visit, date_format)
-                worksheet.write(row_index, 27, third_anc.visit_date, date_format)
-                worksheet.write(row_index, 18, 'Yes')
+                worksheet.write(row_index, 17, third_anc.next_visit, date_format)
+                worksheet.write(row_index, 18, third_anc.visit_date, date_format)
+                worksheet.write(row_index, 19, 'Yes')
             else:
-                worksheet.write(row_index, 16, '')
-                worksheet.write(row_index, 17, '')
-                worksheet.write(row_index, 18, 'No')
+                worksheet.write(row_index, 17, 'N/A')
+                worksheet.write(row_index, 18, 'N/A')
+                worksheet.write(row_index, 19, 'No')
             row_index += 1
 
         fname = 'Mothers-export.xls'
