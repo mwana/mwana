@@ -86,7 +86,6 @@ def anc_delivery_report(request, id=None):
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
             filter_option = form.cleaned_data.get('filter_option')
-            print filter_option
         # determine what location(s) to include in the report
         if id:
             # get district facilities
@@ -428,10 +427,12 @@ def pnc_report(request, id=None):
             if not mother.birthregistration_set.all():
                 mmr_deaths += 1
 
-        if mmr_deaths:
+        if births.count():
             mmr_num = float(mmr_deaths)/float(births.count())
+        else:
+            mmr_num = 0
 
-        r['mmr'] = "{0:.1f}%".format((mmr_num * 100000))
+        r['mmr'] = "{0:.1f}".format((mmr_num * 100000))
         r['nmr'] = nmr
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
@@ -455,7 +456,6 @@ def pnc_report(request, id=None):
         if sort:
             records.reverse()
 
-    print records
 
 
     statistics_table = StatisticsLinkTable(records,
@@ -2259,7 +2259,7 @@ def error(request):
     start_date, end_date = get_default_dates()
     province = district = facility = None
     messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming', flat=True)
-    messages = Message.objects.filter(id__in=messages)
+    messages = Message.objects.filter(id__in=messages).order_by('-date')
     if request.GET:
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
