@@ -101,7 +101,7 @@
 					enabled:false
 				},
 				title:{
-					text: '<b>Common Referral Reasons</b>',
+					text: '<b>Common Reasons for Referral</b>',
 					style: {
 						'font-weight':'bold',
 						'text-decoration':'underline',
@@ -134,12 +134,77 @@
 	function initialize(){
 		var mapOptions = {
 			center: new google.maps.LatLng(-17.033397, 26.48502),
-			zoom:14
+			zoom:9
 		};
 		var map = new google.maps.Map(document.getElementById('map-canvas'),
 		mapOptions);
-	};
+
+		setMarkers(map, clinics);
+	}
+	var clinics = [
+	['Habulile RHC', -16.35866, 26.52111],
+	['Mapatizya RHC', -17.69354, 26.86418],
+	['Masempela RHC', -17.41367, 26.51511],
+	['Mawaya UHC', -17.02679,  26.48231],
+	['Mukwela RHC', -17.04765, 26.68393],
+	['Naluja RHC', -16.64417, 26.53877],
+	['Namwianga RHC', -17.06463, 26.48695],
+	['Simwatachela  RHC ', -17.53004, 26.76021],
+	['Sipatunyana RHC', -17.28667, 26.56134],
+	['Muzya RHC', -17.42179, 26.27506],
+	['Bbilili RHC', -16.74924, 26.23403],
+	['Chilala RHC', -16.37828, 26.64569],
+	['Choonga UHC', -17.02073, 26.48234],
+	['Kalonda RHC', -16.88512, 26.69765],
+	['Kanchela RHC', -17.30291, 26.77917],
+	['Luyaba RHC', -17.45223, 26.66584],
+	['Mabombo RHC', -16.33480, 26.43254],
+	['Nameeto RHC', -16.67371, 26.35648],
+	['Nkandanzovu RHC', -16.57284, 26.20173],
+	['Siabukululu RHC', -16.47625, 26.66712],
+	['Siachitema RHC', -16.81829, 26.70498],
+	['Siamafumbe RHC', -17.51267, 26.60272],
+	['Chifusa RHC', -16.66636, 26.77063],
+	['Dimbwe RHC', -17.15584, 26.92053],
+	['Mubanga RHC', -16.46522, 26.46498],
+	['Munkolo RHC', -17.28695, 26.22586],
+	['Nakowa', -17.31601, 26.19305],
+	['Kalemu RHC', -16.03098, 26.47724],
+	['Mayoba  RHC', -17.22764, 26.26913],
+	['Moonde RHC', -17.07603,  26.79831],
+	['Simalundu', -17.65931, 26.55323],
+	['Zimba Mission Hospital', -17.31756, 26.20381],
+	['Kalomo District Hospital', -17.03078, 26.47764]
+	]
+
+
+	function setMarkers(map, clinics){
+		var image = {
+			url: '{{ STATIC_URL }}smgl/images/mini_facility.png',
+			size: new google.maps.Size(20, 32),
+			origin: new google.maps.Point(0, 0),
+			anchor: new google.maps.Point(0, 32)
+		};
+
+		var shape = {
+			coord: [1, 1, 1, 20, 18, 20, 18, 1],
+			type: 'poly'
+		}
+
+		for (var i = 0; i < clinics.length; i++){
+			var clinic = clinics[i];
+			var myLatLng = new google.maps.LatLng(clinic[1], clinic[2])
+			var marker = new google.maps.Marker({
+				position: myLatLng,
+				map:map,
+				icon: image,
+				shape: shape,
+				title: clinic[0],
+			});
+		}
+		}
 	google.maps.event.addDomListener(window, 'load', initialize);
+
 </script>
 
 {% endblock %}
@@ -191,7 +256,7 @@
 		</div>
 		<div class="col-xs-5">
 			<div class="row-fluid">
-				<div id="birth-comp-chart"></div>
+				<div id="ref-comp-chart"></div>
 			</div>
 		</div>
 	</div>
@@ -200,7 +265,7 @@
 			<div id="map-canvas"></div>
 		</div>
 		<div class="col-xs-5">
-			<div id="ref-comp-chart"></div>
+			<div id="birth-comp-chart"></div>
 		</div>
 	</div>
 	<div class="row">
