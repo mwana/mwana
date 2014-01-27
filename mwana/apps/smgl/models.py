@@ -110,13 +110,19 @@ class PregnantMother(models.Model):
 
     @property
     def has_delivered(self):
-        before_edd = self.edd - datetime.timedelta(days=60)
-        after_edd = self.edd + datetime.timedelta(days=60)
+        if not self.edd:
+            return True
+        before_edd = self.edd - datetime.timedelta(days=90)
+        after_edd = self.edd + datetime.timedelta(days=90)
         try:
             birth = self.birthregistration_set.filter(
                 date__range=[before_edd, after_edd])[0]
         except IndexError:
-            return False
+            print datetime.datetime.today()
+            if datetime.datetime.now().date() > (self.edd + datetime.timedelta(days=30)):
+                return True #If we are 30 days past the edd
+            else:
+                return False
         else:
             return True
 
@@ -159,7 +165,15 @@ class PregnantMother(models.Model):
 
 
     def get_gestational_age(self):
-        pass
+        #For now, under gestational age we return 0 if something is not applicable
+        if self.has_delivered:
+            return 0
+        else:
+            gestational_age = self.created_date.date() - self.lmp
+            if gestational_age.days > 365:
+                return 0
+            else:
+                return gestational_age.days
 
     def __unicode__(self):
         return 'Mother: %s %s, UID: %s' % (
