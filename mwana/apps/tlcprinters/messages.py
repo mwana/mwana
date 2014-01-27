@@ -6,11 +6,13 @@ import time
 
 from mwana.apps.tlcprinters.models import MessageConfirmation
 
+
 class TLCOutgoingMessage(OutgoingMessage):
 
     def send(self):
         # Pause a little. unit tests can run so fast such that 'sent_at' can be
-        # equal for two different messages. Therefore, last_msg may not be as expected
+        # equal for two different messages. Therefore,
+        # last_msg may not be as expected
         time.sleep(.1)
         try:
             last_msg = MessageConfirmation.objects.latest('sent_at')
@@ -28,7 +30,8 @@ class TLCOutgoingMessage(OutgoingMessage):
         # message_sent = super(TLCOutgoingMessage, self).send()
         message_sent = send(self.text, self.connections)
         if message_sent:
-            MessageConfirmation.objects.create(connection=self.connections,
+            msg_connection = self.connections[0]
+            MessageConfirmation.objects.create(connection=msg_connection,
                                                text=self.text,
                                                sent_at=datetime.today(),
                                                seq_num=seq_num)

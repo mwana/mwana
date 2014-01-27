@@ -189,7 +189,7 @@ class App (rapidsms.apps.base.AppBase):
 
         for connection in connections:
             for resp in responses:
-                msg = msgcls(connections=[connection], text=resp)
+                msg = msgcls([connection], resp)
                 msg.send()
                 # if SYSTEM_LOCALE == LOCALE_MALAWI:
                     # time.sleep(2)
