@@ -221,7 +221,8 @@ class App (rapidsms.apps.base.AppBase):
                             u" printer at {clinic}. IDs: {nuids}"
                             u"".format(name=contact.name, count=len(results),
                                        clinic=clinic.name, nuids=NUIDs))
-            send(msg_text, [contact.default_connection])
+            if contact.default_connection is not None:
+                send(msg_text, [contact.default_connection])
 
     def chunk_messages(self, content):
         message = ''
