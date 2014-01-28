@@ -148,7 +148,7 @@ def monthly_birth_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'Monthly Birth Trends'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Date of Birth)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'# of Births'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
@@ -178,7 +178,7 @@ def monthly_scheduled_visit_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'%s Visit Trend'" % visit_type.title(),
-                              "sub_title": "'**Note that TOLD and CONFIRMED may be under-reported'",
+                              "sub_title": "' (Filtered by Postanatal Date) **Note that TOLD and CONFIRMED may be under-reported'",
                               "label_y_axis": "'%s'" % (data_type.title()),
                               "report_data": report_data,
                               "skip_total": True,
@@ -207,7 +207,7 @@ def monthly_turnaround_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'Monthly DBS Turnaround Trends'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Results Retreived Date)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'Days'",
                               "report_data": report_data,
                               "skip_total": True,
@@ -321,7 +321,7 @@ def facility_vs_community(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'Facility vs Community Births'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Date of Birth)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
@@ -343,7 +343,7 @@ def turnaround(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'DBS Turnaround'",
-                              "sub_title": "'Month: %s'" % (end_date.strftime("%b %Y")),
+                              "sub_title": "'Month: %s ( (Filtered by Results Retrived Date))'" % (end_date.strftime("%b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "transport": transport,
                               "processing": processing,

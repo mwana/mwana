@@ -413,8 +413,8 @@ class GraphServive:
         facs = get_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
 
-        return PatientEvent.objects.filter(date_logged__gte=start,
-                                           date_logged__lt=end,
+        return PatientEvent.objects.filter(date__gte=start,
+                                           date__lt=end,
                                            patient__location__parent__in=facs,
                                            event__name__iexact='birth').\
             values('event_location_type').\
