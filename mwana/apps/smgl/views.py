@@ -1837,7 +1837,10 @@ def sms_users(request):
             district, facility, zone = get_district_facility_zone(contact.location)
             worksheet.write(row_index, 0, contact.created_date, date_format)
             worksheet.write(row_index, 1, contact.name)
-            worksheet.write(row_index, 2, contact.default_connection.identity)
+            if contact.default_connection:
+                worksheet.write(row_index, 2, contact.default_connection.identity)
+            else:
+                worksheet.write(row_index, 2, "")
             worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
             worksheet.write(row_index, 4, district)
             worksheet.write(row_index, 5, facility)
