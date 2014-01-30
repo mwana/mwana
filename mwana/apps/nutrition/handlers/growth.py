@@ -348,7 +348,9 @@ class GrowthHandler(KeywordHandler):
                          cba_conn=healthworker.default_connection,
                          notification_status="sam", patient=child)
 
-    def _update_survey_averages(self, ass, survey, survey_entry, results):
+    def _update_survey_averages(self, ass, survey,
+                                survey_entry, results,
+                                healthworker):
         try:
             logger.debug('updating averages...')
             average_zscores = survey.update_avg_zscores()
@@ -480,7 +482,8 @@ class GrowthHandler(KeywordHandler):
             self._check_wasting(ass, healthworker, patient)
 
             # update survey averages
-            self._update_survey_averages(ass, survey, survey_entry, results)
+            self._update_survey_averages(ass, survey, survey_entry,
+                                         results, healthworker)
 
             # send feedback to healthworker
             try:
