@@ -66,6 +66,23 @@
 <script src="http://code.highcharts.com/highcharts.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(e){
+		var abv = {
+			HBP:'High Blood Pressure',
+			GD: 'Gestational Diabetes',
+			PSB: 'Previous Still Born',
+			Other: 'Other',
+	        FD:    "Fetal Distress",
+	        PEC:   "Pre-Eclampsia",
+	        EC:    "Eclampsia",
+	        HBP:   "High Blood Pressure",
+	        PPH:   "Post-Partum Hemorrhage",
+	        APH:   "Antepartum Hemorrhage",
+	        PL:    "Prolonged Labor",
+	        CPD:   "Big Baby Small Pelvis",
+	        OTH:   "Other",
+	        PP:    "post-partum visit"
+
+		}
 		$.get('/smgl', function(data){
 			$('#birth-comp-chart').highcharts({
 				credits:{
@@ -79,7 +96,9 @@
 					}
 				},
 				tooltip:{
-					pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
+					formatter: function(){
+						return abv[this.key]+" <br> "+this.series.name+': <b>'+this.point.y+' ('+this.point.percentage.toPrecision(3)+'%)</b>'
+					}
 				},
 				subtitle:{
 					text: 'Total Number: '+ data['num_mothers']
@@ -108,7 +127,9 @@
 					}
 				},
 				tooltip:{
-					pointFormat: '{series.name}: <b>{point.y} ({point.percentage:.1f}%)</b>'
+					formatter: function(){
+						return abv[this.key]+" <br> "+this.series.name+': <b>'+this.point.y+' ('+this.point.percentage.toPrecision(3)+'%)</b>'
+					}
 				},
 				subtitle:{
 					text: 'Total Number: '+ data['num_ref_reasons']

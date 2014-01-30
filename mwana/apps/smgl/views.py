@@ -2154,20 +2154,20 @@ def help_manager(request, id):
 
 def home_page(request):
     if request.is_ajax():
-        conditions = {}
-
-        conditions['C-Section'] = PregnantMother.objects.filter(
-            risk_reason_csec=True).count()
-        conditions['Comp. during previous'] = PregnantMother.objects.filter(
-            risk_reason_cmp=True).count()
-        conditions['Gestational Diabetes'] = PregnantMother.objects.filter(
-            risk_reason_gd=True).count()
-        conditions['HBP'] = PregnantMother.objects.filter(
-            risk_reason_hbp=True).count()
-        conditions['Previous Still Born'] = PregnantMother.objects.filter(
-            risk_reason_psb=True).count()
-        conditions['Other'] = PregnantMother.objects.filter(
-            risk_reason_oth=True).count()
+        conditions = (
+        ('CSEC', PregnantMother.objects.filter(
+            risk_reason_csec=True).count()),
+        ('GD', PregnantMother.objects.filter(
+            risk_reason_gd=True).count()),
+        ('HBP', PregnantMother.objects.filter(
+            risk_reason_hbp=True).count()),
+        ('PSB', PregnantMother.objects.filter(
+            risk_reason_psb=True).count()),
+        ('CMP', PregnantMother.objects.filter(
+            risk_reason_cmp=True).count()),
+        ('Other', PregnantMother.objects.filter(
+            risk_reason_oth=True).count()),
+        )
 
         ref_reasons = {}
         for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
@@ -2175,16 +2175,14 @@ def home_page(request):
                 **{'reason_%s'%short_reason:True }
                 ).count()
             if num > 0: # Only get the ones over 0
-                ref_reasons[long_reason] = num
-
+                ref_reasons[short_reason.upper()] = num
         num_ref_reasons = sum([cond_num[1] for cond_num in ref_reasons.items()])
-        num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
-
+        num_mothers = sum([cond_num[1] for cond_num in conditions])
         return HttpResponse(json.dumps(
             {
             'ref_reasons':ref_reasons.items(),
             'num_ref_reasons':num_ref_reasons,
-            'conditions':conditions.items(),
+            'conditions':conditions,
             'num_mothers':num_mothers
             }),
             content_type='application/json')
