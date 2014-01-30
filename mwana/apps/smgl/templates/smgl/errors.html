@@ -30,22 +30,20 @@
 
 <div class="statistics module">
   <h2>Filtering</h2>
-  <form action="" method="GET" >
+ <form action="" method="GET" >
     <table>
       <thead>
         <tr>
           <th colspan="2">Period</th>
-          <th colspan="3">Location</th>
+          <th colspan="2">Location</th>
+          <th>User</th>
         </tr>
         <tr>
           <th>Start</th>
           <th>End</th>
-          {% if not district %}
           <th>Province</th>
-          {% endif %}
           <th>District</th>
-          <th>Facility</th>
-
+          <th>Contact Type</th>
         </tr>
       </thead>
       <tbody>
@@ -67,8 +65,8 @@
             {{ form.district }}
           </td>
           <td>
-            {{ form.facility.errors}}
-            {{ form.facility }}
+            {{ form.c_type.errors}}
+            {{ form.c_type }}
           </td>
         </tr>
       </tbody>
@@ -77,6 +75,13 @@
       <input type="submit" class="btn" name="export" value="Export" />
   </form>
   {{ form.media.js }}
+    <form action="." method="POST">
+      {% csrf_token %}
+      Or search by (partial) Name or Phone Number<br />
+      {{ search_form.search_string.errors }}
+      {{ search_form.search_string }}
+      <input type="Submit" class="btn" name="search" value="Search" />
+    </form>
   <div id="records">
     {{ error_table.as_html }}
   </div>
