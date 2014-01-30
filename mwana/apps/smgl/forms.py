@@ -124,12 +124,14 @@ class SuggestionForm(forms.ModelForm):
         self.fields['title'].widget.attrs['placeholder'] = 'Suggestion Title'
 
         self.fields['text'].widget.attrs['class'] = 'form-control'
+        self.fields['closed'].widget.attrs['class'] = 'form-control'
+        self.fields['close_comment'].widget.attrs['class'] = 'form-control'
         self.fields['text'].widget.attrs['placeholder'] = \
             'Describe your suggestion, you can add images/files below.'
 
     class Meta:
         model = Suggestion
-        fields = ('title', 'text')
+        fields = ('title', 'text', 'closed', 'close_comment')
 
 
 class FileUploadForm(forms.ModelForm):

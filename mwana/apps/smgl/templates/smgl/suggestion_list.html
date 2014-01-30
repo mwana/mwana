@@ -11,7 +11,7 @@
 		font-size: 1.6em;
 		text-align:center;
 	}
-	
+
 	#branding h1 a:hover{
 		text-decoration: none;
 		text-align:center;
@@ -30,8 +30,13 @@
 			{% for suggestion in suggestions %}
 			<li>
 				<b class="suggestion-item"><a href="{% url suggestions-detail suggestion.id %}">{{ suggestion.title }}</a></b>
-				<p style="margin:0 0 0 10px;">{{ suggestion.text|truncatewords:30 }}</p><b>Authors:</b> {{ suggestion.get_authors_names }} | 
+				<p style="margin:0 0 0 10px;">{{ suggestion.text|truncatewords:30 }}</p><b>Authors:</b> {{ suggestion.get_authors_names }} |
 					<b>Last Edited</b>: {{ suggestion.last_edited_time }}  | <a href="{% url suggestions-edit suggestion.id %}">edit</a>
+				{% if suggestion.closed %}
+					<span class='alert alert-success'>Closed</span>
+				{% else %}
+					<span class='alert alert-warning'>Pending</span>
+				{% endif %}
 			</li>
 			<br />
 			{% endfor %}
