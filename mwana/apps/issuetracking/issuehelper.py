@@ -1,13 +1,15 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator
+from mwana.apps.graphs.utils import get_sms_facilities
 from mwana.apps.blacklist.models import BlacklistedPeople
-from mwana.apps.training.models import Trained
-
-from rapidsms.contrib.messagelog.models import Message
-from mwana.apps.reports.webreports.models import GroupUserMapping
-from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.models import Issue
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from mwana.apps.reports.webreports.models import GroupFacilityMapping
+from mwana.apps.reports.webreports.models import GroupUserMapping
+from mwana.apps.training.models import Trained
+from rapidsms.contrib.messagelog.models import Message
 
 class IssueHelper:   
 #    TODO take out generic methods here to a util/general 
@@ -39,7 +41,7 @@ class IssueHelper:
         """
         Returns open issues with pagination
         """
-        
+
         issues = Issue.objects.filter(open=True).order_by('pk')
         return self.get_paginated(issues, page, 30)
 
@@ -59,12 +61,18 @@ class IssueHelper:
         issues = GroupUserMapping.objects.all().order_by('pk')
         return self.get_paginated(issues, page, 400)
 
-    def get_trained_people(self, order='pk', page=1):
+    def get_trained_people(self, start_date, end_date, order='pk', page=1,
+                           province_slug=None, district_slug=None,
+                           facility_slug=None):
         """
         Returns trained people
         """
         max_per_page = 400
-        issues = Trained.objects.all().order_by(order)
+        issues = Trained.objects.filter(date__gte=start_date).filter(date__lte=end_date).order_by(order)
+        if any([province_slug, district_slug, facility_slug]):
+            facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+            issues = Trained.objects.filter(location__in=facs, date__gte=start_date).filter(date__lte=end_date).order_by(order)
+
         return self.get_paginated(issues, page, max_per_page), max_per_page
 
     def get_blacklisted_people(self, order='pk', page=1):
@@ -74,7 +82,7 @@ class IssueHelper:
         max_per_page = 400
         blacklist = (bl.phone for bl in BlacklistedPeople.objects.filter(valid=True))
         messages = Message.objects.filter(
-        direction='I', connection__identity__in=blacklist).order_by(order)\
+                                          direction='I', connection__identity__in=blacklist).order_by(order)\
             .exclude(text__istartswith='help')\
             .exclude(text__istartswith='training')\
             .exclude(text__istartswith='result')\
@@ -87,5 +95,5 @@ class IssueHelper:
             .exclude(text__icontains='demo')\
             .exclude(text__istartswith='sent')
         return self.get_paginated(messages, page, max_per_page), max_per_page
-        
+
     
