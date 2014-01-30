@@ -1837,7 +1837,10 @@ def sms_users(request):
             district, facility, zone = get_district_facility_zone(contact.location)
             worksheet.write(row_index, 0, contact.created_date, date_format)
             worksheet.write(row_index, 1, contact.name)
-            worksheet.write(row_index, 2, contact.default_connection.identity)
+            if contact.default_connection:
+                worksheet.write(row_index, 2, contact.default_connection.identity)
+            else:
+                worksheet.write(row_index, 2, "")
             worksheet.write(row_index, 3, ", ".join([contact_type.name for contact_type in contact.types.all()]))
             worksheet.write(row_index, 4, district)
             worksheet.write(row_index, 5, facility)
@@ -2151,20 +2154,20 @@ def help_manager(request, id):
 
 def home_page(request):
     if request.is_ajax():
-        conditions = {}
-
-        conditions['C-Section'] = PregnantMother.objects.filter(
-            risk_reason_csec=True).count()
-        conditions['Comp. during previous'] = PregnantMother.objects.filter(
-            risk_reason_cmp=True).count()
-        conditions['Gestational Disease'] = PregnantMother.objects.filter(
-            risk_reason_gd=True).count()
-        conditions['High Blood Pressure'] = PregnantMother.objects.filter(
-            risk_reason_hbp=True).count()
-        conditions['Previous Still Born'] = PregnantMother.objects.filter(
-            risk_reason_psb=True).count()
-        conditions['Other'] = PregnantMother.objects.filter(
-            risk_reason_oth=True).count()
+        conditions = (
+        ('CSEC', PregnantMother.objects.filter(
+            risk_reason_csec=True).count()),
+        ('GD', PregnantMother.objects.filter(
+            risk_reason_gd=True).count()),
+        ('HBP', PregnantMother.objects.filter(
+            risk_reason_hbp=True).count()),
+        ('PSB', PregnantMother.objects.filter(
+            risk_reason_psb=True).count()),
+        ('CMP', PregnantMother.objects.filter(
+            risk_reason_cmp=True).count()),
+        ('Other', PregnantMother.objects.filter(
+            risk_reason_oth=True).count()),
+        )
 
         ref_reasons = {}
         for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
@@ -2172,22 +2175,26 @@ def home_page(request):
                 **{'reason_%s'%short_reason:True }
                 ).count()
             if num > 0: # Only get the ones over 0
-                ref_reasons[long_reason] = num
-
+                ref_reasons[short_reason.upper()] = num
         num_ref_reasons = sum([cond_num[1] for cond_num in ref_reasons.items()])
-        num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
-
+        num_mothers = sum([cond_num[1] for cond_num in conditions])
         return HttpResponse(json.dumps(
             {
             'ref_reasons':ref_reasons.items(),
             'num_ref_reasons':num_ref_reasons,
-            'conditions':conditions.items(),
-            'num_mothers':num_mothers
+            'conditions':conditions,
+            'num_mothers':num_mothers,
             }),
             content_type='application/json')
 
     return render_to_response(
         "smgl/home.html",
+        {
+            'num_emergencies':Referral.objects.count(),
+            'num_antenatal': FacilityVisit.objects.filter(visit_type='anc').count(),
+            'num_postpartum': FacilityVisit.objects.filter(visit_type='pos').count(),
+            'num_intrapartum': PregnantMother.objects.count()
+        },
         context_instance=RequestContext(request)
         )
 
