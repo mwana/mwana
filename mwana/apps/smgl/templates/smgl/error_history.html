@@ -1,0 +1,15 @@
+{% extends  "layout.html" %}
+
+{% block title %}User Error History - {{ block.super }}{% endblock %}
+
+{% block content %}
+
+<div class="messages module">
+<h2>User's Error History</h2>
+<h3>{{ user }}&nbsp({{ user.default_connection.identity }})</h3>
+<a href="?export=1"><button class="btn" name="export">Export</button></a>
+<a href="{% url error_page %}">Back to Errors</a>
+{{ message_table.as_html }}
+</div>
+
+{% endblock %}

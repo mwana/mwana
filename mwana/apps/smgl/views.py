@@ -36,7 +36,8 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
                      HelpRequestTable, UserReport, get_msg_type,
-                     PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable)
+                     PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable,
+                     ErrorMessageTable)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
 from smsforms.models import XFormsSession
@@ -2357,6 +2358,56 @@ def error(request):
                               {"error_table":error_table,
                                "form":form},
                               context_instance=RequestContext(request))
+
+def error_history(request, id):
+    contact = get_object_or_404(Contact, id=id)
+    error_messages = XFormsSession.objects.filter(
+        has_error=True
+        ).values_list('message_incoming', flat=True)
+    messages = Message.objects.filter(connection__contact=contact,
+                                      direction='I', id__in=error_messages)
+
+    if request.GET.get('export'):
+        messages = messages.filter(direction='I') #only show incoming messages.
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("User Page")
+        column_headers = ['Date', 'Time', 'Type', 'Sender Number', 'User Type', 'District', 'Facility', 'Zone', 'Message']
+        worksheet, row_index = excel_export_header(
+                                                   worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(3).width = worksheet.col(4).width = 15*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
+        for message in messages:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.date.time(), time_format)
+            worksheet.write(row_index, 2, get_msg_type(message))
+            worksheet.write(row_index, 3, message.connection.identity)
+            worksheet.write(row_index, 4, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, message.text)
+            row_index += 1
+        fname = 'Error-history-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+
+    return render_to_response(
+        "smgl/error_history.html",
+        {"user": contact,
+          "message_table": ErrorMessageTable(messages,
+                                        request=request)
+        },
+        context_instance=RequestContext(request))
 
 
 def reports_main(request):
