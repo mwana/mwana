@@ -104,5 +104,5 @@ SYP_TEST_COMPLETE = _("Thanks %(name)s. A Syphilis Test Result has been recorded
 SYP_TREATMENT_COMPLETE = _("Thanks %(name)s. A Syphilis Treatment has been recorded for %(unique_id)s.")
 
 # MISC OUTBOUND SCHEDULED MESSAGES
-INACTIVE_CONTACT = _("Our records indicate that you have not sent a single SMS for 14 days. You will be contacted on this matter soon by a representative")
+INACTIVE_CONTACT = _("We have not heard from you for the past %(days)s days. Please send help to mUbumi (0974148753)")
 EXPECTED_EDDS = _("We want to inform you that according to our records, your clinic should expect %(edd_count)s deliveries in the next 7 days. From SMGL/mUbumi")
