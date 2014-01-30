@@ -160,7 +160,7 @@ def send_upcoming_delivery_reminders(router_obj=None):
                 c.message(const.REMINDER_UPCOMING_DELIVERY,
                           **{"name": mom.name,
                              "unique_id": mom.uid,
-                             "date": mom.edd})
+                             "date": mom.edd.strftime('%d %b %Y')})
                 _create_notification("edd_14", c, mom.uid)
         if found_someone:
             mom.reminded = True
@@ -420,20 +420,20 @@ def send_syphillis_reminders(router_obj=None):
             v.save()
 
 
-def send_inactive_notice(router_obj=None):
+def send_inactive_notice_cbas(router_obj=None):
     """
     Automated Reminder for inactive users
 
-    To: Active CBAs & Data Clerks
-    On: 14th day after Contact.latest_sms_date who are marked as
+    To: Active CBAs
+    On: 60th day after Contact.latest_sms_date who are marked as
         Contact.is_active=True
     """
     _set_router(router_obj)
-
+    cba = ContactType.objects.get(slug='cba')
     def _contacts_to_remind():
         now = datetime.utcnow().date()
-        inactive_threshold = now - timedelta(days=14)
-        contacts = Contact.objects.filter(is_active=True)
+        inactive_threshold = now - timedelta(days=60)
+        contacts = Contact.objects.filter(types=cba, is_active=True)
 
         for c in contacts:
             last_sent = c.latest_sms_date
@@ -442,7 +442,31 @@ def send_inactive_notice(router_obj=None):
 
     for c in _contacts_to_remind():
         if c.default_connection:
-            c.message(const.INACTIVE_CONTACT, **{})
+            c.message(const.INACTIVE_CONTACT, **{'days':60})
+
+def send_inactive_notice_data_clerks(router_obj=None):
+    """
+    Automated Reminder for inactive users
+
+    To: Data Clerks
+    On: 14th day after Contact.latest_sms_date who are marked as
+        Contact.is_active=True
+    """
+    _set_router(router_obj)
+    data_clerk = ContactType.objects.get(slug='dc')
+    def _contacts_to_remind():
+        now = datetime.utcnow().date()
+        inactive_threshold = now - timedelta(days=14)
+        contacts = Contact.objects.filter(types=data_clerk, is_active=True)
+
+        for c in contacts:
+            last_sent = c.latest_sms_date
+            if last_sent and last_sent.date() == inactive_threshold:
+                yield c
+
+    for c in _contacts_to_remind():
+        if c.default_connection:
+            c.message(const.INACTIVE_CONTACT, **{'days':14})
 
 
 def send_expected_deliveries(router_obj=None):
