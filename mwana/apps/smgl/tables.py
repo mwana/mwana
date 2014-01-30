@@ -53,6 +53,21 @@ class MotherMessageTable(Table):
     class Meta:
         order_by = "-date"
 
+class ErrorMessageTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    msg_type = NamedColumn(col_name="Type",
+                           value=lambda cell: cell.object.text.split(
+                               ' ')[0].upper(),
+                           sortable=False)
+    contact = NamedColumn(col_name="Sender")
+    facility = Column(
+        value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
+    text = NamedColumn(col_name="Message")
+    error_response = NamedColumn(col_name="Error Resp", value=lambda cell: get_response(cell.object))
+
+
+    class Meta:
+        order_by = "-date"
 
 class NotificationsTable(Table):
     date = DateColumn(format="Y m d H:i ")
@@ -412,8 +427,19 @@ class ErrorTable(Table):
                       value=lambda cell: get_msg_type(cell.object),
                       sortable=False
                     )
-    user_number = NamedColumn(col_name="User Number", value=lambda cell: cell.object.connection.identity)
-    user_name = NamedColumn(col_name="User Name",value=lambda cell: cell.object.connection.contact.name)
+    user_number = NamedColumn(link=lambda cell: reverse("error-history", args=[
+        cell.object.connection.contact.id
+        ]),
+    col_name="User Number",
+    value=lambda cell: cell.object.connection.identity
+    )
+    user_name = NamedColumn(link=lambda cell: reverse("error-history", args=[
+        cell.object.connection.contact.id
+        ]),
+    col_name="User Name",
+    value=lambda cell: cell.object.connection.contact.name
+    )
+
     user_type = NamedColumn(col_name="User Type", value=lambda cell: ", ".join(
         [x.name for x in cell.object.connection.contact.types.all()]))
     district = Column(value=lambda cell: cell.object.connection.contact.get_current_district()
