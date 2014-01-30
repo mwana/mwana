@@ -714,7 +714,7 @@ class Suggestion(models.Model):
         return ", ".join([user.username for user in self.authors.all()])
 
     class Meta:
-        ordering = ('-last_edited_time', '-created_time', )
+        ordering = ('created_time', )
 
     def __unicode__(self):
         return self.title
