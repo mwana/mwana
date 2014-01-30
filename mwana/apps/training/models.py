@@ -34,5 +34,9 @@ class Trained(models.Model):
     def __unicode__(self):
         return '%s of %s trained on %s by %s' % (self.name, self.location, self.date, self.trained_by )
 
+    def save(self, *args, **kwargs):
+        if not self.email or self.email.trim() == '':  self.email = None
+        super(Trained, self).save(*args, **kwargs)
+
     class Meta:
         verbose_name_plural = "Trained People"
