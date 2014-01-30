@@ -160,7 +160,7 @@ def send_upcoming_delivery_reminders(router_obj=None):
                 c.message(const.REMINDER_UPCOMING_DELIVERY,
                           **{"name": mom.name,
                              "unique_id": mom.uid,
-                             "date": mom.edd})
+                             "date": mom.edd.strftime('%d %b %Y')})
                 _create_notification("edd_14", c, mom.uid)
         if found_someone:
             mom.reminded = True
