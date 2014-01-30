@@ -2160,9 +2160,9 @@ def home_page(request):
             risk_reason_csec=True).count()
         conditions['Comp. during previous'] = PregnantMother.objects.filter(
             risk_reason_cmp=True).count()
-        conditions['Gestational Disease'] = PregnantMother.objects.filter(
+        conditions['Gestational Diabetes'] = PregnantMother.objects.filter(
             risk_reason_gd=True).count()
-        conditions['High Blood Pressure'] = PregnantMother.objects.filter(
+        conditions['HBP'] = PregnantMother.objects.filter(
             risk_reason_hbp=True).count()
         conditions['Previous Still Born'] = PregnantMother.objects.filter(
             risk_reason_psb=True).count()
