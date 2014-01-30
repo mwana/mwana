@@ -10,7 +10,6 @@ from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.reports.webreports.forms import GroupFacilityMappingForm
 from mwana.apps.reports.models import Login
 from datetime import datetime, timedelta, date
-from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
 
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
@@ -165,8 +164,6 @@ def get_admin_email_address():
         return "Admin's email address"
 
 
-@csrf_response_exempt
-@csrf_view_exempt
 def group_user_mapping(request):
 
 
@@ -212,8 +209,6 @@ def group_user_mapping(request):
                               }, context_instance=RequestContext(request)
                               )
 
-@csrf_response_exempt
-@csrf_view_exempt
 def group_facility_mapping(request):
 
 

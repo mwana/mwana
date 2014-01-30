@@ -1,8 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
 
-from django.contrib.csrf.middleware import csrf_response_exempt
-from django.contrib.csrf.middleware import csrf_view_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from mwana.apps.issuetracking.issuehelper import IssueHelper
@@ -14,9 +12,6 @@ from mwana.const import get_clinic_worker_type
 from mwana.const import get_district_worker_type
 from mwana.const import get_hub_worker_type
 from mwana.const import get_province_worker_type
-
-
-
 
 
 def get_int(val):
@@ -115,8 +110,6 @@ def get_trained_data(type):
 
     return "[%s]" % ','.join("'%s'" % i for i in trainer_labels), trainer_values, total
 
-@csrf_response_exempt
-@csrf_view_exempt
 def trained(request):
     name_dir = phone_dir = email_dir = location_dir = type_dir = trained_by_dir = date_dir = additional_text_dir = "asc"
 
@@ -154,7 +147,7 @@ def trained(request):
             date = form.cleaned_data['date']
             location = form.cleaned_data['location']
             additional_text = form.cleaned_data['additional_text']
-            if not email:email = None
+            if not email or email.trim() == '':email = None
             if not additional_text:additional_text = None
 
 
