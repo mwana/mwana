@@ -708,10 +708,15 @@ class Suggestion(models.Model):
     last_edited_time = models.DateTimeField(auto_now=True)
     parent_suggestion = models.ForeignKey('self', null=True, blank=True)
     text = models.TextField()
+    closed = models.BooleanField(default=False)
+    close_comment = models.TextField(null=True, blank=True)
 
     def get_authors_names(self):
 
         return ", ".join([user.username for user in self.authors.all()])
+
+    def get_status(self):
+        return 'Closed' if self.closed else 'Pending'
 
     class Meta:
         ordering = ('created_time', )
