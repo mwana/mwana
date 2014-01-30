@@ -2183,12 +2183,18 @@ def home_page(request):
             'ref_reasons':ref_reasons.items(),
             'num_ref_reasons':num_ref_reasons,
             'conditions':conditions,
-            'num_mothers':num_mothers
+            'num_mothers':num_mothers,
             }),
             content_type='application/json')
 
     return render_to_response(
         "smgl/home.html",
+        {
+            'num_emergencies':Referral.objects.count(),
+            'num_antenatal': FacilityVisit.objects.filter(visit_type='anc').count(),
+            'num_postpartum': FacilityVisit.objects.filter(visit_type='pos').count(),
+            'num_intrapartum': PregnantMother.objects.count()
+        },
         context_instance=RequestContext(request)
         )
 
