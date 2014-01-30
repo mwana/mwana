@@ -11,7 +11,7 @@
 		font-size: 1.6em;
 		text-align:center;
 	}
-	
+
 	#branding h1 a:hover{
 		text-decoration: none;
 		text-align:center;
@@ -27,9 +27,9 @@
 	<div class="col-md-10 col-md-offset-1">
 		<h3 style="text-align: center">{{ suggestion.title }}</h3>
 		<p>{{ suggestion.text|linebreaks }}</p>
-		
+
 		<p>
-			
+
 			<b>Attached</b>:
 			{% for attached_file in suggestion.attached_files.all %}
 				{% if attached_file.file %}
@@ -40,7 +40,11 @@
 		<p>
 			<b>Authors</b>: {{ suggestion.get_authors_names }}
 		</p>
-		<p><b>Created</b>: {{ suggestion.created_time}}</p> 
+		<p><b>Status</b>: {{suggestion.get_status}}</p>
+		{% if suggestion.close_comment %}
+			<p><b>Comment: </b> {{ suggestion.close_comment }}</p>
+		{% endif %}
+		<p><b>Created</b>: {{ suggestion.created_time}}</p>
 		<p><b>Last Edited</b>: {{ suggestion.last_edited_time }}</p>
 		<a href="{% url suggestions-edit suggestion.id %}" class="btn btn-info col-md-6">Edit</a>
 		<a href="{% url suggestions-list %}" class="btn btn-default col-md-6">Back to List</a>
