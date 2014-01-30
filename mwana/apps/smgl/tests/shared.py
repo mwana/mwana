@@ -247,7 +247,7 @@ class SMGLSetUp(TestScript):
             11 > Join AntonTN EN
             11 < Thank you for registering! You have successfully registered as a Triage Nurse at Kalomo District.
             12 > join ANTONAD en
-            12 < Thank you for registering! You have successfully registered as a Ambulance at Kalomo District Hospital HAHC.
+            12 < Thank you for registering! You have successfully registered as a Ambulance Driver at Kalomo District Hospital HAHC.
             13 > join antonCW en
             13 < Thank you for registering! You have successfully registered as a Clinic Worker at Kalomo District Hospital HAHC.
             14 > join antonOther en
