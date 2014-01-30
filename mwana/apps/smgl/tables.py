@@ -63,6 +63,8 @@ class ErrorMessageTable(Table):
     facility = Column(
         value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
     text = NamedColumn(col_name="Message")
+    error_response = NamedColumn(col_name="Error Resp", value=lambda cell: get_response(cell.object))
+
 
     class Meta:
         order_by = "-date"
