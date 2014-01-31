@@ -114,6 +114,9 @@ class StatisticsTable(Table):
     mother_deaths_com = NamedColumn(col_name="COM")
     mother_deaths_fac = NamedColumn(col_name="FAC")
     mother_deaths_total = NamedColumn(col_name="Total")
+    anc_total = NamedColumn(col_name='ANC Total')
+    pos_total = NamedColumn(col_name='POS Total')
+    """
     anc1 = NamedColumn(col_name="1 ANC")
     anc2 = NamedColumn(col_name="2 ANCs")
     anc3 = NamedColumn(col_name="3 ANCs")
@@ -121,7 +124,7 @@ class StatisticsTable(Table):
     pos1 = NamedColumn(col_name="1 POS")
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
-
+    """
 
 class StatisticsLinkTable(StatisticsTable):
 
@@ -141,6 +144,9 @@ class StatisticsLinkTable(StatisticsTable):
     mother_deaths_com = NamedColumn(col_name="COM")
     mother_deaths_fac = NamedColumn(col_name="FAC")
     mother_deaths_total = NamedColumn(col_name="Total")
+    anc_total = NamedColumn(col_name='ANC Total')
+    pos_total = NamedColumn(col_name='POS Total')
+    """
     anc1 = NamedColumn(col_name="1 ANC")
     anc2 = NamedColumn(col_name="2 ANCs")
     anc3 = NamedColumn(col_name="3 ANCs")
@@ -148,6 +154,7 @@ class StatisticsLinkTable(StatisticsTable):
     pos1 = NamedColumn(col_name="1 POS")
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
+    """
 
 
 class ReminderStatsTable(Table):
