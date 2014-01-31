@@ -15,7 +15,7 @@ from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral
 
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
-SEND_REMINDER_LOWER_BOUND = timedelta(days=2)
+SEND_REMINDER_LOWER_BOUND = timedelta(days=5)
 SEND_AMB_OUTCOME_LOWER_BOUND = timedelta(hours=1)
 SEND_SYPHILIS_REMINDER_LOWER_BOUND = timedelta(days=2)
 
@@ -112,7 +112,7 @@ def send_emergency_referral_reminders(router_obj=None):
     """
     _set_router(router_obj)
     now = datetime.utcnow()
-    reminder_threshold = now - timedelta(days=3)
+    reminder_threshold = now - timedelta(days=5)
     referrals_to_remind = Referral.emergencies().filter(
         reminded=False,
         responded=False,

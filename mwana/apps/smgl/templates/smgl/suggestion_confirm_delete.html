@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block title %}mUbumi Confirm Delete - {{ block.super }}{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+<link rel="stylesheet" href="{{ STATIC_URL }}smgl/css/zcahrd_style.css">
+<style type="text/css">
+	#branding h1 a span{
+		font-size: 1.6em;
+		text-align:center;
+	}
+</style>
+{% endblock %}
+{% block content %}
+<div class="row">
+	<form action="" method="post">{% csrf_token %}
+    	<p>Are you sure you want to delete "{{ object.title }}" and all related attachments? You can not Undo this action.</p>
+    	<a class="col-sm-6 btn btn-success" href="{% url suggestions-list %}">Cancel</a>
+    	<input class="btn btn-danger col-sm-6" type="submit" value="Confirm" />
+	</form>
+</div>
+{% endblock %}

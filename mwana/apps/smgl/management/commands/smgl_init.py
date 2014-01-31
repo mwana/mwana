@@ -16,7 +16,7 @@ class Command(BaseCommand):
                            "mwana.apps.smgl.reminders.send_second_postpartum_reminders",
                            "mwana.apps.smgl.reminders.send_missed_postpartum_reminders",
                            "mwana.apps.smgl.reminders.reactivate_user",
-                           "mwana.apps.smgl.reminders.send_syphillis_reminders",
+                           #"mwana.apps.smgl.reminders.send_syphillis_reminders",
                            "mwana.apps.smgl.reminders.send_inactive_notice"
                      ]
         weekly_reminders = ["mwana.apps.smgl.reminders.send_expected_deliveries"]
@@ -24,7 +24,7 @@ class Command(BaseCommand):
                          "mwana.apps.smgl.reminders.send_no_outcome_help_admin_reminder"]
 
         _update_schedules(daily_reminders)
-        _update_schedules(weekly_reminders, days=[4])
+        _update_schedules(weekly_reminders, days=[0])
         _update_schedules(amb_reminders, hours=[0, 12])
 
 

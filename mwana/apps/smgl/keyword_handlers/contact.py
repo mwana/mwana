@@ -55,6 +55,7 @@ def make_active(session, xform, router):
         return respond_to_session(router, session, const.IN_COMPLETE,
                                   **{'name': connection.contact.name})
 
+
 @registration_required
 @is_active
 def out(session, xform, router):
@@ -78,6 +79,6 @@ def out(session, xform, router):
     connection.contact.return_date = return_date
     connection.contact.save()
 
-    return respond_to_session(router, session, const.OUT_COMPLETE, 
+    return respond_to_session(router, session, const.OUT_COMPLETE,
                               **{'name': connection.contact.name,
                                  'date': return_date.strftime("%d %m %Y")})

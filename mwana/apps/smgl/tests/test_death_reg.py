@@ -19,7 +19,7 @@ class SMGLDeathRegTest(SMGLSetUp):
 
     # TODO: beef these up. Just testing the basic workflow
     def testBasicDeathReg(self):
-        resp = const.DEATH_REG_RESPONSE % {"name": self.name}
+        resp = const.DEATH_REG_RESPONSE % {"name": self.name, "unique_id": "1234"}
         script = """
             %(num)s > death 1234 01 01 2012 ma h
             %(num)s < %(resp)s
