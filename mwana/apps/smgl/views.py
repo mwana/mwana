@@ -1881,11 +1881,12 @@ def sms_users(request):
                 Q(name__icontains=search_string) |
                 Q(connection__identity__icontains=search_string)
                 )
-
+    users_table = SMSUsersTable(contacts,
+        request=request,
+        )
     return render_to_response(
         "smgl/sms_users.html",
-        {"users_table": SMSUsersTable(contacts,
-            request=request),
+        {"users_table": users_table,
             "search_form": search_form,
             "form": form
         },

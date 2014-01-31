@@ -294,6 +294,7 @@ def map_message_fields(message):
 
 
 class SMSRecordsTable(Table):
+
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(
         col_name="Phone Number", value=lambda cell: cell.object.connection.identity)
