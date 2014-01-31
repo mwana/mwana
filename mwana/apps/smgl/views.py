@@ -1776,7 +1776,7 @@ def sms_users(request):
     Report on all users
     """
     start_date, end_date = get_default_dates()
-    province = district = c_type = status = None
+    province = district = facility = c_type = status = None
 
     contacts = Contact.objects.all()
 
@@ -1786,6 +1786,7 @@ def sms_users(request):
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
             c_type = form.cleaned_data.get('c_type')
             status = form.cleaned_data.get('status')
             start_date = form.cleaned_data.get('start_date', start_date)
@@ -1804,24 +1805,29 @@ def sms_users(request):
     if district:
         locations = get_location_tree_nodes(district)
 
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
     if c_type:
         contacts = contacts.filter(types__in=[c_type])
     contacts = contacts.filter(location__in=locations)
 
-    print len(contacts)
     # filter by latest_sms_date, which is a property on the model, not a field
-    contacts = [x for x in contacts if x.latest_sms_date != None]
+    active_contacts =  Message.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    active_contacts = Contact.objects.filter(id__in=active_contacts)
 
-    active_contacts = itertools.ifilter(lambda contact: active_within_messages(Message.objects.all(),start_date, end_date, contact), contacts)
-    inactive_contacts = itertools.ifilterfalse(lambda contact: contact in active_contacts, contacts)
+    inactive_contacts = [x for x in contacts if not x in active_contacts]
+
     if status == 'active':
         contacts = active_contacts
     elif status == 'inactive':
         contacts = [x for x in inactive_contacts if x.created_date < start_date]
 
+    contacts = [x for x in contacts if x.latest_sms_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
-    print len(contacts)
     if form.data.get('export'):
         workbook = xlwt.Workbook(encoding='utf-8')
         worksheet = workbook.add_sheet('SMS Users Page')
