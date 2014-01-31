@@ -36,7 +36,8 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
                      HelpRequestTable, UserReport, get_msg_type,
-                     PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable)
+                     PNCReportTable, ANCDeliveryTable, ReferralReportTable,
+                     ErrorTable, ReminderStatsTableSMAG)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
 from smsforms.models import XFormsSession
@@ -1118,12 +1119,13 @@ def statistics(request, id=None):
 
 
 def reminder_stats(request):
-    records = []
+    mother_records = []
+    smag_records = []
     province = district = facility = None
     start_date, end_date = get_default_dates()
 
     record_types = ['edd', 'anc', 'pos', 'ref']
-    field_mapper = {'edd': 'Expected Delivery Date', 'anc': 'Next Visit Date',
+    field_mapper = {'edd': 'Expected Delivery Date', 'anc': 'ANC',
                     'pos': 'Post Partum', 'ref': 'Referrals',
                     }
 
@@ -1162,87 +1164,173 @@ def reminder_stats(request):
         reminded_mothers = reminders.filter(
             mother__in=mothers).values_list('mother', flat=True)
 
-        told_mothers = ToldReminder.objects.values_list('mother', flat=True)
+        tolds = ToldReminder.objects.all()
         referrals = filter_by_dates(Referral.objects.all(), 'date', start=start_date,
             end=end_date)
+
         births = BirthRegistration.objects.filter(mother__in=mothers)
         births = filter_by_dates(births, 'date', end=end_date, start=start_date)
         if key == 'edd':
-            tolds = ToldReminder.objects.filter(type='edd',
-                                    mother__in=mothers
-                                    )
-            showed_up = births
-            told_mothers = tolds.values_list('mother', flat=True)
-            told_and_showed = showed_up.filter(mother__in=told_mothers)
+            #we want reminders that would have been sent out IF they occur within
+            #the selected time period
+            #If an edd falls before the start date, not reminder would be
+            #scheduled, BUT if edd falls beyond end date then there is a chance we
+            #started sending reminders earlier
+            scheduled_reminders = filter_by_dates(mothers, 'edd',
+                start=start_date,
+                end=end_date+datetime.timedelta(days=14))
+            scheduled_mothers = scheduled_reminders
+            number = scheduled_mothers.distinct()
+            sent  = reminders.filter(type__icontains='edd_14', mother__in=mothers)
+            sent_reminders = filter_by_dates(sent, 'date',
+                start=start_date,
+                end=end_date)
+            birth_anc_pnc_ref = births
+            reminded = scheduled_mothers.filter(reminded=True)
+            birth_mothers = births.filter(mother__in=scheduled_mothers).values_list('mother', flat=True)
+            told_and_showed = ToldReminder.objects.filter(
+                type='edd_14',
+                mother__id__in=birth_mothers).count()
+            showed_on_time = "N/A"
 
-            lower_envelop = start_date - datetime.timedelta(days=13)
-            higher_envelop = end_date + datetime.timedelta(days=14)
-            scheduled_reminders = PregnantMother.objects.filter(
-                                                        edd__gte=lower_envelop,
-                                                        edd__lte=higher_envelop
-                                                             )
-            reminders = reminders.filter(type__icontains='edd_14',
-                                                        mother__in=mothers)
-            tolds_count = tolds.count()
+            #Smag focused
+            smag_scheduled_reminders = 0
+            for mother in scheduled_mothers:
+                smag_scheduled_reminders += mother.get_laycounselors().count()
+            smag_number = smag_scheduled_reminders
+            smag_sent_reminders  = reminders.filter(type__icontains='edd_14', mother__in=mothers)
+            smag_tolds = tolds.filter(type__icontains='edd_14', mother__in=mothers).count()
+            response_rate = percentage(smag_tolds, smag_sent_reminders.count())
         elif key == 'ref':
-            showed_up = referrals.filter(mother_showed=True,
-                                                mother__in=mothers
-                                                )
-            scheduled_reminders = referrals
-            told_and_showed = showed_up.filter(mother__in=told_mothers)
+            #Mother Focused
+            scheduled_mothers = referrals
+            scheduled_reminders = scheduled_mothers
+            scheduled_mothers  = PregnantMother.objects.filter(
+                id__in=scheduled_reminders.values_list('mother', flat=True))
+            number = scheduled_mothers.distinct()
+            sent_reminders = reminders.filter(
+                type='ref',
+                mother__in=scheduled_mothers)
+            reminded = scheduled_mothers.filter(reminded=True)
+            birth_anc_pnc_ref = referrals
+            told_mothers = tolds.filter(
+                type='ref',
+                mother__in=scheduled_mothers
+                ).values_list('mother', flat=True)
+            told_and_showed = referrals.filter(mother__id__in=told_mothers, mother_showed=True)
+            showed_on_time = "N/A"
 
-            reminders= reminders.filter(type='em_ref', mother__in=mothers)
 
-            told_and_showed = showed_up.filter(mother__in=told_mothers)
-            tolds = ToldReminder.objects.filter(type='ref', mother__in=mothers)
-            tolds_count = tolds.count()
+            #smag focused
+            smag_scheduled_reminders = 0
+            for mother in scheduled_mothers:
+                smag_scheduled_reminders += mother.get_laycounselors().count()
+            smag_number = smag_scheduled_reminders
+            smag_sent_reminders = reminders.filter(
+                type__icontains='ref',
+                mother__in=scheduled_mothers)
+
+            smag_tolds = tolds.filter(
+                type='ref',
+                mother__in=scheduled_mothers).count()
+            response_rate = percentage(smag_tolds, smag_sent_reminders.count())
         elif key == 'anc':
-            tolds = ToldReminder.objects.filter(type='anc',
-                                    mother__in=mothers
-                                    )
-            showed_up = FacilityVisit.objects.filter(
-                mother__in=mothers,
-                visit_type='anc')
-
-            showed_up = filter_by_dates(showed_up, 'created_date', start=start_date,
-                end=end_date)
-            told_mothers = tolds.values_list('mother', flat=True)
-            #calculate the scheduled reminders based on the same algorithm used
-            #to calculate the reminders to send.
+            #Mother focused
             scheduled_reminders = FacilityVisit.objects.filter(
-                        next_visit__gte=start_date-datetime.timedelta(days=7),
-                        next_visit__lte=end_date+datetime.timedelta(days=5),
+                        next_visit__gte=start_date,
+                        next_visit__lte=end_date+datetime.timedelta(days=7),
                         visit_type='anc')
+            scheduled_mothers  = PregnantMother.objects.filter(
+                id__in=scheduled_reminders.values_list('mother', flat=True))
+            number = scheduled_mothers.distinct()
+            sent_reminders = reminders.filter(
+                type='nvd',
+                mother__in=scheduled_mothers)
+            reminded = scheduled_reminders.filter(reminded=True).values('mother')
+            anc = FacilityVisit.objects.filter(
+                visit_date__gte=start_date,
+                visit_date__lte=end_date)
+            birth_anc_pnc_ref = anc
+            told_and_showed = 0
+            for facility_visit in anc:
+                if facility_visit.told():
+                    told_and_showed += 1
+            showed_on_time = 0
+            for visit in anc:
+                if visit.is_on_time():
+                    showed_on_time += 1
 
-            told_and_showed = showed_up.filter(mother__in=told_mothers)
-            reminders = reminders.filter(type='nvd', mother__in=mothers)
-            tolds_count = tolds.count()
+            #SMAG Focused
+            smag_scheduled_reminders = 0
+            for mother in scheduled_mothers:
+                smag_scheduled_reminders += mother.get_laycounselors().count()
+            smag_number = smag_scheduled_reminders
+            smag_sent_reminders = reminders.filter(
+                type='nvd',
+                mother__in=scheduled_mothers)
+            smag_tolds = 0
+            for told in tolds.filter(mother__in=scheduled_mothers):
+                if told.get_told_type() == 'anc':
+                    smag_tolds += 1
+            response_rate = percentage(smag_tolds, smag_sent_reminders.count())
         else:
-            tolds = ToldReminder.objects.filter(type='pos', mother__in=mothers)
-            told_mothers = tolds.values_list('mother', flat=True)
+            #Mother focused
             scheduled_reminders = FacilityVisit.objects.filter(
-                        next_visit__gte=start_date - SEND_REMINDER_LOWER_BOUND,
-                        next_visit__lte=end_date + datetime.timedelta(days=3),
+                        next_visit__gte=start_date,
+                        next_visit__lte=end_date+datetime.timedelta(days=7),
                         visit_type='pos')
-            showed_up = FacilityVisit.objects.filter(
-                                                    mother__in=mothers,
-                                                    visit_type='pos'
-                                                    )
-            showed_up = filter_by_dates(showed_up, 'created_date', start=start_date,
-                end=end_date)
-            told_and_showed = showed_up.filter(mother__in=told_mothers)
-            reminders = reminders.filter(type='pos', mother__in=mothers)
-            tolds_count = tolds.count()
+            scheduled_mothers  = PregnantMother.objects.filter(
+                id__in=scheduled_reminders.values_list('mother', flat=True))
+            number = scheduled_mothers.distinct()
+            sent_reminders = reminders.filter(
+                type='pos',
+                mother__in=scheduled_mothers)
+            reminded = scheduled_reminders.filter(reminded=True).values('mother')
+            pos = FacilityVisit.objects.filter(
+                visit_date__gte=start_date,
+                visit_date__lte=end_date)
+            birth_anc_pnc_ref = pos
+            told_and_showed = 0
+            for facility_visit in anc:
+                if facility_visit.told():
+                    told_and_showed += 1
+            showed_on_time = 0
+            for visit in anc:
+                if visit.is_on_time():
+                    showed_on_time += 1
 
+            #SMAG Focused
+            smag_scheduled_reminders = 0
+            for mother in scheduled_mothers:
+                smag_scheduled_reminders += mother.get_laycounselors().count()
+            smg_number = smag_scheduled_reminders
+            smag_sent_reminders = reminders.filter(
+                type='pos',
+                mother__in=scheduled_mothers)
+            smag_tolds = 0
+            for told in tolds.filter(mother__in=scheduled_mothers):
+                if told.get_told_type() == 'pos':
+                    smag_tolds += 1
+            response_rate = percentage(smag_tolds, smag_sent_reminders.count())
 
-        records.append({
-                'reminder_type': field_mapper[key],
-                'scheduled_reminders': scheduled_reminders.count(),
-                'sent_reminders': reminders.count(),
-                'received_told': tolds_count,
-                'follow_up_visits': showed_up.count(),
-                'told_and_showed': told_and_showed.count(),
-                'showed_on_time':0
+        mother_records.append({
+            'reminder_type': field_mapper[key],
+            'number':number.count(),
+            'scheduled_reminders': scheduled_reminders.count(),
+            'sent_reminders': sent_reminders.count(),
+            'reminded': reminded.count(),
+            'birth_anc_pnc_ref': birth_anc_pnc_ref.count(),
+            'told_and_showed': told_and_showed,
+            'showed_on_time':showed_on_time
+            })
+
+        smag_records.append({
+            'reminder_type': field_mapper[key],
+            'number':smag_number,
+            'smag_scheduled_reminders':smag_scheduled_reminders,
+            'smag_sent_reminders': smag_sent_reminders.count(),
+            'smag_tolds':smag_tolds,
+            'response_rate':response_rate
             })
 
     # render as CSV if export
@@ -1258,12 +1346,16 @@ def reminder_stats(request):
         filename = '{0}{1}'.format(filename, date_range)
         return export_as_csv(records, keys, filename)
 
-    reminder_stats_table = ReminderStatsTable(records,
+    reminder_mothers_table = ReminderStatsTable(mother_records,
+                                           request=request)
+
+    reminder_smag_table = ReminderStatsTableSMAG(smag_records,
                                            request=request)
 
     return render_to_response(
         "smgl/reminder_stats.html",
-        {"reminder_stats_table": reminder_stats_table,
+        {"reminder_mothers_table": reminder_mothers_table,
+         "reminder_smag_table":reminder_smag_table,
          "form": form
         },
         context_instance=RequestContext(request))

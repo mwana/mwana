@@ -137,13 +137,20 @@ class StatisticsLinkTable(StatisticsTable):
 
 class ReminderStatsTable(Table):
     reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
+    number = NamedColumn(sortable=False, col_name="Number")
     scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
     sent_reminders = NamedColumn(sortable=False, col_name='Sent')
-    received_told = NamedColumn(sortable=False, col_name='Received Told')
-    follow_up_visits = NamedColumn(sortable=False, col_name='Follow Up visits')
+    reminded = NamedColumn(sortable=False, col_name='Reminded')
+    birth_anc_pnc_ref = NamedColumn(sortable=False, col_name='Birth/ANC/PNC/REF')
     told_and_showed = NamedColumn(sortable=False, col_name='Told and showed')
     showed_on_time = NamedColumn(sortable=False, col_name='Showed on Time')
 
+class ReminderStatsTableSMAG(Table):
+    reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
+    smag_scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
+    smag_sent_reminders = NamedColumn(sortable=False, col_name='Sent')
+    smag_tolds = NamedColumn(sortable=False, col_name='Received Told')
+    response_rate = NamedColumn(sortable=False, col_name='Response rate')
 
 class SummaryReportTable(Table):
     data = Column(sortable=False)
