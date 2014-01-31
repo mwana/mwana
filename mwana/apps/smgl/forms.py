@@ -89,6 +89,15 @@ class SMSUsersFilterForm(StatisticsFilterForm):
                                     empty_label='(All)',
                                     required=False)
 
+    status = forms.ChoiceField(choices=(
+        ('', 'All'),
+        ('active', 'Active'),
+        ('inactive', 'Inactive')),
+        required=False)
+
+class ErrorFilterForm(SMSUsersFilterForm):
+    class Meta:
+        exclude = ('c_type')
 
 class ANCReportForm(StatisticsFilterForm):
     filter_option = forms.ChoiceField(choices=(

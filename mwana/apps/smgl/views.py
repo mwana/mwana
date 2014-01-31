@@ -3,7 +3,7 @@ import urllib
 import datetime
 import json
 from operator import itemgetter
-
+import itertools
 from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -39,7 +39,9 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable,
                      ErrorMessageTable, get_response)
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
+    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates,
+     excel_export_header, write_excel_columns, get_district_facility_zone,
+     active_within_messages)
 from smsforms.models import XFormsSession
 from reminders import SEND_REMINDER_LOWER_BOUND
 import xlwt
@@ -1774,7 +1776,7 @@ def sms_users(request):
     Report on all users
     """
     start_date, end_date = get_default_dates()
-    province = district = c_type = None
+    province = district = facility = c_type = status = None
 
     contacts = Contact.objects.all()
 
@@ -1784,7 +1786,9 @@ def sms_users(request):
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
             c_type = form.cleaned_data.get('c_type')
+            status = form.cleaned_data.get('status')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
     else:
@@ -1801,16 +1805,27 @@ def sms_users(request):
     if district:
         locations = get_location_tree_nodes(district)
 
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
     if c_type:
         contacts = contacts.filter(types__in=[c_type])
     contacts = contacts.filter(location__in=locations)
 
     # filter by latest_sms_date, which is a property on the model, not a field
-    contacts = [x for x in contacts if x.latest_sms_date != None]
-    if start_date:
-        contacts = [x for x in contacts if x.latest_sms_date.date() >= start_date]
-    if end_date:
-        contacts = [x for x in contacts if x.latest_sms_date.date() <= end_date]
+    active_contacts =  Message.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    active_contacts = Contact.objects.filter(id__in=active_contacts)
+
+    inactive_contacts = [x for x in contacts if not x in active_contacts]
+
+    if status == 'active':
+        contacts = active_contacts
+    elif status == 'inactive':
+        contacts = [x for x in inactive_contacts if x.created_date < start_date]
+
+    contacts = [x for x in contacts if x.latest_sms_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
     if form.data.get('export'):
@@ -1848,7 +1863,7 @@ def sms_users(request):
             worksheet.write(row_index, 6, zone)
             worksheet.write(row_index, 7, contact.latest_sms_date, date_format)
             worksheet.write(row_index, 8, contact.created_date, date_format)
-            worksheet.write(row_index, 9, 'Yes' if contact.is_active else 'No')
+            worksheet.write(row_index, 9, 'Yes' if contact in active_contacts else 'No')
             row_index += 1
         fname = 'sms-users-export.xls'
         response = HttpResponse(mimetype="applications/vnd.msexcel")
@@ -1866,11 +1881,12 @@ def sms_users(request):
                 Q(name__icontains=search_string) |
                 Q(connection__identity__icontains=search_string)
                 )
-
+    users_table = SMSUsersTable(contacts,
+        request=request,
+        )
     return render_to_response(
         "smgl/sms_users.html",
-        {"users_table": SMSUsersTable(contacts,
-            request=request),
+        {"users_table": users_table,
             "search_form": search_form,
             "form": form
         },

@@ -30,15 +30,17 @@
       <thead>
         <tr>
           <th colspan="2">Period</th>
-          <th colspan="2">Location</th>
-          <th>User</th>
+          <th colspan="3">Location</th>
+          <th colspan="2">User</th>
         </tr>
         <tr>
           <th>Start</th>
           <th>End</th>
           <th>Province</th>
           <th>District</th>
+          <th>Facility</th>
           <th>Contact Type</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -59,9 +61,17 @@
             {{ form.district.errors}}
             {{ form.district }}
           </td>
+           <td>
+             {{ form.facility.errors}}
+             {{ form.facility }}
+           </td>
           <td>
             {{ form.c_type.errors}}
             {{ form.c_type }}
+          </td>
+          <td>
+            {{ form.status.errors }}
+            {{ form.status }}
           </td>
         </tr>
       </tbody>

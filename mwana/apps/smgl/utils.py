@@ -21,6 +21,17 @@ NONE_VALUES = ['none', 'n', None, '']
 
 class DateFormatError(ValueError):  pass
 
+def active_within_messages(messages, period_start, period_end, contact):
+    messages =  messages.filter(
+            connection__contact=contact,
+            date__gte=period_start,
+            date__lte=period_end,
+            direction="I"
+            )
+    if messages:
+        return True
+    else:
+        return False
 
 def build_url(*args, **kwargs):
     get = kwargs.pop('get', {})
