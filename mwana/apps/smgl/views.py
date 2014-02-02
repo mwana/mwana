@@ -570,23 +570,38 @@ def user_report(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = SMSUsersFilterForm(initial=fetch_initial(initial, request.session))
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     cbas_registered = ContactType.objects.get(slug='cba').contacts.all()
     cbas_registered = filter_by_dates(cbas_registered, 'created_date',
                            start=start_date, end=end_date)
     cbas_active = [cba for cba in cbas_registered if cba.active_status == "active"]
+    cbas_active_ids =  Message.objects.filter(
+        connection__contact__in=cbas_registered,
+        date__gte=start_date-datetime.timedelta(days=60),
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    cbas_active = Contact.objects.filter(id__in=cbas_active_ids)
+
 
     data_clerks_registered = ContactType.objects.get(slug='dc').contacts.all()
     data_clerks_registered = filter_by_dates(data_clerks_registered, 'created_date',
                              start=start_date, end=end_date)
-    data_clerks_active = [clerk for clerk in data_clerks_registered if clerk.active_status == "active"]
+    data_clerks_active_ids =  Message.objects.filter(
+        connection__contact__in=data_clerks_registered,
+        date__gte=start_date-datetime.timedelta(days=14),
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    data_clerks_active = Contact.objects.filter(id__in=data_clerks_active_ids)
+
 
     clinic_worker_types = ContactType.objects.filter(slug__in=['worker'])
     clinic_workers_registered = Contact.objects.filter(types__in=clinic_worker_types)
     clinic_workers_registered = filter_by_dates(clinic_workers_registered, 'created_date',
                               start=start_date, end=end_date)
-    clinic_workers_active = [worker for worker in clinic_workers_registered if worker.active_status == "active"]
+    clinic_workers_active_ids =  Message.objects.filter(
+        connection__contact__in=clinic_workers_registered,
+        date__gte=start_date-datetime.timedelta(days=30),
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    clinic_workers_active = Contact.objects.filter(id__in=clinic_workers_active_ids)
 
 
     #Error rates
