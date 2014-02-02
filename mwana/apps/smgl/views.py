@@ -1049,13 +1049,13 @@ def statistics(request, id=None):
             key = 'anc{0}'.format(i + 1)
             if i in num_visits:
                 r[key] = num_visits[i]
-        
+
         #add the anc visits
         anc_total = 0
         for num in num_visits:
             anc_total += num_visits
         r['anc_total'] = anc_total
-        
+
         pos_visits = mothers.filter(facility_visits__visit_type='pos') \
                             .annotate(Count('facility_visits')) \
                             .values_list('facility_visits__count', flat=True)
@@ -1071,7 +1071,7 @@ def statistics(request, id=None):
             key = 'pos{0}'.format(i)
             if i in num_visits:
                 r[key] = num_visits[i]
-        
+
         pos_total = 0
         for num in num_visits:
             pos_total += num_visits[num]
@@ -2462,3 +2462,27 @@ def reports_main(request):
     return render_to_response(
                               "smgl/reports_main.html",
                               context_instance=RequestContext(request))
+
+def reports_tabs(request):
+    start_date, end_date = get_default_dates()
+    province = district = facility = None
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    return render_to_response(
+                            "smgl/reports_tabs.html",
+                            {"form": form},
+                            context_instance=RequestContext(request))
