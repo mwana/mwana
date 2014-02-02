@@ -7,7 +7,8 @@ from mwana.apps.contactsplus.models import ContactType
 
 from mwana.apps.smgl.tests.shared import SMGLSetUp, create_mother
 from mwana.apps.smgl import const
-from mwana.apps.smgl.reminders import (send_inactive_notice,
+from mwana.apps.smgl.reminders import (send_inactive_notice_cbas,
+    send_inactive_notice_data_clerks,
     send_expected_deliveries)
 
 
@@ -25,23 +26,22 @@ class SMGLReminderTest(SMGLSetUp):
         self.anton.location = self.mom.location
         self.anton.save()
 
-    def testInactiveContactReminder(self):
+    def testInactiveContactReminderDataClerks(self):
         # get inbound messages for user
-        da = Contact.objects.get(id=1)
+        da = Contact.objects.get(id=5)#5 is a data clerk
         join_msg = Message.objects.get(direction="I", connection__contact=da)
         out_msgs = Message.objects.filter(direction="O", connection__contact=da)
         self.assertEqual(out_msgs.count(), 1)
         # this should do nothing because it's not in range
-        send_inactive_notice(router_obj=self.router)
+        send_inactive_notice_data_clerks(router_obj=self.router)
         self.assertEqual(out_msgs.count(), 1)
-
         # set the date back so it triggers a reminder
         join_msg.date = self.now - timedelta(days=14)
         join_msg.save()
-        send_inactive_notice(router_obj=self.router)
+        send_inactive_notice_data_clerks(router_obj=self.router)
         out_msgs = Message.objects.filter(direction="O", connection__contact=da)
         self.assertEqual(out_msgs.count(), 2)
-        self.assertEqual(out_msgs[1].text, const.INACTIVE_CONTACT)
+        self.assertEqual(out_msgs[1].text, const.INACTIVE_CONTACT%{'days':14})
 
     def testExpectedEddReminder(self):
         Message.objects.all().delete()

@@ -3,7 +3,7 @@ import urllib
 import datetime
 import json
 from operator import itemgetter
-
+import itertools
 from django.db.models import Count, Q
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, HttpResponse
@@ -36,10 +36,17 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
                      HelpRequestTable, UserReport, get_msg_type,
+<<<<<<< HEAD
                      PNCReportTable, ANCDeliveryTable, ReferralReportTable,
                      ErrorTable, ReminderStatsTableSMAG)
+=======
+                     PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable,
+                     ErrorMessageTable, get_response)
+>>>>>>> uf
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
-    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates, excel_export_header, write_excel_columns, get_district_facility_zone)
+    get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates,
+     excel_export_header, write_excel_columns, get_district_facility_zone,
+     active_within_messages)
 from smsforms.models import XFormsSession
 from reminders import SEND_REMINDER_LOWER_BOUND
 import xlwt
@@ -255,6 +262,8 @@ def anc_delivery_report(request, id=None):
     if id:
         anc_delivery_table = ANCDeliveryTable(records, request=request)
 
+    return HttpResponse(anc_delivery_table.as_html())
+    """
     return render_to_response(
         "smgl/anc_delivery_report.html",
         {"anc_delivery_table": anc_delivery_table,
@@ -262,6 +271,7 @@ def anc_delivery_report(request, id=None):
          "form": form
         },
         context_instance=RequestContext(request))
+    """
 
 def pnc_report(request, id=None):
     records = []
@@ -467,13 +477,8 @@ def pnc_report(request, id=None):
                                            request=request)
 
     pnc_report_table = PNCReportTable(records, request=request)
-    return render_to_response(
-        "smgl/pnc_report.html",
-        {"pnc_report_table": pnc_report_table,
-         "district": facility_parent,
-         "form": form
-        },
-        context_instance=RequestContext(request))
+    return HttpResponse(pnc_report_table.as_html())
+
 
 def referral_report(request):
     start_date, end_date = get_default_dates()
@@ -546,16 +551,7 @@ def referral_report(request):
     #average_turnaround_time = ''
 
     referral_report_table = ReferralReportTable([ref], request=request)
-    referral_report_table.as_html()
-    return render_to_response(
-        "smgl/referral_report.html",
-        {"referral_report_table": referral_report_table,
-         "form": form,
-         "start_date": start_date,
-         "end_date": end_date
-        },
-        context_instance=RequestContext(request))
-
+    return HttpResponse(referral_report_table.as_html())
 
 def user_report(request):
     start_date, end_date = get_default_dates()
@@ -652,16 +648,7 @@ def user_report(request):
                request
                )
 
-    return render_to_response(
-        "smgl/user_report.html",
-        {"user_report_table": user_report_table,
-         "form": form,
-         "start_date": start_date,
-         "end_date": end_date
-        },
-        context_instance=RequestContext(request))
-
-
+    return HttpResponse(user_report_table.as_html())
 
 def get_four_anc_visits(mother):
     mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
@@ -1128,7 +1115,6 @@ def statistics(request, id=None):
         },
         context_instance=RequestContext(request))
 
-
 def reminder_stats(request):
     mother_records = []
     smag_records = []
@@ -1363,14 +1349,7 @@ def reminder_stats(request):
     reminder_smag_table = ReminderStatsTableSMAG(smag_records,
                                            request=request)
 
-    return render_to_response(
-        "smgl/reminder_stats.html",
-        {"reminder_mothers_table": reminder_mothers_table,
-         "reminder_smag_table":reminder_smag_table,
-         "form": form
-        },
-        context_instance=RequestContext(request))
-
+    return HttpResponse(reminder_stats_table.as_html())
 
 def report(request):
     records = []
@@ -1876,7 +1855,7 @@ def sms_users(request):
     Report on all users
     """
     start_date, end_date = get_default_dates()
-    province = district = c_type = None
+    province = district = facility = c_type = status = None
 
     contacts = Contact.objects.all()
 
@@ -1886,7 +1865,9 @@ def sms_users(request):
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
             c_type = form.cleaned_data.get('c_type')
+            status = form.cleaned_data.get('status')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
     else:
@@ -1903,16 +1884,27 @@ def sms_users(request):
     if district:
         locations = get_location_tree_nodes(district)
 
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
     if c_type:
         contacts = contacts.filter(types__in=[c_type])
     contacts = contacts.filter(location__in=locations)
 
     # filter by latest_sms_date, which is a property on the model, not a field
-    contacts = [x for x in contacts if x.latest_sms_date != None]
-    if start_date:
-        contacts = [x for x in contacts if x.latest_sms_date.date() >= start_date]
-    if end_date:
-        contacts = [x for x in contacts if x.latest_sms_date.date() <= end_date]
+    active_contacts =  Message.objects.filter(
+        date__gte=start_date,
+        date__lte=end_date).values_list('connection__contact', flat=True).distinct()
+    active_contacts = Contact.objects.filter(id__in=active_contacts)
+
+    inactive_contacts = [x for x in contacts if not x in active_contacts]
+
+    if status == 'active':
+        contacts = active_contacts
+    elif status == 'inactive':
+        contacts = [x for x in inactive_contacts if x.created_date < start_date]
+
+    contacts = [x for x in contacts if x.latest_sms_date]
     contacts = sorted(contacts, key=lambda contact: contact.latest_sms_date, reverse=True)
 
     if form.data.get('export'):
@@ -1950,7 +1942,7 @@ def sms_users(request):
             worksheet.write(row_index, 6, zone)
             worksheet.write(row_index, 7, contact.latest_sms_date, date_format)
             worksheet.write(row_index, 8, contact.created_date, date_format)
-            worksheet.write(row_index, 9, 'Yes' if contact.is_active else 'No')
+            worksheet.write(row_index, 9, 'Yes' if contact in active_contacts else 'No')
             row_index += 1
         fname = 'sms-users-export.xls'
         response = HttpResponse(mimetype="applications/vnd.msexcel")
@@ -1968,11 +1960,12 @@ def sms_users(request):
                 Q(name__icontains=search_string) |
                 Q(connection__identity__icontains=search_string)
                 )
-
+    users_table = SMSUsersTable(contacts,
+        request=request,
+        )
     return render_to_response(
         "smgl/sms_users.html",
-        {"users_table": SMSUsersTable(contacts,
-            request=request),
+        {"users_table": users_table,
             "search_form": search_form,
             "form": form
         },
@@ -2257,20 +2250,20 @@ def help_manager(request, id):
 
 def home_page(request):
     if request.is_ajax():
-        conditions = {}
-
-        conditions['C-Section'] = PregnantMother.objects.filter(
-            risk_reason_csec=True).count()
-        conditions['Comp. during previous'] = PregnantMother.objects.filter(
-            risk_reason_cmp=True).count()
-        conditions['Gestational Disease'] = PregnantMother.objects.filter(
-            risk_reason_gd=True).count()
-        conditions['High Blood Pressure'] = PregnantMother.objects.filter(
-            risk_reason_hbp=True).count()
-        conditions['Previous Still Born'] = PregnantMother.objects.filter(
-            risk_reason_psb=True).count()
-        conditions['Other'] = PregnantMother.objects.filter(
-            risk_reason_oth=True).count()
+        conditions = (
+        ('CSEC', PregnantMother.objects.filter(
+            risk_reason_csec=True).count()),
+        ('GD', PregnantMother.objects.filter(
+            risk_reason_gd=True).count()),
+        ('HBP', PregnantMother.objects.filter(
+            risk_reason_hbp=True).count()),
+        ('PSB', PregnantMother.objects.filter(
+            risk_reason_psb=True).count()),
+        ('CMP', PregnantMother.objects.filter(
+            risk_reason_cmp=True).count()),
+        ('Other', PregnantMother.objects.filter(
+            risk_reason_oth=True).count()),
+        )
 
         ref_reasons = {}
         for short_reason, long_reason in Referral.REFERRAL_REASONS.items():
@@ -2278,22 +2271,26 @@ def home_page(request):
                 **{'reason_%s'%short_reason:True }
                 ).count()
             if num > 0: # Only get the ones over 0
-                ref_reasons[long_reason] = num
-
+                ref_reasons[short_reason.upper()] = num
         num_ref_reasons = sum([cond_num[1] for cond_num in ref_reasons.items()])
-        num_mothers = sum([cond_num[1] for cond_num in conditions.items()])
-
+        num_mothers = sum([cond_num[1] for cond_num in conditions])
         return HttpResponse(json.dumps(
             {
             'ref_reasons':ref_reasons.items(),
             'num_ref_reasons':num_ref_reasons,
-            'conditions':conditions.items(),
-            'num_mothers':num_mothers
+            'conditions':conditions,
+            'num_mothers':num_mothers,
             }),
             content_type='application/json')
 
     return render_to_response(
         "smgl/home.html",
+        {
+            'num_emergencies':Referral.objects.count(),
+            'num_antenatal': FacilityVisit.objects.filter(visit_type='anc').count(),
+            'num_postpartum': FacilityVisit.objects.filter(visit_type='pos').count(),
+            'num_intrapartum': PregnantMother.objects.count()
+        },
         context_instance=RequestContext(request)
         )
 
@@ -2378,16 +2375,17 @@ class SuggestionDelete(DeleteView):
 
 def error(request):
     start_date, end_date = get_default_dates()
-    province = district = facility = None
-    messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming', flat=True)
-    messages = Message.objects.filter(id__in=messages).order_by('-date')
+    province = district = facility = c_type = None
+    error_messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming', flat=True)
+    messages = Message.objects.filter(id__in=error_messages).order_by('-date')
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = SMSUsersFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
+            c_type = form.cleaned_data.get('c_type')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
     else:
@@ -2395,7 +2393,7 @@ def error(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = SMSUsersFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -2407,6 +2405,8 @@ def error(request):
         locations = get_location_tree_nodes(facility)
 
     messages = messages.filter(connection__contact__location__in=locations)
+    if c_type:
+        messages = messages.filter(connection__contact__types__in=[c_type])
     messages = filter_by_dates(messages, 'date',
                              start=start_date, end=end_date)
 
@@ -2417,7 +2417,7 @@ def error(request):
         selected_level = district or province
         column_headers = column_headers = ['Date', 'Type', 'User Number',
             'User Name', 'User Type', 'District',
-            'Facility', 'Zone', 'Message']
+            'Facility', 'Zone', 'Message', 'Response']
         worksheet, row_index = excel_export_header(worksheet,
                                                    selected_indicators=column_headers,
                                                    start_date=start_date,
@@ -2442,6 +2442,7 @@ def error(request):
             worksheet.write(row_index, 6, facility)
             worksheet.write(row_index, 7, zone)
             worksheet.write(row_index, 8, message.text)
+            worksheet.write(row_index, 9, get_response(message))
             row_index += 1
         fname = 'Error-Message-export.xls'
         response = HttpResponse(mimetype="applications/vnd.msexcel")
@@ -2449,13 +2450,78 @@ def error(request):
         workbook.save(response)
         return response
 
+    search_form = SMSUsersSearchForm()
+    if request.method == 'POST':
+        messages = Message.objects.filter(id__in=error_messages)
+        search_form = SMSUsersSearchForm(request.POST)
+        search_string = request.POST.get('search_string', None)
+        if search_string:
+            messages = messages.filter(
+                Q(connection__contact__name__icontains=search_string) |
+                Q(connection__identity__icontains=search_string)
+                )
 
     error_table = ErrorTable(messages, request=request)
     return render_to_response(
                               "smgl/errors.html",
-                              {"error_table":error_table,
-                               "form":form},
+                              {
+                              "error_table":error_table,
+                               "form":form,
+                               "search_form":search_form,
+                               },
                               context_instance=RequestContext(request))
+
+def error_history(request, id):
+    contact = get_object_or_404(Contact, id=id)
+    error_messages = XFormsSession.objects.filter(
+        has_error=True
+        ).values_list('message_incoming', flat=True)
+    messages = Message.objects.filter(connection__contact=contact,
+                                      direction='I', id__in=error_messages)
+
+    if request.GET.get('export'):
+        messages = messages.filter(direction='I') #only show incoming messages.
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet("User Page")
+        column_headers = ['Date', 'Time', 'Type', 'Sender Number', 'User Type', 'District', 'Facility', 'Zone', 'Message', 'Response']
+        worksheet, row_index = excel_export_header(
+                                                   worksheet,
+                                                   selected_indicators=column_headers,
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+        time_format = xlwt.easyxf('align: horiz left;', num_format_str='HH:MM:SS')
+        worksheet.col(3).width = worksheet.col(4).width = 15*256
+        worksheet.col(5).width = worksheet.col(6).width = worksheet.col(7).width = 20*256
+        worksheet.col(8).width = 100*256
+        for message in messages:
+            district, facility, zone = get_district_facility_zone(message.connection.contact.location)
+            worksheet.write(row_index, 0, message.date, date_format)
+            worksheet.write(row_index, 1, message.date.time(), time_format)
+            worksheet.write(row_index, 2, get_msg_type(message))
+            worksheet.write(row_index, 3, message.connection.identity)
+            worksheet.write(row_index, 4, ", ".join([contact_type.name for contact_type in message.connection.contact.types.all()]))
+            worksheet.write(row_index, 5, district)
+            worksheet.write(row_index, 6, facility)
+            worksheet.write(row_index, 7, zone)
+            worksheet.write(row_index, 8, message.text)
+            worksheet.write(row_index, 9, get_response(message))
+
+            row_index += 1
+        fname = 'Error-history-export.xls'
+        response = HttpResponse(mimetype="applications/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
+
+    return render_to_response(
+        "smgl/error_history.html",
+        {"user": contact,
+          "message_table": ErrorMessageTable(messages,
+                                        request=request)
+        },
+        context_instance=RequestContext(request))
 
 
 def reports_main(request):
