@@ -36,13 +36,10 @@ from .tables import (PregnantMotherTable, MotherMessageTable, StatisticsTable,
                      SummaryReportTable, ReferralsTable, NotificationsTable,
                      SMSUsersTable, SMSUserMessageTable, SMSRecordsTable,
                      HelpRequestTable, UserReport, get_msg_type,
-<<<<<<< HEAD
                      PNCReportTable, ANCDeliveryTable, ReferralReportTable,
-                     ErrorTable, ReminderStatsTableSMAG)
-=======
-                     PNCReportTable, ANCDeliveryTable, ReferralReportTable, ErrorTable,
-                     ErrorMessageTable, get_response)
->>>>>>> uf
+                     ErrorTable, ReminderStatsTableSMAG, ReminderStatsTable,
+                      ErrorMessageTable, get_response)
+
 from .utils import (export_as_csv, filter_by_dates, get_current_district,
     get_location_tree_nodes, percentage, mother_death_ratio, get_default_dates,
      excel_export_header, write_excel_columns, get_district_facility_zone,
