@@ -5,7 +5,7 @@ from djtables import Table, Column
 from djtables.column import DateColumn
 from smsforms.models import XFormsSession
 from .models import BirthRegistration, DeathRegistration, FacilityVisit, PregnantMother, ToldReminder
-from utils import get_time_range
+from utils import get_time_range, get_district_facility_zone
 
 
 class NamedColumn(Column):
@@ -53,6 +53,21 @@ class MotherMessageTable(Table):
     class Meta:
         order_by = "-date"
 
+class ErrorMessageTable(Table):
+    date = DateColumn(format="Y m d H:i ")
+    msg_type = NamedColumn(col_name="Type",
+                           value=lambda cell: cell.object.text.split(
+                               ' ')[0].upper(),
+                           sortable=False)
+    contact = NamedColumn(col_name="Sender")
+    facility = Column(
+        value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
+    text = NamedColumn(col_name="Message")
+    error_response = NamedColumn(col_name="Error Resp", value=lambda cell: get_response(cell.object))
+
+
+    class Meta:
+        order_by = "-date"
 
 class NotificationsTable(Table):
     date = DateColumn(format="Y m d H:i ")
@@ -293,6 +308,7 @@ def map_message_fields(message):
 
 
 class SMSRecordsTable(Table):
+
     date = DateColumn(format="Y m d H:i")
     phone_number = NamedColumn(
         col_name="Phone Number", value=lambda cell: cell.object.connection.identity)
@@ -365,6 +381,12 @@ class SMSUsersTable(Table):
     number = Column(
         value=lambda cell: cell.object.default_connection.identity if cell.object.default_connection else '',
         sortable=False)
+    user_type = NamedColumn(
+        name='USER TYPE',
+        value=lambda cell: ", ".join([contact_type.name for contact_type in cell.object.types.all()]),
+        sortable=False)
+    facility = Column(
+        value=lambda cell:get_district_facility_zone(cell.object.location)[1])
     last_active = DateColumn(value=lambda cell: cell.object.latest_sms_date,
                              format="Y m d H:i",
                              sortable=False)
@@ -426,8 +448,19 @@ class ErrorTable(Table):
                       value=lambda cell: get_msg_type(cell.object),
                       sortable=False
                     )
-    user_number = NamedColumn(col_name="User Number", value=lambda cell: cell.object.connection.identity)
-    user_name = NamedColumn(col_name="User Name",value=lambda cell: cell.object.connection.contact.name)
+    user_number = NamedColumn(link=lambda cell: reverse("error-history", args=[
+        cell.object.connection.contact.id
+        ]),
+    col_name="User Number",
+    value=lambda cell: cell.object.connection.identity
+    )
+    user_name = NamedColumn(link=lambda cell: reverse("error-history", args=[
+        cell.object.connection.contact.id
+        ]),
+    col_name="User Name",
+    value=lambda cell: cell.object.connection.contact.name
+    )
+
     user_type = NamedColumn(col_name="User Type", value=lambda cell: ", ".join(
         [x.name for x in cell.object.connection.contact.types.all()]))
     district = Column(value=lambda cell: cell.object.connection.contact.get_current_district()

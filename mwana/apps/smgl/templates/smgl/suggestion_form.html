@@ -20,17 +20,30 @@
 <form class="form-horizontal" role="form" method="POST" action="" enctype="multipart/form-data">{% csrf_token %}
 <h2 style="text-align: center;">Development Suggestion</h2>
 	 {{ form.non_field_errors }}
-	 {% for field in form %}	 
-	 	<br />
-	 	<div class="form-group">
-	 		<label for="id_{{ field.html_name }}" class="col-sm-2 control-label">{{ field.label }}</label>
-	 		<div class="col-sm-8">
-      			{{ field }}
-    		</div>
-    		{% for error in field.errors %}
-    			<div class="col-sm-2 alert alert-danger">{{ error }}</div>
-    		{% endfor %}
-	 	</div>
+	 {% for field in form %}
+ 		{% if field.label == 'Closed' or field.label == 'Close comment' %}
+			{% if request.user.username == 'Andre'%}
+				<div class="form-group">
+			 		<label for="id_{{ field.html_name }}" class="col-sm-2 control-label">{{ field.label }}</label>
+			 		<div class="col-sm-8">
+		      			{{ field }}
+		    		</div>
+		    		{% for error in field.errors %}
+		    			<div class="col-sm-2 alert alert-danger">{{ error }}</div>
+		    		{% endfor %}
+			 	</div>
+			{% endif %}
+		{% else %}
+		 	<div class="form-group">
+		 		<label for="id_{{ field.html_name }}" class="col-sm-2 control-label">{{ field.label }}</label>
+		 		<div class="col-sm-8">
+	      			{{ field }}
+	    		</div>
+	    		{% for error in field.errors %}
+	    			<div class="col-sm-2 alert alert-danger">{{ error }}</div>
+	    		{% endfor %}
+		 	</div>
+		 {% endif %}
 	 {% endfor %}
 	 <h4 style="text-align: center;">File Uploads</h4>
 	 {% for formset in inlines %}
