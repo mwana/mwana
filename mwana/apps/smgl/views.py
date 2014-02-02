@@ -1885,13 +1885,20 @@ def sms_users(request):
     if facility:
         locations = get_location_tree_nodes(facility)
 
+    inactivity_threshold = datetime.timedelta(days=30)
     if c_type:
         contacts = contacts.filter(types__in=[c_type])
+        if c_type.slug == "dc":
+            inactivity_threshold = datetime.timedelta(days=14)
+        elif c_type.slug == "cba":
+            inactivity_threshold = datetime.timedelta(days=60)
+
     contacts = contacts.filter(location__in=locations)
 
     # filter by latest_sms_date, which is a property on the model, not a field
+
     active_contacts =  Message.objects.filter(
-        date__gte=start_date,
+        date__gte=start_date-inactivity_threshold,
         date__lte=end_date).values_list('connection__contact', flat=True).distinct()
     active_contacts = Contact.objects.filter(id__in=active_contacts)
 
