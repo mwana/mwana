@@ -255,6 +255,8 @@ def anc_delivery_report(request, id=None):
     if id:
         anc_delivery_table = ANCDeliveryTable(records, request=request)
 
+    return HttpResponse(anc_delivery_table.as_html())
+    """
     return render_to_response(
         "smgl/anc_delivery_report.html",
         {"anc_delivery_table": anc_delivery_table,
@@ -262,6 +264,7 @@ def anc_delivery_report(request, id=None):
          "form": form
         },
         context_instance=RequestContext(request))
+    """
 
 def pnc_report(request, id=None):
     records = []
@@ -467,13 +470,8 @@ def pnc_report(request, id=None):
                                            request=request)
 
     pnc_report_table = PNCReportTable(records, request=request)
-    return render_to_response(
-        "smgl/pnc_report.html",
-        {"pnc_report_table": pnc_report_table,
-         "district": facility_parent,
-         "form": form
-        },
-        context_instance=RequestContext(request))
+    return HttpResponse(pnc_report_table.as_html())
+
 
 def referral_report(request):
     start_date, end_date = get_default_dates()
@@ -546,16 +544,7 @@ def referral_report(request):
     #average_turnaround_time = ''
 
     referral_report_table = ReferralReportTable([ref], request=request)
-    referral_report_table.as_html()
-    return render_to_response(
-        "smgl/referral_report.html",
-        {"referral_report_table": referral_report_table,
-         "form": form,
-         "start_date": start_date,
-         "end_date": end_date
-        },
-        context_instance=RequestContext(request))
-
+    return HttpResponse(referral_report_table.as_html())
 
 def user_report(request):
     start_date, end_date = get_default_dates()
@@ -652,16 +641,7 @@ def user_report(request):
                request
                )
 
-    return render_to_response(
-        "smgl/user_report.html",
-        {"user_report_table": user_report_table,
-         "form": form,
-         "start_date": start_date,
-         "end_date": end_date
-        },
-        context_instance=RequestContext(request))
-
-
+    return HttpResponse(user_report_table.as_html())
 
 def get_four_anc_visits(mother):
     mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
@@ -1050,6 +1030,12 @@ def statistics(request, id=None):
             if i in num_visits:
                 r[key] = num_visits[i]
 
+        #add the anc visits
+        anc_total = 0
+        for num in num_visits:
+            anc_total += num_visits
+        r['anc_total'] = anc_total
+
         pos_visits = mothers.filter(facility_visits__visit_type='pos') \
                             .annotate(Count('facility_visits')) \
                             .values_list('facility_visits__count', flat=True)
@@ -1065,6 +1051,11 @@ def statistics(request, id=None):
             key = 'pos{0}'.format(i)
             if i in num_visits:
                 r[key] = num_visits[i]
+
+        pos_total = 0
+        for num in num_visits:
+            pos_total += num_visits[num]
+        r['pos_total'] = pos_total
 
         records.append(r)
 
@@ -1116,7 +1107,6 @@ def statistics(request, id=None):
          "form": form
         },
         context_instance=RequestContext(request))
-
 
 def reminder_stats(request):
     mother_records = []
@@ -1352,14 +1342,7 @@ def reminder_stats(request):
     reminder_smag_table = ReminderStatsTableSMAG(smag_records,
                                            request=request)
 
-    return render_to_response(
-        "smgl/reminder_stats.html",
-        {"reminder_mothers_table": reminder_mothers_table,
-         "reminder_smag_table":reminder_smag_table,
-         "form": form
-        },
-        context_instance=RequestContext(request))
-
+    return HttpResponse(reminder_stats_table.as_html())
 
 def report(request):
     records = []
@@ -2451,3 +2434,27 @@ def reports_main(request):
     return render_to_response(
                               "smgl/reports_main.html",
                               context_instance=RequestContext(request))
+
+def reports_tabs(request):
+    start_date, end_date = get_default_dates()
+    province = district = facility = None
+    if request.GET:
+        form = StatisticsFilterForm(request.GET)
+        if form.is_valid():
+            save_form_data(form.cleaned_data, request.session)
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
+    else:
+        initial = {
+                    'start_date': start_date,
+                    'end_date': end_date,
+                  }
+        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+
+    return render_to_response(
+                            "smgl/reports_tabs.html",
+                            {"form": form},
+                            context_instance=RequestContext(request))
