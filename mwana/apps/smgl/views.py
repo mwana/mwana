@@ -118,6 +118,7 @@ def anc_delivery_report(request, id=None):
         initial = {'start_date': start_date, 'end_date': end_date}
         form = ANCReportForm(initial=fetch_initial(initial, request.session))
 
+
     for place in records_for:
         locations = Location.objects.all()
         r = {}
