@@ -531,7 +531,19 @@ def referral_report(request):
     ambulance_responses = ambulance_responses.filter(response='otw')|ambulance_responses.filter(response='dl')
     ref['transport_by_ambulance'] = ambulance_responses.count()
 
-    #average_turnaround_time = ''
+    total_turnaround_time = 0
+    refs_to_count = 0
+    for referral in referrals:
+        turn_around_time = referral.turn_around_time()
+        if turn_around_time:
+            refs_to_count += 1
+            total_turnaround_time += turn_around_time
+    if refs_to_count:
+        average_turn_around_secs = float(total_turnaround_time)/float(refs_to_count)
+        average_turn_around_hours = average_turn_around_secs/3600
+        ref['average_turnaround_time'] = "{0:.1f} Hours".format(average_turn_around_hours)
+    else:
+        ref['average_turnaround_time'] = 0
 
     referral_report_table = ReferralReportTable([ref], request=request)
     return HttpResponse(referral_report_table.as_html())
@@ -559,7 +571,7 @@ def user_report(request):
 
     cbas_registered = ContactType.objects.get(slug='cba').contacts.all()
     cbas_registered = filter_by_dates(cbas_registered, 'created_date',
-                           start=start_date, end=end_date)
+                           end=end_date)
     cbas_active = [cba for cba in cbas_registered if cba.active_status == "active"]
     cbas_active_ids =  Message.objects.filter(
         connection__contact__in=cbas_registered,
@@ -570,7 +582,7 @@ def user_report(request):
 
     data_clerks_registered = ContactType.objects.get(slug='dc').contacts.all()
     data_clerks_registered = filter_by_dates(data_clerks_registered, 'created_date',
-                             start=start_date, end=end_date)
+                              end=end_date)
     data_clerks_active_ids =  Message.objects.filter(
         connection__contact__in=data_clerks_registered,
         date__gte=start_date-datetime.timedelta(days=14),
@@ -581,7 +593,7 @@ def user_report(request):
     clinic_worker_types = ContactType.objects.filter(slug__in=['worker'])
     clinic_workers_registered = Contact.objects.filter(types__in=clinic_worker_types)
     clinic_workers_registered = filter_by_dates(clinic_workers_registered, 'created_date',
-                              start=start_date, end=end_date)
+                              end=end_date)
     clinic_workers_active_ids =  Message.objects.filter(
         connection__contact__in=clinic_workers_registered,
         date__gte=start_date-datetime.timedelta(days=30),
@@ -1327,10 +1339,9 @@ def reminder_stats(request, smag_table_requested=False):
             'told_and_showed': told_and_showed,
             'showed_on_time':showed_on_time
             })
-
         smag_records.append({
             'reminder_type': field_mapper[key],
-            'number':smag_number,
+            'smag_number':smag_number,
             'smag_scheduled_reminders':smag_scheduled_reminders,
             'smag_sent_reminders': smag_sent_reminders.count(),
             'smag_tolds':smag_tolds,

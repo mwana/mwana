@@ -1,6 +1,6 @@
 {% extends  "layout.html" %}
 
-{% block title %}SMS Records - {{ block.super }}{% endblock %}
+{% block title %}Reports - {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -22,17 +22,59 @@
 
         var activeTab
         //Load report on click
+        $("a[data-toggle='tab']").on('show.bs.tab', function(e){
+            var targ = $(e.target).attr('href');
+            targ = targ.replace('#', '');
+            $("#"+targ).html("<p>Loading....Please wait.</p>").css({
+              'font-size':'25px',
+              'text-align':'center'
+            })
+        });
+
         $("a[data-toggle='tab']").on('shown.bs.tab', function (e) {
             var formData = $("form").serialize()
             var targ = $(e.target).attr('href');
             targ = targ.replace('#', '');
             var siteURL = "/smgl/";
             var fullURL = siteURL+targ;
-
+            var abbv = {
+              'Emergent Referrals':'Referrals',
+              'Referrals With Response': 'Ref. W/ Resp',
+              'Referrals With Response Outcome': 'Ref. W/ Resp-Out.',
+              'Transport By Ambulance': 'Trans. Amb',
+              'Average Turnaround Time': 'Avg. Time',
+              'Most Common Reason For Referral': 'Common Ref. Reason',
+              'Clinic Workers Registered':'Clinic W. Reg.',
+              'Clinic Workers Active':'Clinic W. Actv.',
+              'Data Clerks Registered':'D. Clerks Reg.',
+              'Data Clerks Active':'D. Clerks Actv.',
+              'Community Based Agents Registered':'CBAs Reg.',
+              'Community Based Agents Active':'CBAs Actv.',
+              'Error Rate: Clinic Workers':'Err. Clinic W.',
+              'Error Rate: Data Clerks':'Err. D. Clerks.',
+              'Error Rate: Community Based Agents': 'Err. CBAs'
+            }
             $.get(fullURL, formData, function(data){
 
-              window.location.hash = '#'+targ
-              $("#"+targ).html(data)
+              window.location.hash = '#'+targ //Set the url hash
+                var table = $("#"+targ).html(data)
+                table.css({
+                  'font-size':'14px',
+                  'text-align':'left'
+                }) //put in the data
+
+                var headers = $(table).find('thead tr th a')
+
+                headers.each(function(index, item){
+                  //use the current text value as the key to pull out the
+                  //correct abbreviation and set it in as the text
+                  //while the text value becomes the title
+                  header = $(item)
+                  text = header.text()
+                  abv = abbv[text.trim()]
+                  header.attr('title', text)
+                  header.text(abv)
+                });
             });
 
 
@@ -141,6 +183,15 @@
 
       </div>
 </div>
+  <div class="row-fluid" style="padding:8px;">
+    <p>**The Option Filter will only apply on the ANC report table as follows:</p>
+    <ul>
+      <li><b>Option 1</b>: All women who have Pregnancy registrations AND gave birth
+      OR had EDD scheduled within the specified time frame</li>
+      <li><b>Option 2</b>: All women who gave birth or had EDD within specified time frame</li>
+    </ul>
+    <p>**The User Type and Status will only apply on the User report table</p>
+  </div>
 </div>
 
   <script type="text/javascript">

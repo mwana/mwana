@@ -540,6 +540,14 @@ class Referral(FormReferenceBase, MotherReferenceBase):
         else:
             return ""
 
+    def turn_around_time(self):
+        if not self.date_outcome:
+            return 0
+        else:
+            turn_around = self.date_outcome - self.date
+            return turn_around.seconds
+
+
 
 class PreRegistration(models.Model):
     LANGUAGES_CHOICES = (
