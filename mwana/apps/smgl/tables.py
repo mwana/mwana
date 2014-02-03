@@ -114,6 +114,9 @@ class StatisticsTable(Table):
     mother_deaths_com = NamedColumn(col_name="COM")
     mother_deaths_fac = NamedColumn(col_name="FAC")
     mother_deaths_total = NamedColumn(col_name="Total")
+    anc_total = NamedColumn(col_name='ANC Total')
+    pos_total = NamedColumn(col_name='POS Total')
+    """
     anc1 = NamedColumn(col_name="1 ANC")
     anc2 = NamedColumn(col_name="2 ANCs")
     anc3 = NamedColumn(col_name="3 ANCs")
@@ -121,7 +124,7 @@ class StatisticsTable(Table):
     pos1 = NamedColumn(col_name="1 POS")
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
-
+    """
 
 class StatisticsLinkTable(StatisticsTable):
 
@@ -141,6 +144,9 @@ class StatisticsLinkTable(StatisticsTable):
     mother_deaths_com = NamedColumn(col_name="COM")
     mother_deaths_fac = NamedColumn(col_name="FAC")
     mother_deaths_total = NamedColumn(col_name="Total")
+    anc_total = NamedColumn(col_name='ANC Total')
+    pos_total = NamedColumn(col_name='POS Total')
+    """
     anc1 = NamedColumn(col_name="1 ANC")
     anc2 = NamedColumn(col_name="2 ANCs")
     anc3 = NamedColumn(col_name="3 ANCs")
@@ -148,17 +154,26 @@ class StatisticsLinkTable(StatisticsTable):
     pos1 = NamedColumn(col_name="1 POS")
     pos2 = NamedColumn(col_name="2 POS")
     pos3 = NamedColumn(col_name="3 POS")
+    """
 
 
 class ReminderStatsTable(Table):
     reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
+    number = NamedColumn(sortable=False, col_name="Number")
     scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
     sent_reminders = NamedColumn(sortable=False, col_name='Sent')
-    received_told = NamedColumn(sortable=False, col_name='Received Told')
-    follow_up_visits = NamedColumn(sortable=False, col_name='Follow Up visits')
+    reminded = NamedColumn(sortable=False, col_name='Reminded')
+    birth_anc_pnc_ref = NamedColumn(sortable=False, col_name='Birth/ANC/PNC/REF')
     told_and_showed = NamedColumn(sortable=False, col_name='Told and showed')
     showed_on_time = NamedColumn(sortable=False, col_name='Showed on Time')
 
+class ReminderStatsTableSMAG(Table):
+    reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
+    smag_number = NamedColumn(sortable=False, col_name="Number")
+    smag_scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
+    smag_sent_reminders = NamedColumn(sortable=False, col_name='Sent')
+    smag_tolds = NamedColumn(sortable=False, col_name='Received Told')
+    response_rate = NamedColumn(sortable=False, col_name='Response rate')
 
 class SummaryReportTable(Table):
     data = Column(sortable=False)
@@ -321,7 +336,7 @@ class ANCDeliveryTable(Table):
     anc4 = NamedColumn(col_name='4+ ANC')
     facility = NamedColumn(col_name='Facility Births')
     home = NamedColumn(col_name='Home Births')
-    unknown = NamedColumn(col_name='Birth Plc. Unknown')
+    unknown = NamedColumn(col_name='Status Unknown')
     gestational_age = NamedColumn(col_name='Gestational Age @ First ANC')
 
 
@@ -329,11 +344,9 @@ class PNCReportTable(Table):
     registered_deliveries = NamedColumn(col_name='Registered Deliveries')
     facility = NamedColumn(col_name='Facility')
     home = NamedColumn(col_name='Community')
-    six_hour_pnc = NamedColumn(col_name='6 Hour PNC')
     six_day_pnc = NamedColumn(col_name='6 Day PNC')
     six_week_pnc = NamedColumn(col_name='6 Week PNC')
     complete_pnc = NamedColumn(col_name='Complete PNC')
-    mmr = NamedColumn(col_name='MMR')
     nmr = NamedColumn(col_name='NMR')
 
 
