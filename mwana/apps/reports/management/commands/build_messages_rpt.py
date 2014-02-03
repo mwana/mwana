@@ -90,7 +90,6 @@ extract (year from messagelog_message.date)::INTEGER  as "year"
 ,extract (month from messagelog_message.date)::INTEGER  as "month"
 ,contactsplus_contacttype.slug as worker_type
 ,case locations_locationtype.slug when 'zone' then location.parent_id else location.id end as absolute_location
-,location.parent_id
 
 from messagelog_message
 join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
@@ -101,7 +100,7 @@ left join locations_location location on location.id = rapidsms_contact.location
 
 WHERE  extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
 
-group by "year", "month", worker_type, absolute_location, parent_id) counts
+group by "year", "month", worker_type, absolute_location) counts
 
 
 ----
