@@ -92,8 +92,6 @@ class LoaningStockHandler(KeywordHandler):
             location_from = self.msg.contact.location
             location_to = Location.objects.get(slug=clinic_to)            
             confirmation_code = ConfirmationCode.objects.create()
-            print (location_to)
-            print (confirmation_code)
             trans = Transaction.objects.create(reference=confirmation_code)
             trans.date =  datetime.datetime.now().date()
             trans.type = "f_f"
@@ -118,7 +116,6 @@ class LoaningStockHandler(KeywordHandler):
                  acc_from.save()
                  acc_to.save()
 
-                 print (acc_from)
                  threshold=Threshold.objects.get(account=acc_from)
                  drugs += stock.code +" "+str(abs(amount))+" "
 
@@ -141,7 +138,6 @@ class LoaningStockHandler(KeywordHandler):
             else:
                 self.respond("Thank you. You have loaned %s the following drugs: " %location_to +""+drugs)
                 staff = Contact.active.location(location_to)#.filter(types=get_clinic_worker_type())                
-                print (staff)
                 self.broadcast(self.message_to_clinic, staff, "CLINIC", drugs, clinic_to, confirmation_code)
                 
 

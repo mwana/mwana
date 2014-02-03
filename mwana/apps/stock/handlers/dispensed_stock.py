@@ -2,10 +2,6 @@
 import datetime
 import re
 
-from mwana import const
-from mwana.apps.locations.models import Location
-from mwana.apps.locations.models import LocationType
-from mwana.apps.reminders import models as reminders
 from mwana.apps.stock.models import ConfirmationCode
 from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
@@ -82,7 +78,6 @@ class DispensedStockHandler(KeywordHandler):
                 self.respond("Sorry, %s are not valid numbers. Enter only numbers for quantity." % ", ".join(invalid_quantities))
 
         else:
-#            print (tokens)
             location = self.msg.contact.location
             c = ConfirmationCode.objects.create()
             trans = Transaction.objects.create(reference=c)
@@ -129,7 +124,6 @@ class DispensedStockHandler(KeywordHandler):
             if (drugs_below_threshold):
                 self.respond("Your stock is below threshold by: " +drugs_below_threshold+"..." )
                 dho_staff = Contact.active.location(location.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())
-                print (dho_staff)
                 self.broadcast(self.message_to_dho, dho_staff, "DHO", drugs_below_threshold, location)
             else:  
                 self.respond("Thank you. You have dispensed the following drugs: " +drugs +"...")

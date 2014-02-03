@@ -359,7 +359,6 @@ def stock_levels(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
     data_type = read_request(request, "data_type") or "percentage"
-    direction = read_request(request, "direction") or "all"
 
     service = GraphServive()
     report_data = []
@@ -370,14 +369,11 @@ def stock_levels(request):
                                                                  rpt_facilities, data_type)
 
     for k, v in data.items():
-        print "key:", k, "value", v
         rpt_object = Expando()
         rpt_object.key = Location.objects.get(slug=k).name
         rpt_object.value = v
         report_data.append(rpt_object)
-
-    print "data", report_data
-    print "data", report_data
+ 
     return render_to_response('graphs/lab_submissions.html',
                               {
                               "x_axis": [str(i) for i in time_ranges],

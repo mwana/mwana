@@ -90,7 +90,7 @@ class NewStockHandler(KeywordHandler):
                  delimeter = '-'
                  for c in '_#$%@=/+:':
                     drug_code = drug_code.replace(c, delimeter)
-                    print (drug_code)
+                    
                  stock = Stock.objects.get(code=drug_code)
                  acc = StockAccount.objects.get(location=location,stock=stock)
                  acc.amount += int(drug.split()[1])
