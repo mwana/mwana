@@ -1,6 +1,6 @@
 {% extends  "layout.html" %}
 
-{% block title %}SMS Records - {{ block.super }}{% endblock %}
+{% block title %}Reports - {{ block.super }}{% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -28,11 +28,32 @@
             targ = targ.replace('#', '');
             var siteURL = "/smgl/";
             var fullURL = siteURL+targ;
-
+            var abbv = {
+              'Emergent Referrals':'Referrals',
+              'Referrals With Response': 'Ref. W/ Resp',
+              'Referrals With Response Outcome': 'Ref. W/ Resp-Out.',
+              'Transport By Ambulance': 'Trans. Amb',
+              'Average Turnaround Time': 'Avg. Time',
+              'Most Common Reason For Referral': 'Common Ref. Reason'
+            }
             $.get(fullURL, formData, function(data){
 
               window.location.hash = '#'+targ
               $("#"+targ).html(data)
+
+                var headers = $('table:eq(1) thead tr th a')
+
+                headers.each(function(index, item){
+                  //use the current text value as the key to pull out the
+                  //correct abbreviation and set it in as the text
+                  //while the text value becomes the title
+                  header = $(item)
+                  header.attr('title', 'Andre')
+                  text = header.text()
+                  abv = abbv[text.trim()]
+                  header.attr('title', text)
+                  header.text(abv)
+                });
             });
 
 
@@ -45,6 +66,8 @@
           activeTab  = $('[href=#anc-report]')
         }
         activeTab.tab('show');
+
+
 
     });
   </script>

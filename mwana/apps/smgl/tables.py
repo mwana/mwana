@@ -352,12 +352,12 @@ class PNCReportTable(Table):
 
 class ReferralReportTable(Table):
     referrals = NamedColumn(col_name='Emergent Referrals')
-    referral_responses = NamedColumn(col_name='Referrals w/ Response')
+    referral_responses = NamedColumn(col_name='Referrals with Response')
     referral_response_outcome = NamedColumn(
-        col_name='Referrals w/ response outcome')
+        col_name='Referrals with response outcome')
     transport_by_ambulance = NamedColumn(col_name='Transport by Ambulance')
     average_turnaround_time = NamedColumn(col_name='Average Turnaround Time')
-    most_common_reason = NamedColumn(col_name='Common Obstetric Complication')
+    most_common_reason = NamedColumn(col_name='Most common reason for referral')
 
 
 class UserReport(Table):
