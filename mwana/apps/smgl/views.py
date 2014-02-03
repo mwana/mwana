@@ -531,7 +531,19 @@ def referral_report(request):
     ambulance_responses = ambulance_responses.filter(response='otw')|ambulance_responses.filter(response='dl')
     ref['transport_by_ambulance'] = ambulance_responses.count()
 
-    #average_turnaround_time = ''
+    total_turnaround_time = 0
+    refs_to_count = 0
+    for referral in referrals:
+        turn_around_time = referral.turn_around_time()
+        if turn_around_time:
+            refs_to_count += 1
+            total_turnaround_time += turn_around_time
+    if refs_to_count:
+        average_turn_around_secs = float(total_turnaround_time)/float(refs_to_count)
+        average_turn_around_hours = average_turn_around_secs/3600
+        ref['average_turnaround_time'] = "{0:.1f} Hours".format(average_turn_around_hours)
+    else:
+        ref['average_turnaround_time'] = 0
 
     referral_report_table = ReferralReportTable([ref], request=request)
     return HttpResponse(referral_report_table.as_html())
