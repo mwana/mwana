@@ -34,7 +34,16 @@
               'Referrals With Response Outcome': 'Ref. W/ Resp-Out.',
               'Transport By Ambulance': 'Trans. Amb',
               'Average Turnaround Time': 'Avg. Time',
-              'Most Common Reason For Referral': 'Common Ref. Reason'
+              'Most Common Reason For Referral': 'Common Ref. Reason',
+              'Clinic Workers Registered':'Clinic W. Reg.',
+              'Clinic Workers Active':'Clinic W. Actv.',
+              'Data Clerks Registered':'D. Clerks Reg.',
+              'Data Clerks Active':'D. Clerks Actv.',
+              'Community Based Agents Registered':'CBAs Reg.',
+              'Community Based Agents Active':'CBAs Actv.',
+              'Error Rate: Clinic Workers':'Err. Clinic W.',
+              'Error Rate: Data Clerks':'Err. D. Clerks.',
+              'Error Rate: Community Based Agents': 'Err. CBAs'
             }
             $.get(fullURL, formData, function(data){
 
@@ -48,7 +57,6 @@
                   //correct abbreviation and set it in as the text
                   //while the text value becomes the title
                   header = $(item)
-                  header.attr('title', 'Andre')
                   text = header.text()
                   abv = abbv[text.trim()]
                   header.attr('title', text)

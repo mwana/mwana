@@ -361,16 +361,16 @@ class ReferralReportTable(Table):
 
 
 class UserReport(Table):
-    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Reg.')
+    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Registered')
     clinic_workers_active = NamedColumn(col_name='Clinic Workers Active')
-    data_clerks_registered = NamedColumn(col_name='Data Clerks Reg.')
+    data_clerks_registered = NamedColumn(col_name='Data Clerks Registered')
     data_clerks_active = NamedColumn(col_name='Data Clerks Active')
-    cbas_registered = NamedColumn(col_name='CBAs Reg.')
-    cbas_active = NamedColumn(col_name='CBAs Active')
+    cbas_registered = NamedColumn(col_name='Community Based Agents Registered')
+    cbas_active = NamedColumn(col_name='Community Based Agents Active')
     clinic_workers_error_rate = NamedColumn(
         col_name='Error Rate: Clinic Workers')
     data_clerks_error_rate = NamedColumn(col_name='Error Rate: Data Clerks')
-    cbas_error_rate = NamedColumn(col_name='Error Rate: CBAS')
+    cbas_error_rate = NamedColumn(col_name='Error Rate: Community Based Agents')
 
 
 class SMSUsersTable(Table):
