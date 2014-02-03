@@ -343,11 +343,9 @@ class PNCReportTable(Table):
     registered_deliveries = NamedColumn(col_name='Registered Deliveries')
     facility = NamedColumn(col_name='Facility')
     home = NamedColumn(col_name='Community')
-    six_hour_pnc = NamedColumn(col_name='6 Hour PNC')
     six_day_pnc = NamedColumn(col_name='6 Day PNC')
     six_week_pnc = NamedColumn(col_name='6 Week PNC')
     complete_pnc = NamedColumn(col_name='Complete PNC')
-    mmr = NamedColumn(col_name='MMR')
     nmr = NamedColumn(col_name='NMR')
 
 

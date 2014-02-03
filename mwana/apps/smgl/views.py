@@ -425,21 +425,6 @@ def pnc_report(request, id=None):
         else:
             nmr = '0'
 
-        mmr_deaths = 0
-        for death in DeathRegistration.objects.filter(person='ma'):
-            try:
-                mother = PregnantMother.objects.get(uid=death.unique_id)
-            except PregnantMother.DoesNotExist:
-                continue
-            if not mother.birthregistration_set.all():
-                mmr_deaths += 1
-
-        if births.count():
-            mmr_num = float(mmr_deaths)/float(births.count())
-        else:
-            mmr_num = 0
-
-        r['mmr'] = "{0:.1f}".format((mmr_num * 100000))
         r['nmr'] = nmr
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
