@@ -169,6 +169,7 @@ class ReminderStatsTable(Table):
 
 class ReminderStatsTableSMAG(Table):
     reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
+    smag_number = NamedColumn(sortable=False, col_name="Number")
     smag_scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
     smag_sent_reminders = NamedColumn(sortable=False, col_name='Sent')
     smag_tolds = NamedColumn(sortable=False, col_name='Received Told')
@@ -335,7 +336,7 @@ class ANCDeliveryTable(Table):
     anc4 = NamedColumn(col_name='4+ ANC')
     facility = NamedColumn(col_name='Facility Births')
     home = NamedColumn(col_name='Home Births')
-    unknown = NamedColumn(col_name='Birth Plc. Unknown')
+    unknown = NamedColumn(col_name='Status Unknown')
     gestational_age = NamedColumn(col_name='Gestational Age @ First ANC')
 
 

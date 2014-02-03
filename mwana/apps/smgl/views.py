@@ -185,7 +185,9 @@ def anc_report(request, id=None):
         # utilize start/end date if supplied
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
-        r['unknown'] = births.exclude(place='h').exclude(place='f').count()
+        r['unknown'] = pregnancies.exclude(id__in=births.\
+            values_list('mother', flat=True)).filter(
+            edd__lte=end_date-datetime.timedelta(days=30)).count()
 
         # Aggregate ANC visits by Mother and # of visits
         visits = visits.filter(mother__in=pregnancies)
@@ -1305,7 +1307,7 @@ def reminder_stats(request, smag_table_requested=False):
             smag_scheduled_reminders = 0
             for mother in scheduled_mothers:
                 smag_scheduled_reminders += mother.get_laycounselors().count()
-            smg_number = smag_scheduled_reminders
+            smag_number = smag_scheduled_reminders
             smag_sent_reminders = reminders.filter(
                 type='pos',
                 mother__in=scheduled_mothers)
