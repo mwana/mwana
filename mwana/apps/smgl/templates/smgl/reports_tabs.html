@@ -30,6 +30,7 @@
             var fullURL = siteURL+targ;
 
             $.get(fullURL, formData, function(data){
+
               window.location.hash = '#'+targ
               $("#"+targ).html(data)
             });
@@ -63,6 +64,8 @@
         <tr>
           <th colspan="2">Period</th>
           <th colspan="3">Location</th>
+          <th colspan="1">Filter</th>
+          <th colspan="2">User</th>
         </tr>
         <tr>
           <th>Start</th>
@@ -70,6 +73,9 @@
           <th>Province</th>
           <th>District</th>
           <th>Facility</th>
+          <th>Filter</th>
+          <th>Type</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -94,11 +100,23 @@
              {{ form.facility.errors}}
              {{ form.facility }}
            </td>
+           <td>
+             {{ form.filter_option.errors}}
+             {{ form.filter_option }}
+           </td>
+          <td>
+            {{ form.c_type.errors}}
+            {{ form.c_type }}
+          </td>
+          <td>
+            {{ form.status.errors }}
+            {{ form.status }}
+          </td>
         </tr>
       </tbody>
     </table>
       <input type="submit" class="btn" name="filter" value="Filter" />
-      <input type="submit" class="btn" name="export" value="Export" />
+      <!--<input type="submit" class="btn" name="export" value="Export" />-->
   </form>
   {{ form.media.js }}
 <div class="row-fluid">

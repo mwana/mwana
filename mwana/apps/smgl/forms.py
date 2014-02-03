@@ -105,6 +105,8 @@ class ANCReportForm(StatisticsFilterForm):
         ('option_2', 'Option 2')
         ))
 
+class ReportsFilterForm(SMSUsersFilterForm, ANCReportForm):
+    pass
 
 class SMSUsersSearchForm(forms.Form):
 

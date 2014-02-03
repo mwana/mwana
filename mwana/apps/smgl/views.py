@@ -25,7 +25,8 @@ from mwana.apps.locations.models import Location
 
 from .forms import (StatisticsFilterForm, MotherStatsFilterForm,
     MotherSearchForm, SMSUsersFilterForm, SMSUsersSearchForm, SMSRecordsFilterForm,
-    HelpRequestManagerForm, SuggestionForm, FileUploadForm, ANCReportForm)
+    HelpRequestManagerForm, SuggestionForm, FileUploadForm, ANCReportForm,
+    ReportsFilterForm)
 
 from .models import (PregnantMother, BirthRegistration, DeathRegistration,
                         FacilityVisit,AmbulanceResponse, Referral, ToldReminder,
@@ -59,7 +60,7 @@ def fetch_initial(initial, session):
 def save_form_data(cleaned_data, session):
     session['form_data'] = cleaned_data
 
-def anc_delivery_report(request, id=None):
+def anc_report(request, id=None):
     records = []
     facility_parent = None
     start_date, end_date = get_default_dates()
@@ -82,14 +83,14 @@ def anc_delivery_report(request, id=None):
             request.GET.update(update)
     """
     if request.GET:
-        form = ANCReportForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date', start_date)
-            end_date = form.cleaned_data.get('end_date', end_date)
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
             filter_option = form.cleaned_data.get('filter_option')
         # determine what location(s) to include in the report
         if id:
@@ -116,24 +117,21 @@ def anc_delivery_report(request, id=None):
                 records_for = [district]
     else:
         initial = {'start_date': start_date, 'end_date': end_date}
-        form = ANCReportForm(initial=fetch_initial(initial, request.session))
-
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     for place in records_for:
         locations = Location.objects.all()
         r = {}
         if not id:
             reg_filter = {'district': place}
-            visit_filter = {'location__in': [x for x in locations\
-                                if get_current_district(x) == place]}
+            visit_filter = {'location__in': get_location_tree_nodes(place)}
         else:
             reg_filter = {'location': place}
             visit_filter = {'location': place}
 
         # Get PregnantMother count for each place
         if not id:
-            district_facilities = [x for x in locations \
-                                if get_current_district(x) == place]
+            district_facilities = get_location_tree_nodes(place)
             pregnancies = PregnantMother.objects \
                             .filter(location__in=district_facilities)
         else:
@@ -294,7 +292,7 @@ def pnc_report(request, id=None):
             request.GET.update(update)
 
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -326,7 +324,7 @@ def pnc_report(request, id=None):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     for place in records_for:
         locations = Location.objects.all()
@@ -483,7 +481,7 @@ def referral_report(request):
     province = district = facility = None
     referrals = Referral.objects.all()
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -496,7 +494,7 @@ def referral_report(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     # filter by location if needed...
     locations = Location.objects.all()
@@ -556,7 +554,7 @@ def user_report(request):
     contacts = Contact.objects.all()
     province = district = facility = None
     if request.GET:
-        form = SMSUsersFilterForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -1140,7 +1138,7 @@ def reminder_stats(request):
                     }
 
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -1153,7 +1151,7 @@ def reminder_stats(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     for key in record_types:
         mothers = PregnantMother.objects.all()
@@ -1191,15 +1189,16 @@ def reminder_stats(request):
                 end=end_date+datetime.timedelta(days=14))
             scheduled_mothers = scheduled_reminders
             number = scheduled_mothers.distinct()
-            sent  = reminders.filter(type__icontains='edd_14', mother__in=mothers)
-            sent_reminders = filter_by_dates(sent, 'date',
-                start=start_date,
-                end=end_date)
+            sent_reminders= ReminderNotification.objects.filter(
+                date__gte=start_date-datetime.timedelta(days=14),
+                date__lte=end_date,
+                type__icontains='edd_14',
+                mother__in=scheduled_mothers)
             birth_anc_pnc_ref = births
             reminded = scheduled_mothers.filter(reminded=True)
             birth_mothers = births.filter(mother__in=scheduled_mothers).values_list('mother', flat=True)
             told_and_showed = ToldReminder.objects.filter(
-                type='edd_14',
+                type='edd',
                 mother__id__in=birth_mothers).count()
             showed_on_time = "N/A"
 
@@ -1208,8 +1207,12 @@ def reminder_stats(request):
             for mother in scheduled_mothers:
                 smag_scheduled_reminders += mother.get_laycounselors().count()
             smag_number = smag_scheduled_reminders
-            smag_sent_reminders  = reminders.filter(type__icontains='edd_14', mother__in=mothers)
-            smag_tolds = tolds.filter(type__icontains='edd_14', mother__in=mothers).count()
+            smag_sent_reminders = ReminderNotification.objects.filter(
+                date__gte=start_date-datetime.timedelta(days=14),
+                date__lte=end_date,
+                type__icontains='edd_14',
+                mother__in=scheduled_mothers)
+            smag_tolds = tolds.filter(type__icontains='edd', mother__in=scheduled_mothers).count()
             response_rate = percentage(smag_tolds, smag_sent_reminders.count())
         elif key == 'ref':
             #Mother Focused
@@ -1227,7 +1230,7 @@ def reminder_stats(request):
                 type='ref',
                 mother__in=scheduled_mothers
                 ).values_list('mother', flat=True)
-            told_and_showed = referrals.filter(mother__id__in=told_mothers, mother_showed=True)
+            told_and_showed = referrals.filter(mother__id__in=told_mothers, mother_showed=True).count()
             showed_on_time = "N/A"
 
 
@@ -1239,7 +1242,11 @@ def reminder_stats(request):
             smag_sent_reminders = reminders.filter(
                 type__icontains='ref',
                 mother__in=scheduled_mothers)
-
+            smag_sent_reminders = ReminderNotification.objects.filter(
+                date__gte=start_date-datetime.timedelta(days=7),
+                date__lte=end_date,
+                type__icontains='ref',
+                mother__in=scheduled_mothers)
             smag_tolds = tolds.filter(
                 type='ref',
                 mother__in=scheduled_mothers).count()
@@ -2553,7 +2560,7 @@ def reports_tabs(request):
     start_date, end_date = get_default_dates()
     province = district = facility = None
     if request.GET:
-        form = StatisticsFilterForm(request.GET)
+        form = ReportsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
             province = form.cleaned_data.get('province')
@@ -2566,7 +2573,7 @@ def reports_tabs(request):
                     'start_date': start_date,
                     'end_date': end_date,
                   }
-        form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
+        form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
     return render_to_response(
                             "smgl/reports_tabs.html",
