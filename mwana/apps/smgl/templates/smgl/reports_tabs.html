@@ -22,15 +22,7 @@
 
         var activeTab
         //Load report on click
-        $("a[data-toggle='tab']").on('show.bs.tab', function(e){
-            var targ = $(e.target).attr('href');
-            targ = targ.replace('#', '');
-            $("#"+targ).html("<p>Loading....Please wait.</p>").css({
-              'font-size':'25px',
-              'text-align':'center'
-            })
 
-        })
         $("a[data-toggle='tab']").on('shown.bs.tab', function (e) {
             var formData = $("form").serialize()
             var targ = $(e.target).attr('href');
@@ -57,12 +49,13 @@
             $.get(fullURL, formData, function(data){
 
               window.location.hash = '#'+targ //Set the url hash
-                $("#"+targ).html(data).css({
+                var table = $("#"+targ).html(data)
+                table.css({
                   'font-size':'14px',
                   'text-align':'left'
                 }) //put in the data
 
-                var headers = $('table:eq(1) thead tr th a')
+                var headers = $(table).find('thead tr th a')
 
                 headers.each(function(index, item){
                   //use the current text value as the key to pull out the
@@ -87,7 +80,14 @@
         }
         activeTab.tab('show');
 
-
+        $("a[data-toggle='tab']").on('show.bs.tab', function(e){
+            var targ = $(e.target).attr('href');
+            targ = targ.replace('#', '');
+            $("#"+targ).html("<p>Loading....Please wait.</p>").css({
+              'font-size':'25px',
+              'text-align':'center'
+            })
+        })
 
     });
   </script>
