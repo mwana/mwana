@@ -22,6 +22,14 @@
 
         var activeTab
         //Load report on click
+        $("a[data-toggle='tab']").on('show.bs.tab', function(e){
+            var targ = $(e.target).attr('href');
+            targ = targ.replace('#', '');
+            $("#"+targ).html("<p>Loading....Please wait.</p>").css({
+              'font-size':'25px',
+              'text-align':'center'
+            })
+        });
 
         $("a[data-toggle='tab']").on('shown.bs.tab', function (e) {
             var formData = $("form").serialize()
@@ -79,15 +87,6 @@
           activeTab  = $('[href=#anc-report]')
         }
         activeTab.tab('show');
-
-        $("a[data-toggle='tab']").on('show.bs.tab', function(e){
-            var targ = $(e.target).attr('href');
-            targ = targ.replace('#', '');
-            $("#"+targ).html("<p>Loading....Please wait.</p>").css({
-              'font-size':'25px',
-              'text-align':'center'
-            })
-        })
 
     });
   </script>

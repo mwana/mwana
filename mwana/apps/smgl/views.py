@@ -1339,10 +1339,9 @@ def reminder_stats(request, smag_table_requested=False):
             'told_and_showed': told_and_showed,
             'showed_on_time':showed_on_time
             })
-
         smag_records.append({
             'reminder_type': field_mapper[key],
-            'number':smag_number,
+            'smag_number':smag_number,
             'smag_scheduled_reminders':smag_scheduled_reminders,
             'smag_sent_reminders': smag_sent_reminders.count(),
             'smag_tolds':smag_tolds,
