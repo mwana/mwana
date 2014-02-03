@@ -1,11 +1,16 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
 
-from django.contrib.csrf.middleware import csrf_response_exempt
-from django.contrib.csrf.middleware import csrf_view_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from mwana.apps.graphs.utils import get_sms_facilities
 from mwana.apps.issuetracking.issuehelper import IssueHelper
+from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
+from mwana.apps.reports.utils.htmlhelper import get_rpt_districts
+from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities
+from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces
+from mwana.apps.reports.utils.htmlhelper import read_date_or_default
+from mwana.apps.reports.views import read_request
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.training.forms import TrainedForm
 from mwana.apps.training.models import Trained
@@ -14,9 +19,7 @@ from mwana.const import get_clinic_worker_type
 from mwana.const import get_district_worker_type
 from mwana.const import get_hub_worker_type
 from mwana.const import get_province_worker_type
-
-
-
+from mwana.const import MWANA_ZAMBIA_START_DATE
 
 
 def get_int(val):
@@ -91,14 +94,17 @@ def get_admin_email_address():
         return "Admin's email address"
 
 
-def get_trained_data(type):
-    trained = Trained.objects.all()
-    trained_cbas = trained.filter(type=type)
+def get_trained_data(type, start_date, end_date, province_slug=None,
+                     district_slug=None, facility_slug=None):
+    trained_users = Trained.objects.filter(type=type, date__gte=start_date).filter(date__lte=end_date)
+    if any([province_slug, district_slug, facility_slug]):
+        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+        trained_users = trained_users.filter(location__in=facs)
 
     from collections import defaultdict
     dict = defaultdict(list)
     total = 0
-    for item in trained_cbas:
+    for item in trained_users:
         key = item.trained_by.name if item.trained_by else ""
         if not key:
             key = "Unclear"
@@ -115,8 +121,6 @@ def get_trained_data(type):
 
     return "[%s]" % ','.join("'%s'" % i for i in trainer_labels), trainer_values, total
 
-@csrf_response_exempt
-@csrf_view_exempt
 def trained(request):
     name_dir = phone_dir = email_dir = location_dir = type_dir = trained_by_dir = date_dir = additional_text_dir = "asc"
 
@@ -151,15 +155,15 @@ def trained(request):
             email = form.cleaned_data['email']
             trained_by = form.cleaned_data['trained_by']
             type = form.cleaned_data['type']
-            date = form.cleaned_data['date']
+            date_trained = form.cleaned_data['date']
             location = form.cleaned_data['location']
             additional_text = form.cleaned_data['additional_text']
-            if not email:email = None
+            if not email or email.trim() == '':email = None
             if not additional_text:additional_text = None
 
 
             model = Trained(name=name, phone=phone, email=email,
-                            trained_by=trained_by, type=type, date=date, location=location,
+                            trained_by=trained_by, type=type, date=date_trained, location=location,
                             additional_text=additional_text)
 
 
@@ -172,19 +176,30 @@ def trained(request):
 
 
 
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+    start_date = MWANA_ZAMBIA_START_DATE
+    if Trained.objects.exclude(date=None):
+        start_date = Trained.objects.exclude(date=None).order_by("date")[0].date
+    start_date = read_date_or_default(request, 'startdate', start_date)
+    end_date = read_date_or_default(request, 'enddate', date.today())
+
     issueHelper = IssueHelper()
 
-    (query_set, num_pages, number, has_next, has_previous), max_per_page = issueHelper.get_trained_people("%s%s" % (direction, sort), page)
+    (query_set, num_pages, number, has_next, has_previous), max_per_page = \
+    issueHelper.get_trained_people(start_date, end_date,
+                                   "%s%s" % (direction, sort), page, rpt_provinces, rpt_districts, rpt_facilities)
 
     offset = max_per_page * (number - 1)
  
     
-    cba_trainer_labels, cba_trainer_values, cba_total = get_trained_data(get_cba_type())
-    dho_trainer_labels, dho_trainer_values, dho_total = get_trained_data(get_district_worker_type())
-    pho_trainer_labels, pho_trainer_values, pho_total = get_trained_data(get_province_worker_type())
-    hub_trainer_labels, hub_trainer_values, hub_total = get_trained_data(get_hub_worker_type())
-    clinic_trainer_labels, clinic_trainer_values, clinic_total = get_trained_data(get_clinic_worker_type())
-
+    cba_trainer_labels, cba_trainer_values, cba_total = get_trained_data(get_cba_type(), start_date, end_date, rpt_provinces, rpt_districts, rpt_facilities)
+    dho_trainer_labels, dho_trainer_values, dho_total = get_trained_data(get_district_worker_type(), start_date, end_date, rpt_provinces, rpt_districts, rpt_facilities)
+    pho_trainer_labels, pho_trainer_values, pho_total = get_trained_data(get_province_worker_type(), start_date, end_date, rpt_provinces, rpt_districts, rpt_facilities)
+    hub_trainer_labels, hub_trainer_values, hub_total = get_trained_data(get_hub_worker_type(), start_date, end_date, rpt_provinces, rpt_districts, rpt_facilities)
+    clinic_trainer_labels, clinic_trainer_values, clinic_total = get_trained_data(get_clinic_worker_type(), start_date, end_date, rpt_provinces, rpt_districts, rpt_facilities)
+    
     return render_to_response('training/trained.html',
                               {
                               'form': form,
@@ -219,6 +234,12 @@ def trained(request):
                               'trained_by_dir': trained_by_dir,
                               'date_dir': date_dir,
                               'additional_text_dir': additional_text_dir,
+                              "fstart_date": start_date.strftime("%Y-%m-%d"),
+                              "fend_date": end_date.strftime("%Y-%m-%d"),
+                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
+                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts),
+                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities),
+
 
                               }, context_instance=RequestContext(request)
                               )

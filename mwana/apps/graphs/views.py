@@ -149,7 +149,7 @@ def monthly_birth_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'Monthly Birth Trends'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Date of Birth)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'# of Births'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
@@ -179,7 +179,7 @@ def monthly_scheduled_visit_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'%s Visit Trend'" % visit_type.title(),
-                              "sub_title": "'**Note that TOLD and CONFIRMED may be under-reported'",
+                              "sub_title": "' (Filtered by Postanatal Date) **Note that TOLD and CONFIRMED may be under-reported'",
                               "label_y_axis": "'%s'" % (data_type.title()),
                               "report_data": report_data,
                               "skip_total": True,
@@ -208,7 +208,7 @@ def monthly_turnaround_trends(request):
                               {
                               "x_axis": time_ranges,
                               "title": "'Monthly DBS Turnaround Trends'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Results Retreived Date)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'Days'",
                               "report_data": report_data,
                               "skip_total": True,
@@ -246,13 +246,17 @@ def monthly_results_retrival_trends(request):
 def messages(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+    data_type = read_request(request, "data_type") or "count"
+    direction = read_request(request, "direction") or "all"
 
     service = GraphServive()
     report_data = []
 
-    time_ranges, data = service.get_monthly_messages(start_date, end_date, rpt_provinces\
+    time_ranges, data = service.get_monthly_messages(start_date, end_date,
+                                                     rpt_provinces
                                                      , rpt_districts,
-                                                     rpt_facilities)
+                                                     rpt_facilities, data_type,
+                                                     direction)
 
     for k, v in data.items():
         rpt_object = Expando()
@@ -263,12 +267,13 @@ def messages(request):
     return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'Monthly SMS Messages'",
+                              "title": "'Monthly SMS\\'s by Backend '",# % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'# of SMS Messages'",
+                              "label_y_axis": "'%s of SMS Messages'" % data_type.title(),
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
+
 def messages_by_user_type(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
@@ -289,13 +294,14 @@ def messages_by_user_type(request):
         rpt_object.value = v
         report_data.append(rpt_object)
 
-    return render_to_response('graphs/lab_submissions.html',
+    return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'Monthly SMS Messages %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
+                              "title": "'Monthly SMS\\'s by User Type %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'%s'" % data_type,
+                              "label_y_axis": "'%s'" % data_type.title(),
                               "report_data": report_data,
+                              "chart_type": "'spline'",
                               }, context_instance=RequestContext(request)
                               )
 
@@ -316,7 +322,7 @@ def facility_vs_community(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'Facility vs Community Births'",
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "sub_title": "'Period: %s  to %s (Filtered by Date of Birth)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
@@ -338,7 +344,7 @@ def turnaround(request):
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
                               "title": "'DBS Turnaround'",
-                              "sub_title": "'Month: %s'" % (end_date.strftime("%b %Y")),
+                              "sub_title": "'Month: %s ( (Filtered by Results Retrived Date))'" % (end_date.strftime("%b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "transport": transport,
                               "processing": processing,

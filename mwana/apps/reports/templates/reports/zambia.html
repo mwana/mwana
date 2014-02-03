@@ -676,7 +676,14 @@ You currently don't belong to any group for viewing reports. Contact the system 
                     <h2 id="RemindMiReports">RemindMi Reports in period {{startdate}} to {{enddate}}</h2>
                     <p>
                     <h3>Births from Clinics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StartDate: {{startdate}} Enddate: {{enddate}}</h3>
+                    <p>
 
+                    <p>
+                        NOTE: This report shows the number of births Reported/Logged
+                        in the selected period. The births themselves could have
+                        happened much earlier. To view the number of births in a
+                        particular month use the "Birth Trends" in charts
+                    </p>
                     <table width="100%">
                         {% for record in births_rpt2 %}
                         <tr>

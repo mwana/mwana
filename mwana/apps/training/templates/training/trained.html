@@ -7,6 +7,7 @@
 {{ block.super }}
 
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 {% endblock %}
 
 
@@ -30,10 +31,7 @@
 
 
 <div class="left">
-    <form name="getValues" action="" method="POST">
-
-
-
+    <form name="getValues" action="" method="POST">{% csrf_token %}
         <div class="module">
             <h2>Trained People</h2>
 
@@ -53,8 +51,37 @@
                         <td valign="top" style="border: 0px" width="100%">
                             <div id="id">
                                 <div id="tab1" >
+                                    <p></p>
+                                    <table border="0" width="100%">
+
+                                        <tbody>
+                                        <thead>
+                                        <th>Start</th>
+                                        <th>End</th>
+                                        <th>Province</th>
+                                        <th>District</th>
+                                        <th>Facility</th>
+                                        </thead>
+                                        <tr>
+                                            <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
+                                            <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' /></td>
+                                            <td>{% autoescape off %}
+                                                {{rpt_provinces}}
+                                                {% endautoescape %}
+                                            </td>
+                                            <td>{% autoescape off %}
+                                                {{rpt_districts}}
+                                                {% endautoescape %}
+                                            </td>
+                                            <td>{% autoescape off %}
+                                                {{rpt_facilities}}
+                                                {% endautoescape %}
+                                            </td>
+                                            <td> <input type="submit" value="Ok" name="Ok" /> </td>
+                                        </tr>
+                                        </tbody></table>
                                     <p>
-                                    Click the bars for the SMS user types to see who trained them. Click again to get back to the SMS users.
+                                        Click the bars for the SMS user types to see who trained them. Click again to get back to the SMS users.
                                     <div id="container" style="min-width: 800px; height: auto; margin: 0 auto"></div>
                                 </div>
                                 <div id="tab2" style="display: none;">
@@ -84,6 +111,7 @@
             </table>
             <hr>
             <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js"></script>
+            <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
             <script type="text/javascript">
                 $(function () {
                     var chart;
@@ -309,10 +337,18 @@
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 <script type="text/javascript">
-    $("select").chosen();
+    $("#id_location").chosen();
+    $("#id_type").chosen();
+    $("#id_trained_by").chosen();
+    $("#id_location").chosen();
     $(".chzn-single").css('width','290px');
     $(".chzn-drop").css('width','298px');
     $(".chzn-search input").css('width','263px');
 </script>
-
+<script type="text/javascript" >
+    $(function(){
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+        $.datepicker.formatDate;
+    });
+</script>
 {% endblock %}

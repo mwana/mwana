@@ -64,7 +64,7 @@ msgid ""
 "zone %(zone)s of %(clinic)s."
 msgstr ""
 "Zikomo %(name)s! Mwakwanitsa kulembetsa ngati wothandiza wa RemindMi wa "
-" %(zone)s la %(clinic)s"
+"zone %(zone)s la %(clinic)s"
 
 #: .\apps\agents\handlers\agent.py:136 .\apps\labresults\handlers\join.py:325
 msgid "Sorry, I didn't understand that."

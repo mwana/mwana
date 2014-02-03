@@ -23,7 +23,12 @@
                 chart = new Highcharts.Chart({
                     chart: {
                         renderTo: 'container',
+                        {% if chart_type %}
+                        type: {% autoescape off %} {{ chart_type }} {% endautoescape %}
+                        {% else %}
                         type: 'column'
+                        {% endif %}
+                        
                     },
                     title: {
                         text: {% autoescape off %} {{ title }} {% endautoescape %}
@@ -39,16 +44,6 @@
                         title: {
                             text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
                         }
-                    },
-                    legend: {
-                        layout: 'vertical',
-                        backgroundColor: '#FFFFFF',
-                        align: 'left',
-                        verticalAlign: 'top',
-                        x: 100,
-                        y: 70,
-                        floating: true,
-                        shadow: true
                     },
                     tooltip: {
                         

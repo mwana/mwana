@@ -2,7 +2,6 @@
 from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.issuetracking.utils import send_issue_email
 import logging
-from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from mwana.apps.alerts.views import get_int
@@ -46,9 +45,7 @@ def get_next_navigation(text):
 #                              "formset": formset,
 #                              })
 
-    
-@csrf_response_exempt
-@csrf_view_exempt
+
 def list_issues(request):
 
     

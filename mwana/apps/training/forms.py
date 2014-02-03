@@ -3,7 +3,6 @@ from mwana.apps.training.models import Trained
 from django.forms.models import ModelForm
 
 
-
 class TrainedForm(ModelForm):
 
     class Meta:
