@@ -1111,7 +1111,7 @@ def statistics(request, id=None):
         },
         context_instance=RequestContext(request))
 
-def reminder_stats(request):
+def reminder_stats(request, smag_table_requested=False):
     mother_records = []
     smag_records = []
     province = district = facility = None
@@ -1354,7 +1354,10 @@ def reminder_stats(request):
     reminder_smag_table = ReminderStatsTableSMAG(smag_records,
                                            request=request)
 
-    return HttpResponse(reminder_stats_table.as_html())
+    if smag_table_requested:
+        return HttpResponse(reminder_smag_table.as_html())
+    else:
+        return HttpResponse(reminder_mothers_table.as_html())
 
 def report(request):
     records = []
