@@ -1048,10 +1048,10 @@ def statistics(request, id=None):
                 r[key] = num_visits[i]
 
         #add the anc visits
-        #anc_total = 0
-        #for num in num_visits:
-        #    anc_total += num_visits
-        #r['anc_total'] = anc_total
+        anc_total = 0
+        for num in num_visits:
+            anc_total += num_visits[num]
+        r['anc_total'] = anc_total
 
         pos_visits = mothers.filter(facility_visits__visit_type='pos') \
                             .annotate(Count('facility_visits')) \
