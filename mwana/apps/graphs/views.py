@@ -14,7 +14,6 @@ from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.apps.reports.views import read_request
 from mwana.const import MWANA_ZAMBIA_START_DATE
-from mwana.apps.locations.models import Location
 
 
 class Expando:
@@ -351,35 +350,5 @@ def turnaround(request):
                               "delays": delays,
                               "retrieving": retrieving,
                               "categories": categories,
-                              }, context_instance=RequestContext(request)
-                              )
-
-                            
-def stock_levels(request):
-    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
-    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
-    data_type = read_request(request, "data_type") or "percentage"
-
-    service = GraphServive()
-    report_data = []
-
-    time_ranges, data = service.get_stocklevels(start_date,
-                                                                 end_date, rpt_provinces\
-                                                                 , rpt_districts,
-                                                                 rpt_facilities, data_type)
-
-    for k, v in data.items():
-        rpt_object = Expando()
-        rpt_object.key = Location.objects.get(slug=k).name
-        rpt_object.value = v
-        report_data.append(rpt_object)
- 
-    return render_to_response('graphs/lab_submissions.html',
-                              {
-                              "x_axis": [str(i) for i in time_ranges],
-                              "title": "'Monthly SMS Messages '" ,
-                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
-                              "label_y_axis": "'%s'" % data_type,
-                              "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )

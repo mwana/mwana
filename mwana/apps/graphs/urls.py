@@ -15,5 +15,4 @@ urlpatterns = patterns('',
     url(r"^monthly_turnaround_trends/$", views.monthly_turnaround_trends, name="monthly_turnaround_trends"),
     url(r"^monthly_results_retrival_trends/$", views.monthly_results_retrival_trends, name="monthly_results_retrival_trends"),
     url(r"^monthly_scheduled_visit_trends/$", views.monthly_scheduled_visit_trends, name="monthly_scheduled_visit_trends"),
-    url(r"^stock_levels/$", views.stock_levels, name="stock_levels"),
 )

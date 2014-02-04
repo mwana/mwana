@@ -1,6 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.stock.models import StockAccount
-from mwana.apps.stock.models import Stock
 from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
 from mwana.apps.contactsplus.models import ContactType
@@ -18,7 +16,6 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reminders.models import PatientEvent
-from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Backend
 
 
@@ -359,36 +356,6 @@ class GraphServive:
 
         return month_ranges, data
 
-    def get_monthly_messages(self, start_date, end_date, province_slug, district_slug, facility_slug):
-        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
-        start, end = get_datetime_bounds(start_date, end_date)
-
-        backends = Backend.objects.exclude(name='message_tester').values_list('name').all().distinct()
-        messages = Message.objects.filter(date__gte=start,
-                                          date__lt=end)
-
-        if any([province_slug, district_slug, facility_slug]):
-            messages = Message.objects.filter(date__gte=start,
-                                              date__lt=end,
-                                              contact__location__in=facs)
-
-        my_date = date(start_date.year, start_date.month, start_date.day)
-        data = {}
-        for backend in sorted(backends):
-            data[backend[0]] = []
-
-        month_ranges = []
-        while my_date <= end_date:
-            for backend in sorted(backends):
-                data[backend[0]].append(messages.filter(
-                                        date__year=my_date.year,
-                                        date__month=my_date.month,
-                                        connection__backend__name=backend[0]
-                                        ).count())
-            month_ranges.append(my_date.strftime('%b %Y'))
-            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
-
-        return month_ranges, data
 
     def get_monthly_messages_by_usertype(self, start_date, end_date,
     province_slug, district_slug, facility_slug, data_type="count", direction='all'):
@@ -440,36 +407,6 @@ class GraphServive:
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
         return month_ranges, data
-
-    
-    def get_stocklevels(self, start_date, end_date,
-    province_slug, district_slug, facility_slug, data_type="count"):
-       
-        """TODO: Optimize this function"""
-        use_percentage = "count" != data_type
-        facs = get_sms_facilities(province_slug, district_slug, facility_slug)
-        start, end = get_datetime_bounds(start_date, end_date)
-
-  
-        slugs = [s.slug for s in facs]
-
-        facillity_names = [f.slug for f in Location.objects.filter(supportedlocation__supported=True, slug__in=slugs)]
-
-        data = {}
-        for item in sorted(facillity_names):
-            data[item] = []
-        
-        # @type d Stock
-        drugs = [d.code for d in Stock.objects.all()]
-        for drug in drugs:
-            for item in sorted(facillity_names):
-                amount = 0
-                stocks = StockAccount.objects.filter(stock__code=drug, location__slug=item)
-                if stocks:
-                    amount =stocks[0].amount
-                data[item].append(amount)
-
-        return drugs, data
 
     def get_facility_vs_community(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_facilities(province_slug, district_slug, facility_slug)
