@@ -59,7 +59,7 @@ TOLD_MOTHER_HAS_NO_NVD = _('Mother ID %(unique_id)s has no scheduled NVD')
 TOLD_MOTHER_HAS_NO_REF = _('Mother ID %(unique_id)s has no scheduled REF')
 
 # lookup messages
-LOOK_MOTHER_DOES_NOT_EXIST = _('Sorry, the mother you are trying to lookup does not exist. Please check the supplied zone id, first and last name values.')
+LOOK_MOTHER_DOES_NOT_EXIST = _('Sorry, the mother you are trying to lookup (%(first_name)s %(last_name)s) does not exist. Please check the supplied zone id, first and last name values.')
 LOOK_COMPLETE = _("The Mother ID is %(unique_id)s.")
 
 # referrals

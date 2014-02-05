@@ -199,7 +199,8 @@ def motherid_lookup(session, xform, router):
                                             location__slug=zone_id)
     except ObjectDoesNotExist:
         # NOTE: should this be an error?
-        return respond_to_session(router, session, const.LOOK_MOTHER_DOES_NOT_EXIST)
+        return respond_to_session(router, session, const.LOOK_MOTHER_DOES_NOT_EXIST,
+            **{'first_name':f_name, 'last_name':l_name})
     else:
         return respond_to_session(router, session, const.LOOK_COMPLETE,
                                   **{'unique_id': mother.uid})
