@@ -161,21 +161,21 @@ class StatisticsLinkTable(StatisticsTable):
 
 
 class ReminderStatsTable(Table):
-    reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
-    number = NamedColumn(sortable=False, col_name="Number")
-    scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
-    sent_reminders = NamedColumn(sortable=False, col_name='Sent')
-    reminded = NamedColumn(sortable=False, col_name='Reminded')
-    birth_anc_pnc_ref = NamedColumn(sortable=False, col_name='Birth/ANC/PNC/REF')
-    told_and_showed = NamedColumn(sortable=False, col_name='Told and showed')
-    showed_on_time = NamedColumn(sortable=False, col_name='Showed on Time')
+    reminder_type = NamedColumn(col_name="Reminder Type")
+    number = NamedColumn(col_name="Number")
+    scheduled_reminders = NamedColumn(col_name='Scheduled')
+    sent_reminders = NamedColumn(col_name='Sent')
+    reminded = NamedColumn(col_name='Reminded')
+    birth_anc_pnc_ref = NamedColumn(col_name='Birth/ANC/PNC/REF')
+    told_and_showed = NamedColumn(col_name='Told and showed')
+    showed_on_time = NamedColumn(col_name='Showed on Time')
 
 class ReminderStatsTableSMAG(Table):
     reminder_type = NamedColumn(sortable=False, col_name="Reminder Type")
-    smag_number = NamedColumn(sortable=False, col_name="Number")
-    smag_scheduled_reminders = NamedColumn(sortable=False, col_name='Scheduled')
-    smag_sent_reminders = NamedColumn(sortable=False, col_name='Sent')
-    smag_tolds = NamedColumn(sortable=False, col_name='Received Told')
+    smag_number = NamedColumn(col_name="Number")
+    smag_scheduled_reminders = NamedColumn(col_name='Scheduled (SMAG)')
+    smag_sent_reminders = NamedColumn(col_name='Sent (SMAG)')
+    smag_tolds = NamedColumn(col_name='Received Told')
     response_rate = NamedColumn(sortable=False, col_name='Response rate')
 
 class SummaryReportTable(Table):
@@ -344,6 +344,7 @@ class ANCDeliveryTable(Table):
 
 
 class PNCReportTable(Table):
+    location = NamedColumn(col_name='Location')
     registered_deliveries = NamedColumn(col_name='Registered Deliveries')
     facility = NamedColumn(col_name='Facility')
     home = NamedColumn(col_name='Community')
@@ -354,26 +355,26 @@ class PNCReportTable(Table):
 
 
 class ReferralReportTable(Table):
-    referrals = NamedColumn(col_name='Emergent Referrals')
-    referral_responses = NamedColumn(col_name='Referrals with Response')
+    referrals = NamedColumn(col_name='Referrals')
+    referral_responses = NamedColumn(col_name='Ref. W/ Resp')
     referral_response_outcome = NamedColumn(
-        col_name='Referrals with response outcome')
-    transport_by_ambulance = NamedColumn(col_name='Transport by Ambulance')
-    average_turnaround_time = NamedColumn(col_name='Average Turnaround Time')
-    most_common_reason = NamedColumn(col_name='Most common reason for referral')
+        col_name='Ref. W/ Resp-Out.')
+    transport_by_ambulance = NamedColumn(col_name='Trans. Amb')
+    average_turnaround_time = NamedColumn(col_name='Avg. Time')
+    most_common_reason = NamedColumn(col_name='Common Ref. Reason')
 
 
 class UserReport(Table):
-    clinic_workers_registered = NamedColumn(col_name='Clinic Workers Registered')
-    clinic_workers_active = NamedColumn(col_name='Clinic Workers Active')
-    data_clerks_registered = NamedColumn(col_name='Data Clerks Registered')
-    data_clerks_active = NamedColumn(col_name='Data Clerks Active')
-    cbas_registered = NamedColumn(col_name='Community Based Agents Registered')
-    cbas_active = NamedColumn(col_name='Community Based Agents Active')
+    clinic_workers_registered = NamedColumn(col_name='Clinic W. Reg.')
+    clinic_workers_active = NamedColumn(col_name='Clinic W. Actv.')
+    data_clerks_registered = NamedColumn(col_name='D. Clerks Reg.')
+    data_clerks_active = NamedColumn(col_name='D. Clerks Actv.')
+    cbas_registered = NamedColumn(col_name='Cbas Reg.')
+    cbas_active = NamedColumn(col_name='Cbas Actv.')
     clinic_workers_error_rate = NamedColumn(
-        col_name='Error Rate: Clinic Workers')
-    data_clerks_error_rate = NamedColumn(col_name='Error Rate: Data Clerks')
-    cbas_error_rate = NamedColumn(col_name='Error Rate: Community Based Agents')
+        col_name='Err. Clinic W.')
+    data_clerks_error_rate = NamedColumn(col_name='Err. D. Clerks')
+    cbas_error_rate = NamedColumn(col_name='Err. CBAs')
 
 
 class SMSUsersTable(Table):

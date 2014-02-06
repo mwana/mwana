@@ -38,21 +38,45 @@
             var siteURL = "/smgl/";
             var fullURL = siteURL+targ;
             var abbv = {
-              'Emergent Referrals':'Referrals',
-              'Referrals With Response': 'Ref. W/ Resp',
-              'Referrals With Response Outcome': 'Ref. W/ Resp-Out.',
-              'Transport By Ambulance': 'Trans. Amb',
-              'Average Turnaround Time': 'Avg. Time',
-              'Most Common Reason For Referral': 'Common Ref. Reason',
-              'Clinic Workers Registered':'Clinic W. Reg.',
-              'Clinic Workers Active':'Clinic W. Actv.',
-              'Data Clerks Registered':'D. Clerks Reg.',
-              'Data Clerks Active':'D. Clerks Actv.',
-              'Community Based Agents Registered':'CBAs Reg.',
-              'Community Based Agents Active':'CBAs Actv.',
-              'Error Rate: Clinic Workers':'Err. Clinic W.',
-              'Error Rate: Data Clerks':'Err. D. Clerks.',
-              'Error Rate: Community Based Agents': 'Err. CBAs'
+              'Pregnant Women': 'Option 1: The number of women who registered a pregnancy AND gave birth OR had their EDD scheduled within the specified time frame; Option 2: The number of women who gave birth OR had their EDD scheduled within the specified time frame',
+              '2 Anc': 'The number of women who complete 2 Antenatal care visits during their pregnancy',
+              '3 Anc': 'The number of women who complete 3 Antenatal care visits during their pregnancy',
+              '4+ Anc': 'The number of women who complete 4 or more Antenatal care visits during their pregnancy',
+              'Facility Births': 'The number of women with registered facility deliveries in the system',
+              'Home Births': 'The number of women with registered community deliveries in the system',
+              'Status Unknown': 'The number of women expected to deliver within the specified timeframe who do not have a delivery registered in the system',
+              'Gestational Age @ First Anc': 'Average gestational age in weeks at ANC booking = LMP date - pregnancy registration date',
+              'Registered Deliveries':"# registered facility or community births during the specified timeframe AND who's delivery dates are at least 6 weeks prior to the specified end date",
+              'Facility': '# of registered deliveries in our cohort that occur at the facility',
+              'Community': '# of registered deliveries in our cohort that occur in the community',
+              '6 Day Pnc': '# of women with registered PNC visit within X days of delivery registration during the specified time frame',
+              '6 Week Pnc': '# of women with registered PNC visit within X days of delivery registration during the specified time frame',
+              'Complete Pnc': '# of women with registered 6 hours, 6 days and 6 weeks PNC visit respectively within 72 hours, X days and  X weeks  of delivery registration during the specified time frame',
+              'Nmr': '[# of neonatal deaths registered in the system that occur within the first 28 days of life/ # of live births] x 1,000 live births during the specified time frame',
+              'Referrals': '# of Emergent Referral Messages sent during the specified timeframe',
+              'Ref. W/ Resp': '# of Emergent Referral Messages with response sent through the system during the specified timeframe',
+              'Ref. W/ Resp-Out.': '# of Emergent Referral Messages with response and referral outcome sent through the system during the specified timeframe',
+              'Trans. Amb': '# of Emergent Referral patients transported by ambulance',
+              'Avg. Time': "Average turnaround time in hours from initiation of referral message to patients' arrival at referral location (Refout Time – Time Referral Sent)",
+              'Common Ref. Reason': 'Most frequent obstetric complication cited in emergent referral requests',
+              'Clinic W. Reg.': 'Total # of clinic workers registered in the system during the specified time period',
+              'Clinic W. Actv.': '# of clinic workers who interacted with the system within the past 30 days during the specified time period',
+              'D. Clerks Reg.': 'Total # of data clerks registered in the system during the specified time period',
+              'D. Clerks Actv.': '# of data clerks who interacted with the system within the past 14 days during the specified time period',
+              'Cbas Reg.': 'Total # of CBAs registered in the system during the specified time period',
+              'Cbas Actv.': '# of CBAs who interacted with the system within the past 30 days during the specified time period',
+              'Err. Clinic W.': 'The proportion of messages containing errors sent by clinic workers during the specified time period',
+              'Err. D. Clerks': 'The proportion of messages containing errors sent by data clerks during the specified time period',
+              'Err. Cbas': 'The proportion of messages containing errors sent by CBAs during the specified time period',
+              'Scheduled': '# EDD/ANC/PNC/Referral Reminders scheduled during the specified time period for each Mother',
+              'Sent': '# EDD/ANC/PNC/Referral Reminders sent from the system during the specified time period',
+              'Told And Showed': '# EDD/ANC/PNC TOLD messages received during the specified time period',
+              'Showed On Time': '# ANC Follow-ups registered in the system that occur 7 days prior OR 14 days after scheduled date with a corresponding TOLD message during the specified time period.....# PNC Follow-ups registered in the system that occur X days, prior OR X days after scheduled date with a corresponding TOLD message during the specified time period',
+              'Reminded': 'Number of Mothers reminded within the specified time period.',
+              'Sent (Smag)': '# EDD/ANC/PNC/Referral Reminders sent to SMAGS',
+              'Scheduled (Smag)': '# EDD/ANC/PNC/Referral Reminders scheduled to be sent to SMAGS',
+              'Received Told': '# EDD/ANC/PNC TOLD messages received during the specified time period'
+
             }
             $.get(fullURL, formData, function(data){
 
@@ -71,9 +95,10 @@
                   //while the text value becomes the title
                   header = $(item)
                   text = header.text()
+
                   abv = abbv[text.trim()]
-                  header.attr('title', text)
-                  header.text(abv)
+                  header.attr('title', abv)
+                  //header.text()
                 });
             });
 
