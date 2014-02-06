@@ -10,19 +10,19 @@ from mwana.apps.stock.models import Transaction
 from mwana.apps.stock.models import Threshold
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
-from mwana.apps.broadcast.models import BroadcastMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.const import get_district_worker_type
+from datetime import date
 
 _ = lambda s: s
 
-UNREGISTERED = "Sorry, you must be registered to add new stock. Reply with HELP if you need assistance."
+UNREGISTERED = "Sorry, you must be registered first with Mwana. Reply with HELP if you need assistance."
 
 class DispensedStockHandler(KeywordHandler):
     """
     """
 
-    keyword = "DISP|dispenced|disp|dispensed"
+    keyword = "DISP|dispenced|desp|dispensed|despensed|despenced"
 
     HELP_TEXT = _("To report dispensed drugs, send DISP <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g DISP DG99 100, DG80 15")
     message_to_dho = "Hi %s, %s are below threshold by: %s."
@@ -56,7 +56,6 @@ class DispensedStockHandler(KeywordHandler):
             self.respond("Sorry, drug ID(s) %s appears more than once in your message" % ", ".join(set(repeating_drugs)))
             return True
 
-
         
         valid_drug_ids = [id[0].upper() for id in Stock.objects.values_list('code').distinct()]
         
@@ -72,92 +71,42 @@ class DispensedStockHandler(KeywordHandler):
 
         invalid_quantities = [drug.split()[1] for drug in tokens if not drug.split()[1].isdigit()]
         if invalid_quantities:
-            if len(invalid_quantities) ==1:
+            if len(invalid_quantities) == 1:
                 self.respond("Sorry, %s is not a valid number. Enter only numbers for quantity." % invalid_quantities[0])
             else:
                 self.respond("Sorry, %s are not valid numbers. Enter only numbers for quantity." % ", ".join(invalid_quantities))
 
         else:
             location = self.msg.contact.location
-            c = ConfirmationCode.objects.create()
-            trans = Transaction.objects.create(reference=c)
+            confirmation_code = ConfirmationCode.objects.create()
+            trans = Transaction.objects.create(reference=confirmation_code)
             trans.date =  datetime.datetime.now().date()
             trans.type = "d"
             trans.sms_user = self.msg.contact
             trans.valid = True
-            drugs_below_threshold=""
-            drugs=""
-            stop = 1
-            last=1
+            last = 1
+            user_drug_codes = []
             for drug in tokens:
                  drug_code = drug.split()[0]
+                 user_drug_codes.append(drug_code.upper())
                  delimeter = '-'
                  for c in '_#$%@=/+:':
                     drug_code = drug_code.replace(c, delimeter)
                  stock = Stock.objects.get(code=drug_code)
-                 acc = StockAccount.objects.get(location=location,stock=stock)
-                 amount= int(drug.split()[1])
+                 acc = StockAccount.objects.get(location=location, stock=stock)
+                 amount = int(drug.split()[1])
                  acc.amount -= amount
-                 stk = StockTransaction.objects.create(transaction=trans,amount=amount, stock=stock)
-                 stk.save()
+                 StockTransaction.objects.create(transaction=trans, 
+                                                        amount=amount,
+                                                        stock=stock)
                  acc.save()
-                 threshold=Threshold.objects.get(account=acc)
+     
 
-
-                 if(acc.amount <= threshold.level):
-#                     drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
-                     
-                     if (stop <=3):
-                         drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
-                         ++stop
-
-#                 drugs += str(abs(amount))+" units of "+stock.code +", "
-                 
-                 if (last <=2):
-                     drugs += str(abs(amount))+" units of "+drug_code +", "
-                     ++last
-
-            trans.account_to =acc
+            trans.account_to = acc
             trans.status = "c"
             trans.save()       
             
-            if (drugs_below_threshold):
-                self.respond("Your stock is below threshold by: " +drugs_below_threshold+"..." )
-                dho_staff = Contact.active.location(location.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())
-                self.broadcast(self.message_to_dho, dho_staff, "DHO", drugs_below_threshold, location)
-            else:  
-                self.respond("Thank you. You have dispensed the following drugs: " +drugs +"...")
+            updated_drugs = list(set(StockAccount.objects.filter(location=location, stock__code__in=user_drug_codes) | StockAccount.objects.filter(location=location, stock__short_code__in=user_drug_codes)))
+            last_part = ", ".join(str(drug.amount) + " units of " + drug.stock.code for drug in updated_drugs)
 
-    def broadcast(self, text, contacts, group_name, drugs, clinic_to):
-
-        message_body = "%(text)s"
-
-        for contact in contacts:
-            if contact.default_connection is None:
-                self.info("Can't send to %s as they have no connections" % contact)
-            else:
-                OutgoingMessage(contact.default_connection, message_body,
-                                **{"text": (text % (contact.name, clinic_to, drugs))}).send()
-
-        logger_msg = getattr(self.msg, "logger_msg", None)
-        if not logger_msg:
-            self.error("No logger message found for %s. Do you have the message log app running?" %\
-                       self.msg)
-        bmsg = BroadcastMessage.objects.create(logger_message=logger_msg,
-                                               contact=self.msg.contact,
-                                               text=text,
-                                               group=group_name)
-        bmsg.recipients = contacts
-        bmsg.save()
-        return True
-
-   
-
-
-
-
-
-        
-
-        
-
+            self.respond("Thank you. New levels for the just dispensed stock are: %s. Cc: %s" % (last_part, confirmation_code))

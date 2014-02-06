@@ -2,17 +2,13 @@
 import datetime
 import re
 
-from mwana import const
-from mwana.apps.locations.models import Location
-from mwana.apps.locations.models import LocationType
-from mwana.apps.reminders import models as reminders
 from mwana.apps.stock.models import ConfirmationCode
 from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Transaction
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.models import Contact
+from django.db.models import Q
 
 _ = lambda s: s
 
@@ -54,10 +50,8 @@ class NewStockHandler(KeywordHandler):
         if repeating_drugs:
             self.respond("Sorry, drug ID(s) %s appears more than once in your message" % ", ".join(set(repeating_drugs)))
             return True
-
-
         
-        valid_drug_ids = [id[0].upper() for id in Stock.objects.values_list('code').distinct()]
+        valid_drug_ids = list(set([id[0].upper() for id in Stock.objects.values_list('code').distinct()] + [id[0].upper() for id in Stock.objects.values_list('short_code').distinct()]))
         
         invalid_ids = list(set(drug_ids) - set(valid_drug_ids))
         
@@ -76,48 +70,39 @@ class NewStockHandler(KeywordHandler):
             else:
                 self.respond("Sorry, %s are not valid numbers. Enter only numbers for quantity." % ", ".join(invalid_quantities))
 
+            return True
+
         else:
             location = self.msg.contact.location
-            c = ConfirmationCode.objects.create()
-            trans = Transaction.objects.create(reference=c)
+            confirmation_code = ConfirmationCode.objects.create()
+            trans = Transaction.objects.create(reference=confirmation_code)
             trans.date =  datetime.datetime.now().date()
             trans.type = "d_f"
             trans.sms_user = self.msg.contact
             trans.valid = True
 
+            user_drug_codes = []
             for drug in tokens:
                  drug_code = drug.split()[0]
                  delimeter = '-'
                  for c in '_#$%@=/+:':
                     drug_code = drug_code.replace(c, delimeter)
-                    
-                 stock = Stock.objects.get(code=drug_code)
+
+                 user_drug_codes.append(drug_code.upper())
+                 stock = Stock.objects.get(Q(code__iexact=drug_code)|Q(short_code__iexact=drug_code))
                  acc = StockAccount.objects.get(location=location,stock=stock)
                  acc.amount += int(drug.split()[1])
-                 stk = StockTransaction.objects.create(transaction=trans,amount=int(drug.split()[1]), stock=stock)
+                 stk = StockTransaction.objects.create(transaction=trans, 
+                                                        amount=int(drug.split()[1]),
+                                                        stock=stock)
                  stk.save()
                  acc.save()
         
-            trans.account_to =acc
+            trans.account_to = acc
             trans.status = "c"
             trans.save()
-            drugs=""
-            last=1
-            for drug in StockAccount.objects.filter(location=location):
-#                 drugs += drug.stock.code +" "+str(drug.amount)+" "
-                 
-                 if (last <=2):
-                     drugs += str(abs(drug.amount))+" units of "+drug.stock.code +", "
-                     ++last
-            drugs += "..."
+            
+            updated_drugs = list(set(StockAccount.objects.filter(location=location, stock__code__in=user_drug_codes) | StockAccount.objects.filter(location=location, stock__short_code__in=user_drug_codes)))
+            last_part = ", ".join(str(drug.amount) + " units of " + drug.stock.code for drug in updated_drugs)
 
-            self.respond("Thank you. Your new levels for the added drugs are as follows: " +drugs)
-
-
-
-
-
-        
-
-        
-
+            self.respond("Thank you. New levels for the added stock are: %s. Cc: %s" % (last_part, confirmation_code))

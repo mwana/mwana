@@ -1,18 +1,21 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
+from datetime import datetime
+import string
+
 from django.contrib.auth.models import User
-from rapidsms.models import Contact
-from mwana.apps.locations.models import Location
 from django.db import models
-from datetime import datetime, date
+from mwana.apps.locations.models import Location
+from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
     def __unicode__(self):
         return str(self.id).zfill(6)
 
 STOCK_TYPES = (
-    ('drug', 'Drugs'),
-    # ('drug','Drugs'),
-)
+               ('drug', 'Drugs'),
+               ('test_kit', 'Test Kits'),
+               )
 
 
 class StockUnit(models.Model):
@@ -20,15 +23,19 @@ class StockUnit(models.Model):
     description = models.CharField(max_length=20, null=False, blank=False)
 
 class Stock(models.Model):
-    type = models.CharField(max_length=10, choices=STOCK_TYPES, null=False, blank=False)
+    type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False,)
     abbr = models.CharField(max_length=10, null=True, blank=True)
     code = models.CharField(max_length=10, null=False, blank=False, unique=True)
-    name = models.CharField(max_length=30, null=False, blank=False)
+    short_code = models.CharField(max_length=10, null=False, blank=True, unique=True)
+    name = models.CharField(max_length=80, null=False, blank=False)
     units = models.ForeignKey(StockUnit, null=True, blank=True)
 
     def __unicode__(self):
         return "%s: %s" % (self.code, self.name)
 
+    def save(self, * args, ** kwargs):
+        self.short_code = "".join(filter(lambda x:x in string.letters + string.digits, list(self.code)))
+        super(Stock, self).save(*args, ** kwargs)
 
 
 class StockAccount(models.Model):
@@ -38,28 +45,28 @@ class StockAccount(models.Model):
     pending_amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     last_updated = models.DateTimeField(default=datetime.now, editable=False)
 
-    def save(self, *args, **kwargs):
+    def save(self, * args, ** kwargs):
         self.last_updated = datetime.now()
-        super(StockAccount, self).save(*args, **kwargs)
+        super(StockAccount, self).save(*args, ** kwargs)
 
     def __unicode__(self):
         return "%s > %s %s" % (self.stock, self.location, self.amount)
 
     class Meta:
-        unique_together = (('stock', 'location'),)
+        unique_together = (('stock', 'location'), )
 
 
 TRANSACTION_CHOICES = (
-    ('p', 'Pending'),
-    ('f', 'Failed'),
-    ('c', 'Completed'),
-)
+                       ('p', 'Pending'),
+                       ('f', 'Failed'),
+                       ('c', 'Completed'),
+                       )
 
 TRANSACTION_TYPES = (
-    ('d', 'Dispense'),
-    ('d_f', 'District to Facility'),
-    ('f_f', 'Facility to Facility'),
-)
+                     ('d', 'Dispense'),
+                     ('d_f', 'District to Facility'),
+                     ('f_f', 'Facility to Facility'),
+                     )
 
 class Transaction(models.Model):
     status = models.CharField(max_length=1, choices=TRANSACTION_CHOICES, default='p')
@@ -85,8 +92,8 @@ class Threshold(models.Model):
     start_date = models.DateField(default=date.today, null=False, blank=False)
     end_date = models.DateField(null=True, blank=True, editable=False)
 
-    def save(self, *args, **kwargs):
-        super(Threshold, self).save(*args, **kwargs)
+    def save(self, * args, ** kwargs):
+        super(Threshold, self).save(*args, ** kwargs)
         for t in Threshold.objects.filter(end_date=None, start_date__lte=self.start_date, account=self.account).exclude(pk=self.pk):
             t.end_date = date.today()
             t.save()
@@ -99,7 +106,7 @@ class StockTransaction(models.Model):
         return "%s > %s %s" % (self.stock, self.transaction, self.amount)
 
     class Meta:
-        unique_together = (('stock', 'transaction'),)
+        unique_together = (('stock', 'transaction'), )
 
 #    def save(self, *args, **kwargs):
 #        if not self.pk:
@@ -127,9 +134,3 @@ class StockTransaction(models.Model):
 #                account_to.save()
 #
 #        super(StockAccount, self).save(*args, **kwargs)
-
-
-
-
-
-

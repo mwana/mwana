@@ -45,6 +45,7 @@ class TestApp(TestScript):
         Threshold.objects.all().delete()
 
 class TestThreshold(TestApp):
+    # TODO add test for low level notifications to DHO
     
     def test_threshold_addition(self):
         self.assertEqual(Threshold.objects.count(), 0)
@@ -126,12 +127,12 @@ class TestStockAtFacility(TestApp):
 
         script = """
             rb > New Stock DRG-123 23
-            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 23
+            rb < Thank you. New levels for the added stock are: 23 units of DRG-123. Cc: 000001
         """
 
         self.runScript(script)
-        self.assertEqual(StockAccount.objects.count(), 0)
-        self.assertEqual(Transaction.objects.count(), 0)
+        self.assertEqual(StockAccount.objects.count(), 1)
+        self.assertEqual(Transaction.objects.count(), 1)
 
 
     def test_new_stock_addition_multiple(self):
@@ -143,9 +144,9 @@ class TestStockAtFacility(TestApp):
 
         script = """
             rb > New Stock DRG-123 10, DRG-124 20
-            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 10 DRG-124 20
+            rb < Thank you. New levels for the added stock are: 10 units of DRG-123, 20 units of DRG-124. Cc: 000001
             rb > New Stock DRG-123 5, DRG-124 15
-            rb < Thank you. Your new levels for the added drugs are as follows: DRG-123 15 DRG-124 35
+            rb < Thank you. New levels for the added stock are: 15 units of DRG-123, 35 units of DRG-124. Cc: 000002
         """
 
         self.runScript(script)
@@ -158,13 +159,15 @@ class TestStockAtFacility(TestApp):
 
         acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
         acc1.amount=50
+        acc1.save()
 
         script = """
             rb > DISP DRG-123 23
-            rb < Thank you. You have dispensed the following drugs: DRG-123 23
+            rb < Thank you. New levels for the just dispensed stock are: 27 units of DRG-123. Cc: 000001
         """
 
         self.runScript(script)
-        self.assertEqual(StockAccount.objects.count(), 0)
-        self.assertEqual(Transaction.objects.count(), 0)
+        self.assertEqual(StockAccount.objects.count(), 1)
+        self.assertEqual(StockAccount.objects.filter(amount=27).count(), 1)
+        self.assertEqual(Transaction.objects.count(), 1)
 
