@@ -1,3 +1,4 @@
+import datetime
 from django.core.urlresolvers import reverse
 
 
@@ -6,6 +7,8 @@ from djtables.column import DateColumn
 from smsforms.models import XFormsSession
 from .models import BirthRegistration, DeathRegistration, FacilityVisit, PregnantMother, ToldReminder
 from utils import get_time_range, get_district_facility_zone
+from rapidsms.contrib.messagelog.models import Message
+
 
 
 class NamedColumn(Column):
@@ -411,6 +414,25 @@ class SMSUserMessageTable(Table):
         order_by = "-date"
 
 
+def find_help_message(help_request):
+    #we find the help message that was sent by the user by looking
+    #at the messages received from them within one minute of the
+    #generated help request.
+    messages = Message.objects.filter(connection=help_request.requested_by)
+    one_min_before = help_request.requested_on - datetime.timedelta(minutes=1)
+    one_min_after = help_request.requested_on + datetime.timedelta(minutes=1)
+    help_messages = messages.filter(text__icontains='help',
+        date__gte=one_min_before,
+        date__lte=one_min_after,
+        direction='I')
+
+    try:
+        help_message = help_messages[0]
+    except IndexError:
+        return 'Help'
+    else:
+        return help_message.text
+
 class HelpRequestTable(Table):
     id = Column(link=lambda cell: reverse(
         "help-manager", args=[cell.object.id]))
@@ -422,7 +444,7 @@ class HelpRequestTable(Table):
 #                   sortable=False)
     facility = Column(
         value=lambda cell: cell.object.requested_by.contact.location if cell.object.requested_by.contact else '')
-    additional_text = NamedColumn(col_name='message')
+    additional_text = NamedColumn(col_name='message', value=lambda cell:find_help_message(cell.object))
     resolved_by = Column(
         value=lambda cell: cell.object.resolved_by or 'Unresolved')
     status = Column(value=lambda cell: '<div class="status {0}">&nbsp;</div>'.format(
