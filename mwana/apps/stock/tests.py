@@ -123,8 +123,6 @@ class TestStockAtFacility(TestApp):
         self.assertEqual(StockAccount.objects.count(), 0)
         self.assertEqual(Transaction.objects.count(), 0)
 
-        acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
-
         script = """
             rb > New Stock DRG-123 23
             rb < Thank you. New levels for the added stock are: 23 units of DRG-123. Cc: 000001
@@ -139,8 +137,8 @@ class TestStockAtFacility(TestApp):
         self.assertEqual(StockAccount.objects.count(), 0)
         self.assertEqual(Transaction.objects.count(), 0)
 
-        acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
-        acc2 = StockAccount.objects.create(stock=self.stock2, location=self.kdh)
+        StockAccount.objects.create(stock=self.stock, location=self.kdh)
+        StockAccount.objects.create(stock=self.stock2, location=self.kdh)
 
         script = """
             rb > New Stock DRG-123 10, DRG-124 20

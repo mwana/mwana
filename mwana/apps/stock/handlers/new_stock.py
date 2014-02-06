@@ -90,7 +90,7 @@ class NewStockHandler(KeywordHandler):
 
                  user_drug_codes.append(drug_code.upper())
                  stock = Stock.objects.get(Q(code__iexact=drug_code)|Q(short_code__iexact=drug_code))
-                 acc = StockAccount.objects.get(location=location,stock=stock)
+                 acc, created = StockAccount.objects.get_or_create(location=location,stock=stock)
                  acc.amount += int(drug.split()[1])
                  stk = StockTransaction.objects.create(transaction=trans, 
                                                         amount=int(drug.split()[1]),

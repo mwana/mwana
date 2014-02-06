@@ -7,12 +7,7 @@ from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Transaction
-from mwana.apps.stock.models import Threshold
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
-from rapidsms.models import Contact
-from rapidsms.messages.outgoing import OutgoingMessage
-from mwana.const import get_district_worker_type
-from datetime import date
 
 _ = lambda s: s
 
@@ -84,7 +79,6 @@ class DispensedStockHandler(KeywordHandler):
             trans.type = "d"
             trans.sms_user = self.msg.contact
             trans.valid = True
-            last = 1
             user_drug_codes = []
             for drug in tokens:
                  drug_code = drug.split()[0]
