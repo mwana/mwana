@@ -261,15 +261,6 @@ def anc_report(request, id=None):
         anc_delivery_table = ANCDeliveryTable(records, request=request)
 
     return HttpResponse(anc_delivery_table.as_html())
-    """
-    return render_to_response(
-        "smgl/anc_delivery_report.html",
-        {"anc_delivery_table": anc_delivery_table,
-         "district": facility_parent,
-         "form": form
-        },
-        context_instance=RequestContext(request))
-    """
 
 def pnc_report(request, id=None):
     records = []
