@@ -100,6 +100,25 @@
                   header.attr('title', abv)
                   //header.text()
                 });
+
+                var head = table.find('thead')
+                var table_groups
+                if (targ =='anc-report'){
+                  var table_groups = $(
+                    "<th colspan='2'></th><th colspan='3'>ANC Visits</th><th colspan='3'>Birth Location</th><th colspan='1'>Gestational Age</th>")
+                } else if (targ == 'pnc-report'){
+                  var table_groups = $(
+                    "<th colspan='2'></th><th colspan='2'>Birth Location</th><th colspan='3'>PNC Visits</th><th colspan='1'>NMR</th>")
+                } else if (targ == 'user-report'){
+                  var table_groups = $(
+                    "<th colspan='2'>Clinic Workers</th><th colspan='2'>Data Clerks</th><th colspan='2'>Community Based Agents</th><th colspan='3'>Error Rates</th>")
+                }
+
+                if (table_groups){
+                  head.prepend("<tr></tr>").prepend(table_groups)
+                }
+
+
             });
 
 
