@@ -121,6 +121,22 @@ def get_incident_grid_selector(id, cases, selected_cases, width=3):
         
     return code
 
+def get_stock_selector_grid(id, stocks, selected_stocks, width=2):
+    code = ''
+    column = 1
+    for case in stocks:
+        if column % width == 1:
+            code += '<tr>'
+        if selected_stocks and case in selected_stocks:
+            code = code + '<td><input type="checkbox" name="_select_stock" value="%s" checked="checked" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
+        else:
+            code = code + '<td><input type="checkbox" name="_select_stock" value="%s" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
+        if column % width == 0:
+            code += '</tr>'
+        column += 1
+
+    return code
+
 def get_groups_dropdown_html(id, selected_group):
     #TODO: move this implemention to templatetags
     code = '<select name="%s" id="%s" class="drop-down" size="1">\n' % (id, id)
