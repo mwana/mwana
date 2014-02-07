@@ -247,7 +247,7 @@
 		<div class="col-xs-7">
 			<div class="row-fluid" id="images">
 				<div class="col-xs-4" style="padding-right:0;">
-					<a href="{% url reports_tabs %}#anc-report" title="{{ num_antenatal }} Visits">
+					<a href="{% url reports_tabs %}#anc-report" title="{{ num_antenatal }} ANC Visits from {{ anc_start }} to {{ today }}">
 						<div id="left-image" class="btn btn-default">
 							<h3 class="image-text">Antenatal</h3>
 							<img src="{{ STATIC_URL }}smgl/images/antenatal.png" class="nav-image"/>
@@ -255,7 +255,7 @@
 					</a>
 				</div>
 				<div class="col-xs-4" style="padding-right:0;">
-					<a href="{% url reports_tabs %}#anc-report" title="{{ num_intrapartum }} Mothers">
+					<a href="{% url reports_tabs %}#anc-report" title="{{ num_intrapartum }} Mothers Registered from {{ pregnancies_start }} to {{ today }}">
 						<div class="row-fluid">
 							<div class="btn btn-default" id="middle-top-image">
 								<h3 class="image-text">Intrapartum</h3>
@@ -264,7 +264,7 @@
 						</div>
 					</a>
 					<div class="row-fluid">
-						<a href="{% url reports_tabs %}#referral-report" title="{{ num_emergencies }} Emergencies">
+						<a href="{% url reports_tabs %}#referral-report" title="{{ num_emergencies }} Emergencies from {{ referrals_start }} to {{ today }}">
 							<div class="btn btn-default" id="middle-bottom-image">
 								<h3  class="image-text">Emergencies</h3>
 								<img src="{{ STATIC_URL }}smgl/images/emerg.png" class="nav-image" />
@@ -273,7 +273,7 @@
 					</div>
 				</div>
 				<div class="col-xs-4" style="padding-right:0;">
-					<a href="{% url reports_tabs %}#pnc-report" title="{{ num_postpartum }} Visits">
+					<a href="{% url reports_tabs %}#pnc-report" title="{{ num_postpartum }} POS Visits from {{ pos_start }} to {{ today }}">
 						<div class="btn btn-default" id="right-image">
 							<h3  class="image-text">Post Partum</h3>
 							<img src="{{ STATIC_URL }}smgl/images/post_partum.png" class="nav-image"/>

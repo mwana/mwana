@@ -2302,13 +2302,24 @@ def home_page(request):
             }),
             content_type='application/json')
 
+    today = datetime.datetime.now()
+    mubumi_start = datetime.date(2012, 12, 01)
+    anc_visits = FacilityVisit.objects.filter(visit_type='anc').order_by('visit_date')
+    pos_visits = FacilityVisit.objects.filter(visit_type='pos').order_by('visit_date')
+    pregnancies = PregnantMother.objects.order_by('created_date')
+    referrals = Referral.objects.order_by('date')
+
     return render_to_response(
         "smgl/home.html",
-        {
-            'num_emergencies':Referral.objects.count(),
-            'num_antenatal': FacilityVisit.objects.filter(visit_type='anc').count(),
+        {   'num_emergencies': referrals.count(),
+            'num_antenatal': anc_visits.count(),
             'num_postpartum': FacilityVisit.objects.filter(visit_type='pos').count(),
-            'num_intrapartum': PregnantMother.objects.count()
+            'num_intrapartum': pregnancies.count(),
+            'today': today.strftime('%d %B %Y'),
+            'referrals_start':referrals[0].date.strftime('%B %Y'),
+            'anc_start':anc_visits[0].visit_date.strftime('%B %Y'),
+            'pos_start': pos_visits[0].visit_date.strftime('%B %Y'),
+            'pregnancies_start': pregnancies[0].created_date.strftime('%B %Y'),
         },
         context_instance=RequestContext(request)
         )
