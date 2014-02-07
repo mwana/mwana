@@ -44,7 +44,8 @@
                         <td></td>
                     </tr>-->
     <tr>
-        <td width="60%">Hello everyone today!s</td>
+        <td width="60%"><div id="container1" style="min-width: 400px; height: 400px; margin: 0 auto">Select the location/District you want to view data own. 
+                The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}</div></td>
         <td style="text-align: left; float: right" width="40%">
             <input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
             to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
@@ -69,7 +70,6 @@
                         {% endautoescape %}</table>
                 </div>
             </div>
-
         </td>
 
     </tr>    
@@ -80,6 +80,8 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.flippy.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/excanvas.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/modules/exporting.js"></script>
 
 
 <script type="text/javascript">
@@ -92,36 +94,36 @@
         district_name: '{{location.parent.name}}',
         facility_slug: '{{location.slug}}',
         facility_name: '{{location.name}}'
-    }
-);
+    });
     {% endfor %}
 
-    //    selectedRegion = [];
-    //    selectedRegion.push({type:'nation', slug: 'all'});
+   
     window.facilityData = _facilityData;
+
+    var _stockData = [];
+    {% for stock in stocks %}
+    _stockData.push({
+        stockId: '{{stock.id}}',
+        stockCode: '{{stock.code}}',
+        stockName: '{{stock.name}}',
+    });
+    {% endfor %}
+
+    window.stockData = _stockData;
+
     
-</script>
+    var _facilityAvailableStockData = [];
+    {% for sa in stockAccounts %}
+    _facilityAvailableStockData.push({
+        stockId: '{{sa.stock.id}}',
+        stockCode: '{{sa.stock.code}}',
+        stockName: '{{sa.stock.name}}',
+        locationSlug: '{{sa.location.slug}}',
+        amount: {{sa.amount}},
+    });
+    {% endfor %}
 
-<script type="text/javascript">
-    current_code = "";
-    current_type = "";
-    {% autoescape off %}
-    var sd = {{districts}};
-    var sp = {{provinces}};
-    {% endautoescape %}
-    function fireChange(str){
-        updateDisplay(current_code, current_type);
-    }
-    function getSelectedDiseases(){
-        var data = [];
-        data.push($('#cases1').select().val());
-        data.push($('#cases2').select().val());
-        data.push($('#cases3').select().val());
-        data.push($('#cases4').select().val());
-        data.push($('#cases5').select().val());
-        return data;
-    }
-
+    window.facilityAvailableStockData = _facilityAvailableStockData;
 
 </script>
 
@@ -133,6 +135,7 @@
         var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
 
         updateFacilitySelectionGrid(districtSlug, [])
+        reloadGraphs()
     }
     
     function updateFacilitySelectionGrid(districtSlug, selected_facilities){
@@ -148,7 +151,7 @@
                 }
 
                 //                if (datum.facility_slug in selected_facilities){
-                code = code + '<td><input type="checkbox" name="_select_facility" value="'+datum.facility_slug+'" checked="checked" parent_id="'+datum.district_slug+'"  />'+datum.facility_name+'</td>'
+                code = code + '<td><input type="checkbox" onchange="reloadGraphs()"  name="_select_facility" value="'+datum.facility_slug+'" checked="checked" parent_id="'+datum.district_slug+'"  />'+datum.facility_name+'</td>'
                 //                }
 
                 //                else{
@@ -194,4 +197,169 @@
 
 
 </script>
+
+<script type="text/javascript">
+    function getAvailableStockValues(locationSlug, stockId){
+        for(item in window.facilityAvailableStockData){
+            var datum = window.facilityAvailableStockData[item]
+            if(datum.locationSlug === locationSlug && datum.stockId == stockId){
+                return datum.amount;
+            }
+        }
+
+        return 0;
+    }
+    window.locs = []
+    function getAvgAvailableStockValues(locationSlug, total){
+       
+        sum = 0;
+        for(item in window.facilityAvailableStockData){
+            var datum = window.facilityAvailableStockData[item]
+            if(datum.locationSlug === locationSlug){
+                sum += datum.amount;
+                window.locs.push(datum.locationSlug)
+            }
+        }
+
+        if(total > 0){
+            return Math.round(sum/total);
+        }
+
+        return 0;
+    }
+    function reloadGraphs(){
+        reloadAvailableStock();
+    }
+
+    function reloadAvailableStock () {
+        var chart;
+        var locationIds = [];
+        var facilityNames = []
+        $("[name='_select_facility']").each(
+        function(){
+            if(this.checked){
+                locationIds.push(this.value)
+            }
+        } );
+
+        for(item in window.facilityData){
+            var datum = window.facilityData[item]
+            if(locationIds.indexOf(datum.facility_slug) > -1 ){
+                facilityNames.push(datum.facility_name)
+            }
+        }
+
+        var stockIds = []
+        var stockNames = []
+        $("[name='_select_stock']").each(
+        function(){
+            if(this.checked){
+                stockIds.push(this.value)
+            }
+        } );
+
+        for(item in window.stockData){
+            var datum = window.stockData[item]
+            if(stockIds.indexOf(datum.stockId) > -1 ){
+                stockNames.push([datum.stockId, datum.stockName])
+            }
+        }
+        var seriesData = [];
+        var pieData = [];
+        var averageData = [];
+        for(i in stockNames){
+            var _name = stockNames[i];
+            var stockPerLocation = []
+            var stockTotal = 0;
+
+            for(loc in locationIds){
+                var val = getAvailableStockValues(locationIds[loc], _name[0]);
+                stockPerLocation.push(val);
+                stockTotal += val;
+            }
+            seriesData.push({
+                type: 'column',
+                name: _name[1],
+                data: stockPerLocation
+            });
+            pieData.push({
+                name: _name[1],
+                y: stockTotal
+            });
+        }
+
+        for(loc in locationIds){
+            var val = getAvgAvailableStockValues(locationIds[loc], stockNames.length);
+            averageData.push(val);
+        }
+
+
+        seriesData.push({
+
+            type: 'spline',
+            name: 'Average',
+            data: averageData,
+            marker: {
+                lineWidth: 2,
+                lineColor: Highcharts.getOptions().colors[3],
+                fillColor: 'white'
+            }
+        });
+
+        seriesData.push({
+            type: 'pie',
+            name: 'Total consumption',
+            data: pieData,
+            center: [100, 80],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+                enabled: true
+            }
+        });
+
+
+        $(document).ready(function() {
+            chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'container1'
+                },
+                title: {
+                    text: 'Available Stock'
+                },
+                xAxis: {
+                    categories: facilityNames
+                },
+                tooltip: {
+                    formatter: function() {
+                        var s;
+                        if (this.point.name) { // the pie chart
+                            s = ''+
+                                this.point.name +': '+ this.y +' stock units';
+                        } else {
+                            s = ''+
+                                this.series.name +': '+ this.y;
+                        }
+                        return s;
+                    }
+                },
+                labels: {
+                    items: [{
+                            html: 'Total stock available',
+                            style: {
+                                left: '40px',
+                                top: '8px',
+                                color: 'black'
+                            }
+                        }]
+                },
+                series: seriesData
+                    
+               
+            });
+        });
+
+    };
+</script>
+
 {% endblock %}

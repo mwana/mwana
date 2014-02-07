@@ -128,9 +128,9 @@ def get_stock_selector_grid(id, stocks, selected_stocks, width=2):
         if column % width == 1:
             code += '<tr>'
         if selected_stocks and case in selected_stocks:
-            code = code + '<td><input type="checkbox" name="_select_stock" value="%s" checked="checked" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
+            code = code + '<td><input type="checkbox" name="_select_stock" onchange="reloadGraphs()" value="%s" checked="checked" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
         else:
-            code = code + '<td><input type="checkbox" name="_select_stock" value="%s" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
+            code = code + '<td><input type="checkbox" name="_select_stock" onchange="reloadGraphs()" value="%s" />%s (%s)</td>\n' % ( case.id, case.name,  case.code)
         if column % width == 0:
             code += '</tr>'
         column += 1

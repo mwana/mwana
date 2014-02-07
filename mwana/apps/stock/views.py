@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import StockAccount
 from mwana.apps.stock.models import Stock
 from datetime import date
 from datetime import timedelta
@@ -36,17 +37,21 @@ def stock(request):
 
     facilities = user_facilities(current_user=request.user, group=None, province=None, district=None, facility=None)
     
-    rpt_provinces = read_request(request, "rpt_provinces")
+#    rpt_provinces = read_request(request, "rpt_provinces")
     rpt_districts = read_request(request, "rpt_districts")
-
-
+    stocks = Stock.objects.all()
+    stockAccounts = StockAccount.objects.filter(location__in=facilities, amount__gt=0)
+    
     return render_to_response('stock/stock.html',
                               {
                               "fstart_date": start_date.strftime("%Y-%m-%d"),
                               "fend_date": end_date.strftime("%Y-%m-%d"),
-                              "stock_selection_grid": get_stock_selector_grid("stock_selection_grid", Stock.objects.all().order_by("name"), None, 1),
-                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
-                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts),
+                              "stock_selection_grid": get_stock_selector_grid("stock_selection_grid", Stock.objects.all().order_by("name"), list(set([sa.stock for sa in stockAccounts])), 1),
+#                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
+                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts).replace("All", "------------"),
                               "facilities": facilities,
+                              "stocks": stocks,
+                              "stockAccounts": stockAccounts,
+                              "districts_with_data": ", ".join(list(set([sa.location.parent.name for sa in stockAccounts]))),
                               }, context_instance=RequestContext(request)
                               )
