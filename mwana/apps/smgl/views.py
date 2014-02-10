@@ -92,6 +92,11 @@ def anc_report(request, id=None):
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
             filter_option = form.cleaned_data.get('filter_option')
+
+            if not start_date:
+                start_date, dispose_date = get_default_dates()
+            if not end_date:
+                dispose_date, end_date = get_default_dates()
         # determine what location(s) to include in the report
         if id:
             # get district facilities
@@ -297,6 +302,10 @@ def pnc_report(request, id=None):
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
         # determine what location(s) to include in the report
+            if not start_date:
+                start_date, dispose_date = get_default_dates()
+            if not end_date:
+                dispose_date, end_date = get_default_dates()
         if id:
             # get district facilities
             records_for = get_location_tree_nodes(facility_parent, None)
@@ -556,8 +565,13 @@ def user_report(request):
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
             c_type = form.cleaned_data.get('c_type')
-            start_date = form.cleaned_data.get('start_date', start_date)
-            end_date = form.cleaned_data.get('end_date', end_date)
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+
+            if not start_date:
+                start_date, dispose_date = get_default_dates()
+            if not end_date:
+                dispose_date, end_date = get_default_dates()
     else:
         initial = {
                     'start_date': start_date,
@@ -1141,6 +1155,11 @@ def reminder_stats(request, smag_table_requested=False):
             facility = form.cleaned_data.get('facility')
             start_date = form.cleaned_data.get('start_date')
             end_date = form.cleaned_data.get('end_date')
+
+            if not start_date:
+                start_date, dispose_date = get_default_dates()
+            if not end_date:
+                dispose_date, end_date = get_default_dates()
     else:
         initial = {
                     'start_date': start_date,
