@@ -196,7 +196,7 @@ def motherid_lookup(session, xform, router):
     try:
         mother = PregnantMother.objects.get(first_name__iexact=f_name,
                                             last_name__iexact=l_name,
-                                            location__slug=zone_id)
+                                            zone__slug=zone_id)
     except ObjectDoesNotExist:
         # NOTE: should this be an error?
         return respond_to_session(router, session, const.LOOK_MOTHER_DOES_NOT_EXIST,
