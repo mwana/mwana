@@ -315,6 +315,8 @@ def pnc_report(request, id=None):
                 records_for = Location.objects.filter(parent=province)
             if district:
                 records_for = [district]
+            if facility:
+                records_for = [facility]
     else:
         initial = {
                     'start_date': start_date,
@@ -325,19 +327,19 @@ def pnc_report(request, id=None):
     for place in records_for:
         locations = Location.objects.all()
         if not id:
-            reg_filter = {'district': place}
-            visit_filter = {'location__in': [x for x in locations \
-                                if get_current_district(x) == place]}
+            reg_filter = {'location': place}
+            visit_filter = {'location__in': get_location_tree_nodes(place)}
         else:
             reg_filter = {'location': place}
             visit_filter = {'location': place}
 
         # Get PregnantMother count for each place
         if not id:
-            district_facilities = [x for x in locations \
-                                if get_current_district(x) == place]
+            district_facilities = get_location_tree_nodes(place)
             pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities)
+                            .filter(zone__in=district_facilities)
+            births = BirthRegistration.objects.filter(
+                mother__zone__in=district_facilities)
         else:
             pregnancies = PregnantMother.objects.filter(location=place)
 
@@ -348,7 +350,6 @@ def pnc_report(request, id=None):
 
         r['location_id'] = place.id
 
-        births = BirthRegistration.objects.filter(**reg_filter)
 
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
@@ -424,7 +425,6 @@ def pnc_report(request, id=None):
         r['nmr'] = nmr
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
-        r['unknown'] = births.exclude(place='h').exclude(place='f').count()
 
         records.append(r)
 
