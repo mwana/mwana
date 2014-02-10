@@ -63,11 +63,11 @@
               'Clinic W. Actv.': '# of clinic workers who interacted with the system within the past 30 days during the specified time period',
               'D. Clerks Reg.': 'Total # of data clerks registered in the system during the specified time period',
               'D. Clerks Actv.': '# of data clerks who interacted with the system within the past 14 days during the specified time period',
-              'Cbas Reg.': 'Total # of CBAs registered in the system during the specified time period',
-              'Cbas Actv.': '# of CBAs who interacted with the system within the past 30 days during the specified time period',
+              'Cbas Reg.': 'Total # of Community Based Agents registered in the system during the specified time period',
+              'Cbas Actv.': '# of Community Based Agents who interacted with the system within the past 30 days during the specified time period',
               'Err. Clinic W.': 'The proportion of messages containing errors sent by clinic workers during the specified time period',
               'Err. D. Clerks': 'The proportion of messages containing errors sent by data clerks during the specified time period',
-              'Err. Cbas': 'The proportion of messages containing errors sent by CBAs during the specified time period',
+              'Err. Cbas': 'The proportion of messages containing errors sent by Community Based Agents during the specified time period',
               'Scheduled': '# EDD/ANC/PNC/Referral Reminders scheduled during the specified time period for each Mother',
               'Sent': '# EDD/ANC/PNC/Referral Reminders sent from the system during the specified time period',
               'Told And Showed': '# EDD/ANC/PNC TOLD messages received during the specified time period',
@@ -93,8 +93,26 @@
                   //use the current text value as the key to pull out the
                   //correct abbreviation and set it in as the text
                   //while the text value becomes the title
+
                   header = $(item)
                   text = header.text()
+
+                  //If this is the User report Page, do something special
+                  //since we cannot differentiate between userTypes
+                  if(targ=='user-report'){
+                      var userTypeText = [
+                        'Clinic W. Reg.',
+                        'Clinic W. Actv.',
+                        'Err. Clinic W.',
+                        'D. Clerks Reg.',
+                        'D. Clerks Actv.',
+                        'Err. D. Clerks',
+                        'Cbas Reg.',
+                        'Cbas Actv.',
+                        'Err. Cbas'
+                      ]
+                      text = userTypeText[index]
+                  }
 
                   abv = abbv[text.trim()]
                   header.attr('title', abv)
@@ -111,7 +129,7 @@
                     "<th colspan='2'></th><th colspan='2'>Birth Location</th><th colspan='3'>PNC Visits</th><th colspan='1'>NMR</th>")
                 } else if (targ == 'user-report'){
                   var table_groups = $(
-                    "<th colspan='2'>Clinic Workers</th><th colspan='2'>Data Clerks</th><th colspan='2'>Community Based Agents</th><th colspan='3'>Error Rates</th>")
+                    "<th colspan='3'>Clinic Workers</th><th colspan='3'>Data Clerks</th><th colspan='3'>Community Based Agents</th>")
                 }
 
                 if (table_groups){
