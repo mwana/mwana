@@ -115,6 +115,9 @@ def anc_report(request, id=None):
                 records_for = Location.objects.filter(parent=province)
             if district:
                 records_for = [district]
+            if facility:
+                records_for = [facility]
+
     else:
         initial = {'start_date': start_date, 'end_date': end_date}
         form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
@@ -123,7 +126,7 @@ def anc_report(request, id=None):
         locations = Location.objects.all()
         r = {}
         if not id:
-            reg_filter = {'district': place}
+            reg_filter = {'location': place}
             visit_filter = {'location__in': get_location_tree_nodes(place)}
         else:
             reg_filter = {'location': place}
@@ -133,7 +136,9 @@ def anc_report(request, id=None):
         if not id:
             district_facilities = get_location_tree_nodes(place)
             pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities)
+                            .filter(zone__in=district_facilities)
+            births = BirthRegistration.objects \
+                            .filter(mother__zone__in=district_facilities)
         else:
             pregnancies = PregnantMother.objects.filter(location=place)
 
@@ -143,7 +148,7 @@ def anc_report(request, id=None):
             pregnancies_reg = filter_by_dates(pregnancies, 'created_date',
                 start=start_date, end=end_date)
 
-            births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+            births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
             birth_mothers = pregnancies_reg.filter(id__in=births.values_list('mother'))
@@ -156,7 +161,7 @@ def anc_report(request, id=None):
             # All women who gave birth or had EDD within specified time frame
             pregnancies_edd = filter_by_dates(pregnancies, 'edd',
                              start=start_date, end=end_date)
-            births = filter_by_dates(BirthRegistration.objects.all(), 'date',
+            births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
             birth_mothers = pregnancies.filter(id__in=births.values_list('mother'))
@@ -180,8 +185,6 @@ def anc_report(request, id=None):
         r['location'] = place.name
         r['location_id'] = place.id
 
-        births = BirthRegistration.objects.filter(mother__in=birth_mothers)
-        births = births.filter(**reg_filter)
         # utilize start/end date if supplied
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
@@ -190,7 +193,7 @@ def anc_report(request, id=None):
             edd__lte=end_date-datetime.timedelta(days=30)).count()
 
         # Aggregate ANC visits by Mother and # of visits
-        visits = visits.filter(mother__in=pregnancies)
+        #visits = visits.filter(mother__in=pregnancies)
         place_visits = visits.filter(**visit_filter)
         place_visits = filter_by_dates(place_visits, 'visit_date',
                                   start=start_date, end=end_date)
@@ -312,6 +315,8 @@ def pnc_report(request, id=None):
                 records_for = Location.objects.filter(parent=province)
             if district:
                 records_for = [district]
+            if facility:
+                records_for = [facility]
     else:
         initial = {
                     'start_date': start_date,
@@ -322,19 +327,19 @@ def pnc_report(request, id=None):
     for place in records_for:
         locations = Location.objects.all()
         if not id:
-            reg_filter = {'district': place}
-            visit_filter = {'location__in': [x for x in locations \
-                                if get_current_district(x) == place]}
+            reg_filter = {'location': place}
+            visit_filter = {'location__in': get_location_tree_nodes(place)}
         else:
             reg_filter = {'location': place}
             visit_filter = {'location': place}
 
         # Get PregnantMother count for each place
         if not id:
-            district_facilities = [x for x in locations \
-                                if get_current_district(x) == place]
+            district_facilities = get_location_tree_nodes(place)
             pregnancies = PregnantMother.objects \
-                            .filter(location__in=district_facilities)
+                            .filter(zone__in=district_facilities)
+            births = BirthRegistration.objects.filter(
+                mother__zone__in=district_facilities)
         else:
             pregnancies = PregnantMother.objects.filter(location=place)
 
@@ -345,7 +350,6 @@ def pnc_report(request, id=None):
 
         r['location_id'] = place.id
 
-        births = BirthRegistration.objects.filter(**reg_filter)
 
         # utilize start/end date if supplied
         births = filter_by_dates(births, 'date',
@@ -421,7 +425,6 @@ def pnc_report(request, id=None):
         r['nmr'] = nmr
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
-        r['unknown'] = births.exclude(place='h').exclude(place='f').count()
 
         records.append(r)
 
