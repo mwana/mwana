@@ -89,8 +89,8 @@ def anc_report(request, id=None):
             province = form.cleaned_data.get('province')
             district = form.cleaned_data.get('district')
             facility = form.cleaned_data.get('facility')
-            start_date = form.cleaned_data.get('start_date')
-            end_date = form.cleaned_data.get('end_date')
+            start_date = form.cleaned_data.get('start_date', start_date)
+            end_date = form.cleaned_data.get('end_date', end_date)
             filter_option = form.cleaned_data.get('filter_option')
         # determine what location(s) to include in the report
         if id:
@@ -186,6 +186,8 @@ def anc_report(request, id=None):
         r['location_id'] = place.id
 
         # utilize start/end date if supplied
+        if not end_date:
+            dispose_date, end_date = get_default_dates()
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
         r['unknown'] = pregnancies.exclude(id__in=births.\
@@ -268,10 +270,8 @@ def anc_report(request, id=None):
 def pnc_report(request, id=None):
     records = []
     facility_parent = None
-    #start_date, end_date = get_default_dates()
-    start_date, end_date = datetime.datetime(2013, 05, 01), datetime.datetime(2013, 12, 01)
+    start_date, end_date = get_default_dates()
     province = district = facility = None
-
     visits = FacilityVisit.objects.all()
     records_for = Location.objects.filter(type__singular='district')
 
@@ -352,8 +352,10 @@ def pnc_report(request, id=None):
 
 
         # utilize start/end date if supplied
+        if not end_date:
+            dispose_date, end_date = get_default_dates()
         births = filter_by_dates(births, 'date',
-                                 start=start_date, end=end_date)
+                                 start=start_date, end=end_date-datetime.timedelta(days=42))
         r['registered_deliveries'] = births.count()
         visits = filter_by_dates(FacilityVisit.objects.filter(visit_type='pos'),
                                 'created_date', start=start_date, end=end_date)
