@@ -15,9 +15,9 @@ admin.site.unregister(Contact)
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
                     'location',
-		            'default_connection', 'types_list', 'date_of_first_sms',
+		            'types_list', 'date_of_first_sms',
                     'date_of_most_recent_sms', 'is_active',
-                    'is_help_admin', 'is_super_user', 'has_quit') # note, these probably shouldn't be here
+                    'has_quit', 'is_help_admin', 'is_super_user') # note, these probably shouldn't be here
     list_filter = ('types', 'is_active', 'language', 'location')
     list_editable = ('has_quit', 'is_active')
     search_fields = ('name', 'alias',)
