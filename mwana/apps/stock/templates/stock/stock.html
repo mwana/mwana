@@ -120,6 +120,7 @@
         stockName: '{{sa.stock.name}}',
         locationSlug: '{{sa.location.slug}}',
         amount: {{sa.amount}},
+        currentThreshold: {{sa.current_threshold.level}},
     });
     {% endfor %}
 
@@ -227,6 +228,26 @@
 
         return 0;
     }
+
+    function getAvgCurrentThreshold(locationSlug, stockIds){
+
+        sum = 0;
+        total = 0;
+        for(item in window.facilityAvailableStockData){
+            var datum = window.facilityAvailableStockData[item]
+            if(datum.locationSlug === locationSlug && stockIds.indexOf(datum.stockId) > -1){
+                sum += datum.currentThreshold;
+                window.locs.push(datum.locationSlug)
+                total += 1
+            }
+        }
+
+        if(total > 0){
+            return Math.round(sum/total);
+        }
+
+        return 0;
+    }
     function reloadGraphs(){
         reloadAvailableStock();
     }
@@ -289,7 +310,7 @@
         }
 
         for(loc in locationIds){
-            var val = getAvgAvailableStockValues(locationIds[loc], stockNames.length);
+            var val = getAvgCurrentThreshold(locationIds[loc], stockIds);
             averageData.push(val);
         }
 
@@ -297,7 +318,7 @@
         seriesData.push({
 
             type: 'spline',
-            name: 'Average',
+            name: 'Average Threshold',
             data: averageData,
             marker: {
                 lineWidth: 2,
@@ -314,7 +335,7 @@
             size: 100,
             showInLegend: false,
             dataLabels: {
-                enabled: true
+                enabled: false
             }
         });
 

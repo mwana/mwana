@@ -5,6 +5,7 @@ import string
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 
@@ -48,9 +49,24 @@ class StockAccount(models.Model):
     def save(self, * args, ** kwargs):
         self.last_updated = datetime.now()
         super(StockAccount, self).save(*args, ** kwargs)
+        Threshold.try_create_threshold(self)
 
     def __unicode__(self):
         return "%s > %s %s" % (self.stock, self.location, self.amount)
+
+    @property
+    def current_threshold(self):
+        today = date.today()
+        thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
+        filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
+        if thresholds:
+            return thresholds[0]
+        
+    def threshold(self, today):
+        thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
+        filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
+        if thresholds:
+            return thresholds[0]
 
     class Meta:
         unique_together = (('stock', 'location'), )
@@ -82,9 +98,6 @@ class Transaction(models.Model):
     def __unicode__(self):
         return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
 
-#
-#    def __unicode__(self):
-#        return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
 
 class Threshold(models.Model):
     account = models.ForeignKey(StockAccount, null=False, blank=False)
@@ -92,11 +105,24 @@ class Threshold(models.Model):
     start_date = models.DateField(default=date.today, null=False, blank=False)
     end_date = models.DateField(null=True, blank=True, editable=False)
 
+    @classmethod
+    def try_create_threshold(cls, stock_account):
+        today = date.today()
+        if not Threshold.objects.filter(account=stock_account, start_date__lte=today).\
+        filter(Q(end_date=None) | Q(end_date__gte=date.today())):
+            Threshold.objects.create(account=stock_account, start_date=today, level=30)
+        return False
+
     def save(self, * args, ** kwargs):
         super(Threshold, self).save(*args, ** kwargs)
         for t in Threshold.objects.filter(end_date=None, start_date__lte=self.start_date, account=self.account).exclude(pk=self.pk):
             t.end_date = date.today()
             t.save()
+
+    def __unicode__(self):
+        return "Threshold of %s for %s starting %s to %s" % (self.level, self.account, self.start_date, self.end_date or "")
+
+
 class StockTransaction(models.Model):
     amount = models.IntegerField(default=0, null=False, blank=False)
     transaction = models.ForeignKey(Transaction, null=False, blank=False)
