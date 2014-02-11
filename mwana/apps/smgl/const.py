@@ -92,6 +92,9 @@ REMINDER_SYP_TREATMENT_DUE = _("This is a reminder: Mother named %(name)s should
 LEAVE_COMPLETE = _("Thanks %(name)s. You have deactivated your account.")
 DEACTIVATED = _("This phone number has been deactivated.")
 
+#QUIT
+QUIT_COMPLETE = _("Good bye %(name)s. You have quit mUbumi.")
+
 # IN
 IN_COMPLETE = _("Thanks %(name)s. Welcome back!")
 IN_REACTIVATE = _("Your account has been reactivated. Welcome back!")

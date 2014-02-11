@@ -50,7 +50,7 @@ def quit(session, xform, router):
         connection.contact.is_active = False
         connection.contact.has_quit = True
         connection.contact.save()
-        return respond_to_session(router, session, const.LEAVE_COMPLETE,
+        return respond_to_session(router, session, const.QUIT_COMPLETE,
             **{'name': connection.contact.name})
 
 @registration_required
