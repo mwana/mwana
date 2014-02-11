@@ -33,6 +33,27 @@ def leave(session, xform, router):
                                   **{'name': connection.contact.name})
 
 @registration_required
+@is_active
+def quit(session, xform, router):
+    """
+    Handler for Quit keyword, used to permanently deactivate the user
+    """
+    logger.debug('Handling the QUIT keyword form')
+    connection = session.connection
+
+    if not connection.contact:
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True, **{'name': connection.contact.name})
+
+    when = get_value_from_form('when', xform)
+    if when == 'now':
+        connection.contact.is_active = False
+        connection.contact.has_quit = True
+        connection.contact.save()
+        return respond_to_session(router, session, const.LEAVE_COMPLETE,
+            **{'name': connection.contact.name})
+
+@registration_required
 def make_active(session, xform, router):
     """
     Handler for IN keyword (Used to re-activate the user early).
@@ -40,7 +61,7 @@ def make_active(session, xform, router):
     Format:
     IN NOW
     """
-    logger.debug('Handling the IN keyword form')
+    logger.debug('Handling the IN/BACK keyword form')
     connection = session.connection
 
     if not connection.contact:
@@ -49,6 +70,12 @@ def make_active(session, xform, router):
 
     when = get_value_from_form('when', xform)
     if when == 'now':
+        if connection.contact.has_quit:
+            return respond_to_session(router,
+                session,
+                "You can not come back after quiting, please contact mUbumi.",
+                is_error=True
+                )
         connection.contact.is_active = True
         connection.contact.return_date = None
         connection.contact.save()

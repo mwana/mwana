@@ -246,136 +246,6 @@
     }
   },
   {
-    "pk": 271,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Zimba Static",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403106"
-    }
-  },
-  {
-    "pk": 269,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Kalomo HAHC Central",
-      "parent": 152,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403007"
-    }
-  },
-  {
-    "pk": 273,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Choma District",
-      "parent": 151,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 3,
-      "slug": "8010"
-    }
-  },
-  {
-    "pk": 213,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Luwezi",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403102"
-    }
-  },
-  {
-    "pk": 214,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chabwino",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403103"
-    }
-  },
-  {
-    "pk": 215,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Tumamango",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403104"
-    }
-  },
-  {
-    "pk": 216,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Zambeef",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403105"
-    }
-  },
-  {
-    "pk": 217,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Goodhope",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402801"
-    }
-  },
-  {
-    "pk": 218,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Twin Fountain",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402802"
-    }
-  },
-  {
-    "pk": 219,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Swart",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402803"
-    }
-  },
-  {
     "pk": 220,
     "model": "locations.location",
     "fields": {
@@ -1715,6 +1585,136 @@
     }
   },
   {
+    "pk": 271,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zimba Static",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403106"
+    }
+  },
+  {
+    "pk": 269,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalomo HAHC Central",
+      "parent": 152,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403007"
+    }
+  },
+  {
+    "pk": 273,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Choma District",
+      "parent": 151,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 3,
+      "slug": "8010"
+    }
+  },
+  {
+    "pk": 213,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Luwezi",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403102"
+    }
+  },
+  {
+    "pk": 214,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chabwino",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403103"
+    }
+  },
+  {
+    "pk": 215,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tumamango",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403104"
+    }
+  },
+  {
+    "pk": 216,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zambeef",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403105"
+    }
+  },
+  {
+    "pk": 217,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Goodhope",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402801"
+    }
+  },
+  {
+    "pk": 218,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Twin Fountain",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402802"
+    }
+  },
+  {
+    "pk": 219,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Swart",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402803"
+    }
+  },
+  {
     "pk": 4,
     "model": "smgl.xformkeywordhandler",
     "fields": {
@@ -1811,6 +1811,14 @@
     }
   },
   {
+    "pk": 20,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "quit",
+      "function_path": "mwana.apps.smgl.keyword_handlers.quit"
+    }
+  },
+  {
     "pk": 9,
     "model": "smgl.xformkeywordhandler",
     "fields": {
@@ -1856,6 +1864,26 @@
     "fields": {
       "keyword": "told",
       "function_path": "mwana.apps.smgl.keyword_handlers.told"
+    }
+  },
+  {
+    "pk": 14,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "outc",
+      "final_response": "",
+      "xform": 16
+    }
+  },
+  {
+    "pk": 29,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": "",
+      "trigger_keyword": "quit",
+      "final_response": "",
+      "xform": 30
     }
   },
   {
@@ -2049,16 +2077,16 @@
     }
   },
   {
-    "pk": 14,
+    "pk": 16,
     "model": "formplayer.xform",
     "fields": {
       "uiversion": 1,
-      "name": "Ambulance Request Confirmation",
-      "created": "2012-04-23T12:51:34.552",
-      "checksum": "f2901d7cc981730244271f1d9c1bb4bd1884e86e",
-      "namespace": "http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3",
+      "name": "Ambulance Outcome",
+      "created": "2012-04-23T16:52:04.172",
+      "checksum": "0cb08c35f35deae9e6e71fd7ba4902a119d9a757",
+      "namespace": "http://openrosa.org/formdesigner/F6901DC3-3BBD-4ABE-A983-E26FC6FFAE6E",
       "version": 1,
-      "file": "xforms/amb_request_conf.xml"
+      "file": "xforms/amb_outcome.xml"
     }
   },
   {
@@ -2072,6 +2100,19 @@
       "namespace": "http://openrosa.org/formdesigner/A652487B-4E6F-4802-A56F-F68BC7207A47",
       "version": 1,
       "file": "xforms/amb.xml"
+    }
+  },
+  {
+    "pk": 14,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Ambulance Request Confirmation",
+      "created": "2012-04-23T12:51:34.552",
+      "checksum": "f2901d7cc981730244271f1d9c1bb4bd1884e86e",
+      "namespace": "http://openrosa.org/formdesigner/073A5845-30AC-4FB5-9D26-1DC056D0C6E3",
+      "version": 1,
+      "file": "xforms/amb_request_conf.xml"
     }
   },
   {
@@ -2267,6 +2308,19 @@
       "namespace": "http://openrosa.org/formdesigner/D6E73C14-AC82-4F34-8F29-6ECCD47CF24C",
       "version": 1,
       "file": "xforms/followup.xml"
+    }
+  },
+  {
+    "pk": 30,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Quit mUbumi",
+      "created": "2014-02-11T22:47:29",
+      "checksum": "59daa3f472fca097817c0c7fa095a3096cd38ec3",
+      "namespace": "http://openrosa.org/formdesigner/866041FA-97B4-486E-964A-7F41D9A31A76",
+      "version": 1,
+      "file": "xforms/quit.xml"
     }
   }
 ]

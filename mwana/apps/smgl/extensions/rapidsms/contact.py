@@ -13,6 +13,9 @@ class ContactLocation(models.Model):
     is_super_user = models.BooleanField(default=False,
                      help_text="Whether this user should receive emergency related messages.")
 
+    has_quit = models.BooleanField(default=False,
+                     help_text="Whether this user has completely quit mUbumi")
+
     class Meta:
         abstract = True
 
