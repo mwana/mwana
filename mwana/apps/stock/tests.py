@@ -49,15 +49,17 @@ class TestThreshold(TestApp):
     
     def test_threshold_addition(self):
         self.assertEqual(Threshold.objects.count(), 0)
-
         
         acc = StockAccount()
         acc.location = self.central_clinic
         acc.stock = self.stock
         acc.save()
         self.assertEqual(StockAccount.objects.all().count(), 1)
+        self.assertEqual(Threshold.objects.all().count(), 1)
+
 
         acc2 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
+        self.assertEqual(Threshold.objects.all().count(), 2)
 
         t = Threshold()
         t.level = 6
@@ -66,15 +68,17 @@ class TestThreshold(TestApp):
 
         t.save()
 
-        self.assertEqual(Threshold.objects.all().count(), 1)
-        self.assertEqual(Threshold.objects.filter(end_date=None).count(), 1)
-
-
+        self.assertEqual(Threshold.objects.all().count(), 3)
+        self.assertEqual(Threshold.objects.filter(end_date=None).count(), 3)
 
         t2 = Threshold.objects.create(level=12, account=acc)
+        self.assertEqual(Threshold.objects.filter(account=acc).count(), 3)
+        self.assertEqual(Threshold.objects.filter(account=acc, end_date=None).count(), 1)
         control= Threshold.objects.create(level=2, account=acc2)
-        self.assertEqual(Threshold.objects.all().count(), 3)
+        self.assertEqual(Threshold.objects.all().count(), 5)
+        self.assertEqual(Threshold.objects.exclude(end_date=None).count(), 3)
         self.assertEqual(Threshold.objects.filter(end_date=None).count(), 2)
+#        self.assertEqual(Threshold.objects.filter(end_date=None).count(), 2, str(Threshold.objects.filter(end_date=None).count())+ "....\n".join(t.__unicode__() for t in Threshold.objects.all().order_by('id')))
         self.assertEqual(t2.end_date, None)
         self.assertEqual(Threshold.objects.get(pk=1).end_date, date.today())
 
