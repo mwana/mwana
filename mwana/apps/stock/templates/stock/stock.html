@@ -290,6 +290,75 @@
         getSelectedStockIds(stockIds);
         getselectedStocknames(stockIds, stockNames);
     }
+    function fillPieData(seriesData, pieSeriesTitle, pieData) {
+        seriesData.push({
+            type: 'pie',
+            name: pieSeriesTitle,
+            data: pieData,
+            center: [100, 80],
+            size: 100,
+            showInLegend: false,
+            dataLabels: {
+                enabled: false
+            }
+        });
+    }
+    function fillAverageTrend(seriesData, avarageTrend, averageData) {
+        seriesData.push({
+
+            type: 'spline',
+            name: avarageTrend,
+            data: averageData,
+            marker: {
+                lineWidth: 2,
+                lineColor: Highcharts.getOptions().colors[3],
+                fillColor: 'white'
+            }
+        });
+    }
+    function drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData) {
+        $(document).ready(function () {
+            chart = new Highcharts.Chart({
+                chart: {
+                    renderTo: renderTo
+                },
+                title: {
+                    text: mainChartTitle
+                },
+                xAxis: {
+                    categories: facilityNames
+                },
+                tooltip: {
+                    formatter: function () {
+                        var s;
+                        if (this.point.name) { // the pie chart
+                            s = '' +
+                                    this.point.name + ': ' + this.y + ' stock units';
+                        } else {
+                            s = '' +
+                                    this.series.name + ': ' + this.y;
+                        }
+                        return s;
+                    }
+                },
+                labels: {
+                    items: [
+                        {
+                            html: pieChartTitle,
+                            style: {
+                                left: '40px',
+                                top: '8px',
+                                color: 'black'
+                            }
+                        }
+                    ]
+                },
+                series: seriesData
+
+
+            });
+        });
+    }
     function reloadAvailableStock () {
         var chart;
         var locationIds = [];
@@ -328,70 +397,17 @@
         }
 
 
-        seriesData.push({
 
-            type: 'spline',
-            name: 'Average Threshold',
-            data: averageData,
-            marker: {
-                lineWidth: 2,
-                lineColor: Highcharts.getOptions().colors[3],
-                fillColor: 'white'
-            }
-        });
-
-        seriesData.push({
-            type: 'pie',
-            name: 'Total consumption',
-            data: pieData,
-            center: [100, 80],
-            size: 100,
-            showInLegend: false,
-            dataLabels: {
-                enabled: false
-            }
-        });
+        var averageTrend = 'Average Threshold';
+        fillAverageTrend(seriesData, averageTrend, averageData);
 
 
-        $(document).ready(function() {
-            chart = new Highcharts.Chart({
-                chart: {
-                    renderTo: 'container1'
-                },
-                title: {
-                    text: 'Available Stock Today'
-                },
-                xAxis: {
-                    categories: facilityNames
-                },
-                tooltip: {
-                    formatter: function() {
-                        var s;
-                        if (this.point.name) { // the pie chart
-                            s = ''+
-                                this.point.name +': '+ this.y +' stock units';
-                        } else {
-                            s = ''+
-                                this.series.name +': '+ this.y;
-                        }
-                        return s;
-                    }
-                },
-                labels: {
-                    items: [{
-                            html: 'Total stock available',
-                            style: {
-                                left: '40px',
-                                top: '8px',
-                                color: 'black'
-                            }
-                        }]
-                },
-                series: seriesData
-                    
-               
-            });
-        });
+        var pieSeriesTitle = 'Total consumption';
+        var renderTo = 'container1';
+        var mainChartTitle = 'Available Stock Today';
+        var pieChartTitle = 'Total stock available';
+
+        drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
 
     };
 </script>
