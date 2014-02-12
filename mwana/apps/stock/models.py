@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
+from datetime import timedelta
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -68,6 +69,18 @@ class StockAccount(models.Model):
         if thresholds:
             return thresholds[0]
 
+    def supplied(self, start_date, end_date):
+        sum = 0
+        supplies = StockTransaction.objects.filter(transaction__account_to=self,
+        transaction__date__gte=start_date.date()).filter(transaction__date__lt=(end_date + timedelta(days=1)).date())
+
+        for s in supplies:
+            # @type s StockTransaction
+            sum += s.amount
+
+        return sum
+        
+
     class Meta:
         unique_together = (('stock', 'location'), )
 
@@ -115,7 +128,7 @@ class Threshold(models.Model):
 
     def save(self, * args, ** kwargs):
         super(Threshold, self).save(*args, ** kwargs)
-        for t in Threshold.objects.filter(end_date=None, start_date__lte=self.start_date, account=self.account).exclude(pk=self.pk):
+        for t in Threshold.objects.filter(end_date=None, start_date__lte=self.start_date, account=self.account, id__lt=self.id).exclude(pk=self.pk):
             t.end_date = date.today()
             t.save()
 
