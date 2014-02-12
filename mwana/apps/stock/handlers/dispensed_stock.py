@@ -94,7 +94,7 @@ class DispensedStockHandler(KeywordHandler):
                  acc.save()
      
 
-            trans.account_to = acc
+            trans.account_from = acc
             trans.status = "c"
             trans.save()       
             
