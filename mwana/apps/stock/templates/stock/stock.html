@@ -8,6 +8,12 @@
 {{ block.super }}
 
 <style type="text/css">
+    table{
+        border: 0px;
+    }
+    td, th{
+        border: 0px;
+    }
     #wrapper {
         background: none repeat scroll 0 0 #FFFFFF;
         box-shadow: 4px 4px 8px #AAAAAA;
@@ -36,45 +42,56 @@
 
 {% block content %}
 
+<form name="getValues" action="" method="POST">{% csrf_token %}
 
+    <table border="0" width="100%" >
+        <!--                <tr>
+                            <td  >what goes here</td>
+                            <td></td>
+                        </tr>-->
+        <tr>
+            <td width="60%">
+                <div class="module">
+                    <div id="container1" style="min-width: 400px; height: 400px; margin: 0 auto" class="module">Select the location/District you want to view data own.
+                        The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}
+                    </div>
+                    <hr>
+                    <!--            <h3>Supplied Stock</h3>-->
 
-<table border="0" width="100%" >
-    <!--                <tr>
-                        <td  >what goes here</td>
-                        <td></td>
-                    </tr>-->
-    <tr>
-        <td width="60%"><div id="container1" style="min-width: 400px; height: 400px; margin: 0 auto">Select the location/District you want to view data own. 
-                The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}</div></td>
-        <td style="text-align: left; float: right" width="40%">
-            <input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
-            to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
-            <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" />
-            <hr>
-            <div class="module" style="padding-bottom: 0.5em"><h3>Locations</h3></div>
-            {% autoescape off %}
-            {{ rpt_districts }}
-            {% endautoescape %}
-            <div class="table-wrapper">
-                <div class="table-scroll">
-                    <table id="facilitygrid"></table>
+                    <div id="container2" style="min-width: 400px; height: 400px; margin: 0 auto" class="module">Select the location/District you want to view data own.
+                        The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}
+                    </div>
                 </div>
-            </div>
-            <hr>
-            <div class="module"><h3>Stock Items</h3></div>            
-            <div class="table-wrapper">
-                <div class="table-scroll">
-                    <table>
-                        {% autoescape off %}
-                        {{ stock_selection_grid }}
-                        {% endautoescape %}</table>
+            </td>
+            <td style="text-align: left; float: right" width="40%">
+                <input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
+                to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
+                <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" />
+                <hr>
+                <div class="module" style="padding-bottom: 0.5em"><h3>Locations</h3></div>
+                {% autoescape off %}
+                {{ rpt_districts }}
+                {% endautoescape %}
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table id="facilitygrid"></table>
+                    </div>
                 </div>
-            </div>
-        </td>
+                <hr>
+                <div class="module"><h3>Stock Items</h3></div>
+                <div class="table-wrapper">
+                    <div class="table-scroll">
+                        <table>
+                            {% autoescape off %}
+                            {{ stock_selection_grid }}
+                            {% endautoescape %}</table>
+                    </div>
+                </div>
+            </td>
 
-    </tr>    
-</table>
-
+        </tr>
+    </table>
+</form>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.flippy.min.js" ></script>
@@ -85,6 +102,8 @@
 
 
 <script type="text/javascript">
+    window.fstart_date = '{{fstart_date2}}';
+    window.fend_date = '{{fend_date2}}';
     var _facilityData = [];
     {% for location in facilities %}
     _facilityData.push({
@@ -120,21 +139,35 @@
         stockName: '{{sa.stock.name}}',
         locationSlug: '{{sa.location.slug}}',
         amount: {{sa.amount}},
-        currentThreshold: {{sa.current_threshold.level}},
+        currentThreshold: {{sa.current_threshold}},
     });
     {% endfor %}
 
     window.facilityAvailableStockData = _facilityAvailableStockData;
+
+    var _suppliedStock = [];
+    {% for sa in supplied_stock %}
+    _suppliedStock.push({
+        stockId: '{{sa.stock_account.stock.id}}',
+        stockCode: '{{sa.stock_account.stock.code}}',
+        stockName: '{{sa.stock_account.stock.name}}',
+        locationSlug: '{{sa.stock_account.location.slug}}',
+        amount: {{sa.supplied_amount}},
+        thresholdLevel: {{sa.threshold_level}},
+    });
+    {% endfor %}
+
+    window.suppliedStock = _suppliedStock;
+
+    window.onload = function(){firerpt_districtsChange()}
 
 </script>
 
 
 <script type="text/javascript">
     function firerpt_districtsChange(){
-
         var districtDropDown = document.getElementById('rpt_districts');
         var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
-
         updateFacilitySelectionGrid(districtSlug, [])
         reloadGraphs()
     }
@@ -201,7 +234,7 @@
 
 <script type="text/javascript">
     function getAvailableStockValues(locationSlug, stockId){
-        for(item in window.facilityAvailableStockData){
+        for(var item in window.facilityAvailableStockData){
             var datum = window.facilityAvailableStockData[item]
             if(datum.locationSlug === locationSlug && datum.stockId == stockId){
                 return datum.amount;
@@ -210,15 +243,27 @@
 
         return 0;
     }
-    window.locs = []
+
+    function getSuppliedStockValues(locationSlug, stockId){
+        for(var item in window.suppliedStock){
+            var datum = window.suppliedStock[item]
+            if(datum.locationSlug === locationSlug && datum.stockId == stockId){
+                return datum.amount;
+            }
+        }
+
+        return 0;
+    }
+
+    //window.locs = []
     function getAvgAvailableStockValues(locationSlug, total){
        
-        sum = 0;
-        for(item in window.facilityAvailableStockData){
+        var sum = 0;
+        for(var item in window.facilityAvailableStockData){
             var datum = window.facilityAvailableStockData[item]
             if(datum.locationSlug === locationSlug){
                 sum += datum.amount;
-                window.locs.push(datum.locationSlug)
+                //window.locs.push(datum.locationSlug)
             }
         }
 
@@ -231,13 +276,31 @@
 
     function getAvgCurrentThreshold(locationSlug, stockIds){
 
-        sum = 0;
-        total = 0;
-        for(item in window.facilityAvailableStockData){
+        var sum = 0;
+        var total = 0;
+        for(var item in window.facilityAvailableStockData){
             var datum = window.facilityAvailableStockData[item]
             if(datum.locationSlug === locationSlug && stockIds.indexOf(datum.stockId) > -1){
                 sum += datum.currentThreshold;
-                window.locs.push(datum.locationSlug)
+                total += 1
+            }
+        }
+
+        if(total > 0){
+            return Math.round(sum/total);
+        }
+
+        return 0;
+    }
+
+    function getAvgThreshold(locationSlug, stockIds){
+
+        var sum = 0;
+        var total = 0;
+        for(var item in window.suppliedStock){
+            var datum = window.suppliedStock[item]
+            if(datum.locationSlug === locationSlug && stockIds.indexOf(datum.stockId) > -1){
+                sum += datum.thresholdLevel;
                 total += 1
             }
         }
@@ -250,6 +313,7 @@
     }
     function reloadGraphs(){
         reloadAvailableStock();
+        reloadSuppliedStock();
     }
 
     function getSelectedIds(locationIds) {
@@ -333,10 +397,10 @@
                         var s;
                         if (this.point.name) { // the pie chart
                             s = '' +
-                                    this.point.name + ': ' + this.y + ' stock units';
+                                this.point.name + ': ' + this.y + ' stock units';
                         } else {
                             s = '' +
-                                    this.series.name + ': ' + this.y;
+                                this.series.name + ': ' + this.y;
                         }
                         return s;
                     }
@@ -396,16 +460,62 @@
             averageData.push(val);
         }
 
-
-
         var averageTrend = 'Average Threshold';
         fillAverageTrend(seriesData, averageTrend, averageData);
-
 
         var pieSeriesTitle = 'Total consumption';
         var renderTo = 'container1';
         var mainChartTitle = 'Available Stock Today';
         var pieChartTitle = 'Total stock available';
+
+        drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
+
+    };
+    
+    function reloadSuppliedStock () {
+        var chart;
+        var locationIds = [];
+        var facilityNames = []
+        var stockIds = []
+        var stockNames = []
+
+        setSelectedValues(locationIds, facilityNames, stockIds, stockNames);
+        var seriesData = [];
+        var pieData = [];
+        var averageData = [];
+        for(var i in stockNames){
+            var _name = stockNames[i];
+            var stockPerLocation = []
+            var stockTotal = 0;
+
+            for(var loc in locationIds){
+                var val = getSuppliedStockValues(locationIds[loc], _name[0]);
+                stockPerLocation.push(val);
+                stockTotal += val;
+            }
+            seriesData.push({
+                type: 'column',
+                name: _name[1],
+                data: stockPerLocation
+            });
+            pieData.push({
+                name: _name[1],
+                y: stockTotal
+            });
+        }
+
+        for(var loc in locationIds){
+            var val = getAvgThreshold(locationIds[loc], stockIds);
+            averageData.push(val);
+        }
+
+        var averageTrend = 'Average Threshold';
+        fillAverageTrend(seriesData, averageTrend, averageData);
+
+        var pieSeriesTitle = 'Total Supplied';
+        var renderTo = 'container2';
+        var mainChartTitle = 'Supplied Stock (' + window.fstart_date + ' - ' + window.fend_date + ')';
+        var pieChartTitle = 'Total supplied stock';
 
         drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
 

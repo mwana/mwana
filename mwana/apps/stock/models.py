@@ -61,18 +61,21 @@ class StockAccount(models.Model):
         thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
         filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
         if thresholds:
-            return thresholds[0]
+            return thresholds[0].level
         
     def threshold(self, today):
         thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
         filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
         if thresholds:
-            return thresholds[0]
+            return thresholds[0].level
 
     def supplied(self, start_date, end_date):
+        my_start_date = datetime(start_date.year, start_date.month, start_date.day)
+        my_end_date = datetime(end_date.year, end_date.month, end_date.day)
+        
         sum = 0
         supplies = StockTransaction.objects.filter(transaction__account_to=self,
-        transaction__date__gte=start_date.date()).filter(transaction__date__lt=(end_date + timedelta(days=1)).date())
+        transaction__date__gte=my_start_date).filter(transaction__date__lt=(my_end_date + timedelta(days=1)).date())
 
         for s in supplies:
             # @type s StockTransaction
