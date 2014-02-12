@@ -252,48 +252,61 @@
         reloadAvailableStock();
     }
 
+    function getSelectedIds(locationIds) {
+        $("[name='_select_facility']").each(
+        function () {
+            if (this.checked) {
+                locationIds.push(this.value)
+            }
+        });
+    }
+    function getSelectedNames(locationIds, facilityNames) {
+        for (item in window.facilityData) {
+            var datum = window.facilityData[item]
+            if (locationIds.indexOf(datum.facility_slug) > -1) {
+                facilityNames.push(datum.facility_name)
+            }
+        }
+    }
+    function getSelectedStockIds(stockIds) {
+        $("[name='_select_stock']").each(
+        function () {
+            if (this.checked) {
+                stockIds.push(this.value)
+            }
+        });
+    }
+    function getselectedStocknames(stockIds, stockNames) {
+        for (item in window.stockData) {
+            var datum = window.stockData[item]
+            if (stockIds.indexOf(datum.stockId) > -1) {
+                stockNames.push([datum.stockId, datum.stockName])
+            }
+        }
+    }
+    function setSelectedValues(locationIds, facilityNames, stockIds, stockNames) {
+        getSelectedIds(locationIds);
+        getSelectedNames(locationIds, facilityNames);
+        getSelectedStockIds(stockIds);
+        getselectedStocknames(stockIds, stockNames);
+    }
     function reloadAvailableStock () {
         var chart;
         var locationIds = [];
         var facilityNames = []
-        $("[name='_select_facility']").each(
-        function(){
-            if(this.checked){
-                locationIds.push(this.value)
-            }
-        } );
-
-        for(item in window.facilityData){
-            var datum = window.facilityData[item]
-            if(locationIds.indexOf(datum.facility_slug) > -1 ){
-                facilityNames.push(datum.facility_name)
-            }
-        }
-
         var stockIds = []
         var stockNames = []
-        $("[name='_select_stock']").each(
-        function(){
-            if(this.checked){
-                stockIds.push(this.value)
-            }
-        } );
 
-        for(item in window.stockData){
-            var datum = window.stockData[item]
-            if(stockIds.indexOf(datum.stockId) > -1 ){
-                stockNames.push([datum.stockId, datum.stockName])
-            }
-        }
+        setSelectedValues(locationIds, facilityNames, stockIds, stockNames);
         var seriesData = [];
         var pieData = [];
         var averageData = [];
-        for(i in stockNames){
+        for(var i in stockNames){
             var _name = stockNames[i];
             var stockPerLocation = []
             var stockTotal = 0;
 
-            for(loc in locationIds){
+            for(var loc in locationIds){
                 var val = getAvailableStockValues(locationIds[loc], _name[0]);
                 stockPerLocation.push(val);
                 stockTotal += val;
@@ -309,7 +322,7 @@
             });
         }
 
-        for(loc in locationIds){
+        for(var loc in locationIds){
             var val = getAvgCurrentThreshold(locationIds[loc], stockIds);
             averageData.push(val);
         }
@@ -346,7 +359,7 @@
                     renderTo: 'container1'
                 },
                 title: {
-                    text: 'Available Stock'
+                    text: 'Available Stock Today'
                 },
                 xAxis: {
                     categories: facilityNames
