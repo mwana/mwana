@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-import datetime
 import re
 
 from mwana.apps.stock.models import ConfirmationCode
@@ -75,7 +74,6 @@ class DispensedStockHandler(KeywordHandler):
             location = self.msg.contact.location
             confirmation_code = ConfirmationCode.objects.create()
             trans = Transaction.objects.create(reference=confirmation_code)
-            trans.date =  datetime.datetime.now().date()
             trans.type = "d"
             trans.sms_user = self.msg.contact
             trans.valid = True
