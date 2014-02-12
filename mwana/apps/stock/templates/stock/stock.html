@@ -116,7 +116,7 @@
     });
     {% endfor %}
 
-   
+
     window.facilityData = _facilityData;
 
     var _stockData = [];
@@ -130,7 +130,7 @@
 
     window.stockData = _stockData;
 
-    
+
     var _facilityAvailableStockData = [];
     {% for sa in stockAccounts %}
     _facilityAvailableStockData.push({
@@ -171,7 +171,7 @@
         updateFacilitySelectionGrid(districtSlug, [])
         reloadGraphs()
     }
-    
+
     function updateFacilitySelectionGrid(districtSlug, selected_facilities){
         var code = "";
         var width = 2;
@@ -203,7 +203,7 @@
         document.getElementById("facilitygrid").innerHTML = code
         try{
             var flip_direction = 'BOTTOM';
-            
+
             $("#facilitygrid").flippy({
                 duration: "500",
                 verso: code,
@@ -214,7 +214,7 @@
             //do something
         }
     }
-    
+
 </script>
 <script type="text/javascript" >
     $(function(){
@@ -257,7 +257,7 @@
 
     //window.locs = []
     function getAvgAvailableStockValues(locationSlug, total){
-       
+
         var sum = 0;
         for(var item in window.facilityAvailableStockData){
             var datum = window.facilityAvailableStockData[item]
@@ -467,11 +467,12 @@
         var renderTo = 'container1';
         var mainChartTitle = 'Available Stock Today';
         var pieChartTitle = 'Total stock available';
+        fillPieData(seriesData, pieSeriesTitle, pieData);
 
         drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
 
     };
-    
+
     function reloadSuppliedStock () {
         var chart;
         var locationIds = [];
@@ -516,6 +517,7 @@
         var renderTo = 'container2';
         var mainChartTitle = 'Supplied Stock (' + window.fstart_date + ' - ' + window.fend_date + ')';
         var pieChartTitle = 'Total supplied stock';
+        fillPieData(seriesData, pieSeriesTitle, pieData);
 
         drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
 
