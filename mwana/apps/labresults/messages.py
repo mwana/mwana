@@ -67,7 +67,7 @@ def build_printer_results_messages(results):
                     "new_result": res.get_result_text(),
                     "clinic_care_no": res.clinic_care_no,
                     "test_type": TEST_TYPE,
-                    "lab_name": settings.ADH_LAB_NAME,
+                    "lab_name": settings.LAB_NAME[res.sample_id[-1]],
                     "sms_date": date.isoformat(date.today())})
             else:
                 msg = (CHANGED_PRINTER_RESULTS % {
@@ -77,7 +77,7 @@ def build_printer_results_messages(results):
                     "new_req_id": res.requisition_id,
                     "new_result": res.get_result_text(),
                     "test_type": TEST_TYPE,
-                    "lab_name": settings.ADH_LAB_NAME,
+                    "lab_name": settings.LAB_NAME[res.sample_id[-1]],
                     "sms_date": date.isoformat(date.today())})
         else:
             if SYSTEM_LOCALE == LOCALE_MALAWI:
@@ -87,7 +87,7 @@ def build_printer_results_messages(results):
                     "clinic_care_no": res.clinic_care_no,
                     "result": res.get_result_text(),
                     "test_type": TEST_TYPE,
-                    "lab_name": settings.ADH_LAB_NAME,
+                    "lab_name": settings.LAB_NAME[res.sample_id[-1]],
                     "sms_date": date.isoformat(date.today())})
             else:
                 msg = (PRINTER_RESULTS % {
@@ -95,7 +95,7 @@ def build_printer_results_messages(results):
                     "req_id": res.requisition_id,
                     "result": res.get_result_text(),
                     "test_type": TEST_TYPE,
-                    "lab_name": settings.ADH_LAB_NAME,
+                    "lab_name": settings.LAB_NAME[res.sample_id[-1]],
                     "sms_date": date.isoformat(date.today())})
         result_strings.append(msg)
 

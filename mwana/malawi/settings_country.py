@@ -33,9 +33,13 @@ GROWTHMONITORING_SETTINGS = {'DEFAULT_LANG': 'en'}
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
 
-ADH_LAB_NAME = "QECH DNA-PCR LAB"
+LAB_NAME = {'1': "KCH DNA-PCR LAB", '2': "QECH DNA-PCR LAB",
+            '3': "MCH DNA-PCR LAB", '4': "MDH DNA-PCR LAB",
+            '6': "DREAM-BT DNA-PCR LAB"}
 
 COUNTRY_CODE = '+265'
+
+DATE_FORMAT = 'F j, Y'  # December 25, 2012
 
 DISTRICTS = sorted(["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji",
                     "Nkhotakota", "Ntcheu", "Ntchisi", "Salima", "Chitipa",
