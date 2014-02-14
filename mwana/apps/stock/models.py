@@ -1,13 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 import string
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
-from datetime import timedelta
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -25,7 +25,7 @@ class StockUnit(models.Model):
     description = models.CharField(max_length=20, null=False, blank=False)
 
 class Stock(models.Model):
-    type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False,)
+    type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False, )
     abbr = models.CharField(max_length=10, null=True, blank=True)
     code = models.CharField(max_length=10, null=False, blank=False, unique=True)
     short_code = models.CharField(max_length=10, null=False, blank=True, unique=True)
@@ -58,13 +58,13 @@ class StockAccount(models.Model):
     @property
     def current_threshold(self):
         today = date.today()
-        thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
+        thresholds = Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
         filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
         if thresholds:
             return thresholds[0].level
         
     def threshold(self, today):
-        thresholds =  Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
+        thresholds = Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
         filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
         if thresholds:
             return thresholds[0].level
@@ -75,9 +75,30 @@ class StockAccount(models.Model):
         
         sum = 0
         supplies = StockTransaction.objects.filter(transaction__account_to=self,
-        transaction__date__gte=my_start_date).filter(transaction__date__lt=(my_end_date + timedelta(days=1)).date())
+                                                   transaction__date__gte=my_start_date).filter(transaction__date__lt=(my_end_date + timedelta(days=1)).date())
 
         for s in supplies:
+            # @type s StockTransaction
+            sum += s.amount
+
+        return sum
+
+    def expended(self, start_date, end_date):
+        my_start_date = datetime(start_date.year, start_date.month, start_date.day)
+        my_end_date = datetime(end_date.year, end_date.month, end_date.day)
+
+        sum = 0
+        
+        out_transactions = Transaction.objects.filter(account_from=self,
+                                                     date__gte=my_start_date).\
+                                                     filter(
+                                                     date__lt=(my_end_date +
+                                                     timedelta(days=1)).date())
+
+
+        expenses = StockTransaction.objects.filter(transaction__in=out_transactions)
+
+        for s in expenses:
             # @type s StockTransaction
             sum += s.amount
 
@@ -85,7 +106,7 @@ class StockAccount(models.Model):
         
 
     class Meta:
-        unique_together = (('stock', 'location'), )
+        unique_together = (('stock', 'location'),)
 
 
 TRANSACTION_CHOICES = (
@@ -148,7 +169,7 @@ class StockTransaction(models.Model):
         return "%s > %s %s" % (self.stock, self.transaction, self.amount)
 
     class Meta:
-        unique_together = (('stock', 'transaction'), )
+        unique_together = (('stock', 'transaction'),)
 
 #    def save(self, *args, **kwargs):
 #        if not self.pk:
