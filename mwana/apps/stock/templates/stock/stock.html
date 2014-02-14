@@ -57,13 +57,13 @@
                         The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}
                     </div>
                     <hr>
-                                <h3>Supplied Stock</h3>
+                    <h3>Supplied Stock</h3>
 
                     <div id="supplied_container" style="min-width: 400px; height: 400px; margin: 0 auto" class="module">Select the location/District you want to view data own.
-                        
+
                     </div>
                     <hr>
-                                <h3>Dispensed Stock</h3>
+                    <h3>Dispensed Stock</h3>
 
                     <div id="dispensed_container" style="min-width: 400px; height: 400px; margin: 0 auto" class="module">Select the location/District you want to view data own.
 
@@ -75,7 +75,8 @@
                 to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
                 <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" />
                 <hr>
-                <div class="module" style="padding-bottom: 0.5em"><h3>Locations</h3></div>
+                <div id="locations_title">
+                <div class="module" style="padding-bottom: 0.5em" ><h3>Locations</h3></div>
                 {% autoescape off %}
                 {{ rpt_districts }}
                 {% endautoescape %}
@@ -93,6 +94,7 @@
                             {{ stock_selection_grid }}
                             {% endautoescape %}</table>
                     </div>
+                </div>
                 </div>
             </td>
 
@@ -180,7 +182,10 @@
 
     window.dispensedStock = _dispensedStock;
 
-    window.onload = function(){firerpt_districtsChange()}
+    window.onload = function(){
+        firerpt_districtsChange();
+         window.selectorWidth = $('#locations_title')[0].offsetWidth ;
+    }
 
 </script>
 
@@ -219,7 +224,6 @@
                 column += 1
 
             }
-            //                alert(window.facilityData[item].facility_name);
         }
         document.getElementById("facilitygrid").innerHTML = code
         try{
@@ -624,6 +628,24 @@
         drawChart(chart, renderTo, mainChartTitle, facilityNames, pieChartTitle, seriesData);
 
     };
+</script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var width = $('#locations_title').width()
+        // check where the shoppingcart-div is
+        var offset = $('#locations_title').offset();
+
+        $(window).scroll(function () {
+            var scrollTop = $(window).scrollTop(); // check the visible top of the browser
+            var el = $('#locations_title')[0];
+            if (offset.top < scrollTop){
+               el.style.cssText = 'position: fixed; top: 20px; width: ' + (window.selectorWidth) + 'px;';
+            }
+            else {
+               el.style.cssText = '';
+            }
+        });
+    });
 </script>
 
 {% endblock %}
