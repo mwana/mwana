@@ -13,6 +13,8 @@ from mwana.apps.smgl import const
 from mwana.apps.smgl.models import FacilityVisit, ReminderNotification, Referral,\
     PregnantMother, AmbulanceResponse, SyphilisTreatment, Location
 
+from mwana.apps.smgl.utils import get_district_facility_zone
+
 # reminders will be sent up to this amount late (if, for example the system
 # was down.
 SEND_REMINDER_LOWER_BOUND = timedelta(days=5)
@@ -371,13 +373,27 @@ def send_no_outcome_help_admin_reminder(router_obj=None):
             if not ref.responded:
                 yield resp
 
+    users = Contact.objects.filter(is_super_user=True)
+    users_per_district_super_users = []
+    kalomo_district_super_users = []
+    for user in users:
+        district, facility, zone = get_district_facility_zone(user.location)
+        if district == 'Kalomo District':
+            kalomo_district_super_users.append(user)
+        elif district == 'Choma District':
+            choma_district_super_users.append(user)
+
     for resp in _responses_to_remind():
         req = resp.ambulance_request
         ref = req.referral_set.all()[0]
         receiving_facility = ref.facility
-        users = Contact.objects.filter(is_help_admin=True,
-                                       location=receiving_facility)
-        for u in users:
+        district_users = None
+        if ref.facility.district == 'Kalomo District':
+            district_users = kalomo_district_super_users
+        elif ref.facility.district == 'Choma District':
+            district_users = choma_district_super_users
+
+        for u in district_users:
             if u.default_connection:
                 u.message(const.AMB_OUTCOME_NO_OUTCOME,
                           **{"unique_id": resp.mother.uid})
