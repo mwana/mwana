@@ -45,14 +45,14 @@
 <form name="getValues" action="" method="POST">{% csrf_token %}
 
     <table border="0" width="100%" >
-        <!--                <tr>
+<!--                        <tr>
                             <td  >what goes here</td>
                             <td></td>
                         </tr>-->
         <tr>
-            <td width="60%">
+            <td >
                 <div class="module">
-                    <h3>Avialable Stock Today</h3>
+                    <h3>Avialable Stock Today <extra id="info">- Selected a District from the Locations drop-down on the far right</extra></h3>
                     <div id="available_container" style="min-width: 400px; height: 400px; margin: 0 auto" class="module">Select the location/District you want to view data own.
                         The selection widget is at the far right. The following districts have data to view: {{districts_with_data}}
                     </div>
@@ -70,31 +70,31 @@
                     </div>
                 </div>
             </td>
-            <td style="text-align: left; float: right" width="40%">
+            <td style="text-align: left; float: right" >
                 <input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
                 to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
                 <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" />
                 <hr>
                 <div id="locations_title">
-                <div class="module" style="padding-bottom: 0.5em" ><h3>Locations</h3></div>
-                {% autoescape off %}
-                {{ rpt_districts }}
-                {% endautoescape %}
-                <div class="table-wrapper">
-                    <div class="table-scroll">
-                        <table id="facilitygrid"></table>
+                    <div class="module" style="padding-bottom: 0.5em" ><h3>Locations</h3></div>
+                    {% autoescape off %}
+                    {{ rpt_districts }}
+                    {% endautoescape %}
+                    <div class="table-wrapper">
+                        <div class="table-scroll">
+                            <table id="facilitygrid"></table>
+                        </div>
                     </div>
-                </div>
-                <hr>
-                <div class="module"><h3>Stock Items</h3></div>
-                <div class="table-wrapper">
-                    <div class="table-scroll">
-                        <table>
-                            {% autoescape off %}
-                            {{ stock_selection_grid }}
-                            {% endautoescape %}</table>
+                    <hr>
+                    <div class="module"><h3>Stock Items</h3></div>
+                    <div class="table-wrapper">
+                        <div class="table-scroll">
+                            <table>
+                                {% autoescape off %}
+                                {{ stock_selection_grid }}
+                                {% endautoescape %}</table>
+                        </div>
                     </div>
-                </div>
                 </div>
             </td>
 
@@ -184,7 +184,7 @@
 
     window.onload = function(){
         firerpt_districtsChange();
-         window.selectorWidth = $('#locations_title')[0].offsetWidth ;
+        window.selectorWidth = $('#locations_title')[0].offsetWidth ;
     }
 
 </script>
@@ -192,10 +192,10 @@
 
 <script type="text/javascript">
     function firerpt_districtsChange(){
-        var districtDropDown = document.getElementById('rpt_districts');
-        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value
-        updateFacilitySelectionGrid(districtSlug, [])
-        reloadGraphs()
+        districtDropDown = document.getElementById('rpt_districts');
+        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value;
+        updateFacilitySelectionGrid(districtSlug, []);
+        reloadGraphs();
     }
 
     function updateFacilitySelectionGrid(districtSlug, selected_facilities){
@@ -205,7 +205,6 @@
         for(item in window.facilityData){
             var datum = window.facilityData[item]
             if(districtSlug === datum.district_slug){
-
                 if (column === 1){
                     code += '<tr>';
                 }
@@ -417,7 +416,7 @@
             data: pieData,
             center: [100, 80],
             size: 100,
-            showInLegend: false,
+            showInLegend: true,
             dataLabels: {
                 enabled: false
             }
@@ -487,6 +486,17 @@
         var stockNames = []
 
         setSelectedValues(locationIds, facilityNames, stockIds, stockNames);
+
+        districtDropDown = document.getElementById('rpt_districts');
+        var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value;
+
+        if(districtSlug.indexOf('--') > -1){
+            $('extra')[0].textContent = "- Selected a District from the Locations drop-down on the far right";
+        }else if(stockIds.length == 0 && locationIds.length > 0){
+            $('extra')[0].textContent = "- Selected drugs on the far right";
+        }else{
+            $('extra')[0].textContent = '- ' + districtDropDown.selectedOptions[0].text;
+        }
         var seriesData = [];
         var pieData = [];
         var averageData = [];
@@ -639,10 +649,10 @@
             var scrollTop = $(window).scrollTop(); // check the visible top of the browser
             var el = $('#locations_title')[0];
             if (offset.top < scrollTop){
-               el.style.cssText = 'position: fixed; top: 20px; width: ' + (window.selectorWidth) + 'px;';
+                el.style.cssText = 'position: fixed; top: 20px; width: ' + (window.selectorWidth) + 'px;';
             }
             else {
-               el.style.cssText = '';
+                el.style.cssText = '';
             }
         });
     });
