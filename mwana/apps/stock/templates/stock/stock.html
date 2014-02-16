@@ -90,6 +90,9 @@
                     <div class="table-wrapper">
                         <div class="table-scroll">
                             <table>
+                                <tr>
+                                    <td><input type='checkbox' checked='checked' onchange='toggleSelectedStock(this.checked)'> All Stock</td>
+                                </tr>
                                 {% autoescape off %}
                                 {{ stock_selection_grid }}
                                 {% endautoescape %}</table>
@@ -198,10 +201,19 @@
         reloadGraphs();
     }
 
+    function toggleSelectedFacilities(toggle){
+        $('[name="_select_facility"]').prop('checked', toggle);
+        reloadGraphs();
+    }
+    function toggleSelectedStock(toggle){
+        $('[name="_select_stock"]').prop('checked', toggle);
+        reloadGraphs();
+    }
     function updateFacilitySelectionGrid(districtSlug, selected_facilities){
-        var code = "";
         var width = 2;
         var column = 1;
+
+        var code = "<tr><td colspan='"+ width + "'><input type='checkbox' checked='checked' onchange='toggleSelectedFacilities(this.checked)'> All Facilities</td></tr>";
         for(item in window.facilityData){
             var datum = window.facilityData[item]
             if(districtSlug === datum.district_slug){
