@@ -2,11 +2,7 @@
 import datetime
 import re
 
-from mwana import const
-from mwana.const import get_clinic_worker_type
 from mwana.apps.locations.models import Location
-from mwana.apps.locations.models import LocationType
-from mwana.apps.reminders import models as reminders
 from mwana.apps.stock.models import ConfirmationCode
 from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
@@ -17,7 +13,6 @@ from mwana.apps.broadcast.models import BroadcastMessage
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
-from mwana.const import get_district_worker_type
 
 _ = lambda s: s
 
@@ -67,8 +62,6 @@ class LoaningStockHandler(KeywordHandler):
             self.respond("Sorry, drug ID(s) %s appears more than once in your message" % ", ".join(set(repeating_drugs)))
             return True
 
-
-
         valid_drug_ids = [id[0].upper() for id in Stock.objects.values_list('code').distinct()]
 
         invalid_ids = list(set(drug_ids) - set(valid_drug_ids))
@@ -87,7 +80,7 @@ class LoaningStockHandler(KeywordHandler):
                 self.respond("Sorry, %s is not a valid number. Enter only numbers for quantity." % invalid_quantities[0])
             else:
                 self.respond("Sorry, %s are not valid numbers. Enter only numbers for quantity." % ", ".join(invalid_quantities))
-
+            return True
         else:
             location_from = self.msg.contact.location
             location_to = Location.objects.get(slug=clinic_to)            
@@ -164,12 +157,3 @@ class LoaningStockHandler(KeywordHandler):
         bmsg.recipients = contacts
         bmsg.save()
         return True
-
-
-
-
-
-
-
-
-
