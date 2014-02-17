@@ -4,7 +4,7 @@ from mwana.malawi.settings_country import *
 DEBUG = False
 
 ADMINS = (
-    ('Tobias McNulty', 'mwana@caktusgroup.com'),
+    # ('Tobias McNulty', 'mwana@caktusgroup.com'),
     ('Lengani Kaunda', 'lengani@p4studio.com'),
 )
 
