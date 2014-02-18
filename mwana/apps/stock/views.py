@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import Threshold
 from mwana.apps.stock.models import Transaction
 from mwana.apps.stock.models import StockAccount
 from mwana.apps.stock.models import Stock
@@ -24,7 +25,15 @@ from mwana.apps.reports.utils.htmlhelper import *
 class TransactedStock:
     pass
 
-def stock(request):
+def can_set_threshold(user):
+    if not user:
+        return False
+    if user.is_active and user.is_superuser:
+        return True
+
+    return bool([gum.group.name for gum in user.groupusermapping_set.all() if 'DHO' in gum.group.name])
+
+def stock(request):  
     today = date.today()
     
     startdate1 = read_date_or_default(request, 'startdate', today - timedelta(days=30))
@@ -34,12 +43,26 @@ def stock(request):
 
     facilities = user_facilities(current_user=request.user, group=None, province=None, district=None, facility=None)
     
-#    rpt_provinces = read_request(request, "rpt_provinces")
     selected_stock = None
     try:
         selected_stock = Stock.objects.filter(id__in=map(int, dict(request.POST).get("_select_stock", ['-1'])))
     except KeyError, e:
         logger.warn("KeyError: %s" % e)
+
+    if can_set_threshold(request.user):
+        new_threshold_stock = dict(request.POST).get('new_threshold_stock', [None])[0]
+        new_threshold_facility = dict(request.POST).get('new_threshold_facility', [None])[0]
+        new_threshhold_value = dict(request.POST).get('new_threshhold_value', [None])[0]
+        if new_threshold_facility and new_threshold_stock and new_threshhold_value:
+            # we don't expect object to exist
+            stock_account  = StockAccount.objects.get(location__slug=\
+                                                        new_threshold_facility,
+                                                        stock__id=int(new_threshold_stock))
+            # @type stock_account StockAccount
+            if stock_account.current_threshold != int(new_threshhold_value):
+                Threshold.objects.create(account=stock_account,
+                                            level=int(new_threshhold_value),
+                                            start_date=date.today())
 
     rpt_districts = read_request(request, "rpt_districts")
     stocks = Stock.objects.all()
@@ -80,6 +103,7 @@ def stock(request):
                               "stockAccounts": stockAccounts,
                               "supplied_stock": supplied_stock,
                               "dispensed_stock": dispensed_stock,
+                              "can_set_threshold": ("%s" % can_set_threshold(request.user)).lower(),
                               "districts_with_data": ", ".join(list(set([sa.location.parent.name for sa in stockAccountsWithData]))),
                               }, context_instance=RequestContext(request)
                               )
