@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Threshold
 from mwana.apps.stock.models import Transaction
 from mwana.apps.stock.models import StockAccount
@@ -69,7 +70,7 @@ def stock(request):
     stockAccounts = StockAccount.objects.filter(location__in=facilities)
     stockAccountsWithData = StockAccount.objects.filter(location__in=facilities, amount__gt=0)
     supplied_stock = []
-    for sa in StockAccount.objects.filter(account_transaction__date__gte=start_date).filter(account_transaction__date__lt=end_date + timedelta(days=1)).distinct():
+    for sa in StockAccount.objects.filter(account_transaction__transaction__date__gte=start_date).filter(account_transaction__transaction__date__lt=end_date + timedelta(days=1)).distinct():
         ss = TransactedStock()
         # @type sa StockAccount
         ss.stock_account = sa
@@ -78,10 +79,10 @@ def stock(request):
         supplied_stock.append(ss)
     
     dispensed_stock = []
-    for sa in StockAccount.objects.filter(transaction__in=
-            Transaction.objects.filter(date__gte=start_date).\
-            filter(date__lt=end_date + timedelta(days=1))
-            ).distinct():
+    d_stock_transactions = StockTransaction.objects.exclude(account_from=None).filter(
+                        transaction__date__gte=start_date).\
+                        filter(transaction__date__lt=end_date + timedelta(days=1)).distinct()
+    for sa in (st.account_from for st in d_stock_transactions):
         es = TransactedStock()
         # @type sa StockAccount
         es.stock_account = sa
