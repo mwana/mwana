@@ -74,7 +74,7 @@ class StockAccount(models.Model):
         my_end_date = datetime(end_date.year, end_date.month, end_date.day)
         
         sum = 0
-        supplies = StockTransaction.objects.filter(transaction__account_to=self,
+        supplies = StockTransaction.objects.filter(account_to=self,
                                                    transaction__date__gte=my_start_date).filter(transaction__date__lt=(my_end_date + timedelta(days=1)).date())
 
         for s in supplies:
@@ -89,14 +89,14 @@ class StockAccount(models.Model):
 
         sum = 0
         
-        out_transactions = Transaction.objects.filter(account_from=self,
-                                                     date__gte=my_start_date).\
+        expenses = StockTransaction.objects.filter(account_from=self,
+                                                     transaction__date__gte=my_start_date).\
                                                      filter(
-                                                     date__lt=(my_end_date +
+                                                     transaction__date__lt=(my_end_date +
                                                      timedelta(days=1)).date())
 
 
-        expenses = StockTransaction.objects.filter(transaction__in=out_transactions)
+#        expenses = StockTransaction.objects.filter(transaction__in=out_transactions)
 
         for s in expenses:
             # @type s StockTransaction
@@ -113,6 +113,7 @@ TRANSACTION_CHOICES = (
                        ('p', 'Pending'),
                        ('f', 'Failed'),
                        ('c', 'Completed'),
+                       ('x', 'Cancelled'),
                        )
 
 TRANSACTION_TYPES = (
@@ -125,10 +126,8 @@ class Transaction(models.Model):
     status = models.CharField(max_length=1, choices=TRANSACTION_CHOICES, default='p')
     web_user = models.ForeignKey(User, null=True, blank=True)
     sms_user = models.ForeignKey(Contact, null=True, blank=True)
-    account_from = models.ForeignKey(StockAccount, null=True, blank=True)
-    account_to = models.ForeignKey(StockAccount, null=True, blank=True, related_name="account_transaction")
     date = models.DateTimeField(default=datetime.now)
-    reference = models.ForeignKey(ConfirmationCode, null=False, blank=False)
+    reference = models.ForeignKey(ConfirmationCode, null=False, blank=False, unique=True)
     type = models.CharField(max_length=3, choices=TRANSACTION_TYPES)
     valid = models.BooleanField(default=True)
 
@@ -164,9 +163,11 @@ class StockTransaction(models.Model):
     amount = models.IntegerField(default=0, null=False, blank=False)
     transaction = models.ForeignKey(Transaction, null=False, blank=False)
     stock = models.ForeignKey(Stock, null=False, blank=False)
+    account_from = models.ForeignKey(StockAccount, null=True, blank=True)
+    account_to = models.ForeignKey(StockAccount, null=True, blank=True, related_name="account_transaction")
 
     def __unicode__(self):
-        return "%s > %s %s" % (self.stock, self.transaction, self.amount)
+        return "%s > %s: %s" % (self.stock, self.transaction, self.amount)
 
     class Meta:
         unique_together = (('stock', 'transaction'),)

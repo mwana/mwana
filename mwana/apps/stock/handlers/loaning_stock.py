@@ -1,3 +1,4 @@
+#TODO: Cleanup
 # vim: ai ts=4 sts=4 et sw=4
 import datetime
 import re
@@ -104,25 +105,29 @@ class LoaningStockHandler(KeywordHandler):
                  acc_from.pending_amount = amount #amount to be deducted when receiving clinic confirms.
                  acc_to = StockAccount.objects.get(location=location_to,stock=stock)
                  acc_to.pending_amount = amount #amount to be added when receiving clinic confirms receipt of drugs.
-                 stk = StockTransaction.objects.create(transaction=trans,amount=amount, stock=stock)
-                 stk.save()
                  acc_from.save()
                  acc_to.save()
+                 StockTransaction.objects.create(transaction=trans,
+                                                     amount=amount,
+                                                     stock=stock,
+                                                     account_from=acc_from,
+                                                     account_to=acc_to)
+                 
+                 
 
                  threshold=Threshold.objects.get(account=acc_from)
                  drugs += stock.code +" "+str(abs(amount))+" "
 
                  if((acc_from.amount-acc_from.pending_amount) <= threshold.level):
-                     drugs_below_threshold += str(abs(threshold.level-acc.amount))+" units of "+stock.code +" "
+                     drugs_below_threshold += str(threshold.level - acc.amount) + " units of " + stock.code +" "
 
-            trans.account_to =acc_to
-            trans.account_from =acc_from
+            
             trans.status = "p"
             trans.save()
             
             
             if (drugs_below_threshold):
-                self.respond("You cannnot proceed with loan because your stock will be below threshold by: " +drugs_below_threshold)
+                self.respond("You cannnot proceed with loan because your stock will below threshold by: " + drugs_below_threshold)
                 trans.status = "f"
                 trans.save()
 #                dho_staff = Contact.active.location(location_from.parent).exclude(id=self.msg.contact.id).filter(types=get_district_worker_type())

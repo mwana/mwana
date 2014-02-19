@@ -40,7 +40,12 @@ class NewStockHandler(KeywordHandler):
             my_text = my_text.replace(c, delimeter)
 
         my_text = re.sub(r"\s+", " ", my_text)
-        tokens = set(my_text.split(delimeter))
+
+        # create a unique list with original order of items
+        tokens = []
+        for i in my_text.split(delimeter):
+            if i not in tokens:
+                tokens.append(i)
 
         drug_ids = [drug.split()[0] for drug in tokens]
         repeating_drugs = [id for id in drug_ids if drug_ids.count(id) > 1]
@@ -88,15 +93,13 @@ class NewStockHandler(KeywordHandler):
 
                  user_drug_codes.append(drug_code.upper())
                  stock = Stock.objects.get(Q(code__iexact=drug_code)|Q(short_code__iexact=drug_code))
-                 acc, created = StockAccount.objects.get_or_create(location=location,stock=stock)
+                 acc, created = StockAccount.objects.get_or_create(location=location, stock=stock)
                  acc.amount += int(drug.split()[1])
-                 stk = StockTransaction.objects.create(transaction=trans, 
-                                                        amount=int(drug.split()[1]),
-                                                        stock=stock)
-                 stk.save()
                  acc.save()
-        
-            trans.account_to = acc
+                 ss = StockTransaction.objects.create(transaction=trans,
+                                                        amount=abs(int(drug.split()[1])),
+                                                        stock=stock, account_to=acc)
+                 
             trans.status = "c"
             trans.save()
             

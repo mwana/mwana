@@ -45,7 +45,7 @@ class ConfirmHandler(KeywordHandler):
             if(trans_type == "f_f"):
                 acc_to = trans.account_to
                 acc_from = trans.account_from
-                lending_staff=trans.sms_user
+                lending_staff = trans.sms_user
                 if((acc_to.pending_amount > 0) and (acc_from.pending_amount > 0)):
                     acc_to.amount+=acc_to.pending_amount
                     acc_from.amount-=acc_from.pending_amount
@@ -58,7 +58,7 @@ class ConfirmHandler(KeywordHandler):
                     trans.save()
 
                     self.respond("Thank you for confirming that you have received the drugs")
-                    self.broadcast(self.message_to_lender, lending_staff, clinic_to,"CLINIC")
+                    self.broadcast(self.message_to_lender, lending_staff, clinic_to, "CLINIC")
 
         else:
             self.respond("A completed transaction cannot be confirm. Kindly ensure you have sent the correct confirmation code")
@@ -86,15 +86,3 @@ class ConfirmHandler(KeywordHandler):
         bmsg.recipients = contacts
         bmsg.save()
         return True
-
-
-
-            
-
-
-
-
-        
-
-        
-

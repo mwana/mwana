@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+# TODO: Fix handler
 import re
 
 from mwana.apps.stock.models import ConfirmationCode
@@ -88,13 +89,13 @@ class DispensedStockHandler(KeywordHandler):
                  acc = StockAccount.objects.get(location=location, stock=stock)
                  amount = int(drug.split()[1])
                  acc.amount -= amount
+                 acc.save()
                  StockTransaction.objects.create(transaction=trans, 
                                                         amount=amount,
-                                                        stock=stock)
-                 acc.save()
-     
-
-            trans.account_from = acc
+                                                        stock=stock,
+                                                        account_from=acc)
+                 
+            
             trans.status = "c"
             trans.save()       
             

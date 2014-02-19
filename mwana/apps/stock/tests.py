@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Transaction
 from datetime import timedelta
 from mwana.apps.stock.models import Stock
@@ -173,3 +174,61 @@ class TestStockAtFacility(TestApp):
         self.assertEqual(StockAccount.objects.filter(amount=27).count(), 1)
         self.assertEqual(Transaction.objects.count(), 1)
 
+
+class TestStockTransactionManagement(TestApp):
+
+    def test_undoing_new_stock(self):
+        self.assertEqual(StockAccount.objects.count(), 0)
+        self.assertEqual(Transaction.objects.count(), 0)
+        self.assertEqual(StockTransaction.objects.count(), 0)
+
+        StockAccount.objects.create(stock=self.stock, location=self.kdh)
+        StockAccount.objects.create(stock=self.stock2, location=self.kdh)
+
+        script = """
+            rb > New Stock DRG-123 10, DRG-124 20
+            rb < Thank you. New levels for the added stock are: 10 units of DRG-123, 20 units of DRG-124. Cc: 000001
+            rb > New Stock DRG-123 5, DRG-124 15
+            rb < Thank you. New levels for the added stock are: 15 units of DRG-123, 35 units of DRG-124. Cc: 000002
+        """
+
+        self.runScript(script)
+        self.assertEqual(StockAccount.objects.count(), 2)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock).amount, 15)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock2).amount, 35)
+        self.assertEqual(Transaction.objects.count(), 2)
+        self.assertEqual(Transaction.objects.filter(status='c').count(), 2)
+        self.assertEqual(StockTransaction.objects.count(), 4)
+
+        script = """
+            tk > Del 000001
+            tk < Sorry, I don't think you did a stock transaction with Confirmation code 000001. If you think this message is a mistake reply with HELP
+            rb > Del 000006
+            rb < Sorry, I don't think you did a stock transaction with Confirmation code 000006. If you think this message is a mistake reply with HELP
+            rb > Del 00001
+            rb < Your transaction with code 000001 has been cancelled. New levels for the affected stock are: 5 units of DRG-123, 15 units of DRG-124.
+            rb > Del 00001
+            rb < Your transaction with code 000001 has already been cancelled.
+        """
+
+        self.runScript(script)
+        
+        self.assertEqual(Transaction.objects.filter(status='x').count(), 1)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock).amount, 5)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock2).amount, 15)
+
+        script = """
+            tk > Del 000002
+            tk < Sorry, I don't think you did a stock transaction with Confirmation code 000002. If you think this message is a mistake reply with HELP
+            rb > Del 2
+            rb < Your transaction with code 000002 has been cancelled. New levels for the affected stock are: 0 units of DRG-123, 0 units of DRG-124.
+            rb > Del 000002
+            rb < Your transaction with code 000002 has already been cancelled.
+        """
+
+        self.runScript(script)
+        
+        
+        self.assertEqual(Transaction.objects.filter(status='x').count(), 2)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock).amount, 0)
+        self.assertEqual(StockAccount.objects.get(stock=self.stock2).amount, 0)

@@ -10,8 +10,8 @@ from django.contrib import admin
 from django import forms
 
 class TransactionAdmin(admin.ModelAdmin):
-    list_display = ('status', 'web_user', 'sms_user', 'account_from', 'account_to', 'date', 'reference', 'type')
-    list_filter = ('status', 'type',  'date', 'account_from', 'account_to', )
+    list_display = ('status', 'web_user', 'sms_user', 'date', 'reference', 'type')
+    list_filter = ('status', 'type',  'date', )
     search_fields = ('web_user__name', 'sms_user__name', 'reference')
     date_hierarchy = 'date'
 
@@ -45,7 +45,7 @@ class StockAccountAdminForm(forms.ModelForm):
 class StockAccountAdmin(admin.ModelAdmin):
     list_display = ('stock', 'location', 'amount', 'last_updated')
     list_filter = ('stock', 'location',  'last_updated')
-    #search_fields = ('stock', 'location', 'amount', 'last_updated')
+#    search_fields = ('stock', 'location', 'amount', 'last_updated')
     date_hierarchy = 'last_updated'
     form = StockAccountAdminForm
 
@@ -66,8 +66,8 @@ class StockUnitAdmin(admin.ModelAdmin):
 admin.site.register(StockUnit, StockUnitAdmin)
 
 class StockTransactionAdmin(admin.ModelAdmin):
-    list_display = ('amount', 'transaction', 'stock')
-    #list_filter = ('amount', 'transaction', 'stock')
+    list_display = ('amount', 'transaction', 'account_from', 'account_to', 'stock')
+    list_filter = ('account_from',)
     #search_fields = ('amount', 'transaction', 'stock')
 
 admin.site.register(StockTransaction, StockTransactionAdmin)
