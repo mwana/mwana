@@ -350,7 +350,7 @@ class GrowthHandler(KeywordHandler):
 
     def _update_survey_averages(self, ass, survey,
                                 survey_entry, results,
-                                healthworker):
+                                healthworker, patient):
         try:
             logger.debug('updating averages...')
             average_zscores = survey.update_avg_zscores()
@@ -483,7 +483,7 @@ class GrowthHandler(KeywordHandler):
 
             # update survey averages
             self._update_survey_averages(ass, survey, survey_entry,
-                                         results, healthworker)
+                                         results, healthworker, patient)
 
             # send feedback to healthworker
             try:

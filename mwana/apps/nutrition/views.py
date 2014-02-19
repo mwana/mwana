@@ -2,9 +2,6 @@
 # vim: ai ts=4 sts=4 et sw=4 encoding=utf-8
 
 from datetime import *
-import os
-import sys
-import string
 import csv
 
 from django.http import HttpResponse
@@ -12,7 +9,6 @@ from django.db.models import Q
 
 from django.template import RequestContext
 from django.shortcuts import render_to_response
-from django.views.generic.list import ListView
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 
 from .models import *
@@ -21,17 +17,17 @@ from .graphs import NutritionGraphs
 
 DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
              "Ntcheu", "Ntchisi", "Salima", "Chitipa", "Karonga", "Likoma",
-             "Mzimba", "Nkhata Bay", "Rumphi", "Balaka", "Blantyre", "Chikwawa",
-             "Chiradzulu", "Machinga", "Mangochi", "Mulanje", "Mwanza", "Nsanje",
-             "Thyolo", "Phalombe", "Zomba", "Neno"]
+             "Mzimba", "Nkhata Bay", "Rumphi", "Balaka", "Blantyre",
+             "Chikwawa", "Chiradzulu", "Machinga", "Mangochi", "Mulanje",
+             "Mwanza", "Nsanje", "Thyolo", "Phalombe", "Zomba", "Neno"]
 
 OEDEMA_VALUES = {1: "Yes", 0: "No", }
 
 stat_options = {"All": "All", "Cancelled": "C", "Good": "G",
-                    "Baseline": "B", "Suspect": "S"}
+                "Baseline": "B", "Suspect": "S"}
 
 action_options = {"R-NRU": "NR", "C-OFP": "OF", "C-R": "RG", "R-SFP": "SF",
-                     "X": "XX", "All": "All"}
+                  "X": "XX", "All": "All"}
 
 
 def index(req):
@@ -54,8 +50,10 @@ def graphs(request):
     startage = request.GET.get('startage', 0)
     endage = request.GET.get('endage', 60)
     selected_gender = request.GET.get('gender', "Both")
-    asses = Assessment.objects.filter(Q(date__gte=startdate), Q(date__lte=enddate),
-    Q(patient__age_in_months__gte=startage), Q(patient__age_in_months__lte=endage))
+    asses = Assessment.objects.filter(Q(date__gte=startdate),
+                                      Q(date__lte=enddate),
+                                      Q(patient__age_in_months__gte=startage),
+                                      Q(patient__age_in_months__lte=endage))
     if selected_gender != "Both":
         asses = asses.filter(patient__gender=selected_gender)
     if selected_location != "All Districts":
@@ -65,28 +63,35 @@ def graphs(request):
         r = NutritionGraphs(asses)
         data = r.get_districts_data()
     if data:
-        context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
+        context = {
+            'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
             'selected_gender': selected_gender,
             'enddate': enddate, 'selected_location': selected_location,
-            'startdate': startdate, 'selected_percent': request.GET.get('percent', "checked"),
+            'startdate': startdate,
+            'selected_percent': request.GET.get('percent', "checked"),
             'startage': startage, 'endage': endage,
-            'weight_table': data['weight_table'], 'stunt_table': data['stunt_table'],
-            'wasting_table': data['wasting_table'], 'weight_data': data['weight_data'],
-            'stunt_data': data['stunt_data'], 'wasting_data': data['wasting_data'],
-            'locations': data['locations'], 'weight_data_percent': data['weight_data_percent'],
+            'weight_table': data['weight_table'],
+            'stunt_table': data['stunt_table'],
+            'wasting_table': data['wasting_table'],
+            'weight_data': data['weight_data'],
+            'stunt_data': data['stunt_data'],
+            'wasting_data': data['wasting_data'],
+            'locations': data['locations'],
+            'weight_data_percent': data['weight_data_percent'],
             'stunt_data_percent': data['stunt_data_percent'],
             'wasting_data_percent': data['wasting_data_percent'],
             'chart_height': max((len(data['locations']) * 100), 700)}
         return render_to_response(template_name, context,
-                              context_instance=RequestContext(request))
+                                  context_instance=RequestContext(request))
     else:
         context = {'districts': sorted(DISTRICTS), 'gender_opts': gender_opts,
-            'selected_gender': selected_gender,
-            'enddate': enddate, 'selected_location': selected_location,
-            'startdate': startdate, 'selected_percent': request.GET.get('percent', "checked"),
-            'startage': startage, 'endage': endage}
+                   'selected_gender': selected_gender,
+                   'enddate': enddate, 'selected_location': selected_location,
+                   'startdate': startdate,
+                   'selected_percent': request.GET.get('percent', "checked"),
+                   'startage': startage, 'endage': endage}
         return render_to_response(template_name_no_data, context,
-                              context_instance=RequestContext(request))
+                                  context_instance=RequestContext(request))
 
 
 def reports(request):
@@ -98,7 +103,8 @@ def reports(request):
     table = AssessmentTable(limited_assessments)
     table.paginate(page=request.GET.get('page', 1))
     context = {'table': table, 'selected_location': selected_location,
-               'startdate': startdate, 'enddate': enddate, 'locations': sorted(DISTRICTS)}
+               'startdate': startdate, 'enddate': enddate,
+               'locations': sorted(DISTRICTS)}
     return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
@@ -111,8 +117,9 @@ def assessments(request):
     selected_status = str(status)
     action_taken = request.GET.get('action_taken', 'All')
     selected_action = str(action_taken)
-    ass_list = Assessment.objects.filter(Q(date__gte=startdate),
-                                      Q(date__lte=enddate)).order_by('-date')
+    ass_list = Assessment.objects.filter(
+        Q(date__gte=startdate),
+        Q(date__lte=enddate)).order_by('-date')
 
     if location != "All Districts":
         filter_loc = Q(healthworker__location__parent__parent__name=location)
@@ -142,8 +149,9 @@ def assessments(request):
                'selected_action': selected_action,
                'ass_list': ass_list}
 
-    return render_to_response("nutrition/assessment_list.html", context,
-                                                             context_instance=RequestContext(request))
+    return render_to_response(
+        "nutrition/assessment_list.html", context,
+        context_instance=RequestContext(request))
 
 
 def instance_to_dict(instance):
@@ -151,7 +159,8 @@ def instance_to_dict(instance):
     for field in instance._meta.fields:
 
         # skip foreign keys. for now... TODO
-        if (hasattr(field, "rel")) and (field.rel is not None):  # and (depth < max_depth):
+        # and (depth < max_depth):
+        if (hasattr(field, "rel")) and (field.rel is not None):
                 # columns.extend(build_row(field.rel.to, cell, depth+1))
                 continue
         value = getattr(instance, field.name)
@@ -167,17 +176,18 @@ def instance_to_dict(instance):
 
 def ass_dicts_for_display(location, startdate, enddate):
     dicts_for_display = []
-    asses = Assessment.objects.filter(Q(date__gte=startdate),
-                                      Q(date__lte=enddate)).order_by('-date').\
-                                      select_related()
+    asses = Assessment.objects.filter(
+        Q(date__gte=startdate),
+        Q(date__lte=enddate)).order_by('-date').select_related()
     if location != "All Districts":
-        asses = asses.filter(healthworker__location__parent__parent__name=location)
+        asses = asses.filter(
+            healthworker__location__parent__parent__name=location)
     for ass in asses:
         ass_dict = {}
         # add desired fields from related models (we want to display the
         # IDs, ect from foreign fields rather than just the unicode() names
         # or all of the fields from related models)
-        # TODO is there a better way to do this? adding fields to the queryset???
+        # TODO better way to do this? adding fields to the queryset???
         ass_dict.update({'interviewer_name': ass.healthworker.name})
         ass_dict.update({'location': ass.healthworker.clinic})
         ass_dict.update({'child_id': ass.patient.code})
@@ -201,19 +211,24 @@ def get_human_oedema(value):
 
 
 # TODO DRY
-def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage, status, action_taken):
+def ass_dicts_for_export(location, startdate, enddate, gender,
+                         startage, endage, status, action_taken):
     dicts_for_export = []
     asses = Assessment.objects.all().order_by('-date').select_related()
     if location != "All Districts":
-        asses = asses.filter(healthworker__location__parent__parent__name=location)
+        asses = asses.filter(
+            healthworker__location__parent__parent__name=location)
     if gender != "Both":
         asses = asses.filter(patient__gender=gender)
     if status != "All":
             asses = asses.filter(status=stat_options[status])
     if action_taken != "All":
         asses = asses.filter(action_taken=action_options[action_taken])
-    asses = asses.filter(Q(date__gte=startdate), Q(date__lte=enddate),
-    Q(patient__age_in_months__gte=startage), Q(patient__age_in_months__lte=endage))
+    asses = asses.filter(
+        Q(date__gte=startdate),
+        Q(date__lte=enddate),
+        Q(patient__age_in_months__gte=startage),
+        Q(patient__age_in_months__lte=endage))
     for ass in asses:
         ass_dict = {}
         # add desired fields from related models (we want to display the
@@ -223,7 +238,10 @@ def ass_dicts_for_export(location, startdate, enddate, gender, startage, endage,
         # queryset???
         ass_dict.update({'interviewer_name': ass.healthworker.name})
         ass_dict.update({'location': ass.healthworker.clinic})
-        ass_dict.update({'district': ass.healthworker.clinic.parent.name})
+        if ass.healthworker.clinic.parent is not None:
+            ass_dict.update({'district': ass.healthworker.clinic.parent.name})
+        else:
+            ass_dict.update({'district': "None"})
         ass_dict.update({'child_id': ass.patient.code})
         ass_dict.update({'sex': ass.patient.gender})
         ass_dict.update({'date_of_birth': ass.patient.date_of_birth})
@@ -272,7 +290,7 @@ def csv_assessments(req):
                'Child ID', 'Sex', 'Date of Birth', 'Age in months', 'Height',
                'Weight', 'Oedema', 'MUAC', 'Weight for height Z', 'Wasting',
                'Weight for age Z', 'Underweight', 'Height for age Z',
-               'Stunting', 'Data Quality', 'Action Taken',]
+               'Stunting', 'Data Quality', 'Action Taken']
     keys = ['date', 'location', 'district', 'interviewer_name', 'child_id',
             'sex', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac', 'weight4height',
@@ -285,7 +303,8 @@ def csv_assessments(req):
     endage = req.GET.get('endage', 60)
     status = req.GET.get('status', 'All')
     action_taken = req.GET.get('action_taken', 'All')
-    assessments = ass_dicts_for_export(location, startdate, enddate, gender, startage, endage, status, action_taken)
+    assessments = ass_dicts_for_export(location, startdate, enddate, gender,
+                                       startage, endage, status, action_taken)
     # sort by date, descending
     #assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     return export(headers, keys, assessments, 'assessments.csv')
@@ -295,8 +314,8 @@ def csv_entries(req):
     headers = ['Date Submitted', 'Facility', 'Interviewer Name', 'Child ID',
                'Sex', 'Date of Birth', 'Age in months', 'Height',
                'Weight', 'Oedema', 'MUAC']
-    keys = ['survey_date', 'healthworker.clinic', 'healthworker.name', 'child_id',
-            'gender', 'date_of_birth', 'age_in_months',
+    keys = ['survey_date', 'healthworker.clinic', 'healthworker.name',
+            'child_id', 'gender', 'date_of_birth', 'age_in_months',
             'height', 'weight', 'oedema', 'muac']
     return export(headers, keys, SurveyEntry.objects.all(), 'entries.csv')
 
@@ -319,7 +338,8 @@ def get_report_criteria(request):
     location = request.GET.get('location', 'All Districts')
     default_end_date = datetime.today().date()
     default_start_date = default_end_date - timedelta(days=30)
-    startdate = request.GET.get('startdate', default_start_date.strftime("%Y-%m-%d"))
+    startdate = request.GET.get('startdate',
+                                default_start_date.strftime("%Y-%m-%d"))
     enddate = request.GET.get('enddate', default_end_date.strftime("%Y-%m-%d"))
 
     return location, startdate, enddate
