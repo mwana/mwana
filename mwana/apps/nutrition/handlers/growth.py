@@ -61,7 +61,7 @@ class GrowthHandler(KeywordHandler):
             # make a new patient)
             patient_args = kwargs.copy()
             logger.debug(patient_args)
-            ids = ['code']
+            ids = ['code', 'cluster_id']
             has_ids = [id in patient_args.keys() for id in ids]
             logger.debug(has_ids)
             if False not in has_ids:
@@ -75,18 +75,18 @@ class GrowthHandler(KeywordHandler):
                 logger.debug("patient!")
                 # compare reported gender and bday to data on file
                 # and update + notify if necessary
-                bday_on_file = patient.date_of_birth
-                gender_on_file = patient.gender
-                if 'gender' in patient_args.keys():
-                    reported_gender = patient_args.get('gender')
-                    if gender_on_file != reported_gender:
-                        patient.gender = reported_gender
-                        patient.save()
-                if 'date_of_birth' in patient_args.keys():
-                    reported_bday = patient_args.get('date_of_birth')
-                    if bday_on_file != reported_bday:
-                        patient.date_of_birth = reported_bday
-                        patient.save()
+                # bday_on_file = patient.date_of_birth
+                # gender_on_file = patient.gender
+                # if 'gender' in patient_args.keys():
+                    # reported_gender = patient_args.get('gender')
+                    # if gender_on_file != reported_gender:
+                        # patient.gender = reported_gender
+                        # patient.save()
+                # if 'date_of_birth' in patient_args.keys():
+                    # reported_bday = patient_args.get('date_of_birth')
+                    # if bday_on_file != reported_bday:
+                        # patient.date_of_birth = reported_bday
+                        # patient.save()
                 return patient, False
         except (ObjectDoesNotExist, IndexError):
             # patient doesnt already exist, so create with all arguments
@@ -437,6 +437,7 @@ class GrowthHandler(KeywordHandler):
         patient_kwargs.update({'date_of_birth': data['date_of_birth']})
         patient_kwargs.update({'gender': data['gender']})
         patient_kwargs.update({'action_taken': data['action_taken']})
+        patient_kwargs.update({'cluster_id': healthworker.clinic.slug})
         # get or create and update patient
         try:
             patient, created = self.__get_or_create_patient(**patient_kwargs)
@@ -489,8 +490,14 @@ class GrowthHandler(KeywordHandler):
             try:
                 logger.debug('constructing confirmation')
                 confirmation = ASSESS_CONFIRM %\
-                    (healthworker.name, ass.get_wasting_display(),
-                     ass.get_underweight_display(), ass.get_stunting_display())
+                    (healthworker.name, data['child_id'])
+                indicators = {'Wasting': ass.get_wasting_display(),
+                              'Underweight': ass.get_underweight_display(),
+                              'Stunting': ass.get_stunting_display()}
+                confirmation += ", ".join(
+                    [key + ":" + value
+                     for key, value in indicators.items() if value != ''])
+                confirmation += ". Please counsel the mother appropriately."
                 logger.debug('confirmation constructed')
                 # send confirmation AFTER any error messages
                 if confirmation is not None:
