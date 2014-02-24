@@ -86,7 +86,9 @@ def stock(request):
         es = TransactedStock()
         # @type sa StockAccount
         es.stock_account = sa
-        es.threshold_level = (sa.threshold(start_date) or 0 + sa.threshold(end_date) or 0)/2
+        
+        es.threshold_level = ((sa.threshold(start_date) or 0) + (sa.threshold(end_date) or 0))/2
+        
         es.dispensed_amount = sa.expended(start_date, end_date)
         dispensed_stock.append(es)
 

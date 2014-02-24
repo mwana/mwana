@@ -1,10 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.handlers.loaning_stock import LoaningStockHandler
 from mwana.apps.stock.handlers.new_stock import NewStockHandler
+from mwana.apps.stock.handlers.dispensed_stock import DispensedStockHandler
 from mwana.apps.surveillance.handlers.survey_cases import SurveyCaseHandler
 from mwana.apps.help.handlers.help import HelpHandler
 from mwana.apps.patienttracing.handlers.trace import TraceHandler
 import rapidsms
-import re
 from mwana.apps.labresults.handlers.results import ResultsHandler
 from mwana.apps.broadcast.handlers.all import AllHandler
 from mwana.apps.broadcast.handlers.clinic import ClinicHandler
@@ -31,6 +32,7 @@ class App (rapidsms.apps.base.AppBase):
         msgtxt = message.text
 
         # TODO find a better way of knowing which hanlers should skip cleaning
+        # E.g. A handler should can have a variable like skip_generic_cleaning = True
 
         # assuming all keywords are declared in lower case
         results_keywords = ResultsHandler.keyword.split('|')
@@ -44,6 +46,8 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(TraceHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(HelpHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(NewStockHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(DispensedStockHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(LoaningStockHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(SurveyCaseHandler.keyword.split('|')))
 
         # remove leading/trailing whitespace

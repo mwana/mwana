@@ -69,7 +69,7 @@ class NewStockHandler(KeywordHandler):
 
         invalid_quantities = [drug.split()[1] for drug in tokens if not drug.split()[1].isdigit()]
         if invalid_quantities:
-            if len(invalid_quantities) ==1:
+            if len(invalid_quantities) == 1:
                 self.respond("Sorry, %s is not a valid number. Enter only numbers for quantity." % invalid_quantities[0])
             else:
                 self.respond("Sorry, %s are not valid numbers. Enter only numbers for quantity." % ", ".join(invalid_quantities))

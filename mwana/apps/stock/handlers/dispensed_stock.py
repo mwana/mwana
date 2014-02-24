@@ -19,7 +19,8 @@ class DispensedStockHandler(KeywordHandler):
 
     keyword = "DISP|dispenced|desp|dispensed|despensed|despenced"
 
-    HELP_TEXT = _("To report dispensed drugs, send DISP <drug-code1> <quantity1>, <drug-code2> <quantity2> e.g DISP DG99 100, DG80 15")
+    HELP_TEXT = _("To report dispensed drugs, send DISP <drug-code1> <quantity1>,"
+                  " <drug-code2> <quantity2> e.g DISP DG99 100, DG80 15")
     message_to_dho = "Hi %s, %s are below threshold by: %s."
     
     def help(self):
@@ -42,7 +43,11 @@ class DispensedStockHandler(KeywordHandler):
 
         my_text = re.sub(r"\s+", " ", my_text)
         tokens = set(my_text.split(delimeter))
-
+        tokens = []
+        for i in my_text.split(delimeter):
+            if i not in tokens:
+                tokens.append(i)
+       
         drug_ids = [drug.split()[0] for drug in tokens]
         repeating_drugs = [id for id in drug_ids if drug_ids.count(id) > 1]
        
@@ -86,9 +91,17 @@ class DispensedStockHandler(KeywordHandler):
                  for c in '_#$%@=/+:':
                     drug_code = drug_code.replace(c, delimeter)
                  stock = Stock.objects.get(code=drug_code)
-                 acc = StockAccount.objects.get(location=location, stock=stock)
+                 acc, created = StockAccount.objects.get_or_create(location=location, stock=stock)
                  amount = int(drug.split()[1])
                  acc.amount -= amount
+                 if acc.amount < 0:
+                     # @type trans Transaction
+                     trans.delete_transaction()
+                     self.respond("Sorry, you cannot dispense %(amt_to_disp)s units of %(drug)s "
+                                  "from your balance of %(avail_amt)s. If you "
+                                  "think this message is a mistake reply with "
+                                  "HELP", amt_to_disp=amount, avail_amt=acc.amount + amount, drug=drug_code)
+                     return True
                  acc.save()
                  StockTransaction.objects.create(transaction=trans, 
                                                         amount=amount,

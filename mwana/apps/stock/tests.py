@@ -161,18 +161,27 @@ class TestStockAtFacility(TestApp):
         self.assertEqual(Transaction.objects.count(), 0)
 
         acc1 = StockAccount.objects.create(stock=self.stock, location=self.kdh)
-        acc1.amount=50
+        acc2 = StockAccount.objects.create(stock=self.stock2, location=self.kdh)
+        acc1.amount = 50
         acc1.save()
+        acc2.amount = 44
+        acc2.save()
 
         script = """
-            rb > DISP DRG-123 23
-            rb < Thank you. New levels for the just dispensed stock are: 27 units of DRG-123. Cc: 000001
+            rb > DISP DRG-123 23, Drg-124 4
+            rb < Thank you. New levels for the just dispensed stock are: 27 units of DRG-123, 40 units of DRG-124. Cc: 000001
+            rb > DISP DRG-123 23, Drg-124 60
+            rb < Sorry, you cannot dispense 60 units of DRG-124 from your balance of 40. If you think this message is a mistake reply with HELP
+            rb > DISP DRG-123 30, Drg-124 6
+            rb < Sorry, you cannot dispense 30 units of DRG-123 from your balance of 27. If you think this message is a mistake reply with HELP
         """
 
         self.runScript(script)
-        self.assertEqual(StockAccount.objects.count(), 1)
+        self.assertEqual(StockAccount.objects.count(), 2)
         self.assertEqual(StockAccount.objects.filter(amount=27).count(), 1)
-        self.assertEqual(Transaction.objects.count(), 1)
+        self.assertEqual(Transaction.objects.count(), 3)
+        self.assertEqual(Transaction.objects.filter(status='x').count(), 2)
+        self.assertEqual(Transaction.objects.filter(status='c').count(), 1)
 
 
 class TestStockTransactionManagement(TestApp):

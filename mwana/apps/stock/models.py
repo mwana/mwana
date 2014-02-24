@@ -58,14 +58,20 @@ class StockAccount(models.Model):
     @property
     def current_threshold(self):
         today = date.today()
-        thresholds = Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
-        filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
+        year = today.year
+        month = today.month
+        thresholds = Threshold.objects.filter(account__id=self.id,
+        start_date__year=year, start_date__month=month).\
+        filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
         if thresholds:
             return thresholds[0].level
         
     def threshold(self, today):
-        thresholds = Threshold.objects.filter(account__id=self.id, start_date__lte=today).\
-        filter(Q(end_date=None) | Q(end_date__gte=date.today())).order_by('-id')
+        year = today.year
+        month = today.month
+        thresholds = Threshold.objects.filter(account__id=self.id, start_date__year=year,
+        start_date__month=month).\
+        filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
         if thresholds:
             return thresholds[0].level
 
@@ -122,6 +128,7 @@ TRANSACTION_TYPES = (
                      ('f_f', 'Facility to Facility'),
                      )
 
+
 class Transaction(models.Model):
     status = models.CharField(max_length=1, choices=TRANSACTION_CHOICES, default='p')
     web_user = models.ForeignKey(User, null=True, blank=True)
@@ -133,6 +140,28 @@ class Transaction(models.Model):
 
     def __unicode__(self):
         return "%s, %s, %s, %s" % (self.reference, self.status, self.type, self.date)
+
+    def delete_transaction(self):
+        stock_transactions = StockTransaction.objects.filter(transaction=self)
+        affected = []
+        for stock_trans in stock_transactions:
+            account_from = stock_trans.account_from
+            account_to = stock_trans.account_to
+            if account_from:
+                account_from.amount += stock_trans.amount
+                account_from.save()
+                affected.append(account_from)
+            if account_to:
+                account = StockAccount.objects.get(id=account_to.id)
+                account.amount -= stock_trans.amount
+                account.save()
+                affected.append(account)
+                # TODO: Consider better implementation than deleting
+            stock_trans.delete()
+            
+        self.status = 'x'
+        self.save()
+        return affected
 
 
 class Threshold(models.Model):
