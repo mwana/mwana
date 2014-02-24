@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.apps.patienttracing.management.commands.correct_automated_traces import correct_patient_traces
 from mwana.util import is_today_a_weekend
 from mwana.apps.alerts.models import Lab
 from datetime import date
@@ -439,3 +440,5 @@ def cleanup_data(router):
         mark_long_pending_results_as_obsolete()
     except Exception, e:
         logger.error('mark_long_pending_results_as_obsolete()). %s', e)
+
+    correct_patient_traces()

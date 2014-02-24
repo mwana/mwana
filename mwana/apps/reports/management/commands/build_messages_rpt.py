@@ -1,7 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 """
-Creates web users from a csv file. The fields in the csv file must be in the
-order: FirstName, LastName, Email, Type, District. Passwords created are 'temporal'
+Updates Reporting table MessagesByMonth
 """
 
 from mwana.apps.reports.models import MessageByLocationByUserType
@@ -186,7 +185,7 @@ def rebuild_messages_data():
 def update_locations():
     for mlt in MessageByLocationByUserType.objects.filter(province=None):
 
-        print mlt.absolute_location.slug, mlt.id
+#        print mlt.absolute_location.slug, mlt.id
         # @type mlt MessageByLocationByUserType
         if mlt.absolute_location.type.slug == 'zone':
             mlt.facility_slug = mlt.absolute_location.parent.slug

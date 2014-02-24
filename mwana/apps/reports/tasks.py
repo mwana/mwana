@@ -17,6 +17,9 @@ from mwana.const import get_district_worker_type
 from mwana.const import get_province_worker_type
 from mwana.util import get_clinic_or_default
 from rapidsms.messages import OutgoingMessage
+from mwana.apps.reports.management.commands.build_messages_rpt import rebuild_messages_data
+from mwana.apps.reports.management.commands.build_messages_rpt import update_locations
+from mwana.apps.reports.management.commands.build_msg_by_backend_rpt import rebuild_messages_data as rebuild_msg_by_backend_data
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
 _ = lambda s: s
@@ -214,3 +217,14 @@ def send_cba_encouragement(router):
         counter = counter + 1
         if counter >= msg_limit:
             break
+
+
+def build_messages_report(router):
+    logger.info('in build_messages_report')
+    rebuild_messages_data()
+    update_locations()
+
+
+def build_msg_by_backend_rpt(router):
+    logger.info('in build_msg_by_backend_rpt')
+    rebuild_msg_by_backend_data()

@@ -56,7 +56,7 @@ def correct_misspelt_status():
 
 def correct_tolds(days_ago):
     if not days_ago: days_ago = 7
-    count = 0
+#    count = 0
     for pt in PatientTrace.objects.filter(source_patient_trace=None,
                                           initiator='cba', status='told',
                                           patient_event=None):
@@ -78,7 +78,7 @@ def correct_tolds(days_ago):
             auto_pt.status = pt.status
             auto_pt.save()
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=auto_pt)
-            count += 1
+#            count += 1
         
         # else try matching by soundex and distance method
         else:
@@ -93,7 +93,7 @@ def correct_tolds(days_ago):
                     my_pt.status = pt.status
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1                    
+#                    count += 1
 
         for my_pt in PatientTrace.objects.filter(initiator__in=["clinic_worker"],
                                                  status='new',
@@ -106,7 +106,7 @@ def correct_tolds(days_ago):
             my_pt.status = pt.status
             my_pt.save()
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-            count += 1
+#            count += 1
         
         # else try matching by soundex and distance method
         else:
@@ -121,15 +121,15 @@ def correct_tolds(days_ago):
                     my_pt.status = pt.status
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
-    print "corrected %s records with told using %s days as tolerance" % (count, days_ago)
+#    print "corrected %s records with told using %s days as tolerance" % (count, days_ago)
 
 
 def correct_confirms(days_ago=7):
     if not days_ago: days_ago = 7
-    count = 0
+#    count = 0
     for pt in PatientTrace.objects.filter(source_patient_trace=None,
                                           initiator='cba', status='confirmed',
                                           patient_event=None).exclude(reminded_date=None):
@@ -156,7 +156,7 @@ def correct_confirms(days_ago=7):
 
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=auto_pt)
 
-            count += 1
+#            count += 1
 
         # else try matching by soundex and distance method
         else:
@@ -174,7 +174,7 @@ def correct_confirms(days_ago=7):
                     my_pt.confirmed_by = pt.confirmed_by or pt.messenger
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
         for my_pt in PatientTrace.objects.filter(initiator="clinic_worker",
@@ -193,7 +193,7 @@ def correct_confirms(days_ago=7):
 
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
 
-            count += 1
+#            count += 1
 
         # else try matching by soundex and distance method
         else:
@@ -212,10 +212,10 @@ def correct_confirms(days_ago=7):
                     my_pt.save()
                     
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
-    print "corrected %s records with confirm using %s days as tolerance" % (count, days_ago)
+#    print "corrected %s records with confirm using %s days as tolerance" % (count, days_ago)
 
 def cleanup():
     # TODO: clear CBA initiated traces that have been mapped to system initiated ones
@@ -379,7 +379,7 @@ def clean_names():
 
     count = _remove_visit_type(count)
 
-    print "Made %s corrections to names" % count
+#    print "Made %s corrections to names" % count
 
 def correct_patient_traces(told_tolerance=None, confirm_tolerance=None):
     clean_names()

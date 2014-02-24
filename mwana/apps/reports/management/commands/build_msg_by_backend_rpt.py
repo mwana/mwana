@@ -1,7 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 """
-Creates web users from a csv file. The fields in the csv file must be in the
-order: FirstName, LastName, Email, Type, District. Passwords created are 'temporal'
+Builds data for reporting table
 """
 
 from django.core.management.base import LabelCommand
