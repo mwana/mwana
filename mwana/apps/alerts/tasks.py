@@ -5,15 +5,14 @@ from datetime import datetime
 from datetime import timedelta
 import logging
 
-from mwana.apps.alerts.models import DhoSMSAlertNotification
 from mwana.apps.alerts.labresultsalerts.alert import Alert
+from mwana.apps.alerts.models import DhoSMSAlertNotification
+from mwana.apps.alerts.models import Hub
 from mwana.apps.labresults.models import Payload
 from mwana.apps.locations.models import Location
 from mwana.const import get_district_worker_type
-from rapidsms.models import Contact
 from rapidsms.messages import OutgoingMessage
-from mwana.apps.alerts.models import Hub
-from mwana.apps.alerts.models import Lab
+from rapidsms.models import Contact
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +55,9 @@ def send_clinics_not_retrieving_results_alerts(router):
         if not my_clinics:
             continue
         msg = "ALERT! %s, Clinics haven't retrieved results: %s" % (dho.name, ", ".\
-                                                                  join(clinic.name for clinic in my_clinics))
+                                                                    join(clinic.name for clinic in my_clinics))
 
-        process_msg_for_dho(dho,"W",Alert.LONG_PENDING_RESULTS,yesterday,msg)
+        process_msg_for_dho(dho, "W", Alert.LONG_PENDING_RESULTS, yesterday, msg)
         
        
 
@@ -81,8 +80,8 @@ def send_clinics_not_sending_dbs_alerts(router):
             continue
         
         msg = "ALERT! %s, Clinics haven't sent DBS to hub: %s" % (dho.name, ", ".\
-                                                              join(clinic.name for clinic in my_clinics))
-        process_msg_for_dho(dho,"W",Alert.CLINIC_NOT_USING_SYSTEM,yesterday,msg)
+                                                                  join(clinic.name for clinic in my_clinics))
+        process_msg_for_dho(dho, "W", Alert.CLINIC_NOT_USING_SYSTEM, yesterday, msg)
         
 def send_hubs_not_sending_dbs_alerts(router):
     logger.info('notifying DHOs of district hubs not sending DBS samples to lab')
@@ -99,15 +98,15 @@ def send_hubs_not_sending_dbs_alerts(router):
         if last_retrieved >= hub_sent_dbs_referal_date:
             continue     
         dist = dho.location
-        msg =("The %s district hub (%s) has not "
-                                                "sent samples to %s in over %s "
-                                                "days." %
-                                                (dist.name,
-                                                get_hub_name(dist),
-                                                get_lab_name(dist),
-                                                DISTICT_TRANSPORT_DAYS-1)
-                                                )
-        process_msg_for_dho(dho,"W",Alert.DISTRICT_NOT_SENDING_DBS,yesterday,msg)
+        msg = ("The %s district hub (%s) has not "
+               "sent samples to %s in over %s "
+               "days." %
+               (dist.name,
+               get_hub_name(dist),
+               get_lab_name(dist),
+               DISTICT_TRANSPORT_DAYS-1)
+               )
+        process_msg_for_dho(dho, "W", Alert.DISTRICT_NOT_SENDING_DBS, yesterday, msg)
 
 def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
 
@@ -126,20 +125,20 @@ def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
                                            district=contact.location)
 
 def get_active_facilities():
-        return Location.objects.filter(lab_results__notification_status__in=
-                                       ['sent']).distinct()
+    return Location.objects.filter(lab_results__notification_status__in=
+                                   ['sent']).distinct()
 def get_hub_name(location):
+    try:
+        return Location.objects.filter(contact__types=get_hub_worker_type()).distinct().get(parent=location).name
+    except:
         try:
-            return Location.objects.filter(contact__types=get_hub_worker_type()).distinct().get(parent=location).name
-        except:
-            try:
-                return Hub.objects.get(district=location).name
-            except Hub.DoesNotExist:
-                return "Unkown hub"
+            return Hub.objects.get(district=location).name
+        except Hub.DoesNotExist:
+            return "Unkown hub"
 
 def get_lab_name(district):
-        try:
-            return Payload.objects.filter(lab_results__clinic__parent\
-                                          =district)[0].source
-        except:
-            return "Unkown lab"
+    try:
+        return Payload.objects.filter(lab_results__clinic__parent\
+                                      =district)[0].source
+    except:
+        return "Unkown lab"

@@ -1,9 +1,7 @@
-import mwana.apps.alerts.tasks
 # vim: ai ts=4 sts=4 et sw=4
 import logging
 import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
-from mwana.apps.alerts.tasks import send_clinics_not_retrieving_results_alerts
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +13,6 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_clinics_not_retrieving_results_alerts_task()
         self.schedule_clinics_not_sending_dbs_alerts_task()
         self.schedule_hubs_not_sending_dbs_alerts_task()
-        pass
 
     def schedule_clinics_not_retrieving_results_alerts_task(self):
         callback = 'mwana.apps.alerts.tasks.send_clinics_not_retrieving_results_alerts'

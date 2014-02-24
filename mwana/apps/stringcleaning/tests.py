@@ -84,9 +84,9 @@ class TestApp(TestScript):
         # in broadcasts don't clean
         script = """
         cba1 > clinic 403012/10. Not 402012/09;
-        0979565992 < 403012/10. Not 402012/09; [from Peter Phiri to CLINIC]
+        0979565992 < 403012/10. Not 402012/09; [from Peter Phiri (cba1) of Central Clinic: Zone 2 to CLINIC]
         cba1 > cba dont't filter , or / or ; or * or + or - in broadcasts
-        cba2 < dont't filter , or / or ; or * or + or - in broadcasts [from Peter Phiri to CBA]
+        cba2 < dont't filter , or / or ; or * or + or - in broadcasts [from Peter Phiri (cba1) of Central Clinic: Zone 2 to CBA]
         """
         self.runScript(script)
 
@@ -103,9 +103,9 @@ class TestApp(TestScript):
 
         script = """
         0979565993 > blaster in blaster we dont clean , or / or ; or * or + or -
-        0979565992 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama to Mwana Users]
-        cba1 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama to Mwana Users]
-        cba2 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama to Mwana Users]
+        0979565992 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama (0979565993) of Central Clinic to Mwana Users]
+        cba1 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama (0979565993) of Central Clinic to Mwana Users]
+        cba2 < in blaster we dont clean , or / or ; or * or + or - [from Princess Obama (0979565993) of Central Clinic to Mwana Users]
         """
         self.runScript(script)
 

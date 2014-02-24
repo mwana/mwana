@@ -3,7 +3,6 @@ from mwana.apps.surveillance.handlers.survey_cases import SurveyCaseHandler
 from mwana.apps.help.handlers.help import HelpHandler
 from mwana.apps.patienttracing.handlers.trace import TraceHandler
 import rapidsms
-import re
 from mwana.apps.labresults.handlers.results import ResultsHandler
 from mwana.apps.broadcast.handlers.all import AllHandler
 from mwana.apps.broadcast.handlers.clinic import ClinicHandler
