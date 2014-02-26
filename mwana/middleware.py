@@ -11,7 +11,7 @@ class LogExceptions(object):
     Simple middleware to log Django exceptions through Python's standard
     logging module.
     """
-    
+
     def process_exception(self, request, exception):
         logger = logging.getLogger('mwana.middleware.LogExceptions')
         logger.exception(exception)
@@ -22,11 +22,14 @@ class LoginRequired(object):
     Makes login required for all views except those that start with the matched
     URLs.
     """
-    
+
     urls = settings.NO_LOGIN_REQUIRED_WHITELIST
-    
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         for url in self.urls:
             if request.get_full_path().startswith(url):
                 return # allow normal processing to continue
+            if request.get_full_path() == '/smgl/' or request.get_full_path() == '/':
+                #Allow processing to continue since this is the home page.
+                return
         return login_required(view_func)(request, *view_args, **view_kwargs)
