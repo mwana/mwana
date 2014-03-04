@@ -11,10 +11,10 @@ from rapidsms.models import Connection, Contact
 class SampleNotification(models.Model):
     """
     Records notifications that samples were sent.  This class
-    is not linked to the Result class because we don't have 
+    is not linked to the Result class because we don't have
     individual sample ids, so we just include them in bulk.
     """
-    
+
     contact  = models.ForeignKey(Contact)
     location = models.ForeignKey(Location)
     count    = models.PositiveIntegerField()
@@ -121,7 +121,7 @@ class Result(models.Model):
 
     #ancillary demographic data that can help matching up results back to patients
     birthdate = models.DateField(null=True, blank=True)
-    child_age = models.IntegerField(null=True, blank=True)
+    child_age = models.DecimalField(max_digits=4,decimal_places=1,blank=True,null=True)
     child_age_unit = models.CharField(null=True, blank=True, max_length=20)
     sex = models.CharField(choices=SEX_CHOICES, max_length=1, blank=True)
     mother_age = models.IntegerField(null=True, blank=True) #age in years
