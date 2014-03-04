@@ -56,6 +56,13 @@ def json_timestamp (val):
     except:
         return None
 
+def lowercase_value(val):
+    """convert a value to lowercase"""
+    try:
+        return val.lower()
+    except:
+        return None
+
 def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None):
     """extract a value from a data dictionary, which may or may not be present in the dictionary,
     and may also need to be transformed in some way"""
@@ -239,7 +246,7 @@ def accept_record (record, payload):
         'birthdate': dictval(record, 'dob', json_date),
         'child_age': dictval(record, 'child_age'),
         'child_age_unit': dictval(record, 'child_age_unit'),
-        'sex': dictval(record, 'sex'),
+        'sex': dictval(record, 'sex', lowercase_value),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
