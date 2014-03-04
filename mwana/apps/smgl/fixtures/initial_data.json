@@ -88,6 +88,16 @@
     }
   },
   {
+    "pk": 9,
+    "model": "locations.locationtype",
+    "fields": {
+      "exists_in": null,
+      "plural": "villages",
+      "slug": "village",
+      "singular": "village"
+    }
+  },
+  {
     "pk": 1,
     "model": "locations.locationtype",
     "fields": {
@@ -168,107 +178,4839 @@
     }
   },
   {
-    "pk": 172,
+    "pk": 284,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Kalonda",
-      "parent": 164,
+      "name": "Chivunya",
+      "parent": 199,
       "point": null,
       "has_independent_printer": false,
-      "type": 5,
-      "slug": "804027"
+      "type": 9,
+      "slug": "8040240102"
     }
   },
   {
-    "pk": 281,
+    "pk": 283,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilala",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240101"
+    }
+  },
+  {
+    "pk": 285,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilyata",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240103"
+    }
+  },
+  {
+    "pk": 286,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mwaayo",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240104"
+    }
+  },
+  {
+    "pk": 287,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Monde",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240105"
+    }
+  },
+  {
+    "pk": 288,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namungundu",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240106"
+    }
+  },
+  {
+    "pk": 289,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kabumbwe",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240107"
+    }
+  },
+  {
+    "pk": 290,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mwabbila",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240108"
+    }
+  },
+  {
+    "pk": 291,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nchibwende",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240109"
+    }
+  },
+  {
+    "pk": 292,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mweebo",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240110"
+    }
+  },
+  {
+    "pk": 293,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chungu",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240111"
+    }
+  },
+  {
+    "pk": 294,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hachimpombe",
+      "parent": 199,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240112"
+    }
+  },
+  {
+    "pk": 295,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chuubo",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240201"
+    }
+  },
+  {
+    "pk": 296,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilyata",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240202"
+    }
+  },
+  {
+    "pk": 297,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamuyala",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240203"
+    }
+  },
+  {
+    "pk": 298,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mapulanga",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240204"
+    }
+  },
+  {
+    "pk": 299,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mulobela",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240205"
+    }
+  },
+  {
+    "pk": 300,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lingamba",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240206"
+    }
+  },
+  {
+    "pk": 301,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hanampota",
+      "parent": 200,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240207"
+    }
+  },
+  {
+    "pk": 302,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Singowa",
+      "parent": 201,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240301"
+    }
+  },
+  {
+    "pk": 303,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simakanta",
+      "parent": 201,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240302"
+    }
+  },
+  {
+    "pk": 304,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Makwenda",
+      "parent": 201,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240303"
+    }
+  },
+  {
+    "pk": 305,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Jombo",
+      "parent": 201,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240304"
+    }
+  },
+  {
+    "pk": 306,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nakasamu",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240401"
+    }
+  },
+  {
+    "pk": 307,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "hamukasunka",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240402"
+    }
+  },
+  {
+    "pk": 308,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simakanta",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240403"
+    }
+  },
+  {
+    "pk": 309,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nabuundu",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240404"
+    }
+  },
+  {
+    "pk": 310,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simoono",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240405"
+    }
+  },
+  {
+    "pk": 311,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Similindi",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240406"
+    }
+  },
+  {
+    "pk": 312,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Natanga",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240407"
+    }
+  },
+  {
+    "pk": 393,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Vanberg-Chabwino farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300608"
+    }
+  },
+  {
+    "pk": 394,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siafwa Compound",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300701"
+    }
+  },
+  {
+    "pk": 395,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bridge ",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300702"
+    }
+  },
+  {
+    "pk": 396,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Town Market",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300703"
+    }
+  },
+  {
+    "pk": 397,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Town Centre",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300704"
+    }
+  },
+  {
+    "pk": 398,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mathews",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300705"
+    }
+  },
+  {
+    "pk": 399,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalomo High School",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300706"
+    }
+  },
+  {
+    "pk": 400,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Road Block",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300707"
+    }
+  },
+  {
+    "pk": 401,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hospital Compound",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300708"
+    }
+  },
+  {
+    "pk": 402,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zesco Compound",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300709"
+    }
+  },
+  {
+    "pk": 403,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Police Camp",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300710"
+    }
+  },
+  {
+    "pk": 404,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "GB Compound",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300711"
+    }
+  },
+  {
+    "pk": 405,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ma Germany",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300712"
+    }
+  },
+  {
+    "pk": 406,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Magrimondi",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300713"
+    }
+  },
+  {
+    "pk": 407,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mwata Compound",
+      "parent": 269,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300714"
+    }
+  },
+  {
+    "pk": 408,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dindi",
+      "parent": 212,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310101"
+    }
+  },
+  {
+    "pk": 409,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mukwalantila",
+      "parent": 212,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310102"
+    }
+  },
+  {
+    "pk": 410,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siansumo",
+      "parent": 212,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310103"
+    }
+  },
+  {
+    "pk": 411,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mamadula",
+      "parent": 212,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310104"
+    }
+  },
+  {
+    "pk": 412,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalamba Sianene",
+      "parent": 212,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310105"
+    }
+  },
+  {
+    "pk": 413,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lonkwe",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310201"
+    }
+  },
+  {
+    "pk": 414,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamazila",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310202"
+    }
+  },
+  {
+    "pk": 415,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Musebela",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310203"
+    }
+  },
+  {
+    "pk": 416,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nasilele",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310204"
+    }
+  },
+  {
+    "pk": 417,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chinkusu",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310205"
+    }
+  },
+  {
+    "pk": 418,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chingobe",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310206"
+    }
+  },
+  {
+    "pk": 419,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chundwe",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310207"
+    }
+  },
+  {
+    "pk": 420,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Shunta",
+      "parent": 213,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310208"
+    }
+  },
+  {
+    "pk": 421,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Treasure",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310601"
+    }
+  },
+  {
+    "pk": 422,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwami",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310602"
+    }
+  },
+  {
+    "pk": 423,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mawaya",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310603"
+    }
+  },
+  {
+    "pk": 424,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Transmitter",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310604"
+    }
+  },
+  {
+    "pk": 425,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mantanyani",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310605"
+    }
+  },
+  {
+    "pk": 426,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zimba Town",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310606"
+    }
+  },
+  {
+    "pk": 427,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namadula A",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310607"
+    }
+  },
+  {
+    "pk": 428,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namadula B",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310608"
+    }
+  },
+  {
+    "pk": 429,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namadula C",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310609"
+    }
+  },
+  {
+    "pk": 430,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalundu Farm",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310610"
+    }
+  },
+  {
+    "pk": 431,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Police Compound",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310611"
+    }
+  },
+  {
+    "pk": 432,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Highland",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310612"
+    }
+  },
+  {
+    "pk": 433,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mutunda Farm",
+      "parent": 271,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310613"
+    }
+  },
+  {
+    "pk": 434,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kabutu",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310701"
+    }
+  },
+  {
+    "pk": 435,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Island",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310702"
+    }
+  },
+  {
+    "pk": 436,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Homesteady",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310703"
+    }
+  },
+  {
+    "pk": 437,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nakoya",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310704"
+    }
+  },
+  {
+    "pk": 438,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Seventen",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310705"
+    }
+  },
+  {
+    "pk": 439,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalundu ",
+      "parent": 272,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040310706"
+    }
+  },
+  {
+    "pk": 440,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Seven fountain ",
+      "parent": 217,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280101"
+    }
+  },
+  {
+    "pk": 441,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Twinfountain",
+      "parent": 217,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280102"
+    }
+  },
+  {
+    "pk": 442,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Goodhope ",
+      "parent": 217,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280103"
+    }
+  },
+  {
+    "pk": 443,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muliwana Old Farm",
+      "parent": 219,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280301"
+    }
+  },
+  {
+    "pk": 444,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mpuundu Farm",
+      "parent": 219,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280302"
+    }
+  },
+  {
+    "pk": 445,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Maambo Farm",
+      "parent": 219,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280303"
+    }
+  },
+  {
+    "pk": 446,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bryan",
+      "parent": 219,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280304"
+    }
+  },
+  {
+    "pk": 447,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nangala",
+      "parent": 219,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280305"
+    }
+  },
+  {
+    "pk": 448,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Yusa Farm",
+      "parent": 220,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280401"
+    }
+  },
+  {
+    "pk": 313,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kabumbwe",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240408"
+    }
+  },
+  {
+    "pk": 314,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chungu",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240409"
+    }
+  },
+  {
+    "pk": 315,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Makwenda",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240410"
+    }
+  },
+  {
+    "pk": 316,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namaloongo",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240411"
+    }
+  },
+  {
+    "pk": 317,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Misinzo",
+      "parent": 202,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240412"
+    }
+  },
+  {
+    "pk": 318,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hanzembwe",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240501"
+    }
+  },
+  {
+    "pk": 319,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Handavwu",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240502"
+    }
+  },
+  {
+    "pk": 320,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sinzala",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240503"
+    }
+  },
+  {
+    "pk": 321,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simungoma",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240504"
+    }
+  },
+  {
+    "pk": 322,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mwabbila",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240505"
+    }
+  },
+  {
+    "pk": 323,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Makupe",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240506"
+    }
+  },
+  {
+    "pk": 324,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Similindi",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240507"
+    }
+  },
+  {
+    "pk": 325,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chivwunya",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240508"
+    }
+  },
+  {
+    "pk": 326,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Habalengu",
+      "parent": 203,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240509"
+    }
+  },
+  {
+    "pk": 327,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kantoolo",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240601"
+    }
+  },
+  {
+    "pk": 328,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sichimbwali",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240602"
+    }
+  },
+  {
+    "pk": 329,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namalindi",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240603"
+    }
+  },
+  {
+    "pk": 330,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Handavu",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240604"
+    }
+  },
+  {
+    "pk": 331,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kauwe",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240605"
+    }
+  },
+  {
+    "pk": 332,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Katambo",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240606"
+    }
+  },
+  {
+    "pk": 333,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Habalengu",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240607"
+    }
+  },
+  {
+    "pk": 334,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kuliwa",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240608"
+    }
+  },
+  {
+    "pk": 335,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chibyabusiku",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240609"
+    }
+  },
+  {
+    "pk": 336,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kanyungwa",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240610"
+    }
+  },
+  {
+    "pk": 337,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Matimba",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240611"
+    }
+  },
+  {
+    "pk": 338,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malindi",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240612"
+    }
+  },
+  {
+    "pk": 449,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bbelo",
+      "parent": 220,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280402"
+    }
+  },
+  {
+    "pk": 450,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siandwazi",
+      "parent": 221,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280501"
+    }
+  },
+  {
+    "pk": 451,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mpuundu",
+      "parent": 221,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280502"
+    }
+  },
+  {
+    "pk": 452,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Plateau Farm",
+      "parent": 222,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280601"
+    }
+  },
+  {
+    "pk": 453,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Rema farm",
+      "parent": 222,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280602"
+    }
+  },
+  {
+    "pk": 454,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lubombo",
+      "parent": 222,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280603"
+    }
+  },
+  {
+    "pk": 455,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siabalumbi",
+      "parent": 222,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280604"
+    }
+  },
+  {
+    "pk": 456,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muyoba",
+      "parent": 223,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280701"
+    }
+  },
+  {
+    "pk": 457,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibajene",
+      "parent": 223,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280702"
+    }
+  },
+  {
+    "pk": 458,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Katungu",
+      "parent": 223,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280703"
+    }
+  },
+  {
+    "pk": 459,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachija",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280801"
+    }
+  },
+  {
+    "pk": 460,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikweya",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280802"
+    }
+  },
+  {
+    "pk": 461,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampeta",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280803"
+    }
+  },
+  {
+    "pk": 462,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibalwa",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280804"
+    }
+  },
+  {
+    "pk": 463,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Gwalala",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280805"
+    }
+  },
+  {
+    "pk": 464,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lubombo",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280806"
+    }
+  },
+  {
+    "pk": 465,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munakanyemba",
+      "parent": 224,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280807"
+    }
+  },
+  {
+    "pk": 466,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tumango",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280901"
+    }
+  },
+  {
+    "pk": 467,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Choolwe",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280902"
+    }
+  },
+  {
+    "pk": 468,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mutala",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280903"
+    }
+  },
+  {
+    "pk": 469,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Wasawange",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280904"
+    }
+  },
+  {
+    "pk": 470,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namwianga",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280905"
+    }
+  },
+  {
+    "pk": 471,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Plateau Farm",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280906"
+    }
+  },
+  {
+    "pk": 472,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lema Farm",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280907"
+    }
+  },
+  {
+    "pk": 473,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siabalumbi",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280908"
+    }
+  },
+  {
+    "pk": 474,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lubombo",
+      "parent": 276,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040280909"
+    }
+  },
+  {
+    "pk": 475,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalowa",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110101"
+    }
+  },
+  {
+    "pk": 476,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibalwa",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110102"
+    }
+  },
+  {
+    "pk": 477,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Katukula",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110103"
+    }
+  },
+  {
+    "pk": 478,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mulwani",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110104"
+    }
+  },
+  {
+    "pk": 479,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muyoba",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110105"
+    }
+  },
+  {
+    "pk": 480,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachija",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110106"
+    }
+  },
+  {
+    "pk": 481,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibajene",
+      "parent": 225,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110107"
+    }
+  },
+  {
+    "pk": 482,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwaamwa",
+      "parent": 226,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110201"
+    }
+  },
+  {
+    "pk": 483,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simapuka",
+      "parent": 226,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110202"
+    }
+  },
+  {
+    "pk": 484,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalefula",
+      "parent": 226,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110203"
+    }
+  },
+  {
+    "pk": 485,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siankutu",
+      "parent": 226,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110204"
+    }
+  },
+  {
+    "pk": 486,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamwaamvwa",
+      "parent": 227,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110301"
+    }
+  },
+  {
+    "pk": 487,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamoono",
+      "parent": 228,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110401"
+    }
+  },
+  {
+    "pk": 488,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Shunta",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110501"
+    }
+  },
+  {
+    "pk": 489,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibayi",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110502"
+    }
+  },
+  {
+    "pk": 490,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chinkusu",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110503"
+    }
+  },
+  {
+    "pk": 491,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chingobe",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110504"
+    }
+  },
+  {
+    "pk": 492,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamazila",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110505"
+    }
+  },
+  {
+    "pk": 493,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simuyuni",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110506"
+    }
+  },
+  {
+    "pk": 494,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siakaloba",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110507"
+    }
+  },
+  {
+    "pk": 495,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nasilele",
+      "parent": 229,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110508"
+    }
+  },
+  {
+    "pk": 496,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampondo",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110601"
+    }
+  },
+  {
+    "pk": 497,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Njabalombe",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110602"
+    }
+  },
+  {
+    "pk": 498,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siakulya",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110603"
+    }
+  },
+  {
+    "pk": 499,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamajali",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110604"
+    }
+  },
+  {
+    "pk": 500,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kayumba",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110605"
+    }
+  },
+  {
+    "pk": 501,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianagombe 2",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110606"
+    }
+  },
+  {
+    "pk": 502,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianagombe 3",
+      "parent": 230,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110607"
+    }
+  },
+  {
+    "pk": 503,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siambula",
+      "parent": 231,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110701"
+    }
+  },
+  {
+    "pk": 504,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mutana",
+      "parent": 231,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110702"
+    }
+  },
+  {
+    "pk": 505,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachongwe",
+      "parent": 231,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110703"
+    }
+  },
+  {
+    "pk": 506,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siaboya",
+      "parent": 231,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110704"
+    }
+  },
+  {
+    "pk": 507,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampeta",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110801"
+    }
+  },
+  {
+    "pk": 508,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mweebo",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110802"
+    }
+  },
+  {
+    "pk": 509,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munakanyembe",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110803"
+    }
+  },
+  {
+    "pk": 510,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kanyeba",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110804"
+    }
+  },
+  {
+    "pk": 511,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Museta",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110805"
+    }
+  },
+  {
+    "pk": 512,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kambulu",
+      "parent": 232,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110806"
+    }
+  },
+  {
+    "pk": 513,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siasyalumba",
+      "parent": 233,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110901"
+    }
+  },
+  {
+    "pk": 514,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "luyala",
+      "parent": 233,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110902"
+    }
+  },
+  {
+    "pk": 515,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kaduku",
+      "parent": 233,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110903"
+    }
+  },
+  {
+    "pk": 516,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ngandu",
+      "parent": 233,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040110904"
+    }
+  },
+  {
+    "pk": 517,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kabulu",
+      "parent": 234,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040111001"
+    }
+  },
+  {
+    "pk": 518,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Katanga",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340101"
+    }
+  },
+  {
+    "pk": 519,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chibila",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340102"
+    }
+  },
+  {
+    "pk": 520,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Michelo",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340103"
+    }
+  },
+  {
+    "pk": 521,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malala",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340104"
+    }
+  },
+  {
+    "pk": 522,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muchindu",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340105"
+    }
+  },
+  {
+    "pk": 523,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munsaka",
+      "parent": 235,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340106"
+    }
+  },
+  {
+    "pk": 524,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simeja",
+      "parent": 236,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340201"
+    }
+  },
+  {
+    "pk": 525,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Michelo",
+      "parent": 236,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340202"
+    }
+  },
+  {
+    "pk": 526,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mundilila",
+      "parent": 236,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340203"
+    }
+  },
+  {
+    "pk": 527,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Michelo",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340301"
+    }
+  },
+  {
+    "pk": 528,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "74",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340302"
+    }
+  },
+  {
+    "pk": 529,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mafwafwa",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340303"
+    }
+  },
+  {
+    "pk": 530,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simalele",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340304"
+    }
+  },
+  {
+    "pk": 531,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Musutu",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340305"
+    }
+  },
+  {
+    "pk": 532,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Number 4",
+      "parent": 237,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340306"
+    }
+  },
+  {
+    "pk": 533,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mancom",
+      "parent": 238,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340401"
+    }
+  },
+  {
+    "pk": 534,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Daphan",
+      "parent": 239,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340501"
+    }
+  },
+  {
+    "pk": 535,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kaleya",
+      "parent": 240,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340601"
+    }
+  },
+  {
+    "pk": 536,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Cibbonta",
+      "parent": 240,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340602"
+    }
+  },
+  {
+    "pk": 537,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siafwa",
+      "parent": 240,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340603"
+    }
+  },
+  {
+    "pk": 538,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mawaya",
+      "parent": 280,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340701"
+    }
+  },
+  {
+    "pk": 539,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bwacha",
+      "parent": 280,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340702"
+    }
+  },
+  {
+    "pk": 540,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chikoli B",
+      "parent": 280,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340703"
+    }
+  },
+  {
+    "pk": 541,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Twambaule",
+      "parent": 280,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040340704"
+    }
+  },
+  {
+    "pk": 542,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ncheenje",
+      "parent": 242,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220201"
+    }
+  },
+  {
+    "pk": 543,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Namilonga",
+      "parent": 242,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220202"
+    }
+  },
+  {
+    "pk": 544,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamuni",
+      "parent": 242,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220203"
+    }
+  },
+  {
+    "pk": 545,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nakayanga",
+      "parent": 242,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220204"
+    }
+  },
+  {
+    "pk": 546,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siluunga",
+      "parent": 242,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220205"
+    }
+  },
+  {
+    "pk": 547,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Naluube",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220301"
+    }
+  },
+  {
+    "pk": 548,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lunamba",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220302"
+    }
+  },
+  {
+    "pk": 549,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simukama",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220303"
+    }
+  },
+  {
+    "pk": 550,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nakatala",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220304"
+    }
+  },
+  {
+    "pk": 551,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simaamba",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220305"
+    }
+  },
+  {
+    "pk": 552,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nacibbwanta",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220306"
+    }
+  },
+  {
+    "pk": 553,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simoonga",
+      "parent": 243,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220307"
+    }
+  },
+  {
+    "pk": 554,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nzila",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220601"
+    }
+  },
+  {
+    "pk": 555,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamwenda",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220602"
+    }
+  },
+  {
+    "pk": 556,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hameja",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220603"
+    }
+  },
+  {
+    "pk": 557,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamboole",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220604"
+    }
+  },
+  {
+    "pk": 558,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hakwale",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220605"
+    }
+  },
+  {
+    "pk": 559,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hantambo",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220606"
+    }
+  },
+  {
+    "pk": 560,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chikapula",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220607"
+    }
+  },
+  {
+    "pk": 561,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chinkumbe",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220608"
+    }
+  },
+  {
+    "pk": 562,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munachande",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220609"
+    }
+  },
+  {
+    "pk": 563,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalulu",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220610"
+    }
+  },
+  {
+    "pk": 564,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Masumpula",
+      "parent": 246,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220611"
+    }
+  },
+  {
+    "pk": 565,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Settlement A",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220701"
+    }
+  },
+  {
+    "pk": 566,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Settlement B",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220702"
+    }
+  },
+  {
+    "pk": 567,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chimvule",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220703"
+    }
+  },
+  {
+    "pk": 568,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibulyoblyo E",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220704"
+    }
+  },
+  {
+    "pk": 569,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachuunga",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220705"
+    }
+  },
+  {
+    "pk": 570,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chitembo",
+      "parent": 247,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220706"
+    }
+  },
+  {
+    "pk": 571,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
       "name": "Gombe",
-      "parent": 188,
+      "parent": 281,
       "point": null,
       "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402208"
+      "type": 9,
+      "slug": "8040220801"
     }
   },
   {
-    "pk": 171,
+    "pk": 572,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Kalemu",
-      "parent": 164,
+      "name": "Mabwe atuba",
+      "parent": 281,
       "point": null,
       "has_independent_printer": false,
-      "type": 5,
-      "slug": "804041"
+      "type": 9,
+      "slug": "8040220802"
     }
   },
   {
-    "pk": 170,
+    "pk": 573,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Habulile",
-      "parent": 164,
+      "name": "Suntwe moowa",
+      "parent": 281,
       "point": null,
       "has_independent_printer": false,
-      "type": 5,
-      "slug": "804032"
+      "type": 9,
+      "slug": "8040220803"
     }
   },
   {
-    "pk": 169,
+    "pk": 574,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Dimbwe",
-      "parent": 164,
+      "name": "Simoonga",
+      "parent": 281,
       "point": null,
       "has_independent_printer": false,
-      "type": 5,
-      "slug": "804019"
+      "type": 9,
+      "slug": "8040220804"
     }
   },
   {
-    "pk": 168,
+    "pk": 575,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Choonga",
-      "parent": 164,
+      "name": "Koolwe",
+      "parent": 281,
       "point": null,
       "has_independent_printer": false,
-      "type": 5,
-      "slug": "804021"
+      "type": 9,
+      "slug": "8040220805"
     }
   },
   {
-    "pk": 220,
+    "pk": 576,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Yusa",
-      "parent": 190,
+      "name": "Siamakumba",
+      "parent": 282,
       "point": null,
       "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402804"
+      "type": 9,
+      "slug": "8040220901"
     }
   },
   {
-    "pk": 221,
+    "pk": 577,
     "model": "locations.location",
     "fields": {
       "send_live_results": false,
-      "name": "Bbello",
-      "parent": 190,
+      "name": "Siamukumwa",
+      "parent": 282,
       "point": null,
       "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402805"
+      "type": 9,
+      "slug": "8040220902"
+    }
+  },
+  {
+    "pk": 578,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibulyoblyo C",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220903"
+    }
+  },
+  {
+    "pk": 579,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mangwada",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220904"
+    }
+  },
+  {
+    "pk": 580,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malilwe",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220905"
+    }
+  },
+  {
+    "pk": 581,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamwiinga",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220906"
+    }
+  },
+  {
+    "pk": 582,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Moondoma",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220907"
+    }
+  },
+  {
+    "pk": 583,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mulomya",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220908"
+    }
+  },
+  {
+    "pk": 584,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hankwimbi",
+      "parent": 282,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040220909"
+    }
+  },
+  {
+    "pk": 585,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Syuulikwa",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120101"
+    }
+  },
+  {
+    "pk": 586,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwatachela A",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120102"
+    }
+  },
+  {
+    "pk": 587,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwatachela B",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120103"
+    }
+  },
+  {
+    "pk": 588,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kapenda",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120104"
+    }
+  },
+  {
+    "pk": 589,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simukabe",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120105"
+    }
+  },
+  {
+    "pk": 590,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikaale",
+      "parent": 248,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120106"
+    }
+  },
+  {
+    "pk": 591,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mayobo",
+      "parent": 249,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120201"
+    }
+  },
+  {
+    "pk": 592,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalundu Kambelele",
+      "parent": 249,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120202"
+    }
+  },
+  {
+    "pk": 593,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampola",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120301"
+    }
+  },
+  {
+    "pk": 594,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kanyeba",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120302"
+    }
+  },
+  {
+    "pk": 595,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Matantilo",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120303"
+    }
+  },
+  {
+    "pk": 596,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Basweene",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120304"
+    }
+  },
+  {
+    "pk": 597,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianyanga",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120305"
+    }
+  },
+  {
+    "pk": 598,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamalonda",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120306"
+    }
+  },
+  {
+    "pk": 599,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siankope C",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120307"
+    }
+  },
+  {
+    "pk": 600,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampango",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120308"
+    }
+  },
+  {
+    "pk": 601,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nkaala 1",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120309"
+    }
+  },
+  {
+    "pk": 602,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simalonga",
+      "parent": 250,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120310"
+    }
+  },
+  {
+    "pk": 603,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mukanlanga",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120401"
+    }
+  },
+  {
+    "pk": 604,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Silokomela",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120402"
+    }
+  },
+  {
+    "pk": 605,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Polo A",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120403"
+    }
+  },
+  {
+    "pk": 606,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Polo B",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120404"
+    }
+  },
+  {
+    "pk": 607,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilundika",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120405"
+    }
+  },
+  {
+    "pk": 608,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nsemani",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120406"
+    }
+  },
+  {
+    "pk": 609,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simutenge",
+      "parent": 251,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120407"
+    }
+  },
+  {
+    "pk": 610,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibooli A",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120501"
+    }
+  },
+  {
+    "pk": 611,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibooli B",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120502"
+    }
+  },
+  {
+    "pk": 612,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mushome",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120503"
+    }
+  },
+  {
+    "pk": 613,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Njenga",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120504"
+    }
+  },
+  {
+    "pk": 614,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simoono",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120505"
+    }
+  },
+  {
+    "pk": 615,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamabwe",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120506"
+    }
+  },
+  {
+    "pk": 616,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siapenga",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120507"
+    }
+  },
+  {
+    "pk": 617,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwatachela C",
+      "parent": 252,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120508"
+    }
+  },
+  {
+    "pk": 618,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampongo",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120601"
+    }
+  },
+  {
+    "pk": 619,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chikwenya",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120602"
+    }
+  },
+  {
+    "pk": 620,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sipawa",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120603"
+    }
+  },
+  {
+    "pk": 621,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Gwangwazu",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120604"
+    }
+  },
+  {
+    "pk": 622,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mulungwa",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120605"
+    }
+  },
+  {
+    "pk": 623,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikazimina",
+      "parent": 253,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120606"
+    }
+  },
+  {
+    "pk": 624,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mupengo",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120701"
+    }
+  },
+  {
+    "pk": 625,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Masuka",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120702"
+    }
+  },
+  {
+    "pk": 626,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siatebwele",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120703"
+    }
+  },
+  {
+    "pk": 627,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Jankile",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120704"
+    }
+  },
+  {
+    "pk": 628,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munsaka",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120705"
+    }
+  },
+  {
+    "pk": 629,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Konauma",
+      "parent": 254,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120706"
+    }
+  },
+  {
+    "pk": 630,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kataba",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120801"
+    }
+  },
+  {
+    "pk": 631,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Jata",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120802"
+    }
+  },
+  {
+    "pk": 632,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Musanje",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120803"
+    }
+  },
+  {
+    "pk": 633,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianjina",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120804"
+    }
+  },
+  {
+    "pk": 634,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianchind",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120805"
+    }
+  },
+  {
+    "pk": 635,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampipi",
+      "parent": 255,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120806"
+    }
+  },
+  {
+    "pk": 636,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chalimongela",
+      "parent": 256,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120901"
+    }
+  },
+  {
+    "pk": 637,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chisangu",
+      "parent": 256,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120902"
+    }
+  },
+  {
+    "pk": 638,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilubwa",
+      "parent": 256,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120903"
+    }
+  },
+  {
+    "pk": 639,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mandonda",
+      "parent": 256,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040120904"
+    }
+  },
+  {
+    "pk": 640,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Keenabanyama A",
+      "parent": 257,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121001"
+    }
+  },
+  {
+    "pk": 641,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Keenabanyama B",
+      "parent": 257,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121002"
+    }
+  },
+  {
+    "pk": 642,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianenga",
+      "parent": 257,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121003"
+    }
+  },
+  {
+    "pk": 643,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Misika",
+      "parent": 257,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121004"
+    }
+  },
+  {
+    "pk": 644,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kayaba",
+      "parent": 258,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121101"
+    }
+  },
+  {
+    "pk": 645,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malambo",
+      "parent": 258,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121102"
+    }
+  },
+  {
+    "pk": 646,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikapili",
+      "parent": 258,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121103"
+    }
+  },
+  {
+    "pk": 647,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siakasasa",
+      "parent": 259,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121201"
+    }
+  },
+  {
+    "pk": 648,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachileka",
+      "parent": 259,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121202"
+    }
+  },
+  {
+    "pk": 649,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Machila",
+      "parent": 259,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121203"
+    }
+  },
+  {
+    "pk": 650,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siankope A",
+      "parent": 260,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121301"
+    }
+  },
+  {
+    "pk": 651,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siankope B",
+      "parent": 260,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121302"
+    }
+  },
+  {
+    "pk": 652,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kapongo",
+      "parent": 260,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121303"
+    }
+  },
+  {
+    "pk": 653,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munkombwe",
+      "parent": 260,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121304"
+    }
+  },
+  {
+    "pk": 654,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sianamalembe",
+      "parent": 260,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040121305"
+    }
+  },
+  {
+    "pk": 655,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muluka",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130101"
+    }
+  },
+  {
+    "pk": 656,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bbilibisi",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130102"
+    }
+  },
+  {
+    "pk": 657,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siakwangala",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130103"
+    }
+  },
+  {
+    "pk": 658,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simuluka",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130104"
+    }
+  },
+  {
+    "pk": 659,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Settlement A",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130105"
+    }
+  },
+  {
+    "pk": 660,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Settlement C",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130106"
+    }
+  },
+  {
+    "pk": 661,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ndyacamaluli",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130107"
+    }
+  },
+  {
+    "pk": 662,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siampande",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130108"
+    }
+  },
+  {
+    "pk": 663,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamubisi",
+      "parent": 261,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130109"
+    }
+  },
+  {
+    "pk": 664,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ndyatamaluli",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130201"
+    }
+  },
+  {
+    "pk": 665,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malawo",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130202"
+    }
+  },
+  {
+    "pk": 666,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kapondo",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130203"
+    }
+  },
+  {
+    "pk": 667,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Misozi",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130204"
+    }
+  },
+  {
+    "pk": 668,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siambizi",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130205"
+    }
+  },
+  {
+    "pk": 669,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dankwerts farm",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130206"
+    }
+  },
+  {
+    "pk": 670,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nkoli",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130207"
+    }
+  },
+  {
+    "pk": 671,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachoono",
+      "parent": 262,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130208"
+    }
+  },
+  {
+    "pk": 672,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siasulwe",
+      "parent": 263,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130301"
+    }
+  },
+  {
+    "pk": 673,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sett C",
+      "parent": 263,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130302"
+    }
+  },
+  {
+    "pk": 674,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikwaazwa",
+      "parent": 263,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130303"
+    }
+  },
+  {
+    "pk": 675,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sett B",
+      "parent": 263,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130304"
+    }
+  },
+  {
+    "pk": 676,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muyuni",
+      "parent": 263,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130305"
+    }
+  },
+  {
+    "pk": 677,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simbunji",
+      "parent": 264,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130401"
+    }
+  },
+  {
+    "pk": 678,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamabela",
+      "parent": 264,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130402"
+    }
+  },
+  {
+    "pk": 679,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachuunga",
+      "parent": 264,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130403"
+    }
+  },
+  {
+    "pk": 680,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mazambani",
+      "parent": 264,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130404"
+    }
+  },
+  {
+    "pk": 681,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muzyamba",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130501"
+    }
+  },
+  {
+    "pk": 682,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muzyamba",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130502"
+    }
+  },
+  {
+    "pk": 683,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachuunga",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130503"
+    }
+  },
+  {
+    "pk": 684,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamable-west",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130504"
+    }
+  },
+  {
+    "pk": 685,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sett A",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130505"
+    }
+  },
+  {
+    "pk": 686,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sett B",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130506"
+    }
+  },
+  {
+    "pk": 687,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bbilibisis",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130507"
+    }
+  },
+  {
+    "pk": 688,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mudobo west",
+      "parent": 265,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130508"
+    }
+  },
+  {
+    "pk": 689,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Misozi",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130601"
+    }
+  },
+  {
+    "pk": 690,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sikwaaba",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130602"
+    }
+  },
+  {
+    "pk": 691,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simulubwa",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130603"
+    }
+  },
+  {
+    "pk": 692,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muuka",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130604"
+    }
+  },
+  {
+    "pk": 693,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simakando",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130605"
+    }
+  },
+  {
+    "pk": 694,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sinduunda",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130606"
+    }
+  },
+  {
+    "pk": 695,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nyanga",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130607"
+    }
+  },
+  {
+    "pk": 696,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Munansangu",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130608"
+    }
+  },
+  {
+    "pk": 697,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chitembo",
+      "parent": 266,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130609"
+    }
+  },
+  {
+    "pk": 698,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Farm 12",
+      "parent": 278,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130701"
+    }
+  },
+  {
+    "pk": 699,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Farm 13",
+      "parent": 278,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130702"
+    }
+  },
+  {
+    "pk": 700,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Cornhill",
+      "parent": 278,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130703"
+    }
+  },
+  {
+    "pk": 701,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chibiisya",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130801"
+    }
+  },
+  {
+    "pk": 702,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamabele",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130802"
+    }
+  },
+  {
+    "pk": 703,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mudobo",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130803"
+    }
+  },
+  {
+    "pk": 704,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachitema",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130804"
+    }
+  },
+  {
+    "pk": 705,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Ndyatamaluli",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130805"
+    }
+  },
+  {
+    "pk": 706,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malawo",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130806"
+    }
+  },
+  {
+    "pk": 707,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dankwerts",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130807"
+    }
+  },
+  {
+    "pk": 708,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Elephants",
+      "parent": 279,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040130808"
     }
   },
   {
@@ -727,6 +5469,1176 @@
     }
   },
   {
+    "pk": 234,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kambulu",
+      "parent": 196,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80401110"
+    }
+  },
+  {
+    "pk": 235,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Najika",
+      "parent": 180,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403401"
+    }
+  },
+  {
+    "pk": 236,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chizunda",
+      "parent": 180,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403402"
+    }
+  },
+  {
+    "pk": 199,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilala",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402401"
+    }
+  },
+  {
+    "pk": 200,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mwebo",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402402"
+    }
+  },
+  {
+    "pk": 201,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kaminya",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402403"
+    }
+  },
+  {
+    "pk": 202,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chikanta",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402404"
+    }
+  },
+  {
+    "pk": 203,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hanzembwe",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402405"
+    }
+  },
+  {
+    "pk": 204,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sichmbwali",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402406"
+    }
+  },
+  {
+    "pk": 205,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hambweka",
+      "parent": 167,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402407"
+    }
+  },
+  {
+    "pk": 206,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Katanda",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403001"
+    }
+  },
+  {
+    "pk": 207,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muyuni",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403002"
+    }
+  },
+  {
+    "pk": 208,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Boongo",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403003"
+    }
+  },
+  {
+    "pk": 209,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Matoondo",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403004"
+    }
+  },
+  {
+    "pk": 210,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kinatone",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403005"
+    }
+  },
+  {
+    "pk": 211,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bowood",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403006"
+    }
+  },
+  {
+    "pk": 212,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sichimwa",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403101"
+    }
+  },
+  {
+    "pk": 271,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zimba Static",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403106"
+    }
+  },
+  {
+    "pk": 269,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalomo HAHC Central",
+      "parent": 152,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403007"
+    }
+  },
+  {
+    "pk": 273,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Choma District",
+      "parent": 151,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 3,
+      "slug": "8010"
+    }
+  },
+  {
+    "pk": 213,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Luwezi",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403102"
+    }
+  },
+  {
+    "pk": 214,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chabwino",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403103"
+    }
+  },
+  {
+    "pk": 215,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tumamango",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403104"
+    }
+  },
+  {
+    "pk": 216,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Zambeef",
+      "parent": 174,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80403105"
+    }
+  },
+  {
+    "pk": 217,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Goodhope",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402801"
+    }
+  },
+  {
+    "pk": 218,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Twin Fountain",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402802"
+    }
+  },
+  {
+    "pk": 219,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Swart",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402803"
+    }
+  },
+  {
+    "pk": 339,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hamubbampa",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240613"
+    }
+  },
+  {
+    "pk": 340,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simwembela",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240614"
+    }
+  },
+  {
+    "pk": 341,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sivwimikamwi",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240615"
+    }
+  },
+  {
+    "pk": 342,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mubinda",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240616"
+    }
+  },
+  {
+    "pk": 343,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mupande",
+      "parent": 204,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240617"
+    }
+  },
+  {
+    "pk": 344,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hambweka",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240701"
+    }
+  },
+  {
+    "pk": 345,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mateele",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240702"
+    }
+  },
+  {
+    "pk": 346,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Makondo",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240703"
+    }
+  },
+  {
+    "pk": 347,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Moomba",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240704"
+    }
+  },
+  {
+    "pk": 348,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hachibabu",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240705"
+    }
+  },
+  {
+    "pk": 349,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kauwe",
+      "parent": 205,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040240706"
+    }
+  },
+  {
+    "pk": 350,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simbansao",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300101"
+    }
+  },
+  {
+    "pk": 351,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Stain",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300102"
+    }
+  },
+  {
+    "pk": 352,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tooboi",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300103"
+    }
+  },
+  {
+    "pk": 353,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simooloka",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300104"
+    }
+  },
+  {
+    "pk": 354,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kangala",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300105"
+    }
+  },
+  {
+    "pk": 355,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kayumba",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300106"
+    }
+  },
+  {
+    "pk": 356,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kabenza",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300107"
+    }
+  },
+  {
+    "pk": 357,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lwambi",
+      "parent": 206,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300108"
+    }
+  },
+  {
+    "pk": 358,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kangela",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300201"
+    }
+  },
+  {
+    "pk": 359,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mutanga",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300202"
+    }
+  },
+  {
+    "pk": 360,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sibbula",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300203"
+    }
+  },
+  {
+    "pk": 361,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siananjokwe",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300204"
+    }
+  },
+  {
+    "pk": 362,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Salt",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300205"
+    }
+  },
+  {
+    "pk": 363,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Motoyandane",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300206"
+    }
+  },
+  {
+    "pk": 364,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Muzyamba",
+      "parent": 207,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300207"
+    }
+  },
+  {
+    "pk": 365,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Malala",
+      "parent": 208,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300301"
+    }
+  },
+  {
+    "pk": 366,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siambela",
+      "parent": 208,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300302"
+    }
+  },
+  {
+    "pk": 367,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siachifulo",
+      "parent": 208,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300303"
+    }
+  },
+  {
+    "pk": 368,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Lwaambi",
+      "parent": 208,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300304"
+    }
+  },
+  {
+    "pk": 369,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simutete",
+      "parent": 209,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300401"
+    }
+  },
+  {
+    "pk": 370,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dafani",
+      "parent": 209,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300402"
+    }
+  },
+  {
+    "pk": 371,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simuluwe",
+      "parent": 209,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300403"
+    }
+  },
+  {
+    "pk": 372,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mancom",
+      "parent": 209,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300404"
+    }
+  },
+  {
+    "pk": 373,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simundaduli",
+      "parent": 209,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300405"
+    }
+  },
+  {
+    "pk": 374,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Country club farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300501"
+    }
+  },
+  {
+    "pk": 375,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dube farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300502"
+    }
+  },
+  {
+    "pk": 376,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tutalike farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300503"
+    }
+  },
+  {
+    "pk": 377,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siapenga Farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300504"
+    }
+  },
+  {
+    "pk": 378,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Nyambe farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300505"
+    }
+  },
+  {
+    "pk": 379,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Musa farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300506"
+    }
+  },
+  {
+    "pk": 380,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siamapuka farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300507"
+    }
+  },
+  {
+    "pk": 381,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kinatone community school",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300508"
+    }
+  },
+  {
+    "pk": 382,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Banji farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300509"
+    }
+  },
+  {
+    "pk": 383,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Haamonga farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300510"
+    }
+  },
+  {
+    "pk": 384,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chaala farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300511"
+    }
+  },
+  {
+    "pk": 385,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Sishamu farm",
+      "parent": 210,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300512"
+    }
+  },
+  {
+    "pk": 386,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Simatanga farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300601"
+    }
+  },
+  {
+    "pk": 387,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Siakasasa farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300602"
+    }
+  },
+  {
+    "pk": 388,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bowood rail station",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300603"
+    }
+  },
+  {
+    "pk": 389,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Hambwalu farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300604"
+    }
+  },
+  {
+    "pk": 390,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Matimba farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300605"
+    }
+  },
+  {
+    "pk": 391,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Tumango",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300606"
+    }
+  },
+  {
+    "pk": 392,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Mazuba farm",
+      "parent": 211,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 9,
+      "slug": "8040300607"
+    }
+  },
+  {
+    "pk": 172,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalonda",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804027"
+    }
+  },
+  {
+    "pk": 281,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Gombe",
+      "parent": 188,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402208"
+    }
+  },
+  {
+    "pk": 171,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Kalemu",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804041"
+    }
+  },
+  {
+    "pk": 170,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Habulile",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804032"
+    }
+  },
+  {
+    "pk": 169,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Dimbwe",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804019"
+    }
+  },
+  {
+    "pk": 168,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Choonga",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804021"
+    }
+  },
+  {
+    "pk": 220,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Yusa",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402804"
+    }
+  },
+  {
+    "pk": 221,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Bbello",
+      "parent": 190,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 8,
+      "slug": "80402805"
+    }
+  },
+  {
+    "pk": 167,
+    "model": "locations.location",
+    "fields": {
+      "send_live_results": false,
+      "name": "Chilala",
+      "parent": 164,
+      "point": null,
+      "has_independent_printer": false,
+      "type": 5,
+      "slug": "804024"
+    }
+  },
+  {
     "pk": 185,
     "model": "locations.location",
     "fields": {
@@ -880,19 +6792,6 @@
       "has_independent_printer": false,
       "type": 5,
       "slug": "804014"
-    }
-  },
-  {
-    "pk": 167,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chilala",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 5,
-      "slug": "804024"
     }
   },
   {
@@ -1364,357 +7263,6 @@
     }
   },
   {
-    "pk": 234,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Kambulu",
-      "parent": 196,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80401110"
-    }
-  },
-  {
-    "pk": 235,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Najika",
-      "parent": 180,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403401"
-    }
-  },
-  {
-    "pk": 236,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chizunda",
-      "parent": 180,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403402"
-    }
-  },
-  {
-    "pk": 199,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chilala",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402401"
-    }
-  },
-  {
-    "pk": 200,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Mwebo",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402402"
-    }
-  },
-  {
-    "pk": 201,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Kaminya",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402403"
-    }
-  },
-  {
-    "pk": 202,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chikanta",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402404"
-    }
-  },
-  {
-    "pk": 203,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Hanzembwe",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402405"
-    }
-  },
-  {
-    "pk": 204,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Sichmbwali",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402406"
-    }
-  },
-  {
-    "pk": 205,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Hambweka",
-      "parent": 167,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402407"
-    }
-  },
-  {
-    "pk": 206,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Katanda",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403001"
-    }
-  },
-  {
-    "pk": 207,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Muyuni",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403002"
-    }
-  },
-  {
-    "pk": 208,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Boongo",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403003"
-    }
-  },
-  {
-    "pk": 209,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Matoondo",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403004"
-    }
-  },
-  {
-    "pk": 210,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Kinatone",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403005"
-    }
-  },
-  {
-    "pk": 211,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Bowood",
-      "parent": 164,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403006"
-    }
-  },
-  {
-    "pk": 212,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Sichimwa",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403101"
-    }
-  },
-  {
-    "pk": 271,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Zimba Static",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403106"
-    }
-  },
-  {
-    "pk": 269,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Kalomo HAHC Central",
-      "parent": 152,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403007"
-    }
-  },
-  {
-    "pk": 273,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Choma District",
-      "parent": 151,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 3,
-      "slug": "8010"
-    }
-  },
-  {
-    "pk": 213,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Luwezi",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403102"
-    }
-  },
-  {
-    "pk": 214,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Chabwino",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403103"
-    }
-  },
-  {
-    "pk": 215,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Tumamango",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403104"
-    }
-  },
-  {
-    "pk": 216,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Zambeef",
-      "parent": 174,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80403105"
-    }
-  },
-  {
-    "pk": 217,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Goodhope",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402801"
-    }
-  },
-  {
-    "pk": 218,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Twin Fountain",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402802"
-    }
-  },
-  {
-    "pk": 219,
-    "model": "locations.location",
-    "fields": {
-      "send_live_results": false,
-      "name": "Swart",
-      "parent": 190,
-      "point": null,
-      "has_independent_printer": false,
-      "type": 8,
-      "slug": "80402803"
-    }
-  },
-  {
     "pk": 4,
     "model": "smgl.xformkeywordhandler",
     "fields": {
@@ -1811,6 +7359,14 @@
     }
   },
   {
+    "pk": 21,
+    "model": "smgl.xformkeywordhandler",
+    "fields": {
+      "keyword": "quit",
+      "function_path": "mwana.apps.smgl.keyword_handlers.quit"
+    }
+  },
+  {
     "pk": 20,
     "model": "smgl.xformkeywordhandler",
     "fields": {
@@ -1864,86 +7420,6 @@
     "fields": {
       "keyword": "told",
       "function_path": "mwana.apps.smgl.keyword_handlers.told"
-    }
-  },
-  {
-    "pk": 14,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "outc",
-      "final_response": "",
-      "xform": 16
-    }
-  },
-  {
-    "pk": 29,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": "",
-      "trigger_keyword": "quit",
-      "final_response": "",
-      "xform": 30
-    }
-  },
-  {
-    "pk": 12,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "confirm",
-      "final_response": "",
-      "xform": 14
-    }
-  },
-  {
-    "pk": 10,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "amb",
-      "final_response": "",
-      "xform": 12
-    }
-  },
-  {
-    "pk": 18,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "hihi",
-      "final_response": "",
-      "xform": 5
-    }
-  },
-  {
-    "pk": 3,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "join",
-      "final_response": "",
-      "xform": 5
-    }
-  },
-  {
-    "pk": 9,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "reg",
-      "final_response": "",
-      "xform": 11
-    }
-  },
-  {
-    "pk": 11,
-    "model": "smsforms.decisiontrigger",
-    "fields": {
-      "context_data": null,
-      "trigger_keyword": "fup",
-      "final_response": "",
-      "xform": 13
     }
   },
   {
@@ -2074,6 +7550,96 @@
       "trigger_keyword": "back",
       "final_response": "",
       "xform": 27
+    }
+  },
+  {
+    "pk": 30,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": "",
+      "trigger_keyword": "quit",
+      "final_response": "",
+      "xform": 30
+    }
+  },
+  {
+    "pk": 14,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "outc",
+      "final_response": "",
+      "xform": 16
+    }
+  },
+  {
+    "pk": 29,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": "",
+      "trigger_keyword": "quit",
+      "final_response": "",
+      "xform": 30
+    }
+  },
+  {
+    "pk": 12,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "confirm",
+      "final_response": "",
+      "xform": 14
+    }
+  },
+  {
+    "pk": 10,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "amb",
+      "final_response": "",
+      "xform": 12
+    }
+  },
+  {
+    "pk": 18,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "hihi",
+      "final_response": "",
+      "xform": 5
+    }
+  },
+  {
+    "pk": 3,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "join",
+      "final_response": "",
+      "xform": 5
+    }
+  },
+  {
+    "pk": 9,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "reg",
+      "final_response": "",
+      "xform": 11
+    }
+  },
+  {
+    "pk": 11,
+    "model": "smsforms.decisiontrigger",
+    "fields": {
+      "context_data": null,
+      "trigger_keyword": "fup",
+      "final_response": "",
+      "xform": 13
     }
   },
   {
@@ -2311,6 +7877,19 @@
     }
   },
   {
+    "pk": 36,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Pick",
+      "created": "2013-09-14T19:09:23",
+      "checksum": "d0874f71dedd01c092fb9ff997f478eb2a284d16",
+      "namespace": "http://openrosa.org/formdesigner/CB05C6F9-971B-4A07-B2FF-4D945DD414B9",
+      "version": 1,
+      "file": "xforms/pick.xml"
+    }
+  },
+  {
     "pk": 30,
     "model": "formplayer.xform",
     "fields": {
@@ -2321,6 +7900,19 @@
       "namespace": "http://openrosa.org/formdesigner/866041FA-97B4-486E-964A-7F41D9A31A76",
       "version": 1,
       "file": "xforms/quit.xml"
+    }
+  },
+  {
+    "pk": 35,
+    "model": "formplayer.xform",
+    "fields": {
+      "uiversion": 1,
+      "name": "Drop",
+      "created": "2013-09-14T19:05:08",
+      "checksum": "246d1ce3b1f7d7444867c905993e727e4517a073",
+      "namespace": "http://openrosa.org/formdesigner/2FCF5F3C-7A88-4F78-BA11-D85C00FD85D2",
+      "version": 1,
+      "file": "xforms/drop.xml"
     }
   }
 ]
