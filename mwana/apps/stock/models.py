@@ -60,8 +60,7 @@ class StockAccount(models.Model):
         today = date.today()
         year = today.year
         month = today.month
-        thresholds = Threshold.objects.filter(account__id=self.id,
-        start_date__year=year, start_date__month=month).\
+        thresholds = Threshold.objects.filter(account__id=self.id).\
         filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
         if thresholds:
             return thresholds[0].level

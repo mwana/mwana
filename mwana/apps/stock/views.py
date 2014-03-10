@@ -74,7 +74,7 @@ def stock(request):
         ss = TransactedStock()
         # @type sa StockAccount
         ss.stock_account = sa
-        ss.threshold_level = (sa.threshold(start_date) or 0 + sa.threshold(end_date) or 0)/2
+        ss.threshold_level = ((sa.threshold(start_date) or 0) + (sa.threshold(end_date) or 0))/2
         ss.supplied_amount = sa.supplied(start_date, end_date)
         supplied_stock.append(ss)
     
