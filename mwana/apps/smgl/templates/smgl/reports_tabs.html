@@ -7,7 +7,17 @@
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
 {{ form.media.css }}
+<style type="text/css">
+  #sms-records-form .ui-autocomplete-input{
+      width:90px;
+      margin-top: 6px;
+  }
 
+  select#id_c_type, select#id_filter_option, select#id_status{
+    height: 23px;
+    margin-top: 3px;
+  }
+</style>
 {% endblock %}
 
 
@@ -207,7 +217,7 @@
              {{ form.filter_option.errors}}
              {{ form.filter_option }}
            </td>
-          <td>
+          <td >
             {{ form.c_type.errors}}
             {{ form.c_type }}
           </td>
