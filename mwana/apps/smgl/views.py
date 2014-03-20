@@ -415,6 +415,7 @@ def pnc_report(request, id=None):
         deaths = filter_by_dates(deaths, 'date',
                                  start=start_date, end=end_date)
 
+        """
         nmr_deaths = 0
         for death in DeathRegistration.objects.filter(person='inf'):
             try:
@@ -424,7 +425,7 @@ def pnc_report(request, id=None):
             time_between = death.date - birth.date
             if time_between.days < 28:
                 nmr_deaths += 1
-
+        """
 
         if nmr_deaths > 0:
             nmr = float(nmr_deaths)/float(births.count())

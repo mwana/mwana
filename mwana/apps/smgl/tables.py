@@ -351,7 +351,6 @@ class PNCReportTable(Table):
     six_day_pnc = NamedColumn(col_name='6 Day PNC')
     six_week_pnc = NamedColumn(col_name='6 Week PNC')
     complete_pnc = NamedColumn(col_name='Complete PNC')
-    nmr = NamedColumn(col_name='NMR')
 
 
 class ReferralReportTable(Table):
