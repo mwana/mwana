@@ -769,13 +769,10 @@ def mothers(request):
 
             if gestational_age:
                 if gestational_age > 365:
-                    worksheet.write(row_index, 9, "Error: Too many days")
+                    worksheet.write(row_index, 9, "Error: Too many days(%s)"%gestational_age)
                 else:
                     worksheet.write(row_index, 9, "{0:.0f} Weeks".format(gestational_age/7)),
             else:
-                if has_delivered:
-                    worksheet.write(row_index, 9, 'Has Delivered')
-                elif not mother.edd:
                     worksheet.write(row_index, 9, 'Error')
 
             worksheet.write(row_index, 10, 'Yes' if has_delivered else 'No')
