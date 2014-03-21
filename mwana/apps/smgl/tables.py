@@ -339,7 +339,6 @@ class ANCDeliveryTable(Table):
     anc4 = NamedColumn(col_name='4+ ANC')
     facility = NamedColumn(col_name='Facility Births')
     home = NamedColumn(col_name='Home Births')
-    unknown = NamedColumn(col_name='Status Unknown')
     gestational_age = NamedColumn(col_name='Gestational Age @ First ANC')
 
 

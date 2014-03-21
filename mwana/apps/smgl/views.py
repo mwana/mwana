@@ -199,10 +199,11 @@ def anc_report(request, id=None):
             dispose_date, end_date = get_default_dates()
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
+        """
         r['unknown'] = pregnancies.exclude(id__in=births.\
             values_list('mother', flat=True)).filter(
             edd__lte=end_date-datetime.timedelta(days=30)).count()
-
+        """
         # Aggregate ANC visits by Mother and # of visits
         #visits = visits.filter(mother__in=pregnancies)
         place_visits = visits.filter(**visit_filter)
