@@ -143,20 +143,23 @@ def anc_report(request, id=None):
             pregnancies = PregnantMother.objects \
                             .filter(zone__in=district_facilities)
             births = BirthRegistration.objects \
-                            .filter(mother__zone__in=district_facilities)
+                            .filter(mother__in=pregnancies)
+
         else:
             pregnancies = PregnantMother.objects.filter(location=place)
+            births = BirthRegistration.objects \
+                            .filter(mother__in=pregnancies)
 
         if filter_option == 'option_1':
             # Option 1 should show All women who have Pregnancy registrations
             #AND gave birth OR had EDD scheduled within our specified time frame
             pregnancies_reg = filter_by_dates(pregnancies, 'created_date',
                 start=start_date, end=end_date)
-
+            births = births.filter(mother__in=pregnancies_reg)
             births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            birth_mothers = pregnancies_reg.filter(id__in=births.values_list('mother'))
+            birth_mothers = pregnancies_reg.filter(id__in=births.values_list('mother', flat=True))
             #Get all mothers with edd and registration within the specified time frame
             pregnancies_edd = filter_by_dates(pregnancies_reg, 'edd',
                              start=start_date, end=end_date)
@@ -166,10 +169,11 @@ def anc_report(request, id=None):
             # All women who gave birth or had EDD within specified time frame
             pregnancies_edd = filter_by_dates(pregnancies, 'edd',
                              start=start_date, end=end_date)
+            births = births.filter(mother__in=pregnancies_edd)
             births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            birth_mothers = pregnancies.filter(id__in=births.values_list('mother'))
+            birth_mothers = pregnancies.filter(id__in=births.values_list('mother', flat=True))
             pregnancies = pregnancies_edd | birth_mothers
 
         r['gestational_age'] = 0
