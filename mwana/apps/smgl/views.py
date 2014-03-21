@@ -1935,7 +1935,6 @@ def sms_users(request):
     contacts = contacts.filter(location__in=locations)
 
     # filter by latest_sms_date, which is a property on the model, not a field
-
     active_contacts =  Message.objects.filter(
         date__gte=start_date-inactivity_threshold,
         date__lte=end_date).values_list('connection__contact', flat=True).distinct()
