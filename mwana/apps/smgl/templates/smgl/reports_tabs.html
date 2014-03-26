@@ -9,7 +9,6 @@
 {{ form.media.css }}
 <style type="text/css">
   #sms-records-form .ui-autocomplete-input{
-      width:90px;
       margin-top: 6px;
   }
 
@@ -178,7 +177,6 @@
           <th colspan="2">Period</th>
           <th colspan="3">Location</th>
           <th colspan="1">Filter</th>
-          <th colspan="2">User</th>
         </tr>
         <tr>
           <th>Start</th>
@@ -187,8 +185,6 @@
           <th>District</th>
           <th>Facility</th>
           <th>Filter</th>
-          <th>Type</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -217,14 +213,6 @@
              {{ form.filter_option.errors}}
              {{ form.filter_option }}
            </td>
-          <td >
-            {{ form.c_type.errors}}
-            {{ form.c_type }}
-          </td>
-          <td>
-            {{ form.status.errors }}
-            {{ form.status }}
-          </td>
         </tr>
       </tbody>
     </table>
@@ -261,7 +249,6 @@
       OR had EDD scheduled within the specified time frame</li>
       <li><b>Option 2</b>: All women who gave birth or had EDD within specified time frame</li>
     </ul>
-    <p>**The User Type and Status will only apply on the User report table</p>
   </div>
 </div>
 
