@@ -114,6 +114,8 @@ class PregnantMother(models.Model):
     def has_delivered(self):
         if not self.edd:
             return True
+        if self.birthregistration_set.all():
+            return True
         before_edd = self.edd - datetime.timedelta(days=1)
         after_edd = self.edd + datetime.timedelta(days=1)
         try:
