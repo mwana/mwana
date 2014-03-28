@@ -430,7 +430,7 @@ def pnc_report(request, id=None):
             time_between = death.date - birth.date
             if time_between.days < 28:
                 nmr_deaths += 1
-        """
+
 
         if nmr_deaths > 0:
             nmr = float(nmr_deaths)/float(births.count())
@@ -440,6 +440,7 @@ def pnc_report(request, id=None):
             nmr = '0'
 
         r['nmr'] = nmr
+        """
         r['home'] = births.filter(place='h').count() #home births
         r['facility'] = births.filter(place='f').count() #facility births
 
