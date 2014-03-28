@@ -74,6 +74,10 @@ class ErrorMessageTable(Table):
 
 class NotificationsTable(Table):
     date = DateColumn(format="Y m d H:i ")
+    name = Column(
+        value=lambda cell: cell.object.connection.contact if cell.object.connection else '', sortable=False)
+    number = Column(
+        value=lambda cell: cell.object.connection.identity if cell.object.connection else '', sortable=False)
     facility = Column(
         value=lambda cell: cell.object.contact.location.name if cell.object.contact else '')
     text = NamedColumn(col_name="Message")
