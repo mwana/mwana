@@ -6,6 +6,17 @@
 {{ block.super }}
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+<style type="text/css">
+  #sms-users-form .ui-autocomplete-input{
+      margin-top: 6px;
+      width: 150px;
+  }
+
+  select#id_c_type, select#id_filter_option, select#id_status{
+    height: 23px;
+    margin-top: 3px;
+  }
+</style>
 {{ form.media.css }}
 
 {% endblock %}
@@ -25,7 +36,7 @@
 
 <div class="statistics messages module">
   <h2>SMS Users</h2>
-  <form action="" method="GET" >
+  <form action="" method="GET" id="sms-users-form">
     <table>
       <thead>
         <tr>
