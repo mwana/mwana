@@ -34,22 +34,38 @@
       <thead>
         <tr>
           <th colspan="2">Period</th>
+          <th colspan="3">Location</th>
         </tr>
         <tr>
           <th>Start</th>
           <th>End</th>
+          <th>Province</th>
+          <th>District</th>
+          <th>Facility</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td>
-            {{ form.start_date.errors}}
             {{ form.start_date }}
+            {{ form.start_date.errors}}
           </td>
           <td>
-            {{ form.end_date.errors}}
             {{ form.end_date }}
+            {{ form.end_date.errors}}
           </td>
+          <td>
+            {{ form.province }}
+            {{ form.province.errors}}
+          </td>
+          <td>
+            {{ form.district }}
+            {{ form.district.errors}}
+          </td>
+           <td>
+             {{ form.facility }}
+             {{ form.facility.errors}}
+           </td>
         </tr>
       </tbody>
     </table>

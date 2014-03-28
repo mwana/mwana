@@ -1600,7 +1600,7 @@ def notifications(request):
     """
     start_date, end_date = get_default_dates()
 
- #   province = district = facility = None
+    province = district = facility = None
 
     help_admins = Contact.objects.filter(is_help_admin=True)
     messages = Message.objects.filter(contact__in=help_admins, direction='O')
@@ -1609,9 +1609,9 @@ def notifications(request):
         form = StatisticsFilterForm(request.GET)
         if form.is_valid():
             save_form_data(form.cleaned_data, request.session)
-#            province = form.cleaned_data.get('province')
-#            district = form.cleaned_data.get('district')
-#            facility = form.cleaned_data.get('facility')
+            province = form.cleaned_data.get('province')
+            district = form.cleaned_data.get('district')
+            facility = form.cleaned_data.get('facility')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
     else:
@@ -1622,15 +1622,15 @@ def notifications(request):
         form = StatisticsFilterForm(initial=fetch_initial(initial, request.session))
 
 #    # filter by location if needed...
-#    locations = Location.objects.all()
-#    if province:
-#        locations = get_location_tree_nodes(province)
-#    if district:
-#        locations = get_location_tree_nodes(district)
-#    if facility:
-#        locations = get_location_tree_nodes(facility)
-#
-#    message = messages.filter(from_facility__in=locations)
+    locations = Location.objects.all()
+    if province:
+        locations = get_location_tree_nodes(province)
+    if district:
+        locations = get_location_tree_nodes(district)
+    if facility:
+        locations = get_location_tree_nodes(facility)
+
+    messages = messages.filter(connection__contact__location__in=locations)
 
     # filter by created_date
     messages = filter_by_dates(messages, 'date',
