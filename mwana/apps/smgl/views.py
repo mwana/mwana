@@ -202,10 +202,11 @@ def anc_report(request, id=None):
 
         r['unknown'] = pregnancies.exclude(id__in=births.\
             values_list('mother', flat=True)).filter(
-            edd__lte=end_date-datetime.timedelta(days=30)).count()
+            edd__lte=end_date).count()
         #TODO Locations numbers still look wrong
         # Aggregate ANC visits by Mother and # of visits
         #visits = visits.filter(mother__in=pregnancies)
+        place_visits = visits.filter(mother__id__in=pregnancies.values_list('id', flat=True))
         place_visits = visits.filter(**visit_filter)
         place_visits = filter_by_dates(place_visits, 'visit_date',
                                   start=start_date, end=end_date)
