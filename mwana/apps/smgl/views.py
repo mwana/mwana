@@ -65,7 +65,6 @@ def anc_report(request, id=None):
     facility_parent = None
     start_date, end_date = get_default_dates()
     province = district = facility = None
-    visits = FacilityVisit.objects.all()
     records_for = Location.objects.filter(type__singular='district')
     pregnancies = PregnantMother.objects.all()
     filter_option = 'option_1'
@@ -205,8 +204,9 @@ def anc_report(request, id=None):
             edd__lte=end_date).count()
         #TODO Locations numbers still look wrong
         # Aggregate ANC visits by Mother and # of visits
-        #visits = visits.filter(mother__in=pregnancies)
-        place_visits = visits.filter(mother__id__in=pregnancies.values_list('id', flat=True))
+        visits = FacilityVisit.objects.all()
+        visits = visits.filter(mother__in=pregnancies)
+        #visits = visits.filter(mother__id__in=pregnancies.values_list('id', flat=True))
         place_visits = visits.filter(**visit_filter)
         place_visits = filter_by_dates(place_visits, 'visit_date',
                                   start=start_date, end=end_date)
