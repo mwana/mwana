@@ -775,7 +775,7 @@ def mothers(request):
             else:
                     worksheet.write(row_index, 9, 'Error')
 
-            worksheet.write(row_index, 10, 'Yes (%s)'%(mother.birth_location.upper()) if has_delivered else 'No')
+            worksheet.write(row_index, 10, 'Yes (%s)'%(mother.birth_location.title()) if has_delivered else 'No')
             second_anc = anc_visits[0]
 
 
