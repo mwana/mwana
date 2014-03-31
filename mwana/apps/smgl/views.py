@@ -748,7 +748,6 @@ def mothers(request):
                                                    end_date=end_date
                                                    )
         row_index += 1
-        #TODO Ensure that mothers who have a next visit date actually shows.
         worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
         date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
         worksheet.col(2).width = worksheet.col(3).width = worksheet.col(4).width = worksheet.col(5).width = 20*256
@@ -776,8 +775,10 @@ def mothers(request):
             else:
                     worksheet.write(row_index, 9, 'Error')
 
-            worksheet.write(row_index, 10, 'Yes' if has_delivered else 'No')
+            worksheet.write(row_index, 10, 'Yes (%s)'%(mother.birth_location.upper()) if has_delivered else 'No')
             second_anc = anc_visits[0]
+
+
             if second_anc:
                 worksheet.write(row_index, 11, mother.next_visit, date_format)
                 worksheet.write(row_index, 12, second_anc.visit_date, date_format)
