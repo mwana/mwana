@@ -138,7 +138,16 @@ class PregnantMother(models.Model):
         else:
             return self.birthregistration_set.all()[0].get_place_display()
 
-
+    @property
+    def birth(self):
+        if not self.has_delivered:
+            return False
+        try:
+            birth = self.birthregistration_set.all()[0]
+        except IndexError:
+            return False
+        else:
+            return birth
 
     @property
     def name(self):
