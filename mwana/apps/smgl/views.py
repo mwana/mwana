@@ -783,7 +783,7 @@ def mothers(request):
                 worksheet.write(row_index, 12, second_anc.visit_date, date_format)
                 worksheet.write(row_index, 13, 'Yes')
             else:
-                worksheet.write(row_index, 11, 'N/A')
+                worksheet.write(row_index, 11, mother.next_visit, date_format)
                 worksheet.write(row_index, 12, 'N/A')
                 worksheet.write(row_index, 13, 'No')
 
@@ -793,7 +793,10 @@ def mothers(request):
                 worksheet.write(row_index, 15, third_anc.visit_date, date_format)
                 worksheet.write(row_index, 16, 'Yes')
             else:
-                worksheet.write(row_index, 14, 'N/A')
+                if second_anc:
+                    worksheet.write(row_index, 14, second_anc.next_visit, date_format)
+                else:
+                    worksheet.write(row_index, 14, 'N/A')
                 worksheet.write(row_index, 15, 'N/A')
                 worksheet.write(row_index, 16, 'No')
 
@@ -803,7 +806,10 @@ def mothers(request):
                 worksheet.write(row_index, 18, third_anc.visit_date, date_format)
                 worksheet.write(row_index, 19, 'Yes')
             else:
-                worksheet.write(row_index, 17, 'N/A')
+                if third_anc:
+                    worksheet.write(row_index, 17, third_anc.next_visit, date_format)
+                else:
+                    worksheet.write(row_index, 17, )
                 worksheet.write(row_index, 18, 'N/A')
                 worksheet.write(row_index, 19, 'No')
             row_index += 1
