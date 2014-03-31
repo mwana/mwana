@@ -116,6 +116,7 @@ class LocationBase(models.Model):
 
         return locations
 
+
     @property
     def full_name(self):
         """
