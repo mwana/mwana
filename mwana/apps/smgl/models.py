@@ -130,6 +130,17 @@ class PregnantMother(models.Model):
             return True
 
     @property
+    def birth_location(self):
+        if not self.has_delivered:
+            return "Not Delivered"
+        elif not self.birthregistration_set.all():
+            return "Unregistered"
+        else:
+            return self.birthregistration_set.all()[0].get_place_display()
+
+
+
+    @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)
 

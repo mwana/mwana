@@ -203,7 +203,7 @@ def anc_report(request, id=None):
         r['unknown'] = pregnancies.exclude(id__in=births.\
             values_list('mother', flat=True)).filter(
             edd__lte=end_date-datetime.timedelta(days=30)).count()
-
+        #TODO Locations numbers still look wrong
         # Aggregate ANC visits by Mother and # of visits
         #visits = visits.filter(mother__in=pregnancies)
         place_visits = visits.filter(**visit_filter)
@@ -776,14 +776,16 @@ def mothers(request):
             else:
                     worksheet.write(row_index, 9, 'Error')
 
-            worksheet.write(row_index, 10, 'Yes' if has_delivered else 'No')
+            worksheet.write(row_index, 10, 'Yes (%s)'%(mother.birth_location.title()) if has_delivered else 'No')
             second_anc = anc_visits[0]
+
+
             if second_anc:
                 worksheet.write(row_index, 11, mother.next_visit, date_format)
                 worksheet.write(row_index, 12, second_anc.visit_date, date_format)
                 worksheet.write(row_index, 13, 'Yes')
             else:
-                worksheet.write(row_index, 11, 'N/A')
+                worksheet.write(row_index, 11, mother.next_visit, date_format)
                 worksheet.write(row_index, 12, 'N/A')
                 worksheet.write(row_index, 13, 'No')
 
@@ -793,7 +795,10 @@ def mothers(request):
                 worksheet.write(row_index, 15, third_anc.visit_date, date_format)
                 worksheet.write(row_index, 16, 'Yes')
             else:
-                worksheet.write(row_index, 14, 'N/A')
+                if second_anc:
+                    worksheet.write(row_index, 14, second_anc.next_visit, date_format)
+                else:
+                    worksheet.write(row_index, 14, 'N/A')
                 worksheet.write(row_index, 15, 'N/A')
                 worksheet.write(row_index, 16, 'No')
 
@@ -803,7 +808,10 @@ def mothers(request):
                 worksheet.write(row_index, 18, third_anc.visit_date, date_format)
                 worksheet.write(row_index, 19, 'Yes')
             else:
-                worksheet.write(row_index, 17, 'N/A')
+                if third_anc:
+                    worksheet.write(row_index, 17, third_anc.next_visit, date_format)
+                else:
+                    worksheet.write(row_index, 17, )
                 worksheet.write(row_index, 18, 'N/A')
                 worksheet.write(row_index, 19, 'No')
             row_index += 1
@@ -1115,7 +1123,7 @@ def statistics(request, id=None):
                 'infant_deaths_com', 'infant_deaths_fac',
                 'infant_deaths_total', 'mother_deaths_com',
                 'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
-                'anc3', 'anc4', 'pos1', 'pos2', 'pos3']
+                'anc3', 'anc4', 'pos1', 'pos2', 'pos3', 'anc_total', 'pos_total']
         filename = 'national_statistics' if not id else 'district_statistics'
         date_range = ''
         if start_date:
@@ -1123,7 +1131,58 @@ def statistics(request, id=None):
         if start_date:
             date_range = '{0}_to{1}'.format(date_range, end_date)
         filename = '{0}{1}'.format(filename, date_range)
-        return export_as_csv(records, keys, filename)
+
+        workbook = xlwt.Workbook(encoding='utf-8')
+        worksheet = workbook.add_sheet('Statistics')
+        selected_level = facility or district or province
+        column_headers = ['location', 'pregnancies', 'births_com',
+                'births_fac', 'births_total',
+                'infant_deaths_com', 'infant_deaths_fac',
+                'infant_deaths_total', 'mother_deaths_com',
+                'mother_deaths_fac', 'mother_deaths_total', 'anc1', 'anc2',
+                'anc3', 'anc4', 'pos1', 'pos2', 'pos3', 'anc_total', 'pos_total']
+        #keyword = "Keyword: %s"%(keyword if keyword else 'None')
+        worksheet, row_index = excel_export_header(worksheet,
+                                                   selected_indicators=column_headers,
+                                                   selected_level=selected_level,
+                                                   start_date=start_date,
+                                                   end_date=end_date
+                                                   )
+        row_index += 1
+        worksheet, row_index = write_excel_columns(worksheet, row_index, column_headers)
+        date_format = xlwt.easyxf('align: horiz left;', num_format_str='mm/dd/yyyy')
+
+        worksheet.col(3).width = 15*256
+        worksheet.col(5).width = 20*256
+        worksheet.col(6).width = worksheet.col(7).width = worksheet.col(8).width = 30*256
+
+        row_index += 1
+        worksheet.write(row_index, 0, r['location'])
+        worksheet.write(row_index, 1, r['pregnancies'])
+        worksheet.write(row_index, 2, r['births_com'])
+        worksheet.write(row_index, 3, r['births_fac'])
+        worksheet.write(row_index, 4, r['births_total'])
+        worksheet.write(row_index, 5, r['infant_deaths_com'])
+        worksheet.write(row_index, 6, r['infant_deaths_fac'])
+        worksheet.write(row_index, 7, r['infant_deaths_total'])
+        worksheet.write(row_index, 8, r['mother_deaths_com'])
+        worksheet.write(row_index, 9, r['mother_deaths_fac'])
+        worksheet.write(row_index, 10, r['mother_deaths_total'])
+        worksheet.write(row_index, 11, r['anc1'])
+        worksheet.write(row_index, 12, r['anc2'])
+        worksheet.write(row_index, 13, r['anc3'])
+        worksheet.write(row_index, 14, r['anc4'])
+        worksheet.write(row_index, 15, r['pos1'])
+        worksheet.write(row_index, 16, r['pos2'])
+        worksheet.write(row_index, 17, r['pos3'])
+        worksheet.write(row_index, 18, r['anc_total'])
+        worksheet.write(row_index, 19, r['pos_total'])
+
+        fname = '%s-export.xls'%filename
+        response = HttpResponse(mimetype="applicatins/vnd.msexcel")
+        response['Content-Disposition'] = 'attachment; filename=%s' %fname
+        workbook.save(response)
+        return response
 
     statistics_table = StatisticsLinkTable(records,
                                            request=request)
