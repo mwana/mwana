@@ -283,7 +283,6 @@ def pnc_report(request, id=None):
     facility_parent = None
     start_date, end_date = get_default_dates()
     province = district = facility = None
-    visits = FacilityVisit.objects.all()
     records_for = Location.objects.filter(type__singular='district')
 
     if id:
@@ -374,6 +373,8 @@ def pnc_report(request, id=None):
         r['registered_deliveries'] = births.count()
         visits = filter_by_dates(FacilityVisit.objects.filter(visit_type='pos'),
                                 'created_date', start=start_date, end=end_date)
+
+        visits = visits.filter(mother__in=pregnancies)
 
         def has_six_day_pnc(birth, visits):
             birth_reg = birth.date
