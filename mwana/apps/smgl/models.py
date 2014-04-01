@@ -149,6 +149,7 @@ class PregnantMother(models.Model):
         else:
             return birth
 
+
     @property
     def name(self):
         return "%s %s" % (self.first_name, self.last_name)

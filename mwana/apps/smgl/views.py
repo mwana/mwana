@@ -687,6 +687,18 @@ def get_four_anc_visits(mother):
     if mother_visits.count() < 3:
         for num in range(mother_visits.count(), 3):
             mother_visit_list.append(None)
+
+    return mother_visit_list
+
+def get_four_pnc_visits(mother):
+    mother_visits = mother.facility_visits.filter(visit_type='pos').order_by('visit_date')
+    #we should have 3 pnc visits if not, we will pad the list of pnc visits with
+    #null values
+    mother_visit_list = list(mother_visits)
+    if mother_visits.count() < 3:
+        for num in range(mother_visits.count(), 3):
+            mother_visit_list.append(None)
+
     return mother_visit_list
 
 
@@ -742,7 +754,9 @@ def mothers(request):
         column_headers = ['Created Date', 'SMN', 'Name', 'District', 'Facility', 'Zone', 'Risk', 'LMP', 'EDD',
                       'Gestational Age', 'NVD2 Date', 'Actual Second ANC Date', 'Second ANC', 'NVD3 Date',
                       'Actual third ANC Date', 'Third ANC', 'NVD4 Date', 'Actual Fourth ANC Date', 'Fourth ANC',
-                      'Has Delivered', 'Delivery Date', 'Delivery Location']
+                      'Has Delivered', 'Delivery Date', 'Delivery Location', 'Six Day PNC Date',
+                      'Actual Six Day PNC Date', 'Six Day PNC', 'Six Week PNC Date', 'Actual Six Week PNC Date',
+                      'Six Week PNC']
         selected_level = zone or facility or district
         worksheet, row_index = excel_export_header(
                                                    worksheet,
@@ -758,6 +772,8 @@ def mothers(request):
         worksheet.col(9).width = 14*256
         for mother in mothers:
             anc_visits = get_four_anc_visits(mother)
+            pnc_visits = get_four_pnc_visits(mother)
+
             gestational_age = mother.get_gestational_age()
             has_delivered = mother.has_delivered
             district, facility, zone = get_district_facility_zone(mother.location)
@@ -837,6 +853,34 @@ def mothers(request):
             else:
                 worksheet.write(row_index, 21, "N/A")
 
+            try:
+                birth_date = mother.birth.date
+            except AttributeError:
+                pass
+            else:
+                six_day_pnc = pnc_visits[0]
+                six_day_pnc_date = birth_date + datetime.timedelta(days=6)
+                if six_day_pnc:
+                    worksheet.write(row_index, 22, six_day_pnc_date, date_format)
+                    worksheet.write(row_index, 23, six_day_pnc.visit_date, date_format)
+                    worksheet.write(row_index, 24, 'Yes')
+                else:
+                    worksheet.write(row_index, 22, six_day_pnc_date, date_format)
+                    worksheet.write(row_index, 23, 'N/A')
+                    worksheet.write(row_index, 24, 'No')
+
+                six_week_pnc = pnc_visits[1]
+                if six_week_pnc:
+                    worksheet.write(row_index, 25, six_day_pnc.next_visit, date_format)
+                    worksheet.write(row_index, 26, six_week_pnc.visit_date, date_format)
+                    worksheet.write(row_index, 27, 'Yes')
+                else:
+                    if six_day_pnc:
+                        worksheet.write(row_index, 25, six_day_pnc.next_visit, date_format)
+                    else:
+                        worksheet.write(row_index, 25, 'N/A')
+                    worksheet.write(row_index, 26, 'N/A')
+                    worksheet.write(row_index, 27, 'No')
 
             row_index += 1
 
