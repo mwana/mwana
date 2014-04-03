@@ -823,7 +823,7 @@ def mothers(request):
             fourth_anc = anc_visits[2]
             if fourth_anc:
                 worksheet.write(row_index, 16, third_anc.next_visit, date_format)
-                worksheet.write(row_index, 17, third_anc.visit_date, date_format)
+                worksheet.write(row_index, 17, fourth_anc.visit_date, date_format)
                 worksheet.write(row_index, 18, 'Yes')
             else:
                 if third_anc:
