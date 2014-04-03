@@ -164,17 +164,20 @@ def anc_report(request, id=None):
             #Get all mothers with edd and registration within the specified time frame
             pregnancies_edd = filter_by_dates(pregnancies_reg, 'edd',
                              start=start_date, end=end_date)
+            pregnancies_edd = pregnancies_edd.exclude(id__in=birth_mothers.values_list('id', flat=True))
             #Combine the two querysets
             pregnancies = birth_mothers | pregnancies_edd
         else:
             # All women who gave birth or had EDD within specified time frame
-            pregnancies_edd = filter_by_dates(pregnancies, 'edd',
-                             start=start_date, end=end_date)
-            births = births.filter(mother__in=pregnancies_edd)
+            births = births.filter(mother__in=pregnancies)
             births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            birth_mothers = pregnancies.filter(id__in=births.values_list('mother', flat=True))
+            birth_mothers = pregnancies.filter(id__in=births.values_list('mother__id', flat=True))
+            pregnancies_edd = filter_by_dates(pregnancies, 'edd',
+                             start=start_date, end=end_date)
+            #for edd, exclude all mothers who already have a birth registration
+            pregnancies_edd = pregnancies_edd.exclude(id__in=birth_mothers.values_list('id', flat=True))
             pregnancies = pregnancies_edd | birth_mothers
 
         r['gestational_age'] = 0
@@ -198,12 +201,12 @@ def anc_report(request, id=None):
         # utilize start/end date if supplied
         if not end_date:
             dispose_date, end_date = get_default_dates()
-        r['home'] = births.filter(place='h').count() #home births
-        r['facility'] = births.filter(place='f').count() #facility births
+        r['home'] = births.filter(place='h').distinct('mother').count() #home births
+        r['facility'] = births.filter(place='f').distinct('mother').count() #facility births
 
-        r['unknown'] = pregnancies.exclude(id__in=births.\
-            values_list('mother', flat=True)).filter(
-            edd__lte=end_date).count()
+
+        r['unknown'] = pregnancies.filter(edd__lte=end_date).exclude(id__in=births.\
+            values_list('mother__id', flat=True)).distinct().count()
         #TODO Locations numbers still look wrong
         # Aggregate ANC visits by Mother and # of visits
         visits = FacilityVisit.objects.all()
@@ -372,6 +375,8 @@ def pnc_report(request, id=None):
             dispose_date, end_date = get_default_dates()
         births = filter_by_dates(births, 'date',
                                  start=start_date, end=end_date-datetime.timedelta(days=42))
+
+        births = births.filter(mother__in=pregnancies)
         r['registered_deliveries'] = births.count()
         visits = filter_by_dates(FacilityVisit.objects.filter(visit_type='pos'),
                                 'created_date', start=start_date, end=end_date)
