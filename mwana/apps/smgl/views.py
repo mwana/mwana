@@ -154,7 +154,9 @@ def anc_report(request, id=None):
             #AND gave birth OR had EDD scheduled within our specified time frame
             pregnancies_reg = filter_by_dates(pregnancies, 'created_date',
                 start=start_date, end=end_date)
+
             births = births.filter(mother__in=pregnancies_reg)
+
             births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
@@ -680,7 +682,14 @@ def user_report(request):
     return HttpResponse(user_report_table.as_html())
 
 def get_four_anc_visits(mother):
-    mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
+    #If there is a birth registration, we look at everything before birth as anc and anything post
+    #as pnc
+    try:
+        birth_date = mother.birth.date
+    except AttributeError:
+        mother_visits = mother.facility_visits.filter(visit_type='anc').order_by('visit_date')
+    else:
+        mother_visits = mother.facility_visits.filter(visit_date__lt=birth_date).order_by('visit_date')
     #we should have 3 anc visits if not, we will pad the list of anc visits with
     #null values
     mother_visit_list = list(mother_visits)
@@ -691,7 +700,13 @@ def get_four_anc_visits(mother):
     return mother_visit_list
 
 def get_four_pnc_visits(mother):
-    mother_visits = mother.facility_visits.filter(visit_type='pos').order_by('visit_date')
+    try:
+        birth_date = mother.birth.date
+    except AttributeError:
+        mother_visits = mother.facility_visits.filter(visit_type='pos').order_by('visit_date')
+    else:
+        mother_visits = mother.facility_visits.filter(visit_date__gte=birth_date).order_by('visit_date')
+
     #we should have 3 pnc visits if not, we will pad the list of pnc visits with
     #null values
     mother_visit_list = list(mother_visits)
@@ -796,8 +811,6 @@ def mothers(request):
                     worksheet.write(row_index, 9, 'Error')
 
             second_anc = anc_visits[0]
-
-
             if second_anc:
                 worksheet.write(row_index, 10, mother.next_visit, date_format)
                 worksheet.write(row_index, 11, second_anc.visit_date, date_format)
