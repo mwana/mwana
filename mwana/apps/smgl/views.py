@@ -157,27 +157,33 @@ def anc_report(request, id=None):
 
             births = births.filter(mother__in=pregnancies_reg)
 
-            births = filter_by_dates(births, 'date',
+            date_filtered_births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            birth_mothers = pregnancies_reg.filter(id__in=births.values_list('mother', flat=True))
+            birth_mothers = pregnancies_reg.filter(id__in=date_filtered_births.values_list('mother', flat=True))
             #Get all mothers with edd and registration within the specified time frame
             pregnancies_edd = filter_by_dates(pregnancies_reg, 'edd',
                              start=start_date, end=end_date)
-            pregnancies_edd = pregnancies_edd.exclude(id__in=birth_mothers.values_list('id', flat=True))
+
+            all_births = births.filter(mother__in=pregnancies)
+            pregnancies_edd = pregnancies_edd.exclude(id__in=all_births.values_list('mother__id', flat=True))
+
             #Combine the two querysets
             pregnancies = birth_mothers | pregnancies_edd
         else:
             # All women who gave birth or had EDD within specified time frame
             births = births.filter(mother__in=pregnancies)
-            births = filter_by_dates(births, 'date',
+            date_filtered_births = filter_by_dates(births, 'date',
                             start=start_date, end=end_date)
             #Get all mothers with birth registrations within the specified time frame.
-            birth_mothers = pregnancies.filter(id__in=births.values_list('mother__id', flat=True))
+            birth_mothers = pregnancies.filter(id__in=date_filtered_births.values_list('mother__id', flat=True))
+
+            #!!Edd time
             pregnancies_edd = filter_by_dates(pregnancies, 'edd',
                              start=start_date, end=end_date)
             #for edd, exclude all mothers who already have a birth registration
-            pregnancies_edd = pregnancies_edd.exclude(id__in=birth_mothers.values_list('id', flat=True))
+            all_births = births.filter(mother__in=pregnancies)
+            pregnancies_edd = pregnancies_edd.exclude(id__in=all_births.values_list('mother__id', flat=True))
             pregnancies = pregnancies_edd | birth_mothers
 
         r['gestational_age'] = 0
