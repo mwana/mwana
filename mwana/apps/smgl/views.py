@@ -207,8 +207,8 @@ def anc_report(request, id=None):
         # utilize start/end date if supplied
         if not end_date:
             dispose_date, end_date = get_default_dates()
-        r['home'] = births.filter(place='h').distinct('mother').count() #home births
-        r['facility'] = births.filter(place='f').distinct('mother').count() #facility births
+        r['home'] = date_filtered_births.filter(place='h').distinct('mother').count() #home births
+        r['facility'] = date_filtered_births.filter(place='f').distinct('mother').count() #facility births
 
 
         r['unknown'] = pregnancies.filter(edd__lte=end_date).exclude(id__in=births.\
@@ -219,8 +219,8 @@ def anc_report(request, id=None):
         visits = visits.filter(mother__in=pregnancies)
         #visits = visits.filter(mother__id__in=pregnancies.values_list('id', flat=True))
         place_visits = visits.filter(**visit_filter)
-        place_visits = filter_by_dates(place_visits, 'visit_date',
-                                  start=start_date, end=end_date)
+        #place_visits = filter_by_dates(place_visits, 'visit_date',
+        #                          start=start_date, end=end_date)
 
         mother_ids = place_visits.distinct('mother') \
                             .values_list('mother', flat=True)
@@ -384,8 +384,7 @@ def pnc_report(request, id=None):
 
         births = births.filter(mother__in=pregnancies)
         r['registered_deliveries'] = births.count()
-        visits = filter_by_dates(FacilityVisit.objects.filter(visit_type='pos'),
-                                'created_date', start=start_date, end=end_date)
+        visits = FacilityVisit.objects.filter(visit_type='pos')
 
         visits = visits.filter(mother__in=pregnancies)
 
