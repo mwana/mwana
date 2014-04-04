@@ -797,12 +797,19 @@ def mothers(request):
             gestational_age = mother.get_gestational_age()
             has_delivered = mother.has_delivered
             district, facility, zone = get_district_facility_zone(mother.location)
+
+            zone = mother.zone.name if mother.zone else ''
+
             worksheet.write(row_index, 0, mother.created_date, date_format)
             worksheet.write(row_index, 1, mother.uid)
             worksheet.write(row_index, 2, mother.name)
             worksheet.write(row_index, 3, district)
-            worksheet.write(row_index, 4, facility)
-            worksheet.write(row_index, 5, mother.zone.name)#somehow the zone fetched using the get_district_facility is wrong
+
+            if mother.zone.name == 'Kalomo DH Zone':
+                worksheet.write(row_index, 4, 'Kalomo District Hospital HAHC')
+            else:
+                worksheet.write(row_index, 4, facility)
+            worksheet.write(row_index, 5, zone)#somehow the zone fetched using the get_district_facility is wrong
             worksheet.write(row_index, 6, 'Yes' if mother.has_risk_reasons() else 'No')
             worksheet.write(row_index, 7, mother.lmp, date_format)
             worksheet.write(row_index, 8, mother.edd, date_format)
