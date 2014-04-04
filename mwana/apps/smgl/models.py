@@ -191,6 +191,8 @@ class PregnantMother(models.Model):
     def get_gestational_age(self):
         if not self.lmp:
             return 0
+        if not self.created_date:
+            return 0
         gestational_age = self.created_date.date() - self.lmp
         return gestational_age.days
 
