@@ -805,7 +805,7 @@ def mothers(request):
             worksheet.write(row_index, 2, mother.name)
             worksheet.write(row_index, 3, district)
 
-            if mother.zone.name == 'Kalomo DH Zone':
+            if zone == 'Kalomo DH Zone':
                 worksheet.write(row_index, 4, 'Kalomo District Hospital HAHC')
             else:
                 worksheet.write(row_index, 4, facility)
