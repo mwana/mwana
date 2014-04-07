@@ -576,6 +576,8 @@ def home(request):
         site.name = record.name
         site.district = record.parent.name
         site.province = record.parent.parent.name
+        site.district_id = record.parent.slug
+        site.province_id = record.parent.parent.slug
         site.workers = record.contact_set.filter(types=get_clinic_worker_type(), is_active=True).distinct().count()
         site.cbas = Contact.active.filter(types=get_cba_type(), is_active=True, location__parent=record).distinct().count()
         site.dhos = Contact.active.filter(types=get_district_worker_type(), is_active=True, location__location=record).distinct().count()
