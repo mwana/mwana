@@ -568,7 +568,7 @@ def home(request):
     records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
     sites = []
     
-    unsupported_districts = [str(loc.name) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
+    unsupported_districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
     for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
         site = Site()
         site.point = record.point
