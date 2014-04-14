@@ -97,29 +97,29 @@
 
     function drawPercentCharts() {
         var weight_data_percent = {{weight_data_percent|safe}};
-        var yaxis = "Percentage % of reported values";
+        var xaxis = "Percentage % of reported values";
         var stunt_data_percent = {{stunt_data_percent|safe}};
         var wasting_data_percent = {{wasting_data_percent|safe}};
         var chart_type = "percent";
 
-        drawChart(weight_data_percent, yaxis, weight, chart_type);
-        drawChart(stunt_data_percent, yaxis, stunt, chart_type);
-        drawChart(wasting_data_percent, yaxis, wasting, chart_type);
+        drawChart(weight_data_percent, xaxis, weight, chart_type);
+        drawChart(stunt_data_percent, xaxis, stunt, chart_type);
+        drawChart(wasting_data_percent, xaxis, wasting, chart_type);
     }
 
     function drawValueCharts(){
         var weight_data = {{weight_data|safe}};
-        var yaxis = "Number of reported values";
+        var xaxis = "Number of reported values";
         var stunt_data = {{stunt_data|safe}};
         var wasting_data = {{wasting_data|safe}};
         var chart_type = "values"
 
-        drawChart(weight_data, yaxis, weight, chart_type);
-        drawChart(stunt_data, yaxis, stunt, chart_type);
-        drawChart(wasting_data, yaxis, wasting, chart_type);
+        drawChart(weight_data, xaxis, weight, chart_type);
+        drawChart(stunt_data, xaxis, stunt, chart_type);
+        drawChart(wasting_data, xaxis, wasting, chart_type);
     }
     
-    function drawChart(weight_data, yaxis, chart_id, chart_type) {
+    function drawChart(weight_data, xaxis, chart_id, chart_type) {
         // Create and populate the data table.
         var data = new google.visualization.DataTable();
         var raw_data = weight_data;
@@ -167,13 +167,13 @@
         }
 
         // Create and draw the visualization.
-        new google.visualization.ColumnChart(document.getElementById(chart_id)).
+        new google.visualization.BarChart(document.getElementById(chart_id)).
             draw(data,
                  {title:"",
-                  width:{{ chart_height }}, height: '100%',
+                  height:{{ chart_height }}, width: '100%',
                   colors: colors_list,
-                  hAxis: {title: "Location"},
-                  vAxis: {title: yaxis}}
+                  vAxis: {title: "Location"},
+                  hAxis: {title: xaxis}}
                 );
     }
 
