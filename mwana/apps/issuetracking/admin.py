@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.issuetracking.models import Link
 from mwana.apps.issuetracking.models import Issue, Comment
 from mwana.apps.issuetracking.utils import send_issue_email
 from django.contrib import admin
@@ -56,3 +57,27 @@ class IssueAdmin(admin.ModelAdmin):
 
 admin.site.register(Issue, IssueAdmin)
 admin.site.register(Comment)
+
+
+class LinkAdmin(admin.ModelAdmin):
+    list_display = ('title', 'show_link_url', 'what_it_is', 'target_audience', 'created_by', 'date_created', 'last_updated_by', 'date_updated')
+    list_filter = ('date_created', 'date_updated', 'target_audience', 'created_by', 'last_updated_by')
+    search_fields = ('title', 'url', 'what_it_is', 'target_audience',)
+    date_hierarchy = 'date_created'
+
+    def show_link_url(self, obj):
+        return '<a href="%s" target="_blank">%s</a>' % (obj.url, obj.url)
+    show_link_url.allow_tags = True
+    show_link_url.short_description = "Url"
+
+    def save_model(self, request, object, form, change):
+        instance = form.save()
+        if not instance.created_by:
+            instance.created_by = request.user
+
+        instance.last_updated_by = request.user
+        instance.save()
+
+        return instance
+
+admin.site.register(Link, LinkAdmin)

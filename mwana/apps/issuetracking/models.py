@@ -93,3 +93,29 @@ class Comment(models.Model):
 
     class Meta:
             ordering = ["edited_on"]
+
+
+class Link(models.Model):
+    """
+    Keeps useful links for the programme. E.g. Links to shared docs
+    """
+    AUDIENCE_CHOICES = (
+        ('twg', 'mHealth TWG'),
+        ('dev', 'Software Developers'),
+        ('it', 'ICT Staff'),
+        ('partner', 'Partners'),
+        ('support', 'Mwana Support Staff'),
+        ('all', 'Everyone'),
+        ('other', 'Other'),)
+
+    title = models.CharField(max_length=150)
+    url = models.URLField(verify_exists=False)
+    what_it_is = models.CharField(max_length=150, blank=True, null=True, help_text="What is the link all about?")
+    target_audience = models.CharField(max_length=30, blank=True, null=True, choices=AUDIENCE_CHOICES)
+    created_by = models.ForeignKey(User, blank=True, null=True, editable=False, related_name='link_created')
+    date_created = models.DateField(auto_now_add=True)
+    last_updated_by = models.ForeignKey(User, blank=True, null=True, editable=False, related_name='link_updated')
+    date_updated = models.DateField(auto_now=True)
+
+    def __unicode__(self):
+        return "%s - %s" %(self.title, self.what_it_is)
