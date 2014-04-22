@@ -15,6 +15,9 @@ from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from mwana.util import get_clinic_or_default
 from rapidsms.models import Contact
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Command(LabelCommand):
     help = """Corrects PatientTrace objects that were system initiated"""
@@ -325,6 +328,23 @@ def _remove_locationtype_specifier(count):
         pt.name = pt.name[2:].strip().title()
         pt.save()
         count += 1
+    for pt in PatientTrace.objects.filter(name__istartswith='m '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    for pt in Contact.objects.filter(name__istartswith='f '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    
+    for pt in Contact.objects.filter(name__istartswith='m '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    for pt in Contact.objects.filter(name__istartswith='h '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
     return count
 
 
@@ -354,10 +374,40 @@ def _remove_visit_type(count):
 
 
 def _remove_extraneous_words(count):
-    for pt in PatientTrace.objects.filter(name__istartswith='mwana '):
-        pt.name = pt.name[6:].strip().title()
-        pt.save()
-        count += 1
+    logger.info('_remove_extraneous_words')
+    extra_words = ['TOLD ', 'MWANA ', 'CONFIRM ', 'COMFIRM ', 'CONFIRMED ', 'COMFIRMED ', 'BIRTH ']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__istartswith=word):
+            name = pt.name.title()
+            while name.startswith(word.title()):
+                name = name[len(word):].strip().title()
+            pt.name = name
+            pt.save()
+            count += 1
+        for pt in Contact.objects.filter(name__istartswith=word):
+            name = pt.name.title()
+            while name.startswith(word.title()):
+                name = name[len(word):].strip().title()
+            pt.name = name
+            pt.save()
+            count += 1
+
+    extra_words = [' TOLD', ' MWANA', ' CONFIRM', ' COMFIRM', ' CONFIRMED', ' COMFIRMED',' BIRTH']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__iendswith=word):
+            name = pt.name.title().strip()
+            while name.endswith(word.title()):
+                name = name[:-len(word)]
+            pt.name = name
+            pt.save()
+            count += 1
+        for pt in Contact.objects.filter(name__iendswith=word):
+            name = pt.name.title().strip()
+            while name.endswith(word.title()):
+                name = name[:-len(word)]
+            pt.name = name
+            pt.save()
+            count += 1
     return count
 
 
