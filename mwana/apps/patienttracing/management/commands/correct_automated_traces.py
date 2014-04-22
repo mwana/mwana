@@ -373,6 +373,15 @@ def _remove_visit_type(count):
     return count
 
 
+def _remove_invalid_contacts(count):
+    logger.info('_remove_extraneous_words')
+    extra_words = ['TOLD', 'MWANA', 'CONFIRM', 'COMFIRM', 'CONFIRMED',
+    'COMFIRMED', 'BIRTH', 'REMINDMI', 'CLINIC', 'AND', 'ON', 'VISIT', 'GO', 'TO',
+    'Mwanatold', 'Msg', 'Cba', 'Clinhc', 'And', 'Msg', 'All']
+    for word in extra_words:
+        PatientTrace.objects.filter(name__iexact=word).delete()
+        Contact.objects.filter(name__iexact=word, types__slug='patient').delete()
+
 def _remove_extraneous_words(count):
     logger.info('_remove_extraneous_words')
     extra_words = ['TOLD ', 'MWANA ', 'CONFIRM ', 'COMFIRM ', 'CONFIRMED ', 'COMFIRMED ', 'BIRTH ']
@@ -392,7 +401,8 @@ def _remove_extraneous_words(count):
             pt.save()
             count += 1
 
-    extra_words = [' TOLD', ' MWANA', ' CONFIRM', ' COMFIRM', ' CONFIRMED', ' COMFIRMED',' BIRTH']
+    extra_words = [' TOLD', ' MWANA', ' CONFIRM', ' COMFIRM', ' CONFIRMED',
+    ' COMFIRMED',' BIRTH', ' REMINDMI', ' CLINIC', ' AND', ' ON', ' VISIT']
     for word in extra_words:
         for pt in PatientTrace.objects.filter(name__iendswith=word):
             name = pt.name.title().strip()
@@ -408,6 +418,21 @@ def _remove_extraneous_words(count):
             pt.name = name
             pt.save()
             count += 1
+
+
+    extra_words = ['TOLD', 'CONFIRM', 'COMFIRM', 'CONFIRMED',
+    'COMFIRMED', 'REMINDMI', 'CLINIC', 'COFIRM', 'VISIT',
+     'remaindmi', 'rejmaindmi', 'help', 'comferme', 'MOTHER',
+    'Mwanatold', 'Msg', 'Cba', 'Clinhc', 'ttold', 'ftold', 'itold']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__icontains=word):
+            name = pt.name.lower().replace(word.lower(), '').strip()
+            pt.name = name.title()
+            pt.save()
+        for pt in Contact.objects.filter(name__icontains=word):            
+            name = pt.name.lower().replace(word.lower(), '').strip()
+            pt.name = name.title()
+            pt.save()
     return count
 
 
@@ -428,6 +453,8 @@ def clean_names():
     count = _remove_clinic_data(count)
 
     count = _remove_visit_type(count)
+
+    count = _remove_invalid_contacts(count)
 
 #    print "Made %s corrections to names" % count
 
