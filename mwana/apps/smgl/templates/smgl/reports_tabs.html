@@ -52,7 +52,7 @@
               '3 Anc': 'The number of women who complete ONLY 3 Antenatal care visits during their pregnancy',
               '4+ Anc': 'The number of women who complete ONLY 4 or more Antenatal care visits during their pregnancy',
               'Facility': 'The number of women with registered facility deliveries in the system',
-              'Home': 'The number of women with registered community deliveries in the system',
+              'Home': '# of registered deliveries in our cohort that occur at home',
               'Unregistered': 'The number of women expected to deliver within the specified timeframe who do not have a delivery registered in the system',
               'Gestational Age @ First Anc': 'Average gestational age in weeks at ANC booking = LMP date - pregnancy registration date',
               'Registered Deliveries':"# registered facility or community births during the specified timeframe AND who's delivery dates are at least 6 weeks prior to the specified end date",
@@ -250,9 +250,8 @@
   <div class="row-fluid" style="padding:8px;">
     <p style="color:red;">**The Option Filter will only apply on the ANC report table as follows:</p>
     <ul>
-      <li><b>Option 1</b>: All women who have Pregnancy registrations AND gave birth
-      OR had EDD scheduled within the specified time frame</li>
-      <li><b>Option 2</b>: All women who gave birth or had EDD within specified time frame</li>
+      <li><b>Option 1</b>: # of women who registered a pregnancy AND gave birth within the specified time frame. If delivery information is missing, women are selected based off EDD.</li>
+      <li><b>Option 2</b>:  # of women who gave birth within the specified time frame. If delivery information is missing, women are selected based off EDD.</li>
     </ul>
   </div>
 </div>
