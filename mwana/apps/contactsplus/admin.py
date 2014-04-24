@@ -64,6 +64,7 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "direction", "who", "date",)
     list_filter = ("direction", "date", "contact", "connection__backend",)
     search_fields = ("text",)
+    date_hierarchy = 'date'
 admin.site.register(Message, MessageAdmin)
 
 
