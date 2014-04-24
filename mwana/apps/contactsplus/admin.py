@@ -62,7 +62,7 @@ admin.site.register(contactsplus.ContactType, ContactTypeAdmin)
 admin.site.unregister(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "direction", "who", "date",)
-    list_filter = ("direction", "date", "contact",)
+    list_filter = ("direction", "date", "contact", "connection__backend",)
     search_fields = ("text",)
 admin.site.register(Message, MessageAdmin)
 
