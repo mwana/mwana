@@ -76,15 +76,17 @@
               'Err. Clinic W.': 'The proportion of messages containing errors sent by clinic workers during the specified time period',
               'Err. D. Clerks': 'The proportion of messages containing errors sent by data clerks during the specified time period',
               'Err. Cbas': 'The proportion of messages containing errors sent by Community Based Agents during the specified time period',
-              'Scheduled': '# EDD/ANC/PNC/Referral Reminders scheduled during the specified time period for each Mother',
-              'Sent': '# EDD/ANC/PNC/Referral Reminders sent from the system during the specified time period',
-              'Told And Showed': '# of registered follow-up ANC and PNC visits and facility deliveries for women who were reminded by a SMAG',
-              'Showed On Time': '# ANC Follow-ups registered in the system that occur 7 days prior OR 14 days after scheduled date with a corresponding TOLD message during the specified time period.....# PNC Follow-ups registered in the system that occur 7 days after the scheduled 6 day visit, or 7 weeks after the scheduled 6 week visit with a corresponding TOLD message during the specified time period',
-              'Reminded': '# EDD/ANC/PNC TOLD messages received during the specified time period',
-              'Sent (Smag)': '# EDD/ANC/PNC/Referral Reminders sent to SMAGS',
-              'Scheduled (Smag)': '# EDD/ANC/PNC/Referral Reminders scheduled to be sent to SMAGS',
-              'Received Told': '# EDD/ANC/PNC TOLD messages received during the specified time period',
-              'Birth/Anc/Pnc/Ref':'# of registered ANC/PNC visits, Deliveries and Emergency Referrals during the specified time frame'
+              'Scheduled': '# ANC/PNC Reminders for women with scheduled visit dates within the specified time frame.',
+              'Sent': '# ANC/PNC Reminders sent from the system for women with scheduled visit dates within the specified time frame.',
+              'Told & Showed': '# ANC registered 7 days prior to or 14 days after scheduled date with corresponding “Told” message for women within the cohort---# 6-day PNC registered up to 7 days after birth and # 6 week PNC registered between 8 to 49 days after birth with a corresponding “Told” for women within the cohort.',
+              'Showed W/O Told': "# ANC registered 7 days prior to or 14 days after scheduled date without corresponding 'Told' message for women within the cohort---# 6-day PNC registered up to 7 days after birth and # 6week PNC registered between 8 to 49 days after birth without corresponding “Told” message for women within the cohort.",
+              'Reminded': '# ANC/PNC TOLD messages received for women with scheduled visit dates within the specified time frame.',
+              'Sent (Smag)': '# ANC/PNC reminders sent to SMAGs for scheduled visits within the specified time frame.',
+              'Scheduled (Smag)': '# ANC/PNC reminders expected to be sent to SMAGs for scheduled visits within the specified time frame.',
+              'Told Received': '# ANC/PNC TOLD messages received within 10 days of reminder sent for scheduled visits within the specified time frame.',
+              'Anc/Pnc':'# of registered ANC/PNC visits for women with scheduled visit dates within the specified time frame.',
+              '# Mothers': '# of women with ANC/PNC visits SCHEDULED within the specified time frame.',
+              'Response Rate': 'The proportion of ANC/PNC reminders with corresponding TOLD messages received within 10 days for scheduled visits within the specified time frame',
 
             }
             $.get(fullURL, formData, function(data){

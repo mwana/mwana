@@ -1302,9 +1302,9 @@ def reminder_stats(request, smag_table_requested=False):
     province = district = facility = None
     start_date, end_date = get_default_dates()
 
-    record_types = ['edd', 'anc', 'pos', 'ref']
-    field_mapper = {'edd': 'Expected Delivery Date', 'anc': 'ANC',
-                    'pos': 'Post Partum', 'ref': 'Referrals',
+    record_types = ['anc', 'pos']
+    field_mapper = {'anc': 'ANC',
+                    'pos': 'Post Partum',
                     }
 
     if request.GET:
