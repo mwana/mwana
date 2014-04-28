@@ -11,7 +11,7 @@ from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
 from mwana.apps.smgl.models import PregnantMother, FacilityVisit
 from mwana.apps.smgl.utils import (get_value_from_form, send_msg, make_date,
-    respond_to_session)
+    respond_to_session, get_district_facility_zone)
 
 logger = logging.getLogger(__name__)
 
@@ -94,8 +94,15 @@ def pregnant_registration(session, xform, router):
             mother.zone = Location.objects.get(type=LocationType.objects.get(slug__iexact=const.LOCTYPE_ZONE),
                                                slug__iexact=zone_name)
         except Location.DoesNotExist:
-            return respond_to_session(router, session, const.UNKOWN_ZONE,
-                                      is_error=True, **{"zone": zone_name})
+            #See if this is a village
+            try:
+                village = Location.objects.get(type=LocationType.objects.get(slug__iexact=const.LOCTYPE_VILLAGE),
+                    slug=zone_name)
+                mother.village = village
+                mother.zone = village.parent
+            except Location.DoesNotExist:
+                return respond_to_session(router, session, const.UNKOWN_ZONE,
+                                          is_error=True, **{"zone": zone_name})
 
     reasons = xform.xpath("form/high_risk_factor")
     if reasons:
@@ -104,6 +111,20 @@ def pregnant_registration(session, xform, router):
 
     mother.contact = data_associate
     mother.save()
+
+    #We will also create a Facility Visit object here
+    #Is this right?
+    facility_visit = FacilityVisit.objects.create(
+        created_date=session.modified_time,
+        mother=mother,
+        location=connection.contact.location,
+        visit_date=datetime.datetime.today(),
+        visit_type='anc',
+        reason_for_visit='reg',
+        edd=edd_date,
+        next_visit=next_visit,
+        contact=connection.contact,
+        )
 
     # if there is a lay counselor(s) registered, also notify them
     for contact in mother.get_laycounselors():
@@ -157,7 +178,7 @@ def follow_up(session, xform, router):
                                   is_error=True, **{"date_name": "Next Visit",
                                                     "date": next_visit})
 
-    # Make the follow up facility visit
+    # Create the facility visit
     visit = FacilityVisit()
     visit.mother = mother
     visit.contact = contact

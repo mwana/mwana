@@ -4,8 +4,7 @@ from mwana.apps.smgl.models import PregnantMother, FacilityVisit,\
     ReminderNotification
 from mwana.apps.smgl import const
 from datetime import datetime, timedelta
-from mwana.apps.smgl.reminders import send_followup_reminders,\
-    send_upcoming_delivery_reminders
+from mwana.apps.smgl.reminders import (send_followup_reminders,)
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from mwana.apps.smgl.tests.shared import create_mother
 
@@ -49,7 +48,12 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertEqual(["none"], list(mom.get_risk_reasons()))
         self.assertEqual("r", mom.reason_for_visit)
 
-        self.assertEqual(0, FacilityVisit.objects.count())
+    def testRegisterWithFacilityVisit(self):
+        """Should create a facility visit on registration."""
+        self.testRegister()
+        #A facility visit should have been registered by now.
+        self.assertEqual(1, FacilityVisit.objects.filter(visit_type='anc').count())
+
 
     def testRegisterNotRegistered(self):
         script = """
@@ -119,7 +123,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         self.assertSessionSuccess()
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(0, FacilityVisit.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
 
     def testDuplicateRegister(self):
         self.testRegister()
@@ -154,7 +158,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertSessionSuccess()
 
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(1, FacilityVisit.objects.count())
+        self.assertEqual(2, FacilityVisit.objects.count())
 
     def testFollowUpNotRegistered(self):
         script = """
@@ -182,7 +186,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertSessionSuccess()
 
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(1, FacilityVisit.objects.count())
+        self.assertEqual(2, FacilityVisit.objects.count())
 
     def testFollowUpBadEdd(self):
         self.testRegister()
@@ -197,7 +201,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertSessionFail()
 
         self.assertEqual(1, PregnantMother.objects.count())
-        self.assertEqual(0, FacilityVisit.objects.count())
+        self.assertEqual(1, FacilityVisit.objects.count())
 
     def testDatesInPastOrFuture(self):
         yesterday = (datetime.now() - timedelta(days=1)).date()
@@ -239,7 +243,7 @@ class SMGLPregnancyTest(SMGLSetUp):
     def testVisitReminders(self):
         self.testFollowUp()
         [mom] = PregnantMother.objects.all()
-        visit = FacilityVisit.objects.get(mother=mom)
+        visit = FacilityVisit.objects.filter(mother=mom)[1]
         self.assertEqual(False, visit.reminded)
 
         # set 10 days in the future, no reminder
@@ -275,7 +279,8 @@ class SMGLPregnancyTest(SMGLSetUp):
     def testBirthCancelsVisitReminder(self):
         self.testFollowUp()
         [mom] = PregnantMother.objects.all()
-        visit = FacilityVisit.objects.get(mother=mom)
+
+        visit = FacilityVisit.objects.filter(mother=mom)[0]
         self.assertEqual(False, visit.reminded)
 
         # set to 7 days, should fall in threshold
@@ -296,13 +301,13 @@ class SMGLPregnancyTest(SMGLSetUp):
 
         # send reminders and make sure they didn't actually fire on this one
         send_followup_reminders(router_obj=self.router)
-        visit = FacilityVisit.objects.get(pk=visit.pk)
+        visit = FacilityVisit.objects.filter(pk=visit.pk)[0]
         self.assertFalse(visit.reminded)
 
     def testFollowUpCancelsVisitReminder(self):
         self.testFollowUp()
         [mom] = PregnantMother.objects.all()
-        visit = FacilityVisit.objects.get(mother=mom)
+        visit = FacilityVisit.objects.filter(mother=mom)[0]
         self.assertEqual(False, visit.reminded)
 
         # set to 7 days, should fall in threshold
@@ -322,7 +327,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.runScript(script)
         self.assertSessionSuccess()
 
-        [second_visit] = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)
+        second_visit = FacilityVisit.objects.filter(mother=mom).exclude(pk=visit.pk)[0]
         self.assertTrue(second_visit.created_date > visit.created_date)
         # leave this one outside the reminder threshold
         second_visit.next_visit = datetime.utcnow() + timedelta(days=10)
@@ -335,46 +340,13 @@ class SMGLPregnancyTest(SMGLSetUp):
         second_visit = FacilityVisit.objects.get(pk=visit.pk)
         self.assertFalse(second_visit.reminded)
 
-    def testEDDReminders(self):
-        self.testRegister()
-        [mom] = PregnantMother.objects.all()
-        self.assertEqual(False, mom.reminded)
-
-        # set 15 days in the future, no reminder
-        mom.edd = datetime.utcnow().date() + timedelta(days=15)
-        mom.save()
-        send_upcoming_delivery_reminders(router_obj=self.router)
-        mom = PregnantMother.objects.get(pk=mom.pk)
-        self.assertEqual(False, mom.reminded)
-
-        # set to 14 days, should now fall in threshold
-        mom.edd = datetime.utcnow().date() + timedelta(days=14)
-        mom.save()
-        send_upcoming_delivery_reminders(router_obj=self.router)
-        mom = PregnantMother.objects.get(pk=mom.pk)
-        self.assertEqual(True, mom.reminded)
-
-        reminder = const.REMINDER_UPCOMING_DELIVERY % {"name": "Mary Soko",
-                                                       "unique_id": "80403000000112",
-                                                       "date": mom.edd}
-        script = """
-            %(num)s < %(msg)s
-        """ % {"num": "456",
-               "msg": reminder}
-        self.runScript(script)
-
-        [notif] = ReminderNotification.objects.all()
-        self.assertEqual(mom, notif.mother)
-        self.assertEqual(mom.uid, notif.mother_uid)
-        self.assertEqual(self.cba, notif.recipient)
-        self.assertEqual("edd_14", notif.type)
-
     def testValidLookUpMother(self):
         loc_type = LocationType.objects.get(singular='Zone')
         zone = Location.objects.filter(type=loc_type)[0]
         mom = create_mother(data={'first_name': 'Jane',
                                   'last_name': 'Doe',
                                   'uid': '333333',
+                                  'zone': zone,
                                   'location': zone})
         resp = const.LOOK_COMPLETE % {"unique_id": mom.uid}
         script = """
@@ -386,7 +358,7 @@ class SMGLPregnancyTest(SMGLSetUp):
         self.assertSessionSuccess()
 
     def testInvalidLookUpMother(self):
-        resp = const.LOOK_MOTHER_DOES_NOT_EXIST
+        resp = const.LOOK_MOTHER_DOES_NOT_EXIST%{'first_name':'does', 'last_name':'not'}
         script = """
             %(num)s > look does not exist
             %(num)s < %(resp)s
