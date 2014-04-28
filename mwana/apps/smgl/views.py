@@ -2061,6 +2061,12 @@ def sms_users(request):
             status = form.cleaned_data.get('status')
             start_date = form.cleaned_data.get('start_date', start_date)
             end_date = form.cleaned_data.get('end_date', end_date)
+
+
+            if not start_date:
+                start_date, dispose_date = get_default_dates()
+            if not end_date:
+                dispose_date, end_date = get_default_dates()
     else:
         initial = {
                     'start_date': start_date,

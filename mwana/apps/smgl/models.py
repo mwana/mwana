@@ -729,7 +729,8 @@ class ReminderNotification(MotherReferenceBase):
 
 TOLD_TYPE_CHOICES = (("edd", 'Expected Delivery Date'),
                      ("nvd", "Next Visit Date"),
-                     ("ref", "Referral"))
+                     ("ref", "Referral"),
+                     ("pp", "Post Partum"),)
 
 
 class ToldReminder(FormReferenceBase, MotherReferenceBase):

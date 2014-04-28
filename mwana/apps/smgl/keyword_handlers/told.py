@@ -49,6 +49,16 @@ def told(session, xform, router):
             if not refs:
                 return respond_to_session(router, session, const.TOLD_MOTHER_HAS_NO_REF,
                                           is_error=True, **{'unique_id': unique_id})
+
+        elif reminder_type == 'pp':
+            visits = FacilityVisit.objects.filter(next_visit__gte=now.date(),
+                                                  mother=mother,
+                                                  visit_type='pos')
+            if not visits:
+                return respond_to_session(router, session,
+                                          const.TOLD_MOTHER_HAS_NO_NVD,
+                                          is_error=True,
+                                          **{'unique_id': unique_id})
         else:
             if reminder_type == 'nvd':
                 reminder_type = 'anc'
@@ -56,9 +66,9 @@ def told(session, xform, router):
                                                   mother=mother,
                                                   visit_type=reminder_type)
             if not visits:
-                return respond_to_session(router, session, 
+                return respond_to_session(router, session,
                                           const.TOLD_MOTHER_HAS_NO_NVD,
-                                          is_error=True, 
+                                          is_error=True,
                                           **{'unique_id': unique_id})
         # Generate the TOLD Reminder database entry
         ToldReminder.objects.create(
@@ -68,6 +78,6 @@ def told(session, xform, router):
                             date=session.modified_time,
                             type=reminder_type,
                             )
-        return respond_to_session(router, session, TOLD_COMPLETE, 
+        return respond_to_session(router, session, TOLD_COMPLETE,
                                   **{'name': connection.contact.name,
                                      'unique_id': unique_id})
