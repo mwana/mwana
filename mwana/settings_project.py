@@ -106,12 +106,13 @@ INSTALLED_APPS = [
     "mwana.apps.reports",
     "mwana.apps.training",
     "mwana.apps.help",
+    "mwana.apps.quit",
     "mwana.apps.alerts",
 
     # "mwana.apps.patienttracing",
     # "mwana.apps.hub_workflow",
     # "mwana.apps.stringcleaning",
-# This app should always come last to prevent it from hijacking other apps that handle default messages
+    # This app should always come last to prevent it from hijacking other apps that handle default messages
     "mwana.apps.default",
 ]
 

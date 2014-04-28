@@ -14,6 +14,12 @@ def birth_registration(session, xform, router):
     """
     Keyword: BIRTH
     """
+
+    connection = session.connection
+    if not connection.contact:
+        return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
+                                  is_error=True, **{'name': connection.contact.name})
+
     name = session.connection.contact.name if session.connection.contact else ""
 
     date, error = make_date(xform, "date_of_birth_dd", "date_of_birth_mm", "date_of_birth_yyyy")

@@ -39,6 +39,7 @@ def leave(session, xform, router):
 @registration_required
 @is_active
 def quit(session, xform, router):
+    #This no longer works as the quit is an applicatin by itself
     """
     Handler for Quit keyword, used to permanently deactivate the user
     """
