@@ -1,34 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <h:html xmlns:h="http://www.w3.org/1999/xhtml" xmlns:orx="http://openrosa.org/jr/xforms" xmlns="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:jr="http://openrosa.org/javarosa">
-    <h:head>
-        <h:title>Leave</h:title>
-        <model>
-            <instance>
-                <data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B" uiVersion="1" version="1" name="Leave">
-                    <when />
-                </data>
-            </instance>
-            <bind nodeset="/data/when" type="xsd:string" />
-            <itext>
-                <translation lang="en" default="">
-                    <text id="when-label">
-                        <value>When?</value>
-                    </text>
-                    <text id="when-now-label">
-                        <value>NOW</value>
-                    </text>
-
-                </translation>
-            </itext>
-        </model>
-    </h:head>
-    <h:body>
-        <select1 ref="/data/when">
-            <label ref="jr:itext('when-label')" />
-            <item>
-                <label ref="jr:itext('when-now-label')" />
-                <value>now</value>
-            </item>
-        </select1>
-    </h:body>
+	<h:head>
+		<h:title>Leave</h:title>
+		<model>
+			<instance>
+				<data xmlns:jrm="http://dev.commcarehq.org/jr/xforms" xmlns="http://openrosa.org/formdesigner/523C5102-7B27-4EEC-B2F6-ED4885A4549B" uiVersion="1" version="1" name="Leave">
+					<number_of_days />
+				</data>
+			</instance>
+			<bind nodeset="/data/number_of_days" type="xsd:int" />
+			<itext>
+				<translation lang="en" default="">
+					<text id="number_of_days-label">
+						<value>How many days?</value>
+					</text>
+				</translation>
+			</itext>
+		</model>
+	</h:head>
+	<h:body>
+		<input ref="/data/number_of_days">
+			<label ref="jr:itext('number_of_days-label')" />
+		</input>
+	</h:body>
 </h:html>

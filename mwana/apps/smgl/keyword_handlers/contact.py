@@ -25,12 +25,16 @@ def leave(session, xform, router):
         return respond_to_session(router, session, const.NOT_REGISTERED_FOR_DATA_ASSOC,
                                   is_error=True, **{'name': connection.contact.name})
 
-    when = get_value_from_form('when', xform)
-    if when == 'now':
-        connection.contact.is_active = False
-        connection.contact.save()
-        return respond_to_session(router, session, const.LEAVE_COMPLETE,
-                                  **{'name': connection.contact.name})
+    days = int(get_value_from_form('number_of_days', xform))
+    now = datetime.utcnow().date()
+    return_date = now + timedelta(days=days)
+
+    connection.contact.is_active = False
+    connection.contact.return_date = return_date
+    connection.contact.save()
+
+    return respond_to_session(router, session, const.LEAVE_COMPLETE,
+                              **{'return_date': return_date.strftime('%d %B %Y')})
 
 @registration_required
 @is_active
