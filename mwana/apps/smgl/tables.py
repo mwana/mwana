@@ -493,7 +493,7 @@ class ErrorTable(Table):
     facility = Column(
         value=lambda cell: cell.object.connection.contact.location if cell.object.connection.contact else '')
     text = NamedColumn(
-        col_name="Message", value=lambda cell: map_message_fields(cell.object))
+        col_name="Message", value=lambda cell: cell.object)
     error_response = NamedColumn(col_name="Error Resp", value=lambda cell: get_response(cell.object))
 
 
