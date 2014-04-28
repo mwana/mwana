@@ -1,6 +1,6 @@
 from mwana.apps.smgl.tests.shared import SMGLSetUp, get_last_session
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
-from mwana.apps.smgl.models import BirthRegistration
+from mwana.apps.smgl.models import BirthRegistration, FacilityVisit
 from datetime import date, datetime, timedelta
 from mwana.apps.smgl import const
 
@@ -48,6 +48,12 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertEqual(2, reg.number)
         self.assertSessionSuccess()
 
+    def testBirthFacilityVisit(self):
+        self.testBasicBirthReg()
+        #Check for facility visit
+        self.assertEqual(1, FacilityVisit.objects.filter(visit_type='pos').count())
+
+
     def testBirthNotRegistered(self):
         script = """
             %(num)s > birth 1234 01 01 2012 bo h yes t2
@@ -68,7 +74,7 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.assertSessionFail()
 
     def testOptionalLastQuestion(self):
-        resp = BIRTH_REG_RESPONSE % {"name": self.name}
+        resp = BIRTH_REG_RESPONSE % {"name": self.name, "unique_id":1234}
         script = """
             %(num)s > birth 1234 01 01 2012 gi f yes
             %(num)s < %(resp)s

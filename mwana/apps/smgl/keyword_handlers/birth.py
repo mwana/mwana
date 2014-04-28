@@ -1,7 +1,7 @@
 from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from mwana.apps.smgl.utils import (make_date, mom_or_none,
         respond_to_session)
-from mwana.apps.smgl.models import BirthRegistration, PregnantMother
+from mwana.apps.smgl.models import BirthRegistration, PregnantMother, FacilityVisit
 from dimagi.utils.parsing import string_to_boolean
 from mwana.apps.smgl import const
 from mwana.apps.smgl.decorators import registration_required, is_active
@@ -55,5 +55,21 @@ def birth_registration(session, xform, router):
                             district=contact.get_current_district(),
                             facility=contact.get_current_facility())
     reg.save()
+
+
+    #We automatically create the 1st day visit in the database and assume that
+    #the next visit will be 6 days from that visit day
+    if mom:
+        next_visit = datetime.datetime.now() + datetime.timedelta(days=6)
+        facility_visit = FacilityVisit.objects.create(
+            created_date=session.modified_time,
+            mother=mom,
+            location=session.connection.contact.location,
+            visit_date=datetime.datetime.today() + datetime.timedelta(days=1),
+            visit_type='pos',
+            reason_for_visit='birth_reg',
+            next_visit=next_visit,
+            contact=contact,
+            )
     return respond_to_session(router, session, BIRTH_REG_RESPONSE,
                                **{"name": name, "unique_id": xform.xpath("form/unique_id").lower()})

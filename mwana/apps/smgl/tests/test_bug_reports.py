@@ -3,11 +3,11 @@ from mwana.apps.smgl.models import PregnantMother, Referral
 from mwana.apps.smgl import const
 
 
-class SMGLBirthRegTest(SMGLSetUp):
+class SMGLBirthBugRegTest(SMGLSetUp):
     fixtures = ["initial_data.json"]
 
     def setUp(self):
-        super(SMGLBirthRegTest, self).setUp()
+        super(SMGLBirthBugRegTest, self).setUp()
         self.createDefaults()
         self.user_number = "15"
         self.name = "AntonDA"
@@ -29,7 +29,8 @@ class SMGLBirthRegTest(SMGLSetUp):
 
     def testRefer1(self):
         success_resp = const.REFERRAL_RESPONSE % {"name": self.name,
-                                                  "unique_id": "8040120143"}
+                                                  "unique_id": "8040120143",
+                                                  "facility_name": "Kalomo District Hospital HAHC"}
         script = """
             %(num)s > REFER 8040120143 804030 APH 1100 NEM
             %(num)s < %(resp)s
