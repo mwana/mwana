@@ -84,7 +84,11 @@ REMINDER_FU_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to vis
 REMINDER_NON_EMERGENCY_REFERRAL = _("Mother named %(name)s with ID # %(unique_id)s should visit hospital %(loc)s as referred.")
 REMINDER_EMERGENCY_REFERRAL = _("Please submit outcome SMS (REFOUT) for mother with ID %(unique_id)s referred on %(date)s from %(loc)s")
 REMINDER_UPCOMING_DELIVERY = _("Mother named %(name)s with ID # %(unique_id)s is due for delivery on %(date)s please follow-up visit.")
-REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for a postpartum visit in %(num)s days.")
+
+REMINDER_PP_DUE = _("Mother named %(name)s with ID # %(unique_id)s has delivered. Kindly remind her to visit health center %(loc)s for postnatal care in 3 days and then reply with 'TOLD %(unique_id)s pp'.")
+REMINDER_PP_DUE_6_WEEKS = _("Mother named %(name)s with ID # %(unique_id)s is due to visit health center %(loc)s for postnatal visit in 7 days. Kindly remind her and then reply with 'TOLD %(unique_id)s pp'.")
+
+
 REMINDER_PP_MISSED = _("Mother named %(name)s with ID # %(unique_id)s is overdue to visit health center %(loc)s for a postpartum visit.")
 REMINDER_SYP_TREATMENT_DUE = _("This is a reminder: Mother named %(name)s should visit the health center for follow-up on %(date)s")
 

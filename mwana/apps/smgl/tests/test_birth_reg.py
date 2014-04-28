@@ -3,6 +3,7 @@ from mwana.apps.smgl.app import BIRTH_REG_RESPONSE
 from mwana.apps.smgl.models import BirthRegistration, FacilityVisit
 from datetime import date, datetime, timedelta
 from mwana.apps.smgl import const
+from mwana.apps.smgl.reminders import send_first_postpartum_reminders, send_second_postpartum_reminders
 
 
 class SMGLBirthRegTest(SMGLSetUp):
@@ -52,6 +53,44 @@ class SMGLBirthRegTest(SMGLSetUp):
         self.testBasicBirthReg()
         #Check for facility visit
         self.assertEqual(1, FacilityVisit.objects.filter(visit_type='pos').count())
+
+    def testFirstPOSReminder(self):
+        self.testBirthFacilityVisit()
+
+        visit = FacilityVisit.objects.filter(visit_type='pos')[0]
+
+        #attach a lay personel to the mother's zone
+        cba = self.createUser("cba", "320", "80402404")
+
+        visit.next_visit = datetime.utcnow() + timedelta(days=3)
+        visit.save()
+
+        cba.location = visit.mother.zone
+        cba.save()
+
+        send_first_postpartum_reminders(router_obj=self.router)
+
+    def testSecondPOSReminder(self):
+        self.testFirstPOSReminder()
+
+        first_visit = FacilityVisit.objects.filter(visit_type='pos')[0]
+        visit = FacilityVisit()
+        visit.mother = first_visit.mother
+        visit.contact = first_visit.contact
+        visit.location = first_visit.contact.location
+        visit.visit_date = datetime.utcnow().date()
+        visit.created_date = datetime.utcnow()
+        visit.visit_type = 'pos'
+        visit.mother_status = first_visit.mother_status
+        visit.baby_status = first_visit.baby_status
+
+        #attach a lay counselor to the mother's zone
+        visit.next_visit = datetime.utcnow() + timedelta(days=7)
+        visit.save()
+
+        send_second_postpartum_reminders(router_obj=self.router)
+
+
 
 
     def testBirthNotRegistered(self):

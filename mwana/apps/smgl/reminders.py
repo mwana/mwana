@@ -191,8 +191,7 @@ def send_first_postpartum_reminders(router_obj=None):
         # Check if first visit for mother
 
         for v in visits_to_remind:
-            if v.mother.facility_visits.filter(visit_type='pos').count() == 0 and \
-               v.is_latest_for_mother():
+            if v.is_latest_for_mother():
                 yield v
 
     for v in _visits_to_remind():
@@ -204,7 +203,7 @@ def send_first_postpartum_reminders(router_obj=None):
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
                              "loc": v.location.name,
-                             "num": 3})
+                             })
                 _create_notification("pos", c, v.mother.uid)
         if found_someone:
             v.reminded = True
@@ -231,8 +230,7 @@ def send_second_postpartum_reminders(router_obj=None):
         # Check if second visit
 
         for v in visits_to_remind:
-            if v.mother.facility_visits.filter(visit_type='pos').count() == 1 and \
-               v.is_latest_for_mother():
+            if v.is_latest_for_mother():
                 yield v
 
     for v in _visits_to_remind():
@@ -240,11 +238,11 @@ def send_second_postpartum_reminders(router_obj=None):
         for c in v.mother.get_laycounselors():
             if c.default_connection:
                 found_someone = True
-                c.message(const.REMINDER_PP_DUE,
+                c.message(const.REMINDER_PP_DUE_6_WEEKS,
                           **{"name": v.mother.name,
                              "unique_id": v.mother.uid,
                              "loc": v.location.name,
-                             "num": 7})
+                             })
                 _create_notification("pos", c, v.mother.uid)
         if found_someone:
             v.reminded = True
