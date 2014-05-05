@@ -181,9 +181,16 @@ class GrowthHandler(KeywordHandler):
         """Splits the text into the expected parts."""
         token_labels = ['child_id', 'date_of_birth', 'gender', 'weight',
                         'height', 'oedema', 'muac', 'action_taken']
+        labels = ['child_id', 'first_name', 'last_name', 'date_of_birth',
+                  'gender', 'weight', 'height', 'oedema', 'muac',
+                  'action_taken']
         validate_tokens = True
+
         try:
             token_data = text.split()
+            if len(token_data) == 10:
+                logger.debug("new format...")
+                return dict(zip(labels, token_data)), validate_tokens
             if len(token_data) > 8:
                 logger.debug("too much data")
                 self.respond(TOO_MANY_TOKENS)
@@ -404,14 +411,14 @@ class GrowthHandler(KeywordHandler):
         # get the tokens from the text
         tokens, validate_tokens = self._get_tokens(text)
 
-        # don't bother saving or proceeding as there are errors
-        if not validate_tokens:
-            return True
-
-        # save the raw data submission as it was sent
+        # try to save the raw data submission as it was sent
         survey_entry = SurveyEntry(**tokens)
         survey_entry.healthworker = healthworker
         survey_entry.save()
+
+        # don't bother proceeding as there are errors ??
+        if not validate_tokens:
+            return True
 
         # replace the "no data" shorthands
         for k, v in tokens.iteritems():
@@ -438,6 +445,10 @@ class GrowthHandler(KeywordHandler):
         patient_kwargs.update({'gender': data['gender']})
         patient_kwargs.update({'action_taken': data['action_taken']})
         patient_kwargs.update({'cluster_id': healthworker.clinic.slug})
+        # add the patients first and last name
+        if data['first_name'] and data['last_name']:
+            patient_kwargs.update(
+                {'name': " ".join([data['first_name'], data['last_name']])})
         # get or create and update patient
         try:
             patient, created = self.__get_or_create_patient(**patient_kwargs)

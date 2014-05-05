@@ -207,6 +207,8 @@ class SurveyEntry(models.Model):
     gender              = models.CharField(max_length=25,blank=True,null=True)
     date_of_birth       = models.CharField(max_length=25,blank=True,null=True)
     age_in_months       = models.CharField(max_length=25,blank=True,null=True)
+    first_name = models.CharField(max_length=25, blank=True, null=True)
+    last_name = models.CharField(max_length=25, blank=True, null=True)
 
     # indicators
     height              = models.CharField(max_length=25,blank=True,null=True)
