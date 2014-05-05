@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+import re
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
@@ -20,9 +21,7 @@ class CancelHandler(KeywordHandler):
         self.respond(CANCEL_HELP)
 
     def handle(self, text):
-        PATTERN = re.compile(r'(?P<child_id>\d+)\s+', re.IGNORECASE)
-        m = p.match(text)
-        child = m.group('child_id').strip
+        child = text.strip()
         try:
             patient = Person.objects.get(code=child)
             ass = patient.latest_assessment()
