@@ -33,6 +33,8 @@ UNREGISTERED_DEFAULT_RESPONSE = _("Invalid Keyword. Please send the keyword HELP
 HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as training data"
 DHO_TRAINING_START_NOTIFICATION = "Hi %(contact)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic today as training data"
 HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as live data"
+EID_HELP = "To report a sample delivery send: EID <SAMPLE_ID> <HIV> <ACTION_TAKEN ART/CPT> <AGE AT ART/CPT>"
+REGISTER_AS_CLINIC = "Please register before reporting: JOIN CLINIC <LOCATION_CODE> <FIRSTNAME> <LASTNAME> <PIN_CODE>"
 
 TEST_TYPE = "HIV-DNAPCR Result"
 

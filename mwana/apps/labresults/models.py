@@ -136,12 +136,16 @@ class Result(models.Model):
 
     @classmethod
     def clean_req_id(cls, req_id):
+        req_id = req_id.replace(' ', '')
         return req_id.replace('-', '')
 
     def save(self, *args, **kwargs):
         if self.requisition_id:
             self.requisition_id_search =\
-              Result.clean_req_id(self.requisition_id)
+                Result.clean_req_id(self.requisition_id)
+        elif self.clinic_care_no:
+            self.requisition_id_search =\
+                Result.clean_req_id(self.clinic_care_no)
         super(Result, self).save(*args, **kwargs)
 
     class Meta:
@@ -219,3 +223,21 @@ class PendingPinConnections(models.Model):
     def __unicode__(self):
         return "%s, %s, %s" % (self.connection, self.result, self.timestamp)
 
+
+class EIDConfirmation(models.Model):
+    """Stores confirmation messages from clinic workers."""
+    ACTION_TAKEN_CHOICES = tuple([(x, x) for x in ["ART", "CPT"]])
+    result = models.ForeignKey(Result, null=True)
+    contact = models.ForeignKey(Contact, null=True)
+    sample = models.CharField(max_length=30)
+    status = models.CharField(max_length=1)
+    age_in_months = models.IntegerField(max_length=2, null=True)
+    action_taken = models.CharField(
+        choices=ACTION_TAKEN_CHOICES,
+        max_length=3,
+        null=True,
+        blank=True)
+
+    def __unicode__(self):
+        return 'EID sample: {sample} - {action}'.format(
+            sample=self.sample, action=self.action_taken)

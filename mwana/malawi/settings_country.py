@@ -61,9 +61,9 @@ ROOT_URLCONF = 'mwana.malawi.urls'
 
 # INSTALLED APPS
 INSTALLED_APPS.append("mwana.apps.reports.webreports")
-INSTALLED_APPS.insert(-1, 'eav')
-INSTALLED_APPS.insert(-1, 'uni_form')
-INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
+# INSTALLED_APPS.insert(-1, 'eav')
+# INSTALLED_APPS.insert(-1, 'uni_form')
+# INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
 
@@ -112,10 +112,10 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.help.handlers.facilitycontacts.ContactsHandler",
     "mwana.apps.labresults.handlers.join.JoinHandler",
     "mwana.apps.labresults.handlers.leave.UnregisterHandler",
-    "mwana.apps.labresults.handlers.join.JoinHandler",
     "mwana.apps.labresults.handlers.printer.PrinterHandler",
     "mwana.apps.labresults.handlers.results.ResultsHandler",
     "mwana.apps.labresults.handlers.sent.SentHandler",
+    "mwana.apps.labresults.handlers.eid.EIDHandler",
     "mwana.apps.broadcast.handlers.all.AllHandler",
     "mwana.apps.broadcast.handlers.blaster.BlastHandler",
     "mwana.apps.broadcast.handlers.cba.CBAHandler",
@@ -126,4 +126,5 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
     "mwana.apps.reminders.handlers.mayi.MayiHandler",
+    "mwana.apps.reminders.handlers.discontinue.DiscontinueHandler",
 ]
