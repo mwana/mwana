@@ -248,7 +248,6 @@ def anc_report(request, id=None):
             if len(anc_visits) >= 4:
                 four_anc += 1
 
-        print two_anc, three_anc, four_anc
 
         r['anc2'] = two_anc
         r['anc3'] = three_anc
