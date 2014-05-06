@@ -16,6 +16,8 @@
     height: 23px;
     margin-top: 3px;
   }
+
+
 </style>
 {% endblock %}
 
@@ -34,16 +36,40 @@
         $("a[data-toggle='tab']").on('show.bs.tab', function(e){
             var targ = $(e.target).attr('href');
             targ = targ.replace('#', '');
+
             $("#"+targ).html("<p>Loading....Please wait.</p>").css({
               'font-size':'25px',
               'text-align':'center'
-            })
+            });
+
+            if (targ == 'reminder-report'){
+              $("#"+targ).html("<p>Under Development</p>").css({
+                'margin-top':'20px',
+                'font-size':'25px',
+                'text-align':'center'
+              });
+            }
+            if (targ == 'reminder-report-smag'){
+              $("#"+targ).html("<p>Under Development</p>").css({
+                'margin-top':'20px',
+                'font-size':'25px',
+                'text-align':'center'
+              });
+            }
+
+
         });
 
         $("a[data-toggle='tab']").on('shown.bs.tab', function (e) {
             var formData = $("form").serialize()
             var targ = $(e.target).attr('href');
             targ = targ.replace('#', '');
+            if (targ == 'reminder-report'){
+              return false
+            }
+            if (targ == 'reminder-report-smag'){
+              return false
+            }
             var siteURL = "/smgl/";
             var fullURL = siteURL+targ;
             var abbv = {
@@ -229,9 +255,9 @@
 
         <li><a href="#pnc-report" title="This cohort-based report illustrates delivery and PNC attendance information for enrolled pregnant women who have registered deliveries in the system. To be included, women must have delivered at least 6-weeks prior to the specified end-point to ensure they have had the opportunity to complete the PNC intervention." data-toggle="tab">PNC Report</a></li>
 
-        <li><a href="#reminder-report" title="This cohort-based report illustrates ANC and PNC reminder and attendance information for enrolled women. To be included, women must have scheduled ANC or PNC appointment dates within the specified time period and locations." data-toggle="tab">Reminders Report(Mothers)</a></li>
+        <li><a href="#reminder-report" title="This cohort-based report illustrates ANC and PNC reminder and attendance information for enrolled women. To be included, women must have scheduled ANC or PNC appointment dates within the specified time period and locations." data-toggle="tab" style="color:grey;">Reminders Report(Mothers)</a></li>
 
-        <li><a href="#reminder-report-smag" title="This cohort-based report illustrates ANC and PNC reminder and response information for SMAGs registered in the system. The reminder information reported is for scheduled ANC and PNC visits falling within the specified time period and locations." data-toggle="tab">Reminders Report (SMAG)</a></li>
+        <li><a href="#reminder-report-smag" title="This cohort-based report illustrates ANC and PNC reminder and response information for SMAGs registered in the system. The reminder information reported is for scheduled ANC and PNC visits falling within the specified time period and locations." style="color:grey;" data-toggle="tab">Reminders Report (SMAG)</a></li>
 
         <li><a href="#referral-report" title="This report provides information on complete emergency referral cycles that have been initiated and tracked through the system within the specified time period and locations." data-toggle="tab">Referral Report</a></li>
 

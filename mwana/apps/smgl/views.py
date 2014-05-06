@@ -217,33 +217,44 @@ def anc_report(request, id=None):
         # Aggregate ANC visits by Mother and # of visits
         visits = FacilityVisit.objects.all()
         visits = visits.filter(mother__in=pregnancies)
-        #visits = visits.filter(mother__id__in=pregnancies.values_list('id', flat=True))
-        place_visits = visits.filter(**visit_filter)
-        #place_visits = filter_by_dates(place_visits, 'visit_date',
-        #                          start=start_date, end=end_date)
 
-        mother_ids = place_visits.distinct('mother') \
+        mother_ids = visits.distinct('mother') \
                             .values_list('mother', flat=True)
+
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
-        anc_visits = mothers.filter(facility_visits__visit_type='anc') \
-                            .annotate(Count('facility_visits')) \
-                            .values_list('facility_visits__count', flat=True)
-
-        r['anc1'] = r['anc2'] = r['anc3'] = r['anc4'] = 0
-        # ANC1 is PregnantMother registrations
         r['pregnancies'] = pregnancies.count()
-        r['anc1'] = pregnancies.count()
-        num_visits = {}
-        for num in anc_visits:
-            if num in num_visits:
-                num_visits[num] += 1
+
+
+        two_anc = 0
+        three_anc = 0
+        four_anc = 0
+        for mother in mothers:
+            if mother.birthregistration_set.all():
+                birth_date = mother.birthregistration_set.all()[0].date
+                anc_visits = FacilityVisit.objects.filter(
+                    mother=mother,
+                    visit_date__lt=birth_date)
             else:
-                num_visits[num] = 1
-        for i in range(1, 4):
-            key = 'anc{0}'.format(i + 1)
-            if i in num_visits:
-                r[key] = num_visits[i]
+                anc_visits = FacilityVisit.objects.filter(
+                    mother=mother,
+                    visit_type='anc'
+                    )
+
+            if len(anc_visits) == 2:
+                two_anc += 1
+            if len(anc_visits) == 3:
+                three_anc += 1
+            if len(anc_visits) >= 4:
+                four_anc += 1
+
+        print two_anc, three_anc, four_anc
+
+        r['anc2'] = two_anc
+        r['anc3'] = three_anc
+        r['anc4'] = four_anc
+        # ANC1 is PregnantMother registrations
+
 
         records.append(r)
 
