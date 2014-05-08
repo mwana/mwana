@@ -151,6 +151,12 @@
         document.getElementById('li_tab1').setAttribute("class", "");
         document.getElementById('li_tab2').setAttribute("class", "");
         document.getElementById(tab).style.display = 'block';
+        clearMapCanvas()
+    }
+    function clearMapCanvas(){
+
+        canvas = document.getElementsByTagName('canvas')[0].getContext('2d').clearRect(0, 0, 800, 700);
+        canvas = document.getElementsByTagName('canvas')[2].getContext('2d').clearRect(0, 0, 800, 700);
     }
 </script>
 
@@ -159,6 +165,7 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/excanvas.min.js" ></script>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.maphilight.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/maplabel.min.js" ></script>
 <script src="https://maps-api-ssl.google.com/maps/api/js?v=3.7&amp;key=AIzaSyCRNwriAGXx8oi0a6E8gIeo36MCyBmjKNk&amp;sensor=false"></script>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/oms.min.js" ></script>
@@ -340,6 +347,66 @@ function mapOnClick(str){
 function mapOnClickProvince(str){
     updateDisplay(str, "Province");
 }
+function getNumberOfWorkers(str){
+    var workers = 0;
+    for (var i = 0; i < window.mapData.length; i ++) {
+        var datum = window.mapData[i];
+        if((datum.province_id === str) ||
+                (datum.district_id === str)
+                ){
+            workers = workers + datum.workers
+
+        }
+    }
+    return workers;
+}
+function getNumberOfCommunityWorkers(str){
+    var cbas = 0;
+    for (var i = 0; i < window.mapData.length; i ++) {
+        var datum = window.mapData[i];
+        if((datum.province_id === str) ||
+                (datum.district_id === str)
+                ){
+            cbas = cbas + datum.cbas
+
+        }
+    }
+    return cbas;
+}
+function drawLabelsOnShapes(str, loc_type){
+    var location_type = loc_type;
+    if(!location_type){
+        if(document.getElementById('tab1').style.display === 'none'){
+            location_type = 'District';
+        }else{
+            location_type = 'Province';
+        }
+    }
+
+    var areas = document.getElementsByName('provinces_coords')[0].areas;
+    var users = getNumberOfCommunityWorkers;
+    var canvas = null;
+    var color = '#eebb22';
+    if(str === 'workers'){
+        users = getNumberOfWorkers;
+        color = "#A3CA00";
+    }
+    if(location_type === 'District'){
+        areas = document.getElementsByName('districts_coords')[0].areas;
+        canvas = document.getElementsByTagName('canvas')[2];
+    }
+    
+    for(var i=0; i < areas.length; i++){
+        
+        var id = areas[i].id;
+        var numOfUsers = users(id);
+        var center = getPolygonCenter(id);
+        if(numOfUsers === 0){
+            continue;
+        }
+        drawLabelOnPoly(''+numOfUsers, center[0], center[1], canvas, color, null, i===0);
+    }
+}
 function updateDisplay(str, location_type){
     var toDisplay = []
     var districts = []
@@ -413,16 +480,19 @@ function updateDisplay(str, location_type){
             district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff<a/> and " +
+                cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> registered."
         }else if(location_type === "District"){
             district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " clinic staff and " + cbas + " Comminuty Based Agents are registered."
-        }else if(location_type === "Country"){
+            contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff</a> and "
+                + cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> are registered."
+        }else if(location_type === "Country"){            
             district_fragment = " Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\")'>clinic staff</a> and " + cbas
+                + " <a onclick='drawLabelsOnShapes(\"cbas\")'>Comminuty Based Agents</a> registered."
         }
         
     }else if(districts.length == 1){
