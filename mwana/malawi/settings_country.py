@@ -35,7 +35,7 @@ MAX_SMS_LENGTH = 158
 
 LAB_NAME = {'1': "KCH DNA-PCR LAB", '2': "QECH DNA-PCR LAB",
             '3': "MCH DNA-PCR LAB", '4': "MDH DNA-PCR LAB",
-            '6': "DREAM-BT DNA-PCR LAB"}
+            '6': "DREAM-BT DNA-PCR LAB", '8': "Zomba DNA-PCR LAB", }
 
 COUNTRY_CODE = '+265'
 
