@@ -229,7 +229,7 @@ def anc_report(request, id=None):
         two_anc = 0
         three_anc = 0
         four_anc = 0
-        for mother in mothers:
+        for mother in pregnancies:
             if mother.birthregistration_set.all():
                 birth_date = mother.birthregistration_set.all()[0].date
                 anc_visits = FacilityVisit.objects.filter(
@@ -255,7 +255,7 @@ def anc_report(request, id=None):
             bold_style = xlwt.easyxf('font: bold 1')
             worksheet.write(row_index, 0, 'Mother UID', bold_style)
             row_index += 1
-            for mother in mothers:
+            for mother in pregnancies:
                 worksheet.write(row_index, 0, mother.uid)
                 row_index += 1
 
