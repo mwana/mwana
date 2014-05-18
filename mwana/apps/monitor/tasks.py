@@ -297,12 +297,19 @@ def update_overall_groups():
 def delete_training_births():
     logger.info("deleting training births")
     # clear loveness bwalya patient events
+    PatientEvent.objects.filter(patient__name__icontains='loveness bwalya').delete()
+    Contact.objects.filter(name__icontains='loveness bwalya').delete()
     PatientEvent.objects.filter(patient__name__istartswith='lo').filter(patient__name__icontains='nes').filter(patient__name__icontains='bwal').delete()
+    Contact.objects.filter(name__istartswith='lo').filter(name__icontains='nes')\
+                    .filter(name__icontains='bwal').delete()
 
     PatientEvent.objects.filter(patient__location__name__istartswith='Training').delete()
     from datetime import datetime
     if datetime.now().hour > 18:
-        for c in Contact.objects.filter(location__name__icontains='Training',is_active=True):
+        for c in Contact.objects.filter(location__name__icontains='Training', is_active=True):
+            c.is_active = False
+            c.save()
+        for c in Contact.objects.filter(location__parent__name__icontains='Training', is_active=True):
             c.is_active = False
             c.save()
 
