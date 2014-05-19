@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.messages import EVENT_DUE_NOTIFICATION_MSG
 from mwana.util import get_clinic_or_default
 from mwana.apps.translator.util import Translator
 import datetime
@@ -70,10 +71,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
             clinic_name = 'the clinic'
         appt_date = patient_event.date +\
                     datetime.timedelta(days=appointment.num_days)
-        msg = OutgoingMessage(connection, _("Hi%(cba)s.%(patient)s is due for "
-                              "%(type)s clinic visit on %(date)s.Please "
-                              "remind them to visit %(clinic)s, then "
-                              "reply with TOLD %(patient)s"),
+        msg = OutgoingMessage(connection, EVENT_DUE_NOTIFICATION_MSG,
                               cba=cba_name, patient=patient.name,
                               date=appt_date.strftime('%d/%m/%Y'),
                               clinic=clinic_name, type=translator.translate(lang_code, type))

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.messages import EVENT_DUE_NOTIFICATION_MSG
 from mwana.apps.translator.util import Translator
 from datetime import date
 from datetime import timedelta
@@ -44,10 +45,7 @@ class MockRemindMiUtility(LoggerMixin):
         
         appt_date = date.today() + timedelta(days=3)
         for cba in cbas:
-            OutgoingMessage(cba.default_connection, _("Hi %(cba)s.%(patient)s is due for "
-                                  "%(type)s clinic visit on %(date)s.Please "
-                                  "remind them to visit %(clinic)s, then "
-                                  "reply with TOLD %(patient)s"),
+            OutgoingMessage(cba.default_connection, EVENT_DUE_NOTIFICATION_MSG,
                                   cba=cba.name, patient=patient_name,
                                   date=appt_date.strftime('%d/%m/%Y'),
                                   clinic=clinic.name, type=translator.translate(cba.language, "6 day")).send()
