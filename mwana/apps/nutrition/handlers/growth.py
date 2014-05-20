@@ -191,11 +191,17 @@ class GrowthHandler(KeywordHandler):
             if len(token_data) == 10:
                 logger.debug("new format...")
                 return dict(zip(labels, token_data)), validate_tokens
-            if len(token_data) > 8:
+            elif len(token_data) == 8:
+                logger.debug("old format")
+                old = dict(zip(token_labels, token_data))
+                old['first_name'] = 'X'
+                old['last_name'] = 'X'
+                return old, validate_tokens
+            elif len(token_data) > 10:
                 logger.debug("too much data")
                 self.respond(TOO_MANY_TOKENS)
                 validate_tokens = False
-            elif len(token_data) < 8:
+            elif (len(token_data) < 8) or (len(token_data) == 9):
                 logger.debug("missing data")
                 self.respond(TOO_FEW_TOKENS)
                 validate_tokens = False
@@ -446,7 +452,7 @@ class GrowthHandler(KeywordHandler):
         patient_kwargs.update({'action_taken': data['action_taken']})
         patient_kwargs.update({'cluster_id': healthworker.clinic.slug})
         # add the patients first and last name
-        if data['first_name'] and data['last_name']:
+        if data['first_name'] and data['last_name'] is not None:
             patient_kwargs.update(
                 {'name': " ".join([data['first_name'], data['last_name']])})
         # get or create and update patient
