@@ -21,6 +21,7 @@ from mwana.const import get_clinic_worker_type
 from mwana.const import get_hub_worker_type
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
+from mwana.apps.labresults.handlers.results import ResultsHandler
 
 class Alerter:
     def __init__(self, current_user=None, group=None, province=None,
@@ -257,9 +258,14 @@ class Alerter:
         try:
             return Message.objects.filter(Q(contact__location=location),
                                           Q(direction='O'),
-                                          Q(text__istartswith='The'),
                                           Q(text__istartswith='The results for sample') |
                                           Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
+        except IndexError:
+            return date(1900, 1, 1)
+
+    def _last_used_result(self, location, messages):
+        try:
+            return messages.filter(contact__location=location).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
 
@@ -277,7 +283,12 @@ class Alerter:
                     self.clinic_sent_dbs_referal_date.date()).\
                 exclude(samplenotification__date__gte=
                         self.clinic_sent_dbs_referal_date.date()).distinct()
-        
+
+
+        result_keyword_msgs = Message.objects.filter(direction='I',
+                                text__iregex=r'^(%s)|^result$' % '|'.join(
+                                '%s ' %it for it in ResultsHandler.keyword.\
+                                strip().split('|')))
         for clinic in clinics:
             additional_text = ""
             days_ago = self.days_ago(self.last_retreived_results(clinic))
@@ -301,14 +312,14 @@ class Alerter:
             else:
                 additional_text += ", has never CHECKed for results"
                          
-            days_ago = self.days_ago(self.last_used_result(clinic))
+            days_ago = self.days_ago(self._last_used_result(clinic, result_keyword_msgs))
             if days_ago < 40000:
                 additional_text += ", last used RESULT keyword "\
                 + "%s days ago." % days_ago
             else:
                 additional_text += ", has never used RESULT keyword."
                 
-                
+
             contacts = \
     Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
         distinct().order_by('name')
