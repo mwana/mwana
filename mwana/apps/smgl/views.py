@@ -241,11 +241,11 @@ def anc_report(request, id=None):
                     visit_type='anc'
                     )
 
-            if len(anc_visits) == 2:
+            if len(anc_visits) == 1:
                 two_anc += 1
-            if len(anc_visits) == 3:
+            if len(anc_visits) == 2:
                 three_anc += 1
-            if len(anc_visits) >= 4:
+            if len(anc_visits) >= 3:
                 four_anc += 1
 
         if place.name == 'Kalomo District':
