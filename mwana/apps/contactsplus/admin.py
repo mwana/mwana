@@ -21,7 +21,7 @@ class ContactAdmin(ContactAdmin):
     list_editable = ('is_active',)
     search_fields = ('name', 'alias', 'location__name', 'location__parent__name',)
 
-    
+
     def unicode(self, obj):
         return unicode(obj)
 
@@ -31,7 +31,7 @@ class ContactAdmin(ContactAdmin):
 
     def types_list(self, obj):
         return ', '.join(obj.types.values_list('name', flat=True))
-    
+
     def date_of_first_sms(self, obj):
         earliest = Message.objects.filter(
             contact=obj.id,
@@ -62,7 +62,7 @@ admin.site.register(contactsplus.ContactType, ContactTypeAdmin)
 admin.site.unregister(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "direction", "who", "date",)
-    list_filter = ("direction", "date", "contact", "connection__backend",)
+    list_filter = ("connection__backend", "direction", "date", "contact",)
     search_fields = ("text",)
     date_hierarchy = 'date'
 admin.site.register(Message, MessageAdmin)
