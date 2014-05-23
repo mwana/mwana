@@ -697,8 +697,8 @@
             monthHtml += "</select>";
 
             var currentYear = selected.year();
-            var maxYear = (maxDate && maxDate.year()) || (currentYear + 5);
-            var minYear = (minDate && minDate.year()) || (currentYear - 50);
+            var maxYear = (currentYear + 5);
+            var minYear = (currentYear - 5);
             var yearHtml = '<select class="yearselect">';
 
             for (var y = minYear; y <= maxYear; y++) {
