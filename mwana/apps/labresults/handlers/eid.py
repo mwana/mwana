@@ -26,7 +26,7 @@ class EIDHandler(KeywordHandler):
        EID <SAMPLE_ID> <HIV> <ACTION_TAKEN ART/CPT> <AGE AT ART/CPT>
     """
 
-    keyword = "eid|ied"
+    keyword = "eid"
 
     def help(self):
         self.respond(EID_HELP)
