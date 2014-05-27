@@ -22,9 +22,14 @@ from django.template import RequestContext
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.views import read_request
 from mwana.apps.reports.utils.htmlhelper import *
+from datetime import date
 
 class TransactedStock:
     pass
+
+def _year_ago(date_param):
+    return date(date_param.year - 1, date_param.month, date_param.day)
+
 
 def can_set_threshold(user):
     if not user:
@@ -74,7 +79,8 @@ def stock(request):
         ss = TransactedStock()
         # @type sa StockAccount
         ss.stock_account = sa
-        ss.threshold_level = ((sa.threshold(start_date) or 0) + (sa.threshold(end_date) or 0))/2
+        # This should ideally be calculate using historical dat
+        ss.expected_supply_level = sa.expended(_year_ago(start_date), _year_ago(end_date)) or 0
         ss.supplied_amount = sa.supplied(start_date, end_date)
         supplied_stock.append(ss)
     
@@ -86,8 +92,9 @@ def stock(request):
         es = TransactedStock()
         # @type sa StockAccount
         es.stock_account = sa
-        
-        es.threshold_level = ((sa.threshold(start_date) or 0) + (sa.threshold(end_date) or 0))/2
+
+        # This should ideally be calculate using historical data
+        es.expected_dispensed_level = sa.expended(_year_ago(start_date), _year_ago(end_date)) or 0
         
         es.dispensed_amount = sa.expended(start_date, end_date)
         dispensed_stock.append(es)

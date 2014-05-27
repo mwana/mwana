@@ -295,7 +295,7 @@
         stockName: '{{sa.stock_account.stock.name}}',
         locationSlug: '{{sa.stock_account.location.slug}}',
         amount: {{sa.supplied_amount}},
-        thresholdLevel: {{sa.threshold_level}},
+        expected_supply_level: {{sa.expected_supply_level}}
     });
     {% endfor %}
 
@@ -309,7 +309,7 @@
         stockName: '{{sa.stock_account.stock.name}}',
         locationSlug: '{{sa.stock_account.location.slug}}',
         amount: {{sa.dispensed_amount}},
-        thresholdLevel: {{sa.threshold_level}},
+        expected_dispensed_level: {{sa.expected_dispensed_level}}
     });
     {% endfor %}
 
@@ -348,7 +348,7 @@
         var column = 1;
 
         var code = "<tr><td colspan='"+ width + "'><input type='checkbox' checked='checked' onchange='toggleSelectedFacilities(this.checked)'> All Facilities</td></tr>";
-        for(item in window.facilityData){
+        for(var item in window.facilityData){
             var datum = window.facilityData[item]
             if(districtSlug === datum.district_slug){
                 if (column === 1){
@@ -474,14 +474,14 @@
         return 0;
     }
 
-    function getAvgThresholdForSupplied(locationSlug, stockIds){
+    function getAvgExpectedSupply(locationSlug, stockIds){
 
         var sum = 0;
         var total = 0;
         for(var item in window.suppliedStock){
             var datum = window.suppliedStock[item]
             if(datum.locationSlug === locationSlug && stockIds.indexOf(datum.stockId) > -1){
-                sum += datum.thresholdLevel;
+                sum += datum.expected_supply_level;
                 total += 1
             }
         }
@@ -493,14 +493,14 @@
         return 0;
     }
     
-    function getAvgThresholdForDispensed(locationSlug, stockIds){
+    function getAvgExpectedDispensed(locationSlug, stockIds){
 
         var sum = 0;
         var total = 0;
-        for(var item in window.suppliedStock){
-            var datum = window.suppliedStock[item]
+        for(var item in window.dispensedStock){
+            var datum = window.dispensedStock[item]
             if(datum.locationSlug === locationSlug && stockIds.indexOf(datum.stockId) > -1){
-                sum += datum.thresholdLevel;
+                sum += datum.expected_dispensed_level;
                 total += 1
             }
         }
@@ -526,7 +526,7 @@
         });
     }
     function getSelectedNames(locationIds, facilityNames) {
-        for (item in window.facilityData) {
+        for (var item in window.facilityData) {
             var datum = window.facilityData[item]
             if (locationIds.indexOf(datum.facility_slug) > -1) {
                 facilityNames.push(datum.facility_name)
@@ -542,7 +542,7 @@
         });
     }
     function getselectedStocknames(stockIds, stockNames) {
-        for (item in window.stockData) {
+        for (var item in window.stockData) {
             var datum = window.stockData[item]
             if (stockIds.indexOf(datum.stockId) > -1) {
                 stockNames.push([datum.stockId, datum.stockName])
@@ -568,11 +568,11 @@
             }
         });
     }
-    function fillAverageTrend(seriesData, avarageTrend, averageData) {
+    function fillAverageTrend(seriesData, averageTrend, averageData) {
         seriesData.push({
 
             type: 'spline',
-            name: avarageTrend,
+            name: averageTrend,
             data: averageData,
             marker: {
                 lineWidth: 2,
@@ -740,9 +740,9 @@
     function reloadSuppliedStock () {
         var chart;
         var locationIds = [];
-        var facilityNames = []
-        var stockIds = []
-        var stockNames = []
+        var facilityNames = [];
+        var stockIds = [];
+        var stockNames = [];
 
         setSelectedValues(locationIds, facilityNames, stockIds, stockNames);
         var seriesData = [];
@@ -750,7 +750,7 @@
         var averageData = [];
         for(var i in stockNames){
             var _name = stockNames[i];
-            var stockPerLocation = []
+            var stockPerLocation = [];
             var stockTotal = 0;
 
             for(var loc in locationIds){
@@ -770,13 +770,13 @@
         }
 
         for(var loc in locationIds){
-            var val = getAvgThresholdForSupplied(locationIds[loc], stockIds);
+            var val = getAvgExpectedSupply(locationIds[loc], stockIds);
             averageData.push(val);
         }
 
-        var averageTrend = 'Average Threshold';
+        var averageTrend = 'Average Expected Supply';
         if(stockIds.length === 1){
-            averageTrend = 'Threshold';
+            averageTrend = 'Expected Supply';
         }
         fillAverageTrend(seriesData, averageTrend, averageData);
 
@@ -823,13 +823,13 @@
         }
 
         for(var loc in locationIds){
-            var val = getAvgThresholdForDispensed(locationIds[loc], stockIds);
+            var val = getAvgExpectedDispensed(locationIds[loc], stockIds);
             averageData.push(val);
         }
 
-        var averageTrend = 'Average Threshold';
+        var averageTrend = 'Average Expected Expense';
         if(stockIds.length === 1){
-            averageTrend = 'Threshold';
+            averageTrend = 'Expected Expense';
         }
         fillAverageTrend(seriesData, averageTrend, averageData);
 
