@@ -66,6 +66,7 @@ INSTALLED_APPS.append("mwana.apps.reports.webreports")
 # INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 INSTALLED_APPS.insert(-1, 'people')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
+INSTALLED_APPS.insert(-1, 'mwana.apps.training')
 
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
@@ -127,6 +128,7 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
     "mwana.apps.reminders.handlers.mayi.MayiHandler",
     "mwana.apps.reminders.handlers.discontinue.DiscontinueHandler",
-    "mwana.apps.training.handlers.trainingstart.TrainingStartHandler",
-    "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
+    "mwana.apps.training.handlers.training.TrainingHandler",
+    # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
+    # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
 ]
