@@ -1,13 +1,13 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Threshold
-from mwana.apps.stock.models import Transaction
 from mwana.apps.stock.models import StockAccount
 from mwana.apps.stock.models import Stock
 from datetime import date
 from datetime import timedelta
 from mwana.apps.reports.utils.htmlhelper import get_stock_selector_grid
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
+from mwana.apps.reports.utils.htmlhelper import get_rpt_districts
 
 from mwana.apps.reports.utils.facilityfilter import user_facilities
 
@@ -17,11 +17,8 @@ from mwana.apps.reports.views import read_request
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.const import MWANA_ZAMBIA_START_DATE
 
-from django.shortcuts import render_to_response
-from django.template import RequestContext
-from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
-from mwana.apps.reports.views import read_request
-from mwana.apps.reports.utils.htmlhelper import *
+
+from mwana.apps.reports.utils.htmlhelper import read_request
 from datetime import date
 
 class TransactedStock:
@@ -39,7 +36,7 @@ def can_set_threshold(user):
 
     return bool([gum.group.name for gum in user.groupusermapping_set.all() if 'DHO' in gum.group.name])
 
-def stock(request):  
+def stock(request):
     today = date.today()
     
     startdate1 = read_date_or_default(request, 'startdate', today - timedelta(days=30))
@@ -99,6 +96,10 @@ def stock(request):
         es.dispensed_amount = sa.expended(start_date, end_date)
         dispensed_stock.append(es)
 
+    selected_facilities = map(str, dict(request.POST).get("_select_facility", ['-1']))
+    print '===' * 100
+    print selected_facilities
+
     return render_to_response('stock/stock.html',
                               {
                               "fstart_date": start_date.strftime("%Y-%m-%d"),
@@ -109,6 +110,7 @@ def stock(request):
 #                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
                               'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts).replace("All", "------------"),
                               "facilities": facilities,
+                              "selected_facilities": selected_facilities,
                               "stocks": stocks,
                               "stockAccounts": stockAccounts,
                               "supplied_stock": supplied_stock,

@@ -71,6 +71,7 @@
                 </div>
             </td>
             <td style="text-align: left; float: right" >
+                Show Pies <input type="checkbox" id="showPieCharts" name="showPieCharts" value="ON" onchange="reloadGraphs()" />
                 <input type="text" id="startdate" name="startdate"  class="datefield" size="9" value='{{ fstart_date }}' placeholder='{{ fstart_date }}' />
                 to <input type="text" id="enddate" name="enddate"  class="datefield" size="9" value='{{ fend_date }}'  placeholder='{{ fend_date }}' />
                 <input class="button" type="submit" value="Ok" name="SubmitValues" onclick="document.getElementById('update_user_incidents').value = '';" />
@@ -315,6 +316,7 @@
 
     window.dispensedStock = _dispensedStock;
 
+    window.selectedFacilities = {% autoescape off %} {{ selected_facilities }}{% endautoescape %}
     window.onload = function(){
         firerpt_districtsChange();
         window.selectorWidth = $('#locations_title')[0].offsetWidth ;
@@ -329,7 +331,7 @@
 
 <script type="text/javascript">
     function firerpt_districtsChange(){
-        districtDropDown = document.getElementById('rpt_districts');
+        var districtDropDown = document.getElementById('rpt_districts');
         var districtSlug = districtDropDown.options[districtDropDown.selectedIndex].value;
         updateFacilitySelectionGrid(districtSlug, []);
         reloadGraphs();
@@ -347,21 +349,23 @@
         var width = 2;
         var column = 1;
 
-        var code = "<tr><td colspan='"+ width + "'><input type='checkbox' checked='checked' onchange='toggleSelectedFacilities(this.checked)'> All Facilities</td></tr>";
+//        var code = "<tr><td colspan='"+ width + "'><input type='checkbox' checked='checked' onchange='toggleSelectedFacilities(this.checked)'> All Facilities</td></tr>";
+        var code = "<tr><td colspan='"+ width + "'><input type='checkbox' onchange='toggleSelectedFacilities(this.checked)'> All Facilities</td></tr>";
         for(var item in window.facilityData){
             var datum = window.facilityData[item]
             if(districtSlug === datum.district_slug){
                 if (column === 1){
                     code += '<tr>';
                 }
+                var title = datum.facility_name + ' - '+ datum.facility_slug;
+                if ((window.selectedFacilities.indexOf(datum.facility_slug ) > -1) ||
+                    (window.selectedFacilities.length === 1 && window.selectedFacilities[0] === "-1")){
+                    code = code + '<td><input type="checkbox" onchange="reloadGraphs()" name="_select_facility" value="'+datum.facility_slug+'" parent_id="'+datum.district_slug + '" title="' + title + '" checked="checked" /><label title="' + title + '">' + datum.facility_name + '</label></td>\n'
+                }
 
-                //                if (datum.facility_slug in selected_facilities){
-                code = code + '<td><input type="checkbox" onchange="reloadGraphs()"  name="_select_facility" value="'+datum.facility_slug+'" checked="checked" parent_id="'+datum.district_slug+'"  />'+datum.facility_name+'</td>'
-                //                }
-
-                //                else{
-                //                    code = code + '<td><input type="checkbox" name="_select_facility" value="'+datum.facility_slug+'" parent_id="'+datum.district_slug+'"  />'+datum.facility_name+' ('+datum.facility_slug+')</td>\n'
-                //                }
+                else{
+                    code = code + '<td><input type="checkbox" onchange="reloadGraphs()" name="_select_facility" value="'+datum.facility_slug+'" parent_id="'+datum.district_slug + '" title="' + title + '"  /><label title="' + title + '">' + datum.facility_name + '</label></td>\n'
+                }
 
                 if (column % width === 0){
                     code += '</tr>';
@@ -559,7 +563,7 @@
         seriesData.push({
             type: 'pie',
             name: pieSeriesTitle,
-            data: pieData,
+            data: $('#showPieCharts')[0].checked? pieData: null,
             center: [100, 80],
             size: 100,
             showInLegend: true,
