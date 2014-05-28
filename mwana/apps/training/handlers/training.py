@@ -29,7 +29,7 @@ class TrainingHandler(KeywordHandler):
 
     def handle(self, text):
         # from pudb import set_trace; set_trace()
-        if not self.msg.contact:
+        if not self.msg.connections[0].contact:
             self.respond(UNREGISTERED)
             return
 
@@ -60,7 +60,7 @@ class TrainingHandler(KeywordHandler):
             self.respond(UNKNOWN_LOCATION % clinic_code)
             return
 
-        contact = self.msg.contact
+        contact = self.msg.connections[0].contact
 
         if action.lower() == "stop":
             trainings_at_site = TrainingSession.objects.filter(
