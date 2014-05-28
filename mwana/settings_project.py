@@ -194,7 +194,7 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': True,
         },
-    }
+    },
 }
 
 MIDDLEWARE_CLASSES = [
