@@ -207,12 +207,16 @@ def anc_report(request, id=None):
         # utilize start/end date if supplied
         if not end_date:
             dispose_date, end_date = get_default_dates()
-        r['home'] = date_filtered_births.filter(place='h').count() #home births
-        r['facility'] = date_filtered_births.filter(place='f').count() #facility births
+        r['home'] = date_filtered_births.filter(place='h').distinct('mother').count() #home births
+        r['facility'] = date_filtered_births.filter(place='f').distinct('mother').count() #facility births
 
 
-        r['unknown'] = pregnancies.filter(edd__lte=end_date).exclude(id__in=births.\
-            values_list('mother__id', flat=True)).distinct().count()
+
+        birth_mothers = date_filtered_births.values_list('mother__uid', flat=True)
+        r['unknown'] = pregnancies.filter(edd__lte=end_date, edd__gte=start_date).exclude(uid__in=birth_mothers).distinct('uid').count()
+
+        r['pregnancies'] = r['home'] + r['facility'] + r['unknown']
+
         #TODO Locations numbers still look wrong
         # Aggregate ANC visits by Mother and # of visits
         visits = FacilityVisit.objects.all()
@@ -223,7 +227,6 @@ def anc_report(request, id=None):
 
         mothers = PregnantMother.objects.filter(id__in=mother_ids)
 
-        r['pregnancies'] = pregnancies.count()
 
 
         two_anc = 0
