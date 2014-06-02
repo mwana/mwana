@@ -645,28 +645,33 @@ def user_report(request):
                   }
         form = ReportsFilterForm(initial=fetch_initial(initial, request.session))
 
-    cbas_registered = ContactType.objects.get(slug='cba').contacts.all()
+    cbas_registered = ContactType.objects.get(slug='cba').contacts.filter(is_active=True)
     cbas_active_ids =  Message.objects.filter(
         connection__contact__in=cbas_registered,
-        date__gte=now-datetime.timedelta(days=60)
+        date__gte=now-datetime.timedelta(days=60),
+        direction='I'
         ).values_list('connection__contact', flat=True).distinct()
     cbas_active = Contact.objects.filter(id__in=cbas_active_ids)
 
 
-    data_clerks_registered = ContactType.objects.get(slug='dc').contacts.all()
+    data_clerks_registered = ContactType.objects.get(slug='dc').contacts.filter(is_active=True)
     data_clerks_active_ids =  Message.objects.filter(
         connection__contact__in=data_clerks_registered,
-        date__gte=now-datetime.timedelta(days=14)
+        date__gte=now-datetime.timedelta(days=14),
+        direction='I'
         ).values_list('connection__contact', flat=True).distinct()
     data_clerks_active = Contact.objects.filter(id__in=data_clerks_active_ids)
 
 
     clinic_worker_types = ContactType.objects.filter(slug__in=['worker'])
-    clinic_workers_registered = Contact.objects.filter(types__in=clinic_worker_types)
+    clinic_workers_registered = Contact.objects.filter(
+        types__in=clinic_worker_types,
+        is_active=True)
 
     clinic_workers_active_ids =  Message.objects.filter(
         connection__contact__in=clinic_workers_registered,
         date__gte=now-datetime.timedelta(days=30),
+        direction='I'
       ).values_list('connection__contact', flat=True).distinct()
     clinic_workers_active = Contact.objects.filter(id__in=clinic_workers_active_ids)
 
