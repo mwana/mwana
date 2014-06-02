@@ -2212,6 +2212,7 @@ def sms_users(request):
                 Q(name__icontains=search_string) |
                 Q(connection__identity__icontains=search_string)
                 )
+
     users_table = SMSUsersTable(contacts,
         request=request,
         )

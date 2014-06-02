@@ -392,7 +392,7 @@ class SMSUsersTable(Table):
         value=lambda cell: ", ".join([contact_type.name for contact_type in cell.object.types.all()]),
         sortable=False)
     facility = Column(
-        value=lambda cell:get_district_facility_zone(cell.object.location)[1])
+        value=lambda cell:cell.object.get_current_facility())
     last_active = DateColumn(value=lambda cell: cell.object.latest_sms_date,
                              format="Y m d H:i",
                              sortable=False)
