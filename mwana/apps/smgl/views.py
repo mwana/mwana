@@ -803,7 +803,7 @@ def mothers(request):
     if district:
         locations = get_location_tree_nodes(district)
     if facility:
-        locations = get_location_tree_nodes(facility)
+        locations = [facility]
     if zone:
         locations = [zone]
 
