@@ -2129,9 +2129,8 @@ def sms_users(request):
         locations = get_location_tree_nodes(province)
     if district:
         locations = get_location_tree_nodes(district)
-
     if facility:
-        locations = get_location_tree_nodes(facility)
+        locations = [facility]
 
     inactivity_threshold = datetime.timedelta(days=30)
     if c_type:
