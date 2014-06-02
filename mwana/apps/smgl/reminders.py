@@ -189,11 +189,9 @@ def send_first_postpartum_reminders(router_obj=None):
             visit_type='pos'
             )
         # Check if first visit for mother
-
         for v in visits_to_remind:
-            if v.is_latest_for_mother():
+            if v.reason_for_visit == 'birth_reg':
                 yield v
-
     for v in _visits_to_remind():
         found_someone = False
         for c in v.mother.get_laycounselors():
@@ -228,11 +226,9 @@ def send_second_postpartum_reminders(router_obj=None):
             visit_type='pos'
         )
         # Check if second visit
-
         for v in visits_to_remind:
-            if v.is_latest_for_mother():
+            if v.reason_for_visit != "birth_reg":
                 yield v
-
     for v in _visits_to_remind():
         found_someone = False
         for c in v.mother.get_laycounselors():

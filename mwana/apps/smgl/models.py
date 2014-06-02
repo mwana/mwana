@@ -14,7 +14,8 @@ import ntpath
 
 REASON_FOR_VISIT_CHOICES = (
     ('r', 'Routine'),
-    ('nr', 'Non-Routine')
+    ('nr', 'Non-Routine'),
+    ('birth_reg', 'Birth Registration,')
 )
 
 VISIT_TYPE_CHOICES = (
