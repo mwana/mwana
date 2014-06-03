@@ -11,20 +11,26 @@ from mwana.apps.locations.models import Location
 class NutritionGraphs(object):
     """Calculate values for nutrition graphs"""
 
-    DISTRICTS = ['Balaka', 'Blantyre', 'Chikwawa', 'Chiradzulu', 'Chitipa', 'Dedza',
-                 'Dowa', 'Karonga', 'Kasungu', 'Likoma', 'Lilongwe', 'Machinga', 'Mangochi',
-                 'Mchinji', 'Mulanje', 'Mwanza', 'Mzimba', 'Neno', 'Nkhata Bay', 'Nkhotakota',
-                 'Nsanje', 'Ntcheu', 'Ntchisi', 'Phalombe', 'Rumphi', 'Salima', 'Thyolo', 'Zomba']
+    DISTRICTS = ['Balaka', 'Blantyre', 'Chikwawa', 'Chiradzulu', 'Chitipa',
+                 'Dedza', 'Dowa', 'Karonga', 'Kasungu', 'Likoma', 'Lilongwe',
+                 'Machinga', 'Mangochi', 'Mchinji', 'Mulanje', 'Mwanza',
+                 'Mzimba', 'Neno', 'Nkhata Bay', 'Nkhotakota', 'Nsanje',
+                 'Ntcheu', 'Ntchisi', 'Phalombe', 'Rumphi', 'Salima',
+                 'Thyolo', 'Zomba']
 
     def __init__(self, assessments=None, district=None):
         self.district = district
         self.asses = assessments
-        self.underweight_data = [['Obese'], ['Overweight'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.underweight_data = [['Obese'], ['Overweight'], ['Normal'],
+                                 ['Mild'], ['Moderate'], ['Severe']]
         self.stunting_data = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
         self.wasting_data = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.underweight_data_percent = [['Obese'], ['Overweight'], ['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.stunting_data_percent = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
-        self.wasting_data_percent = [['Normal'], ['Mild'], ['Moderate'], ['Severe']]
+        self.underweight_data_percent = [['Obese'], ['Overweight'], ['Normal'],
+                                         ['Mild'], ['Moderate'], ['Severe']]
+        self.stunting_data_percent = [['Normal'], ['Mild'], ['Moderate'],
+                                      ['Severe']]
+        self.wasting_data_percent = [['Normal'], ['Mild'], ['Moderate'],
+                                     ['Severe']]
         self.graph_data = {}
         self.underweight_table = {}
         self.stunting_table = {}
@@ -49,7 +55,8 @@ class NutritionGraphs(object):
             for i in district_data:
                 if i.healthworker.clinic.name not in facilities:
                     facilities.append(i.healthworker.clinic.name)
-            district_facilities[district] = [str(unicode(item)) for item in facilities]
+            district_facilities[district] = [str(unicode(item))
+                                             for item in facilities]
         return district_facilities
 
     def get_population(self, location):
@@ -63,7 +70,8 @@ class NutritionGraphs(object):
         """  Updates underweight status counts given a filtered queryset"""
         metric = [fac_asses.filter(underweight='V').count(),
                   fac_asses.filter(underweight='T').count(),
-                  fac_asses.filter(Q(underweight='G') | Q(underweight='L')).count(),
+                  fac_asses.filter(
+                      Q(underweight='G') | Q(underweight='L')).count(),
                   fac_asses.filter(underweight='M').count(),
                   fac_asses.filter(underweight='U').count(),
                   fac_asses.filter(underweight='S').count()]
@@ -72,12 +80,15 @@ class NutritionGraphs(object):
         populace = self.get_population(location)
         self.underweight_table[location] = []
         self.underweight_table[location].append(weight_captured)
-        self.underweight_table[location].append("%.1f%%" % (100 * (weight_captured / populace)))
+        self.underweight_table[location].append(
+            "%.1f%%" % (100 * (weight_captured / populace)))
         i = 0
         while i < len(metric):
             self.underweight_data[i].append(metric[i])
-            self.underweight_data_percent[i].append(self.percent(metric[i], den))
-            self.underweight_table[location].append("%.1f%%" % (self.percent(metric[i], den)))
+            self.underweight_data_percent[i].append(
+                self.percent(metric[i], den))
+            self.underweight_table[location].append(
+                "%.1f%%" % (self.percent(metric[i], den)))
             i += 1
 
     def update_stunting_data(self, fac_asses, location):
@@ -105,6 +116,7 @@ class NutritionGraphs(object):
                   fac_asses.filter(wasting='U').count(),
                   fac_asses.filter(wasting='S').count()]
         den = fac_asses.filter(muac__isnull=False).count()
+        recorded = fac_asses.exclude(wasting='N').count()
         populace = self.get_population(location)
         #efficiency = "%.1f%%" % (self.percent(den/populace))
         self.wasting_table[location] = []
@@ -114,8 +126,8 @@ class NutritionGraphs(object):
         i = 0
         while i < len(metric):
             self.wasting_data[i].append(metric[i])
-            self.wasting_data_percent[i].append(self.percent(metric[i], den))
-            self.wasting_table[location].append("%.1f%%" % (self.percent(metric[i], den)))
+            self.wasting_data_percent[i].append(self.percent(metric[i], recorded))
+            self.wasting_table[location].append("%.1f%%" % (self.percent(metric[i], recorded)))
             i += 1
         self.wasting_table[location].append(fac_asses.exclude(Q(oedema__isnull=True) | Q(oedema=False)).count())
 
