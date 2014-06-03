@@ -380,6 +380,7 @@ class Alerter:
         SELECT "source", max(processed_on) FroM labresults_result
         JOIN labresults_payload on labresults_payload.id=labresults_result.payload_id
         WHERE clinic_id in (''' + ids + ''')
+        and processed_on IS NOT null
         GROUP BY "source";
         '''
         cursor = connection.cursor()
