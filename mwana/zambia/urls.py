@@ -22,4 +22,5 @@ urlpatterns = patterns('',
     (r'^charts/', include('mwana.apps.graphs.urls')),
     (r'^survey/', include('mwana.apps.surveillance.urls')),
     (r'^surveillance/', include('mwana.apps.surveillance.urls')),
+    (r'^data_integrity/', include('mwana.apps.monitor.urls')),
 )
