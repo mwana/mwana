@@ -8,6 +8,9 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
+from mwana.const import DISTRICT_SLUGS
+from mwana.const import get_clinic_worker_type
+from mwana.const import get_district_worker_type
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -21,11 +24,18 @@ STOCK_TYPES = (
 
 
 class StockUnit(models.Model):
+    """
+    Units used to measure Stock
+    """
     abbr = models.CharField(max_length=10, null=True, blank=True)
     description = models.CharField(max_length=20, null=False, blank=False)
 
+
 class Stock(models.Model):
-    type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False, )
+    """
+    Describes the type of Stock
+    """
+    type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False,)
     abbr = models.CharField(max_length=10, null=True, blank=True)
     code = models.CharField(max_length=10, null=False, blank=False, unique=True)
     short_code = models.CharField(max_length=10, null=False, blank=True, unique=True)
@@ -40,7 +50,13 @@ class Stock(models.Model):
         super(Stock, self).save(*args, ** kwargs)
 
 
+
 class StockAccount(models.Model):
+    """
+    Contains the stock type, owning facility and amount of the stock. It also
+    has helper properties and mesthods to get assigned threshold, supplied and
+    expended amounts.
+    """
     stock = models.ForeignKey(Stock, null=False, blank=False)
     location = models.ForeignKey(Location, limit_choices_to={"supportedlocation__supported": 'True'})
     amount = models.PositiveIntegerField(default=0, null=False, blank=False)
@@ -61,7 +77,7 @@ class StockAccount(models.Model):
         year = today.year
         month = today.month
         thresholds = Threshold.objects.filter(account__id=self.id).\
-        filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
+            filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
         if thresholds:
             return thresholds[0].level
         
@@ -69,8 +85,8 @@ class StockAccount(models.Model):
         year = today.year
         month = today.month
         thresholds = Threshold.objects.filter(account__id=self.id, start_date__year=year,
-        start_date__month=month).\
-        filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
+                                              start_date__month=month).\
+            filter(Q(end_date=None) | Q(end_date__year=year, end_date__month=month)).order_by('-id')
         if thresholds:
             return thresholds[0].level
 
@@ -108,7 +124,6 @@ class StockAccount(models.Model):
             sum += s.amount
 
         return sum
-        
 
     class Meta:
         unique_together = (('stock', 'location'),)
@@ -129,6 +144,9 @@ TRANSACTION_TYPES = (
 
 
 class Transaction(models.Model):
+    """
+    Keeps track of by who, when particular transactions took place
+    """
     status = models.CharField(max_length=1, choices=TRANSACTION_CHOICES, default='p')
     web_user = models.ForeignKey(User, null=True, blank=True)
     sms_user = models.ForeignKey(Contact, null=True, blank=True)
@@ -188,6 +206,9 @@ class Threshold(models.Model):
 
 
 class StockTransaction(models.Model):
+    """
+    Belongs to a Transaction which can be done as a batch Transaction
+    """
     amount = models.IntegerField(default=0, null=False, blank=False)
     transaction = models.ForeignKey(Transaction, null=False, blank=False)
     stock = models.ForeignKey(Stock, null=False, blank=False)
@@ -226,3 +247,44 @@ class StockTransaction(models.Model):
 #                account_to.save()
 #
 #        super(StockAccount, self).save(*args, **kwargs)
+
+
+class LowStockLevelNotification(models.Model):
+    stock_account = models.ForeignKey(StockAccount)
+    contact = models.ForeignKey(Contact,
+    limit_choices_to=models.Q(is_active=True, location__type__slug__in=DISTRICT_SLUGS)
+                                )
+    date_logged = models.DateField(default=datetime.now, editable=False)
+    week_of_year = models.PositiveSmallIntegerField(null=True, blank=True)
+    level = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s: %s - %s" % (self.date_logged.strftime('%d/%m/%Y %H:%M'),
+                                self.contact, self.stock_account)
+
+    def save(self, * args, ** kwargs):
+        if not self.week_of_year and self.date_logged:
+            self.week_of_year = int(self.date_logged.strftime('%U'))
+
+        super(LowStockLevelNotification, self).save(*args, ** kwargs)
+
+    @classmethod
+    def week(cls, date_value):
+        return int(date_value.strftime('%U'))
+
+    def __unicode__(self):
+        return "%s: %s - %s" % (self.week_of_year, self.stock_account, self.contact)
+
+    class Meta:
+        unique_together = (('stock_account', 'contact', 'week_of_year', 'level'), )
+
+
+class Supported(models.Model):
+    district = models.ForeignKey(Location, limit_choices_to={'type__slug__in':DISTRICT_SLUGS})
+    supported = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.district, "Supported" if self.supported else "Not Supported")
+
+    class Meta:
+        verbose_name_plural = "Supported"

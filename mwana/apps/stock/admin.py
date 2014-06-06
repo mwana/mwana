@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import DISTRICT_SLUGS
+from mwana.apps.stock.models import Supported
+from mwana.apps.stock.models import LowStockLevelNotification
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.locations.models import Location
 from mwana.apps.stock.models import StockUnit
@@ -71,3 +74,29 @@ class StockTransactionAdmin(admin.ModelAdmin):
     #search_fields = ('amount', 'transaction', 'stock')
 
 admin.site.register(StockTransaction, StockTransactionAdmin)
+
+
+class LowStockLevelNotificationAdmin(admin.ModelAdmin):
+    list_display = ('stock_account', 'contact', 'date_logged', 'week_of_year', 'level')
+    list_filter = ('date_logged', 'contact', 'week_of_year')
+    search_fields = ('stock_account__stock__code', 'stock_account__stock__name', 'contact__location__name',)
+    date_hierarchy = 'date_logged'
+
+admin.site.register(LowStockLevelNotification, LowStockLevelNotificationAdmin)
+
+class SupportedAdminForm(forms.ModelForm):
+    class Meta:
+        model = Supported
+
+    def __init__(self, *args, **kwds):
+        super(SupportedAdminForm, self).__init__(*args, **kwds)
+        self.fields['district'].queryset = Location.objects.filter(type__slug__in=DISTRICT_SLUGS).order_by('name')
+
+class SupportedAdmin(admin.ModelAdmin):
+    list_display = ('district', 'supported')
+    list_filter = ('district', 'supported')
+    #search_fields = ('district', 'supported')
+    list_editable = ('supported',)
+    form = SupportedAdminForm
+
+admin.site.register(Supported, SupportedAdmin)

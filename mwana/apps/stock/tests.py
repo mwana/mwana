@@ -1,10 +1,14 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import LowStockLevelNotification
+from mwana.apps.stock.models import Supported
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Transaction
+from mwana.apps.stock import tasks
 from datetime import timedelta
 from mwana.apps.stock.models import Stock
 from mwana.apps.stock.models import StockAccount
 from datetime import date
+import time
 
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
@@ -20,21 +24,32 @@ class TestApp(TestScript):
         self.assertEqual(0, Contact.objects.count())
         ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
         dst = LocationType.objects.create(slug=const.DISTRICT_SLUGS[0])
-        prv = LocationType.objects.create(slug=const.PROVINCE_SLUGS[0])
-        self.kdh = Location.objects.create(name="Kafue District Hospital",
-                                      slug="kdh", type=ctr)
-        self.central_clinic = Location.objects.create(name="Central Clinic",
-                                                 slug="403012", type=ctr)
-        mansa = Location.objects.create(name="Mansa",
-                                        slug="403000", type=dst)
-        luapula = Location.objects.create(name="Luapula",
+        prv = LocationType.objects.create(slug=const.PROVINCE_SLUGS[0])        
+        
+        self.luapula = Location.objects.create(name="Luapula",
                                           slug="400000", type=prv)
+        
+        self.mansa = Location.objects.create(name="Mansa",
+                                        slug="403000", type=dst,
+                                        parent=self.luapula)
+        self.nchelenge = Location.objects.create(name="Nchelenge",
+                                        slug="406000", type=dst,
+                                        parent=self.luapula)
+        self.central_clinic = Location.objects.create(name="Central Clinic",
+                                                 slug="403012", type=ctr,
+                                                 parent=self.mansa)
+        self.kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr,
+                                                 parent=self.mansa)
         script = """            
             rb     > join clinic kdh rupiah banda 1234
             tk     > join clinic kdh tizie kays 1000
+            dho     > join dho 403000 Mr kays 1002
+            pho     > join pho 400000 Mr Peters 1002
             """
 
         self.runScript(script)
+        self.assertEqual(4, Contact.objects.count())
         
         self.stock = Stock.objects.create(abbr='DRG-123', code='DRG-123', name='My Drug')
         self.stock2 = Stock.objects.create(abbr='DRG-124', code='DRG-124', name='Sondashi Formula')
@@ -47,10 +62,10 @@ class TestApp(TestScript):
 
 class TestThreshold(TestApp):
     # TODO add test for low level notifications to DHO
-    
+
     def test_threshold_addition(self):
         self.assertEqual(Threshold.objects.count(), 0)
-        
+
         acc = StockAccount()
         acc.location = self.central_clinic
         acc.stock = self.stock
@@ -221,7 +236,7 @@ class TestStockTransactionManagement(TestApp):
         """
 
         self.runScript(script)
-        
+
         self.assertEqual(Transaction.objects.filter(status='x').count(), 1)
         self.assertEqual(StockAccount.objects.get(stock=self.stock).amount, 5)
         self.assertEqual(StockAccount.objects.get(stock=self.stock2).amount, 15)
@@ -236,8 +251,95 @@ class TestStockTransactionManagement(TestApp):
         """
 
         self.runScript(script)
-        
-        
+
+
         self.assertEqual(Transaction.objects.filter(status='x').count(), 2)
         self.assertEqual(StockAccount.objects.get(stock=self.stock).amount, 0)
         self.assertEqual(StockAccount.objects.get(stock=self.stock2).amount, 0)
+
+
+class TestSendStockBelowThresholdNotification(TestApp):
+
+    def test_district_notification(self):
+        self.assertEqual(Threshold.objects.count(), 0)
+
+        acc = StockAccount()
+        acc.location = self.central_clinic
+        acc.stock = self.stock
+        acc.amount = 23
+        acc.save()
+        self.assertEqual(StockAccount.objects.all().count(), 1)
+        self.assertEqual(Threshold.objects.all().count(), 1)
+        Supported.objects.create(district=self.mansa, supported=True)
+        self.assertEqual(Supported.objects.all().count(), 1)
+
+
+        time.sleep(0.1)
+        self.startRouter()
+        tasks.send_stock_below_threshold_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(msgs[0].text, 'Hi. Following stock are below thresholds: Central Clinic-DRG-123=23')
+        self.assertEqual(msgs[0].contact.name, 'Mr Kays')
+
+        StockAccount.objects.create(location = self.kdh, stock = self.stock2, amount = 10)
+        acc.amount = 30
+        acc.save()
+        self.assertEqual(StockAccount.objects.all().count(), 2)
+        self.assertEqual(Threshold.objects.all().count(), 2)
+
+        time.sleep(0.1)
+        self.startRouter()
+        tasks.send_stock_below_threshold_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(msgs[0].text, 'Hi. Following stock are below thresholds: Kafue District Hospital-DRG-124=10')
+        self.assertEqual(msgs[0].contact.name, 'Mr Kays')
+
+
+        acc.amount = 7
+        acc.save()
+        self.assertEqual(StockAccount.objects.all().count(), 2)
+        self.assertEqual(Threshold.objects.all().count(), 2)
+
+        time.sleep(0.1)
+        self.startRouter()
+        tasks.send_stock_below_threshold_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(msgs[0].text, 'Hi. Following stock are below thresholds: Central Clinic-DRG-123=7')
+        self.assertEqual(msgs[0].contact.name, 'Mr Kays')
+        time.sleep(0.1)
+
+        # Don't send same messages again
+        self.startRouter()
+        tasks.send_stock_below_threshold_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(0, len(msgs))
+
+
+        for sa in StockAccount.objects.all():
+            sa.amount = 4
+            sa.save()
+       
+        self.assertEqual(StockAccount.objects.all().count(), 2)
+        self.assertEqual(Threshold.objects.all().count(), 2)
+
+        time.sleep(0.1)
+        self.startRouter()
+        tasks.send_stock_below_threshold_notification(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        self.assertEqual(len(msgs), 1)
+        self.assertEqual(msgs[0].text, 'Hi. Following stock are below thresholds: Kafue District Hospital-DRG-124=4*** Central Clinic-DRG-123=4')
+        self.assertEqual(msgs[0].contact.name, 'Mr Kays')
+        time.sleep(0.1)
