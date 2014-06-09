@@ -11,15 +11,23 @@ class App (rapidsms.apps.base.AppBase):
     def start (self):
         self.schedule_monitor_task()
         self.schedule_cleanup_task()
+        self.schedule_notifications_for_clinics_with_no_staff_task()
 
     def schedule_monitor_task(self):
         callback = 'mwana.apps.monitor.tasks.send_monitor_report'
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[8, 13, 16], minutes=[20],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])
+
     def schedule_cleanup_task(self):
         callback = 'mwana.apps.monitor.tasks.cleanup_data'
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[6, 11, 13, 16, 20], minutes=[50],
-                                     days_of_week=[0, 1, 2, 3, 4, 5, 6])
-        
+                                     days_of_week=[0, 1, 2, 3, 4, 5, 6])        
+
+    def schedule_notifications_for_clinics_with_no_staff_task(self):
+        callback = 'mwana.apps.monitor.tasks.send_notifications_for_clinics_with_no_staff'
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours=[7], minutes=[30],
+                                     days_of_week=[0, 1, 2, 3, 4])
+

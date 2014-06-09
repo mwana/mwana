@@ -1,21 +1,23 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
-from mwana.apps.monitor.data_integrity import dbs_with_date_issues
-from mwana.apps.patienttracing.management.commands.correct_automated_traces import correct_patient_traces
-from mwana.util import is_today_a_weekend
-from mwana.apps.alerts.models import Lab
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
-from mwana.const import get_lab_worker_type
 import logging
 
 from django.db.models import Count
+from mwana.apps.alerts.models import Lab
+from mwana.apps.email.sender import EmailSender
 from mwana.apps.hub_workflow.models import HubSampleNotification
+from mwana.apps.issuetracking.utils import get_admin_email_address
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
+from mwana.apps.monitor.data_integrity import dbs_with_date_issues
+from mwana.apps.monitor.models import LostContactsNotification
+from mwana.apps.monitor.models import Support
+from mwana.apps.patienttracing.management.commands.correct_automated_traces import correct_patient_traces
 from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reports.models import SupportedLocation
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
@@ -23,6 +25,8 @@ from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.training.models import Trained
 from mwana.apps.training.models import TrainingSession
 from mwana.const import get_dbs_printer_type
+from mwana.const import get_lab_worker_type
+from mwana.util import is_today_a_weekend
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
@@ -51,7 +55,7 @@ def get_payload_data():
                                incoming_date__day=day()). \
         values("source").annotate(Count('id'))
     return "\n".join(entry['source'].split('/')[1].title().replace(
-        'Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')
+                     'Arthur-Davison', 'ADH').replace('Kalingalinga', 'Kalis')
                      + ":" + str(entry['id__count']) + "/" +
                      str(results.filter(payload__source__icontains=entry['source']).count()) for entry in p)
 
@@ -61,7 +65,7 @@ def get_results_data():
                                        result_sent_date__year=year(),
                                        result_sent_date__month=month(),
                                        result_sent_date__day=day()
-    ).count()
+                                       ).count()
     new = Result.objects.filter(notification_status='new').count()
     notified = Result.objects.filter(notification_status='notified').count()
 
@@ -120,17 +124,17 @@ def send_report_to_lab_workers():
                                     payload__incoming_date__year=my_date.year,
                                     payload__incoming_date__month=my_date.month,
                                     payload__incoming_date__day=my_date.day
-        ).count()
+                                    ).count()
 
         payloads = Payload.objects.filter(source=my_lab.source_key,
                                           incoming_date__year=my_date.year,
                                           incoming_date__month=my_date.month,
                                           incoming_date__day=my_date.day
-        ).count()
+                                          ).count()
 
         message = ("Hi %(name)s. Today Mwana server has received %(payloads)s "
                    "payloads and %(res)s results from %(lab)s" % {
-                       "name": lab_worker.name, "lab": my_lab.source_key.title(), "payloads": payloads, "res": res})
+                   "name": lab_worker.name, "lab": my_lab.source_key.title(), "payloads": payloads, "res": res})
 
         OutgoingMessage(lab_worker.default_connection, message).send()
 
@@ -145,7 +149,7 @@ def send_monitor_report(router):
         logger.warning('No admins to send monitoring data to were found in system')
         return
     message = "Sys. Info\n_Payloads/Res_\n%s\n_Results_\n%s\n_SMS_(I/O)\n%s" % (
-        get_payload_data(), get_results_data(), get_messages_data())
+                                                                                get_payload_data(), get_results_data(), get_messages_data())
     logger.info('Sending msg: %s' % message)
 
     for admin in admins:
@@ -185,7 +189,7 @@ def update_supported_sites():
 
     #    update based on trained user's reports
     trained = Trained.objects.exclude(location__name__icontains='Train').exclude(location__slug__endswith='00').exclude(
-        location__name__icontains='Support')#.exclude(location__type__slug='zone');
+                                                                                                                        location__name__icontains='Support')#.exclude(location__type__slug='zone');
 
     for ts in trained:
         loc = ts.location;
@@ -200,7 +204,7 @@ def update_supported_sites():
 
         #    update based on results retrieved
     results = Result.objects.filter(result_sent_date__year=datetime.today().year
-        , clinic__supportedlocation=None)
+                                    , clinic__supportedlocation=None)
 
     for res in results:
         # @type res Result
@@ -252,15 +256,15 @@ def inactivate_unresponsive_dbs_printers():
                     printer.is_active = False
                     printer.save()
                     logger.warn(
-                        "%s with connection %s has been inactivated for being unresponsive for possibly %s days" % (
-                        printer, printer.default_connection, diff))
+                                "%s with connection %s has been inactivated for being unresponsive for possibly %s days" % (
+                                printer, printer.default_connection, diff))
 
         elif last_outgoing_smg_date and not last_incoming_smg_date:
             if Message.objects.filter(contact=printer).count() > 10:# 10 is arbitrary
                 printer.is_active = False
                 printer.save()
                 logger.warn("%s with connection %s has been inactivated for being unresponsive" % (
-                printer, printer.default_connection))
+                            printer, printer.default_connection))
 
 
 def delete_spurious_supported_sites():
@@ -320,7 +324,7 @@ def delete_training_births():
     PatientEvent.objects.filter(patient__name__icontains='loveness bwalya').delete()
     Contact.objects.filter(name__icontains='loveness bwalya').delete()
     PatientEvent.objects.filter(patient__name__istartswith='lo').filter(patient__name__icontains='nes').filter(
-        patient__name__icontains='bwal').delete()
+                                                                                                               patient__name__icontains='bwal').delete()
     Contact.objects.filter(name__istartswith='lo').filter(name__icontains='nes') \
         .filter(name__icontains='bwal').delete()
 
@@ -426,7 +430,7 @@ def mark_sent_results_with_date_inconsitencies_as_obsolete():
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
-        counter+=1
+        counter += 1
 
     logger.info('%s dbs marked as obsolete' % counter)
 
@@ -500,3 +504,49 @@ def cleanup_data(router):
         logger.error('mark_long_pending_results_as_obsolete()). %s', e)
 
     correct_patient_traces()
+
+
+def send_notifications_for_clinics_with_no_staff(router):
+    logger.info("In send_notifications_for_clinics_with_no_staff")
+    email_sender = EmailSender()
+    host, user = email_sender.connect()
+    today = date.today()
+    footer = """
+
+Thank you,
+%(admin)s
+
+----------------------------------------------
+Do not reply. This is a system generated message.
+----------------------------------------------
+""" % ({'admin': get_admin_email_address()})
+
+    try:
+        for support in Support.objects.filter(is_active=True, user__is_active=True,
+                                              user__email__icontains='@'):
+            exclude = [lcn.facility.id for lcn in LostContactsNotification.\
+            objects.filter(sent_to=support, date__gte=(today - timedelta(days=7)))]
+            locations = Location.objects.filter(supportedlocation__supported=True,
+                                                groupfacilitymapping__group__groupusermapping__user__support=support)\
+                .exclude(contact__is_active=True,
+                         contact__connection__identity__contains='0').\
+                    exclude(id__in=exclude).order_by('parent__parent__name', 'parent__name').distinct()
+
+            if not locations:
+                logger.debug("skipping for %s. Locations=%s" % (support.__unicode__(), len(locations)))
+                continue
+
+            body = "Dear %s,\n\nThe following facilities have no Results160 Staff:\n\n" % support.user.username
+            body += "\n".join("%s, %s, %s, %s" % (loc.parent.parent.name,
+                              loc.parent.name, loc.name, loc.slug)
+                              for loc in locations)
+            body += footer
+            logger.info("sending: %s, %s, %s, %s " % (support.user.email, body[:100], host, user))
+            email_sender.send([support.user.email], "Facilities with no Results160 Staff", body, host, user)
+
+            for loc in locations:
+                LostContactsNotification.objects.create(sent_to=support, facility=loc)
+    except Exception, e:
+        logger.error('Error when sending notifications_for_clinics_with_no_staff: %s', e)
+    finally:
+        email_sender.close(host)
