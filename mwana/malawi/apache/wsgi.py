@@ -27,10 +27,10 @@ os.environ['PYTHON_EGG_CACHE'] = '/var/tmp/.python_eggs'
 
 try:
     from mwana import localsettings as settings
-    from mwana.logconfig import init_file_logging
-    init_file_logging(settings.DJANGO_LOG_FILE, settings.LOG_SIZE,
-                      settings.LOG_BACKUPS, settings.LOG_LEVEL,
-                      settings.LOG_FORMAT)
+    # from mwana.logconfig import init_file_logging
+    # init_file_logging(settings.DJANGO_LOG_FILE, settings.LOG_SIZE,
+    #                   settings.LOG_BACKUPS, settings.LOG_LEVEL,
+    #                   settings.LOG_FORMAT)
     from django.core.wsgi import get_wsgi_application
 
     django_app = get_wsgi_application()
