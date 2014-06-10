@@ -46,7 +46,7 @@ class TrainingStopHandler(KeywordHandler):
             training.is_on = False
             training.end_date = datetime.utcnow()
             training.save()
-            
+
         for help_admin in Contact.active.filter(is_help_admin=True):
             OutgoingMessage(help_admin.default_connection,
                             "Training has stopped at %s, %s"
@@ -57,7 +57,6 @@ class TrainingStopHandler(KeywordHandler):
         hub_workers = Contact.active.filter(location__parent=location.parent,
                                                 types=get_hub_worker_type())
 
-
         for hub_worker in hub_workers:
             hw_msg = OutgoingMessage(hub_worker.default_connection,
                                     HUB_TRAINING_STOP_NOTIFICATION % {
@@ -66,8 +65,4 @@ class TrainingStopHandler(KeywordHandler):
                                     'slug':location.slug})
             hw_msg.send()
 
-
-            
-        self.respond("Thanks %(name)s for your message that training has "
-                     "stopped for %(clinic)s.",
-                     name=contact.name, clinic=location.name)
+        self.respond("Thanks %s for your message that training has stopped for %s." % (contact.name, location.name))

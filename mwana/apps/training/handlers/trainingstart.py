@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.labresults.messages import DHO_TRAINING_START_NOTIFICATION
 from mwana.apps.labresults.messages import HUB_TRAINING_START_NOTIFICATION
+from mwana.apps.labresults.messages import TRAINING_START
 from mwana.apps.training.models import TrainingSession
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.locations.models import Location
@@ -22,7 +23,7 @@ class TrainingStartHandler(KeywordHandler):
         self.respond(self.HELP_TEXT)
 
     def handle(self, text):
-        if not self.msg.contact:
+        if not self.msg.connections[0].contact:
             self.respond(self.UNGREGISTERED)
             return
 
@@ -39,43 +40,37 @@ class TrainingStartHandler(KeywordHandler):
             return
 
         contact = self.msg.contact
-        TrainingSession.objects.create(trainer=contact, location=location)       
+        TrainingSession.objects.create(trainer=contact, location=location)
 
         for help_admin in Contact.active.filter(is_help_admin=True):
-            ha_msg = OutgoingMessage(help_admin.default_connection,
-                                    "Training is starting at %s, %s"
-                                    ". Notification was sent by %s, %s" %
-                                    (location.name, location.slug, contact.name,
-                                    contact.default_connection.identity))
+            ha_msg = OutgoingMessage(
+                help_admin.default_connection,
+                "Training is starting at %s, %s"
+                ". Notification was sent by %s, %s" %
+                (location.name, location.slug, contact.name,
+                 contact.default_connection.identity))
             ha_msg.send()
 
-
         hub_workers = Contact.active.filter(location__parent=location.parent,
-                                                types=get_hub_worker_type())
-
+                                            types=get_hub_worker_type())
 
         for hub_worker in hub_workers:
             hw_msg = OutgoingMessage(hub_worker.default_connection,
-                                    HUB_TRAINING_START_NOTIFICATION % {
-                                    'hub_worker':hub_worker.name,
-                                    'clinic':location.name,
-                                    'slug':location.slug})
+                                     HUB_TRAINING_START_NOTIFICATION % {
+                                         'hub_worker': hub_worker.name,
+                                         'clinic': location.name,
+                                         'slug': location.slug})
             hw_msg.send()
 
         dhos = Contact.active.filter(location=location.parent,
-                                                types=get_district_worker_type())
-
+                                     types=get_district_worker_type())
 
         for contact in dhos:
             hw_msg = OutgoingMessage(contact.default_connection,
-                                    DHO_TRAINING_START_NOTIFICATION % {
-                                    'worker':contact.name,
-                                    'location':location.name,
-                                    'slug':location.slug})
+                                     DHO_TRAINING_START_NOTIFICATION % {
+                                         'worker': contact.name,
+                                         'location': location.name,
+                                         'slug': location.slug})
             hw_msg.send()
 
-
-
-        self.respond("Thanks %(name)s for your message that training is "
-        "starting for %(clinic)s. At end of training please send TRAINING STOP",
-                     name=contact.name, clinic=location.name)
+        self.respond(TRAINING_START % (contact.name, location.name))
