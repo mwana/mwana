@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from rapidsms.messages import OutgoingMessage
+from rapidsms.router import send
 from rapidsms.models import Contact
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
@@ -73,12 +74,13 @@ class TrainingHandler(KeywordHandler):
                 training.end_date = datetime.utcnow()
                 training.save()
 
-            for help_admin in Contact.active.filter(is_help_admin=True):
-                OutgoingMessage(help_admin.default_connection,
-                                "Training has stopped at %s, %s"
-                                ". Notification was sent by %s, %s" %
-                                (location.name, location.slug, contact.name,
-                                 contact.default_connection.identity)).send()
+            ha_msg = "Training has stopped at %s, %s"\
+                     ". Notification was sent by %s, %s" % (
+                         location.name, location.slug, contact.name,
+                         contact.default_connection.identity)
+            send(ha_msg,
+                 [ha.default_connection for ha in Contact.active.filter(
+                     is_help_admin=True)])
 
             hub_workers = Contact.active.filter(
                 location__parent=location.parent,
@@ -97,14 +99,13 @@ class TrainingHandler(KeywordHandler):
         if action.lower() == "start":
             TrainingSession.objects.create(trainer=contact, location=location)
 
-            for help_admin in Contact.active.filter(is_help_admin=True):
-                ha_msg = OutgoingMessage(
-                    help_admin.default_connection,
-                    "Training is starting at %s, %s"
-                    ". Notification was sent by %s, %s" %
-                    (location.name, location.slug, contact.name,
-                     contact.default_connection.identity))
-                ha_msg.send()
+            ha_msg = "Training is starting at %s, %s."\
+                     " Notification was sent by %s, %s" % (
+                         location.name, location.slug, contact.name,
+                         contact.default_connection.identity)
+            send(ha_msg,
+                 [ha.default_connection for ha in Contact.active.filter(
+                     is_help_admin=True)])
 
             hub_workers = Contact.active.filter(
                 location__parent=location.parent,
