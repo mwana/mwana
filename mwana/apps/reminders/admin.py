@@ -55,6 +55,7 @@ class SentNotificationInline(admin.TabularInline):
 class SentNotificationAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'patient_event', 'recipient', 'date_logged',)
     list_filter = ('appointment', 'date_logged',)
+    date_hierarchy = 'date_logged'
     list_select_related = True
     search_fields = ('appointment__name', 'patient_event__patient__name', 'recipient__contact__name',
                      'recipient__contact__alias',)

@@ -12,7 +12,8 @@ class UserVerificationAdmin(admin.ModelAdmin):
     list_display = ("facility", "contact", "is_active", "verification_freq", "request",
     "response",  "responded", "request_date", "response_date",
     'date_of_most_recent_sms',)
-    list_filter = ("responded", "request", "facility", )
+    list_filter = ("request_date", "responded", "request", "facility", )
+    date_hierarchy = 'request_date'
 
     def is_active(self, obj):
         return "Yes" if obj.contact.is_active else "No"
