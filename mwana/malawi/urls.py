@@ -10,6 +10,8 @@ urlpatterns = patterns(
     # Backend urls
     url(r"^backend/zain/$",
         KannelBackendView.as_view(backend_name="zain")),
+    url(r"^backend/airtelsmpp/$",
+        KannelBackendView.as_view(backend_name="airtelsmpp")),
     url(r"^backend/tnm/$",
         KannelBackendView.as_view(backend_name="tnm")),
     url(r'^backend/httptester/$',
