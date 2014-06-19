@@ -25,7 +25,8 @@ class LoginRequired(object):
 
     urls = ['/admin/', '/accounts/login/', '/accounts/logout/',
             '/labresults/incoming/', '/backend/zain/', '/backend/tnm/',
-            '/kannel/delivery-report/', settings.MEDIA_URL]
+            '/backend/airtelsmpp/', '/kannel/delivery-report/',
+            settings.MEDIA_URL]
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         for url in self.urls:
