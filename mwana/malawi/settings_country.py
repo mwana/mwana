@@ -129,6 +129,9 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.reminders.handlers.mayi.MayiHandler",
     "mwana.apps.reminders.handlers.discontinue.DiscontinueHandler",
     "mwana.apps.training.handlers.training.TrainingHandler",
+    "mwana.apps.patienttracing.handlers.confirm.ConfirmHandler",
+    "mwana.apps.patienttracing.handlers.told.ToldHandler",
+    # "mwana.apps.patienttracing.handlers.TraceHandler",
     # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
     # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
 ]
