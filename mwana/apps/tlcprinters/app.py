@@ -2,14 +2,14 @@
 import logging
 import rapidsms
 import re
-from django.conf import settings
 from mwana.apps.tlcprinters.models import MessageConfirmation
 
 logger = logging.getLogger(__name__)
 
+
 class App (rapidsms.apps.base.AppBase):
     confirm_regex = r'Confirm SMS:(.+)'
-    
+
     def handle(self, message):
         """
         Handle the Confirm SMS messages sent by TLC printers.
@@ -26,12 +26,12 @@ class App (rapidsms.apps.base.AppBase):
         if seq_num:
             try:
                 msg_conf = MessageConfirmation.objects.filter(
-                                                              seq_num=seq_num,
-                                                              connection__backend=message.connection.backend,
-                                                              connection__identity__contains=message.connection.identity[-10:-1],
-                                                              confirmed=False,
-                                                              ).order_by('-sent_at')[0]
-            except IndexError: #DoesNotExist never happens with filter()
+                    seq_num=seq_num,
+                    connection__backend=message.connection.backend,
+                    connection__identity__contains=message.connection.identity[-10:-1],
+                    confirmed=False,
+                ).order_by('-sent_at')[0]
+            except IndexError:  # DoesNotExist never happens with filter()
                 msg_conf = None
                 logger.warning('No message confirmation found for '
                                'connection=%s and seq_num=%s' %
