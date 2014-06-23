@@ -10,6 +10,8 @@ from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
 from mwana.malawi.lib import py_cupom
 from mwana import const
+from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA, LOCALE_MALAWI
+
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
 # to attempt the real translation here.  Use _ so that ./manage.py makemessages
@@ -225,6 +227,8 @@ class App(rapidsms.apps.base.AppBase):
         else:
             if event_slug == "mwana":
                 self.HELP_TEXT = "To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>." % dict(event_upper = event_slug.upper())
+                if SYSTEM_LOCALE == LOCALE_MALAWI:
+                    self.HELP_TEXT = "To register a birth, send %(event_upper)s <DOB> <MOTHERS_FIRST_NAME> <MOTHERS_LAST_NAME> <CHILDS_FIRST_NAME> <CHILDS_LAST_NAME>"
                 msg.respond(self.HELP_TEXT)
                 return True
             msg_error = "Sorry, I didn't understand that. To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is optional and is logged as TODAY if left out." % dict(
