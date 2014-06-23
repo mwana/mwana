@@ -18,6 +18,7 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 from mwana.apps.nutrition.models import Assessment
 from mwana.apps.reminders.models import PatientEvent
+from mwana.apps.reminders.models import SentNotification
 from mwana.apps.reports.webreports.reportcreator import MalawiReports
 from mwana.localsettings import DISTRICTS
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
@@ -224,25 +225,48 @@ def malawi_home(request):
 @require_GET
 def dashboard_malawi(request):
     district, startdate, enddate = get_report_criteria(request)
-    locations = Location.objects.filter(lab_results__notification_status__in=['sent'], lab_results__result_sent_date__gte=startdate).distinct()
+    locations = Location.objects.filter(
+        lab_results__notification_status__in=['sent'],
+        lab_results__result_sent_date__gte=startdate,
+        lab_results__result_sent_date__lte=enddate).distinct()
     loc_count = locations.count()
-    results = Result.objects.filter(result_sent_date__gte=startdate, notification_status="sent")
-    eid_processed = Result.objects.filter(processed_on__gte=startdate).count()
-    assessments = Assessment.objects.filter(date__gte=startdate)
+    results = Result.objects.filter(
+        result_sent_date__gte=startdate,
+        result_sent_date__lte=enddate,
+        notification_status="sent")
+    eid_processed = Result.objects.filter(
+        processed_on__gte=startdate,
+        processed_on__lte=enddate).count()
+    assessments = Assessment.objects.filter(
+        date__gte=startdate,
+        date__lte=enddate)
     ass_count = assessments.count()
     ass_suspect = assessments.filter(status='S').count()
-    ass_urgent = assessments.filter(Q(underweight='S') | Q(wasting='S') | Q(stunting='S')).count()
-    remindmis = PatientEvent.objects.filter(Q(date_logged__gte=startdate))
+    ass_urgent = assessments.filter(
+        Q(underweight='S') | Q(wasting='S') | Q(stunting='S')).count()
+    reminders_sent = SentNotification.objects.filter(
+        Q(date_logged__gte=startdate), Q(date_logged__lte=enddate)).count()
+    remindmis = PatientEvent.objects.filter(
+        date_logged__gte=startdate,
+        date_logged__lte=enddate)
     mothers = remindmis.filter(event__name="Care program").count()
     children = remindmis.filter(event__name="Birth").count()
-    all_msgs = Message.objects.filter(direction__exact='I', text__startswith='All', date__gte=startdate).count()
+    all_msgs = Message.objects.filter(
+        direction__exact='I',
+        text__startswith='All',
+        date__gte=startdate,
+        date__lte=enddate).count()
     return render_to_response("reports/malawi_home.html",
                               {"locations": locations, "results": results,
                                "startdate": startdate, "enddate": enddate,
-                               'ass_count': ass_count, 'ass_suspect': ass_suspect,
-                               'ass_severe': ass_urgent, 'res_count': results.count(),
+                               'ass_count': ass_count,
+                               'ass_suspect': ass_suspect,
+                               'ass_severe': ass_urgent,
+                               'res_count': results.count(),
+                               'reminders_sent': reminders_sent,
                                'mothers_registered': mothers,
-                               'births_registered': children, 'eid_processed': eid_processed,
+                               'births_registered': children,
+                               'eid_processed': eid_processed,
                                'all_msgs': all_msgs, 'loc_count': loc_count},
                               context_instance=RequestContext(request))
 
