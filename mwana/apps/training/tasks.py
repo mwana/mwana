@@ -2,10 +2,9 @@
 import logging
 import datetime
 from celery import task
-# from threadless_router.router import Router
 from mwana.apps.training.models import TrainingSession
-from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
+from rapidsms.router import send
 
 logger = logging.getLogger(__name__)
 
@@ -30,24 +29,17 @@ def send_endof_training_notification():
             for help_admin in Contact.active.filter(is_help_admin=True):
                 # router = Router()
                 if help_admin.default_connection is not None:
-                    ha_msg = OutgoingMessage(
-                        help_admin.default_connection, msg)
-                    ha_msg
+                    send(msg, [help_admin.default_connection])
 
-            continue
-
+        trainer_msg = DELAYED_TRAINING_TRAINER_MSG % (training.trainer.name,
+                                                      training.location.name)
         if training.trainer.default_connection is not None:
-            trainer_msg = OutgoingMessage(
-                training.trainer.default_connection,
-                DELAYED_TRAINING_TRAINER_MSG %
-                (training.trainer.name, training.location.name))
-            trainer_msg.send()
-        for help_admin in Contact.active.filter(is_help_admin=True):
-            if help_admin.default_connection is not None:
-                admin_msg = OutgoingMessage(
-                    help_admin.default_connection,
-                    DELAYED_TRAINING_ADMIN_MSG %
-                    (training.trainer.name,
-                     training.trainer.default_connection.identity,
-                     training.location.name, training.location.slug))
-                admin_msg.send()
+            send(trainer_msg, [training.trainer.default_connection])
+
+            admin_msg = DELAYED_TRAINING_ADMIN_MSG % (
+                training.trainer.name,
+                training.trainer.default_connection.identity,
+                training.location.name, training.location.slug)
+            for help_admin in Contact.active.filter(is_help_admin=True):
+                if help_admin.default_connection is not None:
+                    send(admin_msg, [help_admin.default_connection])
