@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.malawi.settings_country import *
 
-DEBUG = True
+DEBUG = False
 
 ADMINS = (
     ('Tobias McNulty', 'mwana@caktusgroup.com'),
@@ -28,32 +28,6 @@ TEMPLATE_DIRS = (
 #                     "phase. We will notify you when the system is live."
 
 #DEFAULT_RESPONSE = "Invalid Keyword. Keywords are GM for Growth Monitor, MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160. Send HELP for more information"
-
-# You can also customize RAPIDSMS_TABS like so:
-RAPIDSMS_TABS = [
-    # ('rapidsms.views.dashboard', 'Dashboard'),
-    # ('rapidsms.contrib.httptester.views.generate_identity', 'Message Tester'),
-    # ('mwana.apps.locations.views.dashboard', 'Map'),
-    # ('rapidsms.contrib.messagelog.views.message_log', 'Message Log'),
-    # ('rapidsms.contrib.messaging.views.messaging', 'Messaging'),
-    # ('rapidsms.contrib.scheduler.views.index', 'Event Scheduler'),
-    # ('mwana.apps.labresults.views.dashboard', 'Results160'),
-    ('mwana.apps.reports.views.malawi_reports', 'Results160'),
-    ('mwana.apps.alerts.views.mwana_alerts', 'Alerts'),
-    ('mwana.apps.reminders.views.malawi_reports', 'RemindMi'),
-    ('growth_index', 'AnthroWatch Reports'),
-    ('growth_graphs', 'AnthroWatch Analysis'),
-    # ('xforms', 'XForms'),
-]
-
-# Add the pygsm backend for our MultiTech modem to INSTALLED_BACKENDS
-#INSTALLED_BACKENDS.update({
-#    "pygsm" : {"ENGINE": "rapidsms.backends.gsm",
-#               "port": "/dev/ttyUSB0",
-#               'baudrate': '115200',
-#               'rtscts': '1',
-#               'timeout': 10}
-#})
 
 # Add the kannel backends for Airtel and TNM
 # INSTALLED_BACKENDS.update({
