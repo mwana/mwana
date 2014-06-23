@@ -296,9 +296,14 @@ class JoinHandler(KeywordHandler):
                 self.respond("Sorry, I don't know about a clinic with code %(code)s. Please check your code and try again." % dict(
                     code=clinic_slug))
                 return
-            zone = self._get_or_create_zone(clinic, zone_slug)
-            contact_clinic, contact_zone =\
-              self._get_clinic_and_zone(self.msg.connections[0].contact)
+            # require zone to be a numeric number
+            try:
+                int_zone_slug = int(zone_slug)
+                zone = self._get_or_create_zone(clinic, zone_slug)
+                contact_clinic, contact_zone = self._get_clinic_and_zone(self.msg.connections[0].contact)
+            except:
+                self.respond("Sorry, please enter a number for your zone. You used %(zone_slug) for the zone."
+                             % dict(zone_slug=zone_slug))
 
             #prepare identity id for interviewer_id
             identity_id = str(self.msg.connections[0].identity)
