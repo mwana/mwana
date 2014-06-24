@@ -2636,10 +2636,38 @@ class SuggestionDelete(DeleteView):
     def dispatch(self, *args, **kwargs):
         return super(SuggestionDelete, self).dispatch(*args, **kwargs)
 
+
+def get_incoming_message(outgoing_message):
+    #Given an outgoing message, attempt to find the message that prompted it
+    secs = datetime.timedelta(seconds=30) #Try to find any incoming message that
+                                        #that might have generated the response
+    connection = outgoing_message.connection
+    try:
+        message = connection.message_set.filter(
+        date__range=[outgoing_message.date-secs, outgoing_message.date],
+        direction="I")[0]
+    except IndexError:
+        message = None
+    return message
+
 def error(request):
     start_date, end_date = get_default_dates()
     province = district = facility = c_type = None
+    #Get all messages already marked as errors.
     error_messages = XFormsSession.objects.filter(has_error=True).values_list('message_incoming', flat=True)
+
+    #now look more deeply for messages that are errors but have not been marked
+    #as but we are making a VERY TEMPORARY ASSUMPTION that errors from smsforms
+    #start with the word "Answer"
+    outgoing_error_messages = Message.objects.filter(
+        direction='O',
+        text__iregex="^Answer")
+    error_messages = list(error_messages)
+    for outgoing_error_message in outgoing_error_messages:
+        incoming_message = get_incoming_message(outgoing_error_message)
+        if incoming_message:
+            error_messages.append(incoming_message.id)
+
     messages = Message.objects.filter(id__in=error_messages).order_by('-date')
     if request.GET:
         form = SMSUsersFilterForm(request.GET)
