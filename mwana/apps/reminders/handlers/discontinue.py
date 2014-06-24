@@ -1,16 +1,13 @@
-from datetime import date, timedelta
 import logging
 
 from django.core.exceptions import ObjectDoesNotExist
-from django import forms
 
-from rapidsms.models import Contact, Connection, Backend
+from mwana import const
+from rapidsms.models import Contact
 from rapidsms.contrib.handlers import KeywordHandler
 from rapidsms.router import send
 
-from mwana.apps.reminders import models as reminders
 # from mwana.malawi.lib import py_cupom
-from mwana import const
 
 
 logger = logging.getLogger(__name__)
@@ -34,25 +31,38 @@ class DiscontinueHandler(KeywordHandler):
     def handle(self, text):
         """ Cancel reminders for a patient"""
         # check validity of reporter
-
-        # get location details
+        # and get location details
         if self.msg.contact is not None:
             location = self.msg.contact.location.id
+        else:
+            self.respond(UNREGISTERED)
+            return True
 
         text = text.strip()
         labels = ['m_first', 'm_last', 'dob']
         data = text.split()
         tokens = dict(zip(labels, data))
         # get contact of type Patient with matching name and dob
-        patient = Contact.objects.location(location).get(
-            first_name=tokens['m_first'], last_name=tokens['m_last'])
+        # and is a patient
+        try:
+            patient = Contact.objects.location(location).get(
+                first_name=tokens['m_first'],
+                last_name=tokens['m_last'],
+                types=const.get_patient_type())
+        except:
+            patient = None
+            msg = "Sorry, we cannot find a patient with those details."
+            send(msg, self.msg.connections[0])
+
         if patient is not None:
+            if patient.is_active is False:
+                msg = "This patient has already been discontinued. "
+            else:
+                msg = ""
             patient.is_active = False
             patient.save()
-            msg = "Thank you. You will no longer receive reminders for {first} {last} born {dob}.".format(first=tokens['m_first'],
-                       last=tokens['m_last'],
-                       dob=tokens['dob'])
-            send(msg, self.msg.connections[0])
-        else:
-            msg = "Sorry, we cannot find a patient with those details."
+            msg += "You will no longer receive reminders for {first} {last}."\
+                   " Thank you.".format(
+                       first=tokens['m_first'],
+                       last=tokens['m_last'])
             send(msg, self.msg.connections[0])
