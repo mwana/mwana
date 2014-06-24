@@ -1,19 +1,18 @@
 {% extends  "layout.html" %}
 
 {% block title %}PNC-Report- {{ block.super }}{% endblock %}
-
+{% load selectable_tags %}
 {% block stylesheets %}
 {{ block.super }}
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
-<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+{% include_ui_theme %}
 {{ form.media.css }}
 
 {% endblock %}
 
 
 {% block javascripts %}
-  <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
-  <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
+{% include_jquery_libs %}
   <script>
       $(function() {
         $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });

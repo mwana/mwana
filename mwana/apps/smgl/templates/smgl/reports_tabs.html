@@ -1,11 +1,11 @@
 {% extends  "layout.html" %}
 
 {% block title %}Reports - {{ block.super }}{% endblock %}
-
+{% load selectable_tags %}
 {% block stylesheets %}
 {{ block.super }}
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
-<link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/smoothness/jquery-ui-1.9.1.custom.min.css">
+{% include_ui_theme %}
 {{ form.media.css }}
 <style type="text/css">
   #sms-records-form .ui-autocomplete-input{
@@ -23,8 +23,7 @@
 
 
 {% block javascripts %}
-  <script src="{{ STATIC_URL }}smgl/js/jquery-1.8.2.min.js"></script>
-  <script src="{{ STATIC_URL }}smgl/js/jquery-ui-1.9.1.custom.min.js"></script>
+{% include_jquery_libs %}
 <script type="text/javascript" src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
   <script>
       $(function() {
