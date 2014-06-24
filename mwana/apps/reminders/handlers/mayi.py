@@ -36,7 +36,9 @@ class MayiHandler(KeywordHandler):
 
     def _get_tokens(self, text):
         """Splits the text into the expected parts."""
-        tokens = {'edd': '', 'name': '', 'phone': '', 'hiv_status': ''}
+        text = text.strip()
+        tokens = {'edd': '', 'name': '', 'first_name': '', 'last_name': '',
+                  'phone': '', 'dob': '', 'hiv_status': ''}
         validate_tokens = True
         try:
             token_list = text.split()
@@ -44,11 +46,23 @@ class MayiHandler(KeywordHandler):
                 logger.debug("missing data")
                 self.respond(TOO_FEW_TOKENS)
                 validate_tokens = False
-            tokens['edd'] = token_list[0]
-            token_list.remove(tokens['edd'])
-            tokens['hiv_status'] = token_list.pop()
-            tokens['phone'] = token_list.pop()
-            tokens['name'] = ' '.join(token_list)
+            if len(token_list) == 5:
+                tokens['edd'] = token_list[0]
+                tokens['first_name'] = token_list[1]
+                tokens['last_name'] = token_list[2]
+                tokens['phone'] = token_list[3]
+                tokens['hiv_status'] = token_list[4]
+                tokens['name'] = ' '.join(
+                    [tokens['first_name'], tokens['last_name']])
+            if len(token_list) == 6:
+                tokens['edd'] = token_list[0]
+                tokens['first_name'] = token_list[1]
+                tokens['last_name'] = token_list[2]
+                tokens['dob'] = token_list[3]
+                tokens['phone'] = token_list[4]
+                tokens['hiv_status'] = token_list[5]
+                tokens['name'] = ' '.join(list(tokens['first_name'],
+                                               tokens['last_name']))
             return tokens, validate_tokens
         except:
             reformat_msg = GARBLED_MSG % text
@@ -81,7 +95,7 @@ class MayiHandler(KeywordHandler):
         errors = []
         # check that date is not too early or too late or not valid
         date_error = "Sorry, I don't understand %s. Please"\
-                     " try a format like 31/12/13" % tokens['edd']
+                     " try a format like 311213" % tokens['edd']
         try:
             date_field = forms.DateField(
                 input_formats=('%d%m%y', '%d/%m/%y', '%d-%m-%y',
@@ -166,7 +180,9 @@ class MayiHandler(KeywordHandler):
         # create the patient
         if healthworker and healthworker.location:
             patient, created = Contact.objects.get_or_create(
-                name=data['name'], location=healthworker.location
+                name=data['name'], location=healthworker.location,
+                first_name=data['first_name'],
+                last_name=data['last_name']
             )
 
         patient_t = const.get_patient_type()
