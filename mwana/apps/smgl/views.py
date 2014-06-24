@@ -2650,6 +2650,7 @@ def get_incoming_message(outgoing_message):
         message = None
     return message
 
+
 def error(request):
     start_date, end_date = get_default_dates()
     province = district = facility = c_type = None
@@ -2659,16 +2660,7 @@ def error(request):
     #now look more deeply for messages that are errors but have not been marked
     #as but we are making a VERY TEMPORARY ASSUMPTION that errors from smsforms
     #start with the word "Answer"
-    outgoing_error_messages = Message.objects.filter(
-        direction='O',
-        text__iregex="^Answer")
-    error_messages = list(error_messages)
-    for outgoing_error_message in outgoing_error_messages:
-        incoming_message = get_incoming_message(outgoing_error_message)
-        if incoming_message:
-            error_messages.append(incoming_message.id)
 
-    messages = Message.objects.filter(id__in=error_messages).order_by('-date')
     if request.GET:
         form = SMSUsersFilterForm(request.GET)
         if form.is_valid():
@@ -2694,6 +2686,21 @@ def error(request):
         locations = get_location_tree_nodes(district)
     if facility:
         locations = get_location_tree_nodes(facility)
+    outgoing_error_messages = Message.objects.filter(
+        direction='O',
+        text__iregex="^Answer",
+        )
+
+    outgoing_error_messages = filter_by_dates(outgoing_error_messages, 'date',
+        start=start_date, end=end_date)
+
+    error_messages = list(error_messages)
+    for outgoing_error_message in outgoing_error_messages:
+        incoming_message = get_incoming_message(outgoing_error_message)
+        if incoming_message:
+            error_messages.append(incoming_message.id)
+
+    messages = Message.objects.filter(id__in=error_messages).order_by('-date')
 
     messages = messages.filter(connection__contact__location__in=locations)
     if c_type:
