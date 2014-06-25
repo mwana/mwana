@@ -120,6 +120,6 @@ def send_notifications(router):
             sent_notifications__appointment=appointment
         )
         for patient_event in patient_events:
-            connections = send_appointment_reminder(patient_event,
+            send_appointment_reminder(patient_event,
                                                     appointment,
                                                     patient_event.cba_conn)
