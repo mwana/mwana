@@ -46,7 +46,7 @@ class MockRemindMiUtility(LoggerMixin):
         appt_date = date.today() + timedelta(days=3)
         for cba in cbas:
             OutgoingMessage(cba.default_connection, EVENT_DUE_NOTIFICATION_MSG,
-                                  cba=cba.name, patient=patient_name,
+                                  cba=" " + cba.name, patient=patient_name,
                                   date=appt_date.strftime('%d/%m/%Y'),
                                   clinic=clinic.name, type=translator.translate(cba.language, "6 day")).send()
                                   
