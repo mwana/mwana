@@ -48,7 +48,7 @@ class PatientTrace(models.Model):
     
     # person who initiates the tracing (used when initiator=clinic_worker)
     initiator_contact = models.ForeignKey(Contact, related_name='patients_traced',
-                                     limit_choices_to={'types__slug': 'clinic_worker'},
+                                     limit_choices_to={'types__slug': 'worker'},
                                      null=True, blank=True)
     clinic = models.ForeignKey(Location, related_name='patient_location', null=True, blank=True)
     type = models.CharField(choices=TYPE_CHOICES, max_length=30)
