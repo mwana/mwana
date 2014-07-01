@@ -2,6 +2,6 @@
 
 _ = lambda x:x
 EVENT_DUE_NOTIFICATION_MSG = _("Hi%(cba)s.%(patient)s is due for "
-                              "%(type)s clinic visit on %(date)s.Please "
-                              "remind them to visit %(clinic)s, then "
-                              "reply with TOLD %(patient)s")
+                               "%(type)s clinic visit on %(date)s.Please "
+                               "remind them to visit %(clinic)s, then "
+                               "reply with TOLD %(patient)s")

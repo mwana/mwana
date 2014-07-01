@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from rapidsms.models import Contact
 from django.contrib import admin
 
 from mwana.apps.reminders import models as reminders
