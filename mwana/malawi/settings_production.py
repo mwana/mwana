@@ -21,8 +21,8 @@ TEMPLATE_DIRS = (
 XFORMS_HOST = 'malawi-qa.projectmwana.org'
 
 DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
- MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
- Send HELP for more information'''
+ MWANA or MAYI for RemindMi and EID, CHECK or RESULT for Results160.
+ Send HELP or the keyword for more information'''
 
 # Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
