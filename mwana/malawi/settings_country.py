@@ -72,7 +72,7 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.training')
 # don't append, 'default' app should come last:
 
 DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
- MWANA for RemindMi, ALL for Broadcast and CHECK or RESULT for Results160.
+ MWANA for RemindMi and CHECK or RESULT for Results160.
  Send HELP for more information'''
 
 # we need separate migration modules for the rapidsms app in Malawi and
