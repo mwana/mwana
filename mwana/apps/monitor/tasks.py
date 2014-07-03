@@ -246,7 +246,7 @@ def inactivate_unresponsive_dbs_printers():
         last_outgoing_smg_date = date_of_most_recent_outgoing_msg(printer)
         if last_incoming_smg_date and last_outgoing_smg_date:
             diff = (last_outgoing_smg_date - last_incoming_smg_date).days
-            if diff > 2:
+            if diff > 7:
                 now = datetime.today()
                 today = datetime(now.year, now.month, now.day)
                 days_ago = today - timedelta(days=3)
