@@ -29,7 +29,7 @@ class ToldHandler(KeywordHandler):
     
     TRACE_WINDOW = 5 #days
     
-    keyword = "told|toll|teld|tod|telld|t0ld|TOLD|t01d|t0ld"
+    keyword = "told|toll|teld|tod|telld|t0ld|TOLD|t01d|t0ld|tnld"
     
     help_txt = "To tell that someone has been to the clinic send: TOLD <PATIENT_NAME>, e.g TOLD Bana Malama"
     unrecognized_txt = "Sorry, the system does not recognise your number.  To join the system please send: JOIN"
