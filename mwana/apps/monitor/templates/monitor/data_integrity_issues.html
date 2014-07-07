@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load forms_tags %}
 
-{% block title %}Send SMS Messages - {{ block.super }}{% endblock %}
+{% block title %}Data Integrity - {{ block.super }}{% endblock %}
 {% block stylesheets %}
 {{ block.super }}
 
@@ -103,9 +103,9 @@
             <table border="0" width="100%">
                 <thead>
                     <tr>
-                        <th>Records with Incorrect Collection Date</th>
-                        <th>Records with Incorrect Test Date</th>
-                        <th>Records with Inconsistent Server Log Date</th>
+                        <th>Records with Collection Date > Date Entered at Lab</th>
+                        <th>Records with Test Date < Date Entered at Lab</th>
+                        <th>Records with Test Date > Actual</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,6 +130,13 @@
 
                         </td>
                         <td valign="top"> <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source Lab</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
                                 {% for res in dbs_test_date_issues %}
                                 <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
                                     <td>{{ forloop.counter }}</td>
@@ -139,6 +146,13 @@
                                 {% endfor %}
                             </table></td>
                         <td valign="top"> <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source Lab</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
                                 {% for res in dbs_arrival_date_issues %}
                                 <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
                                     <td>{{ forloop.counter }}</td>
