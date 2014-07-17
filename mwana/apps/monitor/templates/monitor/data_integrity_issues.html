@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Data Integrity - {{ block.super }}{% endblock %}
+{% block stylesheets %}
+{{ block.super }}
+
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap.min.css" />
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+<script type="text/javascript">
+
+    function inform(){
+        return confirm('Are you sure you want to');
+    }
+    function showNumberOfCharactersTyped(){
+        var textArea = document.getElementById("message")
+        typed = textArea.textLength
+        remaining = 160 - typed
+        var msgLenghthDiv = document.getElementById("msgLenghthDiv")
+        start = "<div style='padding-bottom: 0.2em' id='msgLenghthDiv'>"
+        startBadge = "<span class='badge badge-success'>"
+        endBadge = "</span>"
+        end = "</div>"
+        if (remaining >=  0 && remaining < 140){
+            msgLenghthDiv.outerHTML =  start + startBadge + typed + endBadge
+                + " typed. " + startBadge + remaining + endBadge + " remaining." + end
+        }
+        else{
+            over = " over."
+            if(remaining > 0){
+                over = " remaining."
+            }
+            startBadge = "<span class='badge badge-warning'>"
+            msgLenghthDiv.outerHTML =  start + startBadge +  typed + endBadge
+                + " typed. " + startBadge + Math.abs(remaining) + endBadge + over + end
+        }
+
+
+    }
+    function limitCharacters(){
+        var textArea = document.getElementById("message")
+        typed = textArea.textLength
+        return typed <= 160
+
+    }
+
+    function checkform(form){
+        confirmed = document.getElementById("confirmed").value
+        if(form.message.value.trim() == ""){
+            alert("Please enter a message to send");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length > 160 && confirmed == 'None'){
+            alert("The message should not exceed 160 characters");
+            form.message.focus();
+            return false;
+        }
+        if(form.message.value.length < 15 && confirmed == 'None'){
+            return confirm('Your massage is too short. Are you sure?')
+        }
+        return confirm('Are you sure?');
+    }
+</script>
+
+{% endblock %}
+
+
+
+{% endblock %}
+
+{% block content %}
+
+<div class="left">
+        <div class="module">
+
+            <h2>Data Integrity</h2>
+            <br>
+            <table border="0"  bgcolor="#F8F8F8"  width="100%">
+
+                <tbody>
+                    <tr>
+
+                        <td style="border: 0px" colspan="3">
+                            <p>
+                            <div class="alert">
+                                <strong>DBS Date Issues!</strong> The items listed below indicate DBS records with one or more invalid date fields
+                            </div>
+
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div>
+            <table border="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Records with Collection Date > Date Entered at Lab</th>
+                        <th>Records with Test Date < Date Entered at Lab</th>
+                        <th>Records with Test Date > Actual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td valign="top" width="33%">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source Lab</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
+                                {% for res in dbs_collection_date_issues %}
+                                <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ res.payload.source|title }}</td>
+                                    <td>{{ res.sample_id }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table>
+
+                        </td>
+                        <td valign="top"> <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source Lab</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
+                                {% for res in dbs_test_date_issues %}
+                                <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ res.payload.source|title }}</td>
+                                    <td>{{ res.sample_id }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table></td>
+                        <td valign="top"> <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Source Lab</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
+                                {% for res in dbs_arrival_date_issues %}
+                                <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ res.payload.source|title}}</td>
+                                    <td>{{ res.sample_id }}</td>
+                                </tr>
+                                {% endfor %}
+                            </table></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+        </div>
+
+        <div class="pagination">
+
+        </div>
+
+</div>
+{% endblock %}

@@ -8,7 +8,6 @@ from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.websmssender.models import WebSMSLog
 
 logger = logging.getLogger(__name__)
-
 _ = lambda s: s
 
 
@@ -19,12 +18,13 @@ def send_webblaster_report(router):
     header = subject
 
     footer = """
---------------------------------------------------------------------------------
-Do not reply. This is a system generated message.
---------------------------------------------------------------------------------
 
 Thank you,
-%(admin)s""" % ({'admin':get_admin_email_address()})
+%(admin)s
+
+----------------------------------------------
+Do not reply. This is a system generated message.
+----------------------------------------------""" % ({'admin':get_admin_email_address()})
 
     body_template = """
 Date Sent: %(date_sent)s
@@ -34,7 +34,7 @@ Recipients' Location: %(location)s
 # of Recipients: %(recipients_count)s
 Message:
 %(message)s
--------------------------------------------------------------------------------
+----------------------------------------------
 """
 
     logs = []
@@ -61,12 +61,6 @@ Message:
 
     for sg in support_group:
         recipients.append(sg.user.email)
-
-
-
+        
     message = ("%s\n%s\n%s" % (header, body, footer))
-
-    
     email_sender.send(list(set(recipients)), subject, message)
-
-    

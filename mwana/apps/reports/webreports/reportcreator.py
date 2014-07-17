@@ -826,7 +826,7 @@ class Results160Reports:
 
     def get_total_results_in_province(self, province):
         return Result.objects.filter(clinic__parent__parent=province).\
-    filter(clinic__in=self.user_facilities()).exclude(result=None).count()
+    filter(clinic__in=self.user_facilities()).exclude(result=None).exclude(result='').count()
 
     def dbs_positivity_data(self, year=None):
 
@@ -840,7 +840,8 @@ class Results160Reports:
 
         if not year:
             year = date.today().year
-        results = Result.objects.exclude(result=None).filter(clinic__in=self.user_facilities())
+        results = Result.objects.exclude(result=None).exclude(result='').\
+                                        filter(clinic__in=self.user_facilities())
         total_dbs = results.count()
 
         percent_positive_country = percent(results.filter(result__iexact='P',clinic__in=self.user_facilities()).count(), total_dbs)

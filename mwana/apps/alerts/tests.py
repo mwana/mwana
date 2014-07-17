@@ -2,7 +2,6 @@
 from datetime import timedelta
 import time
 
-from django.conf import settings
 from mwana.apps.alerts import tasks as smstasks
 from mwana.apps.alerts.models import SMSAlertLocation
 from mwana.apps.labresults.models import Result
@@ -83,11 +82,11 @@ class SMSAlertsSetUp(TestScript):
     def tearDown(self):
         # this call is required if you want to override tearDown
         super(SMSAlertsSetUp, self).tearDown()
-   
 
-class TestSendingSMSAlerts(SMSAlertsSetUp):   
-    
-   
+
+class TestSendingSMSAlerts(SMSAlertsSetUp):
+
+
     def testClinicsNotRetrievingResultsAlerts(self):
 
         time.sleep(.1)
@@ -120,12 +119,12 @@ class TestSendingSMSAlerts(SMSAlertsSetUp):
 
         self.runScript(script)
 
-        
+
         time.sleep(.1)
         self.startRouter()
         smstasks.send_clinics_not_sending_dbs_alerts(self.router)
         msgs = self.receiveAllMessages()
-       
+
         self.assertEqual(len(msgs), 1)
         self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't sent DBS to hub: Mibenge Clinic")
         self.stopRouter()

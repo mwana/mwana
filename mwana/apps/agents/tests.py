@@ -1,10 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
-from rapidsms.contrib.handlers.app import App as handler_app
 from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.locations.models import Location, LocationType
 
-from mwana.apps.reminders.app import App
 from mwana.apps.reminders import models as reminders
 from mwana import const
 

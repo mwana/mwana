@@ -1,14 +1,11 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.reports.utils.facilityfilter import get_distinct_parents
-from mwana.apps.userverification.models import UserVerification
-from django.db.models import Max
-
-from operator import itemgetter
-
-import mwana.const as const
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
+from operator import itemgetter
+
+from django.db import connection
+from django.db.models import Max
 from django.db.models import Q
 from mwana.apps.alerts.labresultsalerts.alert import Alert
 from mwana.apps.alerts.models import Hub
@@ -17,16 +14,18 @@ from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
+from mwana.apps.reports.utils.facilityfilter import get_distinct_parents
+from mwana.apps.userverification.models import UserVerification
+import mwana.const as const
+from mwana.const import get_clinic_worker_type
+from mwana.const import get_hub_worker_type
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
-from mwana.const import get_hub_worker_type
-from mwana.const import get_clinic_worker_type
-
-from django.db import connection
+from mwana.apps.labresults.handlers.results import ResultsHandler
 
 class Alerter:
     def __init__(self, current_user=None, group=None, province=None,
-                    district=None, facility=None):
+                 district=None, facility=None):
         self.today = date.today()
         self.user = current_user
         self.reporting_group = group
@@ -168,7 +167,7 @@ class Alerter:
                              -days_late,
                              level,
                              ""
-                             )) 
+                             ))
         return self.tracing_days, sorted(my_alerts, key=itemgetter(5))
 
     def get_clinics_not_retriving_results_alerts(self, days=None):
@@ -177,9 +176,9 @@ class Alerter:
 
         facs = self.get_facilities_for_reporting()
         clinics = facs.filter(
-                           lab_results__notification_status='notified',
-                           lab_results__arrival_date__lt=self.retrieving_ref_date
-                           ).distinct()
+                              lab_results__notification_status='notified',
+                              lab_results__arrival_date__lt=self.retrieving_ref_date
+                              ).distinct()
         for clinic in clinics:
             contacts = \
         Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
@@ -248,20 +247,25 @@ class Alerter:
     
     def last_used_check(self, location):
         try:
-            return Message.objects.filter(contact__location=location ,
-                                                  direction='I',
-                                                  text__iregex='^check\s*'
-                                                  ).order_by('-date')[0].date.date()
+            return Message.objects.filter(contact__location=location,
+                                          direction='I',
+                                          text__iregex='^check\s*'
+                                          ).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
         
     def last_used_result(self, location):        
         try:
-            return Message.objects.filter(Q(contact__location=location) ,
+            return Message.objects.filter(Q(contact__location=location),
                                           Q(direction='O'),
-                                          Q(text__istartswith='The'),
-                                           Q(text__istartswith='The results for sample') |
-                                           Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
+                                          Q(text__istartswith='The results for sample') |
+                                          Q(text__istartswith='There are currently no results')).order_by('-date')[0].date.date()
+        except IndexError:
+            return date(1900, 1, 1)
+
+    def _last_used_result(self, location, messages):
+        try:
+            return messages.filter(contact__location=location).order_by('-date')[0].date.date()
         except IndexError:
             return date(1900, 1, 1)
 
@@ -279,7 +283,12 @@ class Alerter:
                     self.clinic_sent_dbs_referal_date.date()).\
                 exclude(samplenotification__date__gte=
                         self.clinic_sent_dbs_referal_date.date()).distinct()
-        
+
+
+        result_keyword_msgs = Message.objects.filter(direction='I',
+                                text__iregex=r'^(%s)|^result$' % '|'.join(
+                                '%s ' %it for it in ResultsHandler.keyword.\
+                                strip().split('|')))
         for clinic in clinics:
             additional_text = ""
             days_ago = self.days_ago(self.last_retreived_results(clinic))
@@ -303,32 +312,32 @@ class Alerter:
             else:
                 additional_text += ", has never CHECKed for results"
                          
-            days_ago = self.days_ago(self.last_used_result(clinic))
+            days_ago = self.days_ago(self._last_used_result(clinic, result_keyword_msgs))
             if days_ago < 40000:
                 additional_text += ", last used RESULT keyword "\
                 + "%s days ago." % days_ago
             else:
                 additional_text += ", has never used RESULT keyword."
                 
-                
+
             contacts = \
-    Contact.active.filter(location=clinic,types=const.get_clinic_worker_type()).\
+    Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
         distinct().order_by('name')
             days_late = self.days_ago(self.last_sent_samples(clinic))
             level = Alert.HIGH_LEVEL if days_late >= (2 * self.clinic_notification_days) else Alert.LOW_LEVEL
             alert_msg = ("Clinic "
-                             "has no record of sending DBS samples in  the last"
-                             " %s days. Please check "
-                             "that they have supplies by calling (%s)."
-                             "" % (days_late,
-                             ", ".join(contact.name + ":"
-                             + contact.default_connection.identity
-                             for contact in contacts)))
+                         "has no record of sending DBS samples in  the last"
+                         " %s days. Please check "
+                         "that they have supplies by calling (%s)."
+                         "" % (days_late,
+                         ", ".join(contact.name + ":"
+                         + contact.default_connection.identity
+                         for contact in contacts)))
             if days_late > 40000:
                 alert_msg = ("Clinic has no record of sending DBS samples "
                              "since it was added to the SMS system. "
                              "Please check that they have supplies by calling (%s)."
-                             "" % ( ", ".join(contact.name + ":"
+                             "" % (", ".join(contact.name + ":"
                              + contact.default_connection.identity
                              for contact in contacts)))
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
@@ -371,6 +380,7 @@ class Alerter:
         SELECT "source", max(processed_on) FroM labresults_result
         JOIN labresults_payload on labresults_payload.id=labresults_result.payload_id
         WHERE clinic_id in (''' + ids + ''')
+        and processed_on IS NOT null
         GROUP BY "source";
         '''
         cursor = connection.cursor()
@@ -449,9 +459,9 @@ class Alerter:
                                                 "")
     def last_used_system(self, contact):
         latest = Message.objects.filter(
-            contact=contact,
-            direction='I',
-        ).aggregate(date=Max('date'))
+                                        contact=contact,
+                                        direction='I',
+                                        ).aggregate(date=Max('date'))
         if latest['date']:
             return (datetime.today() - latest['date']).days
         else:
@@ -467,7 +477,7 @@ class Alerter:
 
 
         supported_contacts = Contact.active.filter(types=get_clinic_worker_type(),
-        location__supportedlocation__supported=True).distinct()
+                                                   location__supportedlocation__supported=True).distinct()
 
         return supported_contacts.filter(message__direction="I", message__date__gte=date_back).distinct()
 
@@ -479,21 +489,21 @@ class Alerter:
         
         defaulters = UserVerification.objects.\
             filter(responded=False, contact__is_active=True,
-            contact__types=get_clinic_worker_type(), facility__in=facilities).distinct()
+                   contact__types=get_clinic_worker_type(), facility__in=facilities).distinct()
        
-        defaulters = defaulters.exclude(contact__in=complying_contacts)
+        defaulters = [item for item in defaulters.exclude(contact__in=complying_contacts)]
         
         def_facs = set(defa.facility for defa in defaulters)
         
         for facility in def_facs:
             days_late = 75
-            fac_defaulters = defaulters.filter(facility=facility)
+            fac_defaulters = filter(lambda x: x.facility == facility, defaulters)
             if not fac_defaulters:
                 continue
             msg = ("The following staff registered at %s have not been using "
-             "Results160 for too long and have been unresponsive. "
-             "The last time they used the system is "
-            "as shown. Please call and enquire. " % (facility.name))
+                   "Results160 for too long and have been unresponsive. "
+                   "The last time they used the system is "
+                   "as shown. Please call and enquire. " % (facility.name))
 
             contacts  = []
             temp = []
@@ -503,14 +513,14 @@ class Alerter:
                 last_used = self.last_used_system(contact)
                 last_used_msg = "%s days ago" % last_used if last_used else "Never"
                 temp.append("%s (%s) %s" % (contact.name,
-                contact.default_connection.identity, last_used_msg
-                ))
+                            contact.default_connection.identity, last_used_msg
+                            ))
                 if last_used: days_late = max(days_late, last_used)
 
             msg = msg + "; ".join(msg for msg in temp) + "."
 
             inactive_alerts.append(Alert(Alert.WORKER_NOT_USING_SYSTEM, msg, defaulter.facility.name,
-            days_late, -days_late, Alert.HIGH_LEVEL, ""))
+                                   days_late, -days_late, Alert.HIGH_LEVEL, ""))
         return sorted(inactive_alerts, key=itemgetter(5))
 
 
@@ -528,9 +538,9 @@ class Alerter:
                 return "(Unkown hub)"
 
     def get_hub_number(self, location):
-        pipo=Contact.active.filter(types=get_hub_worker_type(),location__parent=location)
+        pipo = Contact.active.filter(types=get_hub_worker_type(), location__parent=location)
         if pipo:
-            return ", ".join(c.name+": "+c.default_connection.identity for c in pipo)
+            return ", ".join(c.name + ": " + c.default_connection.identity for c in pipo)
         try:
             return Hub.objects.exclude(Q(phone=None) | Q(phone='')).\
         get(district=location).phone
@@ -617,8 +627,8 @@ class Alerter:
     def get_facilities_for_reporting(self):
         facs = Location.objects.filter(supportedlocation__supported=True, groupfacilitymapping__group__groupusermapping__user=self.user)
         if self.reporting_group:
-            facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
-            |Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
+            facs = facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)
+                               | Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
         if self.reporting_facility:
             facs = facs.filter(slug=self.reporting_facility)
         elif self.reporting_district:
@@ -626,7 +636,7 @@ class Alerter:
         elif self.reporting_province:
             facs = facs.filter(parent__parent__slug=self.reporting_province)
         return facs.filter(supportedlocation__supported=True
-                                       ).distinct()
+                           ).distinct()
 
     def my_payload_sources(self):
         facs = self.get_facilities_for_reporting()

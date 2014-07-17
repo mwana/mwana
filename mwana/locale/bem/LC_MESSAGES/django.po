@@ -74,7 +74,7 @@ msgid ""
 "Sorry you're having trouble%(person)s. Your help request has been forwarded "
 "to a support team member and they will call you soon."
 msgstr ""
-"Njeleleeniko, mulekwata ubwafya ba %(person)s. Ubwafya bwenu bwapeelwa kuli "
+"Njeleleeniko, mulekwata ubwafya ba%(person)s. Ubwafya bwenu bwapeelwa kuli "
 "umo uwa mwibumba lya bakafwa kabili balamitumina lamya nomba line"
 
 #: .\apps\labresults\messages.py:26
@@ -188,7 +188,7 @@ msgid ""
 "MONTH YEAR, for example: 23 04 2010"
 msgstr ""
 "Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI "
-"UMWAKA - 23 04 2010."
+"UMWAKA. Ichilangililo: 23 04 2010."
 
 #: .\apps\reminders\app.py:171
 #, python-format
@@ -230,8 +230,8 @@ msgid ""
 "left out."
 msgstr ""
 "Njeleleeniko, nshacumfwa iyo imbila. Pakulembesha %(event_lower)s, tumeni %"
-"(event_upper)s <INSHIKU> <ISHINA LYABANINA>.Ichilangililo, MWANA 12 3 2012 "
-"Bana Kalaba."
+"(event_upper)s <DATE> <ISHINA LYABANINA>. Ichilangililo, MWANA 12 3 2012 "
+"Loveness Bwalya."
 
 #: .\apps\reminders\mocking.py:47
 #, python-format
@@ -248,7 +248,7 @@ msgid ""
 "Hi%(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Ba%(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)"
+"Ba %(cba)s, inshita yaba %(patient)s ukuya kuchipatala pa %(type)s pa %(date)"
 "s naifika. Bebukisheni ukuya ku %(clinic)s, elyo mutume ati TOLD %(patient)s"
 
 #: .\apps\reminders\handlers\BirthNotice.py:38

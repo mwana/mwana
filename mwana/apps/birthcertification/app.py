@@ -1,6 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
 import logging
-from mwana.apps.alerts.app import mwana
 import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
 

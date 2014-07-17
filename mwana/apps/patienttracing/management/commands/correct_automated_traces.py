@@ -15,6 +15,9 @@ from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from mwana.util import get_clinic_or_default
 from rapidsms.models import Contact
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Command(LabelCommand):
     help = """Corrects PatientTrace objects that were system initiated"""
@@ -56,7 +59,7 @@ def correct_misspelt_status():
 
 def correct_tolds(days_ago):
     if not days_ago: days_ago = 7
-    count = 0
+#    count = 0
     for pt in PatientTrace.objects.filter(source_patient_trace=None,
                                           initiator='cba', status='told',
                                           patient_event=None):
@@ -78,7 +81,7 @@ def correct_tolds(days_ago):
             auto_pt.status = pt.status
             auto_pt.save()
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=auto_pt)
-            count += 1
+#            count += 1
         
         # else try matching by soundex and distance method
         else:
@@ -93,7 +96,7 @@ def correct_tolds(days_ago):
                     my_pt.status = pt.status
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1                    
+#                    count += 1
 
         for my_pt in PatientTrace.objects.filter(initiator__in=["clinic_worker"],
                                                  status='new',
@@ -106,7 +109,7 @@ def correct_tolds(days_ago):
             my_pt.status = pt.status
             my_pt.save()
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-            count += 1
+#            count += 1
         
         # else try matching by soundex and distance method
         else:
@@ -121,15 +124,15 @@ def correct_tolds(days_ago):
                     my_pt.status = pt.status
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
-    print "corrected %s records with told using %s days as tolerance" % (count, days_ago)
+#    print "corrected %s records with told using %s days as tolerance" % (count, days_ago)
 
 
 def correct_confirms(days_ago=7):
     if not days_ago: days_ago = 7
-    count = 0
+#    count = 0
     for pt in PatientTrace.objects.filter(source_patient_trace=None,
                                           initiator='cba', status='confirmed',
                                           patient_event=None).exclude(reminded_date=None):
@@ -156,7 +159,7 @@ def correct_confirms(days_ago=7):
 
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=auto_pt)
 
-            count += 1
+#            count += 1
 
         # else try matching by soundex and distance method
         else:
@@ -174,7 +177,7 @@ def correct_confirms(days_ago=7):
                     my_pt.confirmed_by = pt.confirmed_by or pt.messenger
                     my_pt.save()
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
         for my_pt in PatientTrace.objects.filter(initiator="clinic_worker",
@@ -193,7 +196,7 @@ def correct_confirms(days_ago=7):
 
             CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
 
-            count += 1
+#            count += 1
 
         # else try matching by soundex and distance method
         else:
@@ -212,10 +215,10 @@ def correct_confirms(days_ago=7):
                     my_pt.save()
                     
                     CorrectedTrace.objects.get_or_create(copied_from=pt, copied_to=my_pt)
-                    count += 1
+#                    count += 1
                     
 
-    print "corrected %s records with confirm using %s days as tolerance" % (count, days_ago)
+#    print "corrected %s records with confirm using %s days as tolerance" % (count, days_ago)
 
 def cleanup():
     # TODO: clear CBA initiated traces that have been mapped to system initiated ones
@@ -325,6 +328,23 @@ def _remove_locationtype_specifier(count):
         pt.name = pt.name[2:].strip().title()
         pt.save()
         count += 1
+    for pt in PatientTrace.objects.filter(name__istartswith='m '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    for pt in Contact.objects.filter(name__istartswith='f '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    
+    for pt in Contact.objects.filter(name__istartswith='m '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
+    for pt in Contact.objects.filter(name__istartswith='h '):
+        pt.name = pt.name[2:].strip().title()
+        pt.save()
+        count += 1
     return count
 
 
@@ -353,11 +373,66 @@ def _remove_visit_type(count):
     return count
 
 
+def _remove_invalid_contacts(count):
+    logger.info('_remove_extraneous_words')
+    extra_words = ['TOLD', 'MWANA', 'CONFIRM', 'COMFIRM', 'CONFIRMED',
+    'COMFIRMED', 'BIRTH', 'REMINDMI', 'CLINIC', 'AND', 'ON', 'VISIT', 'GO', 'TO',
+    'Mwanatold', 'Msg', 'Cba', 'Clinhc', 'And', 'Msg', 'All']
+    for word in extra_words:
+        PatientTrace.objects.filter(name__iexact=word).delete()
+        Contact.objects.filter(name__iexact=word, types__slug='patient').delete()
+
 def _remove_extraneous_words(count):
-    for pt in PatientTrace.objects.filter(name__istartswith='mwana '):
-        pt.name = pt.name[6:].strip().title()
-        pt.save()
-        count += 1
+    logger.info('_remove_extraneous_words')
+    extra_words = ['TOLD ', 'MWANA ', 'CONFIRM ', 'COMFIRM ', 'CONFIRMED ', 'COMFIRMED ', 'BIRTH ']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__istartswith=word):
+            name = pt.name.title()
+            while name.startswith(word.title()):
+                name = name[len(word):].strip().title()
+            pt.name = name
+            pt.save()
+            count += 1
+        for pt in Contact.objects.filter(name__istartswith=word):
+            name = pt.name.title()
+            while name.startswith(word.title()):
+                name = name[len(word):].strip().title()
+            pt.name = name
+            pt.save()
+            count += 1
+
+    extra_words = [' TOLD', ' MWANA', ' CONFIRM', ' COMFIRM', ' CONFIRMED',
+    ' COMFIRMED',' BIRTH', ' REMINDMI', ' CLINIC', ' AND', ' ON', ' VISIT']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__iendswith=word):
+            name = pt.name.title().strip()
+            while name.endswith(word.title()):
+                name = name[:-len(word)]
+            pt.name = name
+            pt.save()
+            count += 1
+        for pt in Contact.objects.filter(name__iendswith=word):
+            name = pt.name.title().strip()
+            while name.endswith(word.title()):
+                name = name[:-len(word)]
+            pt.name = name
+            pt.save()
+            count += 1
+
+
+    extra_words = ['TOLD', 'CONFIRM', 'COMFIRM', 'CONFIRMED',
+    'COMFIRMED', 'REMINDMI', 'CLINIC', 'COFIRM', 'VISIT',
+     'remaindmi', 'rejmaindmi', 'help', 'comferme', 'MOTHER',
+    'Mwanatold', 'Msg', 'Cba', 'Clinhc', 'ttold', 'ftold', 'itold']
+    for word in extra_words:
+        for pt in PatientTrace.objects.filter(name__icontains=word):
+            name = pt.name.lower().replace(word.lower(), '').strip()
+            pt.name = name.title()
+            pt.save()
+        for pt in Contact.objects.filter(name__icontains=word):            
+            name = pt.name.lower().replace(word.lower(), '').strip()
+            pt.name = name.title()
+            pt.save()
     return count
 
 
@@ -379,7 +454,9 @@ def clean_names():
 
     count = _remove_visit_type(count)
 
-    print "Made %s corrections to names" % count
+    count = _remove_invalid_contacts(count)
+
+#    print "Made %s corrections to names" % count
 
 def correct_patient_traces(told_tolerance=None, confirm_tolerance=None):
     clean_names()

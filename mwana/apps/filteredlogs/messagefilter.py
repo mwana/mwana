@@ -79,12 +79,13 @@ class MessageFilter:
         return facs.filter(supportedlocation__supported=True
                            ).distinct()
 
-    def get_filtered_message(self, text):
+    @classmethod
+    def get_filtered_message(cls, text):
         text_copy = text
         key_texts = ["Patient ID:", "***", ". IDs :"]
         for key_text in key_texts:
             if key_text in text:
-                text_copy = text[:text.index(key_text)+len(key_text)] + "*** " * text.count(key_text)
+                text_copy = text[:text.index(key_text) + len(key_text)] + "*** " * text.count(key_text)
                 break
         return text_copy
 

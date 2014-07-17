@@ -21,6 +21,7 @@ from mwana.apps.locations.models import Location
 from rapidsms.models import Contact
 from mwana.apps.labresults.models import Result
 from mwana.const import get_district_worker_type, get_province_worker_type, get_dbs_printer_type, get_clinic_worker_type, get_cba_type
+from django.core.cache import cache
 
 
 
@@ -568,38 +569,46 @@ def home(request):
     records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
     sites = []
     
-    unsupported_districts = [str(loc.name) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
-    for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
-        site = Site()
-        site.point = record.point
-        site.slug = record.slug
-        site.name = record.name
-        site.district = record.parent.name
-        site.province = record.parent.parent.name
-        site.workers = record.contact_set.filter(types=get_clinic_worker_type(), is_active=True).distinct().count()
-        site.cbas = Contact.active.filter(types=get_cba_type(), is_active=True, location__parent=record).distinct().count()
-        site.dhos = Contact.active.filter(types=get_district_worker_type(), is_active=True, location__location=record).distinct().count()
-        site.phos = Contact.active.filter(types=get_province_worker_type(), is_active=True, location__location=record).distinct().count()
-        site.printers = Contact.active.filter(types=get_dbs_printer_type(), is_active=True, location=record).distinct().count()
-        site.results_retrieved = record.lab_results.exclude(result_sent_date=None).count()
-        site.results_positive = record.lab_results.filter(result='P').count()
-        site.results_negative = record.lab_results.filter(result='N').count()
-        site.results_rejected = record.lab_results.filter(result__in='RIX').count()
+    unsupported_districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
+    
+    cached = cache.get('temp_sites')
+    if cached:
+        sites = cached
+    else:
+        for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
+            site = Site()
+            site.point = record.point
+            site.slug = record.slug
+            site.name = record.name
+            site.district = record.parent.name
+            site.province = record.parent.parent.name
+            site.district_id = record.parent.slug
+            site.province_id = record.parent.parent.slug
+            site.workers = record.contact_set.filter(types=get_clinic_worker_type(), is_active=True).distinct().count()
+            site.cbas = Contact.active.filter(types=get_cba_type(), is_active=True, location__parent=record).distinct().count()
+            site.dhos = Contact.active.filter(types=get_district_worker_type(), is_active=True, location__location=record).distinct().count()
+            site.phos = Contact.active.filter(types=get_province_worker_type(), is_active=True, location__location=record).distinct().count()
+            site.printers = Contact.active.filter(types=get_dbs_printer_type(), is_active=True, location=record).distinct().count()
+            site.results_retrieved = record.lab_results.exclude(result_sent_date=None).count()
+            site.results_positive = record.lab_results.filter(result='P').count()
+            site.results_negative = record.lab_results.filter(result='N').count()
+            site.results_rejected = record.lab_results.filter(result__in='RIX').count()
 
-        site.sample_sent_to_lab_this_month = Result.objects.filter(clinic=record,
-        entered_on__year=today.year, entered_on__month=today.month).count()
+            site.sample_sent_to_lab_this_month = Result.objects.filter(clinic=record,
+            entered_on__year=today.year, entered_on__month=today.month).count()
 
-        site.results_retrieved_this_month = Result.objects.filter(clinic=record,
-        result_sent_date__year=today.year, result_sent_date__month=today.month).count()
+            site.results_retrieved_this_month = Result.objects.filter(clinic=record,
+            result_sent_date__year=today.year, result_sent_date__month=today.month).count()
 
-        site.births = PatientEvent.objects.filter(patient__location__parent=record,
-        ).count()
+            site.births = PatientEvent.objects.filter(patient__location__parent=record,
+            ).count()
 
-        site.births_this_month = PatientEvent.objects.filter(patient__location__parent=record,
-        date_logged__year=today.year, date_logged__month=today.month).count()
+            site.births_this_month = PatientEvent.objects.filter(patient__location__parent=record,
+            date_logged__year=today.year, date_logged__month=today.month).count()
 
-        sites.append(site)
+            sites.append(site)
 
+        cache.set('temp_sites', sites, 60 * 60)  # 60 min
 
 
     return render_to_response('reports/index.html',

@@ -115,6 +115,8 @@
             <script type="text/javascript">
                 $(function () {
                     var chart;
+                    var startdate = $('#startdate')[0].value;
+                    var enddate = $('#enddate')[0].value;
                     $(document).ready(function() {
 
                         var colors = Highcharts.getOptions().colors,
@@ -188,7 +190,7 @@
                                 type: 'column'
                             },
                             title: {
-                                text: 'Confirmed Trained Mwana SMS users since October 2012'
+                                text: 'Confirmed Trained Mwana SMS users from ' + startdate + ' to ' + enddate
                             },
                             subtitle: {
                                 text: 'Click the columns to view Partners. Click again to view SMS users.'
@@ -259,7 +261,7 @@
 
 
             <div>
-                <h3>Existing {{ model }}</h3>
+                <h3>All Existing {{ model }}</h3>
 
                 <table width="100%">
 

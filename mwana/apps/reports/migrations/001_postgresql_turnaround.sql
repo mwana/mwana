@@ -19,6 +19,9 @@ FROM
      join locations_location on locations_location.id=labresults_result.clinic_id
      join locations_location as district on locations_location.parent_id=district.id
 WHERE
-     result IS NOT null
+     result IS NOT null AND notification_status <> 'obsolete'
+            and collected_on <= processed_on
+            and entered_on <= processed_on
+            and arrival_date >= processed_on
 ORDER BY
      result_sent_date ASC
