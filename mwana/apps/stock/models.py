@@ -9,8 +9,6 @@ from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
 from mwana.const import DISTRICT_SLUGS
-from mwana.const import get_clinic_worker_type
-from mwana.const import get_district_worker_type
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -280,7 +278,8 @@ class LowStockLevelNotification(models.Model):
 
 
 class Supported(models.Model):
-    district = models.ForeignKey(Location, limit_choices_to={'type__slug__in':DISTRICT_SLUGS})
+    district = models.ForeignKey(Location, related_name='supported_districts',
+                                limit_choices_to={'type__slug__in':DISTRICT_SLUGS})
     supported = models.BooleanField(default=False)
 
     def __unicode__(self):
