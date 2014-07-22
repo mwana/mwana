@@ -32,6 +32,7 @@ admin.site.register(UserVerification, UserVerificationAdmin)
 
 class DeactivatedUserAdmin(admin.ModelAdmin):
     list_display = ("district", "clinic", "contact", "connection", "deactivation_date",)
+    search_fields = ('contact__location__name','contact__name')
 
     def clinic(self, obj):
         return obj.contact.clinic
