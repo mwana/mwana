@@ -1,15 +1,10 @@
 # vim: ai ts=4 sts=4 et sw=4
-import re
-import rapidsms
 import datetime
 import logging
 
-from rapidsms.models import Contact
-from rapidsms.contrib.scheduler.models import EventSchedule, ALL
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.patienttracing import models as patienttracing
 from datetime import datetime,timedelta
-from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
 from mwana.apps.patienttracing.models import SentConfirmationMessage
 
