@@ -33,6 +33,7 @@ HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(c
 
 TEST_TYPE = "HIV-DNAPCR Result"
 
+
 def urgent_requisitionid_update(result):
     """
     Returns True if there has been a critical update in requisition id. That is
@@ -44,6 +45,20 @@ def urgent_requisitionid_update(result):
             toreturn = True
     return toreturn
 
+
+def get_lab_name(result):
+    labs = {"lusaka/kalingalinga": "Kal. DNA-PCR LAB",
+            "ndola/arthur-davison": "ADH DNA-PCR LAB",
+            "lusaka/uth": "UTH DNA-PCR LAB",
+            "livingstone/general": "LGH DNA-PCR LAB"
+            }
+
+    if result.payload:
+        return labs.get(result.payload.source, settings.ADH_LAB_NAME)
+    else:
+        return settings.ADH_LAB_NAME
+
+
 def build_printer_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting 
@@ -53,24 +68,25 @@ def build_printer_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "old_req_id":res.old_value.split(":")[0],
-                   "old_result":res.get_old_result_text(),
-                   "new_req_id":res.requisition_id,
-                   "new_result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            msg = (CHANGED_PRINTER_RESULTS % {"clinic": res.clinic.name,
+                   "old_req_id": res.old_value.split(":")[0],
+                   "old_result": res.get_old_result_text(),
+                   "new_req_id": res.requisition_id,
+                   "new_result": res.get_result_text(),
+                   "test_type": TEST_TYPE,
+                   "lab_name": get_lab_name(res),
+                   "sms_date": date.isoformat(date.today())})
         else:
-            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "req_id":res.requisition_id,
-                   "result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            msg = (PRINTER_RESULTS % {"clinic": res.clinic.name,
+                   "req_id": res.requisition_id,
+                   "result": res.get_result_text(),
+                   "test_type": TEST_TYPE,
+                   "lab_name": get_lab_name(res),
+                   "sms_date": date.isoformat(date.today())})
         result_strings.append(msg)
                
     return result_strings
+
 
 def build_results_messages(results):
     """

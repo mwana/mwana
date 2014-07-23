@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.tlcprinters.models import MessageConfirmation
 import time
@@ -409,9 +410,12 @@ class TestApp(LabresultsSetUp):
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
         msg2 = "Mary Phiri:Hello Mary Phiri, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
-        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
-        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
-        msg5 = "Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992.\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by ADH DNA-PCR LAB."
+        msg3 = ("Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990"
+                ".\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
+        msg4 = ("Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991"
+                ".\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
+        msg5 = ("Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992"
+                ".\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
        
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -433,6 +437,8 @@ class TestApp(LabresultsSetUp):
     def testSend_results_to_printer_task(self):
         self.assertEqual(0, MessageConfirmation.objects.count())
 
+        payload1 = Payload.objects.create(source='lusaka/kalingalinga',
+                                          incoming_date=datetime.datetime.now())
         results = labresults.Result.objects.all()
         results.create(requisition_id="%s-0001-1" % self.clinic.slug,
                           clinic=self.clinic, result="N",
@@ -444,7 +450,7 @@ class TestApp(LabresultsSetUp):
                           result="P",
                           collected_on=datetime.datetime.today(),
                           entered_on=datetime.datetime.today(),
-                          notification_status="new")
+                          notification_status="new", payload=payload1)
         self.clinic.has_independent_printer = True
         self.clinic.save()
         script = """
@@ -463,9 +469,13 @@ class TestApp(LabresultsSetUp):
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
         msg2 = "Mary Phiri:Hello Mary Phiri, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
-        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg3 = ("Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID:"
+                " 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by "
+                "Kal. DNA-PCR LAB.")
 
-        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg4 = ("Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID:"
+                " 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\n"
+                "Approved by %s." % settings.ADH_LAB_NAME)
 
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -968,7 +978,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         response = self.client.get(reverse('accept_results'))
         self.assertEqual(response.status_code, 405) # method not supported
 
-    def test_results_changed_notification(self):        
+    def test_results_changed_notification(self):
         """
         Tests sending of notifications for previously sent results but later
         change in either
