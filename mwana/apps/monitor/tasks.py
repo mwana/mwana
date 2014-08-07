@@ -290,7 +290,6 @@ def delete_spurious_group_facility_mappings():
     GroupFacilityMapping.objects.filter(facility__name__istartswith='Training').delete()
     GroupFacilityMapping.objects.filter(facility__name__istartswith='Support').delete()
 
-#synchronize
 def try_assign(group, facilities):
     for loc in facilities:
         GroupFacilityMapping.objects.get_or_create(group=group, facility=loc)
@@ -380,11 +379,16 @@ def update_sub_groups():
             group = ReportingGroup.objects.get(name=pho)
             try_assign(group, [loc])
 
+
+            unicef = ReportingGroup.objects.get(name__iexact='unicef')
+            idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
+            bu = ReportingGroup.objects.get(name__iexact='BU')
+
             if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
-                idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
                 try_assign(idinsight, [loc])
-                unicef = ReportingGroup.objects.get(name__iexact='unicef')
                 try_assign(unicef, [loc]);
+            if loc.parent.parent.slug == '800000':
+                try_assign(bu, [loc]);
         except Exception, e:
             a, b = ReportingGroup.objects.get_or_create(name=dho)
             a, b = ReportingGroup.objects.get_or_create(name=pho)
