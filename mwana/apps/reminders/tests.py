@@ -38,7 +38,7 @@ class EventRegistration(TestScript):
         script = """
             kk     > birth
             kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
-            kk     > birth 24 3 2010
+            kk     > birth 24 3 2014
             kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
@@ -50,7 +50,7 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             kk     > birth 34553 maria
-            kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2010
+            kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2014
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -109,8 +109,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > birth 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -120,8 +120,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            aa     > birth 4/3/2010 maria
-            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for his or her next appointment at the clinic.
+            aa     > birth 4/3/2014 maria
+            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for his or her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -132,15 +132,15 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", gender="f",
                                        slug="birth|bith|bilth|mwana")
         script = """
-            kk     > bIrth 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > bith 4/3/2010 anna
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > BILTH 4/3/2010 laura
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwaNA 4/3/2010 lynn
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > unknownevent 4/3/2010 lynn
+            kk     > bIrth 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            kk     > bith 4/3/2014 anna
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            kk     > BILTH 4/3/2014 laura
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            kk     > mwaNA 4/3/2014 lynn
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            kk     > unknownevent 4/3/2014 lynn
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -166,10 +166,10 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
-            kk     > birth 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2010. You will be notified when it is time for her next appointment at the clinic.
+            kk     > birth 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            kk     > birth 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -180,12 +180,12 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
         reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
-            kk     > mwana f 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
-            kk     > mwanaf 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next clinic appointment.
-            kk     > mwana facility 4/3/2010 Nelly Mwansa
-            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana f 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            kk     > mwanaf 4/3/2014 Nelly Daka
+            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana facility 4/3/2014 Nelly Mwansa
+            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2014. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -198,12 +198,12 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
         reminders.Event.objects.create(name="Birth", slug="mwanah ", gender='f')
         script = """
-            kk     > mwana h 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
-            kk     > mwana h 4/3/2010 maria
-            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2010. You will be notified when it is time for her next clinic appointment.
-            kk     > mwanah 4/3/2010 Nelly Daka
-            kk     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2010. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana h 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            kk     > mwana h 4/3/2014 maria
+            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            kk     > mwanah 4/3/2014 Nelly Daka
+            kk     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -470,8 +470,8 @@ class MockReminders(TestScript):
 
         #only cba at given faclity should receive reminder. If baby is registered pick one
         script = """
-        kashitu_cba > birth 29 06 2011 Groovy Phiri
-        kashitu_cba < Thank you Kashitu Cba! You have successfully registered a birth for Groovy Phiri on 29/06/2011. You will be notified when it is time for his or her next appointment at the clinic.
+        kashitu_cba > birth 29 06 2014 Groovy Phiri
+        kashitu_cba < Thank you Kashitu Cba! You have successfully registered a birth for Groovy Phiri on 29/06/2014. You will be notified when it is time for his or her next appointment at the clinic.
         demo_initiator > rmdemo 402026
         kashitu_cba < Hi Kashitu Cba.Groovy Phiri is due for 6 day clinic visit on %s.Please remind them to visit Kashitu Clinic, then reply with TOLD Groovy Phiri
         """ % (fdate)
