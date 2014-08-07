@@ -120,10 +120,10 @@ msgstr ""
 
 #: .\apps\labresults\handlers\join.py:260
 msgid ""
-"To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> "
+"To register as a RemindMi agent, send JOIN CBA <CLINIC CODE> <ZONE #> "
 "<YOUR NAME>"
 msgstr ""
-"Mwabuka kuto n'olisa: JOIN <CBA> <CLINIC CODE> <ZONE #> <YOUR NAME>"
+"Mwabuka kuto n'olisa: JOIN CBA <CLINIC CODE> <ZONE #> <YOUR NAME>"
 
 #: .\apps\labresults\handlers\join.py:305
 #, python-format
@@ -212,10 +212,10 @@ msgstr ""
 #: .\apps\reminders\app.py:162
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
-"MONTH YEAR, for example: 23 04 2010"
+"MONTH YEAR, for example: %(formatted_date)s"
 msgstr ""
 "Muniswalele ni nisikautwisisa, wahesu mukenise lizazi, inge moku inezi,:"
-" DAY MONTH YEAR, muhala: 23 04 2010"
+" DAY MONTH YEAR, muhala: %(formatted_date)s"
 
 #: .\apps\reminders\app.py:171
 #, python-format
