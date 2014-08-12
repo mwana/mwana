@@ -5,8 +5,6 @@ from mwana.apps.reminders.models import Event
 import logging
 
 from mwana import const
-from mwana.apps.labresults.util import is_eligible_for_results
-from mwana.apps.stringcleaning.inputcleaner import InputCleaner
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.models import Contact
 
