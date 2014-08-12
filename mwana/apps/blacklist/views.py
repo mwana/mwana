@@ -1,8 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.training.models import Trained
-from mwana.apps.training.forms import TrainedForm
 from mwana.apps.issuetracking.issuehelper import IssueHelper
-from datetime import datetime, date
+from datetime import  date
 from django.contrib.csrf.middleware import csrf_response_exempt, csrf_view_exempt
 
 from django.template import RequestContext
