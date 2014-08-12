@@ -223,6 +223,8 @@ class EventRegistration(TestScript):
         script = """
             unknown > mwanafor +260977600123 h 4/3/2014 maria
             unknown < Sorry, you are NOT allowed to register a birth on behalf of anyone. If you think this message is a mistake reply with keyword HELP
+            admin > mwanafor +260977600000 h 4/3/2014 maria
+            admin < The phone number +260977600000 does not belong to any CBA. Make sure you typed it correctly
             admin > mwanafor +260977600123 h 4/3/2014 maria
             admin < Thank you Beyonce! You have registered a home birth for Maria on 04/03/2014 on behalf of Rupiah Banda.
             admin > mwanafor 0977600123 f 4.5.2014 Tracy
