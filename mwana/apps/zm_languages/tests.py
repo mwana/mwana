@@ -173,7 +173,7 @@ class LanguagesTest(LangaugeSetup):
             Liwu losakwanira. Mawu yokwanira ndi: BIRTH, MWANA, TOLD, CONFIRM. Yankhulani ndi liwu lokwanira liri lonse kapena HELP kuti mulandire uthenga wina.
             Pepani, onetsetsani kuti mulowetse chaka choyenera. 2009 ndi chaka chakale. Chaka chomwe tilimo ndi 2014.
             Pepani simungathe kulembetsa kubeleka ndi tsiku kuposa pa la lelo
-            Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY, MONTH YEAR mwachisanzo: 23 04 2014.
+            Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY MONTH YEAR mwachisanzo: 23 04 2014.
             Pepani sindinamvere icho. Poongeza kubeleka, tumizani MWANA <DATE> <NAME>. Mwachisanzo, MWANA 12 3 2012 Loveness Bwalya.
             Pepani sindinamvere icho. Poongeza kubeleka, tumizani MWANA <DATE> <NAME>. Mwachisanzo, MWANA 12 3 2012 Loveness Bwalya.
         '''.format(next_appointment_date=(date.today() + timedelta(days=3)).strftime("%d/%m/%Y"))

@@ -196,7 +196,7 @@ msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
 "MONTH YEAR, for example: %(formatted_date)s"
 msgstr ""
-"Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY, MONTH YEAR "
+"Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY MONTH YEAR "
 "mwachisanzo: %(formatted_date)s."
 
 #: .\apps\reminders\app.py:171
