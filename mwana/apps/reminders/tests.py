@@ -25,21 +25,27 @@ class EventRegistration(TestScript):
         Location.objects.create(name="Kafue District Hospital", slug="kdh",
                                 type=clinic)
         script = """
-            kk     > agent kdh 01 rupiah banda
-            kk     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
-            kk     > agent kdh 01 rupiah banda
-            kk     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
+            +260977600123     > agent kdh 01 rupiah banda
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
+            +260977600123     > agent kdh 01 rupiah banda
+            +260977600123     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for zone 01 of Kafue District Hospital.
+            admin  > join clinic kdh beyonce 1234
+            admin  < Hi Beyonce, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
+        admin = Contact.objects.get(connection__identity='admin')
+        # @type admin Contact
+        admin.is_help_admin = True
+        admin.save()
 
     def testMalformedMessage(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth
-            kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
-            kk     > birth 24 3 2014
-            kk     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
+            +260977600123     > birth
+            +260977600123     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
+            +260977600123     > birth 24 3 2014
+            +260977600123     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -49,8 +55,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth 34553 maria
-            kk     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2014
+            +260977600123     > birth 34553 maria
+            +260977600123     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2014
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -60,30 +66,30 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth 1/1/2014 maria
-            kk     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1 1 2014 laura
-            kk     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1-1-2014 anna
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1.1.2014 michelle
-            kk     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1. 1. 2014 anne
-            kk     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 01012014 heidi
-            kk     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1/1 rachel
-            kk     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1 1 nancy
-            kk     < Thank you %(cba)s! You have successfully registered a birth for nancy on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1-1 katrina
-            kk     < Thank you %(cba)s! You have successfully registered a birth for katrina on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1.1 molly
-            kk     < Thank you %(cba)s! You have successfully registered a birth for molly on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 1. 1 lisa
-            kk     < Thank you %(cba)s! You have successfully registered a birth for lisa on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
-            kk     > birth 0101 lauren
-            kk     < Thank you %(cba)s! You have successfully registered a birth for lauren on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1/1/2014 maria
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1 1 2014 laura
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1-1-2014 anna
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1.1.2014 michelle
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1. 1. 2014 anne
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 01012014 heidi
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1/1 rachel
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1 1 nancy
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for nancy on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1-1 katrina
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for katrina on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1.1 molly
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for molly on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1. 1 lisa
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for lisa on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 0101 lauren
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for lauren on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % {'year': datetime.datetime.now().year, 'cba': "Rupiah Banda"}
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -98,8 +104,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth 1/1/1213 maria
-            kk     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in 2014.
+            +260977600123     > birth 1/1/1213 maria
+            +260977600123     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in 2014.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -109,8 +115,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -132,15 +138,15 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", gender="f",
                                        slug="birth|bith|bilth|mwana")
         script = """
-            kk     > bIrth 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
-            kk     > bith 4/3/2014 anna
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
-            kk     > BILTH 4/3/2014 laura
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
-            kk     > mwaNA 4/3/2014 lynn
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
-            kk     > unknownevent 4/3/2014 lynn
+            +260977600123     > bIrth 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > bith 4/3/2014 anna
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > BILTH 4/3/2014 laura
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > mwaNA 4/3/2014 lynn
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > unknownevent 4/3/2014 lynn
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -150,8 +156,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            kk     > birth maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on %s. You will be notified when it is time for his or her next appointment at the clinic.
         """ % datetime.date.today().strftime('%d/%m/%Y')
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -166,10 +172,10 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
-            kk     > birth 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2014. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -180,12 +186,12 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
         reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
-            kk     > mwana f 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
-            kk     > mwanaf 4/3/2014 Nelly Daka
-            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
-            kk     > mwana facility 4/3/2014 Nelly Mwansa
-            kk     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana f 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwanaf 4/3/2014 Nelly Daka
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana facility 4/3/2014 Nelly Mwansa
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2014. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -196,14 +202,14 @@ class EventRegistration(TestScript):
     def testCommunityBirthRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
-        reminders.Event.objects.create(name="Birth", slug="mwanah ", gender='f')
+        reminders.Event.objects.create(name="Birth", slug="mwanah", gender='f')
         script = """
-            kk     > mwana h 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
-            kk     > mwana h 4/3/2014 maria
-            kk     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
-            kk     > mwanah 4/3/2014 Nelly Daka
-            kk     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana h 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana h 4/3/2014 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2014. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwanah 4/3/2014 Nelly Daka
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2014. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -211,12 +217,45 @@ class EventRegistration(TestScript):
 
         self.assertEqual(2, reminders.PatientEvent.objects.filter(event_location_type='hm').count())
 
+    def testBirthRegistrationOnBehalfOf(self):
+        self._register()
+        reminders.Event.objects.create(name="Birth", slug="mwana|birth", gender='f')
+        script = """
+            unknown > mwanafor +260977600123 h 4/3/2014 maria
+            unknown < Sorry, you are NOT allowed to register a birth on behalf of anyone. If you think this message is a mistake reply with keyword HELP
+            admin > mwanafor +260977600123 h 4/3/2014 maria
+            admin < Thank you Beyonce! You have registered a home birth for Maria on 04/03/2014 on behalf of Rupiah Banda.
+            admin > mwanafor 0977600123 f 4.5.2014 Tracy
+            admin < Thank you Beyonce! You have registered a facility birth for Tracy on 04/05/2014 on behalf of Rupiah Banda.
+            admin > mwanafor 977600123 4 6 2014 Shakira
+            admin < Thank you Beyonce! You have registered a birth for Shakira on 04/06/2014 on behalf of Rupiah Banda.
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(3, patients.count())
+
+        script = """
+            admin > mwanafor +260977600123 h 4/3/2014 maria
+            admin < Maria with DOB 04/03/2014 is already for/by Rupiah Banda (+260977600123).
+            admin > mwanafor 0977600123 f 4.5.2014 Tracy
+            admin < Tracy with DOB 04/05/2014 is already for/by Rupiah Banda (+260977600123).
+            admin > mwanafor 977600123 4 6 2014 Shakira
+            admin < Shakira with DOB 04/06/2014 is already for/by Rupiah Banda (+260977600123).
+        """
+        self.runScript(script)
+        patients = Contact.objects.filter(types__slug='patient')
+        self.assertEqual(3, patients.count())
+        self.assertEqual(1, reminders.PatientEvent.objects.filter(
+            event_location_type='hm', cba_conn__identity='+260977600123').count())
+        self.assertEqual(1, reminders.PatientEvent.objects.filter(
+            event_location_type='cl', cba_conn__identity='+260977600123').count())
+
     def testFutureEventRegistration(self):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            kk     > birth 4/6/2041 maria
-            kk     < Sorry, you can not register a birth with a date after today's.
+            +260977600123     > birth 4/6/2041 maria
+            +260977600123     < Sorry, you can not register a birth with a date after today's.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
