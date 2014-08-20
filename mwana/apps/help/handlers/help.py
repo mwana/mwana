@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.training.models import TrainingSession
 from mwana.apps.help.models import HelpRequest
 from mwana.apps.locations.models import Location
 from mwana.util import get_clinic_or_default
@@ -6,6 +7,7 @@ from mwana.util import get_contact_type_slug
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
+from datetime import datetime
 
 _ = lambda s: s
 
@@ -53,19 +55,35 @@ class HelpHandler(KeywordHandler):
             params["message"] = text
 
         contact = self.msg.connection.contact
-        for help_admin in Contact.active.filter(is_help_admin=True):
-            # if support admin is set to receive help requests for specific
-            # locations, don't forward them requests from other locations
-            if contact and contact.location:
-                admin_clinics = Location.objects.filter(groupfacilitymapping__group__helpadmingroup__contact=help_admin)
-                admin_districts = Location.objects.filter(location__in=admin_clinics)
-                admin_provinces = Location.objects.filter(location__in=admin_districts)
-                if admin_clinics:
-                    location  = get_clinic_or_default(contact)
-                    if not (location in admin_clinics or location in admin_districts or location in admin_provinces):
-                        continue
 
-            OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
+        # Don't forward any but the first help requests for a facility where
+        # there is training
+        today = datetime.today()
+        user_location = get_clinic_or_default(contact)
+        user_current_trainings = TrainingSession.objects.filter(location=user_location, is_on=True,
+                                                                start_date__year=today.year,
+                                                                start_date__month=today.month,
+                                                                start_date__day=today.day)
+        # count of help requests for this user's location today
+        user_helps_today = HelpRequest.objects.filter(requested_by__contact__location=user_location,
+                                                      requested_on__year=today.year,
+                                                      requested_on__month=today.month,
+                                                      requested_on__day=today.day).count()
+        
+        if not (contact and user_current_trainings and user_helps_today > 1):
+            for help_admin in Contact.active.filter(is_help_admin=True):
+                # if support admin is set to receive help requests for specific
+                # locations, don't forward them requests from other locations
+                if contact and contact.location:
+                    admin_clinics = Location.objects.filter(groupfacilitymapping__group__helpadmingroup__contact=help_admin)
+                    admin_districts = Location.objects.filter(location__in=admin_clinics)
+                    admin_provinces = Location.objects.filter(location__in=admin_districts)
+                    if admin_clinics:
+                        location  = get_clinic_or_default(contact)
+                        if not (location in admin_clinics or location in admin_districts or location in admin_provinces):
+                            continue
+
+                OutgoingMessage(help_admin.default_connection, resp_template, **params).send()
         
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
         self.respond(RESPONSE, person=person_arg)
