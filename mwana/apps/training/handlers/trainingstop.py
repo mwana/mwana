@@ -47,7 +47,8 @@ class TrainingStopHandler(KeywordHandler):
             training.end_date = datetime.utcnow()
             training.save()
             
-        for help_admin in Contact.active.filter(is_help_admin=True):
+        for help_admin in Contact.active.filter(is_help_admin=True).exclude(
+                id=contact.id):
             OutgoingMessage(help_admin.default_connection,
                             "Training has stopped at %s, %s"
                             ". Notification was sent by %s, %s" %
