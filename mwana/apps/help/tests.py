@@ -42,6 +42,7 @@ class TestApp(TestScript):
             0974 > join 403012 help admin  1234
             0975 > join cba kdh 2 Kafue CBA
             0976 > join cba 403012 2 Central CBA
+            0977 > join cba kdh 2 Kdh CBA
         """
         self.runScript(script)
 
@@ -195,6 +196,58 @@ class TestApp(TestScript):
                                                 text__contains='requested help',
                                                 contact=self.help_admin).count(), 6)
         self.assertEqual(HelpRequest.objects.count(), 8)
+
+    def testCBATrainingAwareHelpForwarding(self):
+        # Start a training session for KDH but not central clinic
+        script = """
+            0974 > Training start kdh
+            """
+        self.runScript(script)
+        self.receiveAllMessages()
+        self.assertEqual(1, TrainingSession.objects.filter(location=self.kdh, is_on=True).count())
+
+        script = """
+            0977 > help postnatal
+            0974 < Kdh Cba (cba) at Kafue District Hospital(kdh) has requested help. Please call them at 0977. Their message was: postnatal
+            0977 < Sorry you're having trouble Kdh Cba. Your help request has been forwarded to a support team member and they will call you soon.
+        """
+        self.runScript(script)
+
+        # Ignore second request from this CBA's location where there is training
+        # Total forwarded help requests will still be 4
+        script = """
+            0975 > help
+            0975 < Sorry you're having trouble Kafue Cba. Your help request has been forwarded to a support team member and they will call you soon.
+            """
+        self.runScript(script)
+
+
+        self.assertEqual(Message.objects.filter(direction='O',
+                                                text__contains='requested help',
+                                                contact=self.help_admin).count(), 1)
+        self.assertEqual(HelpRequest.objects.count(), 2)
+
+        # Stop the training session for KDH
+        script = """
+            0974 > Training stop kdh
+            """
+        self.runScript(script)
+        self.receiveAllMessages()
+        self.assertEqual(0, TrainingSession.objects.filter(location=self.kdh, is_on=True).count())
+
+        # Help request for KDH cba can now be forwarded again.
+        # Total forwarded help requests will be come 6
+        script = """
+            0975 > help
+            0974 < Kafue Cba (cba) at Kafue District Hospital(kdh) has requested help. Please call them at 0975.
+            0975 < Sorry you're having trouble Kafue Cba. Your help request has been forwarded to a support team member and they will call you soon.
+            """
+        self.runScript(script)
+
+        self.assertEqual(Message.objects.filter(direction='O',
+                                                text__contains='requested help',
+                                                contact=self.help_admin).count(), 2)
+        self.assertEqual(HelpRequest.objects.count(), 3)
 
     def _post_json(self, url, data):
         if not isinstance(data, basestring):
