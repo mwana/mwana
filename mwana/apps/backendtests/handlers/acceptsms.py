@@ -6,7 +6,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 
 class ForwardHandler(KeywordHandler):
     """
-    A simple app, that allows help admins to get the code for a facility
+    A quick simple app, for testing an smpp backend
     """
 
     keyword = "acceptsms|accept sms|aceptsms|acept sms"

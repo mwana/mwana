@@ -9,7 +9,7 @@ from mwana.apps.backendtests.models import ForwardedMessage
 
 class ForwardHandler(KeywordHandler):
     """
-    A simple app, that allows help admins to get the code for a facility
+    A quick simple app, for testing an smpp backend
     """
 
     keyword = "forwardsms|forward sms|fowardsms|foward sms|fowardsms|foward sms"
