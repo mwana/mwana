@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
+# from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 
 from rapidsms.models import Contact, Connection, Backend
@@ -15,14 +15,15 @@ from mwana import const
 
 logger = logging.getLogger(__name__)
 
-MAYI_HELP = """To report an expectant mother send:
-MAYI <EDD:DDMMYY> <MOTHERS_NAME> <MOTHERS_PHONE|X> <HIV_STATUS:P|N|U>"""
+MAYI_HELP = "To register a mother send: MAYI <EDD:DDMMYY> <MOTHERS_FIRSTNAME>"\
+            " <MOTHERS_LASTNAME> <MOTHERS_DOB> <MOTHERS_PHONE|X>"\
+            " <HIV_STATUS:P|N|U>"
 UNREGISTERED = "Please register as an HSA before submitting MAYI reports."\
                " Send JOIN for help on how to join."
 TOO_FEW_TOKENS = "It seems you have not sent enough data. Please put an X"\
                  " where there is no data or send MAYI to"\
                  "check the format you need to send."
-GARBLED_MSG = "Sorry, I don't understand: %s. Please send MAYI"\
+GARBLED_MSG = "Sorry, I don't understand: %s. Please send MAYI "\
               "to check the format."
 
 
@@ -63,6 +64,7 @@ class MayiHandler(KeywordHandler):
                 tokens['hiv_status'] = token_list[5]
                 tokens['name'] = ' '.join(list(tokens['first_name'],
                                                tokens['last_name']))
+
             return tokens, validate_tokens
         except:
             reformat_msg = GARBLED_MSG % text
@@ -94,19 +96,19 @@ class MayiHandler(KeywordHandler):
 
         errors = []
         # check that date is not too early or too late or not valid
-        date_error = "Sorry, I don't understand %s. Please"\
-                     " try a format like 311213" % tokens['edd']
+        date_error_msg = "Sorry, I don't understand %s. Please"\
+                     " try a format like 311213"
+        edd_error = date_error_msg % tokens['edd']
         try:
             date_field = forms.DateField(
                 input_formats=('%d%m%y', '%d/%m/%y', '%d-%m-%y',
                                '%d%m%Y', '%d/%m/%Y', '%d-%m-%Y'),
-                error_messages={'invalid': date_error}
-                # TODO: add validators for min max date
+                error_messages={'invalid': edd_error}
             )
             tokens['edd'] = date_field.clean(tokens['edd'])
             if tokens['edd'] < date.today():
                 early_date_msg = "Sorry, it seems that date has already"\
-                                 "passed. Plese enter a date in the next"\
+                                 "passed. Please enter a date in the next"\
                                  "9 months."
                 errors.append(early_date_msg)
             elif tokens['edd'] > (date.today() + timedelta(270)):
@@ -114,8 +116,30 @@ class MayiHandler(KeywordHandler):
                                 "expectant before registering for reminders."
                 errors.append(late_date_msg)
         except forms.ValidationError:
-            errors.append(date_error)
-            self.respond(date_error)
+            errors.append(edd_error)
+            self.respond(edd_error)
+
+        # validate date_of_birth
+        dob_error = date_error_msg % tokens['dob']
+        try:
+            dob_field = forms.DateField(
+                input_formats=('%d%m%y', '%d/%m/%y', '%d-%m-%y',
+                               '%d%m%Y', '%d/%m/%Y', '%d-%m-%Y',
+                               '%Y-%m-%d'),
+                error_messages={'invalid': dob_error}
+            )
+            # set default dob to 1990-01-01
+            if tokens['dob'].upper() == 'X':
+                tokens['dob'] = date(1990, 01, 01)
+            tokens['dob'] = dob_field.clean(tokens['dob'])
+            if tokens['dob'] > date.today():
+                future_date_msg = "Sorry, mothers cannot be born "\
+                                 "in the future. Please enter x if the date"\
+                                 " is unknown."
+                errors.append(future_date_msg)
+        except forms.ValidationError:
+            errors.append(dob_error)
+            self.respond(dob_error)
 
         # pass on name checking
         # check phone number
@@ -182,7 +206,8 @@ class MayiHandler(KeywordHandler):
             patient, created = Contact.objects.get_or_create(
                 name=data['name'], location=healthworker.location,
                 first_name=data['first_name'],
-                last_name=data['last_name']
+                last_name=data['last_name'],
+                date_of_birth=data['dob'],
             )
 
         patient_t = const.get_patient_type()
