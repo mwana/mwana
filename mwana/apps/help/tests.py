@@ -43,6 +43,7 @@ class TestApp(TestScript):
             0975 > join cba kdh 2 Kafue CBA
             0976 > join cba 403012 2 Central CBA
             0977 > join cba kdh 2 Kdh CBA
+            0978 > join kdh other worker 1234
         """
         self.runScript(script)
 
@@ -140,6 +141,8 @@ class TestApp(TestScript):
         script = """
             0971 > help
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
+            0978 > help
+            0978 < Sorry you're having trouble Other Worker. Your help request has been forwarded to a support team member and they will call you soon.
             """
         self.runScript(script)
 
@@ -173,7 +176,7 @@ class TestApp(TestScript):
         self.assertEqual(Message.objects.filter(direction='O',
                                                 text__contains='requested help',
                                                 contact=self.help_admin).count(), 5)
-        self.assertEqual(HelpRequest.objects.count(), 7)
+        self.assertEqual(HelpRequest.objects.count(), 8)
 
         # Stop the training session for KDH
         script = """
@@ -195,7 +198,7 @@ class TestApp(TestScript):
         self.assertEqual(Message.objects.filter(direction='O',
                                                 text__contains='requested help',
                                                 contact=self.help_admin).count(), 6)
-        self.assertEqual(HelpRequest.objects.count(), 8)
+        self.assertEqual(HelpRequest.objects.count(), 9)
 
     def testCBATrainingAwareHelpForwarding(self):
         # Start a training session for KDH but not central clinic
