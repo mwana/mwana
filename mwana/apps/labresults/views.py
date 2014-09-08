@@ -63,6 +63,14 @@ def lowercase_value(val):
     except:
         return None
 
+def normalize_sex(val):
+    """change LIMS 'Not Provided' or other values into acceptable values"""
+    accepted_values = ['m', 'M', 'f', 'F']
+    if val not in accepted_values:
+        return ''
+    else:
+        return val.lower()
+
 def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None):
     """extract a value from a data dictionary, which may or may not be present in the dictionary,
     and may also need to be transformed in some way"""
@@ -246,12 +254,13 @@ def accept_record (record, payload):
         'birthdate': dictval(record, 'dob', json_date),
         'child_age': dictval(record, 'child_age'),
         'child_age_unit': dictval(record, 'child_age_unit'),
-        'sex': dictval(record, 'sex', lowercase_value),
+        'sex': dictval(record, 'sex', normalize_sex),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
         'clinic_care_no': dictval(record, 'care_clinic_no'),
+        'phone': dictval(record, 'phone'),
     }
 
     #need to keep old record 'pristine' so we can check which fields have changed

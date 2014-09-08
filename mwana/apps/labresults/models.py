@@ -20,7 +20,7 @@ class SampleNotification(models.Model):
     count    = models.PositiveIntegerField()
     count_in_text = models.CharField(max_length=160, null=True, blank = True)
     date     = models.DateTimeField(default=datetime.utcnow)
-    
+
     def __unicode__(self):
         return "%s DBS Samples from %s on %s" % \
             (self.count, self.location.name, self.date.date())
@@ -102,6 +102,8 @@ class Result(models.Model):
 
     clinic_care_no = models.CharField(max_length=50, null=True, blank=True)   # could potentially be handled by requisition_id
 
+    phone = models.CharField(max_length=15, null=True, blank=True) # mother or guardians phone number
+
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
@@ -111,12 +113,12 @@ class Result(models.Model):
 
     result = models.CharField(choices=RESULT_CHOICES, max_length=1, blank=True)  #blank == 'not tested yet'
     result_detail = models.CharField(max_length=200, blank=True)   #reason for rejection or explanation of inconsistency
-    
+
     collected_on = models.DateField(null=True, blank=True)   #date collected at clinic
     entered_on = models.DateField(null=True, blank=True)     #date received at lab
     processed_on = models.DateField(null=True, blank=True)   #date tested at lab
     #all date fields are entered by lab -- not based on date result entered or such
-    
+
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
 
     #ancillary demographic data that can help matching up results back to patients
@@ -159,16 +161,16 @@ class Result(models.Model):
 
 class Payload(models.Model):
     """a raw incoming data payload from the DBS lab computer"""
-    
+
     incoming_date = models.DateTimeField()                  #date received by rapidsms
     auth_user = models.ForeignKey(User, null=True, blank=True) #http user used for authorization (blank == anon)
-    
+
     version = models.CharField(max_length=10, blank=True)    #version of extract script payload came from
     source = models.CharField(max_length=50, blank=True)     #source identifier (i.e., 'ndola')
     client_timestamp = models.DateTimeField(null=True, blank=True)      #timestamp on lab computer that payload was created
                                                                         #use to detect if lab computer clock is off
     info = models.CharField(max_length=50, blank=True)       #extra info about payload
-    
+
     parsed_json = models.BooleanField(default=False)        #whether this payload parsed as valid json
     validated_schema = models.BooleanField(default=False, help_text='If parsed'
                                            ', whether this payload validated '
@@ -178,10 +180,10 @@ class Payload(models.Model):
                                            'the data in this payload did NOT '
                                            'make it into Result or LabLog '
                                            'records!')
-    
+
     raw = models.TextField()        #raw POST content of the payload; will always be present, even if other fields
                                     #like version, source, etc., couldn't be parsed
-    
+
     def __unicode__(self):
         return 'from %s::%s at %s (%s bytes)' % (self.source if self.source else '-',
                                                  self.version if self.version else '-',
@@ -191,16 +193,16 @@ class Payload(models.Model):
 
 class LabLog(models.Model):
     """a logging message from the lab computer extract script"""
-    
+
     timestamp = models.DateTimeField(null=True, blank=True)
     message = models.TextField(blank=True)
     level = models.CharField(max_length=20, blank=True)
     line = models.IntegerField(null=True, blank=True)
-    
+
     payload = models.ForeignKey(Payload)       #payload this message came from
     raw = models.TextField(blank=True) #raw content of log -- present only if log info couldn't be
                                                   #parsed/validated
-    
+
     def __unicode__(self):
         return ('%s: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                                 self.message if len(self.message) < 20 else (self.message[:17] + '...'))) \
