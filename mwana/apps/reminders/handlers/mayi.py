@@ -107,12 +107,12 @@ class MayiHandler(KeywordHandler):
             )
             tokens['edd'] = date_field.clean(tokens['edd'])
             if tokens['edd'] < date.today():
-                early_date_msg = "Sorry, it seems that date has already"\
+                early_date_msg = "Sorry, it seems that date has already "\
                                  "passed. Please enter a date in the next"\
-                                 "9 months."
+                                 " 9 months."
                 errors.append(early_date_msg)
             elif tokens['edd'] > (date.today() + timedelta(270)):
-                late_date_msg = "Sorry, the mother needs to be already"\
+                late_date_msg = "Sorry, the mother needs to be already "\
                                 "expectant before registering for reminders."
                 errors.append(late_date_msg)
         except forms.ValidationError:
