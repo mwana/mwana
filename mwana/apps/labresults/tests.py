@@ -22,6 +22,8 @@ from mwana.apps.labresults import tasks
 from mwana.apps.labresults import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.payloads import UNVERIFIED
+from mwana.apps.labresults.testdata.payloads import VERIFIED
 from mwana.apps.labresults.testdata.reports import *
 
 
@@ -908,6 +910,56 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertEqual(result1.child_age_unit, 'weeks')
         self.assertFalse(result2.verified)
         self.assertEqual(result2.child_age_unit, 'days')
+
+    def test_results_verified_updated(self):
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        type = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        Location.objects.create(name='Clinic', slug='202020',
+                                type=type)
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        
+        now = datetime.datetime.now()
+        self._post_json(reverse('accept_results'), UNVERIFIED)        
+
+        self.assertEqual(labresults.Result.objects.count(), 3)
+        result1 = labresults.Result.objects.get(sample_id="10-09999")
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result3 = labresults.Result.objects.get(sample_id="10-09997")
+        
+
+        
+        self.assertTrue(result1.verified == False)
+        self.assertTrue(result2.verified == None)
+        self.assertTrue(result3.verified == False)
+        # @type result1 Result
+        self.assertTrue(result1.arrival_date == None)
+        # @type result2 Result
+        self.assertTrue(result2.arrival_date.year == now.year)
+        self.assertTrue(result2.arrival_date.month == now.month)
+        self.assertTrue(result2.arrival_date.day == now.day)
+        # @type result3 Result
+        self.assertTrue(result3.arrival_date == None)
+
+        self._post_json(reverse('accept_results'), VERIFIED)
+
+        self.assertEqual(labresults.Result.objects.count(), 3)
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result3 = labresults.Result.objects.get(sample_id="10-09997")
+        result1 = labresults.Result.objects.get(sample_id="10-09999")
+
+
+        self.assertTrue(result1.verified == True)# just being explicit
+        self.assertTrue(result2.verified == True)
+        self.assertTrue(result3.verified == True)
+
+        self.assertTrue(labresults.Result.objects.filter(arrival_date__year=now.year,
+        arrival_date__month=now.month,
+        arrival_date__day=now.day).count() == 3)
+
 
     def test_payload_missing_fac(self):
         user = User.objects.create_user(username='adh', email='',

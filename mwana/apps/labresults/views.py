@@ -260,6 +260,8 @@ def accept_record (record, payload):
         cant_save('sync_status not an allowed value')
         return False
     if new_record.result:
+        # @type new_record Result
+        if new_record.verified is None or new_record.verified == True:
             new_record.arrival_date = new_record.payload.incoming_date
     if not old_record:
         if rec_status == 'update':
