@@ -410,13 +410,15 @@ def mark_long_pending_results_as_obsolete():
 
     # based on arrival_date
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
-                                     arrival_date__lt=last_month):
+                                     arrival_date__lt=last_month).\
+                                     exclude(verified=False):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
     # based on processed_on
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
-                                     processed_on__lt=two_months_ago):
+                                     processed_on__lt=two_months_ago).\
+                                     exclude(verified=False):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
