@@ -63,6 +63,7 @@ class App (rapidsms.apps.base.AppBase):
             uv.response = message.text
             uv.response_date = datetime.today()
             uv.save()
-        return bool(message.text and (
-                    message.text.lower().startswith('yes')
-                    or message.text.lower().startswith('no') ))
+            msg_text = "%s " % message.text.lower()
+        return bool(uv_records and message.text and (
+                    msg_text.startswith('yes ')
+                    or msg_text.startswith('no ') ))
