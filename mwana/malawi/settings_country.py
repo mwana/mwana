@@ -33,9 +33,11 @@ GROWTHMONITORING_SETTINGS = {'DEFAULT_LANG': 'en'}
 # the size of all outgoing messages by 2 chars here
 MAX_SMS_LENGTH = 158
 
+# These correspond to the sample id suffixes in the labresults.result
 LAB_NAME = {'1': "KCH DNA-PCR LAB", '2': "QECH DNA-PCR LAB",
             '3': "MCH DNA-PCR LAB", '4': "MDH DNA-PCR LAB",
-            '6': "DREAM-BT DNA-PCR LAB", '8': "Zomba DNA-PCR LAB", }
+            '5': "PIH DNA-PCR LAB", '6': "DREAM-BT DNA-PCR LAB",
+            '8': "Zomba DNA-PCR LAB", }
 
 COUNTRY_CODE = '+265'
 
