@@ -62,8 +62,8 @@ class MayiHandler(KeywordHandler):
                 tokens['dob'] = token_list[3]
                 tokens['phone'] = token_list[4]
                 tokens['hiv_status'] = token_list[5]
-                tokens['name'] = ' '.join(list(tokens['first_name'],
-                                               tokens['last_name']))
+                tokens['name'] = ' '.join([tokens['first_name'],
+                                           tokens['last_name']])
 
             return tokens, validate_tokens
         except:
@@ -97,12 +97,13 @@ class MayiHandler(KeywordHandler):
         errors = []
         # check that date is not too early or too late or not valid
         date_error_msg = "Sorry, I don't understand %s. Please"\
-                     " try a format like 311213"
+                         " try a format like 311213"
         edd_error = date_error_msg % tokens['edd']
         try:
             date_field = forms.DateField(
                 input_formats=('%d%m%y', '%d/%m/%y', '%d-%m-%y',
-                               '%d%m%Y', '%d/%m/%Y', '%d-%m-%Y'),
+                               '%d%m%Y', '%d/%m/%Y', '%d-%m-%Y',
+                               '%Y-%m-%d'),
                 error_messages={'invalid': edd_error}
             )
             tokens['edd'] = date_field.clean(tokens['edd'])
@@ -134,8 +135,8 @@ class MayiHandler(KeywordHandler):
             tokens['dob'] = dob_field.clean(tokens['dob'])
             if tokens['dob'] > date.today():
                 future_date_msg = "Sorry, mothers cannot be born "\
-                                 "in the future. Please enter x if the date"\
-                                 " is unknown."
+                                  "in the future. Please enter x if the date"\
+                                  " is unknown."
                 errors.append(future_date_msg)
         except forms.ValidationError:
             errors.append(dob_error)
@@ -179,7 +180,6 @@ class MayiHandler(KeywordHandler):
     def handle(self, text):
         """Handle the mayi submission."""
         # only allow registered users to submit
-
         if self.msg.connections[0].contact is not None:
             healthworker = self.msg.connections[0].contact
         else:
@@ -188,7 +188,7 @@ class MayiHandler(KeywordHandler):
 
         # get the event
         event = self._get_event('cooc')
-       # get the message parts
+        # get the message parts
         tokens, validate_tokens = self._get_tokens(text)
 
         # only proceed if all is ok
