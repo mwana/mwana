@@ -93,7 +93,6 @@ class MayiHandler(KeywordHandler):
 
     def _validate_tokens(self, tokens):
         """ Check that tokens sent are valid"""
-
         errors = []
         # check that date is not too early or too late or not valid
         date_error_msg = "Sorry, I don't understand %s. Please"\
@@ -130,12 +129,13 @@ class MayiHandler(KeywordHandler):
                 error_messages={'invalid': dob_error}
             )
             # set default dob to 1990-01-01
-            if tokens['dob'].upper() == 'X':
+            blank_dates = ['X', '']
+            if tokens['dob'].upper() in blank_dates:
                 tokens['dob'] = date(1990, 01, 01)
             tokens['dob'] = dob_field.clean(tokens['dob'])
             if tokens['dob'] > date.today():
-                future_date_msg = "Sorry, mothers cannot be born "\
-                                  "in the future. Please enter x if the date"\
+                future_date_msg = "Sorry, mothers cannot be born in"\
+                                  " the future. Please enter x if the date"\
                                   " is unknown."
                 errors.append(future_date_msg)
         except forms.ValidationError:
