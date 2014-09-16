@@ -130,7 +130,8 @@ class MayiHandler(KeywordHandler):
                 error_messages={'invalid': dob_error}
             )
             # set default dob to 1990-01-01
-            if tokens['dob'].upper() == 'X':
+            blank_dates = ['X', '']
+            if tokens['dob'].upper() in blank_dates:
                 tokens['dob'] = date(1990, 01, 01)
             tokens['dob'] = dob_field.clean(tokens['dob'])
             if tokens['dob'] > date.today():
