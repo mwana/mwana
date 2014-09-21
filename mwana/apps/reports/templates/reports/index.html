@@ -297,6 +297,7 @@ results delivered via SMS to date<br>{{site.births}} births registered to date\n
 <br>{{site.results_retrieved_this_month}} Results received\n\
 <br>{{site.births_this_month}} births registered this month<br><br>'}); {% else %}data.push({
         province:'{{site.province}}', district:'{{site.district}}',
+        province_id:'{{site.province_id}}', district_id:'{{site.district_id}}',
         name:'{{site.name}}', workers:{{site.workers}}, cbas:{{site.cbas}},
         results_retrieved:{{site.results_retrieved}}, results_negative:{{site.results_negative}},
         results_positive:{{site.results_positive}},results_rejected:{{site.results_rejected}},
