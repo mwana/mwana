@@ -122,7 +122,7 @@ def get_district_facility_zone(location):
     location_parents_types = get_location_and_parents_types(location)
     facility = location_parents_types.get('rural_health_centre', None)
     if not facility:
-        location_parents_types.get('urban_health_centre', None)
+        facility = location_parents_types.get('urban_health_centre', None)
 
     zone = location_parents_types.get('zone', None)
     district = location_parents_types.get('districts', None)
