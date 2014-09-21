@@ -475,7 +475,7 @@ def get_response(message):
         except IndexError:
             return None
         else:
-            return message
+            return message.text
     else:
         return session.message_outgoing.text if session.message_outgoing else ""
 
