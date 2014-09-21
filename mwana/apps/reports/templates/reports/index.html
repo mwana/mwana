@@ -131,7 +131,7 @@
                 </div> </td>
             <td  valign="top" style="border: 0px">
                 <div class="module" id="toupdate">
-                    <div id="mousemovemessage">                        
+                    <div id="mousemovemessage">
                     </div>
                     <div id="spacer"><br>&nbsp;</div>
                     <div id="map3" style=" position: relative;height: 400px; width: 400px;padding-top: 1em;">
@@ -144,7 +144,7 @@
 </table>
 <div style="display: none">
     <div id="chart-main-container"  class="module">
-        <div id="container" style="height: 400px; margin: 0 auto">Graph not available. </div>        
+        <div id="container" style="height: 400px; margin: 0 auto">Graph not available. </div>
     </div>
 </div>
 
@@ -405,9 +405,9 @@ function drawLabelsOnShapes(str, loc_type){
         areas = document.getElementsByName('districts_coords')[0].areas;
         canvas = document.getElementsByTagName('canvas')[2];
     }
-    
+
     for(var i=0; i < areas.length; i++){
-        
+
         var id = areas[i].id;
         var numOfUsers = users(id);
         var center = getPolygonCenter(id);
@@ -438,7 +438,7 @@ function updateDisplay(str, location_type){
     if(document.getElementById(str) != null){
         location_name = document.getElementById(str).getAttribute('name');
     }
-    
+
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         if((location_type === "Province" && datum.province_id === str) ||
@@ -458,8 +458,8 @@ function updateDisplay(str, location_type){
             }
             else if(location_type === "Country" && districts.indexOf(datum.province) === -1){
                 districts.push(datum.province)
-            }        
-        
+            }
+
             workers = workers + datum.workers
             cbas = cbas + datum.cbas
             results_retrieved = results_retrieved + datum.results_retrieved
@@ -485,7 +485,7 @@ function updateDisplay(str, location_type){
     }else{
         toDisplay.push("<h3>" + location_name + " " + location_type +"</h3>")
     }
-    
+
     if(districts.length > 1){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
@@ -498,14 +498,14 @@ function updateDisplay(str, location_type){
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff</a> and "
                 + cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> are registered."
-        }else if(location_type === "Country"){            
+        }else if(location_type === "Country"){
             district_fragment = ", within <a onclick='showGrowthChart()'>" + mwana_years + "</a>, Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
             contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\")'>clinic staff</a> and " + cbas
                 + " <a onclick='drawLabelsOnShapes(\"cbas\")'>Comminuty Based Agents</a> registered."
         }
-        
+
     }else if(districts.length == 1){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
@@ -518,7 +518,7 @@ function updateDisplay(str, location_type){
             district_fragment = " Mwana has been deployed to 1 province namely, " + districts[0]
             contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
         }
-        
+
     }else if(districts.length == 0){
         if(location_type === "Province"){
             district_fragment = " Province Mwana hasn't been deployed yet."
@@ -532,7 +532,7 @@ function updateDisplay(str, location_type){
         perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
         perc_pos+"% Positive|"+perc_neg+"% Negative|"+
         perc_rej+"% Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
-    
+
     toDisplay.push("<p>In " + location_name + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
@@ -618,20 +618,9 @@ $(function () {
                     }
                 }
             },
-            plotOptions: {
-                spline: {
-                    marker: {
-                        radius: 4,
-                        lineColor: '#666666',
-                        lineWidth: 1
-                    }, dataLabels: {
-                        enabled: true
-                    },
-                    enableMouseTracking: false
-                }
-            },
+            
             legend: {
-                enabled: false
+                enabled: true
             },
             series: [
                 {% for item in report_data %}
@@ -640,10 +629,40 @@ $(function () {
                     marker: {
                         symbol: 'diamond'
                     },
-                    data: {{ item.value }}
+                    {% if forloop.counter0 %}
+                            data: [{% for x in item.value %} {dataLabels: { enabled: true, borderRadius: 5, backgroundColor: 'rgba(252, 255, 197, 0.7)',  borderWidth: 1, borderColor: '#AAA'}, y: {{x}}}, {% endfor %}]
+                     {% else %}
+                            data: {{ item.value }}
+                    {% endif %}
+
                 },
                 {% endfor %}
-            ]
+            ],
+            plotOptions: {
+                spline: {
+                    marker: {
+                        radius: 4,
+                        lineColor: '#666666',
+                        lineWidth: 1
+                    }, dataLabels: {
+                        enabled: true,
+                        borderRadius: 5,
+                        backgroundColor: 'rgba(208, 229, 245, 0.7)',
+                        borderWidth: 1,
+                        borderColor: '#AAA',
+                        y: -6
+                    },
+                    enableMouseTracking: false
+                }
+            }
+
+        });
+        window.chart = chart;
+        $.each(chart.series[0].data, function(i, point) {
+            if(point.x < 3) {
+                point.dataLabel.attr({x: 30 + point.dataLabel.x});
+                point.dataLabel.attr({enabled:false});
+            }
         });
 
     });

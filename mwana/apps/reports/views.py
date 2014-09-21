@@ -645,7 +645,7 @@ def home(request):
                                 {'sites': sites,
                                  'unsupported_districts': unsupported_districts,
                                  "x_axis": time_ranges,
-                                 "title": "'Mwana Supported Sites by Year'",
+                                 "title": "'Mwana Active Sites by Year'",
                                  "sub_title": "'2010 to %s'"  % today.year,
                                  "label_y_axis": "'# of Facilities'",
                                  "report_data": report_data,

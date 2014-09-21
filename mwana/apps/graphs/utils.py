@@ -55,23 +55,33 @@ class GraphServive:
         Uses plain SQL for performance/simplicity reasons
         """
         sql = '''
-        SELECT extract(year FROM result_sent_date)::int AS "year",
-        COUNT( DISTINCT clinic_id) AS "count" FROM labresults_result
-        WHERE result_sent_date is NOT NULL
-        GROUP BY "year"
-        ORDER BY "year";
+            select eid."year", eid.eid_count, reminders.remindmi_count  FROM (SELECT extract(year FROM date_logged)::int AS "year",
+            count( DISTINCT clinic.id) as remindmi_count FROM reminders_patientevent
+            JOIN rapidsms_contact on rapidsms_contact.id = reminders_patientevent.patient_id
+            JOIN locations_location as "zone" on zone.id = rapidsms_contact.location_id
+            JOIN locations_location as "clinic" on clinic.id = zone.parent_id
+            GROUP BY "year") reminders
+
+            FULL JOIN (
+
+            SELECT extract(year FROM result_sent_date)::int AS "year",
+            count( DISTINCT clinic_id) AS "eid_count" FROM labresults_result
+            WHERE result_sent_date is NOT NULL
+            GROUP BY "year") eid on eid."year" = reminders."year"
         '''
         cursor = connection.cursor()
         cursor.execute(sql)
 
         rows = cursor.fetchall()        
         time_ranges = []
-        values = []
+        
+        data = {"Results 160": [], "RemindMi": []}
         for row in rows:
             time_ranges.append(row[0])
-            values.append(int(row[1]))
+            data["Results 160"].append(int(row[1]))
+            data["RemindMi"].append(int(row[2]))
 
-        return time_ranges, {"# of Facilities": values}
+        return time_ranges, data
 
     def get_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
