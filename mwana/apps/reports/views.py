@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.graphs.utils import GraphServive
 from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
 from mwana.apps.reports.utils.facilityfilter import get_rpt_districts
 from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
@@ -22,10 +23,6 @@ from rapidsms.models import Contact
 from mwana.apps.labresults.models import Result
 from mwana.const import get_district_worker_type, get_province_worker_type, get_dbs_printer_type, get_clinic_worker_type, get_cba_type
 from django.core.cache import cache
-
-
-
-
 
 
 def get_int(val):
@@ -61,6 +58,10 @@ def text_date(text):
         return date(int(a), int(b), int(c))
     else:
         return date(int(c), int(b), int(a))
+
+
+class Expando:
+    pass
 
 
 @require_GET
@@ -564,17 +565,46 @@ def home(request):
             login.save()
             return redirect('/admin/password_change')
 
-    today = datetime.today().date()
+    today = date.today()
     
-    records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
+    growth_data = cache.get('growth_data')
+    time_ranges = cache.get('time_ranges')
+    if growth_data and time_ranges:
+        report_data =  growth_data
+        time_ranges =  time_ranges
+    else:
+        service = GraphServive()
+        report_data = []
+        time_ranges, data = service.get_yearly_supported_sites()
+
+        for k, v in data.items():
+            rpt_object = Expando()
+            rpt_object.key = k.title()
+            rpt_object.value = v
+            report_data.append(rpt_object)
+
+        cache.set('growth_data', report_data, 60 * 60)  # 60 min
+        cache.set('time_ranges', time_ranges, 60 * 60)  # 60 min
+    
+    mwana_years = ""
+    if time_ranges:
+        results160_start_date = date(2010, 6, 14)
+        days = (today - results160_start_date).days
+        years = int(days / 365.25)
+        months = int((days % 365.25) / 30.4375)
+        if years:
+            mwana_years = "%s years" % years
+        if months:
+            mwana_years = "%s and %s months" %(mwana_years, months)
+            
     sites = []
-    
     unsupported_districts = [str(loc.slug) for loc in Location.objects.filter(type__slug='districts').exclude(location__supportedlocation__supported=True)]
-    
+
     cached = cache.get('temp_sites')
     if cached:
         sites = cached
     else:
+        records = Location.objects.filter(supportedlocation__supported=True).exclude(parent__parent=None)
         for record in sorted(records, key = lambda record: record.parent.parent.name.lower()):
             site = Site()
             site.point = record.point
@@ -612,12 +642,12 @@ def home(request):
 
 
     return render_to_response('reports/index.html',
-        {
-         'today': today,
-         'adminEmail': get_admin_email_address(),
-         'userHasNoAssingedFacilities': False,
-         'formattedtoday': today.strftime("%d %b %Y"),
-         'formattedtime': datetime.today().strftime("%I:%M %p"),
-         'sites': sites,         
-         'unsupported_districts': unsupported_districts,
-     }, context_instance=RequestContext(request))
+                                {'sites': sites,
+                                 'unsupported_districts': unsupported_districts,
+                                 "x_axis": time_ranges,
+                                 "title": "'Mwana Supported Sites by Year'",
+                                 "sub_title": "'2010 to %s'"  % today.year,
+                                 "label_y_axis": "'# of Facilities'",
+                                 "report_data": report_data,
+                                 "mwana_years": mwana_years,
+                             }, context_instance=RequestContext(request))

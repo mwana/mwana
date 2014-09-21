@@ -16,7 +16,6 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reminders.models import PatientEvent
-from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Backend
 
 
@@ -50,6 +49,29 @@ class GraphServive:
                 categories.append(str(row[-1]))
 
         return categories, transport, processing, delays, retrieving
+
+    def get_yearly_supported_sites(self):
+        """
+        Uses plain SQL for performance/simplicity reasons
+        """
+        sql = '''
+        SELECT extract(year FROM result_sent_date)::int AS "year",
+        COUNT( DISTINCT clinic_id) AS "count" FROM labresults_result
+        WHERE result_sent_date is NOT NULL
+        GROUP BY "year"
+        ORDER BY "year";
+        '''
+        cursor = connection.cursor()
+        cursor.execute(sql)
+
+        rows = cursor.fetchall()        
+        time_ranges = []
+        values = []
+        for row in rows:
+            time_ranges.append(row[0])
+            values.append(int(row[1]))
+
+        return time_ranges, {"# of Facilities": values}
 
     def get_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_dbs_facilities(province_slug, district_slug, facility_slug)

@@ -14,8 +14,10 @@
         margin: 0.5em auto 0;
         width: 90%;
     }
+    /*    .ui-dialog { z-index: 21000 !important ;}*/
 </style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 {% endblock %}
 
 {% block content %}
@@ -140,7 +142,11 @@
         </tr>
     </tbody>
 </table>
-
+<div style="display: none">
+    <div id="chart-main-container"  class="module">
+        <div id="container" style="height: 400px; margin: 0 auto">Graph not available. </div>        
+    </div>
+</div>
 
 
 <script type="text/javascript">
@@ -168,6 +174,9 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery.maphilight.min.js" ></script>
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/maplabel.min.js" ></script>
 <script src="https://maps-api-ssl.google.com/maps/api/js?v=3.7&amp;key=AIzaSyCRNwriAGXx8oi0a6E8gIeo36MCyBmjKNk&amp;sensor=false"></script>
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
 
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/oms.min.js" ></script>
 <script type="text/javascript" >
@@ -353,8 +362,8 @@ function getNumberOfWorkers(str){
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         if((datum.province_id === str) ||
-                (datum.district_id === str)
-                ){
+            (datum.district_id === str)
+    ){
             workers = workers + datum.workers
 
         }
@@ -366,8 +375,8 @@ function getNumberOfCommunityWorkers(str){
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         if((datum.province_id === str) ||
-                (datum.district_id === str)
-                ){
+            (datum.district_id === str)
+    ){
             cbas = cbas + datum.cbas
 
         }
@@ -470,6 +479,7 @@ function updateDisplay(str, location_type){
     district_fragment = ""
     clinic_fragment = ""
     contact_fragment = ""
+    var mwana_years = "{{ mwana_years }}";
     if(location_type === "Country"){
         toDisplay.push("<h2>Zambia</h2>")
     }else{
@@ -484,12 +494,12 @@ function updateDisplay(str, location_type){
             contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff<a/> and " +
                 cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> registered."
         }else if(location_type === "District"){
-            district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
+            district_fragment = " District Mwana has been deployed to " + (districts.length) + " facilities namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff</a> and "
                 + cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> are registered."
         }else if(location_type === "Country"){            
-            district_fragment = " Mwana has been deployed to " +(districts.length) + " provinces namely, "
+            district_fragment = ", within <a onclick='showGrowthChart()'>" + mwana_years + "</a>, Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
             contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\")'>clinic staff</a> and " + cbas
@@ -579,4 +589,88 @@ function updateDisplay(str, location_type){
 <script type="text/javascript">
 showNationalData();
 </script>
+<script type="text/javascript">
+$(function () {
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                type: 'spline',
+            },
+            title: {
+                text: {% autoescape off %} {{ title }} {% endautoescape %}
+            },
+            subtitle: {
+                text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
+            },
+            xAxis: {
+                categories: {% autoescape off %} {{ x_axis}} {% endautoescape %}
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value
+                    }
+                }
+            },
+            plotOptions: {
+                spline: {
+                    marker: {
+                        radius: 4,
+                        lineColor: '#666666',
+                        lineWidth: 1
+                    }, dataLabels: {
+                        enabled: true
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            series: [
+                {% for item in report_data %}
+                {
+                    name: '{{ item.key}}',
+                    marker: {
+                        symbol: 'diamond'
+                    },
+                    data: {{ item.value }}
+                },
+                {% endfor %}
+            ]
+        });
+
+    });
+
+});
+
+
+
+function showGrowthChart() {
+    $($('#chart-main-container')[0].outerHTML.replace('chartType', 'chartTypeX')).dialog(
+    {
+        draggable: true,
+        resizable: true,
+        width: 780,
+        modal: true,
+        show: 'slide',
+        hide: 'slide',
+        title: 'Mwana Growth Chart',
+        buttons: {
+            Ok: function() {
+
+                $(this).dialog("close");
+            }
+        }
+
+    }
+);}
+</script>
 {% endblock %}
+
