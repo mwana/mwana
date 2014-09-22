@@ -1,7 +1,7 @@
 {% extends  "layout.html" %}
 
 {% block title %}Help Messages - {{ block.super }}{% endblock %}
-{% load_selectable_tags %}
+{% load selectable_tags %}
 {% block stylesheets %}
 {{ block.super }}
 <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}smgl/css/statistics.css" />
@@ -12,7 +12,7 @@
 
 
 {% block javascripts %}
-  {% include jquery_theme %}
+
   <script>
       $(function() {
         $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
