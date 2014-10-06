@@ -44,20 +44,20 @@ class App (rapidsms.apps.base.AppBase):
         """
         contact = message.contact
         if not contact:
-            return
+            return        
 
-        if message.text and message.text.upper().strip() == 'NO':
+        uv_records = UserVerification.objects.filter(contact=contact,
+                                                     facility=contact.location, request__in=['1', '2'],
+                                                     verification_freq__in=['A', 'F'],
+                                                     responded=False)
+
+        if uv_records and message.text and message.text.upper().strip() == 'NO':
             contact.is_active = False
             contact.save()
             conn = Connection.objects.get(contact=contact)
             conn.contact = None
             conn.save()
 
-
-        uv_records = UserVerification.objects.filter(contact=contact,
-                                                     facility=contact.location, request__in=['1', '2'],
-                                                     verification_freq__in=['A', 'F'],
-                                                     responded=False)
         for uv in uv_records:
             uv.responded = True
             uv.response = message.text
