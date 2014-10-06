@@ -31,7 +31,6 @@ class App (rapidsms.apps.base.AppBase):
     Responds with error messages relevant to the user
     """
 
-
     def handle (self, message):
         text = message.text.strip()
         contact = message.contact
@@ -76,6 +75,11 @@ class App (rapidsms.apps.base.AppBase):
                                 "Send the keyword HELP if you need to be helped." % contact.name)
                 return True
 
+
+        skip_words = ["yes", "no", "thanks", "thank you"]
+        for word in skip_words:
+            if text.lower() == word or text.lower().startswith('%s ' % word):
+                return True
 
         if get_clinic_worker_type() in contact.types.all():
             message.respond(CLINIC_DEFAULT_RESPONSE)

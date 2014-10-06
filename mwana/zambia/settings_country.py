@@ -27,12 +27,12 @@ INSTALLED_APPS.append("mwana.apps.websmssender")
 INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
 INSTALLED_APPS.append("mwana.apps.birthcertification")
-INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.webusers")
 INSTALLED_APPS.append("mwana.apps.graphs")
 INSTALLED_APPS.append("mwana.apps.surveillance")
 INSTALLED_APPS.append("mwana.apps.zm_languages")
 INSTALLED_APPS.append("mwana.apps.reminders.experimental")
+INSTALLED_APPS.append("mwana.apps.errorhandling")
 
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
