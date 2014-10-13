@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.filteredlogs.messagefilter import MessageFilter
 from datetime import date
 import logging
 
@@ -41,7 +42,7 @@ Message:
 
     for log in WebSMSLog.objects.exclude(admins_notified=True).order_by('pk')[:30]:
         logs.append(body_template % ({'date_sent': log.date_sent,
-                    'sender': log.sender, 'message': log.message,
+                    'sender': log.sender, 'message': MessageFilter.get_filtered_message(log.message),
                     'workertype': log.workertype, 'location': log.location if log.location else "Not Specified" ,
                     'recipients_count': log.recipients_count
                     }))
