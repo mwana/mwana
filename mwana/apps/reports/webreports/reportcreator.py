@@ -556,8 +556,9 @@ class Results160Reports:
         contacts = Contact.active.filter(Q(location__in=locations)|
         Q(location__parent__in=locations) | Q(location__location__in=locations)
         |Q(location__location__location__in=locations)
-        ).exclude(connection=None).distinct().order_by('location__parent__parent__name').\
-        order_by('location__parent__name')
+        ).exclude(connection=None).distinct().order_by('location__parent__parent__name',
+        'location__parent__name', 'location__name')
+        
         if not page:
             page = 1
 
