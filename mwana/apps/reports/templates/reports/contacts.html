@@ -4,14 +4,16 @@
 
 {% block title %}SMS Users - {{ block.super }}{% endblock %}
 
+{% block stylesheets %}
+{{ block.super }}
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
+{% endblock %}
+
 {% block javascripts %}
 {{ block.super }}
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
-{% endblock %}
-
-{% block stylesheets %}
-{{ block.super }}
-
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js" ></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/chosen.jquery.min.js" ></script>
 {% endblock %}
 
 {% block content %}
@@ -20,8 +22,8 @@
 You currently don't belong to any group for viewing reports. Contact the system administrator at <a href="mailto:{{adminEmail}}">{{adminEmail}}</a>  for help.
 {%else%}
 
-    <div class="left">
-        <form name="getValues" action="" method="GET">
+<div class="left">
+    <form name="getValues" action="" method="GET">
         <div class="module">
 
 
@@ -29,91 +31,112 @@ You currently don't belong to any group for viewing reports. Contact the system 
 
 
             <h2>SMS Contacts</h2>
-            <br>
-
-                 {% if region_selectable %}
-                <p>Select Region: &nbsp;&nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
-                    {{rpt_provinces}}
-                    {% endautoescape %}&nbsp;
-                    or District:{% autoescape off %}
-                    {{rpt_districts}}
-                    {% endautoescape %}&nbsp;
-                    or Facility:{% autoescape off %}
-                    {{rpt_facilities}}
-                    {% endautoescape %}&nbsp;
-
-                    {% if is_report_admin %}
-                <p>Select Implementer:
-                    {% autoescape off %}
-                    {{rpt_group}}
-                    {% endautoescape %}
-                    &nbsp;
+            <table border="0" width="100%">
+                <thead>
+                <th colspan="3">Location</th>
+                <th colspan="2"></th>
+                </thead>
+                <tbody>
+                <thead>
+                <th>Province</th>
+                <th>District</th>
+                <th>Facility</th>
+                <th>Implementing Group</th>
+                <th></th>
+                </thead>
+                <tr>
+                    {% if region_selectable %}
+                    <td>{% autoescape off %}
+                        {{rpt_provinces}}
+                        {% endautoescape %}
+                    </td>
+                    <td>{% autoescape off %}
+                        {{rpt_districts}}
+                        {% endautoescape %}
+                    </td>
+                    <td>{% autoescape off %}
+                        {{rpt_facilities}}
+                        {% endautoescape %}
+                    </td>
+                    {% else %}
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     {%endif%}
-                    {%endif%}
+                    <td>{% if is_report_admin %}
+                        {% autoescape off %}
+                        {{rpt_group}}
+                        {% endautoescape %}
+                        {%endif%}
+                    </td>
+                    <td>
+                        <input type="submit" value=" Ok " name="SubmitValues" /></td>
+                </tr>
+                </tbody>
+            </table>
+            <p></p>
+            
+            <div>
 
-                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
 
-
-            <hr>
-           <div>
-
-
-            <h3>
-                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                <h3>
+                    Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
                 </h3>
 
 
-       <table width="100%">
-                {% for record in facility_contacts %}
-                <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                <table width="100%">
+                    {% for record in facility_contacts %}
+                    <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
 
-                    {% for column in record %}
-                    {% if column %}
-                    {% if not forloop.parentloop.counter0 %}
-                    <td ><u>{{ column }}</u></td>
-                    {% else %}
-                    <td >{{ column }}</td>
+                        {% for column in record %}
+                        {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                        <td ><u>{{ column }}</u></td>
+                        {% else %}
+                        <td >{{ column }}</td>
 
-                    {% endif %}
-                    {% else %}
-                    {% if forloop.parentloop.last %}
-                    <td><b> 0 </b></td>
-                    {% else %}
-                    <td> 0 </td>
-                    {% endif %}
-                    {% endif %}
+                        {% endif %}
+                        {% else %}
+                        {% if forloop.parentloop.last %}
+                        <td><b> 0 </b></td>
+                        {% else %}
+                        <td> 0 </td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
-            </table>
+                </table>
 
 
+            </div>
+            <div class="clear-hack"></div>
         </div>
-        <div class="clear-hack"></div>
-    </div>
 
         <div class="pagination">
-    <span class="step-links">
-        {% if messages_has_previous %}
-            <input type="submit" value="Previous" name="navigate" />
-        {% endif %}
+            <span class="step-links">
+                {% if messages_has_previous %}
+                <input type="submit" value="Previous" name="navigate" />
+                {% endif %}
 
-        <span class="current">
-            Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
-        </span>
+                <span class="current">
+                    Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+                </span>
 
-        {% if messages_has_next %}
-        <input type="submit" value="Next" name="navigate" size="8" />
-        {% endif %}
-        <input type="hidden" name="page" value={{ messages_number }}>
-    </span>
+                {% if messages_has_next %}
+                <input type="submit" value="Next" name="navigate" size="8" />
+                {% endif %}
+                <input type="hidden" name="page" value={{ messages_number }}>
+            </span>
+
+        </div>
+    </form>
 
 </div>
-        </form>
-
-</div>
+<script type="text/javascript">
+    $("#rpt_group").chosen();
+</script>
 {% endif %}
 {% endblock %}
 
