@@ -96,34 +96,45 @@ You currently don't belong to any group for viewing reports. Contact the system 
             <h2 id="Results160">Results160 Reports in period {{fstartdate}} to {{fenddate}}</h2>
             <br>
             <form name="getValues" action="" method="GET">
-                <p>Select Period:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type="text" name="startdate" class="datefield" size="9" value={{ fstartdate }} />
-                           to
-                           <input type="text" name="enddate" class="datefield" size="9" value={{ fenddate }} />
-                           {% if region_selectable %}
-                <p>Select Region: &nbsp;
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
+
+                <table border="1" width="100%">
+            <thead>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Province</th>
+            <th>District</th>
+            <th>Facility</th>
+            <th>Implementer</th>
+            <th></th>
+            </thead>
+            <tbody>            
+            <tr>
+                <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstartdate }}' placeholder='{{ fstartdate }}' /></td>
+                <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value='{{ fenddate }}'  placeholder='{{ fenddate }}' /></td>
+                <td>{% autoescape off %}
                     {{rpt_provinces}}
-                    {% endautoescape %}&nbsp;
-                    or District:{% autoescape off %}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
                     {{rpt_districts}}
-                    {% endautoescape %}&nbsp;
-                    or Facility:{% autoescape off %}
+                    {% endautoescape %}
+                </td>
+                <td>{% autoescape off %}
                     {{rpt_facilities}}
                     {% endautoescape %}
-
-                    {% if is_report_admin %}
-                <p>Select Implementer:
+                </td>
+                <td>{% if is_report_admin %}
                     {% autoescape off %}
                     {{rpt_group}}
                     {% endautoescape %}
-                    &nbsp;
-                    {%endif%}
-                    {%endif%}
-
-                    &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
-            </form><hr>
-            <p>
+                    {%endif%}</td>
+                    <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+            </tr>
+            </tbody>
+                </table>
+                
+            </form><p><hr>
+            
                 Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
             <div>
                 <p align="center"><h3>Results Received By Facilities</h3>
@@ -146,25 +157,8 @@ You currently don't belong to any group for viewing reports. Contact the system 
                         {% if forloop.parentloop.last %}
                         <td width="20"><b>{{ column }}</b></td>
                         {% else %}
-                        <td width="20">
-                            {% if single_bar_length %}
-                            {% ifequal forloop.counter 3 %}
-
-                            <img src="{{ MEDIA_URL }}reports/images/positive.JPG"  height="10"
-                                 width="{% widthratio column 10 50 %}" />
-                            {% endifequal %}
-                            {% ifequal forloop.counter 5 %}
-                            <img src="{{ MEDIA_URL }}reports/images/rejected.JPG"  height="10"
-                                 width="{% widthratio column 10 50 %}" />
-                            {% endifequal %}
-                            {% ifequal forloop.counter 4 %}
-
-                            <img src="{{ MEDIA_URL }}labresults/images/green-bar.GIF"  height="10"
-                                 width="{% widthratio column 10 50 %}" />
-                            {% endifequal %}
-                            {%  endif %}
+                        <td width="20">                            
                             {{ column }}
-
                         </td>
                         {% endif %}
                         {% endif %}
@@ -398,13 +392,14 @@ You currently don't belong to any group for viewing reports. Contact the system 
             </table>
             <p>
 
-            <h3 id="AverageEnteringTime">Average Entering Time &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="AverageEnteringTime">Average Entering Time + Delays* &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
                 Showing average time between the Date results are tested at
 				the lab to the time their values are entered/updated in
-                the machine at the lab
+                the machine at the lab. Delays in synchronising results with the
+                Mwana server can happen due to internet connection failure at either end
                 <br>
                 Minimum Average Days = {{min_entering_time}}; &nbsp;
                 Maximum Average Days = {{max_entering_time}}; &nbsp;
