@@ -11,6 +11,7 @@ from mwana.apps.broadcast.handlers.blaster import BlastHandler
 from mwana.apps.broadcast.handlers.district import DistrictHandler
 from mwana.apps.broadcast.handlers.hsa import HSAHandler
 from mwana.apps.broadcast.handlers.msg import MessageHandler
+from mwana.apps.stringcleaning.inputcleaner import strip_non_or_bad_ascii
 import logging
 
 
@@ -27,6 +28,8 @@ class App (rapidsms.apps.base.AppBase):
 
         # dont mess with the real message text until the end
         msgtxt = message.text
+        msgtxt = strip_non_or_bad_ascii(msgtxt)
+        message.text = msgtxt
 
         # TODO find a better way of knowing which hanlers should skip cleaning
 
@@ -51,7 +54,7 @@ class App (rapidsms.apps.base.AppBase):
             keyword = msgtxt.split()[0].lower()
             if keyword in broadcast_keywords:
                 message.text = msgtxt
-                self.info('Skipping string cleaning for %s message' % msgtxt.split()[0])
+                self.info('Skipping further string cleaning for %s message' % msgtxt.split()[0])
                 return
 
         # replace separation marks with a space
