@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from appointments.handlers.new import NewHandler
+from mwana.apps.appointments.handlers.new import NewHandler
 
 from ..forms import MwanaForm
 

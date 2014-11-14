@@ -2,8 +2,8 @@ from __future__ import unicode_literals
 
 from django.utils.translation import ugettext_lazy as _
 
-from appointments.handlers.base import AppointmentHandler
-from appointments.forms import QuitForm
+from mwana.apps.appointments.handlers.base import AppointmentHandler
+from mwana.apps.appointments.forms import QuitForm
 
 
 class DiscontinueHandler(AppointmentHandler):
