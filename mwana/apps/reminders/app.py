@@ -228,7 +228,7 @@ class App(rapidsms.apps.base.AppBase):
             if event_slug == "mwana":
                 self.HELP_TEXT = "To register a birth, send %(event_upper)s <DATE> <MOTHERS NAME>." % dict(event_upper = event_slug.upper())
                 if SYSTEM_LOCALE == LOCALE_MALAWI:
-                    self.HELP_TEXT = "To register a birth, send %(event_upper)s <DOB> <MOTHERS_FIRST_NAME> <MOTHERS_LAST_NAME> <CHILDS_FIRST_NAME> <CHILDS_LAST_NAME>"
+                    self.HELP_TEXT = "To register a birth, send MWANA <DOB> <MOTHERS_FIRST_NAME> <MOTHERS_LAST_NAME> <CHILDS_FIRST_NAME> <CHILDS_LAST_NAME>"
                 msg.respond(self.HELP_TEXT)
                 return True
             msg_error = "Sorry, I didn't understand that. To add a %(event_lower)s, send %(event_upper)s <DATE> <NAME>. The date is optional and is logged as TODAY if left out." % dict(

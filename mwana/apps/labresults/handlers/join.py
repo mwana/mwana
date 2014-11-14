@@ -272,7 +272,6 @@ class JoinHandler(KeywordHandler):
         HELP_TEXT = _("To register as a Mobile agent, send JOIN <CBA> <CLINIC CODE> "\
                 "<ZONE #> <YOUR NAME>")
         MAX_IDENTITY_ID = 10
-
         m = PATTERN.search(text)
         if m is not None:
             clinic_slug = m.group('clinic').strip()
@@ -296,13 +295,11 @@ class JoinHandler(KeywordHandler):
                 self.respond("Sorry, I don't know about a clinic with code %(code)s. Please check your code and try again." % dict(
                     code=clinic_slug))
                 return
-            # require zone to be a numeric number
             try:
-                int_zone_slug = int(zone_slug)
                 zone = self._get_or_create_zone(clinic, zone_slug)
                 contact_clinic, contact_zone = self._get_clinic_and_zone(self.msg.connections[0].contact)
             except:
-                self.respond("Sorry, please enter a number for your zone. You used %(zone_slug) for the zone."
+                self.respond("Sorry, please check the value for the zone. You used %(zone_slug)s for the zone."
                              % dict(zone_slug=zone_slug))
 
             #prepare identity id for interviewer_id
@@ -312,7 +309,7 @@ class JoinHandler(KeywordHandler):
             else:
                 identity_id = identity_id
 
-            if contact_zone == zone:
+            if (contact_zone is not None and (contact_zone == zone)):
                 # don't let agents register twice for the same zone
                 self.respond("Hello %(name)s! You are already registered as a Mobile Agent for zone %(zone)s of %(clinic)s." % dict(
                              name=self.msg.connections[0].contact.name, zone=zone.name,

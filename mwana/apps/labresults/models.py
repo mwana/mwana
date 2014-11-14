@@ -102,6 +102,8 @@ class Result(models.Model):
 
     clinic_care_no = models.CharField(max_length=50, null=True, blank=True)   # could potentially be handled by requisition_id
 
+    phone = models.CharField(max_length=15, null=True, blank=True) # mother or guardians phone number
+
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
