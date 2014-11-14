@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load forms_tags django_tables2 %}
+
+{% block title %}RemindMI Patient Traces{% endblock title %}
+
+{% block extra_stylesheets %}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}appointments/stylesheets/appointments.css" />
+    <style>
+.table-container ul.pagination {
+    overflow: auto;
+    margin: 0;
+    padding: 5px;
+    border: 1px solid #DDD;
+    list-style: none;
+}
+.table-container ul.pagination > li > a {
+    text-decoration: none;
+    font-weight: bold;
+}
+.table-container ul.pagination li {
+    float: left;
+    line-height: 22px;
+    margin-left: 10px;
+}
+.table-container ul.pagination li:first-child {
+    margin-left: 0;
+}
+
+.table-container ul.pagination li.cardinality {
+    float: right;
+    color: #8d8d8d;
+}
+
+.report-exports {
+       margin: -60px 0 50px 0;
+       float:right;
+     }
+    </style>
+{% endblock extra_stylesheets %}
+
+{% block content %}
+    <div class="span12" id="remindmi">
+        <div class="page-header"><h1>RemindMI Patient Traces</h1></div>
+        <div class="row-fluid">
+            <div class="span3">
+                <form id="filter-form" method="GET">
+                    {% render_form filter.form %}
+                    <input class="btn btn-primary" type="submit" value="Update Filters" />
+                    <a class="btn" href="{% url 'traces_list' %}">Clear Filters</a>
+                </form>
+            </div>
+            <div class="span9">
+                {% if table.page %}
+                    <p>
+                        Displaying {{ table.page.start_index }} -
+                        {{ table.page.end_index }} of {{ table.page.paginator.count }} patient traces.<br/>
+                    </p>
+                    {% render_table table %}
+                {% else %}
+                    <p>No patient traces match your query. </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

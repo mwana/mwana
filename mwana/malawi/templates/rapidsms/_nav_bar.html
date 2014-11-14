@@ -6,6 +6,9 @@
   <ul class="dropdown-menu">
     <li><a href="{% url 'growth_index' %}">Reports</a></li>
     <li><a href="{% url 'growth_graphs' %}">Analysis</a></li>
+    <!-- <li class="divider"></li> -->
+    <!-- <li><a href="{% url 'assessment_report_list' %}">Reports - Advanced filters</a></li> -->
+    <!-- <li><a href="{% url 'anthro_report_graphs' %}">Analysis -  Advanced filters</a></li> -->
   </ul>
 </li>
 <li class="dropdown">
@@ -15,10 +18,40 @@
   <ul class="dropdown-menu">
     <li><a href="{% url 'mwana_reports' %}">Reports</a></li>
     <li><a href="{% url 'mwana_graphs' %}">Analysis</a></li>
+    <!-- <li class="divider"></li> -->
+    <!-- <li><a href="{% url 'growth_index' %}">Reports - Advanced filters</a></li> -->
+    <!-- <li><a href="{% url 'growth_graphs' %}">Analysis - Advanced filters</a></li> -->
+    <!-- <li><a href="{% url 'results_list' %}">Results</a></li> -->
   </ul>
 </li>
-<li><a href="{% url 'remindmi_reports' %}">RemindMI</a></li>
-<li><a href="{% url 'message_log' %}">Message Log</a></li>
-{% comment %} <!-- <li><a href="{% url 'registration' %}">Registration</a></li>
-<li><a href="{% url 'messaging' %}">Messaging</a></li>
-<li><a href="{% url 'httptester-index' %}">Message Tester</a></li>-->{% endcomment %}
+<li class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">Follow Up
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="{% url 'mothers_list' %}">Mothers</a></li>
+    <li><a href="{% url 'children_list' %}">Children</a></li>
+    <li><a href="{% url 'appointments_list' %}">Appointments</a></li>
+    <li><a href="{% url 'traces_list' %}">Traces</a></li>
+    <li><a href="{% url 'reminders_list' %}">Reminders</a></li>
+    <li><a href="{% url 'eid_list' %}">EID</a></li>
+  </ul>
+</li>
+<!-- <li class="dropdown">
+<a class="dropdown-toggle" data-toggle="dropdown" href="#">Exports
+<b class="caret"></b>
+</a>
+<ul class="dropdown-menu">
+<li><a href="{% url 'dhis2_submission_list' %}">DHIS2</a></li>
+</ul>
+</li> -->
+<li class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">Messages
+    <b class="caret"></b>
+  </a>
+  <ul class="dropdown-menu">
+    <li><a href="{% url 'help_request_list' %}">Help Requests</a></li>
+    <li><a href="{% url 'message_log' %}">Logs</a></li>
+    <li><a href="">Analysis</a></li>
+  </ul>
+</li>

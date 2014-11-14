@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>Mothers</h2>
+    <ul>
+        {% for mother in object_list %}
+            <li>{{ mother.name }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

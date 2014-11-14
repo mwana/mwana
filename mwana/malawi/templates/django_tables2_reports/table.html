@@ -1,0 +1,18 @@
+{% extends "django_tables2/bootstrap-tables.html" %}
+
+{% load i18n django_tables2 %}
+
+{% block pagination %}
+    {{ block.super }}
+    {% block table.report %}
+        {% if table.is_configured %}
+<div class="report-exports">
+            {% for label, format in table.formats %}
+                <a href="{% querystring table.param_report=format %}">
+                    <img src="{{ STATIC_URL }}img/{{ format }}_icon.png" title="{{ label }}"/>
+                </a>
+            {% endfor %}
+</div>
+        {% endif %}
+    {% endblock table.report %}
+{% endblock %}

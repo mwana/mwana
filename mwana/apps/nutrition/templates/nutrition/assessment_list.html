@@ -79,8 +79,7 @@
         font-size: 16px;
     }
 
- </style>  
-</style>
+ </style>
 {% endblock %}
 
 {% block javascripts %}
@@ -88,8 +87,8 @@
 
 <script type="text/javascript" src="{{ STATIC_URL }}malawi/javascripts/datepicker.js"></script>
 <script type="text/javascript">
-    // <![CDATA[     
-       
+    // <![CDATA[
+
     datePickerController.addEvent(window, "load", function() {
           var start_opts = {
             // The ID of the associated form element
@@ -204,7 +203,7 @@
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.height4age|default:"<span class='x'>X</span>" }}</td>
                 <td class="{{ ass.get_stunting_display|slugify }}">{{ ass.get_stunting_display|default:"<span class='x'>X</span>" }}</td>
                 <td>{{ ass.get_status_display }}</td>
-                <td>{% if ass.action_taken == 'XX' %} <span class='x'>X</span> {% else %} {{ ass.get_action_taken_display }} {% endif %}</td> 
+                <td>{% if ass.action_taken == 'XX' %} <span class='x'>X</span> {% else %} {{ ass.get_action_taken_display }} {% endif %}</td>
             </tr>
             {% endfor %}
             <tr>

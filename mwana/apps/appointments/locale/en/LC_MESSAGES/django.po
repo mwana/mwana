@@ -1,0 +1,202 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-03-08 13:04-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: forms.py:44 forms.py:304
+#, python-format
+msgid "Sorry, we could not find any appointments for the keyword: %s"
+msgstr ""
+
+#: forms.py:73
+msgid ""
+"Sorry, you must include a name or id for your appointments subscription."
+msgstr ""
+
+#: forms.py:77 forms.py:220 forms.py:288
+msgid ""
+"Sorry, we cannot understand that date format. For the best results please "
+"use the ISO YYYY-MM-DD format."
+msgstr ""
+
+#: forms.py:92
+#, python-format
+msgid ""
+"Sorry, you previously registered a %(timeline)s for %(name)s. You will be "
+"notified when it is time for the next appointment."
+msgstr ""
+
+#: forms.py:135 forms.py:190 forms.py:244
+msgid "Sorry, name/id does not match an active subscription."
+msgstr ""
+
+#: forms.py:147
+msgid "Sorry, you have no unconfirmed appointment notifications."
+msgstr ""
+
+#: forms.py:175
+#, python-format
+msgid ""
+"Sorry, the status update must be in %(choices)s. You supplied %(raw_status)s"
+msgstr ""
+
+#: forms.py:199
+msgid "Sorry, user has no recent appointments that require a status update."
+msgstr ""
+
+#: forms.py:229
+#, python-format
+msgid "Sorry, the reschedule date %s must be in the future"
+msgstr ""
+
+#: forms.py:255
+msgid "Sorry, user has no future appointments that require a reschedule."
+msgstr ""
+
+#: forms.py:284
+msgid "Sorry, you must include a name or id for your unsubscription."
+msgstr ""
+
+#: forms.py:321
+#, python-format
+msgid "Sorry, you have not registered a %(timeline)s for %(name)s."
+msgstr ""
+
+#: models.py:17
+msgid ""
+"The keyword(s) to match in messages from the user. Specify multiple keywords "
+"by separating them with vertical bars. e.g., \"birth|bith|bilth\""
+msgstr ""
+
+#: models.py:34
+msgid "Name, phrase, or digits used when joining the timeline."
+msgstr ""
+
+#: models.py:35
+msgid "start date"
+msgstr ""
+
+#: models.py:36
+msgid "end date"
+msgstr ""
+
+#: models.py:61
+msgid "Not Yet Occurred"
+msgstr ""
+
+#: models.py:62
+msgid "Saw"
+msgstr ""
+
+#: models.py:63
+msgid "Missed"
+msgstr ""
+
+#: models.py:68
+msgid "appointment date"
+msgstr ""
+
+#: models.py:90
+msgid "Sent"
+msgstr ""
+
+#: models.py:91
+msgid "Confirmed"
+msgstr ""
+
+#: models.py:92
+msgid "Manually Confirmed"
+msgstr ""
+
+#: models.py:93
+msgid "Error"
+msgstr ""
+
+#: tasks.py:16
+#, python-format
+msgid ""
+"This is a reminder for your upcoming appointment on %(date)s. Please confirm."
+msgstr ""
+
+#: handlers/base.py:49
+#, python-format
+msgid ""
+"Sorry, we cannot understand that message. For additional help send: "
+"%(prefix)s %(keyword)s"
+msgstr ""
+
+#: handlers/confirm.py:14
+#, python-format
+msgid ""
+"To confirm an upcoming appointment send: %(prefix)s %(keyword)s <KEY> <NAME/"
+"ID>"
+msgstr ""
+
+#: handlers/confirm.py:15
+msgid "Thank you! Your appointment has been confirmed."
+msgstr ""
+
+#: handlers/move.py:14
+#, python-format
+msgid ""
+"To reschedule the next appointment send: %(prefix)s %(keyword)s <KEY> <NAME/"
+"ID> <DATE>"
+msgstr ""
+
+#: handlers/move.py:15
+msgid "Thank you! The appointment has been rescheduled."
+msgstr ""
+
+#: handlers/new.py:14
+#, python-format
+msgid ""
+"Thank you%(user)s! You registered a %(timeline)s for %(name)s on %(date)s. "
+"You will be notified when it is time for the next appointment."
+msgstr ""
+
+#: handlers/new.py:16
+#, python-format
+msgid ""
+"To add a user a timeline send: %(prefix)s %(keyword)s <KEY> <NAME/ID> "
+"<DATE>. The date is optional."
+msgstr ""
+
+#: handlers/quit.py:14
+#, python-format
+msgid ""
+"Thank you%(user)s! You unsubcribed from the %(timeline)s for %(name)s on "
+"%(date)s. You will be no longer be notified when it is time for the next "
+"appointment."
+msgstr ""
+
+#: handlers/quit.py:16
+#, python-format
+msgid ""
+"To unsubcribe a user from a timeline send: %(prefix)s %(keyword)s <KEY> "
+"<NAME/ID> <DATE>. The date is optional."
+msgstr ""
+
+#: handlers/status.py:14
+#, python-format
+msgid ""
+"To set the status of the most recent appointment send: %(prefix)s "
+"%(keyword)s <KEY> <NAME/ID> <SAW|MISSED>"
+msgstr ""
+
+#: handlers/status.py:15
+msgid "Thank you! The appointment status has been set."
+msgstr ""

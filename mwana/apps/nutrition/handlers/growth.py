@@ -78,15 +78,15 @@ class GrowthHandler(KeywordHandler):
                 # bday_on_file = patient.date_of_birth
                 # gender_on_file = patient.gender
                 # if 'gender' in patient_args.keys():
-                    # reported_gender = patient_args.get('gender')
-                    # if gender_on_file != reported_gender:
-                        # patient.gender = reported_gender
-                        # patient.save()
+                #     reported_gender = patient_args.get('gender')
+                #     if gender_on_file != reported_gender:
+                #         patient.gender = reported_gender
+                #         patient.save()
                 # if 'date_of_birth' in patient_args.keys():
-                    # reported_bday = patient_args.get('date_of_birth')
-                    # if bday_on_file != reported_bday:
-                        # patient.date_of_birth = reported_bday
-                        # patient.save()
+                #     reported_bday = patient_args.get('date_of_birth')
+                #     if bday_on_file != reported_bday:
+                #         patient.date_of_birth = reported_bday
+                #         patient.save()
                 return patient, False
         except (ObjectDoesNotExist, IndexError):
             # patient doesnt already exist, so create with all arguments
@@ -197,6 +197,13 @@ class GrowthHandler(KeywordHandler):
                 old['first_name'] = 'X'
                 old['last_name'] = 'X'
                 return old, validate_tokens
+            elif len(token_data) == 7:
+                token_data.append("XX")
+                noaction = dict(zip(token_labels, token_data))
+                noaction['first_name'] = 'X'
+                noaction['last_name'] = 'X'
+                # noaction['action_taken] = 'XX'
+                return noaction, validate_tokens
             elif len(token_data) > 10:
                 logger.debug("too much data")
                 self.respond(TOO_MANY_TOKENS)

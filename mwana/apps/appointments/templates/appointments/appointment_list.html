@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load forms_tags django_tables2 %}
+
+{% block title %}Appointment List{% endblock title %}
+
+{% block extra_stylesheets %}
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}appointments/stylesheets/appointments.css" />
+{% endblock extra_stylesheets %}
+
+{% block content %}
+    <div class="span12" id="appointments">
+        <div class="page-header"><h1>Appointment List</h1></div>
+        <div class="row-fluid">
+            <div class="span3">
+                <form id="filter-form" method="GET">
+                    {% render_form form %}
+                    <input class="btn btn-primary" type="submit" value="Update Filters" />
+                    <a class="btn" href="{% url 'appointment_list' %}">Clear Filters</a>
+                </form>
+            </div>
+            <div class="span9">
+                {% if table.data.queryset.exists %}
+                    <p>
+                        Displaying appointments {{ table.page.start_index }} -
+                        {{ table.page.end_index }} of {{ table.data.queryset.count }}.<br/>
+                        {% url 'csv_appointment_list' as csv %}
+                        {% if request.GET %}
+                            <a href="{{ csv }}?{{ request.GET.urlencode }}">Export results as CSV</a>
+                        {% else %}
+                            <a href="{{ csv }}">Export results as CSV</a>
+                        {% endif %}
+                    </p>
+                    {% render_table table %}
+                {% else %}
+                    <p>No appointments match your query.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

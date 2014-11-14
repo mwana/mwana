@@ -1,0 +1,516 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load forms_tags django_tables2 %}
+{% load render_table from django_tables2 %}
+
+{% block title %}RapidSMS AnthroWatch - Assessment Analysis {% endblock title %}
+
+{% block extra_stylesheets %}
+    <link type="text/css" rel="stylesheet"
+          href="{{ STATIC_URL }}appointments/stylesheets/appointments.css" />
+    {#comment}
+    <!--
+    <link type="text/css" rel="stylesheet"
+          href="{{ STATIC_URL }}malawi/stylesheets/malawi.css" />
+    -->
+    {#endcomment}
+    <link type="text/css" rel="stylesheet"
+          href="{{ STATIC_URL }}malawi/stylesheets/daterangepicker-bs2.css" />
+    <style>
+.table-container ul.pagination {
+    overflow: auto;
+    margin: 0;
+    padding: 5px;
+    border: 1px solid #DDD;
+    list-style: none;
+}
+.table-container ul.pagination > li > a {
+    text-decoration: none;
+    font-weight: bold;
+}
+.table-container ul.pagination li {
+    float: left;
+    line-height: 22px;
+    margin-left: 10px;
+}
+.table-container ul.pagination li:first-child {
+    margin-left: 0;
+}
+
+.table-container ul.pagination li.cardinality {
+    float: right;
+    color: #8d8d8d;
+}
+
+.report-exports {
+       margin: -60px 0 50px 0;
+       float:right;
+     }
+    .unusual, .very-tall, .obese {background: #9c8aa5;}
+    .normal, .low-normal {background: #00cd00;}
+    .mild {background: #fee01e;}
+    .moderate {background: #dd7500;}
+     .severe, .oedema {background: #cd0000;}
+     span.false {font-size: 20px; font-weight: bold; color: green;}
+     span.true {font-size: 20px; font-weight: bold; color: #cd0000;}
+    </style>
+
+{% endblock extra_stylesheets %}
+
+{% block javascripts %}
+{{ block.super }}
+<script type="text/javascript"
+        src="{{ STATIC_URL }}malawi/javascripts/moment.min.js"></script>
+<script type="text/javascript"
+        src="{{ STATIC_URL }}malawi/javascripts/daterangepicker.js"></script>
+<script type="text/javascript"
+        src="{{ STATIC_URL }}malawi/javascripts/highcharts.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#reportrange').daterangepicker(
+     {
+        startDate: moment().subtract('days', 29),
+        endDate: moment(),
+        minDate: '01/01/2008',
+        maxDate: '01/01/2018',
+        // maxDate: moment(),
+        dateLimit: { days: 3650 },
+        showDropdowns: true,
+        showWeekNumbers: true,
+        timePicker: false,
+        timePickerIncrement: 1,
+        timePicker12Hour: true,
+        ranges: {
+           'Today': [moment().startOf('day'), moment()],
+           'Yesterday': [moment().subtract('days', 1), moment().subtract('days', 1)],
+           'Last 7 Days': [moment().subtract('days', 6), moment()],
+           'Last 30 Days': [moment().subtract('days', 29), moment()],
+           'This Month': [moment().startOf('month'), moment().endOf('month')],
+           'Last Month': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')],
+           'Last Year': [moment().startOf('year').subtract('year', 1), moment().startOf('year')],
+           'Project Start to Present Day': [moment([2010, 10, 01]), moment()],
+        },
+        opens: 'right',
+        buttonClasses: ['btn btn-default'],
+        applyClass: 'btn-small btn-primary',
+        cancelClass: 'btn-small',
+        format: 'MM/DD/YYYY',
+        separator: ' to ',
+        locale: {
+            applyLabel: 'Submit',
+            fromLabel: 'From ',
+            toLabel: 'To ',
+            customRangeLabel: 'Custom Range',
+            daysOfWeek: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr','Sa'],
+            monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+            firstDay: 1
+        }
+     },
+     function(start, end) {
+      console.log("Callback has been called!");
+      $('#reportrange span').html(start.format('YYYY-MM-DD') + ' - ' + end.format('YYYY-MM-DD'));
+      $('#id_startdate').val(start.format('YYYY-MM-DD'));
+      $('#id_enddate').val(end.format('YYYY-MM-DD'));
+     }
+  );
+  //Set the initial state of the picker label
+   if ($('#id_startdate').val() === ""){
+     default_start = moment().subtract('days', 29)
+     $('#id_startdate').val(default_start.format('YYYY-MM-DD'))
+   }
+   if ($('#id_enddate').val() === ""){
+     default_end = moment().format('YYYY-MM-DD')
+     $('#id_enddate').val(default_end)
+   }
+   /* $('#reportrange span').html(); */
+   $('#reportrange span').html($('#id_startdate').val() + ' - ' + $('#id_enddate').val());
+   // Set the parent classes for color coding.
+   $('.normal').parents('td').addClass('normal');
+   $('.severe').parents('td').addClass('severe');
+   $('.mild').parents('td').addClass('mild');
+   $('.obese').parents('td').addClass('obese');
+   $('.moderate').parents('td').addClass('moderate');
+   $('.unusual').parents('td').addClass('unusual');
+   $('.very-tall').parents('td').addClass('very-tall');
+   // Draw the charts
+   $(function () {
+    $('#anthro_overview').highcharts({
+        title: {
+            text: 'AnthroWatch Submissions and Assessments',
+            x: -20 //center
+        },
+        subtitle: {
+            text: 'Source: RapidSMS AnthroWatch',
+            x: -20
+        },
+        xAxis: {
+            categories: ['2010', '2011', '2012', '2013', '2014']
+        },
+        yAxis: {
+            title: {
+                text: 'Number'
+            },
+            plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+            }]
+        },
+        tooltip: {
+            valueSuffix: ' children'
+        },
+        plotOptions: {
+            line: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+       credits: {
+            enabled: false
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'middle',
+            borderWidth: 0
+        },
+        series: [{
+            name: 'Submissions',
+            data: [0, 12648, 29866, 26132, 60669 ]
+//            data: [11534, 10832, 10675, 5736, 7804, 3551, 1667, 3148, 2520, 693, 0, 0 ]
+        },
+                 {
+            name: 'Assessments',
+            data: [0, 11625, 25885, 23759, 52870 ]
+//            data: [10878, 10115, 9959, 5418, 3240, 2982, 1503, 2749, 2211, 588, 0, 0 ]
+        }
+                 ]
+    });
+// end #anthro_overview
+// start #anthro_action_taken
+        // Action taken overview chart.
+        $('#anthro_action_taken').highcharts({
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false
+            },
+            title: {
+                text: 'Action Taken for Assessments'
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true
+                    },
+                    showInLegend: true
+                }
+            },
+            credits: {
+                enabled: false
+            },
+            series: [{
+                type: 'pie',
+                name: 'Action Taken',
+                data: {{ graph_action_taken|safe }}
+            }]
+        });
+// end #anthro_action_taken
+// start #anthro_underweight
+  $('#anthro_underweight').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Underweight Classification by District'
+        },
+        subtitle: {
+            text: 'Source: RapidSMS AnthroWatch'
+        },
+        xAxis: {
+            categories: {{locations|safe}},
+            title: {
+                text: 'Districts'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Children assessed',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' children',
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Obese',
+            color: '#9c8aa5',
+// {{u_obese|safe}}
+            data: {{u_obese|safe}}
+        }, {
+            name: 'Overweight',
+            color: '#0077bb',
+            data: {{u_overweight|safe}}
+        }, {
+            name: 'Normal',
+            color: '#00cd00',
+            data: {{u_normal|safe}}
+        }, {
+            name: 'Mild',
+            color: '#fee01e',
+            data: {{u_mild|safe}}
+        }, {
+            name: 'Moderate',
+            color: '#dd7500',
+            data: {{u_moderate|safe}}
+        }, {
+            name: 'Severe',
+            color: '#cd0000',
+            data: {{u_severe|safe}}
+        }]
+    });
+// end #anthro_underweight
+// start #anthro_stunting
+  $('#anthro_stunting').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Stunting Classification by District'
+        },
+        subtitle: {
+            text: 'Source: RapidSMS AnthroWatch'
+        },
+        xAxis: {
+            categories: {{locations|safe}},
+            title: {
+                text: 'Districts'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Children assessed',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' children',
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Normal',
+            color: '#00cd00',
+            data: {{s_normal|safe}}
+        }, {
+            name: 'Mild',
+            color: '#fee01e',
+            data: {{s_mild|safe}}
+        }, {
+            name: 'Moderate',
+            color: '#dd7500',
+            data: {{s_moderate|safe}}
+        }, {
+            name: 'Severe',
+            color: '#cd0000',
+            data: {{s_severe|safe}}
+        }]
+    });
+// end #anthro_stunting
+// start #anthro_wasting
+  $('#anthro_wasting').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: 'Wasting Classification by District'
+        },
+        subtitle: {
+            text: 'Source: RapidSMS AnthroWatch'
+        },
+        xAxis: {
+            categories: {{locations|safe}},
+            title: {
+                text: 'Districts'
+            }
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Children assessed',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' children',
+        },
+        plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            x: -40,
+            y: 100,
+            floating: true,
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+            name: 'Normal',
+            color: '#00cd00',
+            data: {{w_normal|safe}}
+        }, {
+            name: 'Mild',
+            color: '#fee01e',
+            data: {{w_mild|safe}}
+        }, {
+            name: 'Moderate',
+            color: '#dd7500',
+            data: {{w_moderate|safe}}
+        }, {
+            name: 'Severe',
+            color: '#cd0000',
+            data: {{w_severe|safe}}
+        }]
+    });
+// end #anthro_wasting
+
+});
+});
+
+</script>
+{% endblock javascripts %}
+
+{% block content %}
+    <div class="span12" id="remindmi">
+        <div class="page-header"><h1>AnthroWatch Analysis</h1></div>
+        <h2>Overview</h2>
+        <div class="row-fluid">
+            <div class="span3">
+              <!--
+              <form id="filter-form" method="GET">
+              <p>Reported on</p>
+              <div id="reportrange" class="pull-right daterangepicker"
+              style="background: #fff; cursor: pointer;
+              padding: 5px 10px;; border: 1px solid #ccc;
+              position:relative; float: left; min-width:80%;
+              top:0; left:0; margin-bottom:17px; clear:right;">
+              <i class="glyphicon glyphicon-calendar icon-calendar icon-large"></i>
+              <span></span><b class="caret" style="float:right"></b>
+              </div>
+              {{ filter.form.as_p }}
+              <input class="btn btn-primary" type="submit" value="Update Filters" />
+              <a class="btn" href="{% url 'assessment_report_list' %}">Clear Filters</a>
+              </form>
+
+              -->
+            </div>
+            <div class="span9">
+              <div id="anthro_overview"></div>
+              <div id="anthro_action_taken"></div>
+            </div>
+        </div>
+        <br />
+        <h2>Underweight</h2>
+        <div class="row-fluid">
+          <div class="span3">
+            <!-- form here -->
+          </div>
+          <div class="span9">
+            <div id="anthro_underweight" style="height:{{u_chart_height|safe}}px;"></div>
+            <div id="anthro_underweight_table"></div>
+          </div>
+        </div>
+        <div class="row-fluid"><br />
+          <h2>Stunting</h2>
+        </div>
+        <div class="row-fluid">
+          <div class="span3">
+            <!-- form here -->
+          </div>
+          <div class="span9">
+            <div id="anthro_stunting" style="height:{{chart_height|safe}}px;"></div>
+            <div id="anthro_stunting_table"></div>
+          </div>
+        </div>
+        <br />
+        <h2>Wasting</h2>
+        <div class="row-fluid">
+          <div class="span3">
+            <!-- form here -->
+          </div>
+          <div class="span9">
+            <div id="anthro_wasting" style="height:{{chart_height|safe}}px;></div>
+            <div id="anthro_wasting_table"></div>
+          </div>
+        </div>
+
+    </div>
+{% endblock content %}
