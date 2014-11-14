@@ -8,12 +8,20 @@ from django.views.decorators.http import require_http_methods, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.forms import ModelForm
 from django.db import transaction
+from django.db.models import Q
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
 from mwana.apps.locations.models import Location
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+
+# from django_tables2_reports.views import ReportTableView
+from mwana.apps.remindmi.views import FilteredSingleTableView
+
+from .filters import ResultFilter
+from .tables import ResultTable
+from mwana.apps.labresults.models import Result
 
 """
 TODO
@@ -252,6 +260,7 @@ def accept_record (record, payload):
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
         'clinic_care_no': dictval(record, 'care_clinic_no'),
+        'carer_phone': dictval(record, 'carer_phone'),
     }
 
     #need to keep old record 'pristine' so we can check which fields have changed
@@ -512,7 +521,7 @@ def mwana_reports (request):
     try:
         startdate1 = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
-        startdate1 = today -timedelta(days=30)
+        startdate1 = today - timedelta(days=30)
 
     try:
         enddate1 = text_date(request.REQUEST['enddate'])
@@ -611,3 +620,11 @@ def mwana_reports (request):
                                 'year_reporting':year_reporting,
                                 },
                                 context_instance=RequestContext(request))
+
+
+class ResultList(FilteredSingleTableView):
+    model = Result
+    table_class = ResultTable
+    template_name = 'remindmi/result_list.html'
+    filter_class = ResultFilter
+    queryset = Result.objects.filter(Q(verified='t'))

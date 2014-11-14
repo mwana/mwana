@@ -11,8 +11,13 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
 
-from .models import *
+from mwana.apps.remindmi.views import FilteredSingleTableView
+from .models import Assessment
+
 from .graphs import NutritionGraphs
+from .filters import AssessmentFilter
+
+from .reporttables import AssessmentTable
 
 
 DISTRICTS = ["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji", "Nkhotakota",
@@ -94,19 +99,19 @@ def graphs(request):
                                   context_instance=RequestContext(request))
 
 
-def reports(request):
-    template_name = "nutrition/reports.html"
-    location, startdate, enddate = get_report_criteria(request)
-    assessments = ass_dicts_for_display(location, startdate, enddate)
-    selected_location = str(location)
-    limited_assessments = assessments[:501]
-    table = AssessmentTable(limited_assessments)
-    table.paginate(page=request.GET.get('page', 1))
-    context = {'table': table, 'selected_location': selected_location,
-               'startdate': startdate, 'enddate': enddate,
-               'locations': sorted(DISTRICTS)}
-    return render_to_response(template_name, context,
-                              context_instance=RequestContext(request))
+# def reports(request):
+#     template_name = "nutrition/reports.html"
+#     location, startdate, enddate = get_report_criteria(request)
+#     assessments = ass_dicts_for_display(location, startdate, enddate)
+#     selected_location = str(location)
+#     limited_assessments = assessments[:501]
+#     table = AssessmentTable(limited_assessments)
+#     table.paginate(page=request.GET.get('page', 1))
+#     context = {'table': table, 'selected_location': selected_location,
+#                'startdate': startdate, 'enddate': enddate,
+#                'locations': sorted(DISTRICTS)}
+#     return render_to_response(template_name, context,
+#                               context_instance=RequestContext(request))
 
 
 def assessments(request):
@@ -306,7 +311,7 @@ def csv_assessments(req):
     assessments = ass_dicts_for_export(location, startdate, enddate, gender,
                                        startage, endage, status, action_taken)
     # sort by date, descending
-    #assessments.sort(lambda x, y: cmp(y['date'], x['date']))
+    # assessments.sort(lambda x, y: cmp(y['date'], x['date']))
     return export(headers, keys, assessments, 'assessments.csv')
 
 
@@ -343,3 +348,51 @@ def get_report_criteria(request):
     enddate = request.GET.get('enddate', default_end_date.strftime("%Y-%m-%d"))
 
     return location, startdate, enddate
+
+
+class AssessmentReportList(FilteredSingleTableView):
+    model = Assessment
+    table_class = AssessmentTable
+    template_name = 'nutrition/report_list.html'
+    filter_class = AssessmentFilter
+    queryset = Assessment.objects.all()
+
+
+def report_graphs(request):
+    asses = Assessment.objects.all()
+    graph_action_taken = []
+    action_options = ['NR', 'OF', 'OT', 'RG', 'SF', 'XX']
+    for x in action_options:
+        num = asses.filter(action_taken__in=[x, x.lower()]).count()
+        graph_action_taken.append([x, num])
+    overview = "tested"
+    r = NutritionGraphs(asses)
+    data = r.get_districts_data()
+    context = {'overview': overview,
+               'graph_action_taken': graph_action_taken,
+               'weight_data': data['weight_data'],
+               'u_obese': data['weight_data'][0][1:],
+               'u_overweight': data['weight_data'][1][1:],
+               'u_normal': data['weight_data'][2][1:],
+               'u_mild': data['weight_data'][3][1:],
+               'u_moderate': data['weight_data'][4][1:],
+               'u_severe': data['weight_data'][5][1:],
+               'stunt_data': data['stunt_data'],
+               's_normal': data['stunt_data'][0][1:],
+               's_mild': data['stunt_data'][1][1:],
+               's_moderate': data['stunt_data'][2][1:],
+               's_severe': data['stunt_data'][3][1:],
+               'wasting_data': data['wasting_data'],
+               'w_normal': data['wasting_data'][0][1:],
+               'w_mild': data['wasting_data'][1][1:],
+               'w_moderate': data['wasting_data'][2][1:],
+               'w_severe': data['wasting_data'][3][1:],
+               'locations': data['locations'],
+               'u_chart_height': len(data['locations']) * 6 * 40,
+               'chart_height': len(data['locations']) * 4 * 40,
+
+               }
+
+    return render_to_response(
+        "nutrition/report_graphs.html", context,
+        context_instance=RequestContext(request))

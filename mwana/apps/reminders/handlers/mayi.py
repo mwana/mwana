@@ -2,7 +2,7 @@
 from datetime import date, timedelta
 import logging
 
-from django.core.exceptions import ObjectDoesNotExist
+# from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 
 from rapidsms.models import Contact, Connection, Backend
@@ -15,8 +15,9 @@ from mwana import const
 
 logger = logging.getLogger(__name__)
 
-MAYI_HELP = """To report an expectant mother send:
-MAYI <EDD:DDMMYY> <MOTHERS_NAME> <MOTHERS_PHONE|X> <HIV_STATUS:P|N|U>"""
+MAYI_HELP = "To report an expectant mother send: MAYI <EDD:DDMMYY>"\
+            " <MOTHERS_FIRSTNAME> <MOTHERS_LASTNAME> <MOTHERS_DOB>"\
+            " <MOTHERS_PHONE|X> <HIV_STATUS:P|N|U>"
 UNREGISTERED = "Please register as an HSA before submitting MAYI reports."\
                " Send JOIN for help on how to join."
 TOO_FEW_TOKENS = "It seems you have not sent enough data. Please put an X"\

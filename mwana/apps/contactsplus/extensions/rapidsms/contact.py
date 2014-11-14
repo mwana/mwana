@@ -2,9 +2,9 @@
 
 from django.db import models
 
+
 class ContactType(models.Model):
 
-    
     types = models.ManyToManyField('contactsplus.ContactType',
                                    related_name='contacts', blank=True)
     is_active = models.BooleanField(default=True)
@@ -35,9 +35,15 @@ class ContactType(models.Model):
                 self._district = clinic.parent
             elif self.location.type.slug in const.DISTRICT_SLUGS:
                 self._district = self.location
-        return self._district 
+        return self._district
 
-    
     class Meta:
         abstract = True
 
+
+class ContactParent(models.Model):
+    """To relate mother and child pair patients."""
+    parent = models.ForeignKey('self', null=True, blank=True)
+
+    class Meta:
+        abstract = True

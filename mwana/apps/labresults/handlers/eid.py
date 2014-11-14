@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class EIDHandler(KeywordHandler):
     """Handles reports on DBS results delivered to clients at the clinic.
 
-       EID <SAMPLE_ID> <HIV> <ACTION_TAKEN ART/CPT> <AGE AT ART/CPT>
+       EID <SAMPLE_ID> <HIV> <ACTION_TAKEN ART/CPT> <AGE AT ART/CPT> <ART_NUMBER>
     """
 
     keyword = "eid"
@@ -36,9 +36,10 @@ class EIDHandler(KeywordHandler):
         cleaner = InputCleaner()
         text = cleaner.remove_dash_plus(text)
         text = cleaner.remove_double_spaces(text)
-        labels = ['sample', 'status', 'action_taken', 'age_in_months']
+        labels = ['sample', 'status', 'action_taken', 'age_in_months',
+                  'art_number']
         data = text.split()
-        if len(data) == 4:
+        if len(data) == 5:
             tokens = dict(zip(labels, data))
         else:
             self.help()
@@ -122,4 +123,4 @@ class EIDHandler(KeywordHandler):
         the client." % (tokens['sample'])
 
         # send back response
-        send(confirmation, clinic_worker.default_connection)
+        send(confirmation, [clinic_worker.default_connection])

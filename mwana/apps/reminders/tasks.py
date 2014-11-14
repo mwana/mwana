@@ -20,7 +20,7 @@ _ = lambda s: s
 
 translator = Translator()
 
-NOTIFICATION_NUM_DAYS = 2  # days before scheduled appointments
+NOTIFICATION_NUM_DAYS = 7  # days before scheduled appointments
 
 logger = logging.getLogger('mwana.apps.reminders.tasks')
 

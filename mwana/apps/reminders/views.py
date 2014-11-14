@@ -6,10 +6,13 @@ from django.http import HttpResponse
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.db.models import Q
+from django.conf import settings
 
-from mwana.apps.nutrition.views import DISTRICTS
 from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.locations.models import Location
+
+
+DISTRICTS = settings.DISTRICTS
 
 
 def remindmi_graphs(queryset, places):
