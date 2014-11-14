@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from rapidsms.router import send
 
-from appointments.handlers.new import NewHandler
+from mwana.apps.appointments.handlers.new import NewHandler
 from ..forms import MayiForm
 from ..tasks import generate_appointments
 
