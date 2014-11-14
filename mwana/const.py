@@ -17,6 +17,8 @@ PROVINCE_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PROVINCE_WORKER_SLUG',
                                                      'province-worker')
 DBS_PRINTER_SLUG = settings.RESULTS160_SLUGS.get('DBS_PRINTER_SLUG',
                                                  'dbs-printer')
+CHILD_SLUG = settings.RESULTS160_SLUGS.get('CHILD_SLUG', 'child-patient')
+MOTHER_SLUG = settings.RESULTS160_SLUGS.get('MOTHER_SLUG', 'mother-patient')
 
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))
@@ -30,6 +32,7 @@ PROVINCE_SLUGS = settings.RESULTS160_SLUGS.get('PROVINCE_SLUGS', ('province',))
 
 # apps
 LAB_RESULTS_APP = "mwana.apps.labresults"
+
 
 def _get_contacttype(slug, name):
     try:
@@ -53,11 +56,14 @@ def _get_locationtype(slug, singular, plural=None):
 def get_lab_worker_type():
     return _get_contacttype(LAB_WORKER_SLUG, 'LAB Worker')
 
+
 def get_hub_worker_type():
     return _get_contacttype(HUB_WORKER_SLUG, 'Hub Worker')
 
+
 def get_cba_type():
     return _get_contacttype(CBA_SLUG, 'Community Based Agent')
+
 
 def get_dbs_printer_type():
     return _get_contacttype(DBS_PRINTER_SLUG, 'DBS Printer')
@@ -66,8 +72,18 @@ def get_dbs_printer_type():
 def get_patient_type():
     return _get_contacttype(PATIENT_SLUG, 'Patient')
 
+
+def get_child_type():
+    return _get_contacttype(CHILD_SLUG, 'Child')
+
+
+def get_mother_type():
+    return _get_contacttype(MOTHER_SLUG, 'Mother')
+
+
 def get_zone_type():
     return _get_locationtype(ZONE_SLUGS, 'Zone')
+
 
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
@@ -80,8 +96,10 @@ def get_district_worker_type():
 def get_province_worker_type():
     return _get_contacttype(PROVINCE_WORKER_SLUG, 'Province Worker')
 
+
 def get_nutrition_worker_type():
     return _get_contacttype(NUTRITION_WORKER_SLUG, 'Nutrition Interviewer')
+
 
 def get_nutrition_patient_type():
     return _get_contacttype(NUTRITION_PATIENT_SLUG, 'Nutrition Patient')

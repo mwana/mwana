@@ -65,8 +65,13 @@ INSTALLED_APPS.append("mwana.apps.reports.webreports")
 # INSTALLED_APPS.insert(-1, 'uni_form')
 # INSTALLED_APPS.insert(-1, 'rapidsms_xforms')
 INSTALLED_APPS.insert(-1, 'people')
+INSTALLED_APPS.insert(-1, 'django_filters')
 INSTALLED_APPS.insert(-1, 'mwana.apps.nutrition')
 INSTALLED_APPS.insert(-1, 'mwana.apps.training')
+INSTALLED_APPS.insert(-1, 'mwana.apps.appointments')
+INSTALLED_APPS.insert(-1, 'django_tables2_reports')
+INSTALLED_APPS.insert(-1, 'mwana.apps.remindmi')
+INSTALLED_APPS.insert(-1, 'mwana.apps.dhis2')
 
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
@@ -89,6 +94,12 @@ LOG_LEVEL = "INFO"
 
 # paginator configuration
 PAGINATOR_OBJECTS_PER_PAGE = 50
+
+# MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES.extend(
+#     ['django_tables2_reports.middleware.TableReportMiddleware', ])
+
+# XLS exports
+EXCEL_SUPPORT = 'xlwt'
 
 # Django celery
 import djcelery
@@ -126,12 +137,19 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
-    "mwana.apps.reminders.handlers.mayi.MayiHandler",
-    "mwana.apps.reminders.handlers.discontinue.DiscontinueHandler",
+    "mwana.apps.remindmi.handlers.mayi.MayiHandler",
+    "mwana.apps.remindmi.handlers.mwana.MwanaHandler",
+    "mwana.apps.remindmi.handlers.status.StatusHandler",
+    "mwana.apps.remindmi.handlers.discontinue.DiscontinueHandler",
+    "mwana.apps.remindmi.handlers.collect.CollectHandler",
+    "mwana.apps.remindmi.handlers.refill.RefillHandler",
+    "mwana.apps.patienttracing.handlers.trace.TraceHandler",
     "mwana.apps.training.handlers.training.TrainingHandler",
-    "mwana.apps.patienttracing.handlers.confirm.ConfirmHandler",
-    "mwana.apps.patienttracing.handlers.told.ToldHandler",
-    # "mwana.apps.patienttracing.handlers.TraceHandler",
+    # "mwana.apps.reminders.handlers.mwana.MwanaHandler",
+    # "mwana.apps.reminders.handlers.mayi.MayiHandler",
+    # "mwana.apps.reminders.handlers.discontinue.DiscontinueHandler",
+    # "mwana.apps.patienttracing.handlers.confirm.ConfirmHandler",
+    # "mwana.apps.patienttracing.handlers.told.ToldHandler",
     # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
     # "mwana.apps.training.handlers.trainingstop.TrainingStopHandler",
 ]

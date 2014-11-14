@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     "rapidsms.backends.database",
     "rapidsms.router.db",
     "djcelery",
-    "kombu.transport.django",
+    # "kombu.transport.django",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",
     # enable the django admin using a little shim app (which includes
@@ -204,6 +204,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'mwana.middleware.LoginRequired',
+    'django_tables2_reports.middleware.TableReportMiddleware',
 ]
 
 
