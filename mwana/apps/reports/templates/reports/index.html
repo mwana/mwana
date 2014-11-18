@@ -162,8 +162,8 @@
     }
     function clearMapCanvas(){
 
-        canvas = document.getElementsByTagName('canvas')[0].getContext('2d').clearRect(0, 0, 800, 700);
-        canvas = document.getElementsByTagName('canvas')[2].getContext('2d').clearRect(0, 0, 800, 700);
+        document.getElementsByTagName('canvas')[0].getContext('2d').clearRect(0, 0, 800, 700);
+        document.getElementsByTagName('canvas')[2].getContext('2d').clearRect(0, 0, 800, 700);
     }
 </script>
 
@@ -182,7 +182,7 @@
 <script type="text/javascript" >
     var map;
     var usualColor = '0495d4';
-    var spiderfiedColor = 'eebb22';
+    var spiderfieldColor = 'eebb22';
     var iconWithColor;
     var shadow;
     function moveToLocation(lat, lng, zoom){
@@ -202,7 +202,7 @@
             window.oms.a[i].setShadow(shadow);
         }
         for(var i = 0; i < markers.length; i ++) {
-            markers[i].setIcon(iconWithColor(spiderfiedColor));
+            markers[i].setIcon(iconWithColor(spiderfieldColor));
             markers[i].setShadow(null);
         }
     }
@@ -218,7 +218,7 @@
         {markersWontMove: true, markersWontHide: true});
 
         usualColor = '0495d4';
-        spiderfiedColor = 'eebb22';
+        spiderfieldColor = 'eebb22';
         iconWithColor = function(color) {
             return 'https://chart.googleapis.com/chart?chst=d_map_xpin_letter&chld=pin|+|' +
                 color + '|000000|ffff00';
@@ -236,7 +236,7 @@
         });
         oms.addListener('spiderfy', function(markers) {
             for(var i = 0; i < markers.length; i ++) {
-                markers[i].setIcon(iconWithColor(spiderfiedColor));
+                markers[i].setIcon(iconWithColor(spiderfieldColor));
                 markers[i].setShadow(null);
             }
             iw.close();
@@ -276,8 +276,6 @@
 </script>
 
 <script type="text/javascript" >
-
-    var rnd = Math.random;
     var data = [];
     //code may look ugly but is compressed to reduce size
     {% for site in sites %} {%if site.point %} data.push({lon: {{site.point.longitude}}, lat: {{site.point.latitude}},
@@ -329,11 +327,14 @@ results delivered via SMS to date<br>{{site.births}} births registered to date\n
 });</script>
 
 <script type="text/javascript">
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 
 function mapOnMouseOver(str){
 
 }
-
 
 function mapOnMouseOut(str){
 
@@ -362,14 +363,22 @@ function getNumberOfWorkers(str){
     var workers = 0;
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
-        if((datum.province_id === str) ||
-            (datum.district_id === str)
-    ){
+        if((datum.province_id === str) || (datum.district_id === str)){
             workers = workers + datum.workers
 
         }
     }
     return workers;
+}
+function getNumberOfFacilities(str){
+    var items = 0;
+    for (var i = 0; i < window.mapData.length; i ++) {
+        var datum = window.mapData[i];
+        if((datum.province_id === str) ||(datum.district_id === str)) {
+            items = items + 1;
+        }
+    }
+    return items;
 }
 function getNumberOfCommunityWorkers(str){
     var cbas = 0;
@@ -402,6 +411,10 @@ function drawLabelsOnShapes(str, loc_type){
         users = getNumberOfWorkers;
         color = "#A3CA00";
     }
+    else if(str === 'facilities'){
+        users = getNumberOfFacilities;
+        color = "#E26F36";
+    }
     if(location_type === 'District'){
         areas = document.getElementsByName('districts_coords')[0].areas;
         canvas = document.getElementsByTagName('canvas')[2];
@@ -415,8 +428,9 @@ function drawLabelsOnShapes(str, loc_type){
         if(numOfUsers === 0){
             continue;
         }
-        drawLabelOnPoly(''+numOfUsers, center[0], center[1], canvas, color, null, i===0);
+        drawLabelOnPoly(''+numOfUsers, center[0], center[1], canvas, color, null, i===0, "");
     }
+    drawLabelOnPoly(toTitleCase(str), 100, 100, canvas, color, '20px Arial bold', false, 'rectangle');
 }
 function updateDisplay(str, location_type){
     var toDisplay = []
@@ -474,12 +488,12 @@ function updateDisplay(str, location_type){
         }
     }
     var total_results = results_positive + results_negative + results_rejected
-    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
-    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
-    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
-    district_fragment = ""
-    clinic_fragment = ""
-    contact_fragment = ""
+    var perc_pos = (100.0 * results_positive / total_results).toFixed(1)
+    var perc_neg = (100.0 * results_negative / total_results).toFixed(1)
+    var perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
+    var district_fragment = ""
+    var clinic_fragment = ""
+    var contact_fragment = ""
     var mwana_years = "{{ mwana_years }}";
     if(location_type === "Country"){
         toDisplay.push("<h2>Zambia</h2>")
@@ -491,20 +505,23 @@ function updateDisplay(str, location_type){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff<a/> and " +
-                cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> registered."
+            clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
+            contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>" + workers 
+                + " clinic staff<a/> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>" +
+                cbas + " Comminuty Based Agents</a> currently registered."
         }else if(location_type === "District"){
             district_fragment = " District Mwana has been deployed to " + (districts.length) + " facilities namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff</a> and "
-                + cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> are registered."
+            contact_fragment = " In these <a onclick='drawLabelsOnShapes(\"facilities\")'>" +(districts.length) + " facilities</a>, a total of <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>"+ workers
+                + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>"
+                + cbas + " Comminuty Based Agents</a> are currently registered."
         }else if(location_type === "Country"){
             district_fragment = ", within <a onclick='showGrowthChart()'>" + mwana_years + "</a>, Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\")'>clinic staff</a> and " + cbas
-                + " <a onclick='drawLabelsOnShapes(\"cbas\")'>Comminuty Based Agents</a> registered."
+            clinic_fragment = "<br>In these " +(districts.length) +
+                " provinces Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
+            contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\")'>" + workers + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\")'>" + cbas
+                + " Comminuty Based Agents</a> currently registered."
         }
 
     }else if(districts.length == 1){
