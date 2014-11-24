@@ -56,7 +56,7 @@ message threads. If you think this message is a mistake, respond with keyword 'H
         msgs = Message.objects.filter(contact__in=contacts).order_by('-date')[:limit]
 
         main_body = "\n".join("%s %s %s (%s)" % (msg.connection.identity,
-                                                 {"I": "<<", "O": ">>"}.get(
+                                                 {"I": ">>", "O": "<<"}.get(
                                                      msg.direction, "-"),
                                                  MessageFilter.get_filtered_message(
                                                      msg.text),
