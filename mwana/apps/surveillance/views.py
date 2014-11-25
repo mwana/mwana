@@ -55,7 +55,7 @@ def export_to_csv(request):
     writer = csv.writer(response, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     for row in htmltable_to_rows(data):
-        writer.writerow(row)
+        writer.writerow([item.encode("UTF-8") for item in row])
         
     return response
 
