@@ -97,7 +97,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
             <br>
             <form name="getValues" action="" method="GET">
 
-                <table border="1" width="100%">
+                <table border="1" width="100%" id="input_parameters_table">
             <thead>
             <th>Start Date</th>
             <th>End Date</th>
@@ -759,6 +759,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
         <div class="clear-hack"></div>
     </div>
 
+<input type="hidden" name="{% csrf_token %}" id="csrf_token" value="{% csrf_token %}" >
 </div>
 <div id="floating-navigator">
     <div id="title"> Quick Navigator</div><p></p>
@@ -777,6 +778,38 @@ You currently don't belong to any group for viewing reports. Contact the system 
 </div>
 <script type="text/javascript">
     $("#rpt_group").chosen();
+    $("table").attr("onclick", "showExportPopup(this)")
+    $("table").attr("title", "Click here to export to Excel")
+    $("#input_parameters_table").attr("onclick", "")
+    $("#input_parameters_table").attr("title", "Choose Parameters")
+</script>
+<script type="text/javascript">
+   
+    function showExportPopup(elem){
+        var d = new Date();
+        var html_code = "";
+        var filename = 'mwana_export_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + "_" + d.getHours() + d.getMinutes() + '_' + d.getSeconds() + '.csv';
+        html_code = html_code + '<form name="postValues" action="/surveillance/export_to_csv/?filename=' + filename + '&my_table=" method="POST">';
+        html_code = html_code + document.getElementById('csrf_token').value
+        html_code = html_code + '<input id="export-to-csv-btn" class="button" type="submit" value="Export to csv" name="export-to-csv-btn" />';
+        html_code = html_code + '<input type="hidden" name="csv_text" id="csv_text" value="'+ elem.innerHTML.replace(/\n/g, '').replace(/"/g, "'") +'">';
+        html_code = html_code + "<p>";
+        html_code = html_code + '</form>';
+
+        $(html_code).dialog({
+                draggable: false,
+                resizable: true,
+                width: 400,
+                modal: true,
+                hide: 'slide',
+                title: 'Export Report',
+                buttons: {
+                    Close: function() {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+    }
 </script>
 {%endif%}
 {% endblock %}
