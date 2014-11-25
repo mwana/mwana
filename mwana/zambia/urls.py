@@ -2,11 +2,10 @@
 from django.conf.urls.defaults import *
 from mwana.apps.reports import views
 
-urlpatterns = patterns('',
-    # global project URLs:
-    (r'^', include('mwana.urls')),
+urlpatterns = patterns('',    
     # custom URL additions for Zambia:
     url(r'^$', views.home, name='home'),
+    url(r'^dashboard$', views.home, name='home'),
     url(r'^reports/', views.zambia_reports, name='mwana_reports'),
     url(r'^contacts/', views.contacts_report, name='mwana_contacts'),
     url(r'^groups/', views.group_facility_mapping, name='group_facility_mapping'),
@@ -23,4 +22,7 @@ urlpatterns = patterns('',
     (r'^survey/', include('mwana.apps.surveillance.urls')),
     (r'^surveillance/', include('mwana.apps.surveillance.urls')),
     (r'^data_integrity/', include('mwana.apps.monitor.urls')),
+    # global project URLs:
+    # putting this at the bottom allows overidding global patterns as necessary
+    (r'^', include('mwana.urls')),
 )
