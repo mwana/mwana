@@ -3,18 +3,17 @@ from __future__ import unicode_literals
 from django.utils.translation import ugettext_lazy as _
 
 from appointments.handlers.base import AppointmentHandler
-from appointments.forms import QuitForm
+from ..forms import QuitForm
 
 
 class DiscontinueHandler(AppointmentHandler):
 
-    "Unsubscribes a user to a timeline."
+    "Unsubscribes a user from a timeline."
     prefix = ''
     keyword = 'discontinue'
     form = QuitForm
-    success_text = _('Thank you%(user)s! You unsubcribed from the %(timeline)s'
-                     ' for %(name)s on %(date)s. You will be no longer be '
-                     'notified when it is time for the next appointment.')
+    success_text = _('Thank you%(user)s! You unsubcribed %(name)s from the '
+                     ' %(timeline)s reminders on %(date)s.')
     help_text = _('To unsubcribe a user from a timeline send: %(prefix)s '
                   '%(keyword)s <NAME/ID> <DATE>. The date is optional.')
 

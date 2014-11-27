@@ -19,6 +19,7 @@ DBS_PRINTER_SLUG = settings.RESULTS160_SLUGS.get('DBS_PRINTER_SLUG',
                                                  'dbs-printer')
 CHILD_SLUG = settings.RESULTS160_SLUGS.get('CHILD_SLUG', 'child-patient')
 MOTHER_SLUG = settings.RESULTS160_SLUGS.get('MOTHER_SLUG', 'mother-patient')
+VOLUNTEER_SLUG = settings.RESULTS160_SLUGS.get('VOLUNTEER_SLUG', 'volunteer')
 
 # location types:
 CLINIC_SLUGS = settings.RESULTS160_SLUGS.get('CLINIC_SLUGS', ('clinic',))
@@ -103,3 +104,7 @@ def get_nutrition_worker_type():
 
 def get_nutrition_patient_type():
     return _get_contacttype(NUTRITION_PATIENT_SLUG, 'Nutrition Patient')
+
+
+def get_volunteer_type():
+    return _get_contacttype(VOLUNTEER_SLUG, 'Volunteer')

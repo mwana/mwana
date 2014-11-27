@@ -100,7 +100,7 @@ class MayiForm(HandlerForm):
 
     edd = forms.DateField(required=True, error_messages={
         'required': _(
-            'Sorry, please use the DMMYYYY or YYYY-MM-DD format.')})
+            'Sorry, please use the DDMMYYYY or YYYY-MM-DD format.')})
     firstname = forms.CharField(required=False, error_messages={
         'required': _(
             'Sorry, you must provide a mothers first name.')})
@@ -115,11 +115,12 @@ class MayiForm(HandlerForm):
         'required': _('Please enter P, N or U for the mothers status.')})
     name = forms.CharField(required=True, max_length=50, error_messages={
         'required': _('Please provide the id of the mother.')})
+    volunteer = forms.CharField(max_length=15, required=False)
 
     def clean(self):
         "Check for previous subscription."
         timeline = self.cleaned_data.get('timeline', None)
-        name = self.cleaned_data.get('name', None)
+        name = self.cleaned_data.get('name', None).upper()
         location = self.connection.contact.location
         if name is not None and timeline is not None and location is not None:
             previous = TimelineSubscription.objects.filter(
@@ -160,7 +161,7 @@ class MayiForm(HandlerForm):
             if str(num)[:1] == '8':
                 backend_name = 'tnm'
             elif str(num)[:1] == '9':
-                backend_name = 'zain'
+                backend_name = 'airtelsmpp'
             valid_cell = True
         else:
             backend_name = None
@@ -171,7 +172,7 @@ class MayiForm(HandlerForm):
         if not self.is_valid():
             return None
         timeline = self.cleaned_data['timeline']
-        name = self.cleaned_data['name']
+        name = self.cleaned_data['name'].upper()
         if "_" in name:
             firstname, lastname = name.split("_")
         else:
@@ -179,27 +180,44 @@ class MayiForm(HandlerForm):
         start = self.cleaned_data['edd']
         edd_start = start - timedelta(days=270)
         phone = self.cleaned_data['phone']
+        volunteer = self.cleaned_data['volunteer']
+        v_backend_name, v_cell = self._validate_cell(volunteer)
+        if v_cell:
+            volunteer = "+265" + volunteer[1:]
+            v_backend = self._get_backend(v_backend_name)
+            v_conn = lookup_connections(backend=v_backend,
+                                        identities=[volunteer])[0]
+        else:
+            v_conn = None
         healthworker = self.connection.contact
         location_id = self.connection.contact.location
+        if v_conn is not None:
+            reminder_conn = v_conn
+        else:
+            reminder_conn = self.connection
+
         TimelineSubscription.objects.create(
             timeline=timeline, start=edd_start, pin=name,
-            connection=self.connection
+            connection=reminder_conn
         )
         exposed = Timeline.objects.get(name="Exposed")
         if self.cleaned_data['status'].upper() == "P":
             TimelineSubscription.objects.create(
                 timeline=exposed, start=edd_start, pin=name,
-                connection=self.connection
+                connection=reminder_conn
             )
 
-        # create the patient, really should move to rapidsms-healthcare
+        if len(volunteer) < 2:
+            volunteer = self.connection.identity
+        # create the patient
         if healthworker is not None and location_id is not None:
             patient, created = Contact.objects.get_or_create(
                 name=name,
                 location=location_id,
                 first_name=firstname,
                 last_name=lastname,
-                date_of_birth=self.cleaned_data['dob'])
+                date_of_birth=self.cleaned_data['dob'],
+                volunteer=volunteer)
 
         patient_t = const.get_patient_type()
         if not patient.types.filter(pk=patient_t.pk).count():
@@ -218,6 +236,7 @@ class MayiForm(HandlerForm):
                                               identities=[phone])[0]
             if patient_conn.contact_id is None:
                 patient_conn.contact_id = patient.id
+                patient_conn.contact = patient
                 patient_conn.save()
                 # patient opted in subscribe them to timeline.
                 # TODO: need to add per appointment/contact_type messages
@@ -260,12 +279,13 @@ class MwanaForm(HandlerForm):
             'Sorry, you must provide the childs firstname_lastname'
             ' or an id')
     })
+    volunteer = forms.CharField(required=False, max_length=15)
 
     def clean(self):
         "Check for previous subscription."
         timeline = self.cleaned_data.get('timeline', None)
-        name = self.cleaned_data['child_name']
-        mother_name = self.cleaned_data['mother_name']
+        name = self.cleaned_data['child_name'].upper()
+        mother_name = self.cleaned_data['mother_name'].upper()
         location = self.connection.contact.location
         if name is not None and timeline is not None and location is not None:
             previous = TimelineSubscription.objects.filter(
@@ -292,16 +312,43 @@ class MwanaForm(HandlerForm):
                 raise forms.ValidationError(message)
         return self.cleaned_data
 
+    def _get_backend(self, backend_name):
+        """Returns a matching backend based on the name."""
+        return Backend.objects.filter(name__iexact=backend_name)[0]
+
+    def _validate_cell(self, num):
+        if num is None:
+            return None, False
+        num = str(num)
+        if num.strip().upper() in ['X', 'XX']:
+            return None, False
+        try:
+            num = int(num)
+        except ValueError:
+            # register no number if not valid number
+            return None, False
+        # only accept 10 digit numbers for now
+        if len(str(num)) == 9:
+            if str(num)[:1] == '8':
+                backend_name = 'tnm'
+            elif str(num)[:1] == '9':
+                backend_name = 'airtelsmpp'
+            valid_cell = True
+        else:
+            backend_name = None
+            valid_cell = False
+        return backend_name, valid_cell
+
     def save(self):
         if not self.is_valid():
             return None
         timeline = self.cleaned_data['timeline']
-        name = self.cleaned_data['child_name']
+        name = self.cleaned_data['child_name'].upper()
         if "_" in name:
             child_firstname, child_lastname = name.split("_")
         else:
             child_firstname = child_lastname = ''
-        mother_name = self.cleaned_data['mother_name']
+        mother_name = self.cleaned_data['mother_name'].upper()
         if "_" in mother_name:
             mother_firstname, mother_lastname = mother_name.split("_")
         else:
@@ -309,18 +356,35 @@ class MwanaForm(HandlerForm):
         date = self.cleaned_data['date']
         healthworker = self.connection.contact
         location_id = self.connection.contact.location
+        volunteer = self.cleaned_data['volunteer']
+        v_backend_name, v_cell = self._validate_cell(volunteer)
+        if v_cell:
+            volunteer = "+265" + volunteer[1:]
+            v_backend = self._get_backend(v_backend_name)
+            v_conn = lookup_connections(backend=v_backend,
+                                        identities=[volunteer])[0]
+        else:
+            v_conn = None
+        if v_conn is not None:
+            reminder_conn = v_conn
+        else:
+            reminder_conn = self.connection
         # subscribe to birth timeline
         TimelineSubscription.objects.create(
-            timeline=timeline, start=date, pin=name,
-            connection=self.connection
+            timeline=timeline, start=date, pin=mother_name,
+            connection=reminder_conn
         )
-        # create the patient, really should move to rapidsms-healthcare
+
+        if len(volunteer) < 2:
+            volunteer = self.connection.identity
+        # create the patient
         if healthworker is not None and location_id is not None:
             mother, created_mom = Contact.objects.get_or_create(
                 name=mother_name,
                 location=location_id,
                 first_name=mother_firstname,
-                last_name=mother_lastname
+                last_name=mother_lastname,
+                volunteer=volunteer
             )
 
             patient_t = const.get_patient_type()
@@ -366,7 +430,7 @@ class RefillForm(HandlerForm):
     def clean(self):
         "Check that mother is subscribed"
         timeline = self.cleaned_data.get('timeline', None)
-        name = self.cleaned_data['name']
+        name = self.cleaned_data['name'].upper()
         if name is not None and timeline is not None:
             previous = TimelineSubscription.objects.filter(
                 Q(Q(end__isnull=True) | Q(end__gte=now())),
@@ -389,10 +453,10 @@ class RefillForm(HandlerForm):
         if not self.is_valid():
             return None
         # timeline = self.get_cleaned_data['timeline']
-        name = self.cleaned_data['name']
+        name = self.cleaned_data['name'].upper()
         date = self.cleaned_data['date']
         sub = self.cleaned_data['sub']
-        milestone, created = Milestone.objects.get_or_create(
+        milestone, created = Milestone.objects.get(
             name="ART refill (Adhoc)")
         # create the appointment
         appt, created = Appointment.objects.get_or_create(
@@ -429,7 +493,7 @@ class StatusForm(HandlerForm):
     def clean_name(self):
         "Find the most recent appointment/trace for the patient."
         timeline = self.cleaned_data.get('timeline', None)
-        name = self.cleaned_data.get('name', '')
+        name = self.cleaned_data.get('name', '').upper()
         # name should be a pin for an active timeline subscription
         timelines = TimelineSubscription.objects.filter(
             Q(Q(end__gte=now()) | Q(end__isnull=True)),
@@ -476,6 +540,71 @@ class StatusForm(HandlerForm):
         trace.status = self.cleaned_data['status']
         trace.save()
         return {}
+
+
+class QuitForm(HandlerForm):
+    "Unsubscribes a user from a timeline by populating the end date."
+
+    keyword = forms.CharField()
+    name = forms.CharField(error_messages={
+        'required': _('Sorry, you must include a name or id for your '
+            'unsubscription.')
+    })
+    date = forms.DateTimeField(required=False, error_messages={
+        'invalid': _('Sorry, we cannot understand that date format. '
+            'For the best results please use the ISO YYYY-MM-DD format.')
+    })
+
+    def clean_keyword(self):
+        "Check if this keyword is associated with any timeline."
+        keyword = self.cleaned_data.get('keyword', '')
+        match = None
+        if keyword:
+            # Query DB for valid keywords
+            for timeline in Timeline.objects.filter(slug__icontains=keyword):
+                if keyword.strip().lower() in timeline.keywords:
+                    match = timeline
+                    break
+        if match is None:
+            # Invalid keyword
+            raise forms.ValidationError(_('Sorry, we could not find any appointments for '
+                    'the keyword: %s') % keyword)
+        else:
+            self.cleaned_data['timeline'] = match
+        return keyword
+
+    def clean(self):
+        "Check for previous subscription."
+        timeline = self.cleaned_data.get('timeline', None)
+        name = self.cleaned_data.get('name', None)
+        if name is not None and timeline is not None:
+            previous = TimelineSubscription.objects.filter(
+                Q(Q(end__isnull=True) | Q(end__gte=now())),
+                timeline=timeline, connection=self.connection, pin__iexact=name
+            )
+            if not previous.exists():
+                params = {'timeline': timeline.name, 'name': name}
+                message = _('Sorry, you have not registered a %(timeline)s for '
+                        '%(name)s.') % params
+                raise forms.ValidationError(message)
+            self.cleaned_data['subscription'] = previous[0]
+        return self.cleaned_data
+
+    def save(self):
+        if not self.is_valid():
+            return None
+        subscription = self.cleaned_data['subscription']
+        name = self.cleaned_data['name']
+        end = self.cleaned_data.get('date', now()) or now()
+        user = ' %s' % self.connection.contact.name if self.connection.contact else ''
+        subscription.end = end
+        subscription.save()
+        return {
+            'user': user,
+            'date': end,
+            'name': name,
+            'timeline': subscription.timeline.name,
+        }
 
 
 class PatientReportFilterForm(forms.Form):

@@ -4,8 +4,8 @@ import logging
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.patienttracing.models import PatientTrace
 from datetime import datetime
-from rapidsms.models import Contact
-from rapidsms.router import send
+from rapidsms.models import Contact, Backend
+from rapidsms.router import send, lookup_connections
 from mwana.util import get_clinic_or_default
 from mwana.apps.broadcast.models import BroadcastMessage
 from mwana.const import get_cba_type
@@ -57,12 +57,12 @@ class TraceHandler(KeywordHandler):
             if len(name) > 50:
                 self.respond("%s is too long for a name." % name)
             elif name:
-                self.man_trace(name.title())
+                self.man_trace(name.upper())
         return True
 
     def contact_valid(self):
         connection = self.msg.connection
-       # only clinic workers should be able to trace
+        # only clinic workers should be able to trace
         if not is_valid_connection(connection, const.get_clinic_worker_type()):
             if is_valid_connection(connection, const.get_cba_type()):
                 self.respond(self.cba_not_allowed_txt % (
@@ -91,29 +91,19 @@ class TraceHandler(KeywordHandler):
 
         self.respond_trace_initiated(name)
         # send to patient if they have a number otherwise to CHWs
-        # create the patient if none existent, plan move to rapidsms-healthcare
-        if "_" in name:
-            firstname, lastname = name.split("_")
-        else:
-            firstname = lastname = ''
-        patient, created = Contact.objects.get_or_create(
-            name=name,
-            location=self.msg.connection.contact.location,
-            first_name=firstname,
-            last_name=lastname)
+        location = get_clinic_or_default(self.msg.connection.contact)
 
-        if created:
-            patient_t = const.get_patient_type()
-            if not patient.types.filter(pk=patient_t.pk).count():
-                patient.types.add(patient_t)
+        opted_in_contacts = Contact.active.location(location).filter(
+            name=name.upper())
 
-        if patient.default_connection is not None:
-            params = {'first': firstname, 'last': lastname,
-                      'clinic': p.clinic.name}
-            msg = "Please visit the %(clinic)s clinic for your appointment."
-            send(msg % params, [patient.default_connection])
-        else:
-            self.send_trace_to_cbas(name)
+        for contact in opted_in_contacts:
+            if contact.default_connection is not None:
+                params = {'clinic': contact.clinic.name}
+                msg = "Please visit %(clinic)s clinic "\
+                      "for your appointment." % params
+                send(msg, [contact.default_connection])
+            else:
+                self.send_trace_to_volunteer(name)
 
     def respond_trace_initiated(self, patient_name):
         '''
@@ -143,6 +133,22 @@ class TraceHandler(KeywordHandler):
                     cworker=self.msg.connection.contact.name)
                 send(msg, [contact.default_connection])
         # self.broadcast(self.cba_initiate_trace_msg, cbas, "CHWs", patient_name)
+
+    def send_trace_to_volunteer(self, patient_name):
+        '''
+        Sends a trace request to the volunteer assigned to the mother.'''
+        patient = Contact.active.get(name=patient_name)
+        msg = "Moni, Chonde pezani a %(name)s kuti apite kuchipatala." % dict(
+            name=patient_name)
+        if len(patient.volunteer) > 5:
+            if str(patient.volunteer)[4:5] == 8:
+                v_backend_name = 'tnm'
+            else:
+                v_backend_name = 'airtelsmpp'
+            v_backend = Backend.objects.filter(name__iexact=v_backend_name)[0]
+            v_conn = lookup_connections(backend=v_backend,
+                                        identities=[patient.volunteer])
+            send(msg, v_conn)
 
     def help(self):
         '''

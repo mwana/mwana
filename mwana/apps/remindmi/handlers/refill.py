@@ -20,13 +20,13 @@ class RefillHandler(AppointmentHandler):
         "Tokenize message text."
         result = {}
         tokens = text.strip().split()
-        result['keyword'] = tokens.pop(0)
+        result['keyword'] = 'exp'
         if tokens:
             # Next token is the name
-            result['name'] = tokens.pop(0)
+            result['name'] = tokens[0]
             if tokens:
                 # Next token is the date
-                result['date'] = tokens.pop(0)
+                result['date'] = tokens[1]
         return result
 
     def check_healthworker(self):

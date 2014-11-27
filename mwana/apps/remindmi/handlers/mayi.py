@@ -30,7 +30,7 @@ class MayiHandler(NewHandler):
         result = {'keyword': 'mayi'}
         tokens = [t.upper() for t in text.strip().split()]
         # check # of tokens and deal with old version
-        if len(tokens) == 6:
+        if len(tokens) == 6 and len(tokens[5]) < 2:
             result['edd'] = tokens[0]
             result['firstname'] = tokens[1]
             result['lastname'] = tokens[2]
@@ -38,12 +38,30 @@ class MayiHandler(NewHandler):
             result['name'] = "_".join(tokens[1:3])
             result['phone'] = tokens[4]
             result['status'] = tokens[5]
-        elif len(tokens) == 5:
+            result['volunteer'] = ''
+        elif len(tokens) == 7 and len(tokens[6]) > 2:
+            result['edd'] = tokens[0]
+            result['firstname'] = tokens[1]
+            result['lastname'] = tokens[2]
+            result['dob'] = tokens[3]
+            result['name'] = "_".join(tokens[1:3])
+            result['phone'] = tokens[4]
+            result['status'] = tokens[5]
+            result['volunteer'] = tokens[6]
+        elif len(tokens) == 6 and len(tokens[5]) > 2:
             result['edd'] = tokens[0]
             result['name'] = tokens[1]
             result['dob'] = tokens[2]
             result['phone'] = tokens[3]
             result['status'] = tokens[4]
+            result['volunteer'] = tokens[5]
+        elif len(tokens) == 5 and len(tokens[4]) < 2:
+            result['edd'] = tokens[0]
+            result['name'] = tokens[1]
+            result['dob'] = tokens[2]
+            result['phone'] = tokens[3]
+            result['status'] = tokens[4]
+            result['volunteer'] = ''
         return result
 
     def check_healthworker(self):

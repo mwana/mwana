@@ -314,7 +314,7 @@ class QuitForm(HandlerForm):
         if name is not None and timeline is not None:
             previous = TimelineSubscription.objects.filter(
                 Q(Q(end__isnull=True) | Q(end__gte=now())),
-                timeline=timeline, connection=self.connection, pin=name
+                timeline=timeline, connection=self.connection, pin__iexact=name
             )
             if not previous.exists():
                 params = {'timeline': timeline.name, 'name': name}
