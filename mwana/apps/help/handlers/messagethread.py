@@ -43,7 +43,7 @@ message threads. If you think this message is a mistake, respond with keyword 'H
         if len(parts) == 2:
             phone_number = parts[0]
             if parts[1].isdigit():
-                limit = parts[1]
+                limit = min(int(parts[1]), 30)
 
         contacts = Contact.active.filter(
             connection__identity__contains=phone_number)
