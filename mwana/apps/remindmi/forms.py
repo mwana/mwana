@@ -456,7 +456,7 @@ class RefillForm(HandlerForm):
         name = self.cleaned_data['name'].upper()
         date = self.cleaned_data['date']
         sub = self.cleaned_data['sub']
-        milestone, created = Milestone.objects.get(
+        milestone = Milestone.objects.get(
             name="ART refill (Adhoc)")
         # create the appointment
         appt, created = Appointment.objects.get_or_create(
