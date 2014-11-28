@@ -145,8 +145,7 @@ class JoinHandler(KeywordHandler):
     def handle(self, text):
         text = text.strip()
         cba_pattern = re.compile(r"^(cba|hsa|agent)(\s+)(\w+)(\s+)(.{1,})(\s+)$", re.IGNORECASE)
-        if cba_pattern.findall(text) or text.strip().split()[0].lower() in \
-        ('agent', 'cba', 'hsa'):
+        if cba_pattern.findall(text) or text.strip().split()[0].lower() in ('agent', 'cba', 'hsa'):
             try:
                 words = text.split()
                 self.handle_zone(text[text.index(' '):])
@@ -155,6 +154,9 @@ class JoinHandler(KeywordHandler):
                 self.respond("To register as a Mobile agent, send JOIN <HSA> <CLINIC CODE> "\
                              "<ZONE #> <YOUR NAME>")
                 return
+        elif text.split()[0].lower() in ['vnt']:
+            self.handle_volunteer(text)
+            return
 
         tokens = self.check_message_valid_and_clean(text)
 
@@ -214,6 +216,60 @@ class JoinHandler(KeywordHandler):
 
             self.respond(self.get_response_message(worker_type, name,
                                                    clinic.name, pin))
+        except Location.DoesNotExist:
+            no_location = "Sorry, I don't know about a location with"\
+                          "code %(code)s. Please check your code and"\
+                          "try again." % {'code': slug}
+            self.respond(no_location)
+
+    def handle_volunteer(self, text):
+        tokens = text.strip().split()
+        slug = tokens[1]
+        clinic_code = LocationCode(slug)
+        name = " ".join(tokens[2:]).title().strip()
+        volunteer_type = const.get_volunteer_type()
+        location_type = clinic_code.get_location_type()
+        slug = clinic_code.slug
+
+        if is_already_valid_connection_type(self.msg.connections[0],
+                                            volunteer_type):
+            # refuse re-registration if they're still active and eligible
+            self.respond(self.ALREADY_REGISTERED % dict(
+                name=self.msg.connections[0].contact.name,
+                location=self.msg.connections[0].contact.location))
+            return False
+        try:
+            location = Location.objects.get(slug__iexact=slug,
+                                            type__slug__in=location_type)
+            if self.msg.connections[0].contact is not None \
+               and self.msg.connections[0].contact.is_active:
+                # this means they were already registered and active,
+                # but not yet receiving results.
+                clinic = get_clinic_or_default(self.msg.connections[0].contact)
+                if clinic != location:
+                    self.respond(self.ALREADY_REGISTERED % dict(
+                                 name=self.msg.connections[0].contact.name,
+                                 location=clinic))
+                    return True
+                else:
+                    contact = self.msg.connections[0].contact
+            else:
+                contact = Contact(location=location)
+                clinic = get_clinic_or_default(contact)
+                contact.name = name
+                contact.save()
+                contact.types.add(volunteer_type)
+            if SYSTEM_LOCALE == LOCALE_MALAWI:
+                if not contact.types.filter(
+                        slug=const.get_volunteer_type()).exists():
+                    contact.types.add(const.get_volunteer_type())
+
+            self.msg.connections[0].contact = contact
+            self.msg.connections[0].save()
+            msg = "Thank you %(name)s! you have successfully registered as "\
+                  "a %(volunteer)s at %(clinic)s."
+            self.respond(msg % dict(volunteer=volunteer_type, name=name,
+                                    clinic=clinic.name))
         except Location.DoesNotExist:
             no_location = "Sorry, I don't know about a location with"\
                           "code %(code)s. Please check your code and"\
