@@ -34,7 +34,7 @@ facility codes. If you think this message is a mistake, respond with keyword 'HE
         
         locations = Location.objects.exclude(type__slug='zone')\
                                     .filter(Q(name__icontains=location_text) |
-                                            Q(slug__contains=location_text))[:5]
+                                            Q(slug__contains=location_text))[:30]
         
         if locations:
             location_list = "\n**".join(location.slug + "-"
