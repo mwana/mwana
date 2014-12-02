@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.apps.userverification.models import DeactivatedUser
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -542,9 +543,17 @@ Do not reply. This is a system generated message.
                 logger.debug("skipping for %s. Locations=%s" % (support.__unicode__(), len(locations)))
                 continue
 
-            body = "Dear %s,\n\nThe following facilities have no Results160 Staff:\n\n" % support.user.username
-            body += "\n".join("%s, %s, %s, %s" % (loc.parent.parent.name,
-                              loc.parent.name, loc.name, loc.slug)
+            body = "Dear %s,\n\nThe following facilities have no Results160 Staff.\n" \
+                   "The staff indicated have stopped using the Mwana SMS system"\
+                   " for unknown reasons\n\n" % support.user.username
+
+            body += "\n".join("- %s, %s, %s, %s. %s" % (
+                              loc.parent.parent.name,
+                              loc.parent.name, loc.name, loc.slug,
+                              ", ".join("%s (%s)" % ( da.contact.name, da.connection.identity)
+                                        for da in DeactivatedUser
+                                        .objects.filter(contact__location=loc, contact__is_active=False))
+                              )
                               for loc in locations)
             body += footer
             logger.info("sending: %s, %s, %s, %s " % (support.user.email, body[:100], host, user))
