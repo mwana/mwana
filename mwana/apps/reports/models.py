@@ -8,6 +8,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from datetime import date
 
+
 class Turnaround(models.Model):
     """
     A stub to display a view in django admin format for turnaround data
@@ -22,16 +23,21 @@ class Turnaround(models.Model):
     date_reached_moh = models.DateTimeField(blank=True, null=True)
     date_retrieved = models.DateField(blank=True, null=True)
 
+
 class SupportedLocation(models.Model):
     location = models.ForeignKey(Location)
     supported = models.BooleanField(default=True)
 
+    def __unicode__(self):
+        return "%s %s" % (self.location.name, "supported" if self.supported else "Not supported")
+
+
 class MessageGroup(models.Model):
     APP_LIST = (
-                ('results160', 'Results160'),
-                ('reminders', 'RemindMI')
-                )
-#    id = models.IntegerField()
+        ('results160', 'Results160'),
+        ('reminders', 'RemindMI')
+    )
+    #    id = models.IntegerField()
     date = models.DateTimeField()
     text = models.TextField()
     direction = models.CharField(max_length=1)
@@ -45,87 +51,88 @@ class MessageGroup(models.Model):
     clinic = models.CharField(max_length=20)
     before_pilot = models.BooleanField()
 
+
 class DhoReportNotification(models.Model):
     """
     Records EID and Birth reports sent to dho
     """
     REPORT_TYPES = (
-    ('M','Monthly Report'),
+        ('M', 'Monthly Report'),
     )
 
-    contact  = models.ForeignKey(Contact, related_name='dho')
+    contact = models.ForeignKey(Contact, related_name='dho')
     district = models.ForeignKey(Location)
-    type    = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    type = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
     samples = models.PositiveIntegerField()
     results = models.PositiveIntegerField()
     births = models.PositiveIntegerField()
-    date     = models.DateField()
-    date_sent     = models.DateTimeField(default=datetime.now)
-
+    date = models.DateField()
+    date_sent = models.DateTimeField(default=datetime.now)
 
     def __unicode__(self):
         return "%s DHO EID & Births Summary for %s on %s" % \
-            (self.district.name, self.date, self.date_sent.date())
+               (self.district.name, self.date, self.date_sent.date())
+
 
 class PhoReportNotification(models.Model):
     """
     Records EID and Birth reports sent to pho
     """
     REPORT_TYPES = (
-    ('M','Monthly Report'),
+        ('M', 'Monthly Report'),
     )
 
-    contact  = models.ForeignKey(Contact, related_name='pho')
+    contact = models.ForeignKey(Contact, related_name='pho')
     province = models.ForeignKey(Location)
-    type    = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    type = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
     samples = models.PositiveIntegerField()
     results = models.PositiveIntegerField()
     births = models.PositiveIntegerField()
-    date     = models.DateField()
-    date_sent     = models.DateTimeField(default=datetime.now)
-
+    date = models.DateField()
+    date_sent = models.DateTimeField(default=datetime.now)
 
     def __unicode__(self):
         return "%s DHO EID & Births Summary for %s on %s" % \
-            (self.province.name, self.date, self.date_sent.date())
+               (self.province.name, self.date, self.date_sent.date())
+
 
 class CbaThanksNotification(models.Model):
     """
     Send thank you messages to CBA's who registered births during a given month
     """
     REPORT_TYPES = (
-    ('M','Monthly Report'),
+        ('M', 'Monthly Report'),
     )
 
-    contact  = models.ForeignKey(Contact, related_name='cba')
+    contact = models.ForeignKey(Contact, related_name='cba')
     facility = models.ForeignKey(Location)
-    type  = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    type = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
     births = models.PositiveIntegerField()
-    date  = models.DateField()
+    date = models.DateField()
     date_sent = models.DateTimeField(default=datetime.now)
-
 
     def __unicode__(self):
         return "Congratulatory message for %s of %s for registering %s births in %s" % \
-            (self.contact.name, self.facility.name, self.births, self.date)
+               (self.contact.name, self.facility.name, self.births, self.date)
+
 
 class CbaEncouragement(models.Model):
     """
     Send encouragement/reminder messages to CBA's to register births
     """
     REPORT_TYPES = (
-    ('M','Monthly Encouragement'),
+        ('M', 'Monthly Encouragement'),
     )
 
-    contact  = models.ForeignKey(Contact)
+    contact = models.ForeignKey(Contact)
     facility = models.ForeignKey(Location)
-    type  = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
+    type = models.CharField(choices=REPORT_TYPES, max_length=1, blank=True)
     date_sent = models.DateTimeField(default=datetime.now)
-
 
     def __unicode__(self):
         return "Encouragement message to %s to register births" % \
-            (self.contact.name)
+               (self.contact.name)
+
 
 class Login(models.Model):
     user = models.ForeignKey(User)
@@ -151,7 +158,7 @@ class MessageByLocationByUserType(models.Model):
     facility_slug = models.CharField(max_length=6, null=True, blank=True)
     absolute_location = models.ForeignKey(Location)
     min_date = models.DateField(null=True, blank=True)
-    max_date = models.DateField(null=True, blank=True)    
+    max_date = models.DateField(null=True, blank=True)
     month_year = models.CharField(max_length=8, null=True, blank=True)
     count_incoming = models.PositiveIntegerField(default=0, null=True, blank=True)
     count_outgoing = models.PositiveIntegerField(default=0, null=True, blank=True)
@@ -167,7 +174,7 @@ class MessageByLocationByUserType(models.Model):
         super(MessageByLocationByUserType, self).save(*args, **kwargs)
 
     class Meta:
-        unique_together=("absolute_location", "year", "month", "worker_type")
+        unique_together = ("absolute_location", "year", "month", "worker_type")
 
 
 class MessageByLocationByBackend(models.Model):
@@ -204,10 +211,11 @@ class MessageByLocationByBackend(models.Model):
 #    class Meta:
 #        unique_together=("absolute_location", "year", "month", "backend")
 
+
 class MsgByLocationByBackendBuildLog(models.Model):
     message_id = models.IntegerField(null=True, blank=True, editable=False, default=0)
     lock = models.IntegerField(unique=True)
-    
+
     def __unicode__(self):
         return "%s" % self.message_id
 
