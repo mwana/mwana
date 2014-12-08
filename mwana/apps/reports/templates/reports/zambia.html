@@ -98,44 +98,44 @@ You currently don't belong to any group for viewing reports. Contact the system 
             <form name="getValues" action="" method="GET">
 
                 <table border="1" width="100%" id="input_parameters_table">
-            <thead>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Province</th>
-            <th>District</th>
-            <th>Facility</th>
-            <th>Implementer</th>
-            <th></th>
-            </thead>
-            <tbody>            
-            <tr>
-                <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstartdate }}' placeholder='{{ fstartdate }}' /></td>
-                <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value='{{ fenddate }}'  placeholder='{{ fenddate }}' /></td>
-                <td>{% autoescape off %}
-                    {{rpt_provinces}}
-                    {% endautoescape %}
-                </td>
-                <td>{% autoescape off %}
-                    {{rpt_districts}}
-                    {% endautoescape %}
-                </td>
-                <td>{% autoescape off %}
-                    {{rpt_facilities}}
-                    {% endautoescape %}
-                </td>
-                <td>{% if is_report_admin %}
-                    {% autoescape off %}
-                    {{rpt_group}}
-                    {% endautoescape %}
-                    {%endif%}</td>
-                    <td><input type="submit" value="Ok" name="SubmitValues" /></td>
-            </tr>
-            </tbody>
+                    <thead>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Province</th>
+                    <th>District</th>
+                    <th>Facility</th>
+                    <th>Implementer</th>
+                    <th></th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstartdate }}' placeholder='{{ fstartdate }}' /></td>
+                            <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value='{{ fenddate }}'  placeholder='{{ fenddate }}' /></td>
+                            <td>{% autoescape off %}
+                                {{rpt_provinces}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% autoescape off %}
+                                {{rpt_districts}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% autoescape off %}
+                                {{rpt_facilities}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% if is_report_admin %}
+                                {% autoescape off %}
+                                {{rpt_group}}
+                                {% endautoescape %}
+                                {%endif%}</td>
+                            <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+                        </tr>
+                    </tbody>
                 </table>
-                
+
             </form><p><hr>
-            
-                Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
+
+            Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
             <div>
                 <p align="center"><h3>Results Received By Facilities</h3>
 
@@ -759,7 +759,7 @@ You currently don't belong to any group for viewing reports. Contact the system 
         <div class="clear-hack"></div>
     </div>
 
-<input type="hidden" name="{% csrf_token %}" id="csrf_token" value="{% csrf_token %}" >
+    {% csrf_token %}
 </div>
 <div id="floating-navigator">
     <div id="title"> Quick Navigator</div><p></p>
@@ -784,31 +784,59 @@ You currently don't belong to any group for viewing reports. Contact the system 
     $("#input_parameters_table").attr("title", "Choose Parameters")
 </script>
 <script type="text/javascript">
-   
+    function _showExportReportIntro(showDialog) {
+        if(showDialog !== true){
+            return;
+        }
+        var htmlCode = "<html><p>Hello {{ user_name }},<br>You can now now export reports to Excel/CSV. To begin exporting a report just click on it!</html>";
+        $(htmlCode).dialog({
+            draggable: false,
+            resizable: true,
+            width: 400,
+            modal: true,
+            hide: 'slide',
+            title: 'Message',
+            buttons: {
+                "Don't show this again": function() {
+                    $.post( "/reports/save_user_preferences/", { pref_id: "{{ pref_id }}",
+                        val: "{{ val }}", csrfmiddlewaretoken: "{{ csrf_token }}",
+                        csrf_token: "{{ csrf_token }}" } ).done(function( data ) {
+                        
+                    });
+                    $(this).dialog("close");
+                },
+                Dismiss: function() {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    };
+    window.onload = _showExportReportIntro({{ show_export_msg }});
+
     function showExportPopup(elem){
         var d = new Date();
         var html_code = "";
         var filename = 'mwana_export_' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + "_" + d.getHours() + d.getMinutes() + '_' + d.getSeconds() + '.csv';
         html_code = html_code + '<form name="postValues" action="/surveillance/export_to_csv/?filename=' + filename + '&my_table=" method="POST">';
-        html_code = html_code + document.getElementById('csrf_token').value
+        html_code = html_code + "{% csrf_token %}"
         html_code = html_code + '<input id="export-to-csv-btn" class="button" type="submit" value="Export to csv" name="export-to-csv-btn" />';
         html_code = html_code + '<input type="hidden" name="csv_text" id="csv_text" value="'+ elem.innerHTML.replace(/\n/g, '').replace(/"/g, "'") +'">';
         html_code = html_code + "<p>";
         html_code = html_code + '</form>';
 
         $(html_code).dialog({
-                draggable: false,
-                resizable: true,
-                width: 400,
-                modal: true,
-                hide: 'slide',
-                title: 'Export Report',
-                buttons: {
-                    Close: function() {
-                        $(this).dialog("close");
-                    }
+            draggable: false,
+            resizable: true,
+            width: 400,
+            modal: true,
+            hide: 'slide',
+            title: 'Export Report',
+            buttons: {
+                Close: function() {
+                    $(this).dialog("close");
                 }
-            });
+            }
+        });
     }
 </script>
 {%endif%}

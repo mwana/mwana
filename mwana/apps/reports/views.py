@@ -10,18 +10,23 @@ from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.reports.webreports.forms import GroupFacilityMappingForm
 from mwana.apps.reports.models import Login
+from mwana.apps.reports.webreports.preferences import NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO
+from mwana.apps.reports.webreports.preferences import VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES
 from datetime import datetime, timedelta, date
 
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from django.http import HttpResponse
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from django.shortcuts import redirect
 from mwana.apps.locations.models import Location
+from mwana.apps.reports.webreports.preferences import preference_exists
 from rapidsms.models import Contact
 from mwana.apps.labresults.models import Result
 from mwana.const import get_district_worker_type, get_province_worker_type, get_dbs_printer_type, get_clinic_worker_type, get_cba_type
+from mwana.apps.reports.webreports.preferences import save_preference
 from django.core.cache import cache
 
 
@@ -385,6 +390,10 @@ def zambia_reports(request):
                                'year_reporting': year_reporting,
                                'is_report_admin': is_report_admin,
                                'region_selectable': True,
+                               'user_name': request.user.get_full_name(),
+                               'show_export_msg': 'false' if preference_exists(request.user, NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO, VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES) else 'true',
+                               'pref_id': NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO,
+                               'val': VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES,
                                'rpt_group': get_groups_dropdown_html('rpt_group', rpt_group),
                                'rpt_provinces': get_facilities_dropdown_html("rpt_provinces",
                                                                              get_rpt_provinces(request.user),
@@ -670,3 +679,15 @@ def home(request):
                                "report_data": report_data,
                                "mwana_years": mwana_years,
                               }, context_instance=RequestContext(request))
+
+
+
+def save_user_preferences(request):
+    pref_id =  (dict(request.POST).get('pref_id') or [''])[0]
+    val = int((dict(request.POST).get('val') or ['-1'])[0])
+    print val == VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES
+    print pref_id == NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO
+    if pref_id == NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO and val == VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES:
+        print 'calling them'
+        save_preference(request.user, pref_id, val)
+    return HttpResponse("done")
