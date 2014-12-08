@@ -138,8 +138,8 @@ class TraceHandler(KeywordHandler):
         '''
         Sends a trace request to the volunteer assigned to the mother.'''
         patient = Contact.active.get(name=patient_name)
-        msg = "Moni, Chonde pezani a %(name)s kuti apite kuchipatala." % dict(
-            name=patient_name)
+        msg = self.cba_initiate_trace_msg % dict(
+            name=patient_name, cworker=self.msg.connections[0].contact.name)
         if len(patient.volunteer) > 5:
             if str(patient.volunteer)[4:5] == 8:
                 v_backend_name = 'tnm'

@@ -497,36 +497,34 @@ class StatusForm(HandlerForm):
         # name should be a pin for an active timeline subscription
         timelines = TimelineSubscription.objects.filter(
             Q(Q(end__gte=now()) | Q(end__isnull=True)),
-            timeline=timeline, connection=self.connection, pin=name
+            timeline=timeline, pin__iexact=name
         ).values_list('timeline', flat=True)
         if not timelines:
             # PIN doesn't match an active subscription for this connection
             raise forms.ValidationError(_('Sorry, name/id does not match an '
                                           'active subscription.'))
-        try:
-            appointment = Appointment.objects.filter(
-                status=Appointment.STATUS_DEFAULT,
-                date__lte=now(),
-                milestone__timeline__in=timelines
-            ).order_by('-date')[0]
-        except IndexError:
+        appointments = Appointment.objects.filter(
+            status=Appointment.STATUS_DEFAULT,
+            date__lte=now(),
+            milestone__timeline__in=timelines
+        ).order_by('-date')
+        if not appointments:
             # No recent appointment that is not STATUS_DEFAULT
             msg = _('Sorry, user has no recent appointments that require a '
                     'status update.')
             raise forms.ValidationError(msg)
         else:
-            self.cleaned_data['appointment'] = appointment
-        try:
-            trace = PatientTrace.objects.filter(
-                name=name, status='new',
-                location=self.connection.contact.clinic)[0]
-        except IndexError:
+            self.cleaned_data['appointment'] = appointments[0]
+        traces = PatientTrace.objects.filter(
+            name=name, status='new',
+            location=self.connection.contact.clinic)
+        if not traces:
             # no trace for the patient was found
             msg = _('Sorry, %s has no trace request waiting for an '
                     'update.' % name)
             raise forms.ValidationError(msg)
         else:
-            self.cleaned_data['trace'] = trace
+            self.cleaned_data['trace'] = traces[0]
         return name
 
     def save(self):
