@@ -22,53 +22,63 @@
     <form name="getValues" action="" method="GET">
         <div class="module">
             <h2>Filtered Message Logs</h2>
-            <br>                        
-            <table border="0"   width="100%">
-
+            <br>  
+            <table border="1" width="100%" id="input_parameters_table">
+                <thead>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Province</th>
+                <th>District</th>
+                <th>Facility</th>
+                <th>Worker Type</th>
+                <th></th>
+                </thead>
                 <tbody>
                     <tr>
-                        <td style="border: 0px">Select Period:</td>
-                        <td style="border: 0px"><input type="text" name="startdate" class="datefield" size="9" value={{ fstartdate }} />
-                                   to
-                                   <input type="text" name="enddate" class="datefield" size="9" value={{ fenddate }} />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 0px">Province:</td>
-                        <td style="border: 0px">{% autoescape off %}
+                        <td><input type="text" id="startdate" name="startdate" class="datefield" size="9" value='{{ fstartdate }}' placeholder='{{ fstartdate }}' /></td>
+                        <td><input type="text" id="enddate" name="enddate" class="datefield" size="9" value='{{ fenddate }}'  placeholder='{{ fenddate }}' /></td>
+                        <td>{% autoescape off %}
                             {{rpt_provinces}}
                             {% endautoescape %}
-                            District:{% autoescape off %}
+                        </td>
+                        <td>{% autoescape off %}
                             {{rpt_districts}}
                             {% endautoescape %}
-                            Facility:{% autoescape off %}
+                        </td>
+                        <td>{% autoescape off %}
                             {{rpt_facilities}}
-                            {% endautoescape %}</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 0px">Worker Type:</td>
-                        <td style="border: 0px">
+                            {% endautoescape %}
+                        </td>
+                        <td>
                             {% autoescape off %}
                             {{worker_types}}
-                            {% endautoescape %}  Text(Optional): <input type="text" name="search_key" size="17" value="{{ search_key }}">
-                        </td>
+                            {% endautoescape %} </td>
+
                     </tr>
-                    <tr>
-                        <td style="border: 0px">  {% if is_report_admin %}
-                            Select Implementer:
-                            {% endif %}
-                        <td style="border: 0px"> {% if is_report_admin %}
-                            {% autoescape off %}
-                            {{rpt_group}}
-                            {% endautoescape %}
-                            {% endif %}
-                            <input type="submit" value="Ok" name="SubmitValues" />
-                        </td>
-                    </tr>
+                <thead>
+                <th colspan="2">
+
+                    Implementer
+                </th>
+                <th>Search Text</th>
+                <th></th>
+                </thead>
+                <tr>
+                    <td colspan="2">
+
+                        {% if is_report_admin %}
+                        {% autoescape off %}
+                        {{rpt_group}}
+                        {% endautoescape %}
+                        {%endif%}
+                    </td>
+                    <td> <input type="text" name="search_key" size="17" value="{{ search_key }}"> </td>
+                    <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+                </tr>
                 </tbody>
             </table>
 
-            <hr>
+         <hr>
             <div>
 
 
