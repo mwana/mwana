@@ -85,7 +85,7 @@ class TraceHandler(KeywordHandler):
         p.type = patienttracing.get_type_manual()
         p.initiator = patienttracing.get_initiator_clinic_worker()
         p.name = name
-        p.status = patienttracing.get_status_new()
+        p.status = patienttracing.get_status_new().lower()
         p.start_date = datetime.now()
         p.save()
 

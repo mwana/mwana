@@ -4,12 +4,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
 from rapidsms.models import Contact, Backend
-from rapidsms.router import lookup_connections
+from rapidsms.router import lookup_connections, send
 
 from mwana.apps.appointments.forms import *
 from mwana.apps.appointments.models import Milestone
 
 from mwana.apps.labresults.models import Result
+from mwana.apps.patienttracing.models import PatientTrace
 
 from mwana import const
 
@@ -510,19 +511,21 @@ class StatusForm(HandlerForm):
         ).order_by('-date')
         if not appointments:
             # No recent appointment that is not STATUS_DEFAULT
-            msg = _('Sorry, user has no recent appointments that require a '
-                    'status update.')
-            raise forms.ValidationError(msg)
+            # msg = _('Sorry, user has no recent appointments that require a '
+                    # 'status update.')
+            # raise forms.ValidationError(msg)
+            self.cleaned_data['appointment'] = None
         else:
             self.cleaned_data['appointment'] = appointments[0]
         traces = PatientTrace.objects.filter(
             name=name, status='new',
-            location=self.connection.contact.clinic)
+            clinic=self.connection.contact.clinic)
         if not traces:
             # no trace for the patient was found
-            msg = _('Sorry, %s has no trace request waiting for an '
-                    'update.' % name)
-            raise forms.ValidationError(msg)
+            # msg = _('Sorry, %s has no trace request waiting for an '
+                    # 'update.' % name)
+            # raise forms.ValidationError(msg)
+            self.cleaned_data['trace'] = None
         else:
             self.cleaned_data['trace'] = traces[0]
         return name
@@ -532,11 +535,19 @@ class StatusForm(HandlerForm):
         if not self.is_valid():
             return None
         appointment = self.cleaned_data['appointment']
-        appointment.status = self.cleaned_data['status']
-        appointment.save()
+        status = self.cleaned_data['status']
+        name = self.cleaned_data['name']
+        if appointment is not None:
+            appointment.status = status
+            appointment.save()
         trace = self.cleaned_data['trace']
-        trace.status = self.cleaned_data['status']
-        trace.save()
+        if trace is not None:
+            trace.status = PatientTrace.STATUS_CHOICES[status-1][0]
+            trace.save()
+        if appointment and trace is None:
+            msg = _('Sorry, there is no appointment or trace request to update'
+                    'for patient %s.' % name)
+            send(msg, [self.connection])
         return {}
 
 
