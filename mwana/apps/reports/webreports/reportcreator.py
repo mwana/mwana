@@ -18,6 +18,9 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from mwana.apps.reports.utils.htmlhelper import get_rpt_districts as rpt_districts
+from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities as rpt_facilities
+from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces as rpt_provinces
 
 class Positivity():
     pass
@@ -74,17 +77,13 @@ class Results160Reports:
             return Location.objects.all()
         
     def get_rpt_provinces(self, user):
-        self.user = user         
-        return self.get_distinct_parents(self.get_rpt_districts(user))
+        return rpt_provinces(user)
 
     def get_rpt_districts(self, user):
-        self.user = user
-        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
+        return rpt_districts(user)
 
     def get_rpt_facilities(self, user):
-        self.user = user
-        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
-
+        return rpt_facilities(user)
 
     def get_active_facilities(self):
         return self.user_facilities().filter(lab_results__notification_status__in=

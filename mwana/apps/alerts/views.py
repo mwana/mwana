@@ -17,7 +17,6 @@ def get_from_request(request, name):
     except KeyError:
         return None
 
-
 @require_GET
 def mwana_alerts (request):
     transport_time = get_from_request(request, 'input_transport_time')
