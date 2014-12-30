@@ -20,7 +20,7 @@ class MwanaForHandler(KeywordHandler):
     Register a birth on behalf of someone
     """
 
-    keyword = "mwanafor|birthfo|mwanafo|birthfo"
+    keyword = "mwanafor|birthfor|mwanafo|birthfo"
 
     HELP_TEXT = "To register a birth on behalf of a CBA, send MWANAFOR <CBA-PHONE-#> <LOCATION-TYPE> <DAY> <MONTH> <YEAR> <NAME>"
     INELIGIBLE = "Sorry, you are NOT allowed to register a birth on behalf of anyone. If you think this message is a mistake reply with keyword HELP"
@@ -103,7 +103,7 @@ class MwanaForHandler(KeywordHandler):
         if dob < today - timedelta(days=1000):
             self.respond(_("Sorry, make sure you enter the year correctly."
                            " %(date_entered)s is too old. We are in %(current_date)s."),
-                         date_entered=date.year, current_date=today.year)
+                         date_entered=dob.year, current_date=today.year)
             return True
 
         try:
