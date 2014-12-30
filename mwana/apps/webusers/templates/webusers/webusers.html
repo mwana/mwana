@@ -22,99 +22,96 @@
 <div class="left">
     <form name="getValues" action="" method="GET">
         <div class="module">
-            <h2>Supported Sites</h2>
-        <br>
-        {% if region_selectable %}
-        <p>Select Region: &nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
-            {{rpt_provinces}}
-            {% endautoescape %}&nbsp;
-            or District:{% autoescape off %}
-            {{rpt_districts}}
-            {% endautoescape %}&nbsp;
-            
-            {% if is_report_admin %}
-        <p>Select Implementer:
-            {% autoescape off %}
-            {{rpt_group}}
-            {% endautoescape %}
-            &nbsp;
-            {%endif%}
-            {%endif%}
-
-            &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
-        <hr>
-        <div>
-
-
-            <h3>
-                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
-
-            </h3>
-
-                <table width="100%">
-
+            <h2>Web Users</h2>
+            <table border="1"  id="input_parameters_table">
+                <thead>
+                <th>Province</th>
+                <th>District</th>
+                <th>Implementer</th>
+                <th></th>
+                </thead>
+                <tbody>
                     <tr>
-                        <th>#</th>
-                        <th>Login Name</th>
-                        <th>
-                            <a href="?ot=asc&amp;o=1">
-                                Full Name
-                            </a></th><th>
-                                Email
-                            </th><th>
-                            Groups
-                            </th><th>
-                            <a href="?ot=asc&amp;o=6">
-                                Last Login
-                            </a></th><th>
-                            <a href="?ot=asc&amp;o=8">
-                                Days ago
-                            </a></th>
+                        <td>{% autoescape off %}
+                            {{rpt_provinces}}
+                            {% endautoescape %}
+                        </td>
+                        <td>{% autoescape off %}
+                            {{rpt_districts}}
+                            {% endautoescape %}
+                        </td>
+                        <td>{% if is_report_admin %}
+                            {% autoescape off %}
+                            {{rpt_group}}
+                            {% endautoescape %}
+                            {%endif%}</td>
+                        <td><input type="submit" value="Ok" name="SubmitValues" /></td>
                     </tr>
+                </tbody>
+            </table>
 
-                    {% for record in records %}
-                    <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
-                        <td>{{ forloop.counter|add:offset }}</td>
-                        <td>{{ record.username }}</td>
-                        <td>{{ record.first_name }} {{ record.last_name }}</td>
-                        
-                        <td>{{ record.email }}</td>
-                        <td>{% for type in record.groupusermapping_set.all%}
-                            {{ type.group.name }}  
-                            {% endfor %}</td>
-                        <td>{{ record.last_login|date:"d F Y" }}</td>
-                        <td>{{ record.last_login|timesince }}</td>
-                    </tr>
+            <table width="100%">
 
-                    {% endfor %}
+                <tr>
+                    <th>#</th>
+                    <th>Login Name</th>
+                    <th>
+                        <a href="?ot=asc&amp;o=1">
+                            Full Name
+                        </a></th><th>
+                        Email
+                    </th><th>
+                        Groups
+                    </th><th>
+                        <a href="?ot=asc&amp;o=6">
+                            Last Login
+                        </a></th><th>
+                        <a href="?ot=asc&amp;o=8">
+                            Days ago
+                        </a></th>
+                </tr>
 
-                </table>
+                {% for record in records %}
+                <tr  bgcolor="{% cycle #EDF3FE,#ffffff %}">
+                    <td>{{ forloop.counter|add:offset }}</td>
+                    <td>{{ record.username }}</td>
+                    <td>{{ record.first_name }} {{ record.last_name }}</td>
 
-            </div>
-            <div class="clear-hack"></div>
+                    <td>{{ record.email }}</td>
+                    <td>{% for type in record.groupusermapping_set.all%}
+                        {{ type.group.name }}
+                        {% endfor %}</td>
+                    <td>{{ record.last_login|date:"d F Y" }}</td>
+                    <td>{{ record.last_login|timesince }}</td>
+                </tr>
+
+                {% endfor %}
+
+            </table>
+
         </div>
+        <div class="clear-hack"></div>
+</div>
 
-   
-        <div class="pagination">
-            <span class="step-links">
-                {% if has_previous %}
-                <input type="submit" value="Previous" name="navigate" />
-                {% endif %}
 
-                <span class="current">
-                    Page {{ number }} of {{ num_pages }}.
-                </span>
+<div class="pagination">
+    <span class="step-links">
+        {% if has_previous %}
+        <input type="submit" value="Previous" name="navigate" />
+        {% endif %}
 
-                {% if has_next %}
-                <input type="submit" value="Next" name="navigate" size="8" />
-                {% endif %}
-                <input type="hidden" name="page" value={{ number }}>
-            </span>
+        <span class="current">
+            Page {{ number }} of {{ num_pages }}.
+        </span>
 
-        </div>
-    </form>
+        {% if has_next %}
+        <input type="submit" value="Next" name="navigate" size="8" />
+        {% endif %}
+        <input type="hidden" name="page" value={{ number }}>
+    </span>
+
+</div>
+</form>
 </div>
 
 <script type="text/javascript">
