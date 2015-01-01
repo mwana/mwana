@@ -55,7 +55,7 @@ class GraphServive:
         Uses plain SQL for performance/simplicity reasons
         """
         sql = '''
-            select eid."year", eid.eid_count, reminders.remindmi_count  FROM (SELECT extract(year FROM date_logged)::int AS "year",
+            select reminders."year", eid.eid_count, reminders.remindmi_count  FROM (SELECT extract(year FROM date_logged)::int AS "year",
             count( DISTINCT clinic.id) as remindmi_count FROM reminders_patientevent
             JOIN rapidsms_contact on rapidsms_contact.id = reminders_patientevent.patient_id
             JOIN locations_location as "zone" on zone.id = rapidsms_contact.location_id
