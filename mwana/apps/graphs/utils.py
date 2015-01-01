@@ -78,8 +78,8 @@ class GraphServive:
         data = {"Results 160": [], "RemindMi": []}
         for row in rows:
             time_ranges.append(row[0])
-            data["Results 160"].append(int(row[1]))
-            data["RemindMi"].append(int(row[2]))
+            data["Results 160"].append(int(row[1]) if row[1] else 0)
+            data["RemindMi"].append(int(row[2]) if row[2] else 0)
 
         return time_ranges, data
 
