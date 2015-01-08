@@ -69,8 +69,18 @@ def get_dbs_printer_type():
 def get_patient_type():
     return _get_contacttype(PATIENT_SLUG, 'Patient')
 
+
 def get_zone_type():
     return _get_locationtype(ZONE_SLUGS, 'Zone')
+
+
+def get_district_type():
+    return _get_locationtype(DISTRICT_SLUGS, 'District')
+
+
+def get_province_type():
+    return _get_locationtype(PROVINCE_SLUGS, 'Province')
+
 
 def get_clinic_worker_type():
     return _get_contacttype(CLINIC_WORKER_SLUG, 'Clinic Worker')
