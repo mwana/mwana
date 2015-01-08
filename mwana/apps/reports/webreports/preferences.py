@@ -11,16 +11,11 @@ def preference_exists(user, preference_name, preference_value):
 
 
 def save_preference(user, preference_name, preference_value, extra_preference_value=None):
-    print 'called'
-    print (user, preference_name, type(preference_value), extra_preference_value)
     pref, created = UserPreference.objects.get_or_create(user=user, preference_name=preference_name)
     pref.preference_value = preference_value
-    print 'in save_preference'
-    print  created, pref
+    
     if extra_preference_value:
         pref.extra_preference_value = extra_preference_value
 
-    print 'before save'
     pref.save()
-    print 'done saving'
     return pref

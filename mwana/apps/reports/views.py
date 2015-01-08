@@ -681,13 +681,9 @@ def home(request):
                               }, context_instance=RequestContext(request))
 
 
-
 def save_user_preferences(request):
     pref_id =  (dict(request.POST).get('pref_id') or [''])[0]
     val = int((dict(request.POST).get('val') or ['-1'])[0])
-    print val == VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES
-    print pref_id == NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO
     if pref_id == NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO and val == VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES:
-        print 'calling them'
         save_preference(request.user, pref_id, val)
     return HttpResponse("done")
