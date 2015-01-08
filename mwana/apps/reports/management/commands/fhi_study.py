@@ -5,13 +5,7 @@ from mwana.apps.labresults.models import Result
 from rapidsms.contrib.messagelog.models import Message
 
 class Command(LabelCommand):
-    help = "Loads users from the specified csv file."
-    args = "<file_path> <password_suffix>"
-    label = 'valid file path'
-
     def handle(self, * args, ** options):
-
-
         process()
 
     def __del__(self):
@@ -45,7 +39,4 @@ def process():
     for res in results:
         # @type res Result
         print "| ".join( str(i) for i in [res.clinic.parent.name, res.clinic.name, "'%s'" % res.requisition_id, res.result_sent_date, res.birthdate, res.sex, who_received(res, res.result_sent_date) or printer(res, res.result_sent_date)])
-    else:
-        print "Nothing found"
-
-   
+        
