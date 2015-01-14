@@ -233,8 +233,6 @@ def dashboard_malawi(request):
     results = Result.objects.filter(
         result_sent_date__gte=startdate,
         result_sent_date__lte=enddate,
-        processed_on__gte=startdate,
-        processed_on__lte=enddate,
         notification_status="sent")
     eid_processed = Result.objects.filter(
         processed_on__gte=startdate,
