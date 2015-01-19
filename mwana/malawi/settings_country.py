@@ -74,6 +74,7 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.appointments')
 INSTALLED_APPS.insert(-1, 'django_tables2_reports')
 INSTALLED_APPS.insert(-1, 'mwana.apps.remindmi')
 INSTALLED_APPS.insert(-1, 'mwana.apps.dhis2')
+INSTALLED_APPS.insert(-1, 'mwana.apps.emergency')
 
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
@@ -121,6 +122,7 @@ CELERY_TIMEZONE = 'Africa/Blantyre'
 # WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
 
 RAPIDSMS_HANDLERS = [
+    "mwana.apps.emergency.handlers.flood.FloodHandler",
     "mwana.apps.help.handlers.help.HelpHandler",
     "mwana.apps.help.handlers.facilitycode.CodeHandler",
     "mwana.apps.help.handlers.facilitycontacts.ContactsHandler",

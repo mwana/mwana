@@ -4,6 +4,7 @@ from mwana.apps.reports import views
 from mwana.apps.reminders import views as remindmi
 from mwana.apps.labresults import views as results
 from mwana.apps.help import views as help
+from mwana.apps.emergency import views as emergency
 from mwana.apps.dhis2 import views as dhis2
 from mwana.apps.nutrition import views as anthro
 from rapidsms.backends.http.views import GenericHttpBackendView
@@ -53,4 +54,6 @@ urlpatterns = patterns(
         name='send_contacts_message'),
     url(r'^emergency/contacts/', ContactsList.as_view(),
         name='emergency_contacts'),
+    url(r'^emergency/reports/', emergency.FloodReportList.as_view(),
+        name='emergency_flood_list'),
 )
