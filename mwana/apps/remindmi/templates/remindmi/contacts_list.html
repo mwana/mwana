@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+{% load url from future %}
+{% load forms_tags django_tables2 %}
+{% load render_table from django_tables2 %}
+
+{% block title %}Emergency - HSA Contacts{% endblock title %}
+
+{% block extra_stylesheets %}
+    <link type="text/css" rel="stylesheet"
+          href="{{ STATIC_URL }}appointments/stylesheets/appointments.css" />
+    <link type="text/css" rel="stylesheet"
+          href="{{ STATIC_URL }}malawi/stylesheets/daterangepicker-bs2.css" />
+    <style>
+.table-container ul.pagination {
+    overflow: auto;
+    margin: 0;
+    padding: 5px;
+    border: 1px solid #DDD;
+    list-style: none;
+}
+.table-container ul.pagination > li > a {
+    text-decoration: none;
+    font-weight: bold;
+}
+.table-container ul.pagination li {
+    float: left;
+    line-height: 22px;
+    margin-left: 10px;
+}
+.table-container ul.pagination li:first-child {
+    margin-left: 0;
+}
+
+.table-container ul.pagination li.cardinality {
+    float: right;
+    color: #8d8d8d;
+}
+
+.report-exports {
+       margin: -60px 0 50px 0;
+       float:right;
+       display:none;
+     }
+    </style>
+
+{% endblock extra_stylesheets %}
+
+{% block javascripts %}
+{{ block.super }}
+    <!-- Maintain an accurate char count of the message, taking unicode into account. -->
+    <script type="text/javascript" src="{{ STATIC_URL }}messaging/javascripts/jquery.simplyCountable.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#message-field textarea").simplyCountable();
+        });
+    </script>
+
+    <!-- Scripts related to the recipients multi-selector. -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}selectable/js/jquery.dj.selectable.js"></script>
+    <script type="text/javascript">
+        // Override some of django-selectable's defaults to use Bootstrap,
+        // custom styles, and keep a count of the number of recipients.
+        $.ui.djselectable.prototype._initDeck = function() {
+            // Use a custom div to hold selected items, and
+            // append it after the fieldset.
+            var self = this;
+            self.deck = $("<div>").attr("id", "recipients").addClass("group");
+            $(self.element).parent().after(this.deck);
+            $(self.hiddenMultipleSelector).each(function (i, input) {
+                self._addDeckItem(input);
+            });
+        };
+        $.ui.djselectable.prototype._addDeckItem = function(input) {
+            // Put all data inside of a Bootstrap label, and update
+            // the recipient counter upon addition and removal.
+            var self = this,
+                span = $("<span>").addClass("label label-info").html(" " + $(input).attr("title")),
+                item = {element: self.element, input: input, wrapper: span, deck: self.deck};
+            if (self._trigger("add", null, item) === false) {
+                input.remove();
+            } else {
+                function update_recipient_count() {
+                    var count = self.deck.children().length;
+                    if (count === 1) {
+                        $("#recipientcount").text("1 recipient selected");
+                    } else {
+                        $("#recipientcount").text(count + " recipients selected");
+                    }
+                }
+                var button = self._removeButtonTemplate(item).click(function(event) {
+                    event.preventDefault();
+                    if (self._trigger("remove", event, item) !== false) {
+                        $(input).remove();
+                        span.remove();
+                        update_recipient_count();
+                    }
+                });
+                span.append(span.prepend(button)).appendTo(self.deck);
+                update_recipient_count();
+            }
+        };
+        $.ui.djselectable.prototype._removeButtonTemplate = function(item) {
+            // Use a Bootstrap icon.
+            var icon = $("<i>").addClass("icon-white icon-remove-sign");
+            var button = $("<a>").attr("href", "").append(icon);
+            return button;
+        };
+    </script>
+
+
+    <script type="text/javascript">
+        function addNotification(type, message) {
+            var cls = type === null ? "alert" : "alert alert-" + type;
+            var dismiss = $("<button>").attr("data-dismiss", "alert").addClass("close").html("&times;");
+            var notif = $("<div>").addClass(cls).html(message).prepend(dismiss);
+            $("#notifications").append(notif);
+        }
+        function clearNotifications() {
+            $("#notifications").children().alert("close");
+        }
+        function clearMessage() {
+            $("#message-field textarea").val("");
+            $("#counter").text("140");
+        }
+
+        $(function() {
+            // It's too easy for the user to hit "Enter" before they intend to send the message.
+            // We'll handle the submission manually.
+            $("#send-message-form").submit(function(event) {
+                return false;
+            });
+            $("#send-message").click(function(event) {
+                clearNotifications();
+
+                // Check for basic error conditions.
+                var valid = true;
+                if ($("#message-field textarea").val() === "") {
+                    addNotification("error", "You have to write a message.");
+                    valid = false;
+                }
+         /* if ($("#identities").children().length === 0) {
+         addNotification("error", "Please select at least one recipient.");
+         valid = false;
+         } */
+                if (!valid) { return; }
+
+                // Send the form to the server for processing.
+                $.ajax({
+                    url: "{% url 'send_contacts_message' %}",
+                    type: "POST",
+                    data: $("#send-message-form").serialize(),
+                    success: function(data, status, xhr) {
+                        addNotification("success", data);
+                   //     clearRecipients();
+                        clearMessage();
+                    },
+                    error: function(xhr, status, errorThrown) {
+                        addNotification("error", "A problem occurred while trying to send your message. " +
+                                                 "Please contact your administrator if this keeps happening.");
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock javascripts %}
+
+{% block content %}
+    <div class="span12" id="remindmi">
+        <div class="page-header"><h1>HSA Contacts</h1></div>
+        <div class="row-fluid">
+            <div class="span3">
+              <form id="filter-form" method="GET">
+                {{ filter.form.as_p }}
+                <input class="btn btn-primary" type="submit" value="Update Filters" />
+                <a class="btn" href="{% url 'emergency_contacts' %}">Clear Filters</a>
+              </form>
+            </div>
+            <div class="span9">
+              {% render_table table %}
+              <h2>Send Message</h2>
+              <div class="span9" id="messaging">
+                <div id="notifications">{# Container for form errors and messages. #}</div>
+                <form id="send-message-form" method="post" action="{% url 'send_contacts_message' %}">
+                  {% csrf_token %}
+                  <fieldset id="message-field" class="group">
+                    <textarea name="message" id="id_message" rows="10" cols="80" tabindex="" placeholder="Message"
+                              style="width:500px;"></textarea>
+                    <div class="count pull-right">
+                      <span id="counter"></span> characters remaining
+                    </div>
+                    <div>
+                      <textarea name="identities" id="id_identities" style="display:none;">
+                        {% for c in filter.qs %}{{c.default_connection.identity}},{% endfor %}
+                      </textarea>
+                    </div>
+                  </fieldset>
+                </form>
+                {# Keep this outside of the form to prevent accidental form submission. #}
+                <button id="send-message" class="btn btn-primary" style="float:right;">Send Message</button>
+                <br />
+              </div>
+            </div>
+
+        </div>
+    </div>
+    {% endblock content %}

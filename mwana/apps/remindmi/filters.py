@@ -5,7 +5,8 @@ from django.db.models import Q
 from django import forms
 
 import django_filters
-from django_filters import CharFilter, MultipleChoiceFilter
+from django_filters import (CharFilter, MultipleChoiceFilter,
+                            ModelChoiceFilter)
 
 from rapidsms.models import Contact
 
@@ -13,6 +14,7 @@ from mwana.apps.appointments.models import Appointment, Notification
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.labresults.models import EIDConfirmation
 from mwana.apps.labresults.models import Result
+from mwana.apps.contactsplus.models import ContactType
 
 from .forms import DateFilterForm
 
@@ -110,6 +112,37 @@ class AppointmentFilter(django_filters.FilterSet):
     class Meta:
         model = Appointment
         fields = ['date', 'hmis', 'districts', ]
+
+
+class ContactsListFilter(django_filters.FilterSet):
+    hmis = MultiFieldFilter(
+        ['location__slug', 'location__parent__slug'],
+        label="HMIS Code")
+    districts = MultipleChoiceMultiFieldFilter(
+        ['location__parent__parent__name', 'location__parent__name'],
+        label="Districts", choices=DISTRICT_CHOICES)
+    types = ModelChoiceFilter(
+        queryset=ContactType.objects.all(),
+        label="Contact Type")
+    name = MultiFieldFilter(
+        ['name'], label="Contact Name",)
+        # widget=AutoCompleteSelectMultipleWidget)
+    # number = CharFilter(
+    #     ['default_connection'], label="Contact Number")
+
+    # filter_overrides = {
+    #     models.CharField: {
+    #         'filter_class': django_filters.CharFilter,
+    #         'extra': lambda f: {
+    #             'lookup_type': 'icontains',
+    #         }
+    #     }
+    # }
+
+    class Meta:
+        model = Contact
+        fields = ['hmis', 'districts']
+        # form = ContactsListForm
 
 
 class MothersListFilter(django_filters.FilterSet):

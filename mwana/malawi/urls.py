@@ -8,6 +8,7 @@ from mwana.apps.dhis2 import views as dhis2
 from mwana.apps.nutrition import views as anthro
 from rapidsms.backends.http.views import GenericHttpBackendView
 from rapidsms.backends.kannel.views import KannelBackendView
+from mwana.apps.remindmi.views import ContactsList, send_message
 
 urlpatterns = patterns(
     '',
@@ -48,4 +49,8 @@ urlpatterns = patterns(
         name='assessment_report_list'),
     url(r'^anthrowatch/graphs/', anthro.report_graphs,
         name='anthro_report_graphs'),
+    url(r'^emergency/contacts/send/', send_message,
+        name='send_contacts_message'),
+    url(r'^emergency/contacts/', ContactsList.as_view(),
+        name='emergency_contacts'),
 )

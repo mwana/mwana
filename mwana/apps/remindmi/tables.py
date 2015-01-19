@@ -97,6 +97,30 @@ class CSVPatientListTable(PatientListTable):
         return value
 
 
+class ContactsListTable(PatientListTable):
+    # contact = tables.Column(verbose_name='Mobile',
+    #                         accessor='default_connection.identity')
+    facility_id = tables.Column(verbose_name='HMIS Code',
+                                accessor='location.slug')
+
+    def render_name(self, value, record):
+        return value
+
+    def render_facility_id(self, value, record):
+        if "zone" == record.location.type.slug:
+            return record.location.parent.slug
+        else:
+            return record.location.slug
+
+    class Meta:
+        attrs = {'class': "table table-striped table-bordered table-condensed"}
+        exclude = ('id', 'modified_on', 'language', 'pin', 'alias',
+                   'is_help_admin', 'last_updated', 'errors', 'date_of_birth',
+                   'interviewer_id', 'first_name', 'last_name', 'volunteer',
+                   'is_active', 'status', 'parent', 'created_on')
+        sequence = ("name", "location", "district")
+
+
 class MothersListTable(PatientListTable):
     class Meta:
         attrs = {'class': "table table-striped table-bordered table-condensed"}
