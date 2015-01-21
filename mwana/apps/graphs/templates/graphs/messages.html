@@ -90,19 +90,43 @@
             });
 
         });
+
+        var chartTableCode = "<table><tr><td></td>";
+        {% for item in x_axis %}
+            chartTableCode += "<td>{{ item }}</td>";
+        {% endfor %}
+        chartTableCode += "</tr>";
+
+        {% for item in report_data %}
+            chartTableCode += "<tr>";
+            chartTableCode += "<td>{{ item.key }}</td>";
+            {% for value in item.value %}
+                chartTableCode += "<td>{{ value }}</td>";
+            {% endfor %}
+            chartTableCode += "</tr>";
+        {% endfor %}
+        chartTableCode += "</table>";
+        $("#btn_export_to_csv").click(function(){
+            $("#csv_text").val(chartTableCode);
+        });
     </script>
 
 
 
     <div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">Graph not available. <a href="/charts">Take me back.</a> </div>
     <div align="center">
-        Change chart type: <select id="chartType">
-            <option value="column">Column</option>
-            <option value="spline">Spline</option>
-            <option value="line">Line</option>
-            <option value="area">Area</option>
-            <option value="areaspline">Area & Spline</option>
-        </select>
+        <form name="export" action="/surveillance/export_to_csv/?filename={{ title|slugify }}.csv" method="POST">{% csrf_token %}
+            Change chart type: <select id="chartType">
+                <option value="column">Column</option>
+                <option value="spline">Spline</option>
+                <option value="line">Line</option>
+                <option value="area">Area</option>
+                <option value="areaspline">Area & Spline</option>
+            </select>
+            <span style="float: right"> <input type="hidden" name="csv_text" id="csv_text" value="">
+                <input type="submit" value="Export data to csv" id="btn_export_to_csv"/>
+            </span>
+        </form>
     </div
 </body>
 

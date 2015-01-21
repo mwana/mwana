@@ -338,10 +338,30 @@ def turnaround(request):
 
 
     categories, transport, processing, delays, retrieving = service.get_turnarounds(start_date, end_date, province_slug, district_slug, facility_slug)
+    report_data = []
+    rpt_object = Expando()
+    rpt_object.key = 'Transport Time'
+    rpt_object.value = transport
+    report_data.append(rpt_object)
+    
+    rpt_object = Expando()
+    rpt_object.key = 'Processing Time'
+    rpt_object.value = processing
+    report_data.append(rpt_object)    
+
+    rpt_object = Expando()
+    rpt_object.key = 'Delays at Lab'
+    rpt_object.value = delays
+    report_data.append(rpt_object)
+
+    rpt_object = Expando()
+    rpt_object.key = 'Retrieving Time'
+    rpt_object.value = retrieving
+    report_data.append(rpt_object)
 
     return render_to_response('graphs/turnaround.html',
                               {
-                              "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
+                              "x_axis": categories,
                               "title": "'DBS Turnaround'",
                               "sub_title": "'Month: %s ( (Filtered by Results Retrived Date))'" % (end_date.strftime("%b %Y")),
                               "label_y_axis": "'DBS samples'",
@@ -350,5 +370,6 @@ def turnaround(request):
                               "delays": delays,
                               "retrieving": retrieving,
                               "categories": categories,
+                              "report_data": report_data,
                               }, context_instance=RequestContext(request)
                               )
