@@ -3,7 +3,7 @@
 {% load forms_tags django_tables2 %}
 {% load render_table from django_tables2 %}
 
-{% block title %}Emergency - HSA Contacts{% endblock title %}
+{% block title %}Emergency Messaging - RapidSMS {% endblock title %}
 
 {% block extra_stylesheets %}
     <link type="text/css" rel="stylesheet"
@@ -56,57 +56,57 @@
     </script>
 
     <!-- Scripts related to the recipients multi-selector. -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
+    <!-- <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}selectable/js/jquery.dj.selectable.js"></script>
     <script type="text/javascript">
-        // Override some of django-selectable's defaults to use Bootstrap,
-        // custom styles, and keep a count of the number of recipients.
-        $.ui.djselectable.prototype._initDeck = function() {
-            // Use a custom div to hold selected items, and
-            // append it after the fieldset.
-            var self = this;
-            self.deck = $("<div>").attr("id", "recipients").addClass("group");
-            $(self.element).parent().after(this.deck);
-            $(self.hiddenMultipleSelector).each(function (i, input) {
-                self._addDeckItem(input);
-            });
-        };
-        $.ui.djselectable.prototype._addDeckItem = function(input) {
-            // Put all data inside of a Bootstrap label, and update
-            // the recipient counter upon addition and removal.
-            var self = this,
-                span = $("<span>").addClass("label label-info").html(" " + $(input).attr("title")),
-                item = {element: self.element, input: input, wrapper: span, deck: self.deck};
-            if (self._trigger("add", null, item) === false) {
-                input.remove();
-            } else {
-                function update_recipient_count() {
-                    var count = self.deck.children().length;
-                    if (count === 1) {
-                        $("#recipientcount").text("1 recipient selected");
-                    } else {
-                        $("#recipientcount").text(count + " recipients selected");
-                    }
-                }
-                var button = self._removeButtonTemplate(item).click(function(event) {
-                    event.preventDefault();
-                    if (self._trigger("remove", event, item) !== false) {
-                        $(input).remove();
-                        span.remove();
-                        update_recipient_count();
-                    }
-                });
-                span.append(span.prepend(button)).appendTo(self.deck);
-                update_recipient_count();
-            }
-        };
-        $.ui.djselectable.prototype._removeButtonTemplate = function(item) {
-            // Use a Bootstrap icon.
-            var icon = $("<i>").addClass("icon-white icon-remove-sign");
-            var button = $("<a>").attr("href", "").append(icon);
-            return button;
-        };
-    </script>
+    // Override some of django-selectable's defaults to use Bootstrap,
+    // custom styles, and keep a count of the number of recipients.
+    $.ui.djselectable.prototype._initDeck = function() {
+    // Use a custom div to hold selected items, and
+    // append it after the fieldset.
+    var self = this;
+    self.deck = $("<div>").attr("id", "recipients").addClass("group");
+    $(self.element).parent().after(this.deck);
+    $(self.hiddenMultipleSelector).each(function (i, input) {
+    self._addDeckItem(input);
+    });
+    };
+    $.ui.djselectable.prototype._addDeckItem = function(input) {
+    // Put all data inside of a Bootstrap label, and update
+    // the recipient counter upon addition and removal.
+    var self = this,
+    span = $("<span>").addClass("label label-info").html(" " + $(input).attr("title")),
+    item = {element: self.element, input: input, wrapper: span, deck: self.deck};
+    if (self._trigger("add", null, item) === false) {
+    input.remove();
+    } else {
+    function update_recipient_count() {
+    var count = self.deck.children().length;
+    if (count === 1) {
+    $("#recipientcount").text("1 recipient selected");
+    } else {
+    $("#recipientcount").text(count + " recipients selected");
+    }
+    }
+    var button = self._removeButtonTemplate(item).click(function(event) {
+    event.preventDefault();
+    if (self._trigger("remove", event, item) !== false) {
+    $(input).remove();
+    span.remove();
+    update_recipient_count();
+    }
+    });
+    span.append(span.prepend(button)).appendTo(self.deck);
+    update_recipient_count();
+    }
+    };
+    $.ui.djselectable.prototype._removeButtonTemplate = function(item) {
+    // Use a Bootstrap icon.
+    var icon = $("<i>").addClass("icon-white icon-remove-sign");
+    var button = $("<a>").attr("href", "").append(icon);
+    return button;
+    };
+    </script> -->
 
 
     <script type="text/javascript">
@@ -139,10 +139,6 @@
                     addNotification("error", "You have to write a message.");
                     valid = false;
                 }
-         /* if ($("#identities").children().length === 0) {
-         addNotification("error", "Please select at least one recipient.");
-         valid = false;
-         } */
                 if (!valid) { return; }
 
                 // Send the form to the server for processing.
@@ -168,7 +164,7 @@
 
 {% block content %}
     <div class="span12" id="remindmi">
-        <div class="page-header"><h1>HSA Contacts</h1></div>
+        <div class="page-header"><h1>Emergency Messaging</h1></div>
         <div class="row-fluid">
             <div class="span3">
               <form id="filter-form" method="GET">

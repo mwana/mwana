@@ -50,19 +50,23 @@
     <b class="caret"></b>
   </a>
   <ul class="dropdown-menu">
+    <li><a href="{% url 'messaging' %}">Messaging</a></li>
+    <li><a href="{% url 'emergency_contacts' %}">Emergency Messaging</a></li>
+    <li><a href="{% url 'emergency_flood_list' %}">Emergency Reports</a></li>
     <li><a href="{% url 'help_request_list' %}">Help Requests</a></li>
     <li><a href="{% url 'message_log' %}">Logs</a></li>
     <li><a href="">Analysis</a></li>
   </ul>
 </li>
 
-<li class="dropdown" style="display:none">
+<li class="dropdown">
   <a class="dropdown-toggle" data-toggle="dropdown" href="#">Emergency
     <b class="caret"></b>
   </a>
   <ul class="dropdown-menu">
-    <li><a href="#">Dashboard</a></li>
-    <li><a href="{% url 'emergency_contacts' %}">Contacts</a></li>
-    <li><a href="#">Analysis</a></li>
+    <!-- <li><a href="#">Dashboard</a></li> -->
+    <li><a href="{% url 'emergency_contacts' %}">Emergency Messaging</a></li>
+    <li><a href="{% url 'emergency_flood_list' %}">Emergency Reports</a></li>
+    <!-- <li><a href="#">Analysis</a></li> -->
   </ul>
 </li>
