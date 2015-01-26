@@ -79,9 +79,9 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.emergency')
 # Add the people and growth monitoring apps for Malawi:
 # don't append, 'default' app should come last:
 
-DEFAULT_RESPONSE = '''Invalid Keyword. Keywords are GM for Growth Monitor,
- MWANA for RemindMi and CHECK or RESULT for Results160.
- Send HELP for more information'''
+DEFAULT_RESPONSE = '''Invalid Keyword. Use GM for Growth Monitor, MWANA or MAYI
+ for RemindMi, CHECK or RESULT for Results160 and FLOOD for
+ emergency. Send HELP for more information'''
 
 # we need separate migration modules for the rapidsms app in Malawi and
 # Zambia, because different 3rd party apps add different model extensions
