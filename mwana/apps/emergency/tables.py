@@ -38,3 +38,4 @@ class FloodReportTable(TableReport):
         attrs = {'class': "table table-striped table-bordered table-condensed"}
         exclude = ('id', 'status', 'comments', 'addressed_on', 'resolved_by',
                    'notes',)
+        order_by = ('-reported_on',)
