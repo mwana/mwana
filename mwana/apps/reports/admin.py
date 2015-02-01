@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import ScaleUpSite
 from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
 from django.contrib.auth.models import User
@@ -260,4 +261,11 @@ class MessageByLocationByBackendAdmin(admin.ModelAdmin):
 
 admin.site.register(MessageByLocationByBackend, MessageByLocationByBackendAdmin)
 
+
+class ScaleUpSiteAdmin(admin.ModelAdmin):
+    list_display = ('province', 'district', 'site', 'PMTCT', 'EID', 'ART', 'PaedsART', 'Mwana', 'ActiveOnMwana')
+    list_filter = ('PMTCT', 'EID', 'ART', 'PaedsART', 'Mwana', 'ActiveOnMwana', 'province', 'district', 'site',)
+    search_fields = ('province', 'district', 'site')
+    list_editable = ('PMTCT', 'EID', 'ART', 'PaedsART',)
+admin.site.register(ScaleUpSite, ScaleUpSiteAdmin)
 

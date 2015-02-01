@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import CLINIC_SLUGS
 from mwana.apps.reports.utils.htmlhelper import get_month_end
 from django.db import models
 from mwana.apps.locations.models import Location
-#from rapidsms.models import Connection
+from django.conf import settings
 from rapidsms.models import Contact
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -223,3 +224,35 @@ class MsgByLocationByBackendBuildLog(models.Model):
         if self.lock and self.lock != 1:
             return
         super(MsgByLocationByBackendBuildLog, self).save(*args, **kwargs)
+
+
+class ScaleUpSite(models.Model):
+    """
+    Reporting table.
+    """
+    province = models.CharField(max_length=30, null=True, blank=True, editable=False)
+    district = models.CharField(max_length=30, null=True, blank=True, editable=False)
+    site = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)}, unique=True, verbose_name='Facility')
+    PMTCT = models.NullBooleanField()
+    EID = models.NullBooleanField()
+    ART = models.NullBooleanField()
+    PaedsART = models.NullBooleanField()
+    Mwana = models.NullBooleanField(editable=False)
+    ActiveOnMwana = models.NullBooleanField(editable=False)
+
+    def __unicode__(self):
+        return "%s" % self.site
+
+    def save(self, *args, **kwargs):
+        if self.site and self.district is None:
+            self.district = self.site.parent.name
+        if self.site and self.province is None:
+            self.province = self.site.parent.parent.name
+        if self.site and not self.Mwana == True:
+            self.Mwana = SupportedLocation.objects.filter(location=self.site, supported=True).exists()
+        if (self.ActiveOnMwana or self.Mwana) and not self.PaedsART == True:
+            self.PaedsART = True
+        if (self.ActiveOnMwana or self.Mwana) and not self.EID == True:
+            self.EID = True
+        super(ScaleUpSite, self).save(*args, **kwargs)
+        
