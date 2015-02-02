@@ -17,7 +17,7 @@ class Command(LabelCommand):
     help = "Updates Reporting table ScaleUpSite"
 
     def handle(self, *args, **options):
-        update_locations()
+        update_scaleup_sites()
         
 
 def __del__(self):
@@ -42,11 +42,11 @@ def update_art():
 
 def update_permissions():
     group, _ = Group.objects.get_or_create(name='Report Viewer')
-    for user in User.objects.filter(is_active=True).exclude(groups__name='Lab Result Sender'):
+    for user in User.objects.filter(is_active=True).exclude(groups__name__in=['Lab Result Sender', 'Report Viewer']):
         group.user_set.add(user)
 
 
-def update_locations():
+def update_scaleup_sites():
     heal_locations()
     update_art()
     update_permissions()
