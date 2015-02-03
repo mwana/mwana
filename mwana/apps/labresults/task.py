@@ -22,8 +22,9 @@ from mwana.apps.labresults.app import App as LabResults
 
 logger = logging.getLogger(__name__)
 
-verified = Q(lab_results__verified__isnull=True) |\
-    Q(lab_results__verified=True)
+verified = Q(
+    lab_results__verified__isnull=True) | Q(
+        lab_results__verified=True)
 
 send_live_results = Q(lab_results__clinic__send_live_results=True)
 
@@ -32,8 +33,8 @@ send_live_results = Q(lab_results__clinic__send_live_results=True)
 def send_results_notification():
     logger.debug('in send_results_notification')
     if settings.SEND_LIVE_LABRESULTS:
-        new_notified = Q(lab_results__notification_status__in=
-                         ['new', 'notified'])
+        new_notified = Q(
+            lab_results__notification_status__in=['new', 'notified'])
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
@@ -50,8 +51,8 @@ def send_results_notification():
 def send_changed_records_notification():
     logger.debug('in send_changed_records_notification')
     if settings.SEND_LIVE_LABRESULTS:
-        updated_notified = Q(lab_results__notification_status__in=
-                             ['updated', 'notified'])
+        updated_notified = Q(
+            lab_results__notification_status__in=['updated', 'notified'])
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
@@ -116,17 +117,16 @@ def clean_up_unconfirmed_results():
 @task
 def send_results_to_printer():
     logger.debug('in tasks.send_results_to_printer')
-    from pudb import set_trace; set_trace()
     if settings.SEND_LIVE_LABRESULTS:
         if SYSTEM_LOCALE == LOCALE_ZAMBIA:
             clean_up_unconfirmed_results()
-        new_notified = \
-            Q(lab_results__notification_status__in=['new', 'notified'])
+        new_notified = Q(
+            lab_results__notification_status__in=['new', 'notified'])
 
-        clinics_with_results = \
-            Location.objects.filter(Q(has_independent_printer=True)
-                                    & new_notified
-                                    & verified & send_live_results).distinct()
+        clinics_with_results = Location.objects.filter(
+            Q(has_independent_printer=True)
+            & new_notified
+            & verified & send_live_results).distinct()
         labresults_app = LabResults(AppBase)
         for clinic in clinics_with_results:
             logger.info('sending new results to printer at %s' % clinic)

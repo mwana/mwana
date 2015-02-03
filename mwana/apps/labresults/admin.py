@@ -9,7 +9,7 @@ class ResultAdmin(admin.ModelAdmin):
                     'result', 'collected_on', 'entered_on', 'processed_on',
                     'arrival_date', 'result_sent_date', 'notification_status',
                     'verified',)
-    list_filter = ('result', 'notification_status', 'verified',
+    list_filter = ('result', 'notification_status', 'verified', 'payload__source',
                    'result_sent_date', 'collected_on',  'entered_on',
                    'processed_on', 'arrival_date', 'clinic',)
     search_fields = ('sample_id','requisition_id', 'clinic_care_no',)
