@@ -26,19 +26,6 @@ DEFAULT_RESPONSE = '''Invalid Keyword. Use GM for Growth Monitor, MWANA or MAYI
 
 # Add the kannel backends for Airtel and TNM
 INSTALLED_BACKENDS.update({
-    "zain": {
-        # "ENGINE":  "threadless_router.backends.kannel.outgoing",
-        "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
-        "sendsms_url": "http://127.0.0.1:13013/cgi-bin/sendsms",
-        "sendsms_params": {"smsc": "airtel-modem",
-                           "from": "+265999279085",  # will be overridden;
-                           "username": "rapidsms",
-                           "password": ""},  # set password in localsettings.py
-        "coding": 0,
-        "charset": "ascii",
-        "encode_errors": "ignore",  # strip out unknown (unicode) characters
-        "delivery_report_url": "https://127.0.0.1",
-    },
     "airtelsmpp": {
         # "ENGINE":  "threadless_router.backends.kannel.outgoing",
         "ENGINE":  "rapidsms.backends.kannel.KannelBackend",
