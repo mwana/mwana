@@ -43,11 +43,10 @@ class GraphServive:
                 processing.append(float(row[2]))
                 delays.append(float(row[3]))
                 retrieving.append(float(row[4]))
-            if row[0] in category_names:
-                categories.append(str(row[0]))
-            elif row[-1] in category_names:
+            if row[-1] in category_names:
                 categories.append(str(row[-1]))
-
+            elif row[0] in category_names:
+                categories.append(str(row[0]))        
         return categories, transport, processing, delays, retrieving
 
     def get_yearly_supported_sites(self):
