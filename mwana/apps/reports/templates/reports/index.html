@@ -15,6 +15,10 @@
         width: 90%;
     }
     /*    .ui-dialog { z-index: 21000 !important ;}*/
+    .ui-widget {
+        font: 9pt "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif !important;
+        font-size: 1.1em !important;
+    }
 </style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
@@ -143,8 +147,51 @@
     </tbody>
 </table>
 <div style="display: none">
-    <div id="chart-main-container"  class="module">
+    <div id="chart-main-container" class="module">
         <div id="container" style="height: 400px; margin: 0 auto">Graph not available. </div>
+    </div>
+    <div id="results160">
+        <html>
+            <body>
+                <h3>Introduction</h3>
+                <p>Results160 is the component of Mwana that speeds up delivery
+                    of infant HIV results by utilizing SMS Technology. It also
+                    provides monitoring tools to track infant HIV samples
+                    during the Early Infant Diagnosis (EID) process.</p>
+                <p>&nbsp;</p>
+                <h3>EID Background</h3>
+                <p>Without treatment, an infant infected with HIV has a high chance of dying by his first
+                    birthday and a much higher chance of dying before
+                    the age of two.
+                    There is therefore need to diagnose early enough if an HIV 
+                    exposed infant is positive or not. However, the standard
+                    methods of diagnosing HIV infection in
+                    adults don't apply to&nbsp;infants below the age of 18
+                    months because by this age infants would still be carrying
+                    antibodies from their mothers. By this time, many HIV-infected
+                    infants will have died if they have not been put on the right treatment.
+                    The test used to diagnose babies born to HIV-infected
+                    mothers, Polymerase Chain Reaction
+                    (PCR), tests directly for HIV DNA rather than the HIV
+                    antibody. It requires sophisticated, expensive equipment not
+                    available in rural settings.  In Zambia today, only three labs conduct such tests. </p>
+                <p><p>&nbsp;</p><h3>Turnaround a Challenge</h3>
+                <p>Dried blood samples are collected at health facilities from 
+                    all over the country and transported by road to either of the
+                    three labs in the country. When the samples are tested at
+                    the lab, results are sent back to the health facilities
+                    using the same road transport. However, transportation of
+                    samples from the health facilities to the lab and
+                    transportation of paper results back to the health facilities
+                    often takes too long especially for facilities in rural areas
+                    - this makes the turnaround time for EID undesirable. </p>
+                <p>&nbsp;</p>
+                <h3>The Solution</h3>
+                <p>This is where Results160 comes in - to shorten the turnaround time. Results160 employs SMS  technology to send results to health facilities once they&nbsp;are ready at the testig lab. It employs a central server at the Ministry of Health and utility&nbsp;programs at the PCR labs. The utility programs securely send results to the server via the web and the server in turn sends results to facilities via SMS.</p>
+                <p>&nbsp;</p>
+            </body>
+
+        </html>
     </div>
 </div>
 
@@ -555,10 +602,11 @@ function updateDisplay(str, location_type){
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
+        var firstPart  = "<p>Below is summary data for <a onclick='showResults160About()'>Results160</a> and RemindMi in "+ location_name;
         if(location_type === "Country"){
-            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + location_name + ". Click on the map on the left to view data for a particular region.")
+            toDisplay.push(firstPart + ". Click on the map on the left to view data for a particular region.")
         }else{
-            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + location_name + " " + location_type)
+            toDisplay.push(firstPart + " " + location_type)
         }
         toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
         toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
@@ -648,9 +696,9 @@ $(function () {
                         symbol: 'diamond'
                     },
                     {% if forloop.counter0 %}
-                            data: [{% for x in item.value %} {dataLabels: { enabled: true, borderRadius: 5, backgroundColor: 'rgba(252, 255, 197, 0.7)',  borderWidth: 1, borderColor: '#AAA'}, y: {{x}}}, {% endfor %}]
-                     {% else %}
-                            data: {{ item.value }}
+                    data: [{% for x in item.value %} {dataLabels: { enabled: true, borderRadius: 5, backgroundColor: 'rgba(252, 255, 197, 0.7)',  borderWidth: 1, borderColor: '#AAA'}, y: {{x}}}, {% endfor %}]
+                    {% else %}
+                    data: {{ item.value }}
                     {% endif %}
 
                 },
@@ -687,10 +735,8 @@ $(function () {
 
 });
 
-
-
-function showGrowthChart() {
-    $($('#chart-main-container')[0].outerHTML.replace('chartType', 'chartTypeX')).dialog(
+function showDialog(code, title) {
+    $(code).dialog(
     {
         draggable: true,
         resizable: true,
@@ -698,9 +744,9 @@ function showGrowthChart() {
         modal: true,
         show: 'slide',
         hide: 'slide',
-        title: 'Mwana Growth Chart',
+        title: title,
         buttons: {
-            Ok: function() {
+            Close: function() {
 
                 $(this).dialog("close");
             }
@@ -708,6 +754,14 @@ function showGrowthChart() {
 
     }
 );}
+
+function showGrowthChart() {
+    showDialog($('#chart-main-container')[0].outerHTML.replace('chartType', 'chartTypeX'), 'The Mwana Growth Chart');
+}
+
+function showResults160About() {
+    showDialog($('#results160')[0].outerHTML, 'About Results160');
+}
 </script>
 {% endblock %}
 
