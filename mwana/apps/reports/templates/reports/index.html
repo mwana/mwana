@@ -193,6 +193,36 @@
 
         </html>
     </div>
+    <div id="remindMi">
+        <html>
+            <body>
+                <h3>RemindMi Overview</h3>
+                <p>RemindMi stands for Remind Mothers and Infants. It is the
+                    component of Mwana that uses SMS technology to address
+                    post-natal follow-up. Community Health Workers (CHWs) are trained
+                    to use the tool, register their phone on the system, and
+                    given the title of RemindMi Agent.
+                </p>
+                <p>
+                    Also commonly referred to as Community Based agents (CBAs), the RemindMi Agents
+                    first register births in their clinics and communities with
+                    a simple message that is sent to the system.  Once births
+                    have been registered, SMS messages are automatically sent
+                    at regular intervals to
+                    RemindMi Agents, who seek out caregivers and infants in
+                    their respectful communities and ask them to return to the
+                    clinic for post-natal care.  The
+                    National Guidelines are for these SMS messages to be
+                    sent at 6 days, 6 weeks and 6 months. A request for a
+                    patient to be traced can also be sent for special
+                    circumstances, for example when DBS results arrive at the
+                    facility, clinic staff can send a message to the system
+                    that asks the RemindMi agents to find that caregiver and
+                    ask her to return to the clinic.
+                </p>
+            </body>
+        </html>
+    </div>
 </div>
 
 
@@ -602,7 +632,9 @@ function updateDisplay(str, location_type){
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
-        var firstPart  = "<p>Below is summary data for <a onclick='showResults160About()'>Results160</a> and RemindMi in "+ location_name;
+        var firstPart  = "<p>Below is summary data for <a \n\
+                            onclick='showResults160About()'>Results160</a> and \n\
+                            <a onclick='showRemindMiAbout()'>RemindMi</a> in "+ location_name;
         if(location_type === "Country"){
             toDisplay.push(firstPart + ". Click on the map on the left to view data for a particular region.")
         }else{
@@ -761,6 +793,9 @@ function showGrowthChart() {
 
 function showResults160About() {
     showDialog($('#results160')[0].outerHTML, 'About Results160');
+}
+function showRemindMiAbout() {
+    showDialog($('#remindMi')[0].outerHTML, 'About RemindMi');
 }
 </script>
 {% endblock %}
