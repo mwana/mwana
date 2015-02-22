@@ -14,9 +14,9 @@ from mwana.apps.reports.views import read_request
 def get_int(val):
     return int(val) if str(val).isdigit() else None
 
+
 def get_default_int(val):
     return int(val) if str(val).isdigit() else 0
-
 
 
 def get_next_navigation(text):
