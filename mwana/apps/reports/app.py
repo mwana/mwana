@@ -17,6 +17,7 @@ class App (rapidsms.apps.base.AppBase):
         self.schedule_build_messages_report_task()
         self.schedule_build_msg_by_backend_rpt_task()
         self.schedule_build_scaleup_sites_task()
+        self.schedule_build_clinics_not_sending_dbs()
 
     def handle(self, message):
         mocker = MockSMSReportsUtility()
@@ -72,4 +73,11 @@ class App (rapidsms.apps.base.AppBase):
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         EventSchedule.objects.create(callback=callback, hours=[7, 10, 12, 14, 17], minutes=[30],
+                                     days_of_week=[0, 1, 2, 3, 4, 5, 6])
+
+    def schedule_build_clinics_not_sending_dbs(self):
+        callback = 'mwana.apps.reports.tasks.build_clinics_not_sending_dbs'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        EventSchedule.objects.create(callback=callback, hours=range(7, 18), minutes=[40],
                                      days_of_week=[0, 1, 2, 3, 4, 5, 6])

@@ -21,6 +21,7 @@ from mwana.apps.reports.management.commands.build_messages_rpt import rebuild_me
 from mwana.apps.reports.management.commands.build_messages_rpt import update_locations
 from mwana.apps.reports.management.commands.build_msg_by_backend_rpt import rebuild_messages_data as rebuild_msg_by_backend_data
 from mwana.apps.reports.management.commands.scaleup_update import update_scaleup_sites
+from mwana.apps.reports.management.commands.update_clinics_not_sending_dbs import update_clinics_not_sending_dbs
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
 _ = lambda s: s
@@ -234,3 +235,8 @@ def build_msg_by_backend_rpt(router):
 def build_scaleup_sites(router):
     logger.info('in build_scaleup_sites')
     update_scaleup_sites()
+
+
+def build_clinics_not_sending_dbs(router):
+    logger.info('in build_scaleup_sites')
+    update_clinics_not_sending_dbs()

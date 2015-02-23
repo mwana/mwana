@@ -269,3 +269,10 @@ class ScaleUpSiteAdmin(admin.ModelAdmin):
     list_editable = ('PMTCT', 'EID', 'ART', 'PaedsART',)
 admin.site.register(ScaleUpSite, ScaleUpSiteAdmin)
 
+
+class ClinicsNotSendingDBSAdmin(admin.ModelAdmin):
+    list_display = ('location', 'last_sent_samples', 'last_retrieved_results', 'last_used_sent', 'last_used_check', 'last_used_result', 'last_modified', 'contacts')
+    list_filter = ('location', )
+    search_fields = ('contacts',)
+
+admin.site.register(ClinicsNotSendingDBS, ClinicsNotSendingDBSAdmin)
