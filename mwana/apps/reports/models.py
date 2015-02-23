@@ -262,16 +262,17 @@ class ClinicsNotSendingDBS(models.Model):
    Alerts Reporting table.
     """
     location = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)}, unique=True)
-    last_sent_samples = models.PositiveSmallIntegerField(blank=True, null=True)
-    last_retrieved_results = models.PositiveSmallIntegerField(blank=True, null=True)
+    last_sent_samples = models.PositiveSmallIntegerField(blank=True, null=True)# how many days ago
+    last_retrieved_results = models.PositiveSmallIntegerField(blank=True, null=True)# how many days ago
     last_used_sent = models.PositiveSmallIntegerField(blank=True, null=True)
     last_used_check = models.PositiveSmallIntegerField(blank=True, null=True)
     last_used_result = models.PositiveSmallIntegerField(blank=True, null=True)
+    last_used_trace = models.PositiveSmallIntegerField(blank=True, null=True)# how many days ago
     last_modified = models.DateTimeField(auto_now=True)
     contacts = models.TextField(blank=True, null=True)
 
     def __unicode__(self):
-        return "location=%s, last_sent_samples=%s, last_retrieved_results=%s, last_used_sent=%s, last_used_check=%s, last_used_result=%s, last_modified=%s" %(self.location, self.last_sent_samples, self.last_retrieved_results, self.last_used_sent, self.last_used_check, self.last_used_result, self.last_modified)
+        return "location=%s, last_sent_samples=%s, last_retrieved_results=%s, last_used_sent=%s, last_used_check=%s, last_used_result=%s, last_used_trace=%s, last_modified=%s" %(self.location, self.last_sent_samples, self.last_retrieved_results, self.last_used_sent, self.last_used_check, self.last_used_result, self.last_used_trace, self.last_modified)
 
     class Meta:
         verbose_name_plural = "Clinics Not Sending DBS Alerts"

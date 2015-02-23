@@ -271,7 +271,7 @@ admin.site.register(ScaleUpSite, ScaleUpSiteAdmin)
 
 
 class ClinicsNotSendingDBSAdmin(admin.ModelAdmin):
-    list_display = ('location', 'last_sent_samples', 'last_retrieved_results', 'last_used_sent', 'last_used_check', 'last_used_result', 'last_modified', 'contacts')
+    list_display = ('location', 'last_sent_samples', 'last_retrieved_results', 'last_used_sent', 'last_used_check', 'last_used_result', 'last_used_trace', 'last_modified', 'contacts')
     list_filter = ('location', )
     search_fields = ('contacts',)
 

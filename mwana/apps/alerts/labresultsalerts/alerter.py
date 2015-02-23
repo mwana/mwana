@@ -1,20 +1,22 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.reports.models import ClinicsNotSendingDBS
+from operator import itemgetter
+
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
-from operator import itemgetter
-
 from django.db import connection
+from django.db.models import F
 from django.db.models import Max
 from django.db.models import Q
 from mwana.apps.alerts.labresultsalerts.alert import Alert
 from mwana.apps.alerts.models import Hub
 from mwana.apps.alerts.models import Lab
+from mwana.apps.labresults.handlers.results import ResultsHandler
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
+from mwana.apps.reports.models import ClinicsNotSendingDBS
 from mwana.apps.reports.utils.facilityfilter import get_distinct_parents
 from mwana.apps.userverification.models import UserVerification
 import mwana.const as const
@@ -22,7 +24,6 @@ from mwana.const import get_clinic_worker_type
 from mwana.const import get_hub_worker_type
 from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
-from mwana.apps.labresults.handlers.results import ResultsHandler
 
 class Alerter:
     def __init__(self, current_user=None, group=None, province=None,
@@ -142,30 +143,25 @@ class Alerter:
         self.set_tracing_start(days)
 
         facs = self.get_facilities_for_reporting()
-        
-        for clinic in facs:
-            last_retrieved_results = self.get_last_retrieved_results(clinic)
-            last_used_trace = self.get_last_used_trace(clinic)
+        list1 = ClinicsNotSendingDBS.objects.filter(location__in=facs,
+                                                    last_used_trace__gt=F('last_retrieved_results')
+                                                    ).filter(last_retrieved_results__lt=self.tracing_days)
 
-            if last_retrieved_results is None:
-                continue
+        list2 = ClinicsNotSendingDBS.objects.filter(location__in=facs,
+                                                    last_used_trace=None,
+                                                    ).filter(last_retrieved_results__lt=self.tracing_days)
+        clinics_not_sending_dbs = (list1 | list2).distinct()
+        for clinic in clinics_not_sending_dbs:
 
-            if last_retrieved_results <= last_used_trace:
-                continue
-            count = Result.objects.filter(clinic=clinic, result_sent_date__gte=self.tracing_ref_date).count()
-            days_late = self.days_ago(last_retrieved_results)
+            count = Result.objects.filter(clinic=clinic.location, result_sent_date__gte=self.tracing_ref_date).count()
             level = Alert.LOW_LEVEL
-            contacts = \
-        Contact.active.filter(location=clinic, types=const.get_clinic_worker_type()).\
-            distinct().order_by('pk')
+
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_TRACE, "%s clinic have "\
                              " retrieved %s results but have NOT used TRACE command. Please call and enquire "
-                             "(%s)" % (clinic.name, count, ", ".join(contact.name + ":"
-                             + contact.default_connection.identity
-                             for contact in contacts)),
-                             clinic.name,
-                             days_late,
-                             -days_late,
+                             "(%s)" % (clinic.location.name, count, clinic.contacts),
+                             clinic.location.name,
+                             clinic.last_retrieved_results,
+                             -clinic.last_retrieved_results,
                              level,
                              ""
                              ))

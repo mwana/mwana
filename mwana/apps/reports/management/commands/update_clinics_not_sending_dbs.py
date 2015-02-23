@@ -40,6 +40,7 @@ result_keyword_msgs = Message.objects.filter(direction='I',
 def update_clinics_not_sending_dbs():
     locs = Location.objects.filter(supportedlocation__supported=True)
     alerter = Alerter()
+    alerter.set_tracing_start(365 * (date.today().year - 2010))# include all days system has been running
     try:
         last_msg = Message.objects.filter(contact__types__in=[get_clinic_worker_type(), get_dbs_printer_type()], direction='I').order_by('-date')[0].date
         last_mod = ClinicsNotSendingDBS.objects.all().order_by('-last_modified')[0].last_modified
@@ -59,6 +60,7 @@ def update_clinics_not_sending_dbs():
         obj.last_used_sent = _days_ago(alerter.last_used_sent(location))
         obj.last_used_check = _days_ago(alerter.last_used_check(location))
         obj.last_used_result = _days_ago(alerter._last_used_result(location, result_keyword_msgs))
+        obj.last_used_trace = _days_ago(alerter.get_last_used_trace(location))
         contacts = Contact.active.filter(location=location, types=const.get_clinic_worker_type()
                                          ).distinct().order_by('name')
         obj.contacts = ", ".join(contact.name + ":"
