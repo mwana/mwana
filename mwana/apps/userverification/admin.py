@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.db.models import Max
 
 from rapidsms.contrib.messagelog.models import Message
-
+from rapidsms.models import Contact
 
 
 class UserVerificationAdmin(admin.ModelAdmin):
@@ -30,9 +30,28 @@ class UserVerificationAdmin(admin.ModelAdmin):
 
 admin.site.register(UserVerification, UserVerificationAdmin)
 
+
+def reactivate(modeladmin, request, queryset):
+    for da in  queryset:
+        contact = da.contact
+        if Contact.active.filter(name=contact.name,
+            location=contact.location,
+            connection__identity=da.connection.identity):
+            continue
+        contact.is_active = True
+        contact.save()
+        conn = da.connection
+        conn.contact = contact
+        conn.save()
+        UserVerification.objects.filter(contact=contact).delete()
+    queryset.delete()
+reactivate.short_description = "Reactivate selected users"
+
+
 class DeactivatedUserAdmin(admin.ModelAdmin):
     list_display = ("district", "clinic", "contact", "connection", "deactivation_date",)
-    search_fields = ('contact__location__name','contact__name')
+    search_fields = ('contact__location__name','contact__name', 'connection__identity')
+    actions = [reactivate]
 
     def clinic(self, obj):
         return obj.contact.clinic
