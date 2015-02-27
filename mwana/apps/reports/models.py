@@ -238,7 +238,7 @@ class ScaleUpSite(models.Model):
     ART = models.NullBooleanField()
     PaedsART = models.NullBooleanField()
     Mwana = models.NullBooleanField(editable=False)
-    ActiveOnMwana = models.NullBooleanField(editable=False)
+    ActiveOnMwana = models.NullBooleanField(editable=False, verbose_name='Sending DBS Samples')
 
     def __unicode__(self):
         return "%s" % self.site
