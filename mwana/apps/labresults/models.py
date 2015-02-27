@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.const import CLINIC_SLUGS
 from django.contrib.auth.models import User
 from django.db import models
 from django.conf import settings
@@ -105,7 +104,7 @@ class Result(models.Model):
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='lab_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
-                               related_name='lab_results', limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)})
+                               related_name='lab_results')
     clinic_code_unrec = models.CharField(max_length=20, blank=True) #if result is for clinic not registered as a Location
                                                                     #store raw clinic code here
 
