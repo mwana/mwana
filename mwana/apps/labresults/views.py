@@ -307,8 +307,8 @@ def accept_record (record, payload):
 
         new_record.notification_status = old_record.notification_status
 
-        #change to requisition id
-        if old_record.notification_status == 'sent' and old_record.requisition_id != new_record.requisition_id:
+        #change to requisition id, ignore whitespace padding
+        if old_record.notification_status == 'sent' and old_record.requisition_id.strip() != new_record.requisition_id:
             new_record.record_change = 'req_id'
             new_record.old_value = old_record.requisition_id
             new_record.notification_status = 'updated'
