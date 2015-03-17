@@ -22,7 +22,7 @@ urlpatterns = patterns(
         KannelBackendView.as_view(backend_name="tnm")),
     url(r'^backend/httptester/$',
         GenericHttpBackendView.as_view(backend_name='httptester')),
-    url(r'^kannel/', include('rapidsms.backends.kannel.urls')),
+    # url(r'^kannel/', include('rapidsms.backends.kannel.urls')),
     # global project URLs:
     (r'^', include('mwana.urls')),
     # custom URL additions for Malawi:
