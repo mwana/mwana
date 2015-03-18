@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms import ModelForm
 from django.db import transaction
 from django.db.models import Q
+from django.core.exceptions import MultipleObjectsReturned
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
@@ -70,6 +71,13 @@ def lowercase_value(val):
         return val.lower()
     except:
         return None
+
+def normalize_pat_id(val):
+    """consistent empty patient id"""
+    if val=='':
+        return "- - -"
+    else:
+        return val
 
 def normalize_sex(val):
     """change LIMS 'Not Provided' or other values into acceptable values"""
@@ -194,6 +202,12 @@ def normalize_clinic_id (zpct_id):
     if zpct_id != '':
         return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
 
+def normalize_child_age(val):
+    if len(str(val)) > 4:
+        return ''
+    else:
+        return val
+
 def map_result (verbose_result):
     """map the result type from extract.py codes to Result model codes"""
     result_codes = {'positive': 'P',
@@ -214,6 +228,10 @@ def accept_record (record, payload):
     if sample_id:
         try:
             old_record = labresults.Result.objects.get(sample_id=sample_id)
+        except MultipleObjectsReturned:
+            dupes = labresults.Result.filter(sample_id=sample_id)
+            for r in dupes:
+                logger.warning('Check duplicate result: %s with sample id: %s' % (r.id, sample_id))
         except labresults.Result.DoesNotExist:
             pass
 
@@ -235,22 +253,22 @@ def accept_record (record, payload):
     # because pat_id is not required in the source (Access) database.
     # The only way to recover is if they update the database (the record will
     # be resent at that time).
-    if not dictval(record, 'pat_id'):
-        logger.warning('ignoring record without pat_id field: %s' % str(record))
-        return True
+    # if not (dictval(record, 'pat_id') and dictval(record, 'clinic_care_no')):
+    #    logger.warning('ignoring record without pat_id or hcc field: %s' % str(record))
+    #    return True
 
     #validate clinic id
     clinic_code = normalize_clinic_id(str(dictval(record, 'fac')))
     try:
         clinic_obj = Location.objects.get(slug=clinic_code)
     except Location.DoesNotExist:
-        logger.warning('clinic id %s is not a recognized clinic' % clinic_code)
+        logger.warning('clinic id %s is not a recognized clinic, contact %s.' % (clinic_code, payload.source)
         clinic_obj = None
 
     #general field validation
     record_fields = {
         'sample_id': sample_id,
-        'requisition_id': dictval(record, 'pat_id'),
+        'requisition_id': dictval(record, 'pat_id', normalize_pat_id),
         'payload': payload.id if payload else None,
         'clinic': clinic_obj.id if clinic_obj else None,
         'clinic_code_unrec': clinic_code if not clinic_obj else None,
@@ -260,7 +278,7 @@ def accept_record (record, payload):
         'entered_on': dictval(record, 'recv_on', json_date),
         'processed_on': dictval(record, 'proc_on', json_date),
         'birthdate': dictval(record, 'dob', json_date),
-        'child_age': dictval(record, 'child_age'),
+        'child_age': dictval(record, 'child_age', normalize_child_age),
         'child_age_unit': dictval(record, 'child_age_unit'),
         'sex': dictval(record, 'sex', normalize_sex),
         'mother_age': dictval(record, 'mother_age'),
@@ -283,8 +301,8 @@ def accept_record (record, payload):
     #validate record sync status (couldn't validate using the form because has no
     #direct analogue in the model)
     rec_status = dictval(record, 'sync')
-    if rec_status not in ('new', 'update'):
-        cant_save('sync_status not an allowed value')
+    if rec_status not in ('new', 'update', 'synced'):
+        cant_save('sync_status %s is not an allowed value' % rec_status)
         return False
     if new_record.result:
             new_record.arrival_date = new_record.payload.incoming_date
@@ -308,7 +326,7 @@ def accept_record (record, payload):
         new_record.notification_status = old_record.notification_status
 
         #change to requisition id, ignore whitespace padding
-        if old_record.notification_status == 'sent' and old_record.requisition_id.strip() != new_record.requisition_id:
+        if old_record.notification_status == 'sent' and old_record.requisition_id.strip() != new_record.requisition_id.strip():
             new_record.record_change = 'req_id'
             new_record.old_value = old_record.requisition_id
             new_record.notification_status = 'updated'
@@ -318,8 +336,15 @@ def accept_record (record, payload):
         #change to clinic
         if old_record.notification_status in ('sent', 'notified') and old_record.clinic != new_record.clinic:
             if new_record.clinic is not None:
-                logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this?' %
-                           (sample_id, old_record.clinic.slug, new_record.clinic.slug))
+                logger.debug('New record clinic is not None.')
+            else:
+                logger.debug('New record clinic is None.')
+
+            if new_record.clinic is not None or old_record.clinic is not None:
+                old_slug = old_record.clinic.slug if old_record.clinic is not None else "NO OLD CLINIC"
+                new_slug = new_record.clinic.slug if new_record.clinic is not None else "NO NEW CLINIC"
+                logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this? pid: %s' %
+                           (sample_id, old_slug, new_slug, new_record.payload))
             else:
                 logger.warning('the new record does not have an associated clinic.')
 
@@ -340,6 +365,7 @@ def accept_record (record, payload):
 
 
     new_record.save()
+    logger.debug('Success! New record validated and was saved!')
     return True
 
 def accept_log (log, payload):
