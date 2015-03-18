@@ -262,7 +262,7 @@ def accept_record (record, payload):
     try:
         clinic_obj = Location.objects.get(slug=clinic_code)
     except Location.DoesNotExist:
-        logger.warning('clinic id %s is not a recognized clinic, contact %s.' % (clinic_code, payload.source)
+        logger.warning('clinic id %s is not a recognized clinic, contact %s.' % (clinic_code, payload.source))
         clinic_obj = None
 
     #general field validation
