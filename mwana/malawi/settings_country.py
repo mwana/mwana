@@ -132,6 +132,7 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.labresults.handlers.results.ResultsHandler",
     "mwana.apps.labresults.handlers.sent.SentHandler",
     "mwana.apps.labresults.handlers.eid.EIDHandler",
+    "mwana.apps.labresults.handlers.request.RequestCallHandler",
     # "mwana.apps.broadcast.handlers.all.AllHandler",
     "mwana.apps.broadcast.handlers.blaster.BlastHandler",
     "mwana.apps.broadcast.handlers.cba.CBAHandler",
