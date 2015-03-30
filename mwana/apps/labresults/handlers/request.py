@@ -34,7 +34,14 @@ class RequestCallHandler(KeywordHandler):
     def __identify_printer(self):
         try:
             if self.msg.connections[0].contact is not None:
-                printer = self.msg.connections[0].contact
+                printer = None
+                contact = self.msg.connections[0].contact
+                types = contact.types.values_list()
+                for values in types:
+                    for i in values:
+                        if i == "DBS Printer":
+                            printer = contact
+                return printer
             else:
                 return None
         except ObjectDoesNotExist:
