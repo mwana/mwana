@@ -78,9 +78,11 @@ class RequestCallHandler(KeywordHandler):
         results = results.filter(notification_status__in=['unprocessed'])
         return results.count()
 
-    def handle(self):
+    def handle(self, text):
         printer = self.__identify_printer()
         if printer is None:
+            return self.respond(REQUEST_CALL_HELP)
+        if text.lower() != "call":
             return self.respond(REQUEST_CALL_HELP)
 
         clinic = printer.clinic if printer.clinic is not None else None
