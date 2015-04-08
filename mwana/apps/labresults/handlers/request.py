@@ -93,7 +93,7 @@ class RequestCallHandler(KeywordHandler):
         if results.count() != 0:
             responses = build_printer_results_messages(results)
             for resp in responses:
-                msg = TLCOutgoingMessage([printer.connections[0]], resp)
+                msg = TLCOutgoingMessage([printer.default_connection], resp)
                 msg.send()
             for r in results:
                 r.notification_status = 'sent'
@@ -108,14 +108,14 @@ class RequestCallHandler(KeywordHandler):
                        u"the printer at {clinic}.".format(name=contact.name,
                                                           count=results.count(),
                                                           clinic=clinic.name))
-                if contact.connections[0] is not None:
-                    send(msg_notification, [contact.connections[0]])
+                if contact.default_connection is not None:
+                    send(msg_notification, [contact.default_connection])
         else:
             msg_no_results = "There are no results available for now."
-            no_results = TLCOutgoingMessage([printer.connections[0]], msg_no_results)
+            no_results = TLCOutgoingMessage([printer.default_connection], msg_no_results)
             no_results.send()
         if unprocessed != 0:
-            msg_unprocessed = "%s samples were received and are being"\
+            msg_unprocessed = "%s samples were received and are being "\
                               "processed at the lab." % unprocessed
-            pending = TLCOutgoingMessage([printer.connections[0]], msg_unprocessed)
+            pending = TLCOutgoingMessage([printer.default_connection], msg_unprocessed)
             pending.send()
