@@ -10,6 +10,7 @@ from mwana.apps.nutrition import views as anthro
 from rapidsms.backends.http.views import GenericHttpBackendView
 from rapidsms.backends.kannel.views import KannelBackendView
 from mwana.apps.remindmi.views import ContactsList, send_message
+from mwana.apps.monitor.views import MonitorSampleList, result_delivery_stats
 
 urlpatterns = patterns(
     '',
@@ -56,4 +57,9 @@ urlpatterns = patterns(
         name='emergency_contacts'),
     url(r'^emergency/reports/', emergency.FloodReportList.as_view(),
         name='emergency_flood_list'),
+    url(r'^monitor/samples/', MonitorSampleList.as_view(),
+        name='monitor_sample_list'),
+    url(r'^monitor/delivery/', result_delivery_stats,
+        name='monitor_result_delivery'),
 )
+

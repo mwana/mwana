@@ -74,6 +74,7 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.appointments')
 INSTALLED_APPS.insert(-1, 'django_tables2_reports')
 INSTALLED_APPS.insert(-1, 'mwana.apps.remindmi')
 INSTALLED_APPS.insert(-1, 'mwana.apps.dhis2')
+INSTALLED_APPS.insert(-1, 'mwana.apps.monitor')
 INSTALLED_APPS.insert(-1, 'mwana.apps.emergency')
 
 # Add the people and growth monitoring apps for Malawi:
@@ -104,19 +105,8 @@ PAGINATOR_OBJECTS_PER_PAGE = 50
 # XLS exports
 EXCEL_SUPPORT = 'xlwt'
 
-# Django celery
-import djcelery
+# Celery config
 
-djcelery.setup_loader()
-
-BROKER_URL = 'redis://localhost:6379/0'
-REDIS_DB = 0
-REDIS_CONNECT_RETRY = True
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TASK_RESULT_EXPIRES = 10
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
-BROKER_BACKEND = "redis"
-CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERY_TIMEZONE = 'Africa/Blantyre'
 
 # WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
@@ -142,7 +132,7 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
-    "mwana.apps.remindmi.handlers.mayi.MayiHandler",
+    # "mwana.apps.remindmi.handlers.mayi.MayiHandler",
     "mwana.apps.remindmi.handlers.mwana.MwanaHandler",
     "mwana.apps.remindmi.handlers.status.StatusHandler",
     "mwana.apps.remindmi.handlers.discontinue.DiscontinueHandler",

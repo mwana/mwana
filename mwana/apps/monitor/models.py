@@ -2,6 +2,7 @@
 
 from django.db import models
 from rapidsms.models import Contact
+from mwana.apps.labresults.models import Payload
 
 
 class MonitorMessageRecipient(models.Model):
@@ -16,3 +17,29 @@ class MonitorMessageRecipient(models.Model):
         if self.receive_sms:
             extra = "can receive monitor messages"
         return "%s %s" % (self.contact.name, extra)
+
+class MonitorSample(models.Model):
+
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('synced', 'Synced'),
+        ('update', 'Updated'),
+    )
+
+    SYNC_CHOICES = (
+        ('new', 'New sample from lab.'),
+        ('update', 'Update data from lab.'),
+        ('synced', 'Archived sample from lab.')
+    )
+
+    sample_id = models.CharField(max_length=20, help_text="ID from LIMS")
+    payload = models.ForeignKey(Payload, null=True, blank=True,
+                                help_text="Originating payload from lab.")
+    sync = models.CharField(choices=SYNC_CHOICES, max_length=15,
+                            help_text="A new sample or an Update")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=15,
+                              default='pending',
+                              help_text="Synchronisation status.")
+    raw = models.TextField(help_text="Raw value of the sample record.")
+    hmis = models.CharField(max_length=10, null=True, blank=True,
+                            help_text="HMIS Code for the facility.")
