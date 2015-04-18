@@ -18,7 +18,14 @@
   <ul class="dropdown-menu">
     <li><a href="{% url 'mwana_reports' %}">Reports</a></li>
     <li><a href="{% url 'mwana_graphs' %}">Analysis</a></li>
-    <!-- <li class="divider"></li> -->
+    <li class="divider"></li>
+    <li class="dropdown-submenu">
+        <a tabindex="-1" href="#">Monitor</a>
+        <ul class="dropdown-menu">
+          <li><a href="{% url 'monitor_sample_list' %}">Sample Synchronisation</a></li>
+          <li><a href="{% url 'monitor_result_delivery' %}">Sample Delivery</a></li>
+        </ul>
+    </li>
     <!-- <li><a href="{% url 'growth_index' %}">Reports - Advanced filters</a></li> -->
     <!-- <li><a href="{% url 'growth_graphs' %}">Analysis - Advanced filters</a></li> -->
     <!-- <li><a href="{% url 'results_list' %}">Results</a></li> -->
@@ -58,13 +65,3 @@
     <li><a href="">Analysis</a></li>
   </ul>
 </li>
-<li class="dropdown">
-  <a class="dropdown-toggle" data-toggle="dropdown" href="#">Monitor
-    <b class="caret"></b>
-  </a>
-  <ul class="dropdown-menu">
-    <li><a href="{% url 'monitor_sample_list' %}">Sample Synchronisation</a></li>
-    <li><a href="{% url 'monitor_result_delivery' %}">Sample Delivery</a></li>
-  </ul>
-</li>
-
