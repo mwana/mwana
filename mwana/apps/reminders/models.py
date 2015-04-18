@@ -102,8 +102,8 @@ class PatientEvent(models.Model):
     cba_conn = models.ForeignKey(Connection, related_name='cba_patient_events',
                                  limit_choices_to={'contact__types__slug':
                                           'cba'},verbose_name='CBA Connection')
-    #patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
-    patient_conn = models.ForeignKey(Connection, related_name='patient_patient_events',
+    patient_conn = models.CharField(max_length=15, verbose_name='Patient Connection', null=True, blank=True)
+    pat_conn = models.ForeignKey(Connection, related_name='patient_patient_events',
                                      limit_choices_to={'contact__types__slug':
                                                            'patient'},verbose_name='Patient Connection', null=True, blank=True)
     date = models.DateField()

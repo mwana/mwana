@@ -216,11 +216,11 @@ class MayiHandler(KeywordHandler):
 
         if data['phone'] is not None:
             backend = self._get_backend(data['backend_name'])
-            patient_conn = Connection(backend=backend,
+            pat_conn = Connection(backend=backend,
                                       identity=data['phone'],
                                       contact_id=patient.id)
         else:
-            patient_conn = None
+            pat_conn = None
 
         if healthworker:
             hsa_name = ' %s' % healthworker.name
@@ -235,7 +235,7 @@ class MayiHandler(KeywordHandler):
                                 date=data['edd'].strftime('%d/%m/%Y'),
                                 hsa_name=hsa_name)
             self.msg.respond(thanks_msg)
-            if patient_conn is not None:
+            if pat_conn is not None:
                 mayi_msg = "Dear %(name)s, you have been registered to"\
                            " receive reminders for care by %(hsa_name)s. You "\
                            "will be notified of your next clinic appointments."\
@@ -248,8 +248,8 @@ class MayiHandler(KeywordHandler):
             date=data['edd'],
             cba_conn=self.msg.connections[0],
             notification_status="cooc")
-        if patient_conn is not None:
-            patient_event.patient_conn = patient_conn
+        if pat_conn is not None:
+            patient_event.pat_conn = pat_conn
             patient_event.save()
             mayi_msg = "Dear %(name)s, you have been registered to"\
                        " receive reminders for care by %(hsa_name)s. You "\

@@ -1,21 +1,22 @@
-# encoding: utf-8
+# -*- coding: utf-8 -*-
 import datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
 
+
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
-        # Changing field 'EIDConfirmation.age_on_report'
-        db.alter_column(u'labresults_eidconfirmation', 'age_on_report', self.gf('django.db.models.fields.IntegerField')(max_length=2))
+        # Adding field 'Result.recipient'
+        db.add_column(u'labresults_result', 'recipient',
+                      self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='result_connections', null=True, to=orm['rapidsms.Connection']),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        
-        # Changing field 'EIDConfirmation.age_on_report'
-        db.alter_column(u'labresults_eidconfirmation', 'age_on_report', self.gf('django.db.models.fields.DateTimeField')())
+        # Deleting field 'Result.recipient'
+        db.delete_column(u'labresults_result', 'recipient_id')
 
 
     models = {
@@ -34,7 +35,7 @@ class Migration(SchemaMigration):
         },
         u'auth.user': {
             'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 5, 4, 0, 9, 25, 775724)'}),
+            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -42,7 +43,7 @@ class Migration(SchemaMigration):
             'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
             'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 5, 4, 0, 9, 25, 775029)'}),
+            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
@@ -64,10 +65,11 @@ class Migration(SchemaMigration):
         u'labresults.eidconfirmation': {
             'Meta': {'object_name': 'EIDConfirmation'},
             'action_taken': ('django.db.models.fields.CharField', [], {'max_length': '3', 'null': 'True', 'blank': 'True'}),
-            'age_on_report': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
-            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['rapidsms.Contact']"}),
+            'age_in_months': ('django.db.models.fields.IntegerField', [], {'max_length': '2', 'null': 'True'}),
+            'art_number': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
+            'contact': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['rapidsms.Contact']", 'null': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'result': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['labresults.Result']"}),
+            'result': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['labresults.Result']", 'null': 'True'}),
             'sample': ('django.db.models.fields.CharField', [], {'max_length': '30'}),
             'status': ('django.db.models.fields.CharField', [], {'max_length': '1'})
         },
@@ -112,6 +114,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('collected_on', 'requisition_id')", 'object_name': 'Result'},
             'arrival_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'birthdate': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'carer_phone': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'child_age': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '4', 'decimal_places': '1', 'blank': 'True'}),
             'child_age_unit': ('django.db.models.fields.CharField', [], {'max_length': '20', 'null': 'True', 'blank': 'True'}),
             'clinic': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'lab_results'", 'null': 'True', 'to': u"orm['locations.Location']"}),
@@ -126,7 +129,9 @@ class Migration(SchemaMigration):
             'notification_status': ('django.db.models.fields.CharField', [], {'max_length': '15'}),
             'old_value': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'payload': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'lab_results'", 'null': 'True', 'to': u"orm['labresults.Payload']"}),
+            'phone': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
             'processed_on': ('django.db.models.fields.DateField', [], {'null': 'True', 'blank': 'True'}),
+            'recipient': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'result_connections'", 'null': 'True', 'to': u"orm['rapidsms.Connection']"}),
             'record_change': ('django.db.models.fields.CharField', [], {'max_length': '6', 'null': 'True', 'blank': 'True'}),
             'requisition_id': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
             'requisition_id_search': ('django.db.models.fields.CharField', [], {'max_length': '50', 'db_index': 'True'}),
@@ -191,6 +196,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Contact'},
             'alias': ('django.db.models.fields.CharField', [], {'max_length': '100', 'unique': 'True', 'null': 'True', 'blank': 'True'}),
             'created_on': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
+            'date_of_birth': ('django.db.models.fields.DateField', [], {'null': 'True'}),
             'errors': ('django.db.models.fields.IntegerField', [], {'default': '0', 'max_length': '5'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -203,9 +209,11 @@ class Migration(SchemaMigration):
             'location': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['locations.Location']", 'null': 'True', 'blank': 'True'}),
             'modified_on': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
+            'parent': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['rapidsms.Contact']", 'null': 'True', 'blank': 'True'}),
             'pin': ('django.db.models.fields.CharField', [], {'max_length': '4', 'blank': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'default': "'A'", 'max_length': '1'}),
-            'types': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'contacts'", 'blank': 'True', 'to': u"orm['contactsplus.ContactType']"})
+            'types': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'contacts'", 'blank': 'True', 'to': u"orm['contactsplus.ContactType']"}),
+            'volunteer': ('django.db.models.fields.CharField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'})
         }
     }
 
