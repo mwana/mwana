@@ -17,8 +17,9 @@ from mwana.apps.tlcprinters.messages import TLCOutgoingMessage
 
 
 logger = logging.getLogger(__name__)
-REQUEST_CALL_HELP = '''You need to be a registered printer to request
-                    bulk printing of results.'''
+REQUEST_CALL_HELP = '''The REQUEST keyword is for registered printers. Please
+                    contact the administrator for further help using HELP.'''
+
 
 class RequestCallHandler(KeywordHandler):
     """
@@ -62,7 +63,10 @@ class RequestCallHandler(KeywordHandler):
             results = Result.objects.filter(
                 clinic=clinic,
                 clinic__send_live_results=True)
-        return results
+            return results
+        else:
+            self.respond('This server is not allowed to send results.')
+            return None
 
     def __verified_pending_results(self, results):
         """
@@ -88,9 +92,13 @@ class RequestCallHandler(KeywordHandler):
         clinic = printer.clinic if printer.clinic is not None else None
         if clinic is not None:
             pending_results = self.__pending_results(clinic)
-            results = self.__verified_pending_results(pending_results)
-            unprocessed = self.__unprocessed_results(pending_results)
-        if results.count() != 0:
+            if pending_results is not None:
+                results = self.__verified_pending_results(pending_results)
+                unprocessed = self.__unprocessed_results(pending_results)
+            else:
+                results = []
+                unprocessed = 0
+        if len(results) != 0:
             responses = build_printer_results_messages(results)
             for resp in responses:
                 msg = TLCOutgoingMessage([printer.default_connection], resp)
@@ -102,20 +110,25 @@ class RequestCallHandler(KeywordHandler):
 
             contacts = Contact.active.filter(
                 Q(location=clinic) | Q(location__parent=clinic),
-                Q(types=const.get_clinic_worker_type())).distinct().order_by('pk')
+                Q(types=const.get_clinic_worker_type())).distinct().order_by(
+                    'pk')
             for contact in contacts:
-                msg_notification = (u"Hello {name}, {count} results have sent to "
-                       u"the printer at {clinic}.".format(name=contact.name,
-                                                          count=results.count(),
-                                                          clinic=clinic.name))
+                msg_notification = (u"Hello {name}, {count} results have been"
+                                    u" sent to the printer at {clinic}"
+                                    u".".format(name=contact.name,
+                                                count=results.count(),
+                                                clinic=clinic.name))
                 if contact.default_connection is not None:
                     send(msg_notification, [contact.default_connection])
         else:
-            msg_no_results = "There are no results available for now."
-            no_results = TLCOutgoingMessage([printer.default_connection], msg_no_results)
-            no_results.send()
+            if pending_results is not None:
+                msg_no_results = "There are no results available for now."
+                no_results = TLCOutgoingMessage([printer.default_connection],
+                                                msg_no_results)
+                no_results.send()
         if unprocessed != 0:
             msg_unprocessed = "%s samples were received and are being "\
                               "processed at the lab." % unprocessed
-            pending = TLCOutgoingMessage([printer.default_connection], msg_unprocessed)
+            pending = TLCOutgoingMessage([printer.default_connection],
+                                         msg_unprocessed)
             pending.send()
