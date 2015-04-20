@@ -95,7 +95,7 @@ SOUTH_MIGRATION_MODULES = {
 
 # reduce noise in logs
 LOG_LEVEL = "INFO"
-#XFORMS_HOST = '127.0.0.1:8000'
+# XFORMS_HOST = '127.0.0.1:8000'
 
 # paginator configuration
 PAGINATOR_OBJECTS_PER_PAGE = 50
@@ -107,6 +107,18 @@ PAGINATOR_OBJECTS_PER_PAGE = 50
 EXCEL_SUPPORT = 'xlwt'
 
 # Celery config
+import djcelery
+
+djcelery.setup_loader()
+
+BROKER_URL = 'redis://localhost:6379/0'
+REDIS_DB = 0
+REDIS_CONNECT_RETRY = True
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TASK_RESULT_EXPIRES = 10
+BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
+BROKER_BACKEND = "redis"
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 
 CELERY_TIMEZONE = 'Africa/Blantyre'
 
@@ -133,7 +145,7 @@ RAPIDSMS_HANDLERS = [
     "mwana.apps.broadcast.handlers.msg.MessageHandler",
     "mwana.apps.nutrition.handlers.growth.GrowthHandler",
     "mwana.apps.nutrition.handlers.cancel.CancelHandler",
-    # "mwana.apps.remindmi.handlers.mayi.MayiHandler",
+    "mwana.apps.remindmi.handlers.mayi.MayiHandler",
     "mwana.apps.remindmi.handlers.mwana.MwanaHandler",
     "mwana.apps.remindmi.handlers.status.StatusHandler",
     "mwana.apps.remindmi.handlers.discontinue.DiscontinueHandler",
