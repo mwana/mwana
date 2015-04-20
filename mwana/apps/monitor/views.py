@@ -1,8 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 import datetime
 
-from django.shortcuts import render_to_response, render
-from django.views.decorators.http import require_http_methods, require_GET
+from django.shortcuts import render_to_response
+from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django import forms
 
@@ -30,18 +30,25 @@ def get_results_delivery_data():
         hist_notified = notified.count()
         hist_sent = sent.count()
         today_new = new.filter(arrival_date=datetime.date.today()).count()
-        today_sent = sent.filter(result_sent_date=datetime.date.today()).count()
+        today_sent = sent.filter(
+            result_sent_date=datetime.date.today()).count()
         delivery_stats.append({'name': location.name, 'hmis': location.slug,
-                               'district': location.parent.name, 'all_new': hist_new,
-                               'all_notified': hist_notified, 'all_sent': hist_sent,
-                               'new_today': today_new, 'sent_today': today_sent})
+                               'district': location.parent.name,
+                               'all_new': hist_new,
+                               'all_notified': hist_notified,
+                               'all_sent': hist_sent,
+                               'new_today': today_new,
+                               'sent_today': today_sent})
     return delivery_stats
 
 
 class ResultsDeliveryForm(forms.Form):
-    facility = forms.CharField(label='Facility Name', max_length=100, required=False)
-    hmis = forms.CharField(label='HMIS Code', max_length=100, required=False)
-    district = forms.CharField(label='District', max_length=100, required=False)
+    facility = forms.CharField(label='Facility Name', max_length=100,
+                               required=False)
+    hmis = forms.CharField(label='HMIS Code', max_length=100,
+                           required=False)
+    district = forms.CharField(label='District', max_length=100,
+                               required=False)
 
 
 class MonitorSampleList(FilteredSingleTableView):
@@ -58,6 +65,7 @@ class ResultsDeliveryList(FilteredSingleTableView):
     filter_class = ResultsDeliveryFilter
     queryset = get_results_delivery_data()
 
+
 @require_GET
 def result_delivery_stats(request):
     stats = get_results_delivery_data()
@@ -67,5 +75,3 @@ def result_delivery_stats(request):
     return render_to_response("monitor/sample_delivery.html",
                               {"table": table, "form": form},
                               context_instance=RequestContext(request))
-
-

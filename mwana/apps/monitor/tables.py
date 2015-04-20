@@ -39,12 +39,30 @@ FACS_DISTRICTS = {
 
 
 class MonitorSampleTable(TableReport):
+    patientid = tables.Column(verbose_name='Sample ID',
+                              accessor='result.requisition_id')
+    hcc = tables.Column(verbose_name='HCC ID',
+                        accessor='result.clinic_care_no')
     sample_id = tables.Column(verbose_name='Lab ID')
     lab_source = tables.Column(verbose_name='Laboratory',
                                accessor='payload.source')
     hmis = tables.Column(verbose_name='HMIS Code')
+    facility = tables.Column(verbose_name='Facility',
+                             accessor='result.clinic.name')
     district = tables.Column(verbose_name='District',
                              accessor='hmis')
+    entered = tables.Column(verbose_name='Entry in LIMS',
+                            accessor='result.entered_on')
+    arrival = tables.Column(verbose_name='Entry in RapidSMS',
+                            accessor='result.arrival_date')
+    sent = tables.Column(verbose_name='Result Sent Date',
+                         accessor='result.result_sent_date')
+    recipient = tables.Column(verbose_name='Recipient',
+                              accessor='result.recipient.contact')
+    recipient_type = tables.Column(verbose_name="Recipient Type",
+                                   accessor='result.recipient.contact')
+    # confirmation = tables.Column(verbose_name='Receipt Confirmation',
+    # accessor='??)
 
     def render_district(self, value, record):
         if record.hmis is not None:
@@ -52,10 +70,26 @@ class MonitorSampleTable(TableReport):
         else:
             return value
 
+    def render_patient_id(self, value, record):
+        if len(record.result.requisition_id) < 7:
+            return record.result.clinic_care_no
+        else:
+            return record.result.requisition_id
+
+    def render_recipient_type(self, value, record):
+        if record is not None:
+            return ', '.join(record.types.values_list('name', flat=True))
+        else:
+            return value
+
     class Meta:
         model = MonitorSample
         attrs = {'class': "table table-striped table-bordered table-condensed"}
-        exclude = ('id', 'raw', 'sync')
+        exclude = ('id', 'raw', 'sync', 'result')
+        sequence = ("lab_source", "sample_id", "patientid", "hcc", "facility",
+                    "hmis", "district", "entered", "arrival", "sent",
+                    "recipient", "recipient_type", "payload")
+
 
 class ResultsDeliveryTable(TableReport):
     name = tables.Column()
@@ -69,5 +103,3 @@ class ResultsDeliveryTable(TableReport):
 
     class Meta:
         attrs = {'class': "table table-striped table-bordered table-condensed"}
-
-
