@@ -229,7 +229,7 @@ def accept_record (record, payload):
         try:
             old_record = labresults.Result.objects.get(sample_id=sample_id)
         except MultipleObjectsReturned:
-            dupes = labresults.Result.filter(sample_id=sample_id)
+            dupes = labresults.Result.objects.filter(sample_id=sample_id)
             for r in dupes:
                 logger.warning('Check duplicate result: %s with sample id: %s' % (r.id, sample_id))
         except labresults.Result.DoesNotExist:
