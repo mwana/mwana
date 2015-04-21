@@ -105,6 +105,7 @@ class RequestCallHandler(KeywordHandler):
                 msg.send()
             for r in results:
                 r.notification_status = 'sent'
+                r.recipient = printer.default_connection
                 r.result_sent_date = datetime.now()
                 r.save()
 
