@@ -43,7 +43,7 @@ class MonitorSampleTable(TableReport):
                               accessor='result.requisition_id')
     hcc = tables.Column(verbose_name='HCC ID',
                         accessor='result.clinic_care_no')
-    sample_id = tables.Column(verbose_name='Lab ID')
+    sample_id = tables.Column(verbose_name='Lab Sample ID')
     lab_source = tables.Column(verbose_name='Laboratory',
                                accessor='payload.source')
     hmis = tables.Column(verbose_name='HMIS Code')
@@ -86,7 +86,7 @@ class MonitorSampleTable(TableReport):
         model = MonitorSample
         attrs = {'class': "table table-striped table-bordered table-condensed"}
         exclude = ('id', 'raw', 'sync', 'result')
-        sequence = ("lab_source", "sample_id", "patientid", "hcc", "facility",
+        sequence = ("sample_id", "lab_source", "patientid", "hcc", "facility",
                     "hmis", "district", "entered", "arrival", "sent",
                     "recipient", "recipient_type", "payload")
 
