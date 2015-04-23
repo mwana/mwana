@@ -87,7 +87,7 @@ class MonitorSampleTable(TableReport):
         attrs = {'class': "table table-striped table-bordered table-condensed"}
         exclude = ('id', 'raw', 'sync', 'result')
         sequence = ("sample_id", "lab_source", "patientid", "hcc", "facility",
-                    "hmis", "district", "entered", "arrival", "sent",
+                    "hmis", "district", "entered", "status", "arrival", "sent",
                     "recipient", "recipient_type", "payload")
 
 
