@@ -42,7 +42,7 @@ LAB_NAME = {'1': "KCH DNA-PCR LAB", '2': "QECH DNA-PCR LAB",
 COUNTRY_CODE = '+265'
 
 DATE_FORMAT = 'F j, Y'  # December 25, 2012
-DATE_INPUT_FORMATS = ('%d%m%Y', '%Y-%m-%d')
+DATE_INPUT_FORMATS = ('%d%m%y', '%Y-%m-%d')
 
 DISTRICTS = sorted(["Dedza", "Dowa", "Kasungu", "Lilongwe", "Mchinji",
                     "Nkhotakota", "Ntcheu", "Ntchisi", "Salima", "Chitipa",
