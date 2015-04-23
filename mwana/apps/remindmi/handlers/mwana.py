@@ -22,7 +22,7 @@ class MwanaHandler(NewHandler):
     unregistered = _('You need to be registered to report a birth.'
                      ' Send JOIN for more information.')
 
-    def is_phone(text):
+    def is_phone(self, text):
         return all(ch in set(string.digits) for ch in text)
 
     def parse_message(self, text):
@@ -70,7 +70,7 @@ class MwanaHandler(NewHandler):
         "Check reporter, parse text, validate data, and respond."
         healthworker, location = self.check_healthworker()
         if healthworker is None or location is None:
-            self.respond(self.unregistered)
+            return self.respond(self.unregistered)
         parsed = self.parse_message(text)
         form = self.form(data=parsed, connection=self.msg.connection)
         if form. is_valid():

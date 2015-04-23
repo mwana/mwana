@@ -99,17 +99,23 @@ class CollectForm(HandlerForm):
 class MayiForm(HandlerForm):
     """Register a mother on mothers continuum of care. """
 
-    edd = forms.DateField(required=True, error_messages={
-        'required': _(
-            'Sorry, please use the DDMMYYYY or YYYY-MM-DD format.')})
-    firstname = forms.CharField(required=False, error_messages={
-        'required': _(
+    edd = forms.DateField(
+        required=True,
+        error_messages={'required': _(
+            'Sorry, please use the DDMMYY or YYYY-MM-DD format.')},
+        input_formats=settings.DATE_INPUT_FORMATS)
+    firstname = forms.CharField(
+        required=False,
+        error_messages={'required': _(
             'Sorry, you must provide a mothers first name.')})
     lastname = forms.CharField(required=False, error_messages={
         'required': _(
             'Sorry, you must provide a mothers last name.')})
-    dob = forms.CharField(error_messages={'required': _('Please provide a'
-                                                        ' date of birth.')})
+    dob = forms.CharField(
+        required=False,
+        error_messages={'invalid': _(
+            'Please provide a date of birth in YYYY-MM-DD or DDMMYY format.')},
+        )
     phone = forms.CharField(max_length=15, error_messages={
         'required': _('Please enter the phone number or X')})
     status = forms.CharField(max_length=10, error_messages={
@@ -141,6 +147,29 @@ class MayiForm(HandlerForm):
                         'when it is time for the next appointment.') % params
                     raise forms.ValidationError(message)
         return self.cleaned_data
+
+    def clean_dob(self):
+        """
+        Returns a default date of birth for the mother if not supplied.
+        """
+        dob = self.cleaned_data.get('dob', None)
+        if dob is not None:
+            try:
+                error_msg = "There is a error in the date"
+                date_field = forms.DateField(
+                    input_formats=('%d%m%y', '%Y-%m-%d'),
+                    error_messages={'invalid': error_msg})
+                good_date = date_field.clean(dob)
+                if good_date:
+                    return good_date
+            except forms.ValidationError:
+                msg = "Please send date: %s as DDMMYYYY or YYYY-mm-DD" % dob
+                raise forms.ValidationError(msg)
+        else:
+            dob = datetime.date(1970, 1, 1)
+            self.cleaned_data['dob'] = dob
+
+        return dob
 
     def _get_backend(self, backend_name):
         """Returns a matching backend based on the name."""
@@ -268,8 +297,8 @@ class MwanaForm(HandlerForm):
     on mothers status."""
 
     date = forms.DateField(required=True, error_messages={
-        'invalid': _('Sorry, Please use the DDMMYYYY format.')
-    })
+        'invalid': _('Sorry, Please use the DDMMYY or YYYY-MM-DD format.')
+    }, input_formats=settings.DATE_INPUT_FORMATS)
     mother_name = forms.CharField(error_messages={
         'required': _(
             'Sorry, you must provide the mothers firstname_lastname'
