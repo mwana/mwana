@@ -52,7 +52,7 @@ class MonitorSampleTable(TableReport):
     district = tables.Column(verbose_name='District',
                              accessor='hmis')
     entered = tables.Column(verbose_name='Entry in LIMS',
-                            accessor='result.entered_on')
+                            accessor='result.processed_on')
     arrival = tables.Column(verbose_name='Entry in RapidSMS',
                             accessor='result.arrival_date')
     sent = tables.Column(verbose_name='Result Sent Date',

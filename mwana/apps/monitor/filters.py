@@ -7,30 +7,32 @@ from mwana.apps.remindmi.filters import (MultiFieldFilter,
 
 
 from mwana.apps.monitor.models import MonitorSample
-from .tables import FACS_DISTRICTS
+# from .tables import FACS_DISTRICTS
 
 EMPTY_CHOICE = ('', 'Any'),
 # DISTRICTS_CHOICES = [(x, y) for FACS_DISTRICTS[1], ]
+
 
 class MonitorSampleFilter(django_filters.FilterSet):
 
     startdate = django_filters.DateFilter(
         label="Start date",
         lookup_type='gte',
-        name='payload__incoming_date',
+        name='result__processed_on',
         widget=forms.HiddenInput())
     enddate = django_filters.DateFilter(
         label="End date",
         lookup_type='lte',
-        name='payload__incoming_date',
+        name='result__processed_on',
         widget=forms.HiddenInput())
     hmis = MultiFieldFilter(
         ['hmis'],
         label="HMIS Code")
     lab_source = django_filters.AllValuesFilter(name='payload__source',
-                                      label="Laboratory")
-    status =django_filters.AllValuesFilter(name='status')
-    sample_id = django_filters.CharFilter(name='sample_id', label="Lab Sample ID")
+                                                label="Laboratory")
+    status = django_filters.AllValuesFilter(name='status')
+    sample_id = django_filters.CharFilter(name='sample_id',
+                                          label="Lab Sample ID")
 
     class Meta:
         model = MonitorSample
