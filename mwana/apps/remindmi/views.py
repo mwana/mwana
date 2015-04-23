@@ -134,7 +134,7 @@ class MothersList(FilteredSingleTableView):
     table_class = MothersListTable
     template_name = 'remindmi/mothers_list.html'
     filter_class = PatientListFilter
-    queryset = Contact.objects.filter(Q(types=const.get_patient_type()))
+    queryset = Contact.objects.filter(Q(types=const.get_mother_type()))
 
 
 class ChildrenList(FilteredSingleTableView):
