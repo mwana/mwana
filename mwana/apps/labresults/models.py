@@ -132,6 +132,7 @@ class Result(models.Model):
     carer_phone = models.CharField(max_length=15, blank=True, null=True)
 
     recipient = models.ForeignKey(Connection, null=True, blank=True, related_name='result_connections') # connection the result was last sent to.
+    receipt_confirmed = models.BooleanField(default=False)
     record_change = models.CharField(choices=RECORD_CHANGE_CHOICES, max_length=6, null=True, blank=True)
     old_value = models.CharField(max_length=50, null=True, blank=True)
     verified = models.NullBooleanField(null=True, blank=True)
