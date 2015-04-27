@@ -180,17 +180,17 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'basic',
-            'filename': os.path.join(PROJECT_ROOT, 'logs', 'rapidsms.log'),
+            'filename': '/var/log/rapidsms/rapidsms.log',
         },
     },
     'loggers': {
-        #'django.request': {
-        #   'handlers': ['mail_admins'],
-        #  'level': 'ERROR',
-        # 'propagate': True,
-        #},
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
         'rapidsms': {
-            'handlers': ['file'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
         },
