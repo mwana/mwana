@@ -180,7 +180,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'formatter': 'basic',
-            'filename': '/var/log/rapidsms/rapidsms.log',
+            'filename': os.path.join(PROJECT_ROOT, 'logs', 'rapidsms.log'),
         },
     },
     'loggers': {
@@ -190,7 +190,7 @@ LOGGING = {
             'propagate': True,
         },
         'rapidsms': {
-            'handlers': ['console', 'file'],
+            'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': True,
         },
