@@ -100,6 +100,12 @@ class ResultsDeliveryTable(TableReport):
     all_sent = tables.Column()
     new_today = tables.Column()
     sent_today = tables.Column()
+    num_lims = tables.Column(verbose_name="Total in LIMS")
+    num_rsms = tables.Column(verbose_name="Total in Results160")
+    num_sent_out = tables.Column(verbose_name="Total Sent Out")
+    sent_printer = tables.Column(verbose_name="Sent to Printer")
+    sent_worker = tables.Column(verbose_name="Sent to Phone")
+    receipt_confirmed = tables.Column(verbose_name="Confirmed by Recipient")
 
     class Meta:
         attrs = {'class': "table table-striped table-bordered table-condensed"}
