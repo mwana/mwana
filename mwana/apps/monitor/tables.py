@@ -89,6 +89,7 @@ class MonitorSampleTable(TableReport):
         sequence = ("sample_id", "lab_source", "patientid", "hcc", "facility",
                     "hmis", "district", "entered", "status", "arrival", "sent",
                     "recipient", "recipient_type", "payload")
+        order_by = ('-entered')
 
 
 class ResultsDeliveryTable(TableReport):
