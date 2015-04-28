@@ -66,7 +66,10 @@ class MonitorSampleTable(TableReport):
 
     def render_district(self, value, record):
         if record.hmis is not None:
-            return FACS_DISTRICTS[record.hmis[:2]]
+            if record.hmis[:2] in ['00']:  # skip faulty data
+                pass
+            else:
+                return FACS_DISTRICTS[record.hmis[:2]]
         else:
             return value
 
