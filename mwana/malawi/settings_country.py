@@ -74,7 +74,7 @@ INSTALLED_APPS.insert(-1, 'mwana.apps.training')
 INSTALLED_APPS.insert(-1, 'mwana.apps.appointments')
 INSTALLED_APPS.insert(-1, 'django_tables2_reports')
 INSTALLED_APPS.insert(-1, 'mwana.apps.remindmi')
-INSTALLED_APPS.insert(-1, 'mwana.apps.dhis2')
+# INSTALLED_APPS.insert(-1, 'mwana.apps.dhis2')
 INSTALLED_APPS.insert(-1, 'mwana.apps.monitor')
 INSTALLED_APPS.insert(-1, 'mwana.apps.emergency')
 
@@ -107,9 +107,9 @@ PAGINATOR_OBJECTS_PER_PAGE = 50
 EXCEL_SUPPORT = 'xlwt'
 
 # Celery config
-import djcelery
+# import djcelery
 
-djcelery.setup_loader()
+# djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost:6379/0'
 REDIS_DB = 0

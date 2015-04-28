@@ -30,14 +30,14 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 # to configure it. see the documentation in those modules for a list of
 # the valid options for each.
 INSTALLED_BACKENDS = {
-    #"att": {
+    # "att": {
     #    "ENGINE": "rapidsms.backends.gsm",
     #    "PORT": "/dev/ttyUSB0"
-    #},
-    #"verizon": {
+    # },
+    # "verizon": {
     #    "ENGINE": "rapidsms.backends.gsm,
     #    "PORT": "/dev/ttyUSB1"
-    #},
+    # },
     "message_tester": {
         "ENGINE": "rapidsms.backends.database.DatabaseBackend",
     }
@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     "rapidsms.backends.kannel",
     "rapidsms.backends.database",
     "rapidsms.router.db",
-    "djcelery",
+    # "djcelery",
     # "kombu.transport.django",
     # common dependencies (which don't clutter up the ui).
     "rapidsms.contrib.handlers",

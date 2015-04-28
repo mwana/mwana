@@ -39,7 +39,6 @@ urlpatterns = patterns(
     url(r"^csv/child-count/", remindmi.csv_child_count,
         name="csv_child_count"),
     url(r"^remindmi", remindmi.malawi_reports, name="remindmi_reports"),
-    (r'^', include('rapidsms_xforms.urls')),  # needs top level formList url
     (r'^growth/', include('mwana.apps.nutrition.urls')),
     (r'^follow/', include('mwana.apps.remindmi.urls')),
     (r'^appointments/', include('mwana.apps.appointments.urls')),
