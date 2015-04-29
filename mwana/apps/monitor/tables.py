@@ -51,7 +51,7 @@ class MonitorSampleTable(TableReport):
                              accessor='result.clinic.name')
     district = tables.Column(verbose_name='District',
                              accessor='hmis')
-    entered = tables.Column(verbose_name='Entry in LIMS',
+    entered = tables.Column(verbose_name='Processed in LIMS',
                             accessor='result.processed_on')
     arrival = tables.Column(verbose_name='Entry in RapidSMS',
                             accessor='result.arrival_date')
@@ -66,12 +66,12 @@ class MonitorSampleTable(TableReport):
 
     def render_district(self, value, record):
         if record.hmis is not None:
-            if record.hmis[:2] in ['00']:  # skip faulty data
-                pass
+            if record.hmis[:2] not in FACS_DISTRICTS.keys():  # faulty data
+                return "Unknown District"
             else:
                 return FACS_DISTRICTS[record.hmis[:2]]
         else:
-            return value
+            return "Unknown"
 
     def render_patient_id(self, value, record):
         if len(record.result.requisition_id) < 7:
