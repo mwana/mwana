@@ -3,7 +3,7 @@ from mwana.apps.labresults.models import Payload, Result
 from mwana.apps.labresults.views import process_payload
 from mwana.apps.monitor.tasks import import_monitor_samples
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 def process_outstanding_payloads():
@@ -18,8 +18,8 @@ def process_outstanding_payloads():
             logger.exception('failed to parse payload %s : %s' % (
                 payload.id, payload))
 
-labs = ['lilongwe/kch', 'blantyre/queens', 'blantyre/dream', 'mzuzu/mch',
-        'mzimba/mdh', 'zomba/zch']
+labs = ['lilongwe/kch', 'blantyre/queens', 'blantyre/dream', 'mzuzu/central',
+        'mzimba/mdh', 'zomba/zch', 'lilongwe/pih']
 
-process_outstanding_payloads()
-import_monitor_samples(labs, True)
+# process_outstanding_payloads()
+# import_monitor_samples(labs, True)

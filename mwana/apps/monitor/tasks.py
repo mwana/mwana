@@ -100,7 +100,7 @@ def get_monitor_samples(source_lab, init=False):
                 sample_id = sample['id']
                 if sample_id in synced_results:
                     status = 'synced'
-                    result_obj = all_results.get(sample_id=sample_id)
+                    result_obj = all_results.filter(sample_id=sample_id)
                 else:
                     status = 'pending'
                     unsynced += 1
@@ -108,7 +108,7 @@ def get_monitor_samples(source_lab, init=False):
                     sample_id=sample_id, hmis=sample['fac'])
                 m_sample.status = status
                 m_sample.payload = p
-                m_sample.result = result_obj
+                m_sample.result = result_obj[0]
                 m_sample.raw = sample
                 m_sample.save()
     if not init:
