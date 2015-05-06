@@ -81,7 +81,10 @@ class MonitorSampleTable(TableReport):
 
     def render_recipient_type(self, value, record):
         if record is not None:
-            return ', '.join(record.types.values_list('name', flat=True))
+            if record.result.recipient.contact is not None:
+                return ', '.join(
+                    record.result.recipient.contact.types.values_list(
+                        'name', flat=True))
         else:
             return value
 
