@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
+from __future__ import absolute_import
 import logging
 from datetime import datetime
 from datetime import timedelta
-from celery import task
+from celery import shared_task
 
 from django.conf import settings
 from django.db.models import Q
@@ -22,18 +23,18 @@ from mwana.apps.labresults.app import App as LabResults
 
 logger = logging.getLogger(__name__)
 
-verified = Q(lab_results__verified__isnull=True) |\
-    Q(lab_results__verified=True)
+verified = Q(lab_results__verified__isnull=True) | Q(
+    lab_results__verified=True)
 
 send_live_results = Q(lab_results__clinic__send_live_results=True)
 
 
-@task
+@shared_task
 def send_results_notification():
     logger.debug('in send_results_notification')
     if settings.SEND_LIVE_LABRESULTS:
-        new_notified = Q(lab_results__notification_status__in=
-                         ['new', 'notified'])
+        new_notified = Q(
+            lab_results__notification_status__in=['new', 'notified'])
         clinics_with_results =\
             Location.objects.filter(
                 new_notified & verified & send_live_results).distinct()
@@ -46,12 +47,12 @@ def send_results_notification():
                     'settings.SEND_LIVE_LABRESULTS is False')
 
 
-@task
+@shared_task
 def send_changed_records_notification():
     logger.debug('in send_changed_records_notification')
     if settings.SEND_LIVE_LABRESULTS:
-        updated_notified = Q(lab_results__notification_status__in=
-                             ['updated', 'notified'])
+        updated_notified = Q(
+            lab_results__notification_status__in=['updated', 'notified'])
         clinics_with_results =\
             Location.objects.filter(
                 updated_notified & verified & send_live_results).distinct()
@@ -65,7 +66,7 @@ def send_changed_records_notification():
                     'settings.SEND_LIVE_LABRESULTS is False')
 
 
-@task
+@shared_task
 @transaction.commit_manually
 def process_outstanding_payloads():
     logger.debug('in process_outstanding_payloads')
@@ -74,8 +75,9 @@ def process_outstanding_payloads():
         try:
             process_payload(payload)
             transaction.commit()
+            logger.debug('processed payload: %s : %s ' % (payload.id , payload))
         except:
-            logger.exception('failed to parse payload %s' % payload)
+            logger.exception('failed to parse payload %s : %s' % (payload.id, payload))
             transaction.rollback()
 
 
@@ -113,7 +115,7 @@ def clean_up_unconfirmed_results():
             continue
 
 
-@task
+@shared_task
 def send_results_to_printer():
     logger.debug('in tasks.send_results_to_printer')
     if settings.SEND_LIVE_LABRESULTS:

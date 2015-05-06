@@ -1,6 +1,8 @@
+# vim: ai ts=4 sts=4 et sw=4
+from __future__ import absolute_import
 import datetime
 
-from celery import task
+from celery import shared_task
 
 from django.db.models import Q, F
 from django.utils.translation import ugettext_lazy as _
@@ -18,7 +20,7 @@ APPT_REMINDER = _('This is a reminder for your upcoming appointment'
                   ' on %(date)s. Please confirm.')
 
 
-@task()
+@shared_task
 def generate_appointments(days=14):
     """
     Task to create Appointment instances based on current TimelineSubscriptions
@@ -41,7 +43,7 @@ def generate_appointments(days=14):
                 milestone_date = milestone_date - datetime.timedelta(days=1)
             elif milestone_date.weekday() == 6:
                 milestone_date = milestone_date + datetime.timedelta(days=1)
-            #Create appointment(s) for this subscription within the task window
+            # Create appointment(s) for this subscription within the task window
             if start <= milestone_date <= end:
                 appt, created = Appointment.objects.get_or_create(
                     subscription=sub,
@@ -50,7 +52,7 @@ def generate_appointments(days=14):
                 )
 
 
-@task()
+@shared_task
 def send_appointment_notifications(days=7):
     """
     Task to send reminders notifications for upcoming Appointment

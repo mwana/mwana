@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from __future__ import absolute_import
 from datetime import date
 import logging
 import json
@@ -9,7 +10,15 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.monitor.models import MonitorSample
 from rapidsms.router import send
 from rapidsms.models import Contact
+
+from celery import shared_task
+
 logger = logging.getLogger(__name__)
+
+
+@shared_task
+def test(param):
+    return 'The test task executed with argument "%s" ' % param
 
 
 def year():
@@ -48,6 +57,7 @@ def get_results_data():
                                                               unsynced)
 
 
+@shared_task
 def send_monitor_report():
     logger.info('sending monitoring information to support staff')
 
@@ -64,11 +74,18 @@ def send_monitor_report():
         send([admin.default_connection], message)
 
 
-def import_monitor_samples(source_lab, init=False):
+@shared_task
+def get_monitor_samples(source_lab, init=False):
+    labs = ['lilongwe/pih', 'lilongwe/kch', 'blantyre/dream',
+            'blantyre/queens', 'zomba/zch', 'mzimba/mdh',
+            'mzuzu/central']
     if init:
-        payloads = Payload.objects.filter(source__in=source_lab)
+        payloads = Payload.objects.filter(source__in=labs,
+                                          incoming_date__year=year(),
+                                          incoming_date__month=month())
     else:
-        payloads = Payload.objects.filter(incoming_date__year=year(),
+        payloads = Payload.objects.filter(source__in=labs,
+                                          incoming_date__year=year(),
                                           incoming_date__month=month(),
                                           incoming_date__day=day())
     all_results = Result.objects.all()
@@ -84,9 +101,6 @@ def import_monitor_samples(source_lab, init=False):
                 if sample_id in synced_results:
                     status = 'synced'
                     result_obj = all_results.get(sample_id=sample_id)
-                if p.incoming_date and synced_results[sample_id]:
-                    if p.incoming_date > synced_results[sample_id]:
-                        status = 'update'
                 else:
                     status = 'pending'
                     unsynced += 1
@@ -102,4 +116,4 @@ def import_monitor_samples(source_lab, init=False):
 
 
 def get_unsynced_results():
-    import_monitor_samples()
+    get_monitor_samples()

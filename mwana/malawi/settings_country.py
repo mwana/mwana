@@ -107,20 +107,67 @@ PAGINATOR_OBJECTS_PER_PAGE = 50
 EXCEL_SUPPORT = 'xlwt'
 
 # Celery config
-# import djcelery
-
-# djcelery.setup_loader()
-
 BROKER_URL = 'redis://localhost:6379/0'
-REDIS_DB = 0
-REDIS_CONNECT_RETRY = True
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-CELERY_TASK_RESULT_EXPIRES = 10
-BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour.
-BROKER_BACKEND = "redis"
-CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
-
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Africa/Blantyre'
+
+# Celery schedules
+from celery.schedules import crontab
+
+CELERYBEAT_SCHEDULE = {
+    # send DBS notifications every weekday at 08:00 A.M
+    'everyday-dbs-notifications': {
+        'task': 'mwana.apps.labresults.tasks.send_results_notification',
+        'schedule': crontab(hour='8', minute='0', day_of_week='mon-fri'),
+    },
+    # process payloads every 3 hrs every day
+    'everyday-process-payloads': {
+        'task': 'mwana.apps.labresults.tasks.process_outstanding_payloads',
+        'schedule': crontab(hour='*/4', minute='0', day_of_week='mon-fri'),
+    },
+    # send results to printers every day at 08:50 and 14:50
+    'everyday-send-to-printers': {
+        'task': 'mwana.apps.labresults.tasks.send_results_to_printer',
+        'schedule': crontab(hour='8,14', minute='50', day_of_week='mon-fri'),
+    },
+    # schedule end of training notifications at 16:35 every day
+    'everyday-endof-training-notifications': {
+        'task': 'mwana.apps.training.tasks.send_endof_training_notification',
+        'schedule': crontab(hour='16', minute='35', day_of_week='mon-fri'),
+    },
+    # schedule alerts for monitors everyday at 07:00
+    'everyday-monitor-alerts': {
+        'task': 'mwana.apps.monitor.tasks.send_monitor_report',
+        'schedule': crontab(hour='7', minute='0', day_of_week='mon-fri'),
+    },
+    # schedule updates for monitor samples
+    'everyday-monitor-samples': {
+        'task': 'mwana.apps.monitor.tasks.get_monitor_samples',
+        'schedule': crontab(hour='4', minute='0', day_of_week='mon-fri'),
+    },
+    # schedule reminders to hsa's everyday at noon
+    'everyday-reminders-notification': {
+        'task': 'mwana.apps.reminders.tasks.send_notifications',
+        'schedule': crontab(hour='12', minute='0', day_of_week='mon-fri'),
+    },
+    # schedule appointment generation for followup events
+    'everyday-generate-appointments': {
+        'task': 'mwana.apps.remindmi.tasks.generate_appointments',
+        'schedule': crontab(hour='3', minute='0', day_of_week='mon-fri'),
+    },
+    # schedule appointment notifications for followup events
+    'everyday-send-appointment-notifications': {
+        'task': 'mwana.apps.remindmi.tasks.send_appointment_notifications',
+        'schedule': crontab(hour='12', minute='0', day_of_week='mon-fri'),
+    },
+    # schedule help request reports
+    'monthly-help-request-report': {
+        'task': 'mwana.apps.help.tasks.export_help_requests',
+        'schedule': crontab(0, 0, day_of_month='2'),
+    },
+    }
 
 # WSGI_APPLICATION = "mwana.malawi.apache.wsgi.application"
 

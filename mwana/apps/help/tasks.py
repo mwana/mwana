@@ -1,9 +1,11 @@
+# vim: ai ts=4 sts=4 et sw=4
+from __future__ import absolute_import
 import csv
 import StringIO
 import logging
 from datetime import date, timedelta
 
-from celery import task
+from celery import shared_task
 
 from django.core.mail.message import EmailMessage
 from django.utils.encoding import smart_str
@@ -31,7 +33,8 @@ def location(obj):
 
 def type(obj):
     try:
-        return ";".join(type.name for type in obj.requested_by.contact.types.all())
+        return ";".join(
+            type.name for type in obj.requested_by.contact.types.all())
     except:
         return ""
 
@@ -43,7 +46,7 @@ def name(obj):
         return ""
 
 
-@task
+@shared_task
 def export_help_requests(recipients=HELP_REQUEST_ADMINS, days=None,):
     enddate = date.today()
     if days is not None:

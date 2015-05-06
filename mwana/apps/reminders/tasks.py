@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
+from __future__ import absolute_import
 from mwana.apps.translator.util import Translator
 import datetime
 import logging
-from celery import task
+from celery import shared_task
 
 from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
@@ -132,7 +133,7 @@ def send_appointment_reminder(patient_event, appointment, default_conn=None,
     patient_trace.save()
 
 
-@task
+@shared_task
 def send_notifications():
     logger.info('Sending notifications')
     for appointment in reminders.Appointment.objects.all():
