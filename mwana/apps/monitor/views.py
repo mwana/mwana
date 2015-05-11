@@ -15,7 +15,7 @@ from mwana.apps.monitor.tables import MonitorSampleTable, ResultsDeliveryTable
 from mwana.apps.monitor.models import MonitorSample
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
-from mwana.apps.tlcprinters.models import MessageConfirmation
+# from mwana.apps.tlcprinters.models import MessageConfirmation
 from mwana import const
 
 
@@ -26,22 +26,22 @@ def get_results_delivery_data():
     results = Result.objects.filter(verified=True,
                                     processed_on__gt=start_date,
                                     processed_on__lt=end_date)
-    messages_confirmed = MessageConfirmation.objects.filter(
-        confirmed=True,
-        sent_at__gte=start_date,
-        sent_at__lte=end_date)
+    # messages_confirmed = MessageConfirmation.objects.filter(
+    #     confirmed=True,
+    #     sent_at__gte=start_date,
+    #     sent_at__lte=end_date)
     delivery_stats = []
     for location in locations:
         res = results.filter(clinic=location)
         new = res.filter(notification_status='new')
-        notified = res.filter(notification_status='notified')
+        # notified = res.filter(notification_status='notified')
         sent = res.filter(notification_status='sent')
         hist_new = new.count()
-        hist_notified = notified.count()
-        hist_sent = sent.count()
-        today_new = new.filter(arrival_date=datetime.date.today()).count()
-        today_sent = sent.filter(
-            result_sent_date=datetime.date.today()).count()
+        # hist_notified = notified.count()
+        # hist_sent = sent.count()
+        # today_new = new.filter(arrival_date=datetime.date.today()).count()
+        # today_sent = sent.filter(
+        #     result_sent_date=datetime.date.today()).count()
         num_lims = res.count()
         num_rsms = res.count()
         num_sent_out = sent.count()
@@ -49,22 +49,26 @@ def get_results_delivery_data():
             recipient__contact__types=const.get_dbs_printer_type()).count()
         sent_worker = sent.filter(
             recipient__contact__types=const.get_clinic_worker_type()).count()
+        if (num_lims == 0) or (num_sent_out == 0):
+            percentage_sent = 0
+        else:
+            percentage_sent = (num_sent_out/num_lims) * 100
         # receipt_confirmed = sent.filter(receipt_confirmed=True).count()
-        printer_confirmed = messages_confirmed.filter(
-            connection__contact__location=location).count()
+        # printer_confirmed = messages_confirmed.filter(
+        #     connection__contact__location=location).count()
         delivery_stats.append({'name': location.name, 'hmis': location.slug,
                                'district': location.parent.name,
                                'all_new': hist_new,
-                               'all_notified': hist_notified,
-                               'all_sent': hist_sent,
-                               'new_today': today_new,
-                               'sent_today': today_sent,
+                               # 'all_notified': hist_notified,
+                               # 'all_sent': hist_sent,
+                               # 'new_today': today_new,
+                               # 'sent_today': today_sent,
                                'num_lims': num_lims,
                                'num_rsms': num_rsms,
                                'num_sent_out': num_sent_out,
                                'sent_printer': sent_printer,
                                'sent_worker': sent_worker,
-                               'receipt_confirmed': printer_confirmed})
+                               'percentage_sent': percentage_sent})
     return delivery_stats
 
 
