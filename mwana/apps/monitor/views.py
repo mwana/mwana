@@ -5,6 +5,8 @@ from django.shortcuts import render_to_response
 from django.views.decorators.http import require_GET
 from django.template import RequestContext
 from django import forms
+from django.conf import settings
+from django.db.models import Q
 
 from django_tables2_reports.config import RequestConfigReport as RequestConfig
 
@@ -15,33 +17,44 @@ from mwana.apps.monitor.tables import MonitorSampleTable, ResultsDeliveryTable
 from mwana.apps.monitor.models import MonitorSample
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
+from mwana.apps.nutrition.views import get_report_criteria
 # from mwana.apps.tlcprinters.models import MessageConfirmation
 from mwana import const
 
+DISTRICTS = settings.DISTRICTS
 
-def get_results_delivery_data():
-    end_date = datetime.date.today() + timedelta(days=1)
-    start_date = end_date - timedelta(30)
+
+def percent(num=None, den=None):
+    if num is None or num == 0:
+        return int(0)
+    elif den is None or den == 0:
+        return int(0)
+    else:
+        return int(100 * num / float(den))
+
+
+def get_results_delivery_data(location, startdate, enddate):
+    end_date = enddate
+    start_date = startdate
+    location = location
     locations = Location.objects.filter(send_live_results=True)
     results = Result.objects.filter(verified=True,
                                     processed_on__gt=start_date,
                                     processed_on__lt=end_date)
-    # messages_confirmed = MessageConfirmation.objects.filter(
-    #     confirmed=True,
-    #     sent_at__gte=start_date,
-    #     sent_at__lte=end_date)
+    if location == "All Districts":
+        pass
+    else:
+        location = locations.filter(name=location)[0]
+        base_location = Q(clinic=location.id)
+        parent_location = Q(clinic__parent=location.id)
+        results = results.filter(parent_location)
+        locations = locations.filter(parent__name=location.name)
     delivery_stats = []
     for location in locations:
         res = results.filter(clinic=location)
         new = res.filter(notification_status='new')
-        # notified = res.filter(notification_status='notified')
         sent = res.filter(notification_status='sent')
         hist_new = new.count()
-        # hist_notified = notified.count()
-        # hist_sent = sent.count()
-        # today_new = new.filter(arrival_date=datetime.date.today()).count()
-        # today_sent = sent.filter(
-        #     result_sent_date=datetime.date.today()).count()
         num_lims = res.count()
         num_rsms = res.count()
         num_sent_out = sent.count()
@@ -49,20 +62,10 @@ def get_results_delivery_data():
             recipient__contact__types=const.get_dbs_printer_type()).count()
         sent_worker = sent.filter(
             recipient__contact__types=const.get_clinic_worker_type()).count()
-        if (num_lims == 0) or (num_sent_out == 0):
-            percentage_sent = 0
-        else:
-            percentage_sent = (num_sent_out/num_lims) * 100
-        # receipt_confirmed = sent.filter(receipt_confirmed=True).count()
-        # printer_confirmed = messages_confirmed.filter(
-        #     connection__contact__location=location).count()
+        percentage_sent = percent(num_sent_out, num_lims)
         delivery_stats.append({'name': location.name, 'hmis': location.slug,
                                'district': location.parent.name,
                                'all_new': hist_new,
-                               # 'all_notified': hist_notified,
-                               # 'all_sent': hist_sent,
-                               # 'new_today': today_new,
-                               # 'sent_today': today_sent,
                                'num_lims': num_lims,
                                'num_rsms': num_rsms,
                                'num_sent_out': num_sent_out,
@@ -89,21 +92,20 @@ class MonitorSampleList(FilteredSingleTableView):
     queryset = MonitorSample.objects.all()
 
 
-class ResultsDeliveryList(FilteredSingleTableView):
-    table_class = ResultsDeliveryTable
-    template_name = 'monitor/sample_delivery_filtered.html'
-    filter_class = ResultsDeliveryFilter
-    queryset = get_results_delivery_data()
-
-
 @require_GET
 def result_delivery_stats(request):
-    stats = get_results_delivery_data()
+    location, startdate, enddate = get_report_criteria(request)
+    selected_location = str(location)
+    stats = get_results_delivery_data(location, startdate, enddate)
     f = ResultsDeliveryFilter(request.GET, queryset=stats)
-    # form = ResultsDeliveryForm()
+    form = ResultsDeliveryForm()
     table = ResultsDeliveryTable(stats)
+    districts = DISTRICTS
     RequestConfig(request,
                   paginate={"per_page": 25, "page": 1}).configure(table)
     return render_to_response("monitor/sample_delivery.html",
-                              {"table": table, "filter": f},
+                              {"table": table, "filter": f, 'form': form,
+                               "startdate": startdate, "enddate": enddate,
+                               "selected_location": selected_location,
+                               "districts": districts},
                               context_instance=RequestContext(request))

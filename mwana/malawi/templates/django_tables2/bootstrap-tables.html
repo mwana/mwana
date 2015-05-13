@@ -1,6 +1,7 @@
 {% spaceless %}
 {% load django_tables2 %}
 {% load paginator_tags %}
+{% load i18n %}
 {% if table.page %}
 <div class="table-container">
 {% endif %}
@@ -33,16 +34,26 @@
     </tbody>
 </table>
 {% if table.page %}
+{% with table.page.start_index as start_item %}
+{% with table.page.end_index as end_item %}
 {% with table.page.paginator.count as total %}
 {% with table.page.object_list|length as count %}
 {% block pagination %}
 <div class="pagination">
     {% paginator table.page table.prefix %}
-    {% nospaceless %}{% block pagination.cardinality %}<ul class="pagination"><li class="cardinality">{% if total != count %}{{ count }} of {{ total }}{% else %}{{ total }}{% endif %} {% if total == 1 %}{{ table.data.verbose_name }}{% else %}{{ table.data.verbose_name_plural }}{% endif %}</li>{% endblock pagination.cardinality %}{% endnospaceless %}
+    {% nospaceless %}{% block pagination.cardinality %}<ul class="pagination"><li class="cardinality">{% if total != count %}{{ start_item }} - {{ end_item }} ({{ count }}) of {{ total }}{% else %}{{ total }}{% endif %} {% if total == 1 %}{{ table.data.verbose_name }}{% else %}{{ table.data.verbose_name_plural }}{% endif %}
+
+    {% if table.page.has_previous or table.page.has_next %}
+    {% nospaceless %}{% block pagination.current %}{% blocktrans with table.page.number as current and table.paginator.num_pages as total %}on page {{ current }} of {{ total }}{% endblocktrans %}{% endblock pagination.current %}{% endnospaceless %}
+    {% endif %}
+
+    </li>{% endblock pagination.cardinality %}{% endnospaceless %}
 
 </div>
 </div>
 {% endblock pagination %}
+{% endwith %}
+{% endwith %}
 {% endwith %}
 {% endwith %}
 {% endif %}

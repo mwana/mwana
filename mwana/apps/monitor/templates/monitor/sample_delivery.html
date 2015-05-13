@@ -39,7 +39,17 @@
 .report-exports {
        margin: -60px 0 50px 0;
        float:right;
+}
+
+.filters_layout {
+         list-style: none;
      }
+.filters_layout li {
+         float: left;
+         margin-right: 16px;
+     }
+.table-bordered th { white-space: nowrap;}
+
     </style>
 
 {% endblock extra_stylesheets %}
@@ -115,14 +125,54 @@ $(document).ready(function() {
 {% endblock javascripts %}
 
 {% block content %}
-    <div class="span12" id="remindmi">
-        <div class="page-header"><h1>Results160 Sample Delivery</h1></div>
-        <div class="row-fluid">
-            <div class="span12">
-              {% render_table table %}
+<div class="span12" id="remindmi">
+  <div class="page-header"><h1>Results160 Sample Delivery</h1></div>
+  <div class="row-fluid">
+    <div class="span12">
+      <form id="filter-form" method="GET">
+        <input type="hidden" name="startdate" value='{{startdate}}' id="id_startdate" />
+	      <input type="hidden" name="enddate" value='{{enddate}}' id="id_enddate" />
+        <ul class="filters_layout">
+          <li>
+            <label for="reportrange">Sample Date Range:</label>
+            <div id="reportrange" class="pull-right daterangepicker"
+                 style="background: #fff; cursor: pointer;
+                        padding: 5px 10px;; border: 1px solid #ccc;
+                        position:relative; float: left; min-width:;
+                        top:0; left:0; margin-bottom:17px; clear:right;">
+              <i class="glyphicon glyphicon-calendar icon-calendar icon-large"></i>
+              <span></span><b class="caret" style="float:right"></b>
             </div>
-        </div>
+          </li>
+          <li>
+            <label for="location">District:</label>
+	          <select name="location" id="location" value="{{location}}" class="pull-right">
+              <option value="All Districts"  
+                      {% ifequal selected_location "All Districts" %}
+                      selected="selected" 
+                      {% endifequal %}>All Districts</option>
+              {% for location in districts %}
+              <option value="{{ location }}"
+		                  {% ifequal selected_location location %} 
+		                  selected="selected" 
+		                  {% endifequal %}>{{ location }}</option>
+	            {% endfor %}
+            </select>	
+          </li>
+          <li><label for="id_update_filters">&nbsp;</label>
+            <input id="id_update_filters" class="btn btn-primary" type="submit" value="Update Filters" />
+          </li>
+        </ul>
+      </form>
     </div>
+  </div>
+</div>
+<div class="row-fluid">
+  <div class="span12">
+    {% render_table table %}
+  </div>
+</div>
+</div>
 {% endblock content %}
 
 
