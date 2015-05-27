@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana import const
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
 from mwana.apps.issuetracking.issuehelper import IssueHelper
 from mwana.apps.reports.webreports.forms import GroupFacilityMappingForm
@@ -13,6 +14,7 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.db.models import Q
 from rapidsms.contrib.messagelog.models import Message
+from rapidsms.models import Contact
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
@@ -251,11 +253,23 @@ def dashboard_malawi(request):
         date_logged__lte=enddate)
     mothers = remindmis.filter(event__name="Care program").count()
     children = remindmis.filter(event__name="Birth").count()
+    contacts = Contact.objects.filter(types=const.get_patient_type(),
+                                      created_on__gte=startdate,
+                                      created_on__lte=enddate)
+    contact_mothers = contacts.filter(types=const.get_mother_type()).count()
+    contact_children = contacts.filter(types=const.get_child_type()).count()
+    mothers = mothers + contact_mothers
+    children = children + contact_children
     all_msgs = Message.objects.filter(
         direction__exact='I',
         text__startswith='All',
         date__gte=startdate,
         date__lte=enddate).count()
+    please_msgs = Message.objects.filter(
+        direction__exact='O',
+        text__startswith='Please',
+        date__gte=startdate,
+        date_lte=enddate).count()
     return render_to_response("reports/malawi_home.html",
                               {"locations": locations, "results": results,
                                "startdate": startdate, "enddate": enddate,
@@ -267,7 +281,8 @@ def dashboard_malawi(request):
                                'mothers_registered': mothers,
                                'births_registered': children,
                                'eid_processed': eid_processed,
-                               'all_msgs': all_msgs, 'loc_count': loc_count},
+                               'all_msgs': all_msgs, 'loc_count': loc_count,
+                               'please_msgs': please_msgs},
                               context_instance=RequestContext(request))
 
 
