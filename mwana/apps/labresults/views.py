@@ -137,12 +137,13 @@ def accept_results(request):
     if not data:
         #if payload does not parse as valid json, save raw content and return error
         return HttpResponse('CANNOT PARSE (%d bytes received)' % len(content))
-    try:
-        process_payload(payload, data)
-    except:
-        logging.exception('second stage result parsing failed; rolling back '
-                          'to savepoint.')
-        transaction.savepoint_rollback(sid)
+    if payload_user != 'eid-central':
+        try:
+            process_payload(payload, data)
+        except:
+            logging.exception('second stage result parsing failed; rolling'
+                              ' back to savepoint.')
+            transaction.savepoint_rollback(sid)
     return HttpResponse('SUCCESS')
 
 def process_payload(payload, data=None):
