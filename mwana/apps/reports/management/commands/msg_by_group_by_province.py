@@ -71,5 +71,7 @@ def process(start_year, end_year):
             expando.group = group
             helps.append(expando)
         for province in sorted(set(ex.province for ex in helps)):
-            print province, "\t", len(filter(lambda x: x.province == province and x.year in range(start_year, end_year + 1), helps))
+            if province in ['Support Province', 'Training Province']:
+                continue
+            print province, ",", len(filter(lambda x: x.province == province and x.year in range(start_year, end_year + 1), helps))
           
