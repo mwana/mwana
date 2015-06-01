@@ -269,7 +269,7 @@ def dashboard_malawi(request):
         direction__exact='O',
         text__startswith='Please',
         date__gte=startdate,
-        date_lte=enddate).count()
+        date__lte=enddate).count()
     return render_to_response("reports/malawi_home.html",
                               {"locations": locations, "results": results,
                                "startdate": startdate, "enddate": enddate,

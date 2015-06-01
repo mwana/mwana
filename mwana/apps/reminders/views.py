@@ -8,6 +8,9 @@ from django.shortcuts import render_to_response
 from django.db.models import Q
 from django.conf import settings
 
+from rapidsms.models import Contact
+
+from mwana import const
 from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.locations.models import Location
 
@@ -15,25 +18,36 @@ from mwana.apps.locations.models import Location
 DISTRICTS = settings.DISTRICTS
 
 
-def remindmi_graphs(queryset, places):
+def remindmi_graphs(queryset, new_patients, places):
     graph_data = []
     for place in places:
         site_data = [place]
-        site_data.append(queryset.filter(
+        q_count = queryset.filter(
             Q(cba_conn__contact__location__name=place) |
             Q(cba_conn__contact__location__parent__name=place) |
-            Q(cba_conn__contact__location__parent__parent__name=place)).count())
+            Q(cba_conn__contact__location__parent__parent__name=place)).count()
+        new_count = new_patients.filter(
+            Q(location__name=place) |
+            Q(location__parent__name=place) |
+            Q(location__parent__parent__name=place)
+        ).count()
+        site_data.append(q_count + new_count)
         graph_data.append(site_data)
     return graph_data
 
 
-def facility_graphs(queryset, places):
+def facility_graphs(queryset, new_patients, places):
     graph_data = []
     for place in places:
         site_data = [place]
-        site_data.append(queryset.filter(
+        q_count = queryset.filter(
             Q(cba_conn__contact__location__name=place) |
-            Q(cba_conn__contact__location__parent__name=place)).count())
+            Q(cba_conn__contact__location__parent__name=place)).count()
+        new_count = new_patients.filter(
+            Q(location__name=place) |
+            Q(location__parent__name=place)
+        ).count()
+        site_data.append(q_count + new_count)
         graph_data.append(site_data)
     return graph_data
 
@@ -63,13 +77,19 @@ def malawi_reports(request):
         Q(date_logged__lte=enddate)).order_by('-date')
     mothers = remindmis.filter(event__name="Care program")
     children = remindmis.filter(event__name="Birth")
+    new_patients = Contact.objects.filter(
+        types=const.get_patient_type(),
+        created_on__gte=startdate,
+        created_on__lte=enddate)
+    new_mothers = new_patients.filter(types=const.get_mother_type())
+    new_children = new_patients.filter(types=const.get_child_type())
     if selected_location == "All Districts":
-        mother_count = remindmi_graphs(mothers, locations)
-        child_count = remindmi_graphs(children, locations)
+        mother_count = remindmi_graphs(mothers, new_mothers, locations)
+        child_count = remindmi_graphs(children, new_children, locations)
     else:
         facilities = get_district_facilities()[selected_location]
-        mother_count = facility_graphs(mothers, facilities)
-        child_count = facility_graphs(children, facilities)
+        mother_count = facility_graphs(mothers, new_mothers, facilities)
+        child_count = facility_graphs(children, new_children, facilities)
     context = {'mother_count': mother_count, 'child_count': child_count,
                'selected_location': selected_location, 'startdate': startdate,
                'enddate': enddate, 'districts': locations}
