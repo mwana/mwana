@@ -174,6 +174,7 @@ CELERYBEAT_SCHEDULE = {
 RAPIDSMS_HANDLERS = [
     "mwana.apps.emergency.handlers.flood.FloodHandler",
     "mwana.apps.help.handlers.help.HelpHandler",
+    "mwana.apps.help.handlers.pin.PinHandler",
     "mwana.apps.help.handlers.facilitycode.CodeHandler",
     "mwana.apps.help.handlers.facilitycontacts.ContactsHandler",
     "mwana.apps.labresults.handlers.join.JoinHandler",
