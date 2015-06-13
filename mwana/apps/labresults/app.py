@@ -240,29 +240,29 @@ class App (rapidsms.apps.base.AppBase):
 
     def notify_clinic_pending_results(self, clinic):
         """
-        If one or more printers are available at the clinic, sends the results
-        directly there. Otherwise, notifies clinic staff that results are
-        ready via sms.
+        Notifies clinic staff that results are
+        ready via sms to phone or printer.
         """
         printers = self.printers_for_clinic(clinic)
         if SYSTEM_LOCALE == LOCALE_MALAWI and printers.exists():
             results = self._pending_results(clinic, to_printer=True)
+            delivery = 'printer'
         else:
             results = self._pending_results(clinic)
+            delivery = 'phone'
         if not results:
             logger.info("0 results to send for %s" % clinic.name)
             return
 
-        if printers.exists():
-            self.send_printer_results(printers, results,
-                                      msgcls=TLCOutgoingMessage)
-        else:
-            messages = self.results_avail_messages(clinic, results)
-            if messages:
-                self.send_messages(messages)
-                self._mark_results_pending(
-                    results,
-                    [msg.connection for msg in messages])
+        # if printers.exists():
+        #     self.send_printer_results(printers, results,
+        #                               msgcls=TLCOutgoingMessage)
+        messages = self.results_avail_messages(clinic, results, delivery)
+        if messages:
+            self.send_messages(messages)
+            self._mark_results_pending(
+                results,
+                [msg.connection for msg in messages])
 
     def send_printers_pending_results(self, clinic):
         """
@@ -415,7 +415,7 @@ class App (rapidsms.apps.base.AppBase):
             r.notification_status = 'notified'
             r.save()
 
-    def results_avail_messages(self, clinic, results):
+    def results_avail_messages(self, clinic, results, delivery):
         '''
         Returns clinic workers registered to receive
         results notification at this clinic.
@@ -428,11 +428,15 @@ class App (rapidsms.apps.base.AppBase):
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
 
+        if delivery == 'printer':
+            NOTIFICATION = PRINTER_RESULTS_READY
+        else:
+            NOTIFICATION = RESULTS_READY
         all_msgs = []
         for contact in contacts:
             if contact.default_connection is not None:
                 msg = OutgoingMessage([contact.default_connection],
-                                      RESULTS_READY % dict(
+                                      NOTIFICATION % dict(
                                           name=contact.name,
                                           count=results.count()))
                 all_msgs.append(msg)

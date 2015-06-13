@@ -128,10 +128,10 @@ CELERYBEAT_SCHEDULE = {
         'schedule': crontab(hour='*/4', minute='0', day_of_week='mon-fri'),
     },
     # send results to printers every day at 08:50 and 14:50
-    'everyday-send-to-printers': {
-        'task': 'mwana.apps.labresults.tasks.send_results_to_printer',
-        'schedule': crontab(hour='8,14', minute='50', day_of_week='mon-fri'),
-    },
+    # 'everyday-send-to-printers': {
+    #     'task': 'mwana.apps.labresults.tasks.send_results_to_printer',
+    #     'schedule': crontab(hour='8,14', minute='50', day_of_week='mon-fri'),
+    # },
     # schedule end of training notifications at 16:35 every day
     'everyday-endof-training-notifications': {
         'task': 'mwana.apps.training.tasks.send_endof_training_notification',

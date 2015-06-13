@@ -6,6 +6,7 @@ from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+PRINTER_RESULTS_READY = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please switch on the printer and press the 'PLS CALL' button to retrieve them."
 NO_RESULTS        = "Hello %(name)s. There are no new DBS test results for %(clinic)s right now. We'll let you know as soon as more results are available."
 BAD_PIN           = "Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'"
 SELF_COLLECTED    = "Hi %(name)s. It looks like you already collected your DBS results. To check for new results reply with keyword 'CHECK'"
