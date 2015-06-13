@@ -45,6 +45,6 @@ PIN codes. If you think this message is a mistake, respond with keyword 'HELP'"
         for contact in contacts:
             pin_code = contact.pin
             conn = [contact.default_connection]
-            msg = "Your pin code is %s. Please delete this message after reading." % pin_code
+            msg = "Your pin code is %s. Please do not forget this and delete this message after reading." % pin_code
             send(msg, conn)
         return True

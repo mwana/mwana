@@ -59,7 +59,7 @@ class HelpRequestAdmin(admin.ModelAdmin):
         for request in queryset:
             pin_code = request.requested_by.contact.pin
             conn = [request.requested_by]
-            msg = "Your pin code is %s. Please delete this message after reading." % pin_code
+            msg = "Your pin code is %s. Please do not forget this and delete this message after reading." % pin_code
             send(msg, conn)
             request.status = 'R'
             request.notes = 'The pin code was resent to the client.'
