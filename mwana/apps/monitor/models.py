@@ -48,3 +48,5 @@ class MonitorSample(models.Model):
     raw = models.TextField(help_text="Raw value of the sample record.")
     hmis = models.CharField(max_length=10, null=True, blank=True,
                             help_text="HMIS Code for the facility.")
+    lab_source = models.CharField(max_length=30, null=True, blank=True,
+                                  help_text="Actual lab sample was tested at.")

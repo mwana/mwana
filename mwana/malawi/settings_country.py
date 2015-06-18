@@ -142,10 +142,10 @@ CELERYBEAT_SCHEDULE = {
         'task': 'mwana.apps.monitor.tasks.send_monitor_report',
         'schedule': crontab(hour='7', minute='0', day_of_week='mon-fri'),
     },
-    # schedule updates for monitor samples
+    # updates for monitor samples every weekday at 02:00am
     'everyday-monitor-samples': {
         'task': 'mwana.apps.monitor.tasks.get_monitor_samples',
-        'schedule': crontab(hour='4', minute='0', day_of_week='mon-fri'),
+        'schedule': crontab(hour='2', minute='0', day_of_week='mon-fri'),
     },
     # schedule reminders to hsa's everyday at noon
     'everyday-reminders-notification': {

@@ -147,17 +147,34 @@ $(document).ready(function() {
           <li>
             <label for="location">District:</label>
 	          <select name="location" id="location" value="{{location}}" class="pull-right">
-              <option value="All Districts"  
+              <option value="All Districts"
                       {% ifequal selected_location "All Districts" %}
-                      selected="selected" 
+                      selected="selected"
                       {% endifequal %}>All Districts</option>
               {% for location in districts %}
               <option value="{{ location }}"
-		                  {% ifequal selected_location location %} 
-		                  selected="selected" 
+		                  {% ifequal selected_location location %}
+		                  selected="selected"
 		                  {% endifequal %}>{{ location }}</option>
 	            {% endfor %}
-            </select>	
+            </select>
+          </li>
+          <li>
+              <label for="activity">Activity</label>
+              <select name="activity" id="activity" value="{{activity}}" class="pull-right">
+                  <option value="all"
+                          {% ifequal selected_activity "all" %}
+                          selected="selected"
+                          {% endifequal %}>All Sites</option>
+                  <option value="active"
+                          {% ifequal selected_activity "active" %}
+                          selected="selected"
+                          {% endifequal %}>Active Sites</option>
+                  <option value="inactive"
+                          {% ifequal selected_activity "inactive" %}
+                          selected="selected"
+                          {% endifequal %}>Inactive Sites</option>
+              </select>
           </li>
           <li><label for="id_update_filters">&nbsp;</label>
             <input id="id_update_filters" class="btn btn-primary" type="submit" value="Update Filters" />

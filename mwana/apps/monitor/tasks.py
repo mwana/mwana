@@ -50,11 +50,9 @@ def get_results_data():
                                 result_sent_date__day=day()).count()
     new = results.filter(notification_status='new').count()
     notified = results.filter(notification_status='notified').count()
-    unsynced = get_unsynced_results()
+    # unsynced = get_unsynced_results()
 
-    return "New: %s\nNotified: %s\nSent: %s\nUnsynced: %s" % (new, notified,
-                                                              sent_today,
-                                                              unsynced)
+    return "New: %s\nNotified: %s\nSent: %s" % (new, notified, sent_today,)
 
 
 @shared_task
@@ -75,19 +73,13 @@ def send_monitor_report():
 
 
 @shared_task
-def get_monitor_samples(source_lab, init=False):
-    labs = ['lilongwe/pih', 'lilongwe/kch', 'blantyre/dream',
-            'blantyre/queens', 'zomba/zch', 'mzimba/mdh',
-            'mzuzu/central']
-    if init:
-        payloads = Payload.objects.filter(source__in=labs,
-                                          incoming_date__year=year(),
-                                          incoming_date__month=month())
-    else:
-        payloads = Payload.objects.filter(source__in=labs,
-                                          incoming_date__year=year(),
-                                          incoming_date__month=month(),
-                                          incoming_date__day=day())
+def get_monitor_samples():
+    lab_map = {'1': 'lilongwe/kch', '2': 'blantyre/queens',
+               '3': 'mzuzu/central', '4': 'mzimba/mdh',
+               '5': 'lilongwe/pih', '6': 'blantyre/dream',
+               '7': 'balaka/dream', '8': 'zomba/zch'}
+
+    payloads = Payload.objects.filter(incoming_date__year=year())
     all_results = Result.objects.all()
     synced_results = dict(
         [(r.sample_id, r.arrival_date) for r in all_results])
@@ -105,14 +97,14 @@ def get_monitor_samples(source_lab, init=False):
                     status = 'pending'
                     unsynced += 1
                 m_sample, created = MonitorSample.objects.get_or_create(
-                    sample_id=sample_id, hmis=sample['fac'])
+                    sample_id=sample_id, hmis=sample['fac'],
+                    lab_source=lab_map[sample_id[-1]])
                 m_sample.status = status
                 m_sample.payload = p
                 m_sample.result = result_obj[0]
                 m_sample.raw = sample
                 m_sample.save()
-    if not init:
-        return unsynced
+    return unsynced
 
 
 def get_unsynced_results():

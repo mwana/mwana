@@ -44,11 +44,8 @@ def get_results_delivery_data(location, startdate, enddate):
     if location == "All Districts":
         pass
     else:
-        location = locations.filter(name=location)[0]
-        base_location = Q(clinic=location.id)
-        parent_location = Q(clinic__parent=location.id)
-        results = results.filter(parent_location)
-        locations = locations.filter(parent__name=location.name)
+        results = results.filter(clinic__parent__name=location)
+        locations = locations.filter(parent__name=location)
     delivery_stats = []
     for location in locations:
         res = results.filter(clinic=location)
@@ -97,6 +94,12 @@ def result_delivery_stats(request):
     location, startdate, enddate = get_report_criteria(request)
     selected_location = str(location)
     stats = get_results_delivery_data(location, startdate, enddate)
+    activity = request.GET.get("activity", 'all')
+    selected_activity = activity
+    if activity == 'active':
+        stats = [i for i in stats if i['num_lims'] > 0]
+    elif activity == 'inactive':
+        stats = [i for i in stats if i['num_lims'] == 0]
     f = ResultsDeliveryFilter(request.GET, queryset=stats)
     form = ResultsDeliveryForm()
     table = ResultsDeliveryTable(stats)
@@ -107,5 +110,6 @@ def result_delivery_stats(request):
                               {"table": table, "filter": f, 'form': form,
                                "startdate": startdate, "enddate": enddate,
                                "selected_location": selected_location,
+                               "selected_activity": selected_activity,
                                "districts": districts},
                               context_instance=RequestContext(request))
