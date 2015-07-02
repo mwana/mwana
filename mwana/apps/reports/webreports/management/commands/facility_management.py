@@ -6,6 +6,7 @@ Custom command that outputs data for facility managent.
 #TODO : Create a web report that outputs same fields as this management command
 
 from django.core.management.base import LabelCommand
+from mwana.const import get_province_type
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 from mwana.apps.training.models import Trained
@@ -16,26 +17,30 @@ from rapidsms.models import Contact
 
 
 class Command(LabelCommand):
-    help = ("\nUsage: facility_management [hmis_code1 hmis_code2 ...]"
-            '\nE.g. facility_management 406012')
+    help = ("\nUsage: facility_management hmis_code1"
+            '\nE.g. facility_management 406012'
+            '\nE.g. facility_management 4060 (to match all starting with 4060)')
     def build_contact_list(self, contacts):
         return "; ".join("%s:%s" % (c.name, c.default_connection.identity)
                          for c in contacts)
                                            
     def handle(self, * args, ** options):
 
-        codes = args or ['707018', '205020', '208001', '208002', '703014',
-        '702001', '702020', '707002']
+        codes = args 
         delm = '|'
-        field_labels = ['Facility Name', 'Code', 'Registered Workers',
+        field_labels = ['Province Name','District Name','Facility Name', 'Code', 'Registered Workers',
             'Users Removed By System', 'Date Of First SMS',
             'Date Of First DBS Results', 'Names Of Users Not Retrieving',
             'Dates Users Were Trained', 'Ever Had Printer', 'Printers In Use',
             'Are DBS Registers Used', 'DBS Samples', 'DBS Results']
 
         print delm.join(field_labels)
-
+        facility_codes = []
         for code in codes:
+            for loc in Location.objects.filter(slug__startswith=code, parent__parent__type=get_province_type()):
+                facility_codes.append(loc.slug)
+            
+        for code in set(facility_codes):
             try:
                 facility = Location.objects.get(slug=code)
             except Location.DoesNotExist:
@@ -86,8 +91,9 @@ class Command(LabelCommand):
             are_dbs_registers_used = ""
             dbs_samples = str(Result.objects.filter(clinic=facility).count())
             dbs_results = str(Result.objects.filter(clinic=facility, notification_status='sent').count())
-            
-            fields = [facility_name, code, registered_workers, users_removed_by_system
+            district_name = facility.parent.name
+            province_name = facility.parent.parent.name
+            fields = [province_name, district_name, facility_name, code, registered_workers, users_removed_by_system
             , date_of_first_sms, date_of_first_dbs_results,
             names_of_users_not_retrieving, dates_users_were_trained,
             ever_had_printer, printers_in_use, are_dbs_registers_used,
