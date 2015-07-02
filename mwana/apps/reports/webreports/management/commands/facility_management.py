@@ -52,7 +52,7 @@ class Command(LabelCommand):
                                                          types__slug='worker')
                                                          )
             users_removed_by_system = "; ".join("%s:%s" % (du.contact.name,
-                                                du.contact.default_connection.identity if du.contact.default_connection else "" )
+                                                du.connection.identity if du.connection else "" )
                                                 for du in DeactivatedUser.\
                                                 objects.filter(
                                                 contact__location=facility,
