@@ -62,8 +62,8 @@ class Command(LabelCommand):
                                                 if du.connection.identity not in registered_workers
                                                 ))
 
-            num_registered_workers = len(registered_workers) if registered_workers else 0
-            num_users_removed_by_system = len(users_removed_by_system) if users_removed_by_system else 0
+            num_registered_workers = len(registered_workers.split(';')) if registered_workers else 0
+            num_users_removed_by_system = len(users_removed_by_system.split(';')) if users_removed_by_system else 0
             date_of_first_sms = ""
             try:
                 date_of_first_sms = Message.objects.filter(direction='I',
