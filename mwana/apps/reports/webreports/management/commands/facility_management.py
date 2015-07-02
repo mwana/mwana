@@ -21,15 +21,16 @@ class Command(LabelCommand):
             '\nE.g. facility_management 406012'
             '\nE.g. facility_management 4060 (to match all starting with 4060)')
     def build_contact_list(self, contacts):
-        return "; ".join("%s:%s" % (c.name, c.default_connection.identity)
-                         for c in contacts)
+        return "; ".join(set("%s:%s" % (c.name, c.default_connection.identity)
+                         for c in contacts))
                                            
     def handle(self, * args, ** options):
 
         codes = args 
         delm = '|'
-        field_labels = ['Province Name','District Name','Facility Name', 'Code', 'Registered Workers',
-            'Users Removed By System', 'Date Of First SMS',
+        field_labels = ['Province Name','District Name','Facility Name', 'Code',
+            'Registered Workers', '# Registered Workers',
+            'Users Removed By System', '# Users Removed By System', 'Date Of First SMS',
             'Date Of First DBS Results', 'Names Of Users Not Retrieving',
             'Dates Users Were Trained', 'Ever Had Printer', 'Printers In Use',
             'Are DBS Registers Used', 'DBS Samples', 'DBS Results']
@@ -50,15 +51,19 @@ class Command(LabelCommand):
             registered_workers = self.build_contact_list(Contact.active.filter(
                                                          location=facility,
                                                          types__slug='worker')
-                                                         )
-            users_removed_by_system = "; ".join("%s:%s" % (du.contact.name,
+                                                         )          
+
+            users_removed_by_system = "; ".join(set("%s:%s" % (du.contact.name,
                                                 du.connection.identity if du.connection else "" )
                                                 for du in DeactivatedUser.\
                                                 objects.filter(
                                                 contact__location=facility,
-                                                contact__types__slug='worker'))
+                                                contact__types__slug='worker')
+                                                if du.connection.identity not in registered_workers
+                                                ))
 
-
+            num_registered_workers = len(registered_workers) if registered_workers else 0
+            num_users_removed_by_system = len(users_removed_by_system) if users_removed_by_system else 0
             date_of_first_sms = ""
             try:
                 date_of_first_sms = Message.objects.filter(direction='I',
@@ -93,7 +98,9 @@ class Command(LabelCommand):
             dbs_results = str(Result.objects.filter(clinic=facility, notification_status='sent').count())
             district_name = facility.parent.name
             province_name = facility.parent.parent.name
-            fields = [province_name, district_name, facility_name, code, registered_workers, users_removed_by_system
+            fields = [province_name, district_name, facility_name, code,
+            registered_workers,str(num_registered_workers), users_removed_by_system,
+            str(num_users_removed_by_system)
             , date_of_first_sms, date_of_first_dbs_results,
             names_of_users_not_retrieving, dates_users_were_trained,
             ever_had_printer, printers_in_use, are_dbs_registers_used,
