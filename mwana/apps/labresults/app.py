@@ -70,7 +70,7 @@ class App (rapidsms.apps.base.AppBase):
         key = key[:4]
 
         if re.match(self.CHECK_REGEX, message.text, re.IGNORECASE):
-            if not is_eligible_for_results(message.connection):
+            if not is_eligible_for_results(message.connections[0]):
                 message.respond(NOT_REGISTERED)
                 return True
 
@@ -86,10 +86,10 @@ class App (rapidsms.apps.base.AppBase):
                 message.respond(NO_RESULTS % dict(name=message.contact.name,
                                                   clinic=clinic.name))
             return True
-        elif message.connection in self.waiting_for_pin \
-            and message.connection.contact:
+        elif message.connections[0] in self.waiting_for_pin \
+            and message.connections[0].contact:
                 pin = message.text.strip()
-                if pin.upper() == message.connection.contact.pin.upper():
+                if pin.upper() == message.connections[0].contact.pin.upper():
                     self.send_results_after_pin(message)
                     return True
                 else:
@@ -116,15 +116,15 @@ class App (rapidsms.apps.base.AppBase):
         # you'd ever send your PIN in would be after receiving a notification)
         # This could be more robust, but keeping it simple.
         clinic = get_clinic_or_default(message.contact)
-        if is_eligible_for_results(message.connection) \
+        if is_eligible_for_results(message.connections[0]) \
             and clinic in self.last_collectors \
             and message.text.strip().upper() == message.contact.pin.upper():
                 if message.contact == self.last_collectors[clinic]:
                     message.respond(SELF_COLLECTED % dict(
-                        name=message.connection.contact.name))
+                        name=message.connections[0].contact.name))
                 else:
                     message.respond(ALREADY_COLLECTED % dict(
-                        name=message.connection.contact.name,
+                        name=message.connections[0].contact.name,
                         collector=self.last_collectors[clinic]))
                 return True
         return self.mocker.default(message)
@@ -134,22 +134,22 @@ class App (rapidsms.apps.base.AppBase):
         Sends the actual results in response to the message
         (comes after PIN workflow).
         """
-        results = self.waiting_for_pin[message.connection]
+        results = self.waiting_for_pin[message.connections[0]]
         clinic  = get_clinic_or_default(message.contact)
         if not results:
             # how did this happen?
             logger.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
-                       (clinic, message.connection.contact))
+                       (clinic, message.connections[0].contact))
             message.respond("Sorry, there are no new EID results for %s." % clinic)
-#            self.waiting_for_pin.pop(message.connection)
-            self. pop_pending_connection(message.connection)
+            self.waiting_for_pin.pop(message.connections[0])
+            self. pop_pending_connection(message.connections[0])
         else:
-            self.send_results([message.connection], results)
+            self.send_results([message.connections[0]], results)
             message.respond(INSTRUCTIONS % dict(
-                name=message.connection.contact.name))
+                name=message.connections[0].contact.name))
 
-#            self.waiting_for_pin.pop(message.connection)
-            self. pop_pending_connection(message.connection)
+            self.waiting_for_pin.pop(message.connections[0])
+            self. pop_pending_connection(message.connections[0])
 
             # remove pending contacts for this clinic and notify them it
             # was taken care of
@@ -163,10 +163,10 @@ class App (rapidsms.apps.base.AppBase):
                     # self.waiting_for_pin.pop(conn)
                     self. pop_pending_connection(conn)
                     OutgoingMessage([conn], RESULTS_PROCESSED % dict(
-                        name=message.connection.contact.name)).send()
+                        name=message.connections[0].contact.name)).send()
 
             self.last_collectors[clinic] = \
-                message.connection.contact
+                message.connections[0].contact
 
     def send_results(self, connections, results, msgcls=OutgoingMessage):
         """Sends the specified results to the given contacts."""
