@@ -14,6 +14,7 @@ class Turnaround(models.Model):
     """
     A stub to display a view in django admin format for turnaround data
     """
+    province = models.CharField(max_length=50)
     district = models.CharField(max_length=50)
     facility = models.CharField(max_length=100)
     transporting = models.IntegerField(blank=True, null=True)
@@ -21,7 +22,10 @@ class Turnaround(models.Model):
     delays = models.IntegerField(blank=True, null=True, verbose_name="Entering Time")
     retrieving = models.IntegerField(blank=True, null=True)
     turnaround = models.IntegerField(blank=True, null=True)
-    date_reached_moh = models.DateTimeField(blank=True, null=True)
+    collected_on = models.DateField(blank=True, null=True)
+    received_at_lab = models.DateField(blank=True, null=True)
+    processed_on = models.DateField(blank=True, null=True)
+    date_reached_moh = models.DateField(blank=True, null=True)
     date_retrieved = models.DateField(blank=True, null=True)
 
 

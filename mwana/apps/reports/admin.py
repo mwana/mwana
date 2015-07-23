@@ -30,12 +30,16 @@ from django.views.decorators.csrf import csrf_protect
 
 
 class TurnaroundAdmin(admin.ModelAdmin):
-    list_display = ('district', 'facility', 'transporting', 'processing',
-                    'delays', 'date_reached_moh', 'retrieving', 'date_retrieved',
-                    'turnaround')
-    date_hierarchy = 'date_retrieved'
-    list_filter = ('date_retrieved', 'district', 'facility')
+    list_display = ('province', 'district', 'facility', 'transporting',
+                    'processing', 'delays', 'retrieving', 'turnaround',
+                    'collected_on',  'received_at_lab', 'processed_on',
+                    'date_reached_moh', 'date_retrieved')
+    list_filter = ('province',  'collected_on', 'received_at_lab', 'processed_on',
+                    'date_reached_moh', 'date_retrieved', 'district', 'facility')
+    search_fields = ('province', 'district', 'facility',)
+    date_hierarchy = 'received_at_lab'
 admin.site.register(Turnaround, TurnaroundAdmin)
+
 
 class MessageGroupAdmin(admin.ModelAdmin):
     list_display = ('date', 'text', 'direction', 'contact_type',
