@@ -33,8 +33,8 @@ class TurnaroundAdmin(admin.ModelAdmin):
     list_display = ('province', 'district', 'facility', 'transporting',
                     'processing', 'delays', 'retrieving', 'turnaround',
                     'collected_on',  'received_at_lab', 'processed_on',
-                    'date_reached_moh', 'date_retrieved')
-    list_filter = ('province',  'collected_on', 'received_at_lab', 'processed_on',
+                    'date_reached_moh', 'date_retrieved', 'lab')
+    list_filter = ('lab', 'province',  'collected_on', 'received_at_lab', 'processed_on',
                     'date_reached_moh', 'date_retrieved', 'district', 'facility')
     search_fields = ('province', 'district', 'facility',)
     date_hierarchy = 'received_at_lab'
