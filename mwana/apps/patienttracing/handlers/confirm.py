@@ -15,11 +15,11 @@ _ = lambda s: s
 
 class ConfirmHandler(KeywordHandler):
     '''
-    User sends: 
+    User sends:
     TRACE MARY <REASON>
     (Reason is optional)
-    Where mary is patient's name.  Message goes out to all CBAs asking them to find and talk to Mary.  
-    It also asks them to reply with the message, 
+    Where mary is patient's name.  Message goes out to all CBAs asking them to find and talk to Mary.
+    It also asks them to reply with the message,
     TOLD MARY
     once they have spoken to the patient and asked them to go to the clinic.
 
@@ -51,7 +51,7 @@ class ConfirmHandler(KeywordHandler):
     def handle(self,text):
         #check message is valid
         #check for:
-        # CONTACT is valid        
+        # CONTACT is valid
         if not self.contact_valid():
             return
 
@@ -82,7 +82,7 @@ class ConfirmHandler(KeywordHandler):
         p.initiator = patienttracing.get_initiator_cba()
         p.type = patienttracing.get_type_unrecognized()
         p.name = pat_name
-        p.status = patienttracing.get_status_confirmed()
+        p.status = 'confirmed'
         p.confirmed_date = datetime.now()
         p.save()
 
@@ -91,7 +91,7 @@ class ConfirmHandler(KeywordHandler):
         Respond to CONFIRM message, update PatientTrace db entry status to 'CONFIRM'
         '''
 
-        #Check to see if there are any patients being traced by the given name        
+        #Check to see if there are any patients being traced by the given name
         patients = PatientTrace.objects.filter(name__iexact=pat_name)\
                                         .filter(status=patienttracing.get_status_told())\
                                         .filter(clinic=self.msg.connection.contact.location.parent)
@@ -132,12 +132,13 @@ class ConfirmHandler(KeywordHandler):
         '''
         self.respond(self.response_confirmed_thanks_txt % (self.msg.connection.contact.name, pat_name))
 
- 
+
     def help(self):
         '''
         Respond with a help message in the event of a malformed msg or if no name was supplied
         '''
-        self.respond(self.help_txt)
+        pat_name = 'Last Notified'
+        self.respond(self.confirm(pat_name))
 
     def unrecognized_sender(self):
         '''
@@ -152,9 +153,9 @@ class ConfirmHandler(KeywordHandler):
             msg = OutgoingMessage(initiator_contact.default_connection, self.initiator_status_update_txt % (initiator_contact.name, self.msg.connection.contact.name, pat_name))
             msg.send()
 
-    
 
-# ====================================================================     
+
+# ====================================================================
 #    DELETE ME!
 #
 #    initiator = models.ForeignKey(Contact, related_name='patients_traced',
@@ -163,7 +164,7 @@ class ConfirmHandler(KeywordHandler):
 #    type = models.CharField(max_length=15)
 #    name = models.CharField(max_length=50) # name of patient to trace
 #    patient_event = models.ForeignKey(PatientEvent, related_name='patient_traces',
-#                                      null=True, blank=True) 
+#                                      null=True, blank=True)
 #    messenger = models.ForeignKey(Contact,  related_name='patients_reminded',
 #                            limit_choices_to={'types__slug': 'cba'}, null=True,
 #                            blank=True)# cba who informs patient
@@ -176,8 +177,6 @@ class ConfirmHandler(KeywordHandler):
 #
 #    start_date = models.DateTimeField() # date when tracing starts
 #    reminded_on = models.DateTimeField(null=True, blank=True) # date when cba tells mother
-#    confirmed_date = models.DateTimeField(null=True, blank=True)# date of confirmation that patient visited clinic   
-#    
-# =======================================================================    
-    
-    
+#    confirmed_date = models.DateTimeField(null=True, blank=True)# date of confirmation that patient visited clinic
+#
+# =======================================================================
