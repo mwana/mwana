@@ -113,7 +113,7 @@ class EIDHandler(KeywordHandler):
         logger.debug("saved eid delivery confirmation")
 
         # check if result is in the database
-        result = Result.objects.filter(requisition_id_search=tokens['sample'])
+        result = Result.objects.filter(requisition_id_search=tokens['sample'])[0]
         if result is not None:
             eid_confirmation.result = result
             eid_confirmation.save()
