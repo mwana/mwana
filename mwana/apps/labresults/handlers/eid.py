@@ -41,10 +41,15 @@ class EIDHandler(KeywordHandler):
         data = text.split()
         if len(data) == 5:
             tokens = dict(zip(labels, data))
+            tokens, error_msg, errors = self._validate_tokens(tokens)
+            return tokens, errors, error_msg
+        if len(data) == 4:
+            data.append('None')
+            tokens = dict(zip(labels, data))
+            tokens, error_msg, errors = self._validate_tokens(tokens)
+            return tokens, errors, error_msg
         else:
             self.help()
-        tokens, error_msg, errors = self._validate_tokens(tokens)
-        return tokens, errors, error_msg
 
     def _validate_tokens(self, tokens):
         """Checks the validity of each token by its type."""
@@ -113,9 +118,9 @@ class EIDHandler(KeywordHandler):
         logger.debug("saved eid delivery confirmation")
 
         # check if result is in the database
-        result = Result.objects.filter(requisition_id_search=tokens['sample'])[0]
-        if result is not None:
-            eid_confirmation.result = result
+        results = Result.objects.filter(requisition_id_search=tokens['sample'])
+        if len(results) > 0:
+            eid_confirmation.result = results[0]
             eid_confirmation.save()
 
         # construct response
