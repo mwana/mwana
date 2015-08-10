@@ -14,6 +14,7 @@ class UserVerificationAdmin(admin.ModelAdmin):
     'date_of_most_recent_sms',)
     list_filter = ("request_date", "responded", "request", "facility", )
     date_hierarchy = 'request_date'
+    search_fields = ['contact__name']
 
     def is_active(self, obj):
         return "Yes" if obj.contact.is_active else "No"
@@ -49,7 +50,7 @@ reactivate.short_description = "Reactivate selected users"
 
 
 class DeactivatedUserAdmin(admin.ModelAdmin):
-    list_display = ("district", "clinic", "contact", "connection", "deactivation_date",)
+    list_display = ("district", "clinic", "contact", "connection", "type", "deactivation_date",)
     search_fields = ('contact__location__name','contact__name', 'connection__identity')
     actions = [reactivate]
 
@@ -58,5 +59,8 @@ class DeactivatedUserAdmin(admin.ModelAdmin):
 
     def district(self, obj):
         return obj.contact.district
+
+    def type(self, obj):
+        return ", ".join(item.slug for item in obj.contact.types.all())
 
 admin.site.register(DeactivatedUser, DeactivatedUserAdmin)
