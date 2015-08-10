@@ -292,6 +292,7 @@ def accept_record (record, payload):
 
         #change to clinic
         if old_record.notification_status in ('sent', 'notified') and old_record.clinic != new_record.clinic:
+            #TODO: log this event in database so that it can be acted upon. Change notication status to new, result_sent_date to null
             logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this?' %
                            (sample_id, old_record.clinic.slug, new_record.clinic.slug))
 

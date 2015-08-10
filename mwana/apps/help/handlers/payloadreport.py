@@ -89,8 +89,4 @@ payloads. If you think this message is a mistake, respond with keyword 'HELP'"
         full_msg = msg_header + msg_data
 
         self.respond(full_msg)
-
-
-
-
         

@@ -15,7 +15,6 @@ from rapidsms.tests.scripted import TestScript
 from rapidsms.contrib.messagelog.models import Message
 
 
-
 class UserVerificationSetUp(TestScript):
 
     def setUp(self):

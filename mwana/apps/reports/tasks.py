@@ -39,7 +39,7 @@ def send_dho_eid_and_birth_report(router):
         logger.warning('No district workers found in the system')
         return
     today = date.today()
-    month_ago = date(today.year, today.month, 1)-timedelta(days=1)
+    month_ago = date(today.year, today.month, 1) - timedelta(days=1)
     last_year = month_ago.year
     last_month = month_ago.month
     for worker in workers:
@@ -86,7 +86,7 @@ def send_pho_eid_and_birth_report(router):
         logger.warning('No province workers found in the system')
         return
     today = date.today()
-    month_ago = date(today.year, today.month, 1)-timedelta(days=1)
+    month_ago = date(today.year, today.month, 1) - timedelta(days=1)
     last_year = month_ago.year
     last_month = month_ago.month
     for worker in workers:
