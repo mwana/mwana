@@ -32,7 +32,8 @@ class Result(models.Model):
     RECORD_CHANGE_CHOICES = (
     ('result','Result changed'),
     ('req_id','Requisition ID changed'),
-    ('both','Both the result and requisition id changed')
+    ('both','Both the result and requisition id changed'),
+    ('loc_st','Location changed after sending result')
     )
 
     RESULT_CHOICES = (

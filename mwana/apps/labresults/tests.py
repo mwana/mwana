@@ -22,6 +22,7 @@ from mwana.apps.labresults import tasks
 from mwana.apps.labresults import tasks as tlcprinter_tasks
 from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD_FOR_LOCATION
 from mwana.apps.labresults.testdata.payloads import UNVERIFIED
 from mwana.apps.labresults.testdata.payloads import VERIFIED
 from mwana.apps.labresults.testdata.reports import *
@@ -1030,6 +1031,19 @@ class TestResultsAcceptor(LabresultsSetUp):
         response = self.client.get(reverse('accept_results'))
         self.assertEqual(response.status_code, 405) # method not supported
 
+    def create_payload_auther_login(self):
+        """
+        Tests sending of notifications for previously sent results but later
+        change in locaion.
+        """
+
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+
     def test_results_changed_notification(self):
         """
         Tests sending of notifications for previously sent results but later
@@ -1038,14 +1052,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         notification goes to all clinic workers and another to all support staff.
         """
         # Scheduled task will not run on a weekend
-        if is_today_a_weekend():
-            return
-        user = User.objects.create_user(username='adh', email='',
-                                        password='abc')
-        perm = Permission.objects.get(content_type__app_label='labresults',
-                                      codename='add_payload')
-        user.user_permissions.add(perm)
-        self.client.login(username='adh', password='abc')
+        self.create_payload_auther_login()
         
         # get results from initial payload
         self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
@@ -1089,9 +1096,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         "ID=212987b, Result=N, old value=212987, Lab ID=10-09997."
         " Contacts = John ""Banda:clinic_worker, Mary Phiri:other_worker")
 
-        self.assertEqual(msg1,msgs[0].text)
-        self.assertEqual(msg2,msgs[1].text)
-        self.assertEqual(msg3,msgs[2].text)
+        self.assertEqual(msg1, msgs[0].text)
+        self.assertEqual(msg2, msgs[1].text)
+        self.assertEqual(msg3, msgs[2].text, '\n'.join(r.record_change for r in Result.objects.all()))
         self.assertEqual("John Banda",msgs[0].connection.contact.name)
         self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
         self.assertEqual("Help Admin",msgs[2].connection.contact.name)
@@ -1107,6 +1114,38 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
+        
+    def test_results_changed_location_notification(self):
+        """
+        Tests sending of notifications for previously sent results but later
+        change in locaion.
+        """
+
+        self.create_payload_auther_login()
+        # get results from initial payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # let the clinic worker get the results
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """.format(**self._result_text())
+        self.runScript(script)
+
+        
+        self._post_json(reverse('accept_results'), CHANGED_PAYLOAD_FOR_LOCATION)
+
+        results = Result.objects.all()
+        for r in results:
+            self.assertEqual(r.record_change, 'loc_st')
+            self.assertEqual(r.notification_status, 'new')
+
+        # The number of results records should remain to be 3
+        self.assertEqual(labresults.Result.objects.count(), 3)
+   
 
     def test_send_results_notification(self):
         """
@@ -1190,7 +1229,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         old_res = Result.objects.all()[0]
 
         
-        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=12)
+        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=20)
         old_res.save()
 
         time.sleep(.1)

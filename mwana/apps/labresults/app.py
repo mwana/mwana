@@ -345,7 +345,9 @@ class App(rapidsms.apps.base.AppBase):
         if not updated_results:
             return
         for updated_result in updated_results:
-            if updated_result.record_change:
+            # @type updated_result Result
+            if updated_result.record_change and \
+            updated_result.record_change in ['req_id', 'result', 'both']:
                 changed_results.append(updated_result)
 
         if not changed_results:
