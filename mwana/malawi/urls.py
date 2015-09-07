@@ -30,6 +30,8 @@ urlpatterns = patterns(
     url(r'^$', views.dashboard_malawi, name='malawi_home'),
     url(r'^results160/results/', results.ResultList.as_view(),
         name='results_list'),
+    url(r'^results160/confirmations/', results.EIDConfirmationList.as_view(),
+        name='eid_confirmations'),
     url(r'^results160/graphs/', views.malawi_graphs, name='mwana_graphs'),
     url(r'^results160', views.malawi_reports, name='mwana_reports'),
     url(r"^csv/report-one/", views.csv_report_one, name="csv_report_one"),

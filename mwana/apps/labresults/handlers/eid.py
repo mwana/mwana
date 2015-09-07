@@ -114,6 +114,7 @@ class EIDHandler(KeywordHandler):
             return False
 
         eid_confirmation = EIDConfirmation(**tokens)
+        eid_confirmation.contact = clinic_worker
         eid_confirmation.save()
         logger.debug("saved eid delivery confirmation")
 

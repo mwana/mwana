@@ -10,6 +10,7 @@ from django.forms import ModelForm
 from django.db import transaction
 from django.db.models import Q
 from django.core.exceptions import MultipleObjectsReturned
+from django.conf import settings
 
 from mwana.apps.labresults import models as labresults
 from mwana.decorators import has_perm_or_basicauth
@@ -20,9 +21,9 @@ from django.shortcuts import render_to_response
 # from django_tables2_reports.views import ReportTableView
 from mwana.apps.remindmi.views import FilteredSingleTableView
 
-from .filters import ResultFilter
-from .tables import ResultTable
-from mwana.apps.labresults.models import Result
+from .filters import ResultFilter, EIDConfirmationFilter
+from .tables import ResultTable, EIDConfirmationTable, EIDSummaryTable, EIDDistrictSummaryTable
+from mwana.apps.labresults.models import Result, EIDConfirmation
 
 """
 TODO
@@ -37,6 +38,8 @@ TODO
   a facility in our list -- you can still save the result record, but not send it. however, it appeared that
   the lab list even had a few luapula clinics that aren't on our internal list
 """
+
+DISTRICTS = settings.DISTRICTS
 
 logger = logging.getLogger('mwana.apps.labresults.views')
 
@@ -663,3 +666,62 @@ class ResultList(FilteredSingleTableView):
     template_name = 'remindmi/result_list.html'
     filter_class = ResultFilter
     queryset = Result.objects.filter(Q(verified='t'))
+
+class EIDConfirmationList(FilteredSingleTableView):
+    model = EIDConfirmation
+    table_class = EIDConfirmationTable
+    template_name = 'labresults/eid_confirmations.html'
+    filter_class = EIDConfirmationFilter
+    # TODO: Check results and confirmations are correct for date range
+    queryset = EIDConfirmation.objects.all()
+    results = Result.objects.exclude(result_sent_date__isnull=True)
+
+    def get_summary_data(self, qs):
+        facility_summary_data = []
+        district_summary_data = []
+        # locations = set([(e.contact.location.slug, e.contact.location.parent.name)
+        #              for e in qs if e.contact is not None])
+        # above for active|reporting locations
+        locations = [(location.slug, location.parent.name)
+                     for location in Location.objects.filter(send_live_results=True)]
+        for location in locations:
+            facility_qs = qs.filter(contact__location__slug=location[0])
+            facility_data = {}
+            facility_data['hmis'] = location[0]
+            facility_data['district'] = location[1]
+            facility_data['sample_count'] = facility_qs.count()
+            facility_data['result_count'] = self.results.filter(clinic__slug=location[0]).count()
+            facility_data['art_count'] = facility_qs.filter(action_taken='ART').count()
+            facility_data['cpt_count'] = facility_qs.filter(action_taken='CPT').count()
+            facility_data['unknown_count'] = facility_qs.exclude(action_taken__in=['ART', 'CPT']).count()
+            facility_summary_data.append(facility_data)
+        # get district summaries
+        # districts = [location[1] for location in locations]
+        # above for active reporting districts only
+        districts = set([location[1] for location in locations])
+        for district in districts:
+            district_qs = qs.filter(contact__location__parent__name=district)
+            district_data = {}
+            district_data['d_district'] = district
+            district_data['d_sample_count'] = district_qs.count()
+            district_data['d_result_count'] = self.results.filter(clinic__parent__name=district).count()
+            district_data['d_art_count'] = district_qs.filter(action_taken='ART').count()
+            district_data['d_cpt_count'] = district_qs.filter(action_taken='CPT').count()
+            district_data['d_unknown_count'] = district_qs.exclude(action_taken__in=['ART', 'CPT']).count()
+            district_summary_data.append(district_data)
+
+        return facility_summary_data, district_summary_data
+
+    def get_context_data(self, **kwargs):
+        context = super(EIDConfirmationList, self).get_context_data(**kwargs)
+        facility_summary_data, district_summary_data = self.get_summary_data(context['filter'].qs)
+        summary_data_table = EIDSummaryTable(facility_summary_data)
+        summary_data_table.paginate(page=self.request.GET.get('page', 1), per_page=25)
+        summary_data_table.order_by = 'hmis'
+        district_data_table = EIDDistrictSummaryTable(district_summary_data)
+        district_data_table.paginate(page=self.request.GET.get('page', 1), per_page=30)
+        district_data_table.order_by = 'd_district'
+        context['summary'] = summary_data_table
+        context['district_summary'] = district_data_table
+        context['graphs'] = "These are the new graphs on highcharts."
+        return context

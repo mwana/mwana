@@ -58,3 +58,9 @@ class PendingPinConnectionsAdmin(admin.ModelAdmin):
     list_display =('connection', 'result', 'timestamp')
     date_hierarchy = 'timestamp'
 admin.site.register(PendingPinConnections, PendingPinConnectionsAdmin)
+
+class EIDConfirmationAdmin(admin.ModelAdmin):
+    list_display =('contact', 'sample', 'status')
+    list_filter =('status', 'action_taken', 'age_in_months')
+    # TODO: date_hierachy = 'reported'
+admin.site.register(EIDConfirmation, EIDConfirmationAdmin)

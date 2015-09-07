@@ -238,6 +238,7 @@ class EIDConfirmation(models.Model):
     status = models.CharField(max_length=1)
     art_number = models.CharField(max_length=30, blank=True)
     age_in_months = models.IntegerField(max_length=2, null=True)
+    reported_on = models.DateField(auto_now_add=True)   # date confirmation was reported
     action_taken = models.CharField(
         choices=ACTION_TAKEN_CHOICES,
         max_length=3,
