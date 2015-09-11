@@ -719,7 +719,7 @@ class EIDConfirmationList(FilteredSingleTableView):
         summary_data_table.paginate(page=self.request.GET.get('page', 1), per_page=25)
         summary_data_table.order_by = 'hmis'
         district_data_table = EIDDistrictSummaryTable(district_summary_data)
-        district_data_table.paginate(page=self.request.GET.get('page', 1), per_page=30)
+        # district_data_table.paginate(page=self.request.GET.get('page', 1), per_page=30)
         district_data_table.order_by = 'd_district'
         context['summary'] = summary_data_table
         context['district_summary'] = district_data_table
