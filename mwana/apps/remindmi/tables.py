@@ -98,8 +98,8 @@ class CSVPatientListTable(PatientListTable):
 
 
 class ContactsListTable(PatientListTable):
-    # contact = tables.Column(verbose_name='Mobile',
-    #                         accessor='default_connection.identity')
+    contact = tables.Column(verbose_name='Mobile',
+                            accessor='default_connection.identity')
     facility_id = tables.Column(verbose_name='HMIS Code',
                                 accessor='location.slug')
 
@@ -118,7 +118,7 @@ class ContactsListTable(PatientListTable):
                    'is_help_admin', 'last_updated', 'errors', 'date_of_birth',
                    'interviewer_id', 'first_name', 'last_name', 'volunteer',
                    'is_active', 'status', 'parent', 'created_on')
-        sequence = ("name", "location", "district")
+        sequence = ("name", "contact", "location", "district")
 
 
 class MothersListTable(PatientListTable):
