@@ -30,6 +30,32 @@ class Turnaround(models.Model):
     lab = models.CharField(max_length=100)
 
 
+class ResultsForFollowup(models.Model):
+    """
+    A stub to display a view in django admin format for results that need
+    patient followu up
+    """
+    province = models.CharField(max_length=50)
+    district = models.CharField(max_length=50)
+    facility = models.CharField(max_length=100)
+    facility_id = models.IntegerField(null=True, blank=True)
+    lab_id = models.CharField(max_length=20) 
+    requisition_id = models.CharField(max_length=50)    
+    birthdate = models.DateField(null=True, blank=True)
+    child_age = models.IntegerField(null=True, blank=True)
+    child_age_unit = models.CharField(null=True, blank=True, max_length=20)
+    sex = models.CharField( max_length=1, blank=True)
+    collecting_health_worker = models.CharField(max_length=100, blank=True)
+    verified = models.NullBooleanField(null=True, blank=True)
+    result = models.CharField(max_length=1, blank=True)
+    collected_on = models.DateField(blank=True, null=True)
+    received_at_lab = models.DateField(blank=True, null=True)
+    processed_on = models.DateField(blank=True, null=True)
+    date_reached_moh = models.DateField(blank=True, null=True)
+    date_retrieved = models.DateField(blank=True, null=True)
+    lab = models.CharField(max_length=100)
+
+
 class SupportedLocation(models.Model):
     location = models.ForeignKey(Location)
     supported = models.BooleanField(default=True)

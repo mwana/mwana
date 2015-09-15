@@ -1,4 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
+
+from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.apps.reports.models import ResultsForFollowup
+
 from mwana.apps.reports.models import ScaleUpSite
 from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
@@ -61,8 +65,6 @@ class SupportedLocationAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwds):
         super(SupportedLocationAdminForm, self).__init__(*args, **kwds)
         self.fields['location'].queryset = Location.objects.exclude(type__slug='zone').order_by('name')
-
-
 
 class SupportedLocationAdmin(admin.ModelAdmin):
     list_display = ('location', 'supported')
@@ -280,3 +282,22 @@ class ClinicsNotSendingDBSAdmin(admin.ModelAdmin):
     search_fields = ('contacts',)
 
 admin.site.register(ClinicsNotSendingDBS, ClinicsNotSendingDBSAdmin)
+
+
+class ResultsForFollowupAdmin(admin.ModelAdmin):
+
+    def queryset(self, request):
+        user_groups = ReportingGroup.objects.filter(groupusermapping__user=
+                                                    request.user).distinct()
+
+        site_ids =  Location.objects.filter(groupfacilitymapping__group__in=
+                                user_groups).distinct()
+
+        return super(ResultsForFollowupAdmin, self).queryset(request).filter(facility_id__in=site_ids)
+
+    list_display = ('province', 'district', 'facility', 'lab_id', 'requisition_id', 'birthdate', 'child_age', 'child_age_unit', 'sex', 'collecting_health_worker', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'lab')
+    list_filter = ('province', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'sex', 'lab', 'district', 'facility',   'birthdate', 'child_age', 'child_age_unit', 'collecting_health_worker', )
+    search_fields = ('province', 'district', 'facility', 'lab_id', 'requisition_id', 'birthdate', 'child_age', 'child_age_unit', 'sex', 'collecting_health_worker', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'lab')
+    date_hierarchy = 'processed_on'
+
+admin.site.register(ResultsForFollowup, ResultsForFollowupAdmin)
