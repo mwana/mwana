@@ -105,8 +105,8 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             +260977600123     > birth 1/1/1213 maria
-            +260977600123     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in 2014.
-        """
+            +260977600123     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in {year}.
+        """.format(year=datetime.today().year)
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(0, patients.count())

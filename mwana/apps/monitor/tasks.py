@@ -383,7 +383,7 @@ def update_sub_groups():
 
             unicef = ReportingGroup.objects.get(name__iexact='unicef')
             idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
-            bu = ReportingGroup.objects.get(name__iexact='BU')
+            bu = ReportingGroup.objects.get(name__iexact='MGIC')
 
             if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
                 try_assign(idinsight, [loc])
