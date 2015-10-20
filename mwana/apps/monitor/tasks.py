@@ -367,7 +367,7 @@ def clear_en_language_code():
 
 
 def update_sub_groups():
-    logger.info("updating sub groups - PHOs, DHOs, UNICEF, IDInsight")
+    logger.info("updating sub groups - PHOs, DHOs, UNICEF")
     for sl in SupportedLocation.objects.all():
         loc = sl.location;
         loc.send_live_results = True;
@@ -382,18 +382,16 @@ def update_sub_groups():
 
 
             unicef = ReportingGroup.objects.get(name__iexact='unicef')
-            idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
-            bu = ReportingGroup.objects.get(name__iexact='MGIC')
+            mgic = ReportingGroup.objects.get(name__iexact='MGIC Zambia')
 
             if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
-                try_assign(idinsight, [loc])
                 try_assign(unicef, [loc]);
             if loc.parent.parent.slug == '800000':
-                try_assign(bu, [loc]);
-        except Exception, e:
-            a, b = ReportingGroup.objects.get_or_create(name=dho)
-            a, b = ReportingGroup.objects.get_or_create(name=pho)
-            logger.error("%s. Location: %s. Dho: %. Pho: %s" % (e, loc.dho, pho))
+                try_assign(mgic, [loc]);
+        except ReportingGroup.DoesNotExist, e:
+            ReportingGroup.objects.get_or_create(name=dho)
+            ReportingGroup.objects.get_or_create(name=pho)
+            logger.error("%s. Location: %s. Dho: %s. Pho: %s" % (e, loc, dho, pho))
 
 
 def mark_long_pending_results_as_obsolete():
