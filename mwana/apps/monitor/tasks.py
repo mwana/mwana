@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.apps.reports.models import Turnaround
 from mwana.apps.userverification.models import DeactivatedUser
 from datetime import date
 from datetime import datetime
@@ -432,6 +433,14 @@ def mark_sent_results_with_date_inconsitencies_as_obsolete():
     logger.info('in mark_sent_results_with_date_inconsitencies_as_obsolete')
     counter = 0
     for res in dbs_with_date_issues().filter(notification_status='sent'):
+        # @type res Result
+        res.notification_status = 'obsolete'
+        res.save()
+        counter += 1
+
+    # Arbitrary too high figure for transport time is used
+    bad_turnaround = Turnaround.objects.filter(transporting__gt=300)
+    for res in Result.objects.filter(id__in=bad_turnaround, notification_status='sent'):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
