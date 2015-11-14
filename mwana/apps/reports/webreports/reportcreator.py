@@ -931,6 +931,54 @@ class MalawiReports(Results160Reports):
         table = sorted(table, key=itemgetter(0, 1))
         return table, tt_tested, tt_verified, tt_retrieved
 
+    def dbsr_tested_retrieved(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        tt_positive = tt_negative = tt_rejected = 0
+        tt_tested = tt_verified = tt_retrieved = 0
+        positive = negative = rejected = total_tested = 0
+        tested = ['Detected', 'NotDetected', 'R', 'X', 'I']
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                positive = self.get_new_results(location).filter(result='P', verified=True).count()
+                negative = self.get_new_results(location).filter(result='N', verified=True).count()
+                rejected = self.get_new_results(location).filter(result__in='XIR').count()
+                total_retrieved = self.get_new_results(location).filter(notification_status='sent', verified=True).count()
+                total_verified = self.get_new_results(location).filter(verified=True).count()
+                total_tested = positive + negative
+
+                table.append({
+                    "district": parent_name,
+                    "facility": location.name,
+                    "positive": positive,
+                    "negative": negative,
+                    "rejected": rejected,
+                    "tested": total_tested,
+                    "verified": total_verified,
+                    "received": total_retrieved
+                })
+
+                tt_positive = tt_positive + positive
+                tt_negative = tt_negative + negative
+                tt_rejected = tt_rejected + rejected
+                tt_tested = tt_tested + positive + negative
+                tt_verified = tt_verified + total_verified
+                tt_retrieved = tt_retrieved + total_retrieved
+            else:
+                pass
+        table = sorted(table, key=itemgetter('district', 'facility'))
+        table.append({
+            "district": 'All listed districts',
+            "facility": 'All listed  clinics',
+            "positive": tt_positive,
+            "negative": tt_negative,
+            "rejected": tt_rejected,
+            "tested": tt_tested,
+            "verified": tt_verified,
+            "received": tt_retrieved})
+        return table
 
     def dbsr_pending_results_report(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)
@@ -965,6 +1013,48 @@ class MalawiReports(Results160Reports):
         table = sorted(table, key=itemgetter(0, 1))
         return table, tt_new, tt_notified, tt_updated, tt_unprocessed, tt_pending
 
+    def dbsr_pending_results(self, startdate=None, enddate=None, district=None):
+        self.set_reporting_period(startdate, enddate)
+        table = []
+
+        tt_new = tt_notified = tt_updated = tt_unprocessed = tt_pending = 0
+        new = notified = updated = unprocessed = total_pending = 0
+        for location in self.get_live_facilities():
+            parent_name = location.parent and location.parent.name or ' '
+            if (district == "All Districts" or district == parent_name):
+                new = self.get_new_results(location).filter(notification_status='new').count()
+                notified = self.get_new_results(location).filter(notification_status='notified').count()
+                updated = self.get_new_results(location).filter(notification_status='updated').count()
+                unprocessed = self.get_new_results(location).filter(notification_status='unprocessed').count()
+                total_pending = new + notified + updated + unprocessed
+
+                table.append({
+                    "district": parent_name,
+                    "facility": location.name,
+                    "new": new,
+                    "notified": notified,
+                    "updated": updated,
+                    "unprocessed": unprocessed,
+                    "total_pending": total_pending
+                })
+
+                tt_new = tt_new + new
+                tt_notified = tt_notified + notified
+                tt_updated = tt_updated + updated
+                tt_unprocessed = tt_unprocessed + unprocessed
+                tt_pending = tt_pending + total_pending
+            else:
+                pass
+        table = sorted(table, key=itemgetter('district', 'facility'))
+        table.append({
+            "district": 'All listed districts',
+            "facility": 'All listed  clinics',
+            "new": tt_new,
+            "notified": tt_notified,
+            "updated": tt_updated,
+            "unprocessed": tt_unprocessed,
+            "total_pending": tt_pending})
+        return table
 
     def dbsr_positivity_data(self, startdate=None, enddate=None, district=None):
         self.set_reporting_period(startdate, enddate)

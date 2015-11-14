@@ -17,6 +17,7 @@ from rapidsms.contrib.messagelog.models import Message
 from rapidsms.models import Contact
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.labresults.models import Result
+from mwana.apps.labresults.tables import TestedRetrievedTable, PendingResultsTable
 from mwana.apps.locations.models import Location
 from mwana.apps.nutrition.models import Assessment
 from mwana.apps.reminders.models import PatientEvent
@@ -91,10 +92,17 @@ def malawi_reports(request, location=None):
     r = MalawiReports()
     res, tt_tested, tt_verified, tt_retrieved = r.dbsr_tested_retrieved_report(startdate, enddate, district)
 
+    table_data = r.dbsr_tested_retrieved(startdate, enddate, district)
+    tested_retrieved_table = TestedRetrievedTable(table_data)
+
     min_turnaround_time, max_turnaround_time, num_of_rsts, num_of_facilities,\
     turnaround_time = r.dbs_avg_turnaround_time_report(startdate, enddate)
 
     pending, tt_new, tt_notified, tt_updated, tt_unprocessed, tt_pending = r.dbsr_pending_results_report(startdate, enddate, district)
+
+    pending_data = r.dbsr_pending_results(startdate, enddate, district)
+
+    pending_results_table = PendingResultsTable(pending_data)
 
     districts = DISTRICTS
 
@@ -133,6 +141,8 @@ def malawi_reports(request, location=None):
          'percent_negative_district': percent_negative_district,
          'percent_rejected_district': percent_rejected_district,
          'total_dbs': total_dbs,
+         'tested_retrieved_table': tested_retrieved_table,
+         'pending_results_table': pending_results_table,
      }, context_instance=RequestContext(request))
 
 

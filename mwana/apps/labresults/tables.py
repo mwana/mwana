@@ -103,3 +103,28 @@ class EIDDistrictSummaryTable(TableReport):
         attrs = {'class': "table table-striped table-bordered table-condensed",
                  'id': "district-summary"}
         order_by = ('d_district',)
+
+class TestedRetrievedTable(tables.Table):
+    district = tables.Column(order_by=("district", "facility"))
+    facility = tables.Column()
+    positive = tables.Column()
+    negative = tables.Column()
+    rejected = tables.Column()
+    tested = tables.Column()
+    verified = tables.Column()
+    received = tables.Column()
+
+    class Meta:
+        attrs = {"class": "table table-striped table-bordered table-condensed"}
+
+class PendingResultsTable(tables.Table):
+    district = tables.Column()
+    facility = tables.Column()
+    new = tables.Column()
+    notified = tables.Column()
+    updated = tables.Column()
+    unprocessed = tables.Column()
+    total_pending = tables.Column()
+
+    class Meta:
+        attrs = {"class": "table table-striped table-bordered table-condensed"}
