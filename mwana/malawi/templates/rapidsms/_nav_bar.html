@@ -23,6 +23,7 @@
         <a tabindex="-1" href="#">Monitor</a>
         <ul class="dropdown-menu">
           <li><a href="{% url 'monitor_sample_list' %}">Sample Audit Trail</a></li>
+          <li><a href="{% url 'eid_confirmations' %}">EID Confirmations</a></li>
           <li><a href="{% url 'monitor_result_delivery' %}">Sample Delivery</a></li>
         </ul>
     </li>
@@ -42,7 +43,7 @@
     <li><a href="{% url 'appointments_list' %}">Appointments</a></li>
     <li><a href="{% url 'traces_list' %}">Traces</a></li>
     <li><a href="{% url 'reminders_list' %}">Reminders</a></li>
-    <li><a href="{% url 'eid_list' %}">EID</a></li>
+{% comment %}    <li><a href="{% url 'eid_list' %}">EID</a></li> {% endcomment %}
   </ul>
 </li>
 <!-- <li class="dropdown">
