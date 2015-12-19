@@ -145,12 +145,9 @@ class Result(models.Model):
         return req_id.replace('-', '')
 
     def save(self, *args, **kwargs):
-        if self.requisition_id:
-            self.requisition_id_search =\
-                Result.clean_req_id(self.requisition_id)
-        elif self.clinic_care_no:
-            self.requisition_id_search =\
-                Result.clean_req_id(self.clinic_care_no)
+        ids = [self.requisition_id, self.clinic_care_no]
+        active_id = max(ids, key=len)
+        self.requisition_id_search = Result.clean_req_id(active_id)
         super(Result, self).save(*args, **kwargs)
 
     class Meta:
