@@ -308,3 +308,25 @@ class ClinicsNotSendingDBS(models.Model):
     class Meta:
         verbose_name_plural = "Clinics Not Sending DBS Alerts"
 
+class Coverage(models.Model):
+    location = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)}, unique=True, null=True, blank=True)
+    raw_district_text = models.CharField(max_length=50)
+    raw_facility_text = models.CharField(max_length=100)
+    supported = models.NullBooleanField()
+    number_of_active_staff = models.PositiveIntegerField(null=True, blank=True)
+    number_of_active_cba = models.PositiveIntegerField(null=True, blank=True)
+    matched = models.BooleanField(default=False)
+    site_category = models.CharField(max_length=100, null=True, blank=True)
+    district_category = models.CharField(max_length=100, null=True, blank=True)
+    partner = models.CharField(max_length=100, null=True, blank=True)
+
+
+    def __unicode__(self):
+        return "%s" % self.raw_facility_text
+
+    def save(self, *args, **kwargs):
+        self.matched = bool(self.location)
+        super(Coverage, self).save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ("raw_district_text", "raw_facility_text")

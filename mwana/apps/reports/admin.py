@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.reports.models import Coverage
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.models import ResultsForFollowup
 
@@ -301,3 +302,17 @@ class ResultsForFollowupAdmin(admin.ModelAdmin):
     date_hierarchy = 'processed_on'
 
 admin.site.register(ResultsForFollowup, ResultsForFollowupAdmin)
+
+class CoverageAdmin(admin.ModelAdmin):
+    list_display = ('location', 'raw_district_text', 'raw_facility_text', 'supported', 'number_of_active_staff', 'number_of_active_cba', 'mwana_district', 'partner', 'site_category', 'matched')
+    list_filter = ('supported',  'matched', 'partner', 'site_category', 'raw_district_text', 'raw_facility_text','number_of_active_staff', 'number_of_active_cba')
+    search_fields = ('location__name', 'location__slug', 'raw_district_text', 'raw_facility_text', 'number_of_active_staff', 'number_of_active_cba')
+    #list_editable = ('supported', 'matched')
+
+    def mwana_district(self, obj):
+        if obj.location:
+            return obj.location.parent
+
+        return None
+
+admin.site.register(Coverage, CoverageAdmin)
