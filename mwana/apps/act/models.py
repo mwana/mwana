@@ -4,6 +4,7 @@ from rapidsms.models import Connection
 from django.db import models
 from mwana.apps.locations.models import Location
 
+
 class Payload(models.Model):
     """a raw incoming data payload"""
 
@@ -78,7 +79,7 @@ class Client(models.Model):
         return self.alias
 
 
-class CHA(models.Model):
+class CHW(models.Model):
     name = models.CharField(max_length=255)
     national_id = models.CharField(max_length=255, unique=True)
     address = models.TextField(null=True, blank=True)
@@ -108,7 +109,7 @@ class Appointment(models.Model):
     )
 
     client = models.ForeignKey(Client)
-    cha_responsible = models.ForeignKey(CHA, null=True, blank=True)
+    cha_responsible = models.ForeignKey(CHW, null=True, blank=True)
     type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10)
     date = models.DateField(help_text="Date when client should go to clinic for this appointment")
     status = models.CharField(choices=APPOINTMENT_STATUS, max_length=10, default='pending')

@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.act.models import VerifiedNumber
 from mwana.apps.act.models import Client
-from mwana.apps.act.models import CHA
+from mwana.apps.act.models import CHW
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
@@ -26,8 +26,8 @@ class ActYesHandler(KeywordHandler):
         verified.verified = True
         verified.save()
 
-        if CHA.objects.filter(phone__endswith=short_phone_number):
-            for rec in CHA.objects.filter(phone__endswith=short_phone_number):
+        if CHW.objects.filter(phone__endswith=short_phone_number):
+            for rec in CHW.objects.filter(phone__endswith=short_phone_number):
                 rec.phone_verified = True
                 rec.save()
 

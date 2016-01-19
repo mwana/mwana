@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from mwana.apps.act.models import VerifiedNumber
-from mwana.apps.act.models import CHA
+from mwana.apps.act.models import CHW
 from mwana.apps.act.models import Client
 from mwana.apps.act.models import Appointment
 from mwana.apps.act.models import SentReminder
@@ -24,7 +24,7 @@ class CHAAdmin(admin.ModelAdmin):
     list_filter = ('phone_verified', 'location', 'clinic_code_unrec')
     search_fields = ('name', 'national_id', 'address', 'location__name', 'location__slug', 'clinic_code_unrec', 'phone', 'phone_verified', 'uuid')
     list_editable = ['phone_verified']
-admin.site.register(CHA, CHAAdmin)
+admin.site.register(CHW, CHAAdmin)
 
 
 class AppointmentAdmin(admin.ModelAdmin):

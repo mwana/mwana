@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.forms import ModelForm
 from django.db import transaction
 
-from mwana.apps.act.models import CHA
+from mwana.apps.act.models import CHW
 from mwana.apps.act.models import Client
 from mwana.apps.act.models import Payload
 from mwana.decorators import has_perm_or_basicauth
@@ -239,8 +239,8 @@ def accept_chw_record(record, payload):
     old_record = None
     if uuid:
         try:
-            old_record = CHA.objects.get(uuid=uuid)
-        except CHA.DoesNotExist:
+            old_record = CHW.objects.get(uuid=uuid)
+        except CHW.DoesNotExist:
             pass
 
     def cant_save(message):
@@ -279,7 +279,7 @@ def accept_chw_record(record, payload):
     }
 
     #need to keep old record 'pristine' so we can check which fields have changed
-    old_record_copy = CHA.objects.get(uuid=uuid) if old_record else None
+    old_record_copy = CHW.objects.get(uuid=uuid) if old_record else None
     f_cha = CHAForm(record_fields, instance=old_record_copy)
     if f_cha.is_valid():
         new_record = f_cha.save(commit=False)
@@ -331,8 +331,8 @@ def accept_appointment_record(record, payload):
         cant_save('Unrecognized client uuid %s' % client_uuid)
         return False
     try:
-        cha_obj = CHA.objects.get(uuid=cha_uuid)
-    except CHA.DoesNotExist:
+        cha_obj = CHW.objects.get(uuid=cha_uuid)
+    except CHW.DoesNotExist:
         logger.warning('CHA uuid %s is not a recognized CHA' % cha_uuid)
         cha_obj = None
 
@@ -380,7 +380,7 @@ class ClientForm(ModelForm):
 
 class CHAForm(ModelForm):
     class Meta:
-        model = CHA
+        model = CHW
 
 
 class AppointmentForm(ModelForm):
