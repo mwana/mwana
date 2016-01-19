@@ -56,7 +56,7 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             +260977600123     > birth 34553 maria
-            +260977600123     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2014
+            +260977600123     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2016
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -66,18 +66,18 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            +260977600123     > birth 1/1/2014 maria
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1 1 2014 laura
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1-1-2014 anna
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1.1.2014 michelle
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1. 1. 2014 anne
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 01012014 heidi
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2014. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1/1/2016 maria
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1 1 2016 laura
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1-1-2016 anna
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1.1.2016 michelle
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1. 1. 2016 anne
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 01012016 heidi
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2016. You will be notified when it is time for his or her next appointment at the clinic.
             +260977600123     > birth 1/1 rachel
             +260977600123     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             +260977600123     > birth 1 1 nancy
@@ -97,7 +97,7 @@ class EventRegistration(TestScript):
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
-            self.assertEqual(patient_event.date, datetime.date(2014, 1, 1))
+            self.assertEqual(patient_event.date, datetime.date(2016, 1, 1))
             self.assertEqual(patient_event.event.slug, "birth")
 
     def testTooOldDate(self):
@@ -106,7 +106,7 @@ class EventRegistration(TestScript):
         script = """
             +260977600123     > birth 1/1/1213 maria
             +260977600123     < Sorry, make sure you enter the year correctly. 1213 is too old. We are in {year}.
-        """.format(year=datetime.today().year)
+        """.format(year=datetime.date.today().year)
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(0, patients.count())
