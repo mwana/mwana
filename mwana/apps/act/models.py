@@ -67,7 +67,7 @@ class Client(models.Model):
     sex = models.CharField(max_length=1, choices=GENDER_CHOICES)
     address = models.TextField(null=True, blank=True)
     short_address = models.TextField(null=True, blank=True)
-    can_receive_messages = models.NullBooleanField()
+    can_receive_messages = models.NullBooleanField()  # Client consented to receiving SMS messages
     location = models.ForeignKey(Location, null=True, blank=True)
     clinic_code_unrec = models.CharField(max_length=10, null=True, blank=True)
     zone = models.CharField(max_length=20, null=True, blank=True)
@@ -77,6 +77,9 @@ class Client(models.Model):
 
     def __unicode__(self):
         return self.alias
+
+    def is_eligible_for_messaging(self):
+        return self.can_receive_messages and self.phone_verified and self.phone_verified
 
 
 class CHW(models.Model):
@@ -92,17 +95,18 @@ class CHW(models.Model):
     def __unicode__(self):
         return self.name
 
-
+LAB_TYPE = 'lab'
+PHARMACY_TYPE = 'pharmacy'
 APPOINTMENT_TYPES = (
-    ('lab', 'Lab Visit'),
-    ('pharmacy', 'Pharmacy Visit')
+    (LAB_TYPE, 'Lab Visit'),
+    (PHARMACY_TYPE, 'Pharmacy Visit')
 )
 
 
 class Appointment(models.Model):
     APPOINTMENT_STATUS = (
         ('pending', 'Pending'),
-        ('attendend', 'Attended'),
+        ('attended', 'Attended'),
         ('notified', 'Notified'),
         ('missed', 'Missed'),
         ('canceled', 'Canceled'), 
@@ -120,6 +124,14 @@ class Appointment(models.Model):
     def __unicode__(self):
         return "%s on %s for %s" % (self.client, self.date, self.type)
 
+    @classmethod
+    def get_lab_type(cls):
+        return LAB_TYPE
+
+    @classmethod
+    def get_pharmacy_type(cls):
+        return PHARMACY_TYPE
+
 
 class VerifiedNumber(models.Model):
     number = models.CharField(max_length=13)
@@ -135,7 +147,7 @@ class ReminderDay(models.Model):
     days = models.PositiveSmallIntegerField(help_text='Number of days before appointment date when reminder is sent')
 
     def __unicode__(self):
-        return "%s %s" % (self.appointment_type, self.days)
+        return "%s at %s days" % (self.get_appointment_type_display(), self.days)
 
     class Meta:
         unique_together = (('appointment_type', 'days',),)
@@ -149,6 +161,9 @@ class SentReminder(models.Model):
     def __unicode__(self):
         return "%s Reminder for appointment %s on %s" % (self.reminder_type, self.appointment, self.date_logged)
 
+    class Meta:
+        unique_together = ('appointment', 'reminder_type')
+
 
 class RemindersSwitch(models.Model):
     """
@@ -156,6 +171,7 @@ class RemindersSwitch(models.Model):
     """
     can_send_reminders = models.BooleanField(default=True)
     logged_on = models.DateField(auto_now=True)
+    singleton_lock = models.SmallIntegerField(choices=((1, 'lock'),), default=1, unique=True, null=False, blank=False)
 
     def __unicode__(self):
         return "%s send reminders" % ("Can" if self.can_send_reminders else "Can NOT")

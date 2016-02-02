@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.act.models import RemindersSwitch
 from mwana.apps.act.models import VerifiedNumber
 from mwana.apps.act.models import CHW
 from mwana.apps.act.models import Client
@@ -8,6 +9,7 @@ from mwana.apps.act.models import SentReminder
 from mwana.apps.act.models import ReminderDay
 from mwana.apps.act.models import Payload
 from django.contrib import admin
+
 
 class ClientAdmin(admin.ModelAdmin):
     list_display = ('national_id', 'name', 'alias', 'dob', 'sex', 'address', 'short_address', 'can_receive_messages', 'location', 'clinic_code_unrec', 'zone', 'phone', 'phone_verified', 'uuid')
@@ -35,6 +37,7 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 admin.site.register(Appointment, AppointmentAdmin)
 
+
 class ReminderDayAdmin(admin.ModelAdmin):
     list_display = ('appointment_type', 'days')
     #list_filter = ('appointment_type', 'days')
@@ -42,13 +45,15 @@ class ReminderDayAdmin(admin.ModelAdmin):
 
 admin.site.register(ReminderDay, ReminderDayAdmin)
 
+
 class SentReminderAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'reminder_type', 'date_logged')
-    #list_filter = ('appointment', 'reminder_type', 'date_logged')
+    list_filter = ('reminder_type', 'date_logged')
     #search_fields = ('appointment', 'reminder_type', 'date_logged')
     date_hierarchy = 'date_logged'
 
 admin.site.register(SentReminder, SentReminderAdmin)
+
 
 class PayloadAdmin(admin.ModelAdmin):
     list_display = ('incoming_date', 'auth_user', 'version', 'source',
@@ -68,3 +73,12 @@ class VerifiedNumberAdmin(admin.ModelAdmin):
     list_editable = ['verified']
 
 admin.site.register(VerifiedNumber, VerifiedNumberAdmin)
+
+
+class RemindersSwitchAdmin(admin.ModelAdmin):
+    list_display = ('logged_on', 'can_send_reminders',  'singleton_lock')
+    #list_filter = ('can_send_reminders', 'logged_on', 'singleton_lock')
+    #search_fields = ('can_send_reminders', 'logged_on', 'singleton_lock')
+    list_editable = ['can_send_reminders']
+
+admin.site.register(RemindersSwitch, RemindersSwitchAdmin)
