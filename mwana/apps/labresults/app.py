@@ -95,7 +95,7 @@ class App(rapidsms.apps.base.AppBase):
                 # valid keyword for another app.
                 message.possible_bad_pin = True
 
-        # Finally, check if our mocker wants to do anything with this message, 
+        # Finally, check if our mocker wants to do anything with this message,
         # and notify the router if so.
         elif self.mocker.handle(message):
             return True
@@ -121,6 +121,7 @@ class App(rapidsms.apps.base.AppBase):
                 message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
                                 collector=self.last_collectors[clinic])
             return True
+        return self.mocker.default(message)
 
     def send_results_after_pin(self, message):
         """
@@ -143,8 +144,8 @@ class App(rapidsms.apps.base.AppBase):
             #            self.waiting_for_pin.pop(message.connection)
             self.pop_pending_connection(message.connection)
 
-            # remove pending contacts for this clinic and notify them it 
-            # was taken care of 
+            # remove pending contacts for this clinic and notify them it
+            # was taken care of
             clinic_connections = [contact.default_connection for contact in \
                                   Contact.active.filter \
                                           (Q(location=clinic) | Q(location__parent=clinic))]
@@ -337,7 +338,7 @@ class App(rapidsms.apps.base.AppBase):
 
     def notify_clinic_of_changed_records(self, clinic):
         """
-        Notifies clinic of the new status for changed results. 
+        Notifies clinic of the new status for changed results.
         """
         changed_results = []
         updated_results = self._updated_results(clinic)
@@ -419,7 +420,7 @@ class App(rapidsms.apps.base.AppBase):
 
     def results_avail_messages(self, clinic, results):
         '''
-        Returns clinic workers registered to receive results notification at this clinic. 
+        Returns clinic workers registered to receive results notification at this clinic.
         '''
         contacts = \
             Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
@@ -453,4 +454,3 @@ class App(rapidsms.apps.base.AppBase):
 def days_ago(d):
     return (date.today() - d).days
 
-    
