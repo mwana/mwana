@@ -121,7 +121,6 @@ class App(rapidsms.apps.base.AppBase):
                 message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
                                 collector=self.last_collectors[clinic])
             return True
-        return self.mocker.default(message)
 
     def send_results_after_pin(self, message):
         """
@@ -426,7 +425,7 @@ class App(rapidsms.apps.base.AppBase):
             Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
                                   Q(types=const.get_clinic_worker_type())).distinct()
         if not contacts:
-            self.warning("No contacts registered to receiver results at %s! "
+            self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
 
