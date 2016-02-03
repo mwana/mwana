@@ -27,4 +27,5 @@ urlpatterns = patterns('',
     # global project URLs:
     # putting this at the bottom allows overidding global patterns as necessary
     (r'^', include('mwana.urls')),
+    (r'^exportjson/', include('mwana.apps.export.urls')),
 )

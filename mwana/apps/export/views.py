@@ -4,20 +4,22 @@ import psycopg2
 from mwana import localsettings as settings
 from django.http import HttpResponse
 import json
-from mwana.apps.locations.models import Location
-from collections import OrderedDict
+
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
 
 
 def get_turnaround(request):
-    '''
+    """
     key_value = ""
     if ((request.method == 'GET') and ('key_value' in request.GET)):
         key_value = request.GET['key_value']
-    '''
+    """
+    #  TODO: consider using connection from django.db
     connection = psycopg2.connect(host=settings.DATABASES['default']['HOST'], database=settings.DATABASES['default']['NAME'],\
                     user=settings.DATABASES['default']['USER'], password=settings.DATABASES['default']['PASSWORD'])
-    
-    districts = Location.objects.filter().distinct()
     
     site_info_req = OrderedDict()
 
@@ -26,8 +28,6 @@ def get_turnaround(request):
         cursor.execute(SQL_QUERY_SELECT) 
         site_info_req = dictfetchall(cursor)
 
-    except:
-        log = "oops...", sys.exc_info()
     finally:
         connection.close()
         return HttpResponse(json.dumps(site_info_req))   
