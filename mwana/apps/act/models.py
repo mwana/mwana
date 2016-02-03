@@ -74,12 +74,13 @@ class Client(models.Model):
     phone = models.CharField(max_length=13, null=True, blank=True)
     phone_verified = models.NullBooleanField(null=True, blank=True, default=False)
     uuid = models.CharField(max_length=255, unique=True)
+    connection = models.ForeignKey(Connection, null=True, blank=True)
 
     def __unicode__(self):
         return self.alias
 
     def is_eligible_for_messaging(self):
-        return self.can_receive_messages and self.phone_verified and self.phone_verified
+        return self.can_receive_messages and self.phone_verified and self.connection
 
 
 class CHW(models.Model):
@@ -91,6 +92,7 @@ class CHW(models.Model):
     phone = models.CharField(max_length=13, null=True, blank=True)
     phone_verified = models.NullBooleanField(null=True, blank=True, default=False)
     uuid = models.CharField(max_length=255, unique=True)
+    connection = models.ForeignKey(Connection, null=True, blank=True)
 
     def __unicode__(self):
         return self.name
@@ -145,6 +147,7 @@ class ReminderDay(models.Model):
     #TODO: in case the period for collection of drugs has been reduced, ensure only valid reminders go
     appointment_type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10)
     days = models.PositiveSmallIntegerField(help_text='Number of days before appointment date when reminder is sent')
+    activated = models.BooleanField(default=True)
 
     def __unicode__(self):
         return "%s at %s days" % (self.get_appointment_type_display(), self.days)
@@ -156,13 +159,14 @@ class ReminderDay(models.Model):
 class SentReminder(models.Model):
     appointment = models.ForeignKey(Appointment)
     reminder_type = models.ForeignKey(ReminderDay)
+    phone = models.CharField(max_length=13)
     date_logged = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "%s Reminder for appointment %s on %s" % (self.reminder_type, self.appointment, self.date_logged)
 
     class Meta:
-        unique_together = ('appointment', 'reminder_type')
+        unique_together = ('appointment', 'reminder_type', 'phone')
 
 
 class RemindersSwitch(models.Model):

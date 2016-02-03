@@ -110,25 +110,26 @@ def send_notifications(router):
 
             client = appointment.client
             chw = appointment.cha_responsible
+            print "Is client eligible", client.is_eligible_for_messaging()
             if client.is_eligible_for_messaging():
-                conn = Connection.objects.get(identity__endswith=client.phone)
+                conn = client.connection
                 if conn:
                     template = CLIENT_LAB_MESSAGE if appointment.type == appointment.get_lab_type() else CLIENT_PHARMACY_MESSAGE
                     OutgoingMessage(connection=conn, template=template,
                                     date=appointment.date.strftime('%d/%m/%Y')).send()
-                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type)
+                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=client.phone)
                 else:
                     logging.error(
                         "Failed to send message to client %s with phone %s. No matching connection object found" % (
                             client.alias, client.phone))
 
             if chw and chw.phone_verified:
-                chw_conn = Connection.objects.get(identity__endswith=chw.phone)
+                chw_conn = chw.connection
                 if chw_conn:
                     OutgoingMessage(connection=conn, template=CHW_MESSAGE, name=chw.name, client=client.alias,
                                     visit_type=appointment.get_type_display(),
                                     date=appointment.date.strftime('%d/%m/%Y')).send()
-                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type)
+                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=chw.phone)
                 else:
                     logging.error(
                         "Failed to send message to CHW %s with phone %s. No matching connection object found" % (

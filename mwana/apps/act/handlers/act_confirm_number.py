@@ -29,11 +29,13 @@ class ActYesHandler(KeywordHandler):
         if CHW.objects.filter(phone__endswith=short_phone_number):
             for rec in CHW.objects.filter(phone__endswith=short_phone_number):
                 rec.phone_verified = True
+                rec.connection = self.msg.connection
                 rec.save()
 
         if Client.objects.filter(phone__endswith=short_phone_number):
             for rec in Client.objects.filter(phone__endswith=short_phone_number):
                 rec.phone_verified = True
+                rec.connection = self.msg.connection
                 rec.save()
 
         self.respond("Thank you")
