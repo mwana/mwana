@@ -32,10 +32,10 @@ INSTALLED_APPS.append("mwana.apps.webusers")
 INSTALLED_APPS.append("mwana.apps.graphs")
 INSTALLED_APPS.append("mwana.apps.surveillance")
 INSTALLED_APPS.append("mwana.apps.zm_languages")
-INSTALLED_APPS.append("mwana.apps.reminders.experimental")
-INSTALLED_APPS.append("mwana.apps.errorhandling")
-#INSTALLED_APPS.append("mwana.apps.labtests")
+INSTALLED_APPS.append("mwana.apps.labtests")
 INSTALLED_APPS.append("mwana.apps.act")
+#INSTALLED_APPS.append("mwana.apps.reminders.experimental")
+INSTALLED_APPS.append("mwana.apps.errorhandling")
 
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
@@ -97,7 +97,13 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 
-ADH_LAB_NAME = "ADH DNA-PCR LAB"
+LABS = {"lusaka/kalingalinga": "Kal. DNA-PCR LAB",
+        "ndola/arthur-davison": "ADH DNA-PCR LAB",
+        "lusaka/uth": "UTH DNA-PCR LAB",
+        "livingstone/general": "LGH DNA-PCR LAB",
+        "chipata/cgh": "CGH DNA-PCR LAB",
+}
+ADH_LAB_NAME = "DNA-PCR LAB"
 
 SESSION_COOKIE_AGE = 3600 # 1 hour
 
