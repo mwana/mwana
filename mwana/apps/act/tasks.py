@@ -35,31 +35,36 @@ def send_notifications(router):
         # @type reminder_type ReminderDay
         for appointment in appointments.filter(type=reminder_type.appointment_type).filter(
                 date__gte=few_days_before_apnt_date).filter(date__lte=appointment_date):
-            if act.SentReminder.objects.filter(appointment=appointment, reminder_type=reminder_type).exists():
-                continue
 
             client = appointment.client
             chw = appointment.cha_responsible
 
             if client.is_eligible_for_messaging():
                 conn = client.connection
+                if act.SentReminder.objects.filter(appointment=appointment, reminder_type=reminder_type,
+                                                   phone=client.phone, visit_date=appointment.date).exists():
+                    continue
                 if conn:
                     template = CLIENT_LAB_MESSAGE if appointment.type == appointment.get_lab_type() else CLIENT_PHARMACY_MESSAGE
                     OutgoingMessage(connection=conn, template=template,
                                     date=appointment.date.strftime('%d/%m/%Y')).send()
-                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=client.phone)
+                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=client.phone, visit_date=appointment.date)
                 else:
                     logging.error(
                         "Failed to send message to client %s with phone %s. No matching connection object found" % (
                             client.alias, client.phone))
 
             if chw and chw.phone_verified:
+                if act.SentReminder.objects.filter(appointment=appointment, reminder_type=reminder_type,
+                                                   phone=chw.phone, visit_date=appointment.date).exists():
+                    continue
                 chw_conn = chw.connection
                 if chw_conn:
                     OutgoingMessage(connection=chw_conn, template=CHW_MESSAGE, name=chw.name, client=client.alias,
                                     visit_type=appointment.get_type_display(),
                                     date=appointment.date.strftime('%d/%m/%Y')).send()
-                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=chw.phone)
+                    act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type,
+                                                           phone=chw.phone, visit_date=appointment.date)
                 else:
                     logging.error(
                         "Failed to send message to CHW %s with phone %s. No matching connection object found" % (

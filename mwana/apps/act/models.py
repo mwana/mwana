@@ -161,6 +161,7 @@ class SentReminder(models.Model):
     reminder_type = models.ForeignKey(ReminderDay)
     phone = models.CharField(max_length=13)
     date_logged = models.DateTimeField(auto_now_add=True)
+    visit_date = models.DateField()  # If appointment date is updated reminder has to be sent again
 
     def __unicode__(self):
         return "%s Reminder for appointment %s on %s" % (self.reminder_type, self.appointment, self.date_logged)

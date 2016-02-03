@@ -222,6 +222,8 @@ def accept_client_record(record, payload):
             new_record.phone_verified = False
         if new_record.phone and len(new_record.phone) in [10, 13]:
             new_record.phone_verified =  VerifiedNumber.objects.filter(number__endswith=new_record.phone).exists()
+        if old_record and old_record.connection and new_record.phone in old_record.connection.identity:
+            new_record.connection = old_record.connection
         new_record.save()
     else:
         cant_save('validation errors in record: %s' % str(f_client.errors))
@@ -288,6 +290,8 @@ def accept_chw_record(record, payload):
             new_record.phone_verified = False
         if new_record.phone and len(new_record.phone) in [10, 13]:
             new_record.phone_verified =  VerifiedNumber.objects.filter(number__endswith=new_record.phone).exists()
+        if old_record and old_record.connection and new_record.phone in old_record.connection.identity:
+            new_record.connection = old_record.connection
         new_record.save()
     else:
         cant_save('validation errors in record: %s' % str(f_cha.errors))
