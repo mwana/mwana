@@ -11,7 +11,6 @@ from django.db.models import Q
 from mwana.apps.alerts.labresultsalerts.alert import Alert
 from mwana.apps.alerts.models import Hub
 from mwana.apps.alerts.models import Lab
-from mwana.apps.labresults.handlers.results import ResultsHandler
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
@@ -334,15 +333,27 @@ class Alerter:
     def set_district_last_received_dbs(self):
         # uses raw sql for performance reasons
         ids = self._get_reporting_ids()
+        district_ids = self._get_district_reporting_ids()
+        
         sql = '''
-        SELECT district.id, max(entered_on) as entered_on FROM labresults_result
-        join locations_location as clinic on clinic.id = labresults_result.clinic_id
-        join locations_location as district on district.id = clinic.parent_id
-        WHERE entered_on is not null
-        and clinic_id in (''' + ids + ''')
-        GROUP BY district.id;
-        '''
-       
+            SELECT id, max(entered_on) FROM(
+            SELECT district.id, max(entered_on) as entered_on FROM labresults_result
+            join locations_location as clinic on clinic.id = labresults_result.clinic_id
+            join locations_location as district on district.id = clinic.parent_id
+            WHERE entered_on is not null
+            and clinic_id in (''' + ids + ''')
+            GROUP BY district.id
+
+            UNION ALL
+
+            SELECT district.id, max(date)::date as entered_on FROM hub_workflow_hubsamplenotification
+            join locations_location as clinic on clinic.id = hub_workflow_hubsamplenotification.lab_id
+            join locations_location as district on district.id = clinic.parent_id
+            and district.id in (''' + district_ids + ''')
+            GROUP BY district.id
+            ) a
+            GROUP BY id;
+       '''
         cursor = connection.cursor()
         cursor.execute(sql)
 
@@ -498,15 +509,12 @@ class Alerter:
         self.not_sending_dbs_alerts.append(Alert(type, message, culprit,
                                            days_late, sort_field, level, extra))
 
-    def get_hub_name(self, location):
+    def get_hub_name(self, district):
         try:
-            return Location.objects.filter(contact__types=get_hub_worker_type()).distinct().get(parent=location).name
-        except:
-            try:
-                return Hub.objects.get(district=location).name
-            except Hub.DoesNotExist:
-                return "(Unkown hub)"
-
+            return Hub.objects.get(district=district).name
+        except Hub.DoesNotExist:
+            return ','.join(loc.name for loc in Location.objects.filter(contact__types=get_hub_worker_type(), parent=district).distinct()) or "Unkown hub"
+                
     def get_hub_number(self, location):
         pipo = Contact.active.filter(types=get_hub_worker_type(), location__parent=location)
         if pipo:
@@ -515,7 +523,7 @@ class Alerter:
             return Hub.objects.exclude(Q(phone=None) | Q(phone='')).\
         get(district=location).phone
         except Hub.DoesNotExist:
-            return "(Unkown number)"
+            return "Unkown number"
 
     def get_lab_number(self, lab):
         try:
@@ -620,4 +628,11 @@ class Alerter:
         if not ids:
             ids = '-1'
             
+        return ids
+
+    def _get_district_reporting_ids(self):
+        ids = ", ".join("%s" % loc.id for loc in get_distinct_parents(self.get_facilities_for_reporting()))
+        if not ids:
+            ids = '-1'
+
         return ids

@@ -9,7 +9,6 @@ from mwana.const import get_hub_worker_type
 from mwana.util import get_clinic_or_default
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from rapidsms.messages import OutgoingMessage
-from rapidsms.models import Connection
 from rapidsms.models import Contact
 
 UNGREGISTERED = "Sorry, you must be registered with Results160 to report DBS samples sent. If you think this message is a mistake, respond with keyword 'HELP'"

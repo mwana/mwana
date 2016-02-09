@@ -13,7 +13,7 @@ class HubSampleNotification(models.Model):
     """
 
     contact  = models.ForeignKey(Contact, blank=True, null=True, related_name='sender')
-    lab = models.ForeignKey(Location)
+    lab = models.ForeignKey(Location, verbose_name="Hub")
     count    = models.PositiveIntegerField()
     count_in_text = models.CharField(max_length=160, null=True, blank=True)
     date     = models.DateTimeField(default=datetime.now)
