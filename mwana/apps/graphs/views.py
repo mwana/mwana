@@ -214,6 +214,35 @@ def monthly_turnaround_trends(request):
                               }, context_instance=RequestContext(request)
                               )
 
+def dbs_testing_trends(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+
+    service = GraphServive()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_dbs_testing_trends(start_date, end_date,
+                                                              rpt_provinces
+                                                              , rpt_districts,
+                                                              rpt_facilities)
+
+    for k, v in sorted(data.items()):
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/messages.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly DBS Testing Trends'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Days'",
+                              "report_data": report_data,
+                              "skip_total": True,
+                              }, context_instance=RequestContext(request)
+                              )
+
 def monthly_results_retrival_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
