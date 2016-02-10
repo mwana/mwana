@@ -320,8 +320,7 @@ class GraphServive:
 
             #Processing Time
             tt_res = results.filter(entered_on__year=my_date.year,
-                                    entered_on__month=my_date.month).filter(
-                                    entered_on__lte=F('processed_on')
+                                    entered_on__month=my_date.month
                                     ).count()
 
             data['2. Received at Lab'].append(tt_res)
