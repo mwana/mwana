@@ -84,7 +84,7 @@ class SMSAlertsSetUp(TestScript):
 
 
 class TestSendingSMSAlerts(SMSAlertsSetUp):
-
+# TODO: Make tests more comprehensive
 
     def testClinicsNotRetrievingResultsAlerts(self):
 
@@ -97,9 +97,9 @@ class TestSendingSMSAlerts(SMSAlertsSetUp):
         self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central "
                                        "Clinic. Please see https://mwana.moh.gov.zm/alerts for details")
         self.stopRouter()
+        self.fail("TODO: Tests to be more comprehensive")
 
     def testHubsNotSendingDbsAlerts(self):
-
         time.sleep(.1)
         self.startRouter()
         smstasks.send_hubs_not_sending_dbs_alerts(self.router)
@@ -109,6 +109,7 @@ class TestSendingSMSAlerts(SMSAlertsSetUp):
         self.assertEqual(msgs[0].text, "The Mansa District district hub (Unkown hub) has not sent samples to Unkown lab"
                                        " in over 11 days. Please see https://mwana.moh.gov.zm/alerts for details")
         self.stopRouter()
+        self.fail("TODO: Tests to be more comprehensive")
 
     def testClinicsNotSendingDbsAlerts(self):
 

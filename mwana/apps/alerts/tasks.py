@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_hub_worker_type
+from mwana.apps.labresults.models import Result
 from mwana.apps.alerts.labresultsalerts.alert import Alert
 from datetime import date
 from datetime import datetime
@@ -92,31 +94,12 @@ def send_clinics_not_sending_dbs_alerts(router):
         msg = "ALERT! %s, Clinics haven't sent DBS to hub: %s." % (dho.name, ", ".\
                                                                   join(clinic.name for clinic in my_clinics))
         process_msg_for_dho(dho, "W", Alert.CLINIC_NOT_USING_SYSTEM, yesterday, msg)
-        
+
+
 def send_hubs_not_sending_dbs_alerts(router):
-    logger.info('notifying DHOs of district hubs not sending DBS samples to lab')
-    init_varibles()
-
-    hub_sent_dbs_referal_date = \
-    date(today.year, today.month, today.day)-timedelta(days=DISTICT_TRANSPORT_DAYS)
-
-    for dho in dhos:
-        try:
-            last_retrieved = Result.objects.filter(clinic__parent=location).exclude(result_sent_date=None).order_by("-result_sent_date")[0].result_sent_date.date()
-        except:
-            last_retrieved = date(1900, 1, 1)
-        if last_retrieved >= hub_sent_dbs_referal_date:
-            continue     
-        dist = dho.location
-        msg = ("The %s district hub (%s) has not "
-               "sent samples to %s in over %s "
-               "days." %
-               (dist.name,
-               get_hub_name(dist),
-               get_lab_name(dist),
-               DISTICT_TRANSPORT_DAYS-1)
-               )
-        process_msg_for_dho(dho, "W", Alert.DISTRICT_NOT_SENDING_DBS, yesterday, msg)
+    # Removed buggy code that.
+    # TODO: implement correct code
+    pass
 
 def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
 
