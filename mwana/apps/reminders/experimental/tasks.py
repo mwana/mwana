@@ -32,7 +32,7 @@ def send_notifications_to_clinic(router):
     this_week_start = week_start(today)
     this_weekend = weekend(today)
 
-    for location in Location.objects.filter(supported__supported=True):
+    for location in Location.objects.filter(supportedlocation__supported=True):
         if SentNotificationToClinic.objects.filter(location=location,
                                                    date_logged__gte=this_week_start):
             continue
