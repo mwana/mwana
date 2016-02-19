@@ -18,5 +18,5 @@ class App(rapidsms.apps.base.AppBase):
         
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=[7, 9], minutes=[51],
-                                     days_of_week=[0, 1, 2, 3, 4])
+#        EventSchedule.objects.create(callback=callback, hours=[7, 9], minutes=[51],
+#                                     days_of_week=[0, 1, 2, 3, 4])
