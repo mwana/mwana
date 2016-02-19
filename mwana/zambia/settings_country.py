@@ -34,6 +34,7 @@ INSTALLED_APPS.append("mwana.apps.surveillance")
 INSTALLED_APPS.append("mwana.apps.zm_languages")
 INSTALLED_APPS.append("mwana.apps.labtests")
 INSTALLED_APPS.append("mwana.apps.act")
+#INSTALLED_APPS.append("mwana.apps.vaccination")
 #INSTALLED_APPS.append("mwana.apps.reminders.experimental")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.export")
@@ -49,7 +50,7 @@ EMAIL_SUBJECT_PREFIX = '[Mwana] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
-
+DEFAULT_RESPONSE = "It seems something went wrong. Respond with HELP to get assistance."
 
 TIME_ZONE = 'Africa/Lusaka'
 
