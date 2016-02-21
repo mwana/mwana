@@ -14,21 +14,23 @@ make_new.short_description = "Mark selected results as new"
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
-                    'result', 'collected_on', 'entered_on', 'processed_on',
-                    'arrival_date', 'result_sent_date', 'notification_status',
-                    'old_value', 'verified',)
-    list_filter = ('result', 'notification_status', 'verified', 'record_change',
-                   'result_sent_date', 'collected_on',  'entered_on',
-                   'processed_on', 'clinic',)
-    search_fields = ('sample_id','requisition_id', 'payload__source')
+    list_display = ('requisition_id', 'payload', 'clinic', 'clinic_code_unrec',
+                    'result', 'result_unit', 'processed_on', 'notification_status', 'sex',
+                    'result_sent_date', 'phone', 'guspec', 'province', 'district', 'constit',
+                    'ward', 'csa', 'sea')
+    list_filter = ('processed_on', 'notification_status', 'sex',
+                   'result_sent_date', 'phone', 'guspec', 'province', 'district', 'clinic',
+                   'constit', 'ward', 'csa', 'sea')
+    search_fields = ('requisition_id', 'clinic__name', 'clinic__slug', 'result',
+                     'phone', 'guspec', )
     date_hierarchy = 'result_sent_date'
+
     actions = [make_new, make_obsolete]
 admin.site.register(Result, ResultAdmin)
 
 
 class LabLogAdmin(admin.ModelAdmin):
-    list_display = ('timestamp', 'message', 'level', 'line','source',)
+    list_display = ('timestamp', 'message', 'level', 'line', 'source', )
     list_filter = ('timestamp', 'level')
     search_fields = ('message', 'payload__source')
 
@@ -42,8 +44,8 @@ class PayloadAdmin(admin.ModelAdmin):
     list_display = ('incoming_date', 'auth_user', 'version', 'source',
                     'client_timestamp', 'info', 'parsed_json',
                     'validated_schema')
-    list_filter = ('incoming_date',  'source', 'version',
-                   'parsed_json', 'validated_schema',)
-    search_fields = ('raw',)    
+    list_filter = ('incoming_date', 'source', 'version',
+                   'parsed_json', 'validated_schema', )
+    search_fields = ('raw', )
 
 admin.site.register(Payload, PayloadAdmin)

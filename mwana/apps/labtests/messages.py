@@ -5,6 +5,7 @@ from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s viral load test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+PARTICIPANT_RESULTS_READY = "Your appointment is due at %(clinic)s. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore"
 NO_RESULTS        = "Hello %(name)s. There are no new viral load test results for %(clinic)s right now. We'll let you know as soon as more results are available."
 BAD_PIN           = "Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'"
 SELF_COLLECTED    = "Hi %(name)s. It looks like you already collected your viral load results. To check for new results reply with keyword 'VL'"

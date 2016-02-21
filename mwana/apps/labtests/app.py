@@ -1,4 +1,6 @@
+from mwana.apps.labtests.messages import PARTICIPANT_RESULTS_READY
 import logging
+from mwana.apps.labtests.models import PreferredBackend
 import mwana.apps.labresults.config as config
 import mwana.const as const
 import rapidsms
@@ -13,7 +15,8 @@ from mwana.apps.labresults.util import is_eligible_for_results
 from mwana.util import get_clinic_or_default
 from rapidsms.contrib.scheduler.models import EventSchedule
 from rapidsms.messages import OutgoingMessage
-from rapidsms.models import Connection
+from rapidsms.contrib.messagelog.models import Message
+from rapidsms.models import Connection, Backend
 from rapidsms.models import Contact
 
 logger = logging.getLogger(__name__)
@@ -145,6 +148,13 @@ class App(rapidsms.apps.base.AppBase):
                 msg = msgcls(connection, resp)
                 msg.send()
 
+        for res in results:
+            if not res.phone:
+                continue
+            conn = self._get_participant_connection(res.phone)
+            if conn:
+                msgcls(conn, PARTICIPANT_RESULTS_READY, clinic=res.clinic.name).send()
+
         for r in results:
             r.notification_status = 'sent'
             r.result_sent_date = datetime.now()
@@ -176,7 +186,7 @@ class App(rapidsms.apps.base.AppBase):
         #                               {'hours': [11], 'minutes': [30],
         #                                'days_of_week': [0, 1, 2, 3, 4]})
         schedule = self._get_schedule(callback.split('.')[-1],
-                                      {'hours': range(24), 'minutes': range(60),
+                                      {'hours': [9, 15], 'minutes': [30],
                                        'days_of_week': [0, 1, 2, 3, 4, 5, 6]})
         EventSchedule.objects.create(callback=callback, **schedule)
 
@@ -278,7 +288,26 @@ class App(rapidsms.apps.base.AppBase):
             return None
 
     def send_messages(self, messages):
-        for msg in messages:  msg.send()
+        for msg in messages:
+            msg.send()
+
+    def _get_participant_connection(self, phone):
+        backend = Backend.objects.get(name__in=["message_tester", "mockbackend"])
+        conn = None
+        if settings.ON_LIVE_SERVER:
+            phone_part = phone[:6]
+            backends = PreferredBackend.objects.filter(phone_first_part=phone_part)
+            if backends:
+                conn, _ = Connection.objects.get_or_create(backend=backends[0], identity=phone)
+            else:
+                msgs = Message.objects.filter(direction='I', connection__identity__startswith=phone_part).order_by('-date')
+                if msgs:
+                    backend = [0].connection.backend
+                    PreferredBackend.objects.get_or_create(phone_first_part=phone_part, backend=backend)
+                    conn, _ = Connection.objects.get_or_create(backend=backend, identity=phone)
+        else:
+            conn,_ = Connection.objects.get_or_create(backend=backend, identity=phone)
+        return conn
 
 
 def days_ago(d):
