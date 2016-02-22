@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, date
 import logging
 
 from django.http import HttpResponse
-from django.views.decorators.http import require_http_methods, require_GET
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.forms import ModelForm
 from django.db import transaction
@@ -12,12 +12,19 @@ from django.db import transaction
 from mwana.apps.labtests import models as labtests
 from mwana.decorators import has_perm_or_basicauth
 from mwana.apps.locations.models import Location
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-
 
 
 logger = logging.getLogger('mwana.apps.labtests.views')
+
+
+def valid_phone(val):
+    stripped = val.strip()
+    if len(stripped) == 13 and stripped[:6] in ['+26097', '+26096', '+26095']:
+        return stripped
+    if len(stripped) == 10 and stripped[:3] in ['097', '096', '095']:
+        return '+26' + stripped
+    if len(stripped) == 9 and stripped[:2] in ['97', '96', '95']:
+        return '+260' + stripped    
 
 def json_datetime (val):
     """convert a datetime value from the json into a python datetime"""
@@ -40,7 +47,7 @@ def json_timestamp (val):
 
     try:
         dt = datetime.strptime(val[:-4], '%Y-%m-%d %H:%M:%S')
-        return dt + timedelta(microseconds=1000*int(val[-3:]))
+        return dt + timedelta(microseconds=1000 * int(val[-3:]))
     except:
         return None
 
@@ -95,6 +102,7 @@ def accept_results(request):
         transaction.savepoint_rollback(sid)
     return HttpResponse('SUCCESS')
 
+
 def process_payload(payload, data=None):
     """
     Attempts to parse a payload's raw content and create the corresponding
@@ -138,12 +146,15 @@ def process_payload(payload, data=None):
         logger.error('errors in json schema for payload %d: %s' %
                      (payload.id, str(f_payload.errors)))
 
+
 def normalize_clinic_id (zpct_id):
     """turn the ZPCT clinic id format into the MoH clinic id format"""
     return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
 
+
 def map_result (verbose_result):
     return verbose_result
+
 
 def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
@@ -159,7 +170,7 @@ def accept_record (record, payload):
         except labtests.Result.DoesNotExist:
             pass
 
-    def cant_save (message):
+    def cant_save(message):
         message = 'cannot save record: ' + message
         if old_record:
             message += '; original record [%s] untouched' % sample_id
@@ -211,7 +222,15 @@ def accept_record (record, payload):
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
-    }
+        'phone': dictval(record, 'con1nm', valid_phone),
+        'province': dictval(record, 'province'),
+        'district': dictval(record, 'district'),
+        'constit': dictval(record, 'constit'),
+        'ward': dictval(record, 'ward'),
+        'csa': dictval(record, 'csa'),
+        'sea': dictval(record, 'sea'),
+
+        }
 
     #need to keep old record 'pristine' so we can check which fields have changed
     old_record_copy = labtests.Result.objects.get(sample_id=sample_id) if old_record else None

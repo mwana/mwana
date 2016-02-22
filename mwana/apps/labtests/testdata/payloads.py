@@ -2,7 +2,6 @@
 """
 Defines some test data payloads
 """
-
 #a simple raw json payload with three client results records
 INITIAL_PAYLOAD = {
     "source": "ndola/arthur-davison",
@@ -69,7 +68,8 @@ INITIAL_PAYLOAD = {
             "pat_id": "212987",
             "dob": "2010-01-12",
             "proc_on": "2010-04-17",
-            "unit": 'p/mL'
+            "unit": 'p/mL',
+            "phone": '+260977212112'
         }
     ]
 }
