@@ -131,6 +131,7 @@ class LabtestsSetUp(TestScript):
         self.assertEqual("4567", contact.pin)
         self.assertTrue(const.get_clinic_worker_type() in contact.types.all())
 
+
 class TestApp(LabtestsSetUp):
         
     def testUnregisteredCheck(self):
@@ -166,6 +167,7 @@ class TestApp(LabtestsSetUp):
             clinic_worker < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             clinic_worker > %(code)s
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
+            +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
                 clinic_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again %(name)s!
             """ % {"name": self.contact.name, "count": 3, "code": "4567",
             "id1": res1.requisition_id, "res1": res1.get_result_text(),
@@ -195,7 +197,8 @@ class TestApp(LabtestsSetUp):
             script = """
                 clinic_worker > %(code)s
             clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
-                clinic_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again %(name)s!
+            +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again %(name)s!
             """ % {"name": self.contact.name, "code": "4567",
             "id1": res1.requisition_id, "res1": res1.get_result_text(),
             "id2": res2.requisition_id, "res2": res2.get_result_text(),
@@ -210,7 +213,7 @@ class TestApp(LabtestsSetUp):
     def _bootstrap_results(self):
         results = labtests.Result.objects.all()
         res1 = results.create(requisition_id="%s-0001-1" % self.clinic.slug,
-                              clinic=self.clinic, result="100",result_unit = 'm/L',
+                              clinic=self.clinic, result="100",result_unit='m/L',
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today() - datetime.timedelta(days=3),
                               notification_status="new", sample_id='1')
@@ -225,7 +228,8 @@ class TestApp(LabtestsSetUp):
                               clinic=self.clinic, result="300", result_unit = 'm/L',
                               collected_on=datetime.datetime.today(),
                               entered_on=datetime.datetime.today(),
-                              notification_status="new", sample_id='3')
+                              notification_status="new", sample_id='3',
+                              phone='+260977212112')
 
         return [res1, res2, res3]
 
@@ -324,7 +328,14 @@ class TestResultsAcceptor(LabtestsSetUp):
                     "proc_on": "2010-04-13", 
                     "child_age": 8,
                     "result_unit": "p/ML",
-                    "verified": True
+                    "verified": True,
+                    "guspec": 'DLU0026F-02',
+                    'province': '2',
+                    'district': '207',
+                    'constit': '29',
+                    'ward': '3',
+                    'csa': '8',
+                    'sea': '2',
                 }, 
                 {
                     "coll_on": "2010-04-08", 
@@ -369,6 +380,7 @@ class TestResultsAcceptor(LabtestsSetUp):
         self.assertEqual(result2.payload, payload)
         self.assertTrue(result1.verified)
         self.assertFalse(result2.verified)
+        self.assertEqual(labtests.Result.objects.filter(sample_id="10-09998", province='2', district='207', constit='29', ward='3', csa='8', sea='2').count(), 1)
 
 
     def test_payload_missing_fac(self):
@@ -468,7 +480,8 @@ class TestResultsAcceptor(LabtestsSetUp):
 
         # The number of results records should be 3
         self.assertEqual(labtests.Result.objects.count(), 3)
-        self.assertEqual(labtests.Result.objects.filter(clinic=self.clinic).count(), 3, ",".join(res.clinic.slug for res in Result.objects.all()))
+        self.assertEqual(labtests.Result.objects.exclude(phone=None).exclude(phone='').count(), 1)
+        self.assertEqual(labtests.Result.objects.filter(clinic=self.clinic).count(), 3)
 
         time.sleep(.2)
         # start router and send a notification
@@ -489,13 +502,6 @@ class TestResultsAcceptor(LabtestsSetUp):
         "Following message was not sent:\n%s" % msg2)
         self.assertEqual(2,len(msgs))
 
-        # let clinic worker also become a cba, let other worker leave
-        script = """
-            clinic_worker > join agent 402029 3 John Banda
-            clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
-            """
-        
-        self.runScript(script)
         time.sleep(.1)
         # start router and send a notification
         self.startRouter()
@@ -522,6 +528,7 @@ class TestResultsAcceptor(LabtestsSetUp):
         script = """
             other_worker > 6789
             other_worker < Thank you! Here are your results: **** 1029023412;200p/mL. **** 78;100p/mL. **** 212987;300p/mL
+            +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
             clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again Mary Phiri!
 """
