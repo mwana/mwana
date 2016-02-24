@@ -194,17 +194,18 @@ class TestApp(LabtestsSetUp):
                     for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
 
-            script = """
-                clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
-            +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
-            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again %(name)s!
-            """ % {"name": self.contact.name, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_text(),
-            "id2": res2.requisition_id, "res2": res2.get_result_text(),
-            "id3": res3.requisition_id, "res3": res3.get_result_text()}
+        script = """
+            clinic_worker > %(code)s
+        clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
+        +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
+        clinic_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again %(name)s!
+        """ % {"name": self.contact.name, "code": "4567",
+        "id1": res1.requisition_id, "res1": res1.get_result_text(),
+        "id2": res2.requisition_id, "res2": res2.get_result_text(),
+        "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
+        self.assertEqual(Result.objects.filter(participant_informed=1).count(), 1)
         
         for res in [labtests.Result.objects.get(id=res.id)
                     for res in [res1, res2, res3]]:
@@ -380,7 +381,7 @@ class TestResultsAcceptor(LabtestsSetUp):
         self.assertEqual(result2.payload, payload)
         self.assertTrue(result1.verified)
         self.assertFalse(result2.verified)
-        self.assertEqual(labtests.Result.objects.filter(sample_id="10-09998", province='2', district='207', constit='29', ward='3', csa='8', sea='2').count(), 1)
+        self.assertEqual(labtests.Result.objects.filter(sample_id="10-09998", guspec="DLU0026F-02", province='2', district='207', constit='29', ward='3', csa='8', sea='2').count(), 1)
 
 
     def test_payload_missing_fac(self):

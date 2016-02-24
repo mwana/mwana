@@ -43,3 +43,15 @@ def send_results_notification(router):
         logger.info('not notifying any clinics of new results because '
                     'settings.SEND_LIVE_LABRESULTS is False')
 
+
+@transaction.commit_manually
+def process_outstanding_payloads(router):
+    logger.debug('in process_outstanding_payloads')
+    for payload in Payload.objects.filter(parsed_json=True,
+                                          validated_schema=False):
+        try:
+            process_payload(payload)
+            transaction.commit()
+        except:
+            logger.exception('failed to parse payload %s' % payload)
+            transaction.rollback()

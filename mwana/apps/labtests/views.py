@@ -222,6 +222,7 @@ def accept_record (record, payload):
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
+        'guspec': dictval(record, 'guspec'),
         'phone': dictval(record, 'con1nm', valid_phone),
         'province': dictval(record, 'province'),
         'district': dictval(record, 'district'),

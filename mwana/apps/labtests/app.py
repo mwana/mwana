@@ -38,6 +38,7 @@ class App(rapidsms.apps.base.AppBase):
     def start(self):
         """Configure your app in the start phase."""
         self.schedule_notification_task()
+        self.schedule_process_payloads_tasks()
 
     def pop_pending_connection(self, connection):
         self.waiting_for_pin.pop(connection)
@@ -120,7 +121,9 @@ class App(rapidsms.apps.base.AppBase):
             self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
 
-            #            self.waiting_for_pin.pop(message.connection)
+            for res in self.waiting_for_pin[message.connection]:
+                res.who_retrieved = message.connection.contact
+                res.save()
             self.pop_pending_connection(message.connection)
 
             # remove pending contacts for this clinic and notify them it 
@@ -154,6 +157,9 @@ class App(rapidsms.apps.base.AppBase):
             conn = self._get_participant_connection(res.phone)
             if conn:
                 msgcls(conn, PARTICIPANT_RESULTS_READY, clinic=res.clinic.name).send()
+                res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
+                res.date_participant_notified = datetime.now()
+                res.save()
 
         for r in results:
             r.notification_status = 'sent'
@@ -214,6 +220,9 @@ class App(rapidsms.apps.base.AppBase):
                 self.send_messages(messages)
                 self._mark_results_pending(results, (msg.connection
                                                      for msg in messages))
+                for result in results:
+                    result.date_clinic_notified = datetime.now()
+                    result.save()
 
     def _result_verified(self):
         """

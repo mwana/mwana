@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from django.contrib.auth.models import User
 from django.db import models
-from rapidsms.models import Backend
+from rapidsms.models import Backend, Contact
 
 from mwana.apps.locations.models import Location
 
@@ -88,8 +88,10 @@ class Result(models.Model):
     ward = models.CharField(max_length=13, blank=True, null=True)
     csa = models.CharField(max_length=13, blank=True, null=True)
     sea = models.CharField(max_length=13, blank=True, null=True)
-
-
+    date_clinic_notified = models.DateTimeField(null=True, blank=True)
+    date_participant_notified = models.DateTimeField(null=True, blank=True)
+    who_retrieved = models.ForeignKey(Contact, null=True, blank=True)
+    participant_informed = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ('collected_on', 'requisition_id')
@@ -153,3 +155,24 @@ class LabLog(models.Model):
         return ('%s: %s> %s' % (self.line, self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                                 self.message if len(self.message) < 20 else (self.message[:17] + '...'))) \
             if not self.raw else 'parse error'
+
+
+class ViralLoadView(models.Model):
+    guspec = models.CharField(max_length=13, null=True, blank=True)
+    specimen_collection_date = models.DateField(null=True, blank=True)
+    facility_name = models.CharField(max_length=50, null=True, blank=True)
+    result = models.CharField(max_length=30, null=True, blank=True)
+    date_reached_moh = models.DateTimeField(null=True, blank=True)
+    date_facility_retrieved_result = models.DateTimeField(null=True, blank=True)
+    who_retrieved = models.CharField(max_length=30, null=True, blank=True)
+    date_sms_sent_to_participant = models.DateTimeField(null=True, blank=True)
+    number_of_times_sms_sent_to_participant = models.PositiveSmallIntegerField(null=True, blank=True)
+    data_source = models.CharField(max_length=50, null=True, blank=True)
+
+    def __unicode__(self):
+        return self.guspec
+
+    def save(self, force_insert=False, force_update=False, using=None):
+        return
+    
+

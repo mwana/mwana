@@ -6,6 +6,8 @@ Defines some test data payloads
 INITIAL_PAYLOAD = {
     "source": "ndola/arthur-davison",
     "now": "2010-04-22 10:30:00",
+    "version": "1.0",
+    "info": "sync",
     "logs": [
         {
             "msg": "booting daemon...",
@@ -69,7 +71,7 @@ INITIAL_PAYLOAD = {
             "dob": "2010-01-12",
             "proc_on": "2010-04-17",
             "unit": 'p/mL',
-            "phone": '+260977212112'
+            "con1nm": '+260977212112'
         }
     ]
 }

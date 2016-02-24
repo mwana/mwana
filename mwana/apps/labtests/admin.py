@@ -49,3 +49,15 @@ class PayloadAdmin(admin.ModelAdmin):
     search_fields = ('raw', )
 
 admin.site.register(Payload, PayloadAdmin)
+
+
+class ViralLoadViewAdmin(admin.ModelAdmin):
+    list_display = ('id', 'guspec', 'specimen_collection_date', 'facility_name', 'result', 'date_reached_moh', 'date_facility_retrieved_result', 'who_retrieved', 'date_sms_sent_to_participant', 'data_source', 'number_of_times_sms_sent_to_participant')
+    list_filter = ('data_source', 'specimen_collection_date',   'date_reached_moh', 'date_facility_retrieved_result',
+                   'who_retrieved', 'date_sms_sent_to_participant', 'number_of_times_sms_sent_to_participant',
+                   'facility_name',
+                   )
+    search_fields = ('guspec', 'specimen_collection_date', 'facility_name', 'result', 'date_reached_moh', 'date_facility_retrieved_result', 'who_retrieved', 'date_sms_sent_to_participant', 'number_of_times_sms_sent_to_participant', 'data_source')
+    date_hierarchy = 'date_reached_moh'
+
+admin.site.register(ViralLoadView, ViralLoadViewAdmin)
