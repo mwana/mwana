@@ -14,7 +14,7 @@ EMAIL_USE_TLS = True
 logger = logging.getLogger()
 
 gm = TlsSMTPHandler(("smtp.gmail.com", 587), EMAIL_HOST_USER,
-                    ['sinkalation@gmail.com', 'gurum3m@gmail.com'], 'Error encountered!',
+                    ['sinkalation@gmail.com'], 'Error encountered!',
                     (EMAIL_HOST_USER, EMAIL_PASSWORD))
 gm.setLevel(logging.ERROR)
 

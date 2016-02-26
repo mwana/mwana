@@ -111,8 +111,6 @@ RAPIDSMS_TABS = [
 ]
 
 
-# TODO: make a better default response, include other apps, and maybe 
-# this dynamic?
 DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are JOIN, AGENT, CHECK, RESULT, SENT, ALL, CBA, BIRTH and CLINIC. Respond with any keyword or HELP for more information."
 
 

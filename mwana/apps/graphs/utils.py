@@ -43,12 +43,44 @@ class GraphServive:
                 processing.append(float(row[2]))
                 delays.append(float(row[3]))
                 retrieving.append(float(row[4]))
-            if row[0] in category_names:
-                categories.append(str(row[0]))
-            elif row[-1] in category_names:
+            if row[-1] in category_names:
                 categories.append(str(row[-1]))
-
+            elif row[0] in category_names:
+                categories.append(str(row[0]))        
         return categories, transport, processing, delays, retrieving
+
+    def get_yearly_supported_sites(self):
+        """
+        Uses plain SQL for performance/simplicity reasons
+        """
+        sql = '''
+            select reminders."year", eid.eid_count, reminders.remindmi_count  FROM (SELECT extract(year FROM date_logged)::int AS "year",
+            count( DISTINCT clinic.id) as remindmi_count FROM reminders_patientevent
+            JOIN rapidsms_contact on rapidsms_contact.id = reminders_patientevent.patient_id
+            JOIN locations_location as "zone" on zone.id = rapidsms_contact.location_id
+            JOIN locations_location as "clinic" on clinic.id = zone.parent_id
+            GROUP BY "year") reminders
+
+            FULL JOIN (
+
+            SELECT extract(year FROM result_sent_date)::int AS "year",
+            count( DISTINCT clinic_id) AS "eid_count" FROM labresults_result
+            WHERE result_sent_date is NOT NULL
+            GROUP BY "year") eid on eid."year" = reminders."year"
+        '''
+        cursor = connection.cursor()
+        cursor.execute(sql)
+
+        rows = cursor.fetchall()        
+        time_ranges = []
+        
+        data = {"Results 160": [], "RemindMi": []}
+        for row in rows:
+            time_ranges.append(row[0])
+            data["Results 160"].append(int(row[1]) if row[1] else 0)
+            data["RemindMi"].append(int(row[2]) if row[2] else 0)
+
+        return time_ranges, data
 
     def get_lab_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
@@ -260,6 +292,50 @@ class GraphServive:
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
+        return month_ranges, data
+
+
+    def get_monthly_dbs_testing_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        trend_items = ['1. Collected at Facility', '2. Received at Lab',
+        '3. Tested at Lab']
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(trend_items):
+            data[item] = []
+
+        results = Result.objects.filter(clinic__in=facs)
+
+        month_ranges = []
+        while my_date <= end_date:           
+            tt_res = results.filter(collected_on__year=my_date.year,
+                                    collected_on__month=my_date.month).filter(
+                                    collected_on__lte=F('entered_on')
+                                    ).count()
+
+            data['1. Collected at Facility'].append(tt_res)
+
+            #Processing Time
+            tt_res = results.filter(entered_on__year=my_date.year,
+                                    entered_on__month=my_date.month
+                                    ).count()
+
+            data['2. Received at Lab'].append(tt_res)
+
+            #Processing Time
+            tt_res = results.filter(processed_on__year=my_date.year,
+                                    processed_on__month=my_date.month,
+                                    entered_on__lte=F('arrival_date')
+                                    ).count()
+
+            data['3. Tested at Lab'].append(tt_res)
+
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+            
         return month_ranges, data
 
     def get_monthly_results_retrival_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):

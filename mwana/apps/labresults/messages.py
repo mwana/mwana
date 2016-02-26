@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
-from datetime import date
+from mwana.apps.labresults.models import Result
+from datetime import date, timedelta
 from django.conf import settings
 from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
@@ -26,12 +27,13 @@ HUB_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords are RECEIVED and SENT. R
 CBA_DEFAULT_RESPONSE = _("Invalid Keyword. Valid keywords are BIRTH, MWANA, TOLD, CONFIRM, MSG CBA, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information.")
 DHO_DEFAULT_RESPONSE = "Invalid Keyword. Valid keywords MSG DHO, MSG CLINIC and MSG ALL. Respond with any keyword or HELP for more information."
 PHO_DEFAULT_RESPONSE = _("Sorry %s. Respond with keyword HELP for assistance.")
-UNREGISTERED_DEFAULT_RESPONSE = _("Invalid Keyword. Please send the keyword HELP if you need to be assisted.")
+UNREGISTERED_DEFAULT_RESPONSE = _("Please send the keyword HELP if you need to be assisted.")
 HUB_TRAINING_START_NOTIFICATION = "Hi %(hub_worker)s. Training is starting at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as training data"
 DHO_TRAINING_START_NOTIFICATION = "Hi %(contact)s. Training is starting at %(location)s, %(slug)s. Treat notifications you receive from this clinic today as training data"
 HUB_TRAINING_STOP_NOTIFICATION = "Hi %(hub_worker)s. Training has stopped at %(clinic)s, %(slug)s. Treat notifications you receive from this clinic as live data"
 
 TEST_TYPE = "HIV-DNAPCR Result"
+
 
 def urgent_requisitionid_update(result):
     """
@@ -44,6 +46,20 @@ def urgent_requisitionid_update(result):
             toreturn = True
     return toreturn
 
+
+def get_lab_name(result):
+    labs = {"lusaka/kalingalinga": "Kal. DNA-PCR LAB",
+            "ndola/arthur-davison": "ADH DNA-PCR LAB",
+            "lusaka/uth": "UTH DNA-PCR LAB",
+            "livingstone/general": "LGH DNA-PCR LAB"
+            }
+
+    if result.payload:
+        return labs.get(result.payload.source, settings.ADH_LAB_NAME)
+    else:
+        return settings.ADH_LAB_NAME
+
+
 def build_printer_results_messages(results):
     """
     From a list of lab results, build a list of messages reporting 
@@ -53,24 +69,34 @@ def build_printer_results_messages(results):
     # if messages are updates to requisition ids
     for res in results:
         if urgent_requisitionid_update(res):
-            msg = (CHANGED_PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "old_req_id":res.old_value.split(":")[0],
-                   "old_result":res.get_old_result_text(),
-                   "new_req_id":res.requisition_id,
-                   "new_result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            msg = (CHANGED_PRINTER_RESULTS % {"clinic": res.clinic.name,
+                   "old_req_id": res.old_value.split(":")[0],
+                   "old_result": res.get_old_result_text(),
+                   "new_req_id": res.requisition_id,
+                   "new_result": res.get_result_text(),
+                   "test_type": TEST_TYPE,
+                   "lab_name": get_lab_name(res),
+                   "sms_date": date.isoformat(date.today())})
         else:
-            msg = (PRINTER_RESULTS % {"clinic":res.clinic.name,
-                   "req_id":res.requisition_id,
-                   "result":res.get_result_text(),
-                   "test_type":TEST_TYPE,
-                   "lab_name":settings.ADH_LAB_NAME,
-                   "sms_date":date.isoformat(date.today())})
+            msg = (PRINTER_RESULTS % {"clinic": res.clinic.name,
+                   "req_id": res.requisition_id,
+                   "result": res.get_result_text(),
+                   "test_type": TEST_TYPE,
+                   "lab_name": get_lab_name(res),
+                   "sms_date": date.isoformat(date.today())})
         result_strings.append(msg)
                
     return result_strings
+
+
+def _duplicate_requisition_id(res):
+    results = Result.objects.filter(requisition_id=res.requisition_id, clinic=res.clinic)
+    same_testing_period = results.filter(processed_on__gte=res.processed_on - timedelta(days=366)).count() >= 2 \
+        if res.processed_on else False
+    same_collection_period = results.filter(collected_on__gte=res.collected_on - timedelta(days=366)).count() >= 2 \
+        if res.collected_on else False
+    return same_testing_period or same_collection_period
+
 
 def build_results_messages(results):
     """
@@ -87,6 +113,11 @@ def build_results_messages(results):
                                   res.get_old_result_text(),
                                   res.requisition_id,
                                   res.get_result_text()))
+        elif _duplicate_requisition_id(res):
+            result_strings.append("**** %s;%s collected on %s, tested on %s" %
+                                  (res.requisition_id, res.get_result_text(),
+                                  res.collected_on.strftime("%d %b %Y") if res.collected_on else "",
+                                  res.processed_on.strftime("%d %b %Y") if res.processed_on else ""))
         else:
             result_strings.append("**** %s;%s" % (res.requisition_id,
                                   res.get_result_text()))
@@ -122,4 +153,3 @@ def combine_to_length(list, delimiter=". ", length=None):
         else:
             return (msg, list[i:])
     return (msg, [])
- 

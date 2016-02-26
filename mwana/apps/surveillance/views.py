@@ -35,8 +35,10 @@ def htmltable_to_rows(html_table):
     # Had trouble having BeautifulSoup to work on local machine. table2CSV.js
     # had shortcomings
     to_return = []
-    a = html_table.replace('</td>', '|').replace('</th>', '|').replace('</tr>', '\n')    
+    a = html_table.replace('</td>', '|').replace('</th>', '|').replace('</tr>', 'mynewline')
+    a = re.sub(r"\s+", " ", a)
     c = re.sub('<.*?>', '', a)
+    c = c.replace('mynewline', '\n')
     for k, v in ht.name2codepoint.items():
         c = c.replace("&%s;" % k, unichr(int(v)))
     
@@ -51,9 +53,9 @@ def export_to_csv(request):
     response['Content-Disposition'] = 'attachment; filename="%s"' % file_name
 
     writer = csv.writer(response, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    
+
     for row in htmltable_to_rows(data):
-        writer.writerow(row)
+        writer.writerow([item.encode("UTF-8") for item in row])
         
     return response
 

@@ -119,10 +119,10 @@ msgstr ""
 
 #: .\apps\labresults\handlers\join.py:261
 msgid ""
-"To register as a Mobile agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> <YOUR "
+"To register as a Mobile agent, send JOIN CBA <CLINIC CODE> <ZONE #> <YOUR "
 "NAME>"
 msgstr ""
-"Kulilembya mutume: JOIN <CBA> <CLINIC CODE> <ZONE #> <YOUR "
+"Kulilembya mutume: JOIN CBA <CLINIC CODE> <ZONE #> <YOUR "
 "NAME>"
 
 #: .\apps\labresults\handlers\join.py:305
@@ -220,9 +220,9 @@ msgstr ""
 #: .\apps\reminders\app.py:162
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
-"MONTH YEAR, for example: 23 04 2010"
+"MONTH YEAR, for example: %(formatted_date)s"
 msgstr ""
-"Mundijatile, buzuba bwalubila. Ndakomba munjizye buzuba mbuli: DAY MONTH YEAR, mukozyano: 23 04 2010"
+"Mundijatile, buzuba bwalubila. Ndakomba munjizye buzuba mbuli: DAY MONTH YEAR, mukozyano: %(formatted_date)s"
 
 #: .\apps\reminders\app.py:171
 #, python-format

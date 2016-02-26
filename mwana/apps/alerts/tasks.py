@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_hub_worker_type
+from mwana.apps.labresults.models import Result
 from mwana.apps.alerts.labresultsalerts.alert import Alert
 from datetime import date
 from datetime import datetime
@@ -20,6 +22,16 @@ logger = logging.getLogger(__name__)
 RETRIEVING_DAYS = 3
 CLINIC_NOTIFICATION_DAYS = 14
 DISTICT_TRANSPORT_DAYS = 12
+
+WEB_ALERTS_REFERAL_MESSAGE = "Please see https://mwana.moh.gov.zm/alerts for details"
+MAX_MESSAGE_LENGTH = 160
+
+
+def _finalize_message(msg):
+    new_message = msg + ' ' + WEB_ALERTS_REFERAL_MESSAGE
+    if len(new_message) <= MAX_MESSAGE_LENGTH:
+        return new_message
+    return msg
 
 def init_varibles():
     global dhos
@@ -54,7 +66,7 @@ def send_clinics_not_retrieving_results_alerts(router):
                                              ).distinct()[:5]
         if not my_clinics:
             continue
-        msg = "ALERT! %s, Clinics haven't retrieved results: %s" % (dho.name, ", ".\
+        msg = "ALERT! %s, Clinics haven't retrieved results: %s." % (dho.name, ", ".\
                                                                     join(clinic.name for clinic in my_clinics))
 
         process_msg_for_dho(dho, "W", Alert.LONG_PENDING_RESULTS, yesterday, msg)
@@ -79,34 +91,15 @@ def send_clinics_not_sending_dbs_alerts(router):
         if not my_clinics:
             continue
         
-        msg = "ALERT! %s, Clinics haven't sent DBS to hub: %s" % (dho.name, ", ".\
+        msg = "ALERT! %s, Clinics haven't sent DBS to hub: %s." % (dho.name, ", ".\
                                                                   join(clinic.name for clinic in my_clinics))
         process_msg_for_dho(dho, "W", Alert.CLINIC_NOT_USING_SYSTEM, yesterday, msg)
-        
+
+
 def send_hubs_not_sending_dbs_alerts(router):
-    logger.info('notifying DHOs of district hubs not sending DBS samples to lab')
-    init_varibles()
-
-    hub_sent_dbs_referal_date = \
-    date(today.year, today.month, today.day)-timedelta(days=DISTICT_TRANSPORT_DAYS)
-
-    for dho in dhos:
-        try:
-            last_retrieved = Result.objects.filter(clinic__parent=location).exclude(result_sent_date=None).order_by("-result_sent_date")[0].result_sent_date.date()
-        except:
-            last_retrieved = date(1900, 1, 1)
-        if last_retrieved >= hub_sent_dbs_referal_date:
-            continue     
-        dist = dho.location
-        msg = ("The %s district hub (%s) has not "
-               "sent samples to %s in over %s "
-               "days." %
-               (dist.name,
-               get_hub_name(dist),
-               get_lab_name(dist),
-               DISTICT_TRANSPORT_DAYS-1)
-               )
-        process_msg_for_dho(dho, "W", Alert.DISTRICT_NOT_SENDING_DBS, yesterday, msg)
+    # Removed buggy code that.
+    # TODO: implement correct code
+    pass
 
 def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
 
@@ -119,7 +112,7 @@ def process_msg_for_dho(contact, report_type, alert_type, date_back, msg):
         logger.info('%s already notiffied of alert (%s)' % (contact.name, alert_type))
         return
 
-    OutgoingMessage(contact.default_connection, msg).send()
+    OutgoingMessage(contact.default_connection, _finalize_message(msg)).send()
     DhoSMSAlertNotification.objects.create(contact=contact, report_type=report_type,
                                            alert_type=alert_type,
                                            district=contact.location)

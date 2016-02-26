@@ -1,10 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
 
-Replace these with more appropriate tests for your application.
-"""
+#TODO : add tests to carter for the modification to notify hub workers and dho's
 
 from mwana.apps.training.models import Trained
 from mwana import const
@@ -17,7 +13,6 @@ from mwana.apps.training import tasks
 from mwana.apps.training.models import TrainingSession
 import time
 
-#TODO : add tests to carter for the modification to notify hyb workers and dho's
 
 class TestApp(TestScript):
     def setUp(self):
@@ -85,7 +80,7 @@ class TestApp(TestScript):
             tz > training start kdh
             ha < Training is starting at Kafue District Hospital, kdh. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Kafue District Hospital, kdh. Treat notifications you receive from this clinic as training data
-            tz < Thanks Trainer Zulu for your message that training is starting for Kafue District Hospital. At end of training please send TRAINING STOP
+            tz < Thanks Trainer Zulu for your message that training is starting for Kafue District Hospital. At end of training please send TRAINING STOP kdh
             tz < When the trainees finish the course tell them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba
             """
         self.runScript(script)
@@ -105,7 +100,7 @@ class TestApp(TestScript):
             tz > training start 403012
             ha < Training is starting at Central Clinic, 403012. Notification was sent by Trainer Zulu, tz
             hub_worker < Hi Hub Man. Training is starting at Central Clinic, 403012. Treat notifications you receive from this clinic as training data
-            tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP
+            tz < Thanks Trainer Zulu for your message that training is starting for Central Clinic. At end of training please send TRAINING STOP 403012
             tz < When the trainees finish the course tell them to state that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba
             """
         self.runScript(script)

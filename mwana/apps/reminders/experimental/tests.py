@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reminders.models import PatientEvent
 from mwana.apps.reminders.experimental.models import SentNotificationToClinic
 from datetime import date
 from datetime import timedelta
@@ -113,14 +114,82 @@ class MockReminders(TestScript):
             self.assertTrue(msg.text in expected_messages, "'%s' is not in expected messages" % msg.text)
 
         sent_notifications = SentNotificationToClinic.objects.all()
-        self.assertEqual(sent_notifications.count(), 4)# 1 four each appointment type for each clinic
+        self.assertEqual(sent_notifications.count(), 4)# 1 four each appointment type for each clinic, + 1 for total
         self.assertEqual(sent_notifications.filter(recipients=2).count(), 4)
         self.assertEqual(sent_notifications.filter(event_name='6 day', number=1).count(), 1)
         self.assertEqual(sent_notifications.filter(event_name='6 week', number=3).count(), 1)
         self.assertEqual(sent_notifications.filter(event_name='6 month', number=1).count(), 1)
 
+        #Only send once
         send_notifications_to_clinic(self.router)
         messages = self.receiveAllMessages()
         self.assertEqual(0, len(messages))
-        
+
+        # Test message for 1 mother with 6 day visit
+        PatientEvent.objects.all().delete()
+        SentNotificationToClinic.objects.all().delete()
+        self.assertEqual(0, PatientEvent.objects.all().count())
+
+        birth.patient_events.create(patient=patient1, cba_conn=cba1_conn,
+                                    date=this_week - timedelta(days=6))
+
+
+        send_notifications_to_clinic(self.router)
+        messages = self.receiveAllMessages()
+        expected_messages = \
+            ["Hello Suarez, 1 mother is due for her 6 day clinic visit this week."
+            ,"Hello Robben, 1 mother is due for her 6 day clinic visit this week."
+             ]
+        self.assertEqual(len(messages), len(expected_messages))
+        for msg in messages:
+            self.assertTrue(msg.text in expected_messages, "'%s' is not in expected messages" % msg.text)
+
+        sent_notifications = SentNotificationToClinic.objects.all()
+        self.assertEqual(sent_notifications.count(), 2)# 1 four each appointment type for each clinic, + 1 for total
+
+
+        # Test message for 1 mother with 6 week visit
+        PatientEvent.objects.all().delete()
+        SentNotificationToClinic.objects.all().delete()
+        self.assertEqual(0, PatientEvent.objects.all().count())
+
+        birth.patient_events.create(patient=patient1, cba_conn=cba1_conn,
+                                    date=this_week - timedelta(days=42))
+
+
+        send_notifications_to_clinic(self.router)
+        messages = self.receiveAllMessages()
+        expected_messages = \
+            ["Hello Suarez, 1 mother is due for her 6 week clinic visit this week."
+            ,"Hello Robben, 1 mother is due for her 6 week clinic visit this week."
+             ]
+        self.assertEqual(len(messages), len(expected_messages))
+        for msg in messages:
+            self.assertTrue(msg.text in expected_messages, "'%s' is not in expected messages" % msg.text)
+
+        sent_notifications = SentNotificationToClinic.objects.all()
+        self.assertEqual(sent_notifications.count(), 2)# 1 four each appointment type for each clinic, + 1 for total
+
+        # Test message for 1 mother with 6 month visit
+        PatientEvent.objects.all().delete()
+        SentNotificationToClinic.objects.all().delete()
+        self.assertEqual(0, PatientEvent.objects.all().count())
+
+        birth.patient_events.create(patient=patient1, cba_conn=cba1_conn,
+                                    date=this_week - timedelta(days=183))
+
+
+        send_notifications_to_clinic(self.router)
+        messages = self.receiveAllMessages()
+        expected_messages = \
+            ["Hello Suarez, 1 mother is due for her 6 month clinic visit this week."
+            ,"Hello Robben, 1 mother is due for her 6 month clinic visit this week."
+             ]
+        self.assertEqual(len(messages), len(expected_messages))
+        for msg in messages:
+            self.assertTrue(msg.text in expected_messages, "'%s' is not in expected messages" % msg.text)
+
+        sent_notifications = SentNotificationToClinic.objects.all()
+        self.assertEqual(sent_notifications.count(), 2)# 1 four each appointment type for each clinic, + 1 for total
+
         self.stopRouter()

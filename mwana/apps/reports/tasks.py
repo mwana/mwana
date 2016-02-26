@@ -20,6 +20,8 @@ from rapidsms.messages import OutgoingMessage
 from mwana.apps.reports.management.commands.build_messages_rpt import rebuild_messages_data
 from mwana.apps.reports.management.commands.build_messages_rpt import update_locations
 from mwana.apps.reports.management.commands.build_msg_by_backend_rpt import rebuild_messages_data as rebuild_msg_by_backend_data
+from mwana.apps.reports.management.commands.scaleup_update import update_scaleup_sites
+from mwana.apps.reports.management.commands.update_clinics_not_sending_dbs import update_clinics_not_sending_dbs
 from rapidsms.models import Contact
 logger = logging.getLogger(__name__)
 _ = lambda s: s
@@ -37,7 +39,7 @@ def send_dho_eid_and_birth_report(router):
         logger.warning('No district workers found in the system')
         return
     today = date.today()
-    month_ago = date(today.year, today.month, 1)-timedelta(days=1)
+    month_ago = date(today.year, today.month, 1) - timedelta(days=1)
     last_year = month_ago.year
     last_month = month_ago.month
     for worker in workers:
@@ -84,7 +86,7 @@ def send_pho_eid_and_birth_report(router):
         logger.warning('No province workers found in the system')
         return
     today = date.today()
-    month_ago = date(today.year, today.month, 1)-timedelta(days=1)
+    month_ago = date(today.year, today.month, 1) - timedelta(days=1)
     last_year = month_ago.year
     last_month = month_ago.month
     for worker in workers:
@@ -228,3 +230,13 @@ def build_messages_report(router):
 def build_msg_by_backend_rpt(router):
     logger.info('in build_msg_by_backend_rpt')
     rebuild_msg_by_backend_data()
+
+
+def build_scaleup_sites(router):
+    logger.info('in build_scaleup_sites')
+    update_scaleup_sites()
+
+
+def build_clinics_not_sending_dbs(router):
+    logger.info('in build_scaleup_sites')
+    update_clinics_not_sending_dbs()

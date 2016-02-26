@@ -260,6 +260,8 @@ def accept_record (record, payload):
         cant_save('sync_status not an allowed value')
         return False
     if new_record.result:
+        # @type new_record Result
+        if new_record.verified is None or new_record.verified == True:
             new_record.arrival_date = new_record.payload.incoming_date
     if not old_record:
         if rec_status == 'update':
@@ -289,8 +291,34 @@ def accept_record (record, payload):
                            (sample_id, old_record.requisition_id, new_record.requisition_id))
 
         #change to clinic
-        if old_record.notification_status in ('sent', 'notified') and old_record.clinic != new_record.clinic:
-            logger.warning('clinic id in record [%s] has changed (%s -> %s)! how do we handle this?' %
+        if old_record.notification_status == 'sent' and old_record.clinic != new_record.clinic:
+            same_result = (new_record.result == old_record.result)
+            same_patient_id = (new_record.requisition_id == old_record.requisition_id)
+            if same_patient_id and same_result:
+                new_record.record_change = 'loc_st'
+                new_record.old_value = "%s" % (old_record.clinic.id)
+                new_record.notification_status = 'new'
+                logger.error('clinic id in record [%s] has changed (%s:%s -> %s:%s)!' %
+                           (sample_id, old_record.clinic.slug, old_record.clinic.name, new_record.clinic.slug, new_record.clinic.name))
+            elif not same_patient_id:
+                new_record.record_change = 'loc_st'
+                new_record.old_value = "%s" % (old_record.clinic.id)
+                new_record.notification_status = 'new'
+                new_record.result_sent_date = None
+                logger.error('clinic & patient IDs in record [%s] have changed (%s:%s -> %s:%s) (%s -> %s)!' %
+                           (sample_id, old_record.clinic.slug, old_record.clinic.name,
+                           new_record.clinic.slug, new_record.clinic.name,
+                           old_record.requisition_id, new_record.requisition_id))
+            elif not same_result:
+                new_record.record_change = 'loc_st'
+                new_record.old_value = "%s" % (old_record.clinic.id)
+                new_record.notification_status = 'new'
+                logger.error('clinic & result in record [%s] have changed (%s:%s -> %s:%s) (%s -> %s)!' %
+                           (sample_id, old_record.clinic.slug, old_record.clinic.name,
+                           new_record.clinic.slug, new_record.clinic.name,
+                           old_record.result, new_record.result))
+        if old_record.notification_status == 'notified' and old_record.clinic != new_record.clinic:
+           logger.error('clinic id for notified sample in record [%s] has changed (%s -> %s)! how do we handle this?' %
                            (sample_id, old_record.clinic.slug, new_record.clinic.slug))
 
         #change to test result
@@ -298,13 +326,15 @@ def accept_record (record, payload):
             new_record.notification_status = 'new'   #sample was processed by lab
         elif old_record.notification_status == 'sent' and old_record.result != new_record.result:
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
-            new_record.notification_status = 'updated'
+            if not (new_record.record_change and new_record.record_change == 'loc_st'):
+                new_record.notification_status = 'updated'
         #what to do if result changes from a reportable status (+, -, rej) to unreportable (indet, blank)??
-            if old_record.result in 'PN' or new_record.result in 'PN':
+            if (old_record.result in 'PN' or new_record.result in 'PN') \
+            and (new_record.record_change == 'req_id' or (not new_record.record_change)):
                 if not new_record.record_change: #if requisition id hasn't changed
                     new_record.record_change = 'result'
                     new_record.old_value = old_record.result
-                else: #both requisition id and result have changed
+                elif new_record.record_change == 'req_id': #both requisition id and result have changed
                     new_record.record_change = 'both'
                     new_record.old_value = old_record.requisition_id + ":" + old_record.result
 

@@ -3,6 +3,16 @@ from django.contrib import admin
 from mwana.apps.labresults.models import *
 
 
+def make_obsolete(modeladmin, request, queryset):
+    queryset.update(notification_status='obsolete')
+make_obsolete.short_description = "Mark selected results as obsolete"
+
+
+def make_new(modeladmin, request, queryset):
+    queryset.update(notification_status='new')
+make_new.short_description = "Mark selected results as new"
+
+
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
                     'result', 'collected_on', 'entered_on', 'processed_on',
@@ -13,6 +23,7 @@ class ResultAdmin(admin.ModelAdmin):
                    'processed_on', 'clinic',)
     search_fields = ('sample_id','requisition_id', 'payload__source')
     date_hierarchy = 'result_sent_date'
+    actions = [make_new, make_obsolete]
 admin.site.register(Result, ResultAdmin)
 
 

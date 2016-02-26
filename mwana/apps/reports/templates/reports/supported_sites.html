@@ -104,38 +104,37 @@ You currently don't belong to any group for viewing reports. Contact the system 
     <form name="getValues" action="" method="GET">
 
         <h2>Supported Sites</h2>
-        <br>
-        {% if region_selectable %}
-        <p>Select Region: &nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Province&nbsp;: {% autoescape off %}
-            {{rpt_provinces}}
-            {% endautoescape %}&nbsp;
-            or District:{% autoescape off %}
-            {{rpt_districts}}
-            {% endautoescape %}&nbsp;
-            or Facility:{% autoescape off %}
-            {{rpt_facilities}}
-            {% endautoescape %}&nbsp;
-
-            {% if is_report_admin %}
-        <p>Select Implementer:
-            {% autoescape off %}
-            {{rpt_group}}
-            {% endautoescape %}
-            &nbsp;
-            {%endif%}
-            {%endif%}
-
-            &nbsp;&nbsp;&nbsp; <input type="submit" value="Ok" name="SubmitValues" />
-        <hr>
-        <div>
-
-
-            <h3>
-                Implementer:{{ implementer }}&nbsp;&nbsp;&nbsp;&nbsp;Province: {{ province }}&nbsp;
-                &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
-
-            </h3>
+        <table border="1" width="100%" id="input_parameters_table">
+                    <thead>
+                    <th>Province</th>
+                    <th>District</th>
+                    <th>Facility</th>
+                    <th>Implementer</th>
+                    <th></th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{% autoescape off %}
+                                {{rpt_provinces}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% autoescape off %}
+                                {{rpt_districts}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% autoescape off %}
+                                {{rpt_facilities}}
+                                {% endautoescape %}
+                            </td>
+                            <td>{% if is_report_admin %}
+                                {% autoescape off %}
+                                {{rpt_group}}
+                                {% endautoescape %}
+                                {%endif%}</td>
+                            <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+                        </tr>
+                    </tbody>
+                </table>
             <table border="1">
 
                 <tbody>

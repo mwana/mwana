@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.reports.webreports.models import ReportingGroup
 from datetime import datetime
 
 from django.shortcuts import render_to_response

@@ -4,12 +4,6 @@ import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
 
 
-# In RapidSMS, message translation is done in OutgoingMessage, so no need
-# to attempt the real translation here.  Use _ so that ./manage.py makemessages
-# finds our text.
-_ = lambda s: s
-
-
 class App(rapidsms.apps.base.AppBase):   
    
     def start(self):
@@ -24,5 +18,5 @@ class App(rapidsms.apps.base.AppBase):
         
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=range(24),
-                                     minutes=range(60))
+#        EventSchedule.objects.create(callback=callback, hours=[7, 9], minutes=[51],
+#                                     days_of_week=[0, 1, 2, 3, 4])

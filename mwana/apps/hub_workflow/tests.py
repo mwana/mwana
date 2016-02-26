@@ -75,6 +75,7 @@ class TestApp(LabresultsSetUp):
         self.runScript(script)
         
         self.assertEqual(1, HubSampleNotification.objects.all().count())
+        self.assertEqual(1, HubSampleNotification.objects.filter(lab=self.mansa_central).count())
         sample_notification = HubSampleNotification.objects.get(pk=1)
         self.assertEqual(6, sample_notification.count)
         self.assertEqual("Hubman Phiri", sample_notification.contact.name)

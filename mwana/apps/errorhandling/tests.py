@@ -139,7 +139,7 @@ class UnkownWorkerTestApp(TestsSetUp):
         # Error from unregistered user
         script = """
             unknown_worker > what is my name
-            unknown_worker < Invalid Keyword. Please send the keyword HELP if you need to be assisted.
+            unknown_worker < Please send the keyword HELP if you need to be assisted.
         """
         self.runScript(script)
 

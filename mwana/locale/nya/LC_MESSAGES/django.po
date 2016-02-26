@@ -1,7 +1,4 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# English to Nyanja Translation.
 #
 #, fuzzy
 msgid ""
@@ -21,12 +18,14 @@ msgid ""
 "To register as a RemindMi agent, send AGENT <CLINIC CODE> <ZONE #> <YOUR "
 "NAME>"
 msgstr ""
+"Kuti mulembetse kukhala wothandiza wa RemindMi, tumizani uthenga wakuki "
+"AGENT <CLINIC CODE> <ZONE #> <DZINA LANU>"
 
 #: .\apps\agents\handlers\agent.py:33 .\apps\agents\handlers\agent.py:36
 #: .\apps\labresults\handlers\join.py:215
 #: .\apps\labresults\handlers\join.py:218
 msgid "or"
-msgstr ""
+msgstr "kapena"
 
 #: .\apps\agents\handlers\agent.py:39 .\apps\labresults\handlers\join.py:221
 #, python-format
@@ -46,7 +45,7 @@ msgid ""
 "Hello %(name)s! You are already registered as a RemindMi Agent for zone %"
 "(zone)s of %(clinic)s."
 msgstr ""
-"Mooni %(name)s! Ndinu wolembetsedwa kudala ngati wothandiza wa RemindMi wa%"
+"Moni %(name)s! Ndinu wolembetsedwa kale ngati wothandiza wa RemindMi wa zone %"
 "(zone)s la %(clinic)s."
 
 #: .\apps\agents\handlers\agent.py:104 .\apps\labresults\handlers\join.py:307
@@ -56,6 +55,9 @@ msgid ""
 "(old_clinic)s. To leave your current clinic and join %(new_clinic)s, reply "
 "with LEAVE and then re-send your message."
 msgstr ""
+"Moni %(name)s! Ndinu wolembetsedwa kale ngati wothandiza wa RemindMi wa %"
+"(old_clinic)s. Kuti muchoke kuchipatala chakale ndi kulowa chatsopano "
+"%(new_clinic)s, tumani ndi liwu loti LEAVE ndi kutumiza uthenga wanu."
 
 #: .\apps\agents\handlers\agent.py:128 .\apps\labresults\handlers\join.py:335
 #, python-format
@@ -76,7 +78,7 @@ msgid ""
 "Sorry you're having trouble%(person)s. Your help request has been forwarded "
 "to a support team member and they will call you soon."
 msgstr ""
-"Pepani, muli ndi mabvuto%(person)s. Bvuto lanu lapatsidwa ku umodziwagulu "
+"Pepani, muli ndi mabvuto%(person)s. Bvuto lanu lapatsidwa kwa umodzi wa gulu "
 "lothandiza ndipo akuitaneni posachedwa"
 
 #: .\apps\labresults\messages.py:26
@@ -92,7 +94,7 @@ msgstr ""
 #: .\apps\labresults\messages.py:28
 #, python-format
 msgid "Sorry %s. Respond with keyword HELP for assistance."
-msgstr ""
+msgstr "Pepani %s. Yankhulani ndi liwu lonena HELP kuti mulandire thandizo."
 
 #: .\apps\labresults\messages.py:29
 msgid ""
@@ -117,9 +119,11 @@ msgstr ""
 
 #: .\apps\labresults\handlers\join.py:264
 msgid ""
-"To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> "
+"To register as a RemindMi agent, send JOIN CBA <CLINIC CODE> <ZONE #> "
 "<YOUR NAME>"
 msgstr ""
+"Kuti mulembetse kukhala wothandiza wa RemindMi, tumizani uthenga wakuti "
+"JOIN CBA <CLINIC CODE> <ZONE #> <DZINA LANU>"
 
 #: .\apps\labresults\handlers\join.py:342
 msgid "Please notify us next time there is a birth in your zone."
@@ -130,6 +134,8 @@ msgstr "Pepani mukatidziwitse kukabadwa mwana mumudzi mwanu."
 msgid ""
 "You have successfully unregistered, %(name)s. We're sorry to see you go."
 msgstr ""
+"Mwakwanitsa kuleka kukhala mtandizi wa RemindMi, %(name)s. Ndife achisoni "
+"kuona kuti mwapita"
 
 #: .\apps\labresults\handlers\leave.py:10
 msgid ""
@@ -157,7 +163,7 @@ msgid ""
 "Hi %(cba)s! If you know that %(patient)s has been to the clinic, please "
 "send: CONFIRM %(name)s"
 msgstr ""
-"Mooni %(name)s! Ngati mwasimikiza kuti %(mother)s anapita ku kiliniki, "
+"Moni %(name)s! Ngati mwasimikiza kuti %(mother)s anapita ku kiliniki, "
 "tumizani:CONFIRM %(mother)s"
 
 #: .\apps\patienttracing\handlers\confirm.py:37
@@ -188,10 +194,10 @@ msgstr ""
 #: .\apps\reminders\app.py:162
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
-"MONTH YEAR, for example: 23 04 2010"
+"MONTH YEAR, for example: %(formatted_date)s"
 msgstr ""
-"sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY, MONTH YEAR "
-"mwachisanzo: 23 04 2010."
+"Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY MONTH YEAR "
+"mwachisanzo: %(formatted_date)s."
 
 #: .\apps\reminders\app.py:171
 #, python-format
@@ -204,6 +210,8 @@ msgid ""
 "Sorry, make sure you enter the year correctly. %(date_entered)s is too old. "
 "We are in %(current_date)s."
 msgstr ""
+"Pepani, onetsetsani kuti mulowetse chaka choyenera. %(date_entered)s ndi chaka "
+"chakale. Chaka chomwe tilimo ndi %(current_date)s."
 
 #: .\apps\reminders\app.py:215 .\apps\reminders\app.py:241
 #, python-format
@@ -242,8 +250,8 @@ msgid ""
 "Hi %(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Mooni %(cba)s. Nthawi yaba %(patient)s yopita ku kiliniki pa "
-"%(type)s pa %(date)s yafika. Chonde akumbukiritseni kupita ku %(clinic)s, ndipo "
+"Moni %(cba)s. Nthawi ya %(patient)s yopita ku kiliniki pa "
+"%(type)s pa %(date)s yakwanira. Chonde akumbukiritseni kupita ku %(clinic)s, ndipo "
 "yankhulani ndi liwu la TOLD %(patient)s."
 
 #: .\apps\reminders\tasks.py:73
@@ -252,8 +260,8 @@ msgid ""
 "Hi%(cba)s.%(patient)s is due for %(type)s clinic visit on %(date)s.Please "
 "remind them to visit %(clinic)s, then reply with TOLD %(patient)s"
 msgstr ""
-"Mooni %(cba)s. Nthawi yaba %(patient)s yopita ku kiliniki pa "
-"%(type)s pa %(date)s yafika. Chonde akumbukiritseni kupita ku %(clinic)s, ndipo "
+"Moni%(cba)s. Nthawi ya %(patient)s yopita ku kiliniki pa "
+"%(type)s pa %(date)s yakwanira. Chonde akumbukiritseni kupita ku %(clinic)s, ndipo "
 "yankhulani ndi liwu la TOLD %(patient)s."
 
 #: .\apps\reminders\handlers\BirthNotice.py:38
@@ -305,7 +313,7 @@ msgid ""
 "Hello %(name)s. Remember to register births in your community and to remind "
 "mothers go to the clinic. Reminding mothers saves lives."
 msgstr ""
-"Mooni %(name)s. Kumbukirani kulemba kubadwa kwa ana konse mumudzi mwanu "
+"Moni %(name)s. Kumbukirani kulemba kubadwa kwa ana konse mumudzi mwanu "
 "ndipokuudza azimai kupita ku kiliniki. Kukumbutsa azimai kumapulumutsa myoyo."
 
 #: .\build\psycopg2\doc\src\tools\lib\dbapi_extension.py:34

@@ -84,7 +84,7 @@
 
             <h2>Send SMS Messages</h2>
             <br>
-            <table border="0"  bgcolor="#F8F8F8"  width="100%">
+            <table border="0"  bgcolor="#F8F8F8"  width="100%" {% ifequal confirmed "yes" %} hidden="yes"  {%  endifequal %}>
 
                 <tbody>
                 <thead>
@@ -112,20 +112,20 @@
                         {% endautoescape %}
                     </td>
                 </tr>
-                
-                <tr>                    
-                    
+
+                <tr>
+
                     <td style="border: 0px" colspan="4">[Optional] Phone Pattern:
                         <input type="text" name="phone_pattern" size="17" value="{{ phone_pattern }}">
                         &nbsp;E.g. +26097, +26096, +260966700345.
 
                     {% if is_report_admin %}
-                   
+
                     &nbsp;&nbsp;&nbsp;&nbsp;Implementer: {% autoescape off %}
                         {{rpt_group}}
                         {% endautoescape %}
-                    
-                    {%endif%}                    
+
+                    {%endif%}
                     </td>
                 </tr>
                 </tbody>
@@ -143,7 +143,10 @@
             <p/>
             <p>
             <div style="padding-left: 0.3125em; padding-left: 0">
-                <textarea id="message" maxlength="160" required="" name="message" rows="4" style="width: 99%;" cols="36" onkeypress="limitCharacters" onkeyup="showNumberOfCharactersTyped()">{{message}}</textarea>
+                <textarea id="message" maxlength="160" required="" name="message"
+                          rows="4" style="width: 99%;" cols="36" onkeypress="limitCharacters"
+                          onkeyup="showNumberOfCharactersTyped()"
+                          {% ifequal confirmed "yes" %} readonly="readonly"  {%  endifequal %}>{{message}}</textarea>
                 <div id="msgLenghthDiv"></div>
             </div>
 

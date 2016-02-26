@@ -29,47 +29,47 @@ from rapidsms.models import Contact
 
 logger = logging.getLogger(__name__)
 
-class App (rapidsms.apps.base.AppBase):
-    
-    # we store everyone who we think could be sending us a PIN for results 
+
+class App(rapidsms.apps.base.AppBase):
+    # we store everyone who we think could be sending us a PIN for results
     # here, so we can intercept the message.
     waiting_for_pin = {}
-    
+
     # we keep a mapping of locations to who collected last, so we can respond
     # when we receive stale pins
     last_collectors = {}
     for record in PendingPinConnections.objects.filter():
-            if record.connection in waiting_for_pin.keys():
-                waiting_for_pin[record.connection].append(record.result)
-            else:
-                waiting_for_pin[record.connection] = [record.result]
+        if record.connection in waiting_for_pin.keys():
+            waiting_for_pin[record.connection].append(record.result)
+        else:
+            waiting_for_pin[record.connection] = [record.result]
 
     mocker = MockResultUtility()
-    
+
     # regex format stolen from KeywordHandler
     CHECK_KEYWORD = "CHECK|CHEK|CHEC|CHK"
-    CHECK_REGEX   = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (CHECK_KEYWORD)
-    
-    def start (self):
+    CHECK_REGEX = r"^(?:%s)(?:[\s,;:]+(.+))?$" % (CHECK_KEYWORD)
+
+    def start(self):
         """Configure your app in the start phase."""
         self.schedule_change_notification_task()
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
         self.schedule_send_results_to_printer_task()
 
-    def pop_pending_connection(self,connection):
+    def pop_pending_connection(self, connection):
         self.waiting_for_pin.pop(connection)
         PendingPinConnections.objects.filter(connection=connection).delete()
 
-    def handle (self, message):
+    def handle(self, message):
         key = message.text.strip().upper()
         key = key[:4]
-        
+
         if re.match(self.CHECK_REGEX, message.text, re.IGNORECASE):
             if not is_eligible_for_results(message.connection):
                 message.respond(NOT_REGISTERED)
                 return True
-            
+
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
@@ -84,29 +84,29 @@ class App (rapidsms.apps.base.AppBase):
             return True
         elif message.connection in self.waiting_for_pin \
             and message.connection.contact:
-                pin = message.text.strip()
-                if pin.upper() == message.connection.contact.pin.upper():
-                    self.send_results_after_pin(message)
-                    return True
-                else:
-                    # lets hide a magic field in the message so we can respond
-                    # in the default phase if no one else catches this.  We
-                    # don't respond here or return true in case this was a
-                    # valid keyword for another app.
-                    message.possible_bad_pin = True
-        
-        # Finally, check if our mocker wants to do anything with this message, 
+            pin = message.text.strip()
+            if pin.upper() == message.connection.contact.pin.upper():
+                self.send_results_after_pin(message)
+                return True
+            else:
+                # lets hide a magic field in the message so we can respond
+                # in the default phase if no one else catches this.  We
+                # don't respond here or return true in case this was a
+                # valid keyword for another app.
+                message.possible_bad_pin = True
+
+        # Finally, check if our mocker wants to do anything with this message,
         # and notify the router if so.
         elif self.mocker.handle(message):
             return True
-    
+
     def default(self, message):
         # collect our bad pin responses, if they were generated.  See comment
         # in handle()
         if hasattr(message, "possible_bad_pin"):
-            message.respond(BAD_PIN)                
+            message.respond(BAD_PIN)
             return True
-        
+
         # additionally if this is your correct pin then respond that someone
         # has already processed the results (this assumes the only reason
         # you'd ever send your PIN in would be after receiving a notification)
@@ -115,46 +115,46 @@ class App (rapidsms.apps.base.AppBase):
         if is_eligible_for_results(message.connection) \
             and clinic in self.last_collectors \
             and message.text.strip().upper() == message.contact.pin.upper():
-                if message.contact == self.last_collectors[clinic]:
-                    message.respond(SELF_COLLECTED, name=message.connection.contact.name)
-                else:
-                    message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
-                                    collector=self.last_collectors[clinic])
-                return True
+            if message.contact == self.last_collectors[clinic]:
+                message.respond(SELF_COLLECTED, name=message.connection.contact.name)
+            else:
+                message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
+                                collector=self.last_collectors[clinic])
+            return True
         return self.mocker.default(message)
 
-    def send_results_after_pin (self, message):
+    def send_results_after_pin(self, message):
         """
         Sends the actual results in response to the message
         (comes after PIN workflow).
         """
         results = self.waiting_for_pin[message.connection]
-        clinic  = get_clinic_or_default(message.contact)
+        clinic = get_clinic_or_default(message.contact)
         if not results:
             # how did this happen?
             self.error("Problem reporting results for %s to %s -- there was nothing to report!" % \
                        (clinic, message.connection.contact))
             message.respond("Sorry, there are no new EID results for %s." % clinic)
-#            self.waiting_for_pin.pop(message.connection)
-            self. pop_pending_connection(message.connection)
+            #            self.waiting_for_pin.pop(message.connection)
+            self.pop_pending_connection(message.connection)
         else:
             self.send_results([message.connection], results)
             message.respond(INSTRUCTIONS, name=message.connection.contact.name)
 
-#            self.waiting_for_pin.pop(message.connection)
-            self. pop_pending_connection(message.connection)
-            
-            # remove pending contacts for this clinic and notify them it 
-            # was taken care of 
+            #            self.waiting_for_pin.pop(message.connection)
+            self.pop_pending_connection(message.connection)
+
+            # remove pending contacts for this clinic and notify them it
+            # was taken care of
             clinic_connections = [contact.default_connection for contact in \
-                Contact.active.filter\
-                (Q(location=clinic) | Q(location__parent=clinic))]
-            
+                                  Contact.active.filter \
+                                          (Q(location=clinic) | Q(location__parent=clinic))]
+
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
-#                    self.waiting_for_pin.pop(conn)
-                    self. pop_pending_connection(conn)
-                    OutgoingMessage(conn, RESULTS_PROCESSED, 
+                #                    self.waiting_for_pin.pop(conn)
+                    self.pop_pending_connection(conn)
+                    OutgoingMessage(conn, RESULTS_PROCESSED,
                                     name=message.connection.contact.name).send()
 
             self.last_collectors[clinic] = \
@@ -190,29 +190,28 @@ class App (rapidsms.apps.base.AppBase):
 
         clinic = results[0].clinic
         contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).distinct().\
-            order_by('pk')
+            Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                                  Q(types=const.get_clinic_worker_type())).distinct(). \
+                order_by('pk')
         NUIDs = ", ".join(str(res.requisition_id) for res in results)
         for contact in contacts:
             msg_text = (u"Hello {name}, {count} results sent to printer "
                         u"at {clinic}. IDs : {nuids}"
                         u"".format(name=contact.name, count=len(results),
-                        clinic=clinic.name, nuids=NUIDs))
+                                   clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()
-        
 
     def chunk_messages(self, content):
         message = ''
         for piece in content:
             message_ext = message + ('; ' if len(message) > 0 else '') + piece
-            
+
             if len(message_ext) > 140:
                 message_ext = piece
                 yield message
-            
+
             message = message_ext
-            
+
         if len(message) > 0:
             yield message
 
@@ -226,8 +225,8 @@ class App (rapidsms.apps.base.AppBase):
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [11], 'minutes': [30],
-                                      'days_of_week': [0, 1, 2, 3, 4]})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_change_notification_task(self):
         callback = 'mwana.apps.labresults.tasks.send_changed_records_notification'
@@ -235,8 +234,8 @@ class App (rapidsms.apps.base.AppBase):
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [11], 'minutes': [0],
-                                      'days_of_week': [0, 1, 2, 3, 4]})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+                                       'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
         callback = 'mwana.apps.labresults.tasks.process_outstanding_payloads'
@@ -244,7 +243,7 @@ class App (rapidsms.apps.base.AppBase):
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'minutes': [0], 'hours': '*'})
-        EventSchedule.objects.create(callback=callback, ** schedule)
+        EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_send_results_to_printer_task(self):
         callback = 'mwana.apps.labresults.tasks.send_results_to_printer'
@@ -268,11 +267,11 @@ class App (rapidsms.apps.base.AppBase):
         if printers.exists():
             self.send_printer_results(printers, results, msgcls=TLCOutgoingMessage)
         else:
-            messages  = self.results_avail_messages(clinic, results)
+            messages = self.results_avail_messages(clinic, results)
             if messages:
                 self.send_messages(messages)
                 self._mark_results_pending(results, (msg.connection
-                                       for msg in messages))
+                                                     for msg in messages))
 
     def send_printers_pending_results(self, clinic):
         """
@@ -312,12 +311,13 @@ class App (rapidsms.apps.base.AppBase):
         send them only once a week
         """
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
+
         today = datetime.today()
-        ago = today - timedelta(days=7)
+        ago = today - timedelta(days=14)
         if SYSTEM_LOCALE == LOCALE_ZAMBIA and not check:
             if today.weekday() != 0:
                 results = results.exclude(notification_status='notified',
-                arrival_date__lte=ago)
+                                          arrival_date__lte=ago)
         return results
 
     def _updated_results(self, clinic):
@@ -337,14 +337,16 @@ class App (rapidsms.apps.base.AppBase):
 
     def notify_clinic_of_changed_records(self, clinic):
         """
-        Notifies clinic of the new status for changed results. 
+        Notifies clinic of the new status for changed results.
         """
         changed_results = []
         updated_results = self._updated_results(clinic)
         if not updated_results:
             return
         for updated_result in updated_results:
-            if updated_result.record_change:
+            # @type updated_result Result
+            if updated_result.record_change and \
+            updated_result.record_change in ['req_id', 'result', 'both']:
                 changed_results.append(updated_result)
 
         if not changed_results:
@@ -355,22 +357,22 @@ class App (rapidsms.apps.base.AppBase):
         printers = self.printers_for_clinic(clinic)
         if printers.exists():
             self.send_printer_results(printers, changed_results,
-                          msgcls=TLCOutgoingMessage)
+                                      msgcls=TLCOutgoingMessage)
             return
-                        
+
         contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).\
-            distinct().order_by('pk')
+            Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                                  Q(types=const.get_clinic_worker_type())). \
+                distinct().order_by('pk')
         if not contacts:
             self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
             return
 
-        RESULTS_CHANGED     = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result and update your logbooks."
+        RESULTS_CHANGED = "URGENT: A result sent to your clinic has changed. Please send your pin, get the new result and update your logbooks."
         if len(changed_results) > 1:
-            RESULTS_CHANGED     = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
+            RESULTS_CHANGED = "URGENT: Some results sent to your clinic have changed. Please send your pin, get the new results and update your logbooks."
 
         all_msgs = []
         help_msgs = []
@@ -391,12 +393,13 @@ class App (rapidsms.apps.base.AppBase):
 
             for help_admin in Contact.active.filter(is_help_admin=True):
                 h_msg = OutgoingMessage(
-                                        help_admin.default_connection,
-                                        "Make a followup for changed results %s: %s. Contacts = %s" %
-                                        (clinic.name, ";****".join("ID=" + res.requisition_id + ", Result="
-                                        + res.result + ", old value=" + res.old_value + ", Lab ID=" + res.sample_id for res in changed_results),
-                                        ", ".join(contact_detail for contact_detail in contact_details))
-                                        )
+                    help_admin.default_connection,
+                    "Make a followup for changed results %s: %s. Contacts = %s" %
+                    (clinic.name, ";****".join("ID=" + res.requisition_id + ", Result="
+                                               + res.result + ", old value=" + res.old_value + ", Lab ID=" + res.sample_id
+                                               for res in changed_results),
+                     ", ".join(contact_detail for contact_detail in contact_details))
+                )
                 help_msgs.append(h_msg)
             if help_msgs:
                 self.send_messages(help_msgs)
@@ -404,7 +407,6 @@ class App (rapidsms.apps.base.AppBase):
             else:
                 logger.info("There are no help admins")
 
-    
 
     def _mark_results_pending(self, results, connections):
         for connection in connections:
@@ -417,26 +419,26 @@ class App (rapidsms.apps.base.AppBase):
 
     def results_avail_messages(self, clinic, results):
         '''
-        Returns clinic workers registered to receive results notification at this clinic. 
+        Returns clinic workers registered to receive results notification at this clinic.
         '''
         contacts = \
-        Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
-                              Q(types=const.get_clinic_worker_type())).distinct()
+            Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                                  Q(types=const.get_clinic_worker_type())).distinct()
         if not contacts:
-            self.warning("No contacts registered to receiver results at %s! "
+            self.warning("No contacts registered to receive results at %s! "
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
-        
+
         all_msgs = []
         for contact in contacts:
-            msg = OutgoingMessage(connection=contact.default_connection, 
+            msg = OutgoingMessage(connection=contact.default_connection,
                                   template=RESULTS_READY,
                                   name=contact.name, count=results.count())
             all_msgs.append(msg)
-        
+
         return all_msgs
-    
-    def no_results_message (self, clinic):
+
+    def no_results_message(self, clinic):
         if clinic.last_fetch == None or days_ago(clinic.last_fetch) >= config.ping_frequency:
             clinic.last_fetch = date.today()
             clinic.save()
@@ -444,10 +446,10 @@ class App (rapidsms.apps.base.AppBase):
         else:
             return None
 
-    def send_messages (self, messages):
+    def send_messages(self, messages):
         for msg in messages:  msg.send()
 
-def days_ago (d):
+
+def days_ago(d):
     return (date.today() - d).days
 
-    

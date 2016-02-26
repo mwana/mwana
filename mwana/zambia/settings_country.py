@@ -13,8 +13,9 @@ RESULTS160_SLUGS = {
     'HUB_WORKER_SLUG': 'hub',
     'LAB_WORKER_SLUG': 'lab',
     # location types:
-    'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital','2nd_level_hospital',
-                     'rural_health_centre', 'health_post', 'clinic', 'hahc'),
+    'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
+                     '2nd_level_hospital', 'rural_health_centre',
+                     'health_centre', 'health_post', 'clinic', 'hahc'),
     'ZONE_SLUGS': ('zone', ),
     'DISTRICT_SLUGS': ('districts', ), # XXX verify me
     'PROVINCE_SLUGS': ('provinces', ), # XXX verify me
@@ -27,13 +28,18 @@ INSTALLED_APPS.append("mwana.apps.websmssender")
 INSTALLED_APPS.append("mwana.apps.issuetracking")
 INSTALLED_APPS.append("mwana.apps.email")
 INSTALLED_APPS.append("mwana.apps.birthcertification")
-INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.webusers")
 INSTALLED_APPS.append("mwana.apps.graphs")
 INSTALLED_APPS.append("mwana.apps.surveillance")
 INSTALLED_APPS.append("mwana.apps.stock")
 INSTALLED_APPS.append("mwana.apps.zm_languages")
 INSTALLED_APPS.append("mwana.apps.reminders.experimental")
+INSTALLED_APPS.append("mwana.apps.labtests")
+INSTALLED_APPS.append("mwana.apps.act")
+#INSTALLED_APPS.append("mwana.apps.vaccination")
+#INSTALLED_APPS.append("mwana.apps.reminders.experimental")
+INSTALLED_APPS.append("mwana.apps.errorhandling")
+INSTALLED_APPS.append("mwana.apps.export")
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
 ADMINS = (
@@ -46,7 +52,7 @@ EMAIL_SUBJECT_PREFIX = '[Mwana] '
 EMAIL_HOST = 'localhost'
 DEFAULT_FROM_EMAIL = 'sinkalation@gmail.com'
 
-
+DEFAULT_RESPONSE = "It seems something went wrong. Respond with HELP to get assistance."
 
 TIME_ZONE = 'Africa/Lusaka'
 
@@ -94,7 +100,13 @@ RAPIDSMS_TABS = [
 #    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 
-ADH_LAB_NAME = "ADH DNA-PCR LAB"
+LABS = {"lusaka/kalingalinga": "Kal. DNA-PCR LAB",
+        "ndola/arthur-davison": "ADH DNA-PCR LAB",
+        "lusaka/uth": "UTH DNA-PCR LAB",
+        "livingstone/general": "LGH DNA-PCR LAB",
+        "chipata/cgh": "CGH DNA-PCR LAB",
+}
+ADH_LAB_NAME = "DNA-PCR LAB"
 
 SESSION_COOKIE_AGE = 3600 # 1 hour
 

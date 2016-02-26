@@ -28,10 +28,11 @@ send_live_results = Q(lab_results__clinic__send_live_results=True)
 def send_results_notification(router):
     logger.debug('in send_results_notification')
     if settings.SEND_LIVE_LABRESULTS:
+        facility_type = Q(type__slug__in=const.CLINIC_SLUGS)
         new_notified = Q(lab_results__notification_status__in=
                          ['new', 'notified'])
         clinics_with_results =\
-          Location.objects.filter(new_notified & verified & send_live_results).distinct()
+          Location.objects.filter(new_notified & verified & send_live_results, facility_type).distinct()
         labresults_app = router.get_app(const.LAB_RESULTS_APP)
         for clinic in clinics_with_results:
             logger.info('notifying %s of new results' % clinic)

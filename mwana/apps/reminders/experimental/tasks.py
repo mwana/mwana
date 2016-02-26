@@ -32,7 +32,7 @@ def send_notifications_to_clinic(router):
     this_week_start = week_start(today)
     this_weekend = weekend(today)
 
-    for location in Location.objects.filter(supported__supported=True):
+    for location in Location.objects.filter(supportedlocation__supported=True):
         if SentNotificationToClinic.objects.filter(location=location,
                                                    date_logged__gte=this_week_start):
             continue
@@ -63,10 +63,16 @@ def send_notifications_to_clinic(router):
             exclude(connection=None):
             msg = ("Hello %s, %s mothers are due for their clinic visits this week"
                    ", %s." % (contact.name, total, msg_part))
+            if total == 1:
+                single = str(filter(lambda x: x[1] > 0, sorted_tuple)[0][0])
+                msg = ("Hello %s, 1 mother is due for her %s clinic visit this "
+                   "week." % (contact.name, single))
             OutgoingMessage(contact.default_connection, msg).send()
             sent_to += 1
 
         for i, j in sorted_tuple:
+            if j == 0:
+                continue
             SentNotificationToClinic.objects.get_or_create(location=location, event_name=i, number=j, recipients=sent_to)
             SentNotificationToClinic.objects.get_or_create(location=location, event_name='Total', number=total, recipients=sent_to)
                        

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import PendingPinConnections
 from mwana.apps.tlcprinters.models import MessageConfirmation
 import time
@@ -19,8 +20,11 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.apps.labresults import tasks as tlcprinter_tasks
-from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.payloads import PAYLOAD_WITH_DUPLICATE_REQ_ID
+from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD_FOR_LOCATION
+from mwana.apps.labresults.testdata.payloads import UNVERIFIED
+from mwana.apps.labresults.testdata.payloads import VERIFIED
 from mwana.apps.labresults.testdata.reports import *
 
 
@@ -304,14 +308,14 @@ class TestApp(LabresultsSetUp):
                     for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
 
-            script = """
-                clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
-                clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
-            """ % {"name": self.contact.name, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_text(),
-            "id2": res2.requisition_id, "res2": res2.get_result_text(),
-            "id3": res3.requisition_id, "res3": res3.get_result_text()}
+        script = """
+            clinic_worker > %(code)s
+        clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
+        """ % {"name": self.contact.name, "code": "4567",
+        "id1": res1.requisition_id, "res1": res1.get_result_text(),
+        "id2": res2.requisition_id, "res2": res2.get_result_text(),
+        "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
 
@@ -409,9 +413,12 @@ class TestApp(LabresultsSetUp):
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
         msg2 = "Mary Phiri:Hello Mary Phiri, 3 results sent to printer at Mibenge Clinic. IDs : 9990, 9991, 9992"
-        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
-        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
-        msg5 = "Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992.\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by ADH DNA-PCR LAB."
+        msg3 = ("Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 9990"
+                ".\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
+        msg4 = ("Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 9991"
+                ".\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
+        msg5 = ("Printer in Mibenge Clinic:03Mibenge Clinic.\r\nPatient ID: 9992"
+                ".\r\nHIV-DNAPCR Result:\r\nRejected.\r\nApproved by %s." % settings.ADH_LAB_NAME)
        
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -433,6 +440,8 @@ class TestApp(LabresultsSetUp):
     def testSend_results_to_printer_task(self):
         self.assertEqual(0, MessageConfirmation.objects.count())
 
+        payload1 = Payload.objects.create(source='lusaka/kalingalinga',
+                                          incoming_date=datetime.datetime.now())
         results = labresults.Result.objects.all()
         results.create(requisition_id="%s-0001-1" % self.clinic.slug,
                           clinic=self.clinic, result="N",
@@ -444,7 +453,7 @@ class TestApp(LabresultsSetUp):
                           result="P",
                           collected_on=datetime.datetime.today(),
                           entered_on=datetime.datetime.today(),
-                          notification_status="new")
+                          notification_status="new", payload=payload1)
         self.clinic.has_independent_printer = True
         self.clinic.save()
         script = """
@@ -463,9 +472,13 @@ class TestApp(LabresultsSetUp):
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
         msg2 = "Mary Phiri:Hello Mary Phiri, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"
-        msg3 = "Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID: 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg3 = ("Printer in Mibenge Clinic:01Mibenge Clinic.\r\nPatient ID:"
+                " 0002.\r\nHIV-DNAPCR Result:\r\nDetected.\r\nApproved by "
+                "Kal. DNA-PCR LAB.")
 
-        msg4 = "Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID: 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\nApproved by ADH DNA-PCR LAB."
+        msg4 = ("Printer in Mibenge Clinic:02Mibenge Clinic.\r\nPatient ID:"
+                " 402029-0001-1.\r\nHIV-DNAPCR Result:\r\nNotDetected.\r\n"
+                "Approved by %s." % settings.ADH_LAB_NAME)
 
         expected_msgs.append(msg1)
         expected_msgs.append(msg2)
@@ -899,6 +912,54 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertFalse(result2.verified)
         self.assertEqual(result2.child_age_unit, 'days')
 
+    def test_results_verified_updated(self):
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        type = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        Location.objects.create(name='Clinic', slug='202020',
+                                type=type)
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+        
+        now = datetime.datetime.now()
+        self._post_json(reverse('accept_results'), UNVERIFIED)        
+
+        self.assertEqual(labresults.Result.objects.count(), 3)
+        result1 = labresults.Result.objects.get(sample_id="10-09999")
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result3 = labresults.Result.objects.get(sample_id="10-09997")
+                
+        self.assertTrue(result1.verified == False)
+        self.assertTrue(result2.verified == None)
+        self.assertTrue(result3.verified == False)
+        # @type result1 Result
+        self.assertTrue(result1.arrival_date == None)
+        # @type result2 Result
+        self.assertTrue(result2.arrival_date.year == now.year)
+        self.assertTrue(result2.arrival_date.month == now.month)
+        self.assertTrue(result2.arrival_date.day == now.day)
+        # @type result3 Result
+        self.assertTrue(result3.arrival_date == None)
+
+        self._post_json(reverse('accept_results'), VERIFIED)
+
+        self.assertEqual(labresults.Result.objects.count(), 3)
+        result2 = labresults.Result.objects.get(sample_id="10-09998")
+        result3 = labresults.Result.objects.get(sample_id="10-09997")
+        result1 = labresults.Result.objects.get(sample_id="10-09999")
+
+
+        self.assertTrue(result1.verified == True)# just being explicit
+        self.assertTrue(result2.verified == True)
+        self.assertTrue(result3.verified == True)
+
+        self.assertTrue(labresults.Result.objects.filter(arrival_date__year=now.year,
+        arrival_date__month=now.month,
+        arrival_date__day=now.day).count() == 3)
+
+
     def test_payload_missing_fac(self):
         user = User.objects.create_user(username='adh', email='',
                                         password='abc')
@@ -968,7 +1029,20 @@ class TestResultsAcceptor(LabresultsSetUp):
         response = self.client.get(reverse('accept_results'))
         self.assertEqual(response.status_code, 405) # method not supported
 
-    def test_results_changed_notification(self):        
+    def create_payload_auther_login(self):
+        """
+        Tests sending of notifications for previously sent results but later
+        change in locaion.
+        """
+
+        user = User.objects.create_user(username='adh', email='',
+                                        password='abc')
+        perm = Permission.objects.get(content_type__app_label='labresults',
+                                      codename='add_payload')
+        user.user_permissions.add(perm)
+        self.client.login(username='adh', password='abc')
+
+    def test_results_changed_notification(self):
         """
         Tests sending of notifications for previously sent results but later
         change in either
@@ -976,14 +1050,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         notification goes to all clinic workers and another to all support staff.
         """
         # Scheduled task will not run on a weekend
-        if is_today_a_weekend():
-            return
-        user = User.objects.create_user(username='adh', email='',
-                                        password='abc')
-        perm = Permission.objects.get(content_type__app_label='labresults',
-                                      codename='add_payload')
-        user.user_permissions.add(perm)
-        self.client.login(username='adh', password='abc')
+        self.create_payload_auther_login()
         
         # get results from initial payload
         self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
@@ -1027,9 +1094,9 @@ class TestResultsAcceptor(LabresultsSetUp):
         "ID=212987b, Result=N, old value=212987, Lab ID=10-09997."
         " Contacts = John ""Banda:clinic_worker, Mary Phiri:other_worker")
 
-        self.assertEqual(msg1,msgs[0].text)
-        self.assertEqual(msg2,msgs[1].text)
-        self.assertEqual(msg3,msgs[2].text)
+        self.assertEqual(msg1, msgs[0].text)
+        self.assertEqual(msg2, msgs[1].text)
+        self.assertEqual(msg3, msgs[2].text, '\n'.join(r.record_change for r in Result.objects.all()))
         self.assertEqual("John Banda",msgs[0].connection.contact.name)
         self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
         self.assertEqual("Help Admin",msgs[2].connection.contact.name)
@@ -1045,6 +1112,99 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.runScript(script)
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
+        
+    def test_duplicate_requisition_id(self):
+        """
+        If there exists another result at the clinic with the same requsition id
+        and the sample was collected or tested with the same 12 months, include
+        collection date and test date in the results sent to the clinic.
+        """
+        # Scheduled task will not run on a weekend
+        self.create_payload_auther_login()
+
+        # get results from initial payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # let the clinic worker get the results
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """.format(**self._result_text())
+        self.runScript(script)
+
+        # testing if the payload is processed fine is done in other test methods
+
+        # process changed payload with changes in results and one req_id
+        self._post_json(reverse('accept_results'), PAYLOAD_WITH_DUPLICATE_REQ_ID)
+
+        # The number of results records should remain to be 3
+        self.assertEqual(labresults.Result.objects.count(), 6)
+
+        time.sleep(.1)
+        # Start router and manually call send_changed_records_notification()
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+
+        # Get all the messages sent
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+        # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
+        # to them. A follow-up message should be sent to the support staff
+        msg1 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+        msg2 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+
+        self.assertEqual(msg1, msgs[0].text)
+        self.assertEqual(msg2, msgs[1].text)
+        self.assertEqual("John Banda",msgs[0].connection.contact.name)
+        self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
+
+        # clinic_worker should be able to get the results by replying with PIN
+        script = """
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected} collected on 25 Mar 2010, tested on 13 Aug 2010
+            clinic_worker < **** 78;{detected} collected on 30 Sep 2010, tested on 11 Apr 2010. **** 212987;{not_detected}
+            other_worker  < John Banda has collected these results
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+""".format(**self._result_text())
+        self.runScript(script)
+        self.assertEqual(0,Result.objects.filter(notification_status='sent',
+                            result_sent_date=None).count())
+
+
+    def test_results_changed_location_notification(self):
+        """
+        Tests sending of notifications for previously sent results but later
+        change in locaion.
+        """
+
+        self.create_payload_auther_login()
+        # get results from initial payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # let the clinic worker get the results
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """.format(**self._result_text())
+        self.runScript(script)
+
+        
+        self._post_json(reverse('accept_results'), CHANGED_PAYLOAD_FOR_LOCATION)
+
+        results = Result.objects.all()
+        for r in results:
+            self.assertEqual(r.record_change, 'loc_st')
+            self.assertEqual(r.notification_status, 'new')
+
+        # The number of results records should remain to be 3
+        self.assertEqual(labresults.Result.objects.count(), 3)
+   
 
     def test_send_results_notification(self):
         """
@@ -1128,7 +1288,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         old_res = Result.objects.all()[0]
 
         
-        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=12)
+        old_res.arrival_date = datetime.datetime.today() - datetime.timedelta(days=20)
         old_res.save()
 
         time.sleep(.1)

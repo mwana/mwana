@@ -9,6 +9,7 @@ from rapidsms.contrib.scheduler.models import EventSchedule
 
 from mwana.apps.reminders import models as reminders
 from mwana.apps.reminders.mocking import MockRemindMiUtility
+from datetime import timedelta
 from mwana import const
 
 # In RapidSMS, message translation is done in OutgoingMessage, so no need
@@ -161,7 +162,8 @@ class App(rapidsms.apps.base.AppBase):
                 if not date:
                     msg.respond(_("Sorry, I couldn't understand that date. "
                                 "Please enter the date like so: "
-                                "DAY MONTH YEAR, for example: 23 04 2010"))
+                                "DAY MONTH YEAR, for example: %(formatted_date)s")
+                                , formatted_date = "23 04 %s" % today.year)
                     return True
             else:
                 date = today
@@ -173,7 +175,7 @@ class App(rapidsms.apps.base.AppBase):
                 return True
 
             # make sure the date is not unreasonably too old
-            if date.year < 2010:
+            if date < today - timedelta(days=1000):
                 msg.respond(_("Sorry, make sure you enter the year correctly."
                 " %(date_entered)s is too old. We are in %(current_date)s."),
                 date_entered=date.year, current_date=today.year)

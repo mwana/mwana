@@ -13,7 +13,6 @@ from rapidsms.models import Contact
 from rapidsms.tests.scripted import TestScript
 
 
-
 class SMSAlertsSetUp(TestScript):
 
     def setUp(self):
@@ -63,7 +62,7 @@ class SMSAlertsSetUp(TestScript):
         salanga_worker > join clinic 401012 Salanga Man 1111
         mibenge_worker > join clinic 403029 Mibenge Man 1111
         kashitu_worker > join clinic 402026 kashitu Man 1111
-        cental_worker > join clinic 403012 Central Man 1111
+        central_worker > join clinic 403012 Central Man 1111
         mibenge_cba > join cba 403029 1 Mibenge CBA
         kashitu_cba > join cba 402026  2 kashitu cba
         central_cba1 > join cba 403012 3 Central cba1
@@ -85,7 +84,7 @@ class SMSAlertsSetUp(TestScript):
 
 
 class TestSendingSMSAlerts(SMSAlertsSetUp):
-
+# TODO: Make tests more comprehensive
 
     def testClinicsNotRetrievingResultsAlerts(self):
 
@@ -95,26 +94,29 @@ class TestSendingSMSAlerts(SMSAlertsSetUp):
         msgs = self.receiveAllMessages()
 
         self.assertEqual(len(msgs), 1)
-        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central Clinic")
+        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't retrieved results: Mibenge Clinic, Central "
+                                       "Clinic. Please see https://mwana.moh.gov.zm/alerts for details")
         self.stopRouter()
+        self.fail("TODO: Tests to be more comprehensive")
 
     def testHubsNotSendingDbsAlerts(self):
-
         time.sleep(.1)
         self.startRouter()
         smstasks.send_hubs_not_sending_dbs_alerts(self.router)
         msgs = self.receiveAllMessages()
 
         self.assertEqual(len(msgs), 1)
-        self.assertEqual(msgs[0].text, "The Mansa District district hub (Unkown hub) has not sent samples to Unkown lab in over 11 days.")
+        self.assertEqual(msgs[0].text, "The Mansa District district hub (Unkown hub) has not sent samples to Unkown lab"
+                                       " in over 11 days. Please see https://mwana.moh.gov.zm/alerts for details")
         self.stopRouter()
+        self.fail("TODO: Tests to be more comprehensive")
 
     def testClinicsNotSendingDbsAlerts(self):
 
         # from mansa district only central clinic used SENT keyword recently
         script = """
-            cental_worker> sent 5
-            cental_worker < Hello Central Man! We received your notification that 5 DBS samples were sent to us today from Central Clinic. We will notify you when the results are ready.
+            central_worker> sent 5
+            central_worker < Hello Central Man! We received your notification that 5 DBS samples were sent to us today from Central Clinic. We will notify you when the results are ready.
         """
 
         self.runScript(script)
@@ -126,6 +128,7 @@ class TestSendingSMSAlerts(SMSAlertsSetUp):
         msgs = self.receiveAllMessages()
 
         self.assertEqual(len(msgs), 1)
-        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't sent DBS to hub: Mibenge Clinic")
+        self.assertEqual(msgs[0].text, "ALERT! Mansa Dho, Clinics haven't sent DBS to hub: Mibenge Clinic. Please "
+                                       "see https://mwana.moh.gov.zm/alerts for details")
         self.stopRouter()
 

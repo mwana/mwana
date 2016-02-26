@@ -1,5 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.apps.reports.models import Turnaround
+from mwana.apps.userverification.models import DeactivatedUser
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -290,7 +292,6 @@ def delete_spurious_group_facility_mappings():
     GroupFacilityMapping.objects.filter(facility__name__istartswith='Training').delete()
     GroupFacilityMapping.objects.filter(facility__name__istartswith='Support').delete()
 
-#synchronize
 def try_assign(group, facilities):
     for loc in facilities:
         GroupFacilityMapping.objects.get_or_create(group=group, facility=loc)
@@ -367,7 +368,7 @@ def clear_en_language_code():
 
 
 def update_sub_groups():
-    logger.info("updating sub groups - PHOs, DHOs, UNICEF, IDInsight")
+    logger.info("updating sub groups - PHOs, DHOs, UNICEF")
     for sl in SupportedLocation.objects.all():
         loc = sl.location;
         loc.send_live_results = True;
@@ -380,15 +381,18 @@ def update_sub_groups():
             group = ReportingGroup.objects.get(name=pho)
             try_assign(group, [loc])
 
+
+            unicef = ReportingGroup.objects.get(name__iexact='unicef')
+            mgic = ReportingGroup.objects.get(name__iexact='MGIC Zambia')
+
             if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
-                idinsight = ReportingGroup.objects.get(name__iexact='idinsight')
-                try_assign(idinsight, [loc])
-                unicef = ReportingGroup.objects.get(name__iexact='unicef')
                 try_assign(unicef, [loc]);
-        except Exception, e:
-            a, b = ReportingGroup.objects.get_or_create(name=dho)
-            a, b = ReportingGroup.objects.get_or_create(name=pho)
-            logger.error("%s. Location: %s. Dho: %. Pho: %s" % (e, loc.dho, pho))
+            if loc.parent.parent.slug == '800000':
+                try_assign(mgic, [loc]);
+        except ReportingGroup.DoesNotExist, e:
+            ReportingGroup.objects.get_or_create(name=dho)
+            ReportingGroup.objects.get_or_create(name=pho)
+            logger.error("%s. Location: %s. Dho: %s. Pho: %s" % (e, loc, dho, pho))
 
 
 def mark_long_pending_results_as_obsolete():
@@ -406,13 +410,15 @@ def mark_long_pending_results_as_obsolete():
 
     # based on arrival_date
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
-                                     arrival_date__lt=last_month):
+                                     arrival_date__lt=last_month).\
+                                     exclude(verified=False):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
     # based on processed_on
     for res in Result.objects.filter(notification_status__in=['new', 'notified'],
-                                     processed_on__lt=two_months_ago):
+                                     processed_on__lt=two_months_ago).\
+                                     exclude(verified=False):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
@@ -427,6 +433,14 @@ def mark_sent_results_with_date_inconsitencies_as_obsolete():
     logger.info('in mark_sent_results_with_date_inconsitencies_as_obsolete')
     counter = 0
     for res in dbs_with_date_issues().filter(notification_status='sent'):
+        # @type res Result
+        res.notification_status = 'obsolete'
+        res.save()
+        counter += 1
+
+    # Arbitrary too high figure for transport time is used
+    bad_turnaround = Turnaround.objects.filter(transporting__gt=300)
+    for res in Result.objects.filter(id__in=bad_turnaround, notification_status='sent'):
         # @type res Result
         res.notification_status = 'obsolete'
         res.save()
@@ -536,9 +550,17 @@ Do not reply. This is a system generated message.
                 logger.debug("skipping for %s. Locations=%s" % (support.__unicode__(), len(locations)))
                 continue
 
-            body = "Dear %s,\n\nThe following facilities have no Results160 Staff:\n\n" % support.user.username
-            body += "\n".join("%s, %s, %s, %s" % (loc.parent.parent.name,
-                              loc.parent.name, loc.name, loc.slug)
+            body = "Dear %s,\n\nThe following facilities have no Results160 Staff.\n" \
+                   "The staff indicated have stopped using the Mwana SMS system"\
+                   " for unknown reasons\n\n" % support.user.username
+
+            body += "\n".join("- %s, %s, %s, %s. %s" % (
+                              loc.parent.parent.name,
+                              loc.parent.name, loc.name, loc.slug,
+                              ", ".join("%s (%s)" % ( da.contact.name, da.connection.identity)
+                                        for da in DeactivatedUser
+                                        .objects.filter(contact__location=loc, contact__is_active=False))
+                              )
                               for loc in locations)
             body += footer
             logger.info("sending: %s, %s, %s, %s " % (support.user.email, body[:100], host, user))

@@ -41,7 +41,8 @@ class TrainingStartHandler(KeywordHandler):
         contact = self.msg.contact
         TrainingSession.objects.create(trainer=contact, location=location)       
 
-        for help_admin in Contact.active.filter(is_help_admin=True):
+        for help_admin in Contact.active.filter(is_help_admin=True).exclude(
+                id=contact.id):
             ha_msg = OutgoingMessage(help_admin.default_connection,
                                      "Training is starting at %s, %s"
                                      ". Notification was sent by %s, %s" %
@@ -76,11 +77,13 @@ class TrainingStartHandler(KeywordHandler):
 
 
         self.respond("Thanks %(name)s for your message that training is "
-                     "starting for %(clinic)s. At end of training please send TRAINING STOP",
-                     name=contact.name, clinic=location.name)
+                     "starting for %(clinic)s. At end of training please "
+                     "send TRAINING STOP %(code)s",
+                     name=contact.name, clinic=location.name, code=location.slug)
 
         self.respond("When the trainees finish the course tell them to state "
-                     "that they have been trained. Let each one send TRAINED <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba"
+                     "that they have been trained. Let each one send TRAINED"
+                     " <TRAINER GROUP> <USER TYPE>, E.g Trained zpct cba"
                      )
 
         

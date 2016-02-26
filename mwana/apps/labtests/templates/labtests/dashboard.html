@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+{% load forms_tags %}
+
+{% block title %}Test Results{{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css"/>
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css"/>
+
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/full-screen.css"/>
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="left">
+    <form name="getValues" action="" method="GET">
+        <div class="module">
+            <h2>Test Results</h2>
+            <br>
+            <table border="1" width="100%" id="input_parameters_table">
+                <thead>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Province</th>
+                <th>District</th>
+                <th>Facility</th>
+                <th></th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" id="startdate" name="startdate" class="datefield" size="9"
+                                   value='{{ fstartdate }}' placeholder='{{ fstartdate }}'/></td>
+                        <td><input type="text" id="enddate" name="enddate" class="datefield" size="9"
+                                   value='{{ fenddate }}' placeholder='{{ fenddate }}'/></td>
+                        <td>{% autoescape off %}
+                            {{ rpt_provinces }}
+                            {% endautoescape %}
+                        </td>
+                        <td>{% autoescape off %}
+                            {{ rpt_districts }}
+                            {% endautoescape %}
+                        </td>
+                        <td>{% autoescape off %}
+                            {{ rpt_facilities }}
+                            {% endautoescape %}
+                        </td>
+                        <td>
+                            <input type="submit" class="button" value="Ok" name="SubmitValues"/> </td>
+                             
+                </tbody>
+            </table>
+
+            <hr>
+            <div>
+
+
+                <h3>
+                    Province: {{ province }}&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;District: {{ district }}&nbsp;&nbsp;&nbsp;
+                </h3>
+
+
+                <table width="100%">
+                    {% for record in messages %}
+                    <tr bgcolor="{% cycle #EDF3FE,#ffffff %}">
+
+                        {% for column in record %}
+                        {% if column %}
+                        {% if not forloop.parentloop.counter0 %}
+                        <td><u>{{ column }}</u></td>
+                        {% else %}
+                        <td>{{ column }}</td>
+
+                        {% endif %}
+                        {% else %}
+                        {% if forloop.parentloop.last %}
+                        <td style="border: 0px"><b>  </b></td>
+                        {% else %}
+                        <td style="border: 0px"> </td>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+
+
+            </div>
+            <div class="clear-hack"></div>
+        </div>
+
+        <div class="pagination">
+            <span class="step-links">
+                {% if messages_has_previous %}
+                <input type="submit" value="Previous" name="navigate"/>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ messages_number }} of {{ messages_paginator_num_pages }}.
+                </span>
+
+                {% if messages_has_next %}
+                <input type="submit" value="Next" name="navigate" size="8"/>
+                {% endif %}
+                <input type="hidden" name="page" value={{ messages_number }}>
+            </span>
+
+        </div>
+    </form>
+
+</div>
+
+
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-1.8.0.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js"></script>
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/location_selector.js" ></script>
+
+
+<script type="text/javascript">
+    $(function () {
+        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+        $.datepicker.formatDate;
+    });
+</script>
+
+{% endblock %}

@@ -27,7 +27,7 @@ msgstr ""
 
 #: .\apps\labresults\handlers\join.py:261
 msgid ""
-"To register as a RemindMi agent, send JOIN <CBA> <CLINIC CODE> <ZONE #> "
+"To register as a RemindMi agent, send JOIN CBA <CLINIC CODE> <ZONE #> "
 "<YOUR NAME>"
 msgstr ""
 
@@ -108,15 +108,15 @@ msgid ""
 "optional and is logged as TODAY if left out."
 msgstr ""
 "Njeleleeniko, nshacumfwa iyo imbila. Pakulembesha %(event_lower)s, tumeni %(event_upper)s <INSHIKU> <ISHINA LYABANINA>."
-"Ichilangililo, MWANA 12 3 2012 Bana Kalaba."
+" Ichilangililo, MWANA 12 3 2012 Bana Kalaba."
 
 #: .\apps\reminders\app.py:148
 msgid ""
 "Sorry, I couldn't understand that date. Please enter the date like so: DAY "
-"MONTH YEAR, for example: 23 04 2010"
+"MONTH YEAR, for example: %(formatted_date)s"
 msgstr ""
 "Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI "
-"UMWAKA - 23 04 2010."
+"UMWAKA - %(formatted_date)s"
 
 #: .\apps\reminders\app.py:157
 #, python-format

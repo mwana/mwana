@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_district_worker_type
+from mwana.const import get_province_worker_type
 from mwana.apps.reminders.models import PatientEvent
 from rapidsms.models import Contact
 from mwana.util import get_clinic_or_default
@@ -16,6 +18,9 @@ from mwana.apps.labresults.models import Result
 from mwana.apps.labresults.models import SampleNotification
 from mwana.apps.locations.models import Location
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from mwana.apps.reports.utils.htmlhelper import get_rpt_districts as rpt_districts
+from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities as rpt_facilities
+from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces as rpt_provinces
 
 class Positivity():
     pass
@@ -60,8 +65,7 @@ class Results160Reports:
             facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
             if self.reporting_group:
                 facs= facs.filter(Q(groupfacilitymapping__group__id=self.reporting_group)|Q(groupfacilitymapping__group__name__iexact=self.reporting_group))
-            
-            
+                        
             if self.reporting_facility:
                 facs = facs.filter(slug=self.reporting_facility)
             elif self.reporting_district:
@@ -73,17 +77,13 @@ class Results160Reports:
             return Location.objects.all()
         
     def get_rpt_provinces(self, user):
-        self.user = user         
-        return self.get_distinct_parents(self.get_rpt_districts(user))
+        return rpt_provinces(user)
 
     def get_rpt_districts(self, user):
-        self.user = user
-        return self.get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user))
+        return rpt_districts(user)
 
     def get_rpt_facilities(self, user):
-        self.user = user
-        return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=self.user)
-
+        return rpt_facilities(user)
 
     def get_active_facilities(self):
         return self.user_facilities().filter(lab_results__notification_status__in=
@@ -549,16 +549,17 @@ class Results160Reports:
         """
         Returns active contacts
         """
-        table = []
-       
+        table = []       
 
         locations = self.user_facilities()
         contacts = Contact.active.filter(Q(location__in=locations)|
-        Q(location__parent__in=locations)).exclude(connection=None).order_by('location__parent__name')
-
+        Q(location__parent__in=locations) | Q(location__location__in=locations)
+        |Q(location__location__location__in=locations)
+        ).exclude(connection=None).distinct().order_by('location__parent__parent__name',
+        'location__parent__name', 'location__name')
+        
         if not page:
             page = 1
-
 
         paginator = Paginator(contacts, 50)
         try:
@@ -583,12 +584,23 @@ class Results160Reports:
             type = ", ".join(t.name for t in contact.types.all())
             backed = contact.default_connection.backend.name
             phone = contact.default_connection.identity
-
-            table.append([counter, ' ' + district.name, ' ' + facility.name,
+            facility_name = ' ' + facility.name
+            district_name = ' ' + district.name if district else "-"
+            province_name =  district.parent.name if district and district.parent else "-"
+            if get_province_worker_type() in contact.types.all():
+                province_name = facility_name
+                facility_name = '-'
+                district_name = '-'
+            elif get_district_worker_type() in contact.types.all():
+                province_name = district_name
+                district_name = facility_name
+                facility_name = ' -'
+                
+            table.append([counter, province_name, district_name, facility_name,
                          name, type, backed, phone])
             counter = counter + 1
 
-        table.insert(0, ['  #', '  District', '  Clinic', 'User Name','Type', 'Backend', 'Phone'])
+        table.insert(0, ['  #', '  Province', '  District', '  Clinic', 'User Name','Type', 'Channel', 'Phone'])
 
         return table,  messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous
 

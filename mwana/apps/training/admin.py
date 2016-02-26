@@ -12,7 +12,7 @@ class TrainedAdmin(admin.ModelAdmin):
     list_display = ("name", "location", "type", "email", "phone", "date", "trained_by", "additional_text",)
     list_filter = ("trained_by", "type", "date", "location", )
     date_hierarchy = 'date'
-    search_fields = ('name', "email", "phone", "additional_text",)
+    search_fields = ('name', "location__name", "email", "phone", "additional_text",)
 admin.site.register(training.Trained, TrainedAdmin)
 
 

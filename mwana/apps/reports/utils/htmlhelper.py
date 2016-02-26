@@ -5,6 +5,9 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import Location
 from datetime import timedelta
 from mwana.apps.reports.webreports.models import ReportingGroup
+from mwana.const import get_zone_type
+from mwana.const import get_province_type
+from mwana.const import get_district_type
 
 def get_groups_name(id):
     try:
@@ -203,9 +206,11 @@ def get_distinct_parents(locations, type_slugs=None):
     if not locations:
         return None
     parents = []
-    for location in locations:
+    for location in locations:        
         if (not type_slugs) or (location.parent and location.parent.type.slug in type_slugs):
             parents.append(location.parent)
+            if not location.parent:
+                raise Exception("%s %s has no parent" % (location.slug, location.name))
 
     return list(set(parents))
 
@@ -224,6 +229,19 @@ def get_rpt_facilities(user):
         exclude(name__icontains='training').exclude(name__icontains='support').filter(
                   groupfacilitymapping__group__groupusermapping__user=user),
                   key=lambda x:x.name)
+
+def get_all_rpt_provinces():
+    return sorted(get_distinct_parents(get_all_rpt_districts()), key=lambda x:x.name if x else '')
+
+def get_all_rpt_districts():
+    return sorted(get_distinct_parents(get_all_rpt_facilities()
+                 ), key=lambda x:x.name if x else '')
+
+def get_all_rpt_facilities():
+    return sorted(Location.objects.\
+        exclude(name__icontains='training').exclude(name__icontains='support').
+        exclude(type__in=[get_zone_type(), get_district_type(), get_province_type()]),
+                  key=lambda x:x.name if x else '')
 
 def get_month_start(dte):
     return date(dte.year, dte.month, 1)

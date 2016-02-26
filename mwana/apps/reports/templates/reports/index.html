@@ -14,8 +14,14 @@
         margin: 0.5em auto 0;
         width: 90%;
     }
+    /*    .ui-dialog { z-index: 21000 !important ;}*/
+    .ui-widget {
+        font: 9pt "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif !important;
+        font-size: 1.1em !important;
+    }
 </style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/tabs.css" />
+<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 {% endblock %}
 
 {% block content %}
@@ -129,7 +135,7 @@
                 </div> </td>
             <td  valign="top" style="border: 0px">
                 <div class="module" id="toupdate">
-                    <div id="mousemovemessage">                        
+                    <div id="mousemovemessage">
                     </div>
                     <div id="spacer"><br>&nbsp;</div>
                     <div id="map3" style=" position: relative;height: 400px; width: 400px;padding-top: 1em;">
@@ -140,7 +146,84 @@
         </tr>
     </tbody>
 </table>
+<div style="display: none">
+    <div id="chart-main-container" class="module">
+        <div id="container" style="height: 400px; margin: 0 auto">Graph not available. </div>
+    </div>
+    <div id="results160">
+        <html>
+            <body>
+                <h3>Introduction</h3>
+                <p>Results160 is the component of Mwana that speeds up delivery
+                    of infant HIV results by utilizing SMS Technology. It also
+                    provides monitoring tools to track infant HIV samples
+                    during the Early Infant Diagnosis (EID) process.</p>
+                <p>&nbsp;</p>
+                <h3>EID Background</h3>
+                <p>Without treatment, an infant infected with HIV has a high chance of dying by his first
+                    birthday and a much higher chance of dying before
+                    the age of two.
+                    There is therefore need to diagnose early enough if an HIV 
+                    exposed infant is positive or not. However, the standard
+                    methods of diagnosing HIV infection in
+                    adults don't apply to&nbsp;infants below the age of 18
+                    months because by this age infants would still be carrying
+                    antibodies from their mothers. By this time, many HIV-infected
+                    infants will have died if they have not been put on the right treatment.
+                    The test used to diagnose babies born to HIV-infected
+                    mothers, Polymerase Chain Reaction
+                    (PCR), tests directly for HIV DNA rather than the HIV
+                    antibody. It requires sophisticated, expensive equipment not
+                    available in rural settings.  In Zambia today, only three labs conduct such tests. </p>
+                <p><p>&nbsp;</p><h3>Turnaround a Challenge</h3>
+                <p>Dried blood samples are collected at health facilities from 
+                    all over the country and transported by road to either of the
+                    three labs in the country. When the samples are tested at
+                    the lab, results are sent back to the health facilities
+                    using the same road transport. However, transportation of
+                    samples from the health facilities to the lab and
+                    transportation of paper results back to the health facilities
+                    often takes too long especially for facilities in rural areas
+                    - this makes the turnaround time for EID undesirable. </p>
+                <p>&nbsp;</p>
+                <h3>The Solution</h3>
+                <p>This is where Results160 comes in - to shorten the turnaround time. Results160 employs SMS  technology to send results to health facilities once they&nbsp;are ready at the testig lab. It employs a central server at the Ministry of Health and utility&nbsp;programs at the PCR labs. The utility programs securely send results to the server via the web and the server in turn sends results to facilities via SMS.</p>
+                <p>&nbsp;</p>
+            </body>
 
+        </html>
+    </div>
+    <div id="remindMi">
+        <html>
+            <body>
+                <h3>RemindMi Overview</h3>
+                <p>RemindMi stands for Remind Mothers and Infants. It is the
+                    component of Mwana that uses SMS technology to address
+                    post-natal follow-up. Community Health Workers (CHWs) are trained
+                    to use the tool, register their phone on the system, and
+                    given the title of RemindMi Agent.
+                </p>
+                <p>
+                    Also commonly referred to as Community Based agents (CBAs), the RemindMi Agents
+                    first register births in their clinics and communities with
+                    a simple message that is sent to the system.  Once births
+                    have been registered, SMS messages are automatically sent
+                    at regular intervals to
+                    RemindMi Agents, who seek out caregivers and infants in
+                    their respectful communities and ask them to return to the
+                    clinic for post-natal care.  The
+                    National Guidelines are for these SMS messages to be
+                    sent at 6 days, 6 weeks and 6 months. A request for a
+                    patient to be traced can also be sent for special
+                    circumstances, for example when DBS results arrive at the
+                    facility, clinic staff can send a message to the system
+                    that asks the RemindMi agents to find that caregiver and
+                    ask her to return to the clinic.
+                </p>
+            </body>
+        </html>
+    </div>
+</div>
 
 
 <script type="text/javascript">
@@ -156,8 +239,8 @@
     }
     function clearMapCanvas(){
 
-        canvas = document.getElementsByTagName('canvas')[0].getContext('2d').clearRect(0, 0, 800, 700);
-        canvas = document.getElementsByTagName('canvas')[2].getContext('2d').clearRect(0, 0, 800, 700);
+        document.getElementsByTagName('canvas')[0].getContext('2d').clearRect(0, 0, 800, 700);
+        document.getElementsByTagName('canvas')[2].getContext('2d').clearRect(0, 0, 800, 700);
     }
 </script>
 
@@ -169,11 +252,14 @@
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/maplabel.min.js" ></script>
 <script src="https://maps-api-ssl.google.com/maps/api/js?v=3.7&amp;key=AIzaSyCRNwriAGXx8oi0a6E8gIeo36MCyBmjKNk&amp;sensor=false"></script>
 
+<script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/jquery-ui-1.8.23.custom.min.js" ></script>
+<script type="text/javascript"  src="{{ MEDIA_URL }}reports/javascripts/highcharts.js"></script>
+
 <script type="text/javascript" src="{{ MEDIA_URL }}reports/javascripts/oms.min.js" ></script>
 <script type="text/javascript" >
     var map;
     var usualColor = '0495d4';
-    var spiderfiedColor = 'eebb22';
+    var spiderfieldColor = 'eebb22';
     var iconWithColor;
     var shadow;
     function moveToLocation(lat, lng, zoom){
@@ -193,7 +279,7 @@
             window.oms.a[i].setShadow(shadow);
         }
         for(var i = 0; i < markers.length; i ++) {
-            markers[i].setIcon(iconWithColor(spiderfiedColor));
+            markers[i].setIcon(iconWithColor(spiderfieldColor));
             markers[i].setShadow(null);
         }
     }
@@ -209,7 +295,7 @@
         {markersWontMove: true, markersWontHide: true});
 
         usualColor = '0495d4';
-        spiderfiedColor = 'eebb22';
+        spiderfieldColor = 'eebb22';
         iconWithColor = function(color) {
             return 'https://chart.googleapis.com/chart?chst=d_map_xpin_letter&chld=pin|+|' +
                 color + '|000000|ffff00';
@@ -227,7 +313,7 @@
         });
         oms.addListener('spiderfy', function(markers) {
             for(var i = 0; i < markers.length; i ++) {
-                markers[i].setIcon(iconWithColor(spiderfiedColor));
+                markers[i].setIcon(iconWithColor(spiderfieldColor));
                 markers[i].setShadow(null);
             }
             iw.close();
@@ -267,8 +353,6 @@
 </script>
 
 <script type="text/javascript" >
-
-    var rnd = Math.random;
     var data = [];
     //code may look ugly but is compressed to reduce size
     {% for site in sites %} {%if site.point %} data.push({lon: {{site.point.longitude}}, lat: {{site.point.latitude}},
@@ -288,6 +372,7 @@ results delivered via SMS to date<br>{{site.births}} births registered to date\n
 <br>{{site.results_retrieved_this_month}} Results received\n\
 <br>{{site.births_this_month}} births registered this month<br><br>'}); {% else %}data.push({
         province:'{{site.province}}', district:'{{site.district}}',
+        province_id:'{{site.province_id}}', district_id:'{{site.district_id}}',
         name:'{{site.name}}', workers:{{site.workers}}, cbas:{{site.cbas}},
         results_retrieved:{{site.results_retrieved}}, results_negative:{{site.results_negative}},
         results_positive:{{site.results_positive}},results_rejected:{{site.results_rejected}},
@@ -319,11 +404,14 @@ results delivered via SMS to date<br>{{site.births}} births registered to date\n
 });</script>
 
 <script type="text/javascript">
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 
 function mapOnMouseOver(str){
 
 }
-
 
 function mapOnMouseOut(str){
 
@@ -352,22 +440,30 @@ function getNumberOfWorkers(str){
     var workers = 0;
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
-        if((datum.province_id === str) ||
-                (datum.district_id === str)
-                ){
+        if((datum.province_id === str) || (datum.district_id === str)){
             workers = workers + datum.workers
 
         }
     }
     return workers;
 }
+function getNumberOfFacilities(str){
+    var items = 0;
+    for (var i = 0; i < window.mapData.length; i ++) {
+        var datum = window.mapData[i];
+        if((datum.province_id === str) ||(datum.district_id === str)) {
+            items = items + 1;
+        }
+    }
+    return items;
+}
 function getNumberOfCommunityWorkers(str){
     var cbas = 0;
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         if((datum.province_id === str) ||
-                (datum.district_id === str)
-                ){
+            (datum.district_id === str)
+    ){
             cbas = cbas + datum.cbas
 
         }
@@ -392,21 +488,26 @@ function drawLabelsOnShapes(str, loc_type){
         users = getNumberOfWorkers;
         color = "#A3CA00";
     }
+    else if(str === 'facilities'){
+        users = getNumberOfFacilities;
+        color = "#E26F36";
+    }
     if(location_type === 'District'){
         areas = document.getElementsByName('districts_coords')[0].areas;
         canvas = document.getElementsByTagName('canvas')[2];
     }
-    
+
     for(var i=0; i < areas.length; i++){
-        
+
         var id = areas[i].id;
         var numOfUsers = users(id);
         var center = getPolygonCenter(id);
         if(numOfUsers === 0){
             continue;
         }
-        drawLabelOnPoly(''+numOfUsers, center[0], center[1], canvas, color, null, i===0);
+        drawLabelOnPoly(''+numOfUsers, center[0], center[1], canvas, color, null, i===0, "");
     }
+    drawLabelOnPoly(toTitleCase(str), 100, 100, canvas, color, '20px Arial bold', false, 'rectangle');
 }
 function updateDisplay(str, location_type){
     var toDisplay = []
@@ -425,11 +526,11 @@ function updateDisplay(str, location_type){
     var lon = 0
     var points = 0
     var markerIds = []
-    var location_name = "Zammbia";
+    var location_name = "Zambia";
     if(document.getElementById(str) != null){
         location_name = document.getElementById(str).getAttribute('name');
     }
-    
+
     for (var i = 0; i < window.mapData.length; i ++) {
         var datum = window.mapData[i];
         if((location_type === "Province" && datum.province_id === str) ||
@@ -449,8 +550,8 @@ function updateDisplay(str, location_type){
             }
             else if(location_type === "Country" && districts.indexOf(datum.province) === -1){
                 districts.push(datum.province)
-            }        
-        
+            }
+
             workers = workers + datum.workers
             cbas = cbas + datum.cbas
             results_retrieved = results_retrieved + datum.results_retrieved
@@ -464,38 +565,42 @@ function updateDisplay(str, location_type){
         }
     }
     var total_results = results_positive + results_negative + results_rejected
-    perc_pos = (100.0 * results_positive / total_results).toFixed(1)
-    perc_neg = (100.0 * results_negative / total_results).toFixed(1)
-    perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
-    district_fragment = ""
-    clinic_fragment = ""
-    contact_fragment = ""
+    var perc_pos = (100.0 * results_positive / total_results).toFixed(1)
+    var perc_neg = (100.0 * results_negative / total_results).toFixed(1)
+    var perc_rej = (100.0 * results_rejected / total_results).toFixed(1)
+    var district_fragment = ""
+    var clinic_fragment = ""
+    var contact_fragment = ""
+    var mwana_years = "{{ mwana_years }}";
     if(location_type === "Country"){
         toDisplay.push("<h2>Zambia</h2>")
     }else{
         toDisplay.push("<h3>" + location_name + " " + location_type +"</h3>")
     }
-    
+
     if(districts.length > 1){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to " +(districts.length) + " districts namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff<a/> and " +
-                cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> registered."
+            clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
+            contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>" + workers 
+                + " clinic staff<a/> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>" +
+                cbas + " Comminuty Based Agents</a> currently registered."
         }else if(location_type === "District"){
-            district_fragment = " District Mwana has been deployed to " +(districts.length) + " facilities namely, "
+            district_fragment = " District Mwana has been deployed to " + (districts.length) + " facilities namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            contact_fragment = " In these " +(districts.length) + " facilities "+ workers + " <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>clinic staff</a> and "
-                + cbas + " <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>Comminuty Based Agents</a> are registered."
-        }else if(location_type === "Country"){            
-            district_fragment = " Mwana has been deployed to " +(districts.length) + " provinces namely, "
+            contact_fragment = " In these <a onclick='drawLabelsOnShapes(\"facilities\")'>" +(districts.length) + " facilities</a>, a total of <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>"+ workers
+                + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>"
+                + cbas + " Comminuty Based Agents</a> are currently registered."
+        }else if(location_type === "Country"){
+            district_fragment = ", within <a onclick='showGrowthChart()'>" + mwana_years + "</a>, Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
-            clinic_fragment = "<br>In these " +(districts.length) + " provinces Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " <a onclick='drawLabelsOnShapes(\"workers\")'>clinic staff</a> and " + cbas
-                + " <a onclick='drawLabelsOnShapes(\"cbas\")'>Comminuty Based Agents</a> registered."
+            clinic_fragment = "<br>In these " +(districts.length) +
+                " provinces Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
+            contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\")'>" + workers + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\")'>" + cbas
+                + " Comminuty Based Agents</a> currently registered."
         }
-        
+
     }else if(districts.length == 1){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
@@ -508,7 +613,7 @@ function updateDisplay(str, location_type){
             district_fragment = " Mwana has been deployed to 1 province namely, " + districts[0]
             contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
         }
-        
+
     }else if(districts.length == 0){
         if(location_type === "Province"){
             district_fragment = " Province Mwana hasn't been deployed yet."
@@ -522,15 +627,18 @@ function updateDisplay(str, location_type){
         perc_pos+","+perc_neg+","+perc_rej+"&cht=p3&chl="+
         perc_pos+"% Positive|"+perc_neg+"% Negative|"+
         perc_rej+"% Rejected&chco=E26F36|A3CA00|DEC800&chds=a'/>"
-    
+
     toDisplay.push("<p>In " + location_name + district_fragment )
     toDisplay.push(clinic_fragment)
     toDisplay.push(contact_fragment)
     if(districts.length > 0){
+        var firstPart  = "<p>Below is summary data for <a \n\
+                            onclick='showResults160About()'>Results160</a> and \n\
+                            <a onclick='showRemindMiAbout()'>RemindMi</a> in "+ location_name;
         if(location_type === "Country"){
-            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + location_name + ". Click on the map on the left to view data for a particular region.")
+            toDisplay.push(firstPart + ". Click on the map on the left to view data for a particular region.")
         }else{
-            toDisplay.push("<p>Below is summary data for Results160 and RemindMi in " + location_name + " " + location_type)
+            toDisplay.push(firstPart + " " + location_type)
         }
         toDisplay.push("<p><table style='border-collapse: separate;padding-left: 15px;}'>")
         toDisplay.push("<thead><tr><td/><th>Cumulative</th><th>This month</th></tr></thead><tbody>")
@@ -579,4 +687,116 @@ function updateDisplay(str, location_type){
 <script type="text/javascript">
 showNationalData();
 </script>
+<script type="text/javascript">
+$(function () {
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container',
+                type: 'spline',
+            },
+            title: {
+                text: {% autoescape off %} {{ title }} {% endautoescape %}
+            },
+            subtitle: {
+                text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
+            },
+            xAxis: {
+                categories: {% autoescape off %} {{ x_axis}} {% endautoescape %}
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: {% autoescape off %} {{ label_y_axis}} {% endautoescape %}
+                },
+                labels: {
+                    formatter: function() {
+                        return this.value
+                    }
+                }
+            },
+            
+            legend: {
+                enabled: true
+            },
+            series: [
+                {% for item in report_data %}
+                {
+                    name: '{{ item.key}}',
+                    marker: {
+                        symbol: 'diamond'
+                    },
+                    {% if forloop.counter0 %}
+                    data: [{% for x in item.value %} {dataLabels: { enabled: true, borderRadius: 5, backgroundColor: 'rgba(252, 255, 197, 0.7)',  borderWidth: 1, borderColor: '#AAA'}, y: {{x}}}, {% endfor %}]
+                    {% else %}
+                    data: {{ item.value }}
+                    {% endif %}
+
+                },
+                {% endfor %}
+            ],
+            plotOptions: {
+                spline: {
+                    marker: {
+                        radius: 4,
+                        lineColor: '#666666',
+                        lineWidth: 1
+                    }, dataLabels: {
+                        enabled: true,
+                        borderRadius: 5,
+                        backgroundColor: 'rgba(208, 229, 245, 0.7)',
+                        borderWidth: 1,
+                        borderColor: '#AAA',
+                        y: -6
+                    },
+                    enableMouseTracking: false
+                }
+            }
+
+        });
+        window.chart = chart;
+        $.each(chart.series[0].data, function(i, point) {
+            if(point.x < 3) {
+                point.dataLabel.attr({x: 30 + point.dataLabel.x});
+                point.dataLabel.attr({enabled:false});
+            }
+        });
+
+    });
+
+});
+
+function showDialog(code, title) {
+    $(code).dialog(
+    {
+        draggable: true,
+        resizable: true,
+        width: 780,
+        modal: true,
+        show: 'slide',
+        hide: 'slide',
+        title: title,
+        buttons: {
+            Close: function() {
+
+                $(this).dialog("close");
+            }
+        }
+
+    }
+);}
+
+function showGrowthChart() {
+    showDialog($('#chart-main-container')[0].outerHTML.replace('chartType', 'chartTypeX'), 'The Mwana Growth Chart');
+}
+
+function showResults160About() {
+    showDialog($('#results160')[0].outerHTML, 'About Results160');
+}
+function showRemindMiAbout() {
+    showDialog($('#remindMi')[0].outerHTML, 'About RemindMi');
+}
+</script>
 {% endblock %}
+

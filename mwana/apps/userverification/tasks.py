@@ -1,5 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-from django.db.models.query import QuerySet
 from mwana.const import get_province_worker_type
 from mwana.const import get_hub_worker_type
 from mwana.const import get_district_worker_type
@@ -18,7 +17,6 @@ from rapidsms.messages import OutgoingMessage
 from rapidsms.models import Contact
 
 logger = logging.getLogger(__name__)
-
 
 
 def get_defaulters(days_back):

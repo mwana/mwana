@@ -43,7 +43,7 @@ message threads. If you think this message is a mistake, respond with keyword 'H
         if len(parts) == 2:
             phone_number = parts[0]
             if parts[1].isdigit():
-                limit = parts[1]
+                limit = min(int(parts[1]), 30)
 
         contacts = Contact.active.filter(
             connection__identity__contains=phone_number)
@@ -55,11 +55,13 @@ message threads. If you think this message is a mistake, respond with keyword 'H
 
         msgs = Message.objects.filter(contact__in=contacts).order_by('-date')[:limit]
 
-        main_body = "\n".join("%s %s %s" % (msg.connection.identity,
-                                            {"I": "<<", "O": ">>"}.get(
-                                            msg.direction, "-"),
-                                            MessageFilter.get_filtered_message(
-                                            msg.text)) for msg in msgs)
+        main_body = "\n".join("%s %s %s (%s)" % (msg.connection.identity,
+                                                 {"I": ">>", "O": "<<"}.get(
+                                                     msg.direction, "-"),
+                                                 MessageFilter.get_filtered_message(
+                                                     msg.text),
+                                                 msg.date.strftime("%d/%m/%Y %H:%M")
+        ) for msg in msgs)
 
         self.respond(main_body[:160])
 

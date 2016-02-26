@@ -15,7 +15,8 @@ class SMSAlertLocation(models.Model):
     
     def __str__(self):
         return "%s: %s" % (self.district.name, "Enabled" if self.enabled else "Not Enabled")
-    
+
+
 class Hub(models.Model):
     name = models.CharField(max_length=50)
     district = models.ForeignKey(Location, unique=True)
@@ -25,6 +26,8 @@ class Hub(models.Model):
         return "%s in %s district. Contact: %s" % (self.name,
                                                    self.district.name,
                                                    self.phone)
+
+
 class Lab(models.Model):
     source_key = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
@@ -32,6 +35,7 @@ class Lab(models.Model):
 
     def __str__(self):
         return "%s. %s . Contact: %s" % (self.source_key, self.name, self.phone)
+
 
 class DhoSMSAlertNotification(models.Model):
     """

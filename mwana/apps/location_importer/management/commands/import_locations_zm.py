@@ -96,9 +96,6 @@ def load_locations(file_path):
         count += 1
 
 
-
-
-
     print "Successfully processed %s locations." % count
 
 

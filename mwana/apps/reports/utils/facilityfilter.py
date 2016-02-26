@@ -2,6 +2,10 @@
 
 from mwana.apps.locations.models import Location
 from django.db.models import Q
+from mwana.apps.reports.utils.htmlhelper import get_rpt_districts as rpt_districts
+from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities as rpt_facilities
+from mwana.apps.reports.utils.htmlhelper import get_rpt_provinces as rpt_provinces
+
 
 def user_facilities(current_user=None, group=None, province=None, district=None, facility=None):
 
@@ -18,9 +22,6 @@ def user_facilities(current_user=None, group=None, province=None, district=None,
     return facs
 
 
-def get_rpt_provinces(user):
-    return get_distinct_parents(get_rpt_districts(user))
-
 def get_distinct_parents(locations):
     if not locations:
         return []
@@ -29,12 +30,11 @@ def get_distinct_parents(locations):
         parents.append(location.parent)
     return list(set(parents))
 
+def get_rpt_provinces(user):
+    return rpt_provinces(user)
+
 def get_rpt_districts(user):
-    return get_distinct_parents(Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user))
+    return rpt_districts(user)
 
 def get_rpt_facilities(user):
-    return Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=user)
-
-
-
-
+        return rpt_facilities(user)

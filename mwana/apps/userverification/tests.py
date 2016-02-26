@@ -15,7 +15,6 @@ from rapidsms.tests.scripted import TestScript
 from rapidsms.contrib.messagelog.models import Message
 
 
-
 class UserVerificationSetUp(TestScript):
 
     def setUp(self):
@@ -69,8 +68,6 @@ class UserVerificationSetUp(TestScript):
         msgs = self.receiveAllMessages()
 
         self.assertEqual(14, len(msgs))
-
-
 
     def tearDown(self):
         # this call is required if you want to override tearDown
@@ -233,7 +230,7 @@ Hello Peter Hubs. Are you still working at Salanga Clinic and still using Result
 
         self.runScript(script)
         msgs = self.receiveAllMessages()
-        self.assertTrue(0==len(msgs), "%s" % ", ".join(msg.text for msg in msgs))
+        self.assertTrue(4 == len(msgs), "%s" % ", ".join(msg.text for msg in msgs))
         
         self.assertEqual(UserVerification.objects.count(), 13, "User verications not equal to 8")
         self.assertEqual(UserVerification.objects.filter(response="yes").count(), 3, "User verications not equal")
