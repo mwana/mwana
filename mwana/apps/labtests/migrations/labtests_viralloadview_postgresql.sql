@@ -7,7 +7,10 @@ select
 labtests_result.id,
 guspec,
 collected_on as specimen_collection_date,
-locations_location.name as facility_name,
+CASE 
+    WHEN labtests_result.clinic_id is NULL THEN '('||labtests_result.clinic_code_unrec||')'
+    ELSE locations_location.name
+END as facility_name,
 district.name as district,
 province.name as province,
 locations_location.slug as facility_slug,
@@ -22,7 +25,7 @@ participant_informed as number_of_times_sms_sent_to_participant,
 labtests_payload.source as data_source
 
 
-   FROM labtests_result labtests_result
+   FROM labtests_result
    JOIN labtests_payload ON labtests_payload.id = labtests_result.payload_id
    LEFT JOIN locations_location ON locations_location.id = labtests_result.clinic_id
    LEFT JOIN locations_location district ON locations_location.parent_id = district.id
