@@ -193,7 +193,7 @@ class App(rapidsms.apps.base.AppBase):
         #                                'days_of_week': [0, 1, 2, 3, 4]})
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [9, 15], 'minutes': [30],
-                                       'days_of_week': [0, 1, 2, 3, 4, 5, 6]})
+                                       'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
