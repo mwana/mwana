@@ -7,7 +7,6 @@ logger = logging.getLogger(__name__)
 
 class App (rapidsms.apps.base.AppBase):
 
-
     def start (self):
         # TODO: uncomment next line to enable the tasks
         self.schedule_clinics_not_retrieving_results_alerts_task()
