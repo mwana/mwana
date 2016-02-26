@@ -4,6 +4,7 @@ from django.conf.urls.defaults import *
 from mwana.apps.labtests import views
 
 urlpatterns = patterns('',
+    url(r"^$", views.dashboard, name="dashboard"),
     url(r"^incoming/$", views.accept_results, name="accept_results"),
 )
 

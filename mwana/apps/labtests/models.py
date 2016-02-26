@@ -160,7 +160,12 @@ class LabLog(models.Model):
 class ViralLoadView(models.Model):
     guspec = models.CharField(max_length=13, null=True, blank=True)
     specimen_collection_date = models.DateField(null=True, blank=True)
+    province = models.CharField(max_length=50, null=True, blank=True)
+    district = models.CharField(max_length=50, null=True, blank=True)
     facility_name = models.CharField(max_length=50, null=True, blank=True)
+    province_slug = models.CharField(max_length=10, null=True, blank=True)
+    district_slug = models.CharField(max_length=10, null=True, blank=True)
+    facility_slug = models.CharField(max_length=10, null=True, blank=True)
     result = models.CharField(max_length=30, null=True, blank=True)
     date_reached_moh = models.DateTimeField(null=True, blank=True)
     date_facility_retrieved_result = models.DateTimeField(null=True, blank=True)
@@ -171,6 +176,15 @@ class ViralLoadView(models.Model):
 
     def __unicode__(self):
         return self.guspec
+
+    def coded_guspec(self):
+        return self.guspec[:3] + "***" + self.guspec[-3:] if self.guspec else "***"
+
+    def coded_who_retrieved(self):
+        return "***" + self.who_retrieved[-3:] if self.who_retrieved else "***"
+
+    def coded_result(self):
+        return "***" + self.result[-3:] if self.result else "***"
 
     def save(self, force_insert=False, force_update=False, using=None):
         return

@@ -1,0 +1,18 @@
+#wrapper {
+    background: none repeat scroll 0 0 #FFFFFF;
+    box-shadow: 4px 4px 8px #AAAAAA;
+    margin: 0.5em auto 0;
+    width: 99%;
+}
+#table-wrapper {
+    position:relative;
+}
+#table-scroll {
+    height:150px;
+    overflow:auto;
+    margin-top:20px;
+}
+.button {
+    padding: 4px 12px;
+    border-radius: 4px;
+}
