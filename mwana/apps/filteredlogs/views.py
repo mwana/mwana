@@ -98,7 +98,6 @@ def filtered_logs(request):
 
                               'formattedtoday': today.strftime("%d %b %Y"),
                               'formattedtime': datetime.today().strftime("%I:%M %p"),
-
                               
                               'messages':table,
                               "messages_paginator_num_pages":  messages_paginator_num_pages,
