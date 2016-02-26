@@ -171,6 +171,11 @@ def map_result (verbose_result):
     return verbose_result
 
 
+def map_sex(sex):
+    key = sex.lower()
+    return {"male": "m", "female": "f", "m": "m", "f": "f"}.get(key)
+
+
 def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
     does not validate, nothing is saved; existing records are updated as necessary; return whether
@@ -232,7 +237,7 @@ def accept_record (record, payload):
         'birthdate': dictval(record, 'dob', json_date),
         'child_age': dictval(record, 'child_age'),
         'child_age_unit': dictval(record, 'child_age_unit'),
-        'sex': dictval(record, 'sex'),
+        'sex': dictval(record, 'sex', map_sex),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
