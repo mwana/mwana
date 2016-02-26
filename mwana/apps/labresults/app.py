@@ -201,7 +201,6 @@ class App(rapidsms.apps.base.AppBase):
                                    clinic=clinic.name, nuids=NUIDs))
             OutgoingMessage(contact.default_connection, msg_text).send()
 
-
     def chunk_messages(self, content):
         message = ''
         for piece in content:

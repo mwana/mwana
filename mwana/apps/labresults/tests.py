@@ -20,8 +20,8 @@ from rapidsms.models import Connection, Contact, Backend
 from rapidsms.tests.scripted import TestScript
 from mwana.apps.labresults import tasks
 from mwana.apps.labresults import tasks as tlcprinter_tasks
-from mwana.util import is_today_a_weekend
 from mwana.apps.labresults.testdata.payloads import INITIAL_PAYLOAD, CHANGED_PAYLOAD
+from mwana.apps.labresults.testdata.payloads import PAYLOAD_WITH_DUPLICATE_REQ_ID
 from mwana.apps.labresults.testdata.payloads import CHANGED_PAYLOAD_FOR_LOCATION
 from mwana.apps.labresults.testdata.payloads import UNVERIFIED
 from mwana.apps.labresults.testdata.payloads import VERIFIED
@@ -308,14 +308,14 @@ class TestApp(LabresultsSetUp):
                     for res in [res1, res2, res3]]:
             self.assertEqual("notified", res.notification_status)
 
-            script = """
-                clinic_worker > %(code)s
-            clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
-                clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
-            """ % {"name": self.contact.name, "code": "4567",
-            "id1": res1.requisition_id, "res1": res1.get_result_text(),
-            "id2": res2.requisition_id, "res2": res2.get_result_text(),
-            "id3": res3.requisition_id, "res3": res3.get_result_text()}
+        script = """
+            clinic_worker > %(code)s
+        clinic_worker < Thank you! Here are your results: **** %(id1)s;%(res1)s. **** %(id2)s;%(res2)s. **** %(id3)s;%(res3)s
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!
+        """ % {"name": self.contact.name, "code": "4567",
+        "id1": res1.requisition_id, "res1": res1.get_result_text(),
+        "id2": res2.requisition_id, "res2": res2.get_result_text(),
+        "id3": res3.requisition_id, "res3": res3.get_result_text()}
 
         self.runScript(script)
 
@@ -930,9 +930,7 @@ class TestResultsAcceptor(LabresultsSetUp):
         result1 = labresults.Result.objects.get(sample_id="10-09999")
         result2 = labresults.Result.objects.get(sample_id="10-09998")
         result3 = labresults.Result.objects.get(sample_id="10-09997")
-        
-
-        
+                
         self.assertTrue(result1.verified == False)
         self.assertTrue(result2.verified == None)
         self.assertTrue(result3.verified == False)
@@ -1115,6 +1113,67 @@ class TestResultsAcceptor(LabresultsSetUp):
         self.assertEqual(0,Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())
         
+    def test_duplicate_requisition_id(self):
+        """
+        If there exists another result at the clinic with the same requsition id
+        and the sample was collected or tested with the same 12 months, include
+        collection date and test date in the results sent to the clinic.
+        """
+        # Scheduled task will not run on a weekend
+        self.create_payload_auther_login()
+
+        # get results from initial payload
+        self._post_json(reverse('accept_results'), INITIAL_PAYLOAD)
+
+        # let the clinic worker get the results
+        script = """
+            clinic_worker > CHECK RESULTS
+            clinic_worker < Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results.
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected}. **** 78;{not_detected}. **** 212987;{not_detected}
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+            """.format(**self._result_text())
+        self.runScript(script)
+
+        # testing if the payload is processed fine is done in other test methods
+
+        # process changed payload with changes in results and one req_id
+        self._post_json(reverse('accept_results'), PAYLOAD_WITH_DUPLICATE_REQ_ID)
+
+        # The number of results records should remain to be 3
+        self.assertEqual(labresults.Result.objects.count(), 6)
+
+        time.sleep(.1)
+        # Start router and manually call send_changed_records_notification()
+        self.startRouter()
+        tasks.send_results_notification(self.router)
+
+        # Get all the messages sent
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+        # Since we have 2 clinic workers we expect 2 URGENT messages to be sent
+        # to them. A follow-up message should be sent to the support staff
+        msg1 = "Hello John Banda. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+        msg2 = "Hello Mary Phiri. We have 3 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
+
+        self.assertEqual(msg1, msgs[0].text)
+        self.assertEqual(msg2, msgs[1].text)
+        self.assertEqual("John Banda",msgs[0].connection.contact.name)
+        self.assertEqual("Mary Phiri",msgs[1].connection.contact.name)
+
+        # clinic_worker should be able to get the results by replying with PIN
+        script = """
+            clinic_worker > 4567
+            clinic_worker < Thank you! Here are your results: **** 1029023412;{not_detected} collected on 25 Mar 2010, tested on 13 Aug 2010
+            clinic_worker < **** 78;{detected} collected on 30 Sep 2010, tested on 11 Apr 2010. **** 212987;{not_detected}
+            other_worker  < John Banda has collected these results
+            clinic_worker < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again John Banda!
+""".format(**self._result_text())
+        self.runScript(script)
+        self.assertEqual(0,Result.objects.filter(notification_status='sent',
+                            result_sent_date=None).count())
+
+
     def test_results_changed_location_notification(self):
         """
         Tests sending of notifications for previously sent results but later

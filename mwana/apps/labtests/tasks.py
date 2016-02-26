@@ -1,7 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
 import logging
-from datetime import datetime
-from datetime import timedelta
 from django.conf import settings
 
 from django.db.models import Q
@@ -11,12 +9,9 @@ from django.conf import settings
 from mwana import const
 from mwana.apps.labtests.models import Payload
 from mwana.apps.labtests.views import process_payload
-from mwana.apps.labtests.messages import TEST_TYPE
-from mwana.apps.labtests.models import Result
 
 from mwana.apps.locations.models import Location
 
-from mwana.apps.tlcprinters.models import MessageConfirmation
 
 logger = logging.getLogger(__name__)
 

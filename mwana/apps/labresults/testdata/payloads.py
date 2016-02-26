@@ -148,6 +148,81 @@ CHANGED_PAYLOAD = {
     ]
 }
 
+# another payload with the some requisition IDs that already exist:
+# 1st sample has same requsition ID as another sample collected within same window period.
+# 2nd sample has same requsition ID as another sample tested within same window period.
+# 3rd sample has same requsition ID as another sample tested within OUTSIDE window period.
+PAYLOAD_WITH_DUPLICATE_REQ_ID = {
+    "source": "ndola/arthur-davison",
+    "now": "2010-04-22 10:30:00",
+    "logs": [
+        {
+            "msg": "booting daemon...",
+            "lvl": "INFO",
+            "at": "2010-04-22 07:18:03,140"
+        },
+        {
+            "msg": "archiving 124 records",
+            "lvl": "INFO",
+            "at": "2010-04-22 09:18:23,248"
+        }
+    ],
+    "samples": [
+        {
+            "coll_on": "2010-09-30",
+            "hw": "JANE SMITH",
+            "mother_age": 19,
+            "result_detail": None,
+            "sync": "new",
+            "sex": "f",
+            "result": "positive",
+            "recv_on": "2010-04-08",
+            "fac": '402029',
+            "id": "10-01111",
+            "hw_tit": "NURSE",
+            "pat_id": "78",
+            "dob": "2010-02-08",
+            "proc_on": "2010-04-11",
+            "child_age": 3
+        },
+        {
+            "coll_on": "2010-03-25",
+            "hw": "JENNY HOWARD",
+            "mother_age": 41,
+            "result_detail": None,
+            "sync": "new",
+            "sex": "f",
+            "result": "negative",
+            "recv_on": "2010-04-11",
+            "fac": '402029',
+            "id": "10-06998",
+            "hw_tit": "AMM",
+            "pat_id": "1029023412",
+            "dob": "2009-03-30",
+            "proc_on": "2010-08-13",
+            "child_age": 8
+        },
+        {
+            "coll_on": "2011-05-08",
+            "hw": "MOLLY",
+            "mother_age": 31,
+            "result_detail": None,
+            "sync": "new",
+            "sex": "f",
+            "result": "negative",
+            "recv_on": "2010-04-15",
+            "fac": '402029',
+            "id": "10-09990",
+            "hw_tit": "ZAN",
+            "pat_id": "212987",
+            "dob": "2010-01-12",
+            "proc_on": "2011-05-17",
+            "child_age": 4
+        }
+    ]
+}
+
+
 UNVERIFIED = {
     "source": "ndola/arthur-davison",
     "now": "2010-04-22 10:30:00",
