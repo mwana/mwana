@@ -47,10 +47,7 @@ def stock(request):
     facilities = user_facilities(current_user=request.user, group=None, province=None, district=None, facility=None)
     
     selected_stock = None
-    try:
-        selected_stock = Stock.objects.filter(id__in=map(int, dict(request.POST).get("_select_stock", ['-1'])))
-    except KeyError, e:
-        logger.warn("KeyError: %s" % e)
+    selected_stock = Stock.objects.filter(id__in=map(int, dict(request.POST).get("_select_stock", ['-1'])))
 
     if can_set_threshold(request.user):
         new_threshold_stock = dict(request.POST).get('new_threshold_stock', [None])[0]
@@ -97,8 +94,6 @@ def stock(request):
         dispensed_stock.append(es)
 
     selected_facilities = map(str, dict(request.POST).get("_select_facility", ['-1']))
-    print '===' * 100
-    print selected_facilities
 
     return render_to_response('stock/stock.html',
                               {
