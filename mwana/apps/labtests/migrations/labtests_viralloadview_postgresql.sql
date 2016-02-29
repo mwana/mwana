@@ -6,11 +6,12 @@ AS
 select
 labtests_result.id,
 guspec,
+requisition_id as ptid,
+given_facility_name as original_facility,
+nearest_facility_name,
 collected_on as specimen_collection_date,
-CASE 
-    WHEN labtests_result.clinic_id is NULL THEN '('||labtests_result.clinic_code_unrec||')'
-    ELSE locations_location.name
-END as facility_name,
+date_of_first_notification,
+locations_location.name as facility_name,
 district.name as district,
 province.name as province,
 locations_location.slug as facility_slug,

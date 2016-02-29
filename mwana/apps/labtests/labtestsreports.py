@@ -69,24 +69,29 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
 
     counter = records.start_index()
     for record in records.object_list:
-        date = _formated_date_time(record.date_reached_moh)
+        date_reached_moh = _formated_date_time(record.date_reached_moh)
         # @type record ViralLoadView
-        district = record.district
+        original_facility = record.original_facility
         clinic = record.facility_name
         guspec = record.coded_guspec()
+        ptid = record.coded_ptid()
         date_facility_retrieved_result = _formated_date_time(record.date_facility_retrieved_result)
         who_retrieved = record.coded_who_retrieved()
         date_participant_notified = _formated_date_time(record.date_sms_sent_to_participant)
         text = record.coded_result()
         source = record.data_source
         collected_on = record.specimen_collection_date
-        table.append([counter, district, clinic, guspec, collected_on, date,
+        date_of_first_notification = _formated_date_time(record.date_of_first_notification)
+        nearest_facility = record.nearest_facility_name
+        table.append([counter, original_facility, clinic, nearest_facility, ptid, guspec, collected_on,
+            date_reached_moh, date_of_first_notification,
                   date_facility_retrieved_result, date_participant_notified,
                   who_retrieved, text, source])
         counter = counter + 1
 
-    table.insert(0, ['  #',  'District', 'Clinic', 'GUSPEC', 'Collected On', 'Date reached MoH',
-    'Date Facility Got Result', 'Date Participant Notified','Who Retrieved',
+    table.insert(0, ['  #',  'Original Facility', 'Resolved Facility', 'Nearest Facility', 'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
+                     'Date Clinic first Notified',
+                    'Date Facility Got Result', 'Date Participant Notified','Who Retrieved',
                  'Result', 'Source'])
     messages_number=records.number
     messages_has_previous = records.has_previous()

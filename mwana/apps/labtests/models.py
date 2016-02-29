@@ -49,14 +49,17 @@ class Result(models.Model):
     )
 
     sample_id = models.CharField(max_length=20)    #lab-assigned sample id
-    requisition_id = models.CharField(max_length=50)
+    requisition_id = models.CharField(max_length=50, verbose_name='PTID')
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='test_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
                                related_name='test_results')
     clinic_code_unrec = models.CharField(max_length=20,
                                          blank=True) #if result is for clinic not registered as a Location
-    #store raw clinic code here
+    given_facility_name = models.CharField(max_length=100,
+                                         blank=True, null=True)
+    nearest_facility_name = models.CharField(max_length=100,
+                                         blank=True, null=True)
 
     result = models.CharField(max_length=30, blank=True)  #blank == 'not tested yet'
     result_unit = models.CharField(max_length=30, null=True, blank=True)
@@ -79,8 +82,10 @@ class Result(models.Model):
     old_value = models.CharField(max_length=50, null=True, blank=True)
     verified = models.NullBooleanField(null=True, blank=True)
     result_sent_date = models.DateTimeField(null=True, blank=True)
+    date_of_first_notification = models.DateTimeField(null=True, blank=True)
     arrival_date = models.DateTimeField(null=True, blank=True)
     phone = models.CharField(max_length=13, blank=True, null=True)
+    phone_invalid = models.CharField(max_length=20, blank=True, null=True)
     guspec = models.CharField(max_length=13, blank=True, null=True, verbose_name='GUSPEC')
     province = models.CharField(max_length=13, blank=True, null=True)
     district = models.CharField(max_length=13, blank=True, null=True)
@@ -158,16 +163,23 @@ class LabLog(models.Model):
 
 
 class ViralLoadView(models.Model):
+    """
+    Denormalised view for reporting
+    """
     guspec = models.CharField(max_length=13, null=True, blank=True)
+    ptid = models.CharField(max_length=50, null=True, blank=True)
     specimen_collection_date = models.DateField(null=True, blank=True)
     province = models.CharField(max_length=50, null=True, blank=True)
     district = models.CharField(max_length=50, null=True, blank=True)
     facility_name = models.CharField(max_length=50, null=True, blank=True)
+    original_facility = models.CharField(max_length=100, null=True, blank=True)
+    nearest_facility_name = models.CharField(max_length=100, null=True, blank=True)
     province_slug = models.CharField(max_length=10, null=True, blank=True)
     district_slug = models.CharField(max_length=10, null=True, blank=True)
     facility_slug = models.CharField(max_length=10, null=True, blank=True)
     result = models.CharField(max_length=30, null=True, blank=True)
     date_reached_moh = models.DateTimeField(null=True, blank=True)
+    date_of_first_notification = models.DateTimeField(null=True, blank=True)
     date_facility_retrieved_result = models.DateTimeField(null=True, blank=True)
     who_retrieved = models.CharField(max_length=30, null=True, blank=True)
     date_sms_sent_to_participant = models.DateTimeField(null=True, blank=True)
@@ -178,7 +190,10 @@ class ViralLoadView(models.Model):
         return self.guspec
 
     def coded_guspec(self):
-        return self.guspec[:3] + "***" + self.guspec[-3:] if self.guspec else "***"
+        return self.guspec[:3] + "***" + self.guspec[-2:] if self.guspec else "***"
+
+    def coded_ptid(self):
+        return "***"
 
     def coded_who_retrieved(self):
         return "***" + self.who_retrieved[-3:] if self.who_retrieved else "***"

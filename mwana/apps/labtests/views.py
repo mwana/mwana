@@ -243,13 +243,16 @@ def accept_record (record, payload):
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
         'guspec': dictval(record, 'guspec'),
-        'phone': dictval(record, 'con1nm', valid_phone),
+        'phone': dictval(record, 'phone', valid_phone),
+        'phone_invalid': dictval(record, 'phone') if not dictval(record, 'phone', valid_phone) else None,
         'province': dictval(record, 'province'),
         'district': dictval(record, 'district'),
         'constit': dictval(record, 'constit'),
         'ward': dictval(record, 'ward'),
         'csa': dictval(record, 'csa'),
         'sea': dictval(record, 'sea'),
+        'given_facility_name': dictval(record, 'fname'),
+        'nearest_facility_name': dictval(record, 'nfname'),
 
         }
 
@@ -285,6 +288,19 @@ def accept_record (record, payload):
         # if result was previously sent update new record with result_sent_date
         if old_record.result_sent_date:
             new_record.result_sent_date = old_record.result_sent_date
+
+        if old_record.date_of_first_notification:
+            new_record.date_of_first_notification = old_record.date_of_first_notification
+
+        if old_record.date_participant_notified:
+            new_record.date_participant_notified = old_record.date_participant_notified
+
+        if old_record.participant_informed:
+            new_record.participant_informed = old_record.participant_informed
+
+        if old_record.who_retrieved:
+            new_record.who_retrieved = old_record.who_retrieved
+
 
         if rec_status == 'new':
             logger.info('received a \'new\' record that already exists; may have been deleted in lab?; treating as update...')

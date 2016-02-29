@@ -517,6 +517,9 @@ class TestResultsAcceptor(LabtestsSetUp):
 
         self.assertEqual(3, Result.objects.filter(notification_status='notified',
                             ).count())
+               
+        self.assertEqual(3, Result.objects.filter(notification_status='notified',
+                            ).exclude(date_of_first_notification=None).count())
 
         self.assertEqual(0, Result.objects.filter(notification_status='sent',
                             result_sent_date=None).count())

@@ -188,12 +188,9 @@ class App(rapidsms.apps.base.AppBase):
         callback = 'mwana.apps.labtests.tasks.send_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
-        # schedule = self._get_schedule(callback.split('.')[-1],
-        #                               {'hours': [11], 'minutes': [30],
-        #                                'days_of_week': [0, 1, 2, 3, 4]})
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [9, 15], 'minutes': [30],
-                                       'days_of_week': [0, 1, 2, 3, 4]})
+                                        'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
 
     def schedule_process_payloads_tasks(self):
@@ -222,6 +219,8 @@ class App(rapidsms.apps.base.AppBase):
                                                      for msg in messages))
                 for result in results:
                     result.date_clinic_notified = datetime.now()
+                    if not result.date_of_first_notification:
+                        result.date_of_first_notification = datetime.now()
                     result.save()
 
     def _result_verified(self):
