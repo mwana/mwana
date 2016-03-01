@@ -310,7 +310,7 @@ class App(rapidsms.apps.base.AppBase):
             else:
                 msgs = Message.objects.filter(direction='I', connection__identity__startswith=phone_part).order_by('-date')
                 if msgs:
-                    backend = [0].connection.backend
+                    backend = msgs[0].connection.backend
                     PreferredBackend.objects.get_or_create(phone_first_part=phone_part, backend=backend)
                     conn, _ = Connection.objects.get_or_create(backend=backend, identity=phone)
         else:
