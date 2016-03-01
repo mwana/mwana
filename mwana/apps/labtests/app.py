@@ -39,6 +39,7 @@ class App(rapidsms.apps.base.AppBase):
         """Configure your app in the start phase."""
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
+        self.schedule_participant_notification_task()
 
     def pop_pending_connection(self, connection):
         self.waiting_for_pin.pop(connection)
@@ -142,6 +143,14 @@ class App(rapidsms.apps.base.AppBase):
             self.last_collectors[clinic] = \
                 message.connection.contact
 
+    def send_participant_message(self, res, msgcls=OutgoingMessage):
+        conn = self._get_participant_connection(res.phone)
+        if conn:
+            msgcls(conn, PARTICIPANT_RESULTS_READY, clinic=res.clinic.name).send()
+            res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
+            res.date_participant_notified = datetime.now()
+            res.save()
+
     def send_results(self, connections, results, msgcls=OutgoingMessage):
         """Sends the specified results to the given contacts."""
         responses = build_results_messages(results)
@@ -154,12 +163,7 @@ class App(rapidsms.apps.base.AppBase):
         for res in results:
             if not res.phone:
                 continue
-            conn = self._get_participant_connection(res.phone)
-            if conn:
-                msgcls(conn, PARTICIPANT_RESULTS_READY, clinic=res.clinic.name).send()
-                res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
-                res.date_participant_notified = datetime.now()
-                res.save()
+            self.send_participant_message(res, msgcls)
 
         for r in results:
             r.notification_status = 'sent'
@@ -190,6 +194,15 @@ class App(rapidsms.apps.base.AppBase):
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [9, 15], 'minutes': [30],
+                                        'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+    def schedule_participant_notification_task(self):
+        callback = 'mwana.apps.labtests.tasks.send_results_ready_notification_to_participant'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [9, 15], 'minutes': [0],
                                         'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
 
@@ -304,9 +317,9 @@ class App(rapidsms.apps.base.AppBase):
         conn = None
         if settings.ON_LIVE_SERVER:
             phone_part = phone[:6]
-            backends = PreferredBackend.objects.filter(phone_first_part=phone_part)
-            if backends:
-                conn, _ = Connection.objects.get_or_create(backend=backends[0].backend, identity=phone)
+            preferred_backends = PreferredBackend.objects.filter(phone_first_part=phone_part)
+            if preferred_backends:
+                conn, _ = Connection.objects.get_or_create(backend=preferred_backends[0].backend, identity=phone)
             else:
                 msgs = Message.objects.filter(direction='I', connection__identity__startswith=phone_part).order_by('-date')
                 if msgs:
@@ -316,6 +329,12 @@ class App(rapidsms.apps.base.AppBase):
         else:
             conn,_ = Connection.objects.get_or_create(backend=backend, identity=phone)
         return conn
+
+    def send_pending_participant_notifications(self):
+        results = Result.objects.exclude(who_retrieved=None).exclude(result_sent_date=None).\
+            exclude(notification_status='new').exclude(phone=None).exclude(phone='').filter(date_participant_notified=None)
+        for res in results:
+            self.send_participant_message(res)
 
 
 def days_ago(d):

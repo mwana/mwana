@@ -38,6 +38,16 @@ def send_results_notification(router):
         logger.info('not notifying any clinics of new results because '
                     'settings.SEND_LIVE_LABRESULTS is False')
 
+def send_results_ready_notification_to_participant(router):
+    logger.debug('in send_results_notification')
+    if settings.SEND_LIVE_LABRESULTS:
+        testresults_app = router.get_app("mwana.apps.labtests")
+
+        testresults_app.send_pending_participant_notifications()
+    else:
+        logger.info('not participants of new results because '
+                    'settings.SEND_LIVE_LABRESULTS is False')
+
 
 @transaction.commit_manually
 def process_outstanding_payloads(router):
