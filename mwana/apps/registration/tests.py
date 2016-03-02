@@ -1,10 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-"""
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
-"""
 
 import time
 
@@ -317,3 +311,62 @@ class TestApp(TestScript):
             """
         self.runScript(script)
        
+
+    def testChangeClinic(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        dst = LocationType.objects.create(slug=const.DISTRICT_SLUGS[0])
+        prv = LocationType.objects.create(slug=const.PROVINCE_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        central_clinic = Location.objects.create(name="Central Clinic",
+                                                 slug="403012", type=ctr)
+        mansa = Location.objects.create(name="Mansa",
+                                        slug="403000", type=dst)
+        luapula = Location.objects.create(name="Luapula",
+                                          slug="400000", type=prv)
+        script = """
+            tk     > join clinic kdh tizie kays 1000
+            tk     < Hi Tizie Kays, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            hubman     > join hub 403012 hubman banda 1234
+            hubman     < Hi Hubman Banda, thanks for registering for Results160 from hub at Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            dho     > join dho 4030 Dho banda 1234
+            dho     < Hi Dho Banda, thanks for registering for Results160 from Mansa DHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            pho     > join pho 40 Pho banda 1234
+            pho     < Hi Pho Banda, thanks for registering for Results160 from Luapula PHO. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+
+        old_contact = Contact.active.get(connection__identity='tk')
+        old_contact_id = old_contact.id
+
+        script = """
+            tk     > change clinic
+            tk     < To change your registration status from one clinic to another send <CHANGE CLINIC> <NEW CLINIC CODE> E.g. Change clinic 111111
+            tk     > change location 22 44
+            tk     < To change your registration status from one clinic to another send <CHANGE CLINIC> <NEW CLINIC CODE> E.g. Change clinic 111111
+            tk     > change clinic kdh
+            tk     < You already belong to Kafue District Hospital which has clinic code kdh
+            tk     > change clinic 403012
+            tk     < Thank you Tizie Kays! You have successfully changed your location from Kafue District Hospital to Central Clinic.
+            tk     > change clinic 403000
+            tk     < Sorry, I don't know about a location with code 403000. Please check your code and try again.
+            hubman     > change clinic 403012
+            hubman     < You are not registered as a clinic worker. Please respond with HELP to be assisted.
+            dho     > change clinic dho 4030 Dho banda 1234
+            dho     < You are not registered as a clinic worker. Please respond with HELP to be assisted.
+            pho     > change clinic whatever
+            pho     < You are not registered as a clinic worker. Please respond with HELP to be assisted.
+            """
+        self.runScript(script)
+
+        old_contact = Contact.objects.get(id=old_contact_id)
+        self.assertTrue(old_contact.default_connection == None)
+        self.assertEqual(old_contact.is_active, False)
+        self.assertEqual(old_contact.location, kdh)
+
+        new_contact  = Contact.active.get(connection__identity='tk')
+        # @type new_contact Contact
+        self.assertEqual(new_contact.location, central_clinic)
+        self.assertEqual(new_contact.name, 'Tizie Kays')
+        
