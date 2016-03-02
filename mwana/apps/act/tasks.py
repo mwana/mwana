@@ -23,7 +23,7 @@ logger = logging.getLogger('mwana.apps.act.tasks')
 def send_notifications(router):
     logger.info('Sending act notifications')
     if not act.RemindersSwitch.objects.filter(can_send_reminders=True).exists():
-        logger.warn('Sending act notifications is not enabled Reminders Switch')
+        logger.warn('Sending act notifications is not enabled in Reminders Switch')
         return
 
     today = datetime.date.today()
