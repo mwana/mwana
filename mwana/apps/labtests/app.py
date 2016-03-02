@@ -84,9 +84,7 @@ class App(rapidsms.apps.base.AppBase):
         # in handle()
         logger.warning("in default")
         if hasattr(message, "possible_bad_pin"):
-            logger.warning('BAd PIn')
-            message.respond("Hello, world!")
-#            message.respond(BAD_PIN)
+            message.respond(BAD_PIN)
             return True
 
         # additionally if this is your correct pin then respond that someone
