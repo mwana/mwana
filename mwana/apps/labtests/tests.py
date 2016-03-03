@@ -144,7 +144,7 @@ class TestApp(LabtestsSetUp):
     def testCheckResultsNone(self):
         script = """
             clinic_worker > VL RESULTS
-            clinic_worker < Hello John Banda. There are no new viral load test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
+            clinic_worker < Hello John Banda. There are no new test results for Mibenge Clinic right now. We'll let you know as soon as more results are available.
     """
         self.runScript(script)
 
@@ -337,6 +337,7 @@ class TestResultsAcceptor(LabtestsSetUp):
                     'ward': '3',
                     'csa': '8',
                     'sea': '2',
+                    'test_type': 'vl',
                 }, 
                 {
                     "coll_on": "2010-04-08", 
@@ -382,6 +383,7 @@ class TestResultsAcceptor(LabtestsSetUp):
         self.assertTrue(result1.verified)
         self.assertFalse(result2.verified)
         self.assertEqual(labtests.Result.objects.filter(sample_id="10-09998", guspec="DLU0026F-02", province='2', district='207', constit='29', ward='3', csa='8', sea='2').count(), 1)
+        self.assertEqual(labtests.Result.objects.filter(sample_id="10-09998", test_type='vl').count(), 1)
 
 
     def test_payload_missing_fac(self):
@@ -480,14 +482,15 @@ class TestResultsAcceptor(LabtestsSetUp):
         self._post_json(reverse('labtests:accept_results'), INITIAL_PAYLOAD)
 
         # The number of results records should be 3
-        self.assertEqual(labtests.Result.objects.count(), 3)
+        self.assertEqual(labtests.Result.objects.count(), 4)
+        self.assertEqual(labtests.Result.objects.filter(test_type=const.get_viral_load_type()).count(), 3)
         self.assertEqual(labtests.Result.objects.exclude(phone=None).exclude(phone='').count(), 1)
-        self.assertEqual(labtests.Result.objects.filter(clinic=self.clinic).count(), 3)
+        self.assertEqual(labtests.Result.objects.filter(clinic=self.clinic).count(), 4)
 
         time.sleep(.2)
         # start router and send a notification
         self.startRouter()
-        tasks.send_results_notification(self.router)
+        tasks.send_vl_results_notification(self.router)
 
         # Get all the messages sent
         msgs = self.receiveAllMessages()
@@ -506,7 +509,7 @@ class TestResultsAcceptor(LabtestsSetUp):
         time.sleep(.1)
         # start router and send a notification
         self.startRouter()
-        tasks.send_results_notification(self.router)
+        tasks.send_vl_results_notification(self.router)
 
         # Get all the messages sent
         msgs = self.receiveAllMessages()
@@ -528,13 +531,12 @@ class TestResultsAcceptor(LabtestsSetUp):
         time.sleep(1)
         self.stopRouter()
 
-        # ensure that clinic workers registered as CBAs cannot retrieve results twice
         script = """
             other_worker > 6789
             other_worker < Thank you! Here are your results: **** 1029023412;200p/mL. **** 78;100p/mL. **** 212987;300p/mL
             +260977212112 < Your appointment is due at Mibenge Clinic. Bring your referral letter with you to this appointment. If you got this msg by mistake please ignore
             clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone. Thank you again Mary Phiri!
-"""
+        """
         time.sleep(1)
         self.runScript(script)

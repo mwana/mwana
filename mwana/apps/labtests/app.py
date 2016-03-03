@@ -56,11 +56,16 @@ class App(rapidsms.apps.base.AppBase):
             clinic = get_clinic_or_default(message.contact)
             # this allows people to check the results for their clinic rather
             # than wait for them to be initiated by us on a schedule
-            results = self._pending_results(clinic, True)
+            results = self._pending_results(clinic, const.get_viral_load_type())
+            eid_results = self._pending_results(clinic, const.get_dbs_type())
             if results:
                 message.respond(RESULTS_READY, name=message.contact.name,
-                                count=results.count())
+                                count=results.count(), test_type='viral load')
                 self._mark_results_pending(results, [message.connection])
+            elif eid_results:
+                message.respond(RESULTS_READY, name=message.contact.name,
+                                count=eid_results.count(), test_type='dbs')
+                self._mark_results_pending(eid_results, [message.connection])
             else:
                 message.respond(NO_RESULTS, name=message.contact.name,
                                 clinic=clinic.name)
@@ -187,11 +192,19 @@ class App(rapidsms.apps.base.AppBase):
         return schedules.get(key, default)
 
     def schedule_notification_task(self):
-        callback = 'mwana.apps.labtests.tasks.send_results_notification'
+        callback = 'mwana.apps.labtests.tasks.send_vl_results_notification'
         # remove existing schedule tasks; reschedule based on the current setting
         EventSchedule.objects.filter(callback=callback).delete()
         schedule = self._get_schedule(callback.split('.')[-1],
                                       {'hours': [9, 15], 'minutes': [30],
+                                        'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+        callback = 'mwana.apps.labtests.tasks.send_dbs_results_notification'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [10, 14], 'minutes': [30],
                                         'days_of_week': [0, 1, 2, 3, 4]})
         EventSchedule.objects.create(callback=callback, **schedule)
 
@@ -212,13 +225,9 @@ class App(rapidsms.apps.base.AppBase):
                                       {'minutes': [0], 'hours': '*'})
         EventSchedule.objects.create(callback=callback, **schedule)
 
-    def notify_clinic_pending_results(self, clinic):
-        """
-        If one or more printers are available at the clinic, sends the results
-        directly there. Otherwise, notifies clinic staff that results are
-        ready via sms.
-        """
-        results = self._pending_results(clinic)
+    def notify_clinic_pending_results(self, clinic, test_type):
+       
+        results = self._pending_results(clinic, test_type)
         if not results:
             logger.info("0 results to send for %s" % clinic.name)
             return
@@ -241,14 +250,19 @@ class App(rapidsms.apps.base.AppBase):
         """
         return Q(verified__isnull=True) | Q(verified=True)
 
-    def _pending_results(self, clinic, check=False):
+    def _pending_results(self, clinic, test_type):
         """
         Returns the pending results for a clinic. This is limited to 9 results
         (about 3 SMSes) at a time, so clinics aren't overwhelmed with new
         results.
         """
         if settings.SEND_LIVE_LABRESULTS:
-            results = Result.objects.filter(clinic=clinic,
+
+            results = Result.objects.filter(clinic=clinic, test_type=test_type,
+                                            clinic__send_live_results=True,
+                                            notification_status__in=['new', 'notified'])
+            if test_type == const.get_viral_load_type():
+                results = Result.objects.exclude(test_type=const.get_dbs_type()).filter(clinic=clinic,
                                             clinic__send_live_results=True,
                                             notification_status__in=['new', 'notified'])
             return results.filter(self._result_verified())[:9]
@@ -277,7 +291,7 @@ class App(rapidsms.apps.base.AppBase):
             r.notification_status = 'notified'
             r.save()
 
-    def results_avail_messages(self, clinic, results):
+    def results_avail_messages(self, clinic, results, test_type_name="viral load"):
         """
         Returns clinic workers registered to receive results notification at this clinic. 
         """
@@ -292,7 +306,7 @@ class App(rapidsms.apps.base.AppBase):
         all_msgs = []
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection,
-                                  template=RESULTS_READY,
+                                  template=RESULTS_READY, test_type=test_type_name,
                                   name=contact.name, count=results.count())
             all_msgs.append(msg)
 

@@ -23,6 +23,23 @@ INITIAL_PAYLOAD = {
     "samples": [
         {
             "coll_on": "2010-03-31",
+            "hw": "BEYONSE KNOWS",
+            "mother_age": 19,
+            "result_detail": None,
+            "sync": "new",
+            "sex": "f",
+            "result": "Detected",
+            "test_type": "dbs",
+            "recv_on": "2010-04-08",
+            "fac": '402029',
+            "id": "EID10-09999",
+            "hw_tit": "NURSE",
+            "pat_id": "EID78",
+            "dob": "2010-02-08",
+            "proc_on": "2010-04-11",
+        },
+        {
+            "coll_on": "2010-03-31",
             "hw": "JANE SMITH",
             "mother_age": 19,
             "result_detail": None,

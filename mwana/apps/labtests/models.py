@@ -4,6 +4,8 @@ from django.db import models
 from rapidsms.models import Backend, Contact
 
 from mwana.apps.locations.models import Location
+from mwana.const import get_viral_load_type
+from mwana.const import get_dbs_type
 
 
 class Participant(models.Model):
@@ -22,6 +24,11 @@ class PreferredBackend(models.Model):
     def __unicode__(self):
         return "%s on %s" % (self.phone_first_part, self.backend)
 
+
+TEST_TYPES = (
+        (get_dbs_type(), 'EID'),
+        (get_viral_load_type(), 'Viral Load'),
+    )
 
 class Result(models.Model):
     """A viral load result"""
@@ -63,6 +70,7 @@ class Result(models.Model):
 
     result = models.CharField(max_length=30, blank=True)  #blank == 'not tested yet'
     result_unit = models.CharField(max_length=30, null=True, blank=True)
+    test_type = models.CharField(choices=TEST_TYPES, max_length=20, null=True, blank=True)
     result_detail = models.CharField(max_length=200, blank=True)   #reason for rejection or explanation of inconsistency
     collected_on = models.DateField(null=True, blank=True)   #date collected at clinic
     entered_on = models.DateField(null=True, blank=True)     #date received at lab
@@ -178,6 +186,7 @@ class ViralLoadView(models.Model):
     district_slug = models.CharField(max_length=10, null=True, blank=True)
     facility_slug = models.CharField(max_length=10, null=True, blank=True)
     result = models.CharField(max_length=30, null=True, blank=True)
+    test_type = models.CharField(choices=TEST_TYPES, max_length=20, null=True, blank=True)
     date_reached_moh = models.DateTimeField(null=True, blank=True)
     date_of_first_notification = models.DateTimeField(null=True, blank=True)
     date_facility_retrieved_result = models.DateTimeField(null=True, blank=True)

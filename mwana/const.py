@@ -96,3 +96,9 @@ def get_province_worker_type():
 
 def get_dbs_printer_type():
     return _get_contacttype(DBS_PRINTER_SLUG, 'Province Worker')
+
+def get_dbs_type():
+    return 'dbs'
+
+def get_viral_load_type():
+    return 'vl'

@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana import const
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_all_rpt_provinces
 from mwana.apps.reports.utils.htmlhelper import get_all_rpt_districts
@@ -253,7 +254,7 @@ def accept_record (record, payload):
         'sea': dictval(record, 'sea'),
         'given_facility_name': dictval(record, 'fname'),
         'nearest_facility_name': dictval(record, 'nfname'),
-
+        'test_type': dictval(record, 'test_type') or const.get_viral_load_type(),
         }
 
     #need to keep old record 'pristine' so we can check which fields have changed
