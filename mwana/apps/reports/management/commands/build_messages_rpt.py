@@ -94,7 +94,7 @@ from messagelog_message
 join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
 left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
 left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
-left join locations_location location on location.id = rapidsms_contact.location_id
+join locations_location location on location.id = rapidsms_contact.location_id
   left join locations_locationtype on locations_locationtype.id= location.type_id
 
 WHERE  extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
@@ -115,7 +115,7 @@ from messagelog_message
 join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
 left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
 left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
-left join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
+join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
 
 WHERE  direction = 'I'
 and extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
@@ -136,7 +136,7 @@ from messagelog_message
 join rapidsms_contact on rapidsms_contact.id = messagelog_message.contact_id
 left join rapidsms_contact_types on rapidsms_contact_types.contact_id = rapidsms_contact.id
 left join contactsplus_contacttype on contactsplus_contacttype.id =  rapidsms_contact_types.contacttype_id
-left join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
+join locations_location location on location.id = rapidsms_contact.location_id  left join locations_locationtype on locations_locationtype.id= location.type_id
 
 WHERE  direction = 'O'
 and extract (year from messagelog_message.date)::INTEGER = {year} and extract (month from messagelog_message.date)::INTEGER = {month}
