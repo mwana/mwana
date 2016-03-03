@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.labtests.models import ViralLoadView
+from mwana import const
 from datetime import date
 from datetime import datetime
 from datetime import timedelta
@@ -30,7 +31,7 @@ def set_reporting_period(startdate, enddate):
         + timedelta(days=1) - timedelta(seconds=0.01)
 
 
-def get_viral_load_data(province=None, district=None, facility=None, startdate=None, enddate=None, search_key=None, page=1):
+def get_viral_load_data(province=None, district=None, facility=None, startdate=None, enddate=None, search_key=None, page=1, test_type=const.get_viral_load_type()):
     """
     Returns censored message logs (with Requisition IDs, Results hidden)
     """
@@ -51,6 +52,10 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
     results2 = ViralLoadView.objects.filter(facility_slug=None, date_reached_moh__gte=dbsr_startdate). \
         filter(date_reached_moh__lte=dbsr_enddate)
     results = results1|results2
+    if const.get_viral_load_type() == test_type:
+        results = results.exclude(test_type=const.get_dbs_type())
+    elif const.get_dbs_type() == test_type:
+        results = results.exclude(test_type=const.get_viral_load_type())
 
     table = []
    

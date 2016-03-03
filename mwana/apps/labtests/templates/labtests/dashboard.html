@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load forms_tags %}
 
-{% block title %}Test Results{{ block.super }}{% endblock %}
+{% block title %}Test Results {% endblock %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -20,7 +20,7 @@
 <div class="left">
     <form name="getValues" action="" method="GET">
         <div class="module">
-            <h2>Test Results</h2>
+            <h2>{{ title }}</h2>
             <br>
             <table border="1" width="100%" id="input_parameters_table">
                 <thead>

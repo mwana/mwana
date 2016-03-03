@@ -5,6 +5,8 @@ from mwana.apps.labtests import views
 
 urlpatterns = patterns('',
     url(r"^$", views.dashboard, name="dashboard"),
+    url(r"^eid/$", views.eid_dashboard, name="eid_dashboard"),
+    url(r"^dbs/$", views.eid_dashboard, name="eid_dashboard"),
     url(r"^incoming/$", views.accept_results, name="accept_results"),
 )
 
