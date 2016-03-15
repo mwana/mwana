@@ -181,4 +181,3 @@ class RemindersSwitch(models.Model):
     def __unicode__(self):
         return "%s send reminders" % ("Can" if self.can_send_reminders else "Can NOT")
 
-
