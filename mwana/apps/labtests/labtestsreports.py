@@ -15,7 +15,8 @@ dbsr_enddate = datetime(today.year, today.month, today.day) + \
 dbsr_startdate = datetime(today.year, today.month, today.day) - \
         timedelta(days=30)
 
-def _formated_date_time(date):
+
+def _formatted_date_time(date):
     try:
         return date.strftime("%Y-%m-%d %H:%M")
     except:
@@ -53,9 +54,9 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
         filter(date_reached_moh__lte=dbsr_enddate)
     results = results1|results2
     if const.get_viral_load_type() == test_type:
-        results = results.exclude(test_type=const.get_dbs_type())
+        results = results.exclude(test_type=const.get_dbs_type()).order_by("specimen_collection_date")
     elif const.get_dbs_type() == test_type:
-        results = results.exclude(test_type=const.get_viral_load_type())
+        results = results.exclude(test_type=const.get_viral_load_type()).order_by("specimen_collection_date")
 
     table = []
    
@@ -74,19 +75,19 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
 
     counter = records.start_index()
     for record in records.object_list:
-        date_reached_moh = _formated_date_time(record.date_reached_moh)
+        date_reached_moh = _formatted_date_time(record.date_reached_moh)
         # @type record ViralLoadView
         original_facility = record.original_facility
         clinic = record.facility_name
         guspec = record.coded_guspec()
         ptid = record.coded_ptid()
-        date_facility_retrieved_result = _formated_date_time(record.date_facility_retrieved_result)
+        date_facility_retrieved_result = _formatted_date_time(record.date_facility_retrieved_result)
         who_retrieved = record.coded_who_retrieved()
-        date_participant_notified = _formated_date_time(record.date_sms_sent_to_participant)
+        date_participant_notified = _formatted_date_time(record.date_sms_sent_to_participant)
         text = record.coded_result()
         source = record.data_source
         collected_on = record.specimen_collection_date
-        date_of_first_notification = _formated_date_time(record.date_of_first_notification)
+        date_of_first_notification = _formatted_date_time(record.date_of_first_notification)
         nearest_facility = record.nearest_facility_name
         table.append([counter, original_facility, clinic, nearest_facility, ptid, guspec, collected_on,
             date_reached_moh, date_of_first_notification,
