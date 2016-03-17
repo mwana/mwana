@@ -22,6 +22,7 @@ def _formatted_date_time(date):
     except:
         return date
 
+
 def set_reporting_period(startdate, enddate):
     if startdate:
         dbsr_startdate = datetime(startdate.year, startdate.month,
@@ -90,14 +91,14 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
         date_of_first_notification = _formatted_date_time(record.date_of_first_notification)
         nearest_facility = record.nearest_facility_name
         table.append([counter, original_facility, clinic, nearest_facility, ptid, guspec, collected_on,
-            date_reached_moh, date_of_first_notification,
-                  date_facility_retrieved_result, date_participant_notified,
-                  who_retrieved, text, source])
+                    date_reached_moh, date_of_first_notification,
+                  date_facility_retrieved_result, who_retrieved, date_participant_notified,
+                   text, source])
         counter = counter + 1
 
     table.insert(0, ['  #',  'Original Facility', 'Resolved Facility', 'Nearest Facility', 'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
                      'Date Clinic first Notified',
-                    'Date Facility Got Result', 'Date Participant Notified','Who Retrieved',
+                    'Date Facility Got Result', 'Who Retrieved', 'Date Participant Notified',
                  'Result', 'Source'])
     messages_number=records.number
     messages_has_previous = records.has_previous()
