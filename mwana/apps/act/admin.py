@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.act.models import SystemUser
 from mwana.apps.act.models import RemindersSwitch
 from mwana.apps.act.models import VerifiedNumber
 from mwana.apps.act.models import CHW
@@ -82,3 +83,11 @@ class RemindersSwitchAdmin(admin.ModelAdmin):
     list_editable = ['can_send_reminders']
 
 admin.site.register(RemindersSwitch, RemindersSwitchAdmin)
+
+
+class SystemUserAdmin(admin.ModelAdmin):
+    list_display = ('name', 'password_slice', 'site')
+    list_filter = ['site']
+    search_fields = ('name',  'site')
+
+admin.site.register(SystemUser, SystemUserAdmin)

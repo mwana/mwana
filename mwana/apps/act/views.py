@@ -14,6 +14,7 @@ from django.db import transaction
 from mwana.apps.act.models import CHW
 from mwana.apps.act.models import Client
 from mwana.apps.act.models import Payload
+from mwana.apps.act.models import SystemUser
 from mwana.decorators import has_perm_or_basicauth
 from mwana.apps.locations.models import Location
 
@@ -121,6 +122,10 @@ def process_payload(payload, data=None):
     elif 'appointment' in data and hasattr(data['appointment'], '__iter__'):
         if not accept_appointment_record(data['appointment'], payload):
             logger.debug('Appointment record %s did not validate' % data['appointment'])
+            records_validate = False
+    elif 'user' in data and hasattr(data['user'], '__iter__'):
+        if not accept_user_record(data['user'], payload):
+            logger.debug('User record %s did not validate' % data['user'])
             records_validate = False
     else:
         records_validate = False
@@ -369,6 +374,50 @@ def accept_appointment_record(record, payload):
     return True
 
 
+def accept_user_record(record, payload):
+
+    name = dictval(record, 'name')
+    print "-"* 100
+    print name
+    print '+'*100
+    old_record = None
+    if name:
+        try:
+            old_record = SystemUser.objects.get(name=name)
+        except SystemUser.DoesNotExist:
+            pass
+
+    def cant_save(message):
+        message = 'cannot save record: ' + message
+        if old_record:
+            message += '; original record [%s] untouched' % name
+        message += '\nrecord: %s' % str(record)
+        logger.error(message)
+        
+
+    #validate required identifying fields
+    for req_field in ('name', 'token'):
+        if dictval(record, req_field) is None:
+            cant_save('required field %s missing' % req_field)
+            return False
+
+    #general field validation
+    record_fields = {
+        'name': name,
+        'password_slice': dictval(record, 'token'),
+        'site': dictval(record, 'loc'),
+        }
+
+    old_record_copy = SystemUser.objects.get(name=name) if old_record else None
+    f_user = SystemUserForm(record_fields, instance=old_record_copy)
+    if f_user.is_valid():
+        f_user.save()        
+    else:
+        cant_save('validation errors in record: %s' % str(f_user.errors))
+        return False
+    return True
+
+
 class PayloadForm(ModelForm):
     class Meta:
         model = Payload
@@ -388,9 +437,13 @@ class CHAForm(ModelForm):
 
 
 class AppointmentForm(ModelForm):
+        class Meta:
+            model = Appointment
+            exclude = ['status']
+
+class SystemUserForm(ModelForm):
     class Meta:
-        model = Appointment
-        exclude = ['status']
+        model = SystemUser
 
 
 log_rotation_threshold = 5000

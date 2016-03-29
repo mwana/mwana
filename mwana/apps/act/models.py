@@ -181,3 +181,12 @@ class RemindersSwitch(models.Model):
     def __unicode__(self):
         return "%s send reminders" % ("Can" if self.can_send_reminders else "Can NOT")
 
+
+class SystemUser(models.Model):
+    name = models.CharField(max_length=255)
+    password_slice = models.CharField(max_length=255)
+    site = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return "%s of %s" % (self.name, self.site)
+    
