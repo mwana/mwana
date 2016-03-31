@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.const import get_clinic_worker_type
+from rapidsms.models import Contact
 from mwana.apps.labtests.models import ViralLoadView
 from mwana import const
 from datetime import date
@@ -25,12 +27,22 @@ def _formatted_date_time(date):
 
 def set_reporting_period(startdate, enddate):
     if startdate:
+        global dbsr_startdate
         dbsr_startdate = datetime(startdate.year, startdate.month,
                                        startdate.day)
     if enddate:
-        dbsr_enddate = \
+        global dbsr_enddate
+        dbsr_enddate= \
         datetime(enddate.year, enddate.month, enddate.day)\
         + timedelta(days=1) - timedelta(seconds=0.01)
+
+
+def _ready_to_receive_results_via_sms(slug):
+    # @type result Result
+    if not slug:
+        return False
+    return "Yes" if Contact.active.filter(location__slug=slug, types=get_clinic_worker_type(),
+                                          connection__identity__startswith='+26097').exists() else "No"
 
 
 def get_viral_load_data(province=None, district=None, facility=None, startdate=None, enddate=None, search_key=None, page=1, test_type=const.get_viral_load_type()):
@@ -90,13 +102,13 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
         collected_on = record.specimen_collection_date
         date_of_first_notification = _formatted_date_time(record.date_of_first_notification)
         nearest_facility = record.nearest_facility_name
-        table.append([counter, original_facility, clinic, nearest_facility, ptid, guspec, collected_on,
+        table.append([counter, clinic, _ready_to_receive_results_via_sms(record.facility_slug), ptid, guspec, collected_on,
                     date_reached_moh, date_of_first_notification,
                   date_facility_retrieved_result, who_retrieved, date_participant_notified,
                    text, source])
         counter = counter + 1
 
-    table.insert(0, ['  #',  'Original Facility', 'Resolved Facility', 'Nearest Facility', 'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
+    table.insert(0, ['  #', 'Resolved Facility', "Ready to receive results via SMS",  'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
                      'Date Clinic first Notified',
                     'Date Facility Got Result', 'Who Retrieved', 'Date Participant Notified',
                  'Result', 'Source'])
