@@ -240,7 +240,7 @@ def accept_record (record, payload):
         'sex': dictval(record, 'sex'),
         'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
-        'coll_hw_title': dictval(record, 'hw_tit'),
+        'coll_hw_title': dictval(record, 'hw_tit')[:30] if dictval(record, 'hw_tit') else dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
     }
 
