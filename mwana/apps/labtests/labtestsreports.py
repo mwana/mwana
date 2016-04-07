@@ -108,7 +108,7 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
                    text, source])
         counter = counter + 1
 
-    table.insert(0, ['  #', 'Resolved Facility', "Ready to receive results via SMS",  'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
+    table.insert(0, ['  #', 'Facility', "Ready to receive results via SMS",  'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
                      'Date Clinic first Notified',
                     'Date Facility Got Result', 'Who Retrieved', 'Date Participant Notified',
                  'Result', 'Source'])
