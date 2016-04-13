@@ -376,10 +376,7 @@ def accept_appointment_record(record, payload):
 
 def accept_user_record(record, payload):
 
-    name = dictval(record, 'name')
-    print "-"* 100
-    print name
-    print '+'*100
+    name = dictval(record, 'name')    
     old_record = None
     if name:
         try:
