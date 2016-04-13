@@ -17,7 +17,7 @@
                         text: {% autoescape off %} {{ sub_title }} {% endautoescape %}
                     },
                     tooltip: {
-                        pointFormat: '{series.name}: <b>{point.percentage}%</b>',
+                        pointFormat: '{series.name}: <b>{point.percentage}% ({point.y})</b>',
                         percentageDecimals: 1
                     },
                     plotOptions: {
@@ -29,14 +29,14 @@
                                 color: '#000000',
                                 connectorColor: '#000000',
                                 formatter: function() {
-                                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(1)  +' %';
+                                    return '<b>'+ this.point.name +'</b>: '+ this.percentage.toFixed(1)  +' % (' + this.y + ')';
                                 }
                             }
                         }
                     },
                     series: [{
                             type: 'pie',
-                            name: 'Births',
+                            name: '{{ series_name }}',
                             data: {% autoescape off %} {{ report_data}} {% endautoescape %}
                         }]
                 });

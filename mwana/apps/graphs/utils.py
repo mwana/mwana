@@ -19,7 +19,7 @@ from mwana.apps.reminders.models import PatientEvent
 from rapidsms.models import Backend
 
 
-class GraphServive:
+class GraphService:
 
     def get_turnarounds(self, start_date, end_date, province_slug, district_slug, facility_slug):
         """
@@ -494,6 +494,22 @@ class GraphServive:
                                            event__name__iexact='birth').\
             values('event_location_type').\
             annotate(total=Count('id'))
+
+    def get_messages_by_location(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        
+        start, end = get_datetime_bounds(start_date, end_date)
+        messages = MessageByLocationByUserType.objects.filter(min_date__gte=start).filter(max_date__lte=end)
+        report_level = 'province'
+
+        if district_slug:
+            report_level = 'facility'
+            messages = messages.filter(district_slug=district_slug)
+        elif province_slug:
+            report_level = 'district'
+            messages = messages.filter(province_slug=province_slug)
+        
+        return report_level, 'sum', messages.values(report_level).annotate(sum=Sum('count'))
+
 
 def _turnaround_query(start_date, end_date, province_slug, district_slug, facility_slug):
     """

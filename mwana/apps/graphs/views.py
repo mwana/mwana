@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from mwana.apps.graphs.utils import GraphServive
+from mwana.apps.graphs.utils import GraphService
 from mwana.apps.reports.utils.htmlhelper import get_facilities_dropdown_html
 from mwana.apps.reports.utils.htmlhelper import get_month_end
 from mwana.apps.reports.utils.htmlhelper import get_month_start
@@ -75,7 +75,7 @@ def lab_submissions(request):
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
     start_date = end_date - timedelta(days=30)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_lab_submissions(start_date, end_date, rpt_provinces\
@@ -102,7 +102,7 @@ def monthly_lab_submissions(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_lab_submissions(start_date, end_date, rpt_provinces\
@@ -130,7 +130,7 @@ def monthly_birth_trends(request):
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
     start_date = end_date - timedelta(days=30 * monthrange)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_birth_trends(start_date, end_date,
@@ -160,7 +160,7 @@ def monthly_scheduled_visit_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_scheduled_visit_trends(start_date, end_date,
@@ -189,7 +189,7 @@ def monthly_turnaround_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_turnaround_trends(start_date, end_date,
@@ -218,7 +218,7 @@ def dbs_testing_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_dbs_testing_trends(start_date, end_date,
@@ -247,7 +247,7 @@ def monthly_results_retrival_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_results_retrival_trends(start_date, end_date,
@@ -277,7 +277,7 @@ def messages(request):
     data_type = read_request(request, "data_type") or "count"
     direction = read_request(request, "direction") or "all"
 
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_messages(start_date, end_date,
@@ -308,7 +308,7 @@ def messages_by_user_type(request):
     data_type = read_request(request, "data_type") or "percentage"
     direction = read_request(request, "direction") or "all"
     
-    service = GraphServive()
+    service = GraphService()
     report_data = []
 
     time_ranges, data = service.get_monthly_messages_by_usertype(start_date,
@@ -339,7 +339,7 @@ def facility_vs_community(request):
     start_date = min(startdate1, enddate1, date.today())
     end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
     
-    service = GraphServive()
+    service = GraphService()
     
     report_data = []
 
@@ -353,6 +353,32 @@ def facility_vs_community(request):
                               "sub_title": "'Period: %s  to %s (Filtered by Date of Birth)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'DBS samples'",
                               "report_data": report_data,
+                              "series_name": 'Births',
+                              }, context_instance=RequestContext(request)
+                              )
+
+def messages_by_location(request):
+    enddate1, district_slug, facility_slug, province_slug, startdate1, _ = get_report_parameters(request)
+
+    start_date = min(startdate1, enddate1, date.today())
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    report_level = 'province'
+    
+    service = GraphService()
+    
+    report_data = []
+
+    report_level, aggregate_function, service_data = service.get_messages_by_location(start_date, end_date, province_slug, district_slug, facility_slug)
+    for item in service_data:
+        report_data.append([str(item[report_level]), item[aggregate_function]])
+    
+    return render_to_response('graphs/facility_vs_community.html',
+                              {
+                              "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
+                              "title": "'Messages by Loaction'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%b %Y"), end_date.strftime("%b %Y")),                              
+                              "report_data": report_data,
+                              "series_name": 'Messages',
                               }, context_instance=RequestContext(request)
                               )
 
@@ -363,7 +389,7 @@ def turnaround(request):
     start_date = min(startdate1, enddate1, date.today())
     end_date = min(max(enddate1, MWANA_ZAMBIA_START_DATE), date.today())
 
-    service = GraphServive()
+    service = GraphService()
 
 
     categories, transport, processing, delays, retrieving = service.get_turnarounds(start_date, end_date, province_slug, district_slug, facility_slug)
