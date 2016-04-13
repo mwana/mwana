@@ -1,5 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
-from mwana.apps.graphs.utils import GraphServive
+from mwana.apps.graphs.utils import GraphService
 from mwana.apps.reports.utils.facilityfilter import get_rpt_provinces
 from mwana.apps.reports.utils.facilityfilter import get_rpt_districts
 from mwana.apps.reports.utils.facilityfilter import get_rpt_facilities
@@ -594,7 +594,7 @@ def home(request):
         report_data = growth_data
         time_ranges = time_ranges
     else:
-        service = GraphServive()
+        service = GraphService()
         report_data = []
         time_ranges, data = service.get_yearly_supported_sites()
 
