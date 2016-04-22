@@ -479,7 +479,7 @@ def dashboard(request):
         request)
 
     (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
-    get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page)
+    get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_viral_load_type(), request.user)
     title = "Viral Load"
     return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
                        messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
@@ -492,7 +492,7 @@ def eid_dashboard(request):
 
 
     (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
-        get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_dbs_type())
+        get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_dbs_type(), request.user)
 
     title = "EID"
     return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,

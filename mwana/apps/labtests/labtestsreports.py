@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.const import get_clinic_worker_type
 from rapidsms.models import Contact
 from mwana.apps.labtests.models import ViralLoadView
@@ -44,11 +45,19 @@ def _ready_to_receive_results_via_sms(slug):
     return "Yes" if Contact.active.filter(location__slug=slug, types=get_clinic_worker_type(),
                                           connection__identity__startswith='+26097').exists() else "No"
 
-
-def get_viral_load_data(province=None, district=None, facility=None, startdate=None, enddate=None, search_key=None, page=1, test_type=const.get_viral_load_type()):
+def _can_view_results(user):
+    # TODO: Create model were allowed groups can be changed from admin
+    if not user:
+        return False
+    elif not user.is_active:
+        return False
+    return GroupUserMapping.objects.filter(group__name='ZAMPHYA', user=user)
+    
+def get_viral_load_data(province=None, district=None, facility=None, startdate=None, enddate=None, search_key=None, page=1, test_type=const.get_viral_load_type(), user=None):
     """
     Returns censored message logs (with Requisition IDs, Results hidden)
     """
+    can_view_results = _can_view_results(user)
     set_reporting_period(startdate, enddate)
     
     locations = Location.objects.exclude(test_results=None)
@@ -88,16 +97,23 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
 
     counter = records.start_index()
     for record in records.object_list:
+        if not can_view_results:
+            table.append( ['  You', "don't", "have",  'permission', 'to', 'view', 'these',
+                     'results.',
+                    'Contact', 'support', 'if you',
+                 'need', 'help'])
+            break
+
         date_reached_moh = _formatted_date_time(record.date_reached_moh)
         # @type record ViralLoadView
-        original_facility = record.original_facility
+#        original_facility = record.original_facility
         clinic = record.facility_name
-        guspec = record.coded_guspec()
-        ptid = record.coded_ptid()
+        guspec = record.guspec
+        ptid = record.ptid
         date_facility_retrieved_result = _formatted_date_time(record.date_facility_retrieved_result)
-        who_retrieved = record.coded_who_retrieved()
+        who_retrieved = record.who_retrieved
         date_participant_notified = _formatted_date_time(record.date_sms_sent_to_participant)
-        text = record.coded_result()
+        text = record.result
         source = record.data_source
         collected_on = record.specimen_collection_date
         date_of_first_notification = _formatted_date_time(record.date_of_first_notification)
