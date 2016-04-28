@@ -4,8 +4,11 @@ Creates web users from a csv file. The fields in the csv file must be in the
 order: FirstName, LastName, Email, Type, District. Passwords created are 'temporal'
 """
 
+from mwana.apps.reports.models import Login
 from mwana.apps.reports.webreports.models import GroupUserMapping
 from mwana.apps.reports.webreports.models import ReportingGroup
+import string
+import random
 import os
 import os.path
 
@@ -58,19 +61,30 @@ def load_users(file_path):
 
         username = first_name[0].lower() + last_name.split()[0].lower()
 
-        password = "%s%s" % (username, date.today().day)
+        password = ''.join(random.choice(string.ascii_letters) for x in range(6))
 
-        if User.objects.filter(username=username):
-#            User.objects.filter(username=username).delete()
+        if email and User.objects.filter(username=username, email=email):
+            answer = raw_input("%s (%s) already exists. Do you want to reset this user? " % (username, email))
+            if answer.strip().lower() in ['yes' , 'y']:
+                user = User.objects.get(username=username, email=email)
+                user.set_password(password)
+                user.save()
+                Login.objects.filter(user=user).delete()
+                print "Credentials reset. username: %s, password: %s, for %s %s " % (username, password, first_name, last_name)
+            else:
+                print "%s skipped. %s" % (username, line)
+                continue
+        elif User.objects.filter(username=username):
             print "%s exists. Skipping %s" % (username, line)
             continue
 
-        user = User(username=username, first_name=first_name,
+        else:
+            user = User(username=username, first_name=first_name,
                     last_name=last_name, email=email, is_staff=True)
-        user.set_password(password)
-        user.save()
+            user.set_password(password)
+            user.save()
 
-        print "Created login: %s , password: %s, for %s %s " % (username, password, first_name, last_name)
+            print "Created login: %s , password: %s, for %s %s " % (username, password, first_name, last_name)
 
         group, created = ReportingGroup.objects.get_or_create(name=("%s %s" % (user_type, district_name)).strip())
         if group:
