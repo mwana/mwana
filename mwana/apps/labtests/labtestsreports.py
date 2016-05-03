@@ -106,7 +106,7 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
 
         date_reached_moh = _formatted_date_time(record.date_reached_moh)
         # @type record ViralLoadView
-#        original_facility = record.original_facility
+        original_facility = record.original_facility
         clinic = record.facility_name
         guspec = record.guspec
         ptid = record.ptid
@@ -117,14 +117,14 @@ def get_viral_load_data(province=None, district=None, facility=None, startdate=N
         source = record.data_source
         collected_on = record.specimen_collection_date
         date_of_first_notification = _formatted_date_time(record.date_of_first_notification)
-        nearest_facility = record.nearest_facility_name
-        table.append([counter, clinic, _ready_to_receive_results_via_sms(record.facility_slug), ptid, guspec, collected_on,
+#        nearest_facility = record.nearest_facility_name
+        table.append([counter, clinic, original_facility, _ready_to_receive_results_via_sms(record.facility_slug), ptid, guspec, collected_on,
                     date_reached_moh, date_of_first_notification,
                   date_facility_retrieved_result, who_retrieved, date_participant_notified,
                    text, source])
         counter = counter + 1
 
-    table.insert(0, ['  #', 'Facility', "Ready to receive results via SMS",  'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
+    table.insert(0, ['  #', 'Facility', 'User chosen facility', "Ready to receive results via SMS",  'PTID', 'GUSPEC', 'Collected On', 'Date reached MoH',
                      'Date Clinic first Notified',
                     'Date Facility Got Result', 'Who Retrieved', 'Date Participant Notified',
                  'Result', 'Source'])
