@@ -7,6 +7,7 @@ from mwana.apps.reports.utils.htmlhelper import get_all_rpt_facilities
 import json
 
 from datetime import datetime
+from datetime import date
 from datetime import timedelta
 from django.db import transaction
 from django.forms import ModelForm
@@ -505,7 +506,7 @@ def initialise_parameters(request):
     try:
         startdate1 = text_date(request.REQUEST['startdate'])
     except (KeyError, ValueError, IndexError):
-        startdate1 = today - timedelta(days=30)
+        startdate1 = date(2015, 1, 1)
     try:
         enddate1 = text_date(request.REQUEST['enddate'])
     except (KeyError, ValueError, IndexError):

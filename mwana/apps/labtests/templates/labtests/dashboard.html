@@ -33,9 +33,9 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="text" id="startdate" name="startdate" class="datefield" size="9"
+                        <td><input type="text" id="startdate" name="startdate" disabled="true" class="datefield" readonly="" size="9"
                                    value='{{ fstartdate }}' placeholder='{{ fstartdate }}'/></td>
-                        <td><input type="text" id="enddate" name="enddate" class="datefield" size="9"
+                        <td><input type="text" id="enddate" name="enddate" disabled="true" readonly="" class="datefield" size="9"
                                    value='{{ fenddate }}' placeholder='{{ fenddate }}'/></td>
                         <td>{% autoescape off %}
                             {{ rpt_provinces }}
@@ -123,8 +123,8 @@
 
 <script type="text/javascript">
     $(function () {
-        $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
-        $.datepicker.formatDate;
+     //   $(".datefield").datepicker({ dateFormat: 'yy-mm-dd' });
+     //   $.datepicker.formatDate;
     });
 </script>
 
