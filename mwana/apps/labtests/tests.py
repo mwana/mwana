@@ -17,8 +17,6 @@ from rapidsms.tests.scripted import TestScript
 from mwana.apps.labtests import tasks
 from mwana.apps.labtests.testdata.payloads import INITIAL_PAYLOAD
 
-import random
-
 
 class LabtestsSetUp(TestScript):
 

@@ -312,8 +312,10 @@ def update_overall_groups():
     for group in groups:
         try:
             reporting_group = ReportingGroup.objects.get(name__icontains=group)
-        except:
+        except ReportingGroup.DoesNotExist:
             logger.error("Reporting group matching '%s' not found" % group)
+        except ReportingGroup.MultipleObjectsReturned:
+            logger.error("More than one group matching '%s' not found" % group)
 
         if reporting_group and facilities:
             try_assign(reporting_group, facilities)

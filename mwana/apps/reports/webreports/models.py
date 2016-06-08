@@ -45,3 +45,11 @@ class UserPreference(models.Model):
 
     class Meta:
         unique_together = (('user', 'preference_name'))
+
+
+class PayloadAuthorWebUserMapping(models.Model):
+    author = models.ForeignKey(User, related_name='author')
+    web_user = models.ForeignKey(User, related_name='web_user')
+
+    def __unicode__(self):
+        return "%s => %s" % (self.author.username, self.web_user.username)

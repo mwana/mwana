@@ -194,6 +194,8 @@ class ViralLoadView(models.Model):
     date_sms_sent_to_participant = models.DateTimeField(null=True, blank=True)
     number_of_times_sms_sent_to_participant = models.PositiveSmallIntegerField(null=True, blank=True)
     data_source = models.CharField(max_length=50, null=True, blank=True)
+    author = models.ForeignKey(User)
+    lab_id = models.CharField(max_length=20, null=True, blank=True)
 
     def __unicode__(self):
         return self.guspec

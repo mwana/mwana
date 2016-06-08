@@ -19,7 +19,7 @@ class ResultAdmin(admin.ModelAdmin):
                     'result_sent_date', 'phone', 'guspec', 'province', 'district', 'constit',
                     'ward', 'csa', 'sea')
     list_filter = ('test_type', 'processed_on', 'notification_status', 'sex',
-                   'result_sent_date', 'phone', 'guspec', 'province', 'district', 'clinic',
+                   'collected_on', 'arrival_date', 'result_sent_date', 'province', 'district', 'clinic',
                    'constit', 'ward', 'csa', 'sea')
     search_fields = ('requisition_id', 'clinic__name', 'clinic__slug', 'result',
                      'phone', 'guspec', )
@@ -52,12 +52,12 @@ admin.site.register(Payload, PayloadAdmin)
 
 
 class ViralLoadViewAdmin(admin.ModelAdmin):
-    list_display = ('guspec', 'specimen_collection_date', 'facility_name', 'result', 'date_reached_moh', 'date_facility_retrieved_result', 'who_retrieved', 'date_sms_sent_to_participant', 'data_source', 'number_of_times_sms_sent_to_participant')
+    list_display = ('lab_id', 'ptid', 'guspec',  'specimen_collection_date', 'facility_name', 'result', 'date_reached_moh', 'date_facility_retrieved_result', 'who_retrieved', 'date_sms_sent_to_participant', 'data_source', 'author', 'number_of_times_sms_sent_to_participant')
     list_filter = ('test_type', 'data_source', 'specimen_collection_date', 'date_reached_moh', 'date_facility_retrieved_result',
-                   'who_retrieved', 'date_sms_sent_to_participant', 'number_of_times_sms_sent_to_participant',
+                   'who_retrieved', 'date_sms_sent_to_participant',
                    'facility_name',
                    )
-    search_fields = ('guspec', 'specimen_collection_date', 'facility_name', 'result', 'date_reached_moh', 'date_facility_retrieved_result', 'who_retrieved', 'date_sms_sent_to_participant', 'number_of_times_sms_sent_to_participant', 'data_source')
+    search_fields = ('guspec', 'specimen_collection_date', 'facility_name', 'result', 'data_source')
     date_hierarchy = 'date_reached_moh'
 
 admin.site.register(ViralLoadView, ViralLoadViewAdmin)

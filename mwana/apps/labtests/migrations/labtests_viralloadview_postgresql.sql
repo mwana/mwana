@@ -24,7 +24,9 @@ result_sent_date as date_facility_retrieved_result,
 rapidsms_contact.name as who_retrieved,
 date_participant_notified as date_sms_sent_to_participant,
 participant_informed as number_of_times_sms_sent_to_participant,
-labtests_payload.source as data_source
+labtests_payload.source as data_source,
+labtests_payload.auth_user_id as author_id,
+sample_id as lab_id
 
 
    FROM labtests_result

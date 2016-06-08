@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.models import PayloadAuthorWebUserMapping
 from mwana.apps.reports.webreports.models import UserPreference
 from django.contrib import admin
 from mwana.apps.reports.webreports.models import GroupFacilityMapping
@@ -26,3 +27,12 @@ class UserPreferenceAdmin(admin.ModelAdmin):
     #search_fields = ('user', 'preference_name', 'preference_value', 'extra_preference_value')
 
 admin.site.register(UserPreference, UserPreferenceAdmin)
+
+
+class PayloadAuthorWebUserMappingAdmin(admin.ModelAdmin):
+    list_display = ('author', 'web_user')
+    list_filter = ['author', 'web_user']
+    search_fields = ('author__author__name', 'web_user__web_user__name')
+
+admin.site.register(PayloadAuthorWebUserMapping, PayloadAuthorWebUserMappingAdmin)
+
