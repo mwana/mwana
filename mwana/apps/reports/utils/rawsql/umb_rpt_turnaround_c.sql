@@ -1,6 +1,7 @@
-SELECT district as "District", locations_location.name as "Facility", facility_slug as "Code", median(transporting)::int as "Transport Time", median(processing)::int as "Processing Time"
+SELECT parent.name as "District", locations_location.name as "Facility", locations_location.slug as "Code", median(transporting)::int as "Transport Time", median(processing)::int as "Processing Time"
 , median(delays)::int as "Date entry & delays" , median(retrieving)::int as "Retrieving Time", median(turnaround)::int as "Turnaround"  from locations_location
 LEFT JOIN (SELECT * FROM reports_turnaround WHERE year(date_retrieved) = 2016 and month(date_retrieved) = 6) tn on tn.facility_id = locations_location.id
+LEFT JOIN locations_location parent on parent.id = locations_location.parent_id
 where
 
 locations_location.slug in ('813004', '813001', '813007', '813002', '813011', '813012',
@@ -16,6 +17,5 @@ locations_location.slug in ('813004', '813001', '813007', '813002', '813011', '8
                   '808014', '808030', '808011', '808013', '808001', '811013', '811001', '804012',
                   '804031', '801016', '801025', '801026')
 
-                  group by district, locations_location.name, facility_slug
-                  order by district, locations_location.name, facility_slug;
-                  
+                  group by "District", locations_location.name, "Code"
+                  order by "District", locations_location.name, "Code";
