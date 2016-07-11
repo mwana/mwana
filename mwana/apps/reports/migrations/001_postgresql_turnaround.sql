@@ -29,8 +29,8 @@ FROM
      join labresults_payload on labresults_payload.id = labresults_result.payload_id
 WHERE
      result IS NOT null AND notification_status <> 'obsolete'
-            and collected_on <= processed_on
-            and entered_on <= processed_on
+            and (collected_on <= processed_on or collected_on is null)
+            and (entered_on <= processed_on or entered_on is null)
             and arrival_date >= processed_on
 ORDER BY
      result_sent_date ASC;
