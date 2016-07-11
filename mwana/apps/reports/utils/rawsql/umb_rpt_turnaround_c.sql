@@ -1,7 +1,9 @@
 SELECT district as "District", locations_location.name as "Facility", facility_slug as "Code", median(transporting)::int as "Transport Time", median(processing)::int as "Processing Time"
 , median(delays)::int as "Date entry & delays" , median(retrieving)::int as "Retrieving Time", median(turnaround)::int as "Turnaround"  from locations_location
 LEFT JOIN reports_turnaround tn on tn.facility_id = locations_location.id
-where locations_location.slug in ('813004', '813001', '813007', '813002', '813011', '813012',
+where
+year(date_retrieved) = 2016 and month(date_retrieved) = 6
+AND locations_location.slug in ('813004', '813001', '813007', '813002', '813011', '813012',
                   '813015', '813014', '801010', '801099', '801038', '801002', '801002', '801019',
                   '801020', '801022', '801039', '801028', '801035', '802099', '804030', '804014',
                   '804034', '804013', '804046', '805010', '805012', '805013', '805026', '805025',
