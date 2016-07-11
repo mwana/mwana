@@ -8,6 +8,8 @@ SELECT
      province.name as Province,
      district.name as district,
      locations_location.name as facility,
+     locations_location.id as facility_id,
+     locations_location.slug as facility_slug,
      (entered_on-collected_on) + 1 transporting,
      (processed_on-entered_on) + 1 processing,
      (date(arrival_date) - (processed_on)) + 1 delays,
