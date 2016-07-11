@@ -1,6 +1,6 @@
-﻿select district as "District", locations_location.name as "Facility", facility_slug as "Code", median(transporting)::int as "Transport Time", median(processing)::int as "Processing Time"
+SELECT district as "District", locations_location.name as "Facility", facility_slug as "Code", median(transporting)::int as "Transport Time", median(processing)::int as "Processing Time"
 , median(delays)::int as "Date entry & delays" , median(retrieving)::int as "Retrieving Time", median(turnaround)::int as "Turnaround"  from locations_location
-left join reports_turnaround tn on tn.facility_id = locations_location.id
+LEFT JOIN reports_turnaround tn on tn.facility_id = locations_location.id
 where locations_location.slug in ('813004', '813001', '813007', '813002', '813011', '813012',
                   '813015', '813014', '801010', '801099', '801038', '801002', '801002', '801019',
                   '801020', '801022', '801039', '801028', '801035', '802099', '804030', '804014',
@@ -15,6 +15,5 @@ where locations_location.slug in ('813004', '813001', '813007', '813002', '81301
                   '804031', '801016', '801025', '801026')
 
                   group by district, locations_location.name, facility_slug
-                  order by district, locations_location.name, facility_slug
-                  
+                  order by district, locations_location.name, facility_slug;
                   
