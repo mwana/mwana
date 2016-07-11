@@ -17,6 +17,8 @@ class Turnaround(models.Model):
     province = models.CharField(max_length=50)
     district = models.CharField(max_length=50)
     facility = models.CharField(max_length=100)
+    facility_id = models.IntegerField()
+    facility_slug = models.CharField(max_length=10)
     transporting = models.IntegerField(blank=True, null=True)
     processing = models.IntegerField(blank=True, null=True)
     delays = models.IntegerField(blank=True, null=True, verbose_name="Entering Time")
