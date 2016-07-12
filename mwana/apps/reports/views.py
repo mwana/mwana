@@ -283,13 +283,8 @@ def zambia_reports(request):
     enddate = min(max(enddate1, startdate1), datetime.today().date())
 
     is_report_admin = False
-    try:
-        user_group_name = request.user.groupusermapping_set.all()[0].group.name
-        if request.user.groupusermapping_set.all()[0].group.id in (1, 2) \
-            and ("moh" in user_group_name.lower() or "support" in user_group_name.lower()):
-            is_report_admin = True
-    except:
-        pass
+    if request.user:
+        is_report_admin = request.user.groupusermapping_set.filter(group__name__iexact='support').exists() or request.user.groupusermapping_set.filter(group__name__iexact='moh').exists()
 
     rpt_group = read_request(request, "rpt_group")
     rpt_provinces = read_request(request, "rpt_provinces")
