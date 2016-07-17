@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.util import get_clinic_or_default
 import re
 from datetime import datetime, timedelta
 from datetime import date
@@ -107,9 +108,9 @@ class BirthRegHandler(KeywordHandler):
             if existing_client.birth_date != client.birth_date or existing_client.gender != client.gender\
                 or existing_client.mother_name != client.mother_name or existing_client.mother_age != client.mother_age:
                 self.respond(_("There is already a baby registered with BabyID: %(id)s, Gender: %(sex)s, DOB: %(dob)s, "
-                               "Mother's Name: %(name)s, Mother's Age: %(age)s"), id=existing_client.client_number,
-                             sex=existing_client.gender, dob=existing_client.birth_date, name=existing_client.mother_name,
-                             age=existing_client.mother_age)
+                               "Mother's Name: %(name)s, Mother's Age: %(age)s, Clinic: %(loc)s"), id=existing_client.client_number,
+                             sex=existing_client.get_gender_display(), dob=existing_client.birth_date.strftime('%d/%m/%Y'), name=existing_client.mother_name,
+                             age=existing_client.mother_age, loc=get_clinic_or_default(existing_client))
                 return True
             else:
                 exact_duplicate = True
