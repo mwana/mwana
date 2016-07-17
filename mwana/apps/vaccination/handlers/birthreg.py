@@ -1,8 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.vaccination.commons import Parser
 from mwana.util import get_clinic_or_default
-import re
-from datetime import datetime, timedelta
+from datetime import timedelta
 from datetime import date
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 from mwana.apps.vaccination.models import VaccinationSession
@@ -16,30 +16,14 @@ UNREGISTERED = _("Sorry, you must be registered before you can register a child.
 
 SORRY = _("Sorry, we didn't understand that message.")
 HELP_TEXT = _("To register a birth for immunization tracking send BIRTHREG <BABY_ID> <GENDER> <DOB> <MOTHER_NAME> <MOTHER_AGE> E.g. BIRTHREG 21314/16 F 2/8/2016 Jane Moonga 25")
-DATE_RE = re.compile(r"(\d{1,2})[/.-](\d{1,2})[/.-](\d{4}|\d{2})$")
-PATIENT_ID_RE = re.compile(r"\d+/\d+")
 
 
-class BirthRegHandler(KeywordHandler):
+class BirthRegHandler(KeywordHandler, Parser):
 
     keyword = "BIRTHREG|BITHREG|BETHREG|BABY"
 
     def help(self):
         self.respond(HELP_TEXT)
-
-    def _parse_date(self, birth_date_str):
-        dob = None
-        date_str = re.sub('[. -]', '/', birth_date_str)
-        while '//' in date_str:
-            date_str = date_str.replace('//', '/')
-        for format in ['%d/%m/%y', '%d/%m/%Y']:
-            try:
-                dob = datetime.strptime(date_str, format).date()
-            except ValueError:
-                pass
-            if dob:
-                break
-        return dob
 
     def handle(self, text):
         if not self.msg.contact:
@@ -60,7 +44,7 @@ class BirthRegHandler(KeywordHandler):
 
         gender_map = {'f': 'f', 'female': 'f', 'm': 'm', 'male':'m'}
 
-        if len(client_number) < 4 or len(client_number) > 20:
+        if (not self.PATIENT_ID_RE.match(client_number)) or len(client_number) < 4 or len(client_number) > 20:
             self.respond(_("Sorry, '%s', is not a valid Child's ID. If you think this message is a mistake reply with keyword HELP." % client_number))
             return True
 
@@ -70,7 +54,7 @@ class BirthRegHandler(KeywordHandler):
         else:
             gender = gender_map[gender_str.lower()]
 
-        if not DATE_RE.match(birth_date_str):
+        if not self.DATE_RE.match(birth_date_str):
             self.respond(_("Sorry, I couldn't understand the date '%s'. Enter date like DAY/MONTH/YEAR, e.g. %s" % (birth_date_str, date.today().strftime('%d/%m/%Y'))))
             return True
         else:
@@ -133,9 +117,4 @@ class BirthRegHandler(KeywordHandler):
                      dob = client.birth_date.strftime('%d/%m/%Y'),
                      name = client.mother_name,
                      age=mother_age)
-
-
-
-
-
-    
+        
