@@ -1,4 +1,12 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.vaccination.handlers.session_seven import SessionSevenHandler
+from mwana.apps.vaccination.handlers.session_six import SessionSixHandler
+from mwana.apps.vaccination.handlers.session_five import SessionFiveHandler
+from mwana.apps.vaccination.handlers.session_four import SessionFourHandler
+from mwana.apps.vaccination.handlers.session_three import SessionThreeHandler
+from mwana.apps.vaccination.handlers.session_two import SessionTwoHandler
+from mwana.apps.vaccination.handlers.session_one import SessionOneHandler
+from mwana.apps.vaccination.handlers.birthreg import BirthRegHandler
 from mwana.apps.stock.handlers.loaning_stock import LoaningStockHandler
 from mwana.apps.stock.handlers.new_stock import NewStockHandler
 from mwana.apps.stock.handlers.dispensed_stock import DispensedStockHandler
@@ -52,6 +60,14 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(DispensedStockHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(LoaningStockHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(SurveyCaseHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(BirthRegHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionOneHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionTwoHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionThreeHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionFourHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionFiveHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionSixHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(SessionSevenHandler.keyword.split('|')))
 
         # remove leading/trailing whitespace
         # get out your featherduster

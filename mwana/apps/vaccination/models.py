@@ -65,3 +65,11 @@ class SentReminders(models.Model):
 
     def __unicode__(self):
         return "Reminder for %s sent on %s" % (self.appointment, self.date)
+
+
+class ReportingTable(models.Model):
+    appointment = models.ForeignKey(Appointment)
+    reported_visit_date = models.DateField()
+
+    def __unicode__(self):
+        return "Vaccination Session report for %s sent on %s" % (self.appointment, self.reported_visit_date)
