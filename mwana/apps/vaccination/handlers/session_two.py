@@ -13,12 +13,14 @@ _ = lambda s: s
 
 UNREGISTERED = _("Sorry, you must be registered before you can report a vaccination session'")
 SORRY = _("Sorry, we didn't understand that message.")
-HELP_TEXT = _("To report first vaccination for a child send <SESSION1> <Baby ID> <DATE OF VACCINATION> e.g SESSION1  123/16 23/8/2016")
+HELP_TEXT = _("To report first vaccination for a child send <SESSION2> <Baby ID> <DATE OF VACCINATION> e.g SESSION2  123/16 23/8/2016")
 
 
-class SessionOneHandler(KeywordHandler, Parser):
 
-    keyword = "SESSION 1|SESSION ONE|S 1|S ONE|SESSION1|SESSIONONE|S1|SONE"
+
+class SessionTwoHandler(KeywordHandler, Parser):    
+
+    keyword = "SESSION 2|SESSION TWO|S 2|S TWO|SESSION2|SESSIONTWO|S2|STWO"
     
     def help(self):
         self.respond(HELP_TEXT)
@@ -60,20 +62,19 @@ class SessionOneHandler(KeywordHandler, Parser):
         else:
             client = Client.objects.get(client_number=client_number, location=self.msg.contact.location)
 
-        session1 = VaccinationSession.objects.get(session_id='s1')
+        session2 = VaccinationSession.objects.get(session_id='s2')
 
-        appointment = Appointment.objects.get(client=client, vaccination_session=session1)
+        appointment = Appointment.objects.get(client=client, vaccination_session=session2)
         if appointment.actual_date == None:
             appointment.actual_date = vac_date
             appointment.save()
 
         ReportingTable.objects.get_or_create(appointment=appointment, reported_visit_date=vac_date)
-        self.respond(_("Thank you %(cba)s! You have reported '%(s1)s' for baby with "
+        self.respond(_("Thank you %(cba)s! You have reported '%(s2)s' for baby with "
                        "ID %(id)s and vaccination date %(vac_date)s."),
                      cba=self.msg.contact.name,
                      id = client.client_number,
-                     s1=session1.__unicode__(),
+                     s2=session2.__unicode__(),
                      vac_date = vac_date.strftime('%d/%m/%Y')
                      )
-
     

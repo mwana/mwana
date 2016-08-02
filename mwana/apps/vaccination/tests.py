@@ -163,3 +163,43 @@ class TestApp(VaccinationSetUp):
         self.assertEqual(Appointment.objects.count(), 5)
         self.assertEqual(Appointment.objects.filter(client=client, cba_responsible=self.cba).count(), 5)
         self.assertEqual(Appointment.objects.filter(client=client, vaccination_session__predecessor=None).count(), 5)
+
+
+class TestSessionReportingApp(VaccinationSetUp):
+    def testSessionReports(self):
+        script = '''
+            cba > SESSION1 21314/16 42/7/2016
+            cba < Sorry, I couldn't understand the date '42/7/2016'. Enter date like DAY/MONTH/YEAR, e.g. 17/07/2016
+            cba > SESSION1 21314/16 2/7/2016
+            cba < Sorry, I don't know a child with ID 21314/16 at Mibenge Clinic. If you think this message is a mistake reply with keyword HELP
+            cba > BIRTHREG 21314/16 F 2/7/2016 jane moonga 25
+            cba < Thank you Mary Phiri! You have successfully registered a baby with ID 21314/16, Gender Female, DOB 02/07/2016 for Jane Moonga aged 25.
+            cba > SESSION1 21314/16 3/7/2016
+            cba < Thank you Mary Phiri! You have reported 'session1: BCG Vaccination Session Report' for baby with ID 21314/16 and vaccination date 03/07/2016.
+            '''
+        self.runScript(script)
+        self.assertEqual(Client.objects.count(), 1)
+        client = Client.objects.get(client_number='21314/16')
+        self.assertTrue(client.birth_date == date(2016, 7, 2))
+        self.assertEqual(client.gender, 'f')
+        self.assertEqual(client.mother_name, 'Jane Moonga')
+        self.assertEqual(client.mother_age, 25)
+        self.assertEqual(client.location, self.zone)
+        self.assertEqual(Appointment.objects.count(), 5)
+        self.assertEqual(Appointment.objects.filter(client=client, cba_responsible=self.cba).count(), 5)
+        self.assertEqual(Appointment.objects.filter(client=client, vaccination_session__predecessor=None).count(), 5)
+
+        script = '''
+            cba > SESSION2 21314/16 42/7/2016
+            cba < Sorry, I couldn't understand the date '42/7/2016'. Enter date like DAY/MONTH/YEAR, e.g. 17/07/2016
+            cba > SESSION2 21315/16 2/7/2016
+            cba < Sorry, I don't know a child with ID 21315/16 at Mibenge Clinic. If you think this message is a mistake reply with keyword HELP
+            cba > SESSION2 21314/16 3/7/2016
+            cba < Thank you Mary Phiri! You have reported 'session2: OPV0 Vaccination Session Report' for baby with ID 21314/16 and vaccination date 03/07/2016.
+            '''
+        self.runScript(script)
+        self.assertEqual(Client.objects.count(), 1)
+        #TODO Test scheduled dates
+        self.assertEqual(Appointment.objects.count(), 5)
+        self.assertEqual(Appointment.objects.filter(client=client, cba_responsible=self.cba).count(), 5)
+        self.assertEqual(Appointment.objects.filter(client=client, vaccination_session__predecessor=None).count(), 5)

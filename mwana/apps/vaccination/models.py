@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import datetime
 
 from mwana.apps.locations.models import Location
 from django.db import models
@@ -57,6 +58,26 @@ class Appointment(models.Model):
 
     def __unicode__(self):
         return "Appointment for %s scheduled for %s. CBA responsible %s" % (self.client, self.scheduled_date, self.cba_responsible)
+
+
+class DangerSignReport(models.Model):
+    client = models.ForeignKey(Client)
+    description = models.CharField(max_length=160)
+    who_reported = models.ForeignKey(Contact)
+    date_of_event = models.DateTimeField()
+    date_logged = models.DateTimeField(default=datetime.now)
+
+    def __unicode__(self):
+        return "Danger sign for %s on %s: %s" % (self.client, self.date_of_event, self.description)
+
+
+class EducativeMessage(models.Model):
+    danger_sign_report = models.ForeignKey(DangerSignReport)
+    educative_message = models.CharField(max_length=145, blank=True, null=True)
+    date_sent = models.DateTimeField(blank=True, null=True)
+
+    def __unicode__(self):
+        return "Educative message '%s' for '%s' sent on '%s'" % (self.educative_message, self.danger_sign_report, self.date_sent)
 
 
 class SentReminders(models.Model):

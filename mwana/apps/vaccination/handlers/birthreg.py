@@ -60,7 +60,7 @@ class BirthRegHandler(KeywordHandler, Parser):
         else:
             dob = self._parse_date(birth_date_str)
             if not dob:
-                self.respond(_("Sorry, I couldn't understand the date '%s'. Enter date like DAY/MONTH/YEAR, e.g. %s" % (birth_date_str, date.today().strftime('%d/%m/%Y'))))
+                self.respond(_("Sorry, I couldn't understand the date '%s'. Enter date like DAY/MONTH/YEAR, e.g. 17/07/2016" % (birth_date_str)))
                 return True
             elif dob > date.today():
                 self.respond(_("Sorry, you cannot register a birth with a date "
