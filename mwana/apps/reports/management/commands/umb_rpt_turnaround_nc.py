@@ -46,7 +46,9 @@ def __del__(self):
 def _median(p_list):
     if not p_list:
         return '-'
-    ordered = sorted(p_list)
+    ordered = sorted(item for item in p_list if item)
+    if not ordered:
+        return '-'
     size = len(ordered)
 
     # note that lists are zero indexed
