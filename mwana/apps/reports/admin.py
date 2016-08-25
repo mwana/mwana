@@ -296,8 +296,8 @@ class ResultsForFollowupAdmin(admin.ModelAdmin):
 
         return super(ResultsForFollowupAdmin, self).queryset(request).filter(facility_id__in=site_ids)
 
-    list_display = ('province', 'district', 'facility', 'lab_id', 'requisition_id', 'birthdate', 'child_age', 'child_age_unit', 'sex', 'collecting_health_worker', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'lab')
-    list_filter = ('province', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'sex', 'lab', 'district', 'facility',   'birthdate', 'child_age', 'child_age_unit', 'collecting_health_worker', )
+    list_display = ('province', 'district', 'facility', 'lab_id', 'requisition_id', 'birthdate', 'child_age', 'child_age_unit', 'sex', 'result_detail', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'lab', 'collecting_health_worker')
+    list_filter = ('province', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'sex', 'lab', 'district', 'facility',   'birthdate', 'child_age', 'child_age_unit',)
     search_fields = ('province', 'district', 'facility', 'lab_id', 'requisition_id', 'birthdate', 'child_age', 'child_age_unit', 'sex', 'collecting_health_worker', 'verified', 'result', 'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'lab')
     date_hierarchy = 'processed_on'
 

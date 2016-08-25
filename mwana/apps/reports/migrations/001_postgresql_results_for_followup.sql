@@ -23,7 +23,8 @@ SELECT
      date(arrival_date) date_reached_moh,
      date(result_sent_date) date_retrieved,
      labresults_payload.source as lab,
-     clinic_id as facility_id
+     clinic_id as facility_id,
+     result_detail
 FROM
      labresults_result
      join locations_location on locations_location.id = labresults_result.clinic_id
