@@ -35,7 +35,7 @@ class Turnaround(models.Model):
 class ResultsForFollowup(models.Model):
     """
     A stub to display a view in django admin format for results that need
-    patient followu up
+    patient follow up
     """
     province = models.CharField(max_length=50)
     district = models.CharField(max_length=50)
@@ -56,6 +56,7 @@ class ResultsForFollowup(models.Model):
     date_reached_moh = models.DateField(blank=True, null=True)
     date_retrieved = models.DateField(blank=True, null=True)
     lab = models.CharField(max_length=100)
+    result_detail = models.CharField(max_length=200, blank=True)  # reason for rejection or explanation of inconsistency
 
 
 class SupportedLocation(models.Model):
