@@ -158,7 +158,7 @@ class Alerter:
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_TRACE, "%s clinic have "\
                              " retrieved %s results but have NOT used TRACE command. Please call and enquire "
                              "(%s)" % (clinic.location.name, count, clinic.contacts),
-                             clinic.location.name,
+                             "%s - %s" % (clinic.location.name, clinic.location.slug),
                              clinic.last_retrieved_results,
                              -clinic.last_retrieved_results,
                              level,
@@ -186,7 +186,7 @@ class Alerter:
                              "(%s)" % (clinic.name, ", ".join(contact.name + ":"
                              + contact.default_connection.identity
                              for contact in contacts)),
-                             clinic.name,
+                             "%s - %s" % (clinic.name, clinic.slug),
                              days_late,
                              -days_late,
                              level,
@@ -321,7 +321,7 @@ class Alerter:
                              "" % clinic.contacts)
             my_alerts.append(Alert(Alert.CLINIC_NOT_USING_SYSTEM,
                              alert_msg,
-                             clinic.location.name,
+                             "%s - %s" % (clinic.location.name, clinic.location.slug),
                              clinic.last_sent_samples or 40001,
                              -(clinic.last_sent_samples or 40001),
                              level,
@@ -500,7 +500,8 @@ class Alerter:
 
             msg = msg + "; ".join(msg for msg in temp) + "."
 
-            inactive_alerts.append(Alert(Alert.WORKER_NOT_USING_SYSTEM, msg, defaulter.facility.name,
+            inactive_alerts.append(Alert(Alert.WORKER_NOT_USING_SYSTEM, msg,
+            "%s - %s" % (defaulter.facility.name, defaulter.facility.slug),
                                    days_late, -days_late, Alert.HIGH_LEVEL, ""))
         return sorted(inactive_alerts, key=itemgetter(5))
 
