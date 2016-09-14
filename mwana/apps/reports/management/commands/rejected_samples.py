@@ -49,6 +49,7 @@ def _month_ranges(num):
 
 
 def process(code, num):
+    print "District|Facility|", "|".join("%s_%s" % (x, y) for x, y in _month_ranges(num))
     for loc in  Location.objects.filter(parent__parent__slug__startswith=code, supportedlocation__supported=True):
         print loc.parent.name, "|", loc.name, "|",
         time_ranges = _month_ranges(num)
@@ -63,6 +64,7 @@ def process(code, num):
 
 
 def process2(code, num):
+    print "District|Facility|", "|".join("%s_%s" % (x, y) for x, y in _month_ranges(num))
     def percent(num, denom):
         if num == 0:
             return 0
