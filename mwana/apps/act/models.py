@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from rapidsms.models import Connection
 from django.db import models
 from mwana.apps.locations.models import Location
-
+from mwana.apps.act.messages import CLIENT_MESSAGE_CHOICES
 
 class Payload(models.Model):
     """a raw incoming data payload"""
@@ -80,9 +80,9 @@ class Client(models.Model):
         return self.alias
 
     def is_eligible_for_messaging(self):
-        return self.can_receive_messages and self.phone_verified and self.connection
+        return self.can_receive_messages and self.phone_verified and (self.connection is not None)
 
-
+    
 class CHW(models.Model):
     name = models.CharField(max_length=255)
     national_id = models.CharField(max_length=255, unique=True)
@@ -109,7 +109,7 @@ class Appointment(models.Model):
     APPOINTMENT_STATUS = (
         ('pending', 'Pending'),
         ('attended', 'Attended'),
-        ('notified', 'Notified'),
+        ('notified', 'Notified by SMS'),
         ('missed', 'Missed'),
         ('canceled', 'Canceled'), 
     )
@@ -133,6 +133,12 @@ class Appointment(models.Model):
     @classmethod
     def get_pharmacy_type(cls):
         return PHARMACY_TYPE
+
+    def is_lab_type(self):
+        return self.type == LAB_TYPE
+
+    def is_pharmacy_type(self):
+        return self.type == PHARMACY_TYPE
 
 
 class VerifiedNumber(models.Model):
@@ -189,4 +195,33 @@ class SystemUser(models.Model):
 
     def __unicode__(self):
         return "%s of %s" % (self.name, self.site)
-    
+
+
+class HistoricalEvent(models.Model):
+    date = models.DateField()
+    fact_message = models.CharField(max_length=120)
+
+    def __unicode__(self):
+        return 'Did you know? On %s %s' % (self.date.strftime('%d %B'), self.fact_message)
+
+    def did_you_know_message(self):
+        return 'Did you know? On %s %s' % (self.date.strftime('%d %B'), self.fact_message)
+
+    @classmethod
+    def mock_message(cls, p_date):
+        return 'Happy healthy day %s' % (p_date.strftime('%d %B'))
+
+
+class ReminderMessagePreference(models.Model):
+    client = models.ForeignKey(Client)
+    message_id = models.CharField(max_length=5, choices=CLIENT_MESSAGE_CHOICES.items())
+    visit_type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10)
+
+    def __unicode__(self):
+        return "%s => %s" % (self.client, self.type, self.message_id)
+
+    class Meta:
+        unique_together = (('client', 'visit_type',),)
+
+    def get_message_text(self):
+        return CLIENT_MESSAGE_CHOICES.get(self.message_id)

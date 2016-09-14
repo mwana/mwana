@@ -1,7 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
 
-from mwana.apps.act.messages import CLIENT_LAB_MESSAGE
-from mwana.apps.act.messages import CLIENT_PHARMACY_MESSAGE
+from mwana.apps.act.util import get_historical_event_message
+from mwana.apps.act.util import get_preferred_pharmacy_message_template
+from mwana.apps.act.util import get_preferred_lab_message_template
 from mwana.apps.act.messages import CHW_MESSAGE
 
 import datetime
@@ -27,7 +28,7 @@ def send_notifications(router):
         return
 
     today = datetime.date.today()
-    appointments = act.Appointment.objects.filter(status='pending', date__gte=today)
+    appointments = act.Appointment.objects.filter(status__in=['pending', 'notified'], date__gte=today)
 
     for reminder_type in act.ReminderDay.objects.filter(activated=True):
         appointment_date = today + datetime.timedelta(days=reminder_type.days)
@@ -45,9 +46,14 @@ def send_notifications(router):
                                                    phone=client.phone, visit_date=appointment.date).exists()
                 if not already_sent:
                     if conn:
-                        template = CLIENT_LAB_MESSAGE if appointment.type == appointment.get_lab_type() else CLIENT_PHARMACY_MESSAGE
-                        OutgoingMessage(connection=conn, template=template,
-                                        date=appointment.date.strftime('%d/%m/%Y')).send()
+                        a = get_preferred_lab_message_template(client)
+                        template = get_preferred_lab_message_template(client) if appointment.is_lab_type() else get_preferred_pharmacy_message_template(client)
+                        if template:
+                            OutgoingMessage(connection=conn, template=template,
+                                            date=appointment.date.strftime('%d/%m/%Y')).send()
+                        else:
+                            OutgoingMessage(conn, get_historical_event_message(appointment.date)).send()
+
                         act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type, phone=client.phone, visit_date=appointment.date)
                     else:
                         logging.error(
@@ -65,6 +71,8 @@ def send_notifications(router):
                                         date=appointment.date.strftime('%d/%m/%Y')).send()
                         act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type,
                                                                phone=chw.phone, visit_date=appointment.date)
+                        appointment.status = 'notified'
+                        appointment.save()
                     else:
                         logging.error(
                             "Failed to send message to CHW %s with phone %s. No matching connection object found" % (

@@ -1,5 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.act.models import HistoricalEvent
+from mwana.apps.act.models import ReminderMessagePreference
 from mwana.apps.act.models import SystemUser
 from mwana.apps.act.models import RemindersSwitch
 from mwana.apps.act.models import VerifiedNumber
@@ -91,3 +93,18 @@ class SystemUserAdmin(admin.ModelAdmin):
     search_fields = ('name',  'site')
 
 admin.site.register(SystemUser, SystemUserAdmin)
+
+
+class ReminderMessagePreferenceAdmin(admin.ModelAdmin):
+    list_display = ('client', 'message_id', 'visit_type')
+    list_filter = ['message_id', 'visit_type', 'client',]
+    #search_fields = ('client', 'message_id', 'visit_type')
+admin.site.register(ReminderMessagePreference, ReminderMessagePreferenceAdmin)
+
+
+class HistoricalEventAdmin(admin.ModelAdmin):
+    list_display = ('date', 'fact_message')
+    #list_filter = ['date', 'fact_message']
+    search_fields = ('fact_message',)
+    date_hierarchy = 'date'
+admin.site.register(HistoricalEvent, HistoricalEventAdmin)

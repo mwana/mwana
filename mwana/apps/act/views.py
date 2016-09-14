@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.act.models import ReminderMessagePreference
 from mwana.apps.act.models import VerifiedNumber
 from mwana.apps.act.models import Appointment
 import json
@@ -48,6 +49,16 @@ def json_timestamp(val):
         return dt + timedelta(microseconds=1000 * int(val[-3:]))
     except:
         return None
+
+
+def map_sex(sex):
+    key = sex.lower()
+    return {"male": "m", "female": "f", "m": "m", "f": "f"}.get(key)
+
+
+def map_appointment_type(type):
+    key = type.lower()
+    return {"lab": "lab", "pharmacy": "pharmacy", "laboratory": "lab", "p": "pharmacy", 'l': 'lab', 'pharm': 'pharmacy'}.get(key)
 
 
 def dictval(dict, field, trans=lambda x: x, trans_none=False, default_val=None):
@@ -209,7 +220,7 @@ def accept_client_record(record, payload):
         'name': dictval(record, 'name'),
         'alias': dictval(record, 'alias'),
         'dob': dictval(record, 'dob', json_date),
-        'sex': dictval(record, 'sex'),
+        'sex': dictval(record, 'sex', map_sex),
         'address': dictval(record, 'address'),
         'short_address': dictval(record, 'short_address'),
         'can_receive_messages': dictval(record, 'sms_on'),
@@ -230,6 +241,24 @@ def accept_client_record(record, payload):
         if old_record and old_record.connection and new_record.phone in old_record.connection.identity:
             new_record.connection = old_record.connection
         new_record.save()
+        lab_message = dictval(record, 'lab_msg')
+        pharm_message = dictval(record, 'phar_msg')
+        if lab_message:
+            try:
+                rmp = ReminderMessagePreference.objects.get(client=new_record, visit_type=Appointment.get_lab_type())
+                # @type rmp ReminderMessagePreference
+                rmp.message_id = lab_message
+                rmp.save()
+            except ReminderMessagePreference.DoesNotExist:
+                ReminderMessagePreference.objects.create(client=new_record, visit_type=Appointment.get_lab_type(), message_id=lab_message)
+        if pharm_message:
+            try:
+                rmp = ReminderMessagePreference.objects.get(client=new_record, visit_type=Appointment.get_pharmacy_type())
+                # @type rmp ReminderMessagePreference
+                rmp.message_id = pharm_message
+                rmp.save()
+            except ReminderMessagePreference.DoesNotExist:
+                ReminderMessagePreference.objects.create(client=new_record, visit_type=Appointment.get_pharmacy_type(), message_id=pharm_message)
     else:
         cant_save('validation errors in record: %s' % str(f_client.errors))
         return False
@@ -280,7 +309,7 @@ def accept_chw_record(record, payload):
         'clinic_code_unrec': clinic_code if not clinic_obj else None,
         'name': dictval(record, 'name'),
         'dob': dictval(record, 'dob', json_date),
-        'sex': dictval(record, 'sex'),
+        'sex': dictval(record, 'sex', map_sex),
         'address': "%s. (Zone %s)" % (dictval(record, 'village'), dictval(record, 'zone')),
         'phone': dictval(record, 'phone'),
     }
@@ -353,7 +382,7 @@ def accept_appointment_record(record, payload):
         'client': client_obj.id if client_obj else None,
         'cha_responsible': cha_obj.id if cha_obj else None,
         'date': dictval(record, 'date', json_date),
-        'type': dictval(record, 'type').lower(),
+        'type': dictval(record, 'type', map_appointment_type).lower(),
     }
 
     #need to keep old record 'pristine' so we can check which fields have changed
@@ -390,7 +419,6 @@ def accept_user_record(record, payload):
             message += '; original record [%s] untouched' % name
         message += '\nrecord: %s' % str(record)
         logger.error(message)
-        
 
     #validate required identifying fields
     for req_field in ('name', 'token'):
