@@ -20,6 +20,7 @@ from rapidsms.messages import OutgoingMessage
 from mwana.apps.reports.management.commands.build_messages_rpt import rebuild_messages_data
 from mwana.apps.reports.management.commands.build_messages_rpt import update_locations
 from mwana.apps.reports.management.commands.build_msg_by_backend_rpt import rebuild_messages_data as rebuild_msg_by_backend_data
+from mwana.apps.reports.management.commands.build_msg_by_user_type_backend_rpt import rebuild_messages_data as rebuild_msg_by_user_type_backend_data
 from mwana.apps.reports.management.commands.scaleup_update import update_scaleup_sites
 from mwana.apps.reports.management.commands.update_clinics_not_sending_dbs import update_clinics_not_sending_dbs
 from rapidsms.models import Contact
@@ -230,6 +231,11 @@ def build_messages_report(router):
 def build_msg_by_backend_rpt(router):
     logger.info('in build_msg_by_backend_rpt')
     rebuild_msg_by_backend_data()
+
+
+def build_msg_by_user_type_backend_rpt(router):
+    logger.info('in build_msg_by_user_type_backend_rpt')
+    rebuild_msg_by_user_type_backend_data()
 
 
 def build_scaleup_sites(router):

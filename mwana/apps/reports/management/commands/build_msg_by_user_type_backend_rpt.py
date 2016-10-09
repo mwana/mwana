@@ -8,6 +8,10 @@ from mwana.apps.reports.models import MessageByLocationUserTypeBackend
 from mwana.apps.reports.models import MsgByLocationUserTypeBackendLog
 from mwana.util import get_clinic_or_default
 from rapidsms.contrib.messagelog.models import Message
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Command(LabelCommand):
@@ -28,11 +32,10 @@ def rebuild_messages_data():
     try:
         logged = MsgByLocationUserTypeBackendLog.objects.all()[0]
         if logged.locked:
-            # TODO: remove print statement
-            print 'returning as locked'
+            logger.info('Returning as another process has obtained lock on table')
             return
         logged.locked = True
-        print 'locking'
+        logger.info('Obtaining lock on table')
         logged.save()
     except IndexError:
         logged = MsgByLocationUserTypeBackendLog()
@@ -41,7 +44,7 @@ def rebuild_messages_data():
         logged.save()
 
     for msg in Message.objects.filter(id__gt=logged.message_id).\
-                                exclude(connection=None).order_by('id'):
+                                exclude(connection=None).order_by('id')[:20000]:
         msg_year = msg.date.year
         msg_month = msg.date.month
         backend = msg.connection.backend.name
@@ -106,3 +109,4 @@ def rebuild_messages_data():
 
     logged.locked = False # release lock
     logged.save()
+    logger.info('lock released')
