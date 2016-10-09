@@ -1,5 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.reports.models import MsgByLocationUserTypeBackendLog
+from mwana.apps.reports.models import MessageByLocationUserTypeBackend
 from mwana.apps.reports.models import Coverage
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.reports.models import ResultsForFollowup
@@ -67,13 +69,13 @@ class SupportedLocationAdminForm(forms.ModelForm):
         super(SupportedLocationAdminForm, self).__init__(*args, **kwds)
         self.fields['location'].queryset = Location.objects.exclude(type__slug='zone').order_by('name')
 
+
 class SupportedLocationAdmin(admin.ModelAdmin):
     list_display = ('location', 'supported')
     list_filter = ('supported',)
     search_fields = ('location__name', 'location__slug',)
     form = SupportedLocationAdminForm
 admin.site.register(SupportedLocation, SupportedLocationAdmin)
-
 
 
 class PhoReportNotificationAdmin(admin.ModelAdmin):
@@ -259,6 +261,28 @@ class MessageByLocationByUserTypeAdmin(admin.ModelAdmin):
 #    search_fields = ('count', 'province', 'district', 'facility', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug',)
 
 admin.site.register(MessageByLocationByUserType, MessageByLocationByUserTypeAdmin)
+
+
+class MessageByLocationByUserTypeByBackendAdmin(admin.ModelAdmin):
+    list_display = ('province', 'district', 'facility', 'backend',
+    'worker_type', 'year', 'month',
+    'facility_slug', 'absolute_location', 'min_date',
+    'count_DBS_notification', 'count_dbs2_notification', 'count_vl_notification')
+    list_filter = ['backend', 'worker_type', 'year', 'month', 'province', 'district', 'facility',   'province_slug', 'district_slug', 'facility_slug', 'absolute_location']
+    #search_fields = ('count', 'province', 'district', 'facility', 'backend', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
+    date_hierarchy = 'min_date'
+
+admin.site.register(MessageByLocationUserTypeBackend, MessageByLocationByUserTypeByBackendAdmin)
+
+
+class MsgByLocationUserTypeBackendLogAdmin(admin.ModelAdmin):
+    list_display = ('message_id', 'locked')
+    #list_filter = ['message_id', 'locked']
+    #search_fields = ('message_id', 'locked')
+    list_editable = ['locked']
+
+admin.site.register(MsgByLocationUserTypeBackendLog, MsgByLocationUserTypeBackendLogAdmin)
+
 
 class MessageByLocationByBackendAdmin(admin.ModelAdmin):
     list_display = ('count', 'province', 'district', 'facility', 'backend', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
