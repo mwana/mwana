@@ -29,7 +29,7 @@ _ = lambda s: s
 
 _ = lambda s: s
 
-EID_BIRTH_SUMMARY = "%(name)s, %(month)s %(location_name)s EID & Birth Totals\nDBS Samples sent: %(samples)s ***\nDBS Results received: %(results)s ***\nBirths registered: %(births)s"
+EID_BIRTH_SUMMARY = "%(name)s, %(month)s %(location_name)s EID & Birth Totals\nDBS received at lab: %(samples)s *\nTested: %(samples_tested)s *\nResults sent to facility: %(results)s *\nBirths registered: %(births)s"
 CBA_THANKS_MSG = _("Thank you, %(name)s. You helped about %(helps)s mothers in your community in %(month)s %(year)s. Keep up the good work, reminding mothers saves lives.")
 CBA_REMINDER_MSG = _("Hello %(name)s. Remember to register births in your community and to remind mothers go to the clinic. Reminding mothers saves lives.")
 
@@ -59,6 +59,9 @@ def send_dho_eid_and_birth_report(router):
         results = Result.objects.filter(clinic__parent=district,
                                         result_sent_date__year=last_year,
                                         result_sent_date__month=last_month).count()
+        samples_tested = Result.objects.filter(clinic__parent=district,
+                                        processed_on__year=last_year,
+                                        processed_on__month=last_month).count()
 
         births = PatientEvent.objects.filter(Q(event__name__iexact='birth'),
                                              Q(cba_conn__contact__location__parent__parent=district)
@@ -70,7 +73,8 @@ def send_dho_eid_and_birth_report(router):
 
         msg = (EID_BIRTH_SUMMARY % {'name':name, 'month':month,
                'births':births, 'samples':samples,
-               'results':results, 'location_name':district_name})
+               'results':results, 'samples_tested':samples_tested,
+               'location_name':district_name})
 
         DhoReportNotification.objects.create(contact=worker,
                                              district=worker.location, type='M',
@@ -107,6 +111,10 @@ def send_pho_eid_and_birth_report(router):
                                         result_sent_date__year=last_year,
                                         result_sent_date__month=last_month).count()
 
+        samples_tested = Result.objects.filter(clinic__parent__parent=province,
+                                        processed_on__year=last_year,
+                                        processed_on__month=last_month).count()
+
         births = PatientEvent.objects.filter(Q(event__name__iexact='birth'),
                                              Q(cba_conn__contact__location__parent__parent__parent=province)
                                              | Q(cba_conn__contact__location__parent__parent=province), # cba/clinic worker
@@ -117,7 +125,7 @@ def send_pho_eid_and_birth_report(router):
 
         msg = (EID_BIRTH_SUMMARY % {'name':name, 'month':month,
                'births':births, 'samples':samples,
-               'results':results, 'location_name':province_name})
+               'results': results, 'samples_tested': samples_tested, 'location_name': province_name})
 
         PhoReportNotification.objects.create(contact=worker,
                                              province=worker.location, type='M',
@@ -126,6 +134,7 @@ def send_pho_eid_and_birth_report(router):
                                              date=month_ago)
 
         OutgoingMessage(worker.default_connection, msg).send()
+
 
 def send_cba_birth_report(router):
     logger.info('thanking and notifying CBAs of monthly Births they registered')

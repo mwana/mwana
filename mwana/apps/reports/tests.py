@@ -90,11 +90,13 @@ class TestApp(SmsReportsSetUp):
         msgs = self.receiveAllMessages()
 
         expected_msgs =["""Dho M Banda, %s Mansa District EID & Birth Totals
-DBS Samples sent: 3 ***
-DBS Results received: 3 ***
+DBS received at lab: 3 *
+Tested: 3 *
+Results sent to facility: 3 *
 Births registered: 2""" % month_ago.strftime("%B"), """Dho M Kangwa, %s Samfya District EID & Birth Totals
-DBS Samples sent: 1 ***
-DBS Results received: 0 ***
+DBS received at lab: 1 *
+Tested: 0 *
+Results sent to facility: 0 *
 Births registered: 0""" % month_ago.strftime("%B")]
 
         self.assertEqual(len(msgs), 2)
@@ -214,8 +216,9 @@ Births registered: 0""" % month_ago.strftime("%B")]
         msgs = self.receiveAllMessages()
 
         expected_msg ="""Pho Mwale, %s Luapula Province EID & Birth Totals
-DBS Samples sent: 4 ***
-DBS Results received: 3 ***
+DBS received at lab: 4 *
+Tested: 3 *
+Results sent to facility: 3 *
 Births registered: 2""" % month_ago.strftime("%B")
 
         self.assertEqual(len(msgs), 1)
@@ -261,4 +264,5 @@ Births registered: 2""" % month_ago.strftime("%B")
         # fake that the results were sent last month
         for res in Result.objects.filter(notification_status='sent'):
             res.result_sent_date = month_ago
+            res.processed_on = month_ago
             res.save()
