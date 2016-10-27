@@ -1,6 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 """
-Updates Reporting table MessagesByMonth
+Updates Reporting table MessageByLocationByUserType
 """
 
 from mwana.apps.reports.models import MessageByLocationByUserType
@@ -14,8 +14,9 @@ from mwana.const import ZONE_SLUGS
 from rapidsms.contrib.messagelog.models import Message
 from django.db import transaction
 
+
 class Command(LabelCommand):
-    help = "Rebuilds MessagesByMonth data for given month and year "
+    help = "Rebuilds MessageByLocationByUserType data for given month and year "
     args = "<year> <month>"
     label = 'Year and month, like 2020 3'
 
@@ -25,6 +26,7 @@ class Command(LabelCommand):
         else:
             rebuild_messages_data()
             update_locations()
+
 
 def __del__(self):
     pass
@@ -151,6 +153,8 @@ counts.month,
 counts.absolute_location,
 counts.worker_type) table1;
 '''
+
+
 def rebuild_messages_data():
     today = date.today()
     years = range(2010, today.year + 1)
@@ -181,6 +185,7 @@ def rebuild_messages_data():
             cursor.execute(sql.format(year=year, month=month))
             
     transaction.commit_unless_managed()
+
 
 def update_locations():
     for mlt in MessageByLocationByUserType.objects.filter(province=None):
