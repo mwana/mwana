@@ -266,8 +266,9 @@ class MessageByLocationUserTypeBackend(models.Model):
     count_incoming = models.PositiveIntegerField(default=0, null=True, blank=True)
     count_outgoing = models.PositiveIntegerField(default=0, null=True, blank=True)
     count_DBS_notification = models.PositiveIntegerField(default=0, null=True, blank=True)
-    count_dbs2_notification = models.PositiveIntegerField(default=0, null=True, blank=True)
+    count_dbs2_notification = models.PositiveIntegerField(default=0, null=True, blank=True)# tdrc
     count_vl_notification = models.PositiveIntegerField(default=0, null=True, blank=True)
+    count_participant_notification = models.PositiveIntegerField(default=0, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         my_date = date(self.year, self.month, 1)

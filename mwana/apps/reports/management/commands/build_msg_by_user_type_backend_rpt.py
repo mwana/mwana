@@ -77,6 +77,8 @@ def rebuild_messages_data():
                 mlb.count_dbs2_notification = 1 + (mlb.count_dbs2_notification or 0)
             elif 'viral load test results ready for you' in msg.text:
                 mlb.count_vl_notification = 1 + (mlb.count_vl_notification or 0)
+            elif 'Your appointment is due at' in msg.text and 'Bring your referral letter with' in msg.text:
+                mlb.count_participant_notification = 1 + (mlb.count_participant_notification or 0)
 
         if mlb.absolute_location:
             if mlb.absolute_location.type.slug == 'zone':

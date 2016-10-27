@@ -267,7 +267,8 @@ class MessageByLocationByUserTypeByBackendAdmin(admin.ModelAdmin):
     list_display = ('province', 'district', 'facility', 'backend',
     'worker_type', 'year', 'month',
     'facility_slug', 'absolute_location', 'min_date',
-    'count_DBS_notification', 'count_dbs2_notification', 'count_vl_notification')
+    'count_DBS_notification', 'count_dbs2_notification', 'count_vl_notification'
+    , 'count_participant_notification')
     list_filter = ['backend', 'worker_type', 'year', 'month', 'province', 'district', 'facility',   'province_slug', 'district_slug', 'facility_slug', 'absolute_location']
     #search_fields = ('count', 'province', 'district', 'facility', 'backend', 'worker_type', 'year', 'month', 'province_slug', 'district_slug', 'facility_slug', 'absolute_location', 'min_date', 'max_date', 'month_year', 'count_incoming', 'count_outgoing')
     date_hierarchy = 'min_date'
