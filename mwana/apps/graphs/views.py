@@ -355,7 +355,7 @@ def messages_by_user_type(request):
 def messages_by_partner(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
-    data_type = read_request(request, "data_type") or "percentage"
+    data_type = read_request(request, "data_type") or "count"
     direction = read_request(request, "direction") or "all"
 
     service = GraphService()

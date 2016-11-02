@@ -488,7 +488,7 @@ class GraphService:
     def get_monthly_messages_by_partner(self, start_date, end_date,
     province_slug, district_slug, facility_slug, data_type="count", direction='all'):
         # TODO: Consider moving this function to another module
-        use_percentage = "count" != data_type
+        use_percentage = False
 
         start, end = get_datetime_bounds(start_date, end_date)
         all_messages = MessageByLocationUserTypeBackend.objects.exclude(backend="message_tester").filter(min_date__gte=start,
