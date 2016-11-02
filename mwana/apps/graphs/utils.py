@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.models import MessageByLocationUserTypeBackend
 from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
 from mwana.apps.contactsplus.models import ContactType
@@ -482,6 +483,99 @@ class GraphService:
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
 
+        return month_ranges, data
+
+    def get_monthly_messages_by_partner(self, start_date, end_date,
+    province_slug, district_slug, facility_slug, data_type="count", direction='all'):
+        # TODO: Consider moving this function to another module
+        use_percentage = "count" != data_type
+
+        start, end = get_datetime_bounds(start_date, end_date)
+        all_messages = MessageByLocationUserTypeBackend.objects.exclude(backend="message_tester").filter(min_date__gte=start,
+                                          min_date__lt=end)
+
+        if any([province_slug, district_slug, facility_slug]):
+            facs = get_sms_facilities(province_slug, district_slug, facility_slug)
+            all_messages = all_messages.filter(absolute_location__in=facs)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        partner_names = ['TDRC-Clinic-I', 'TDRC-Clinic-O', 'Participant-O', 'Others-I', 'Others-O']
+        backend_names = ['mtn', 'mtn-modem', 'zain', 'zain-smpp']
+        
+        if backend_names != [str(b.name) for b in Backend.objects.exclude(name='message_tester')]:
+            raise Exception('Backend list is inconsistent')
+        partners = []
+        for p in partner_names:
+            for b in backend_names:
+                partners.append("%s:%s" % (b, p))
+
+        data = {}
+        for item in partners:
+            data[item] = []
+
+        month_ranges = []
+
+        while my_date <= end_date:
+            for backend in backend_names:
+                backend_messages = all_messages.filter(backend=backend)
+                denom_in = backend_messages.filter(year=my_date.year,
+                                                              month=my_date.month).aggregate(sum=Sum('count_incoming'))['sum'] or 0
+                denom_out = backend_messages.filter(year=my_date.year,
+                                                              month=my_date.month).aggregate(sum=Sum('count_outgoing'))['sum'] or 0
+                tdrc_vl_notification = backend_messages.filter(year=my_date.year,
+                            month=my_date.month).aggregate(sum=Sum('count_vl_notification'))['sum'] or 0
+
+                tdrc_dbs_notification = backend_messages.filter(year=my_date.year,
+                            month=my_date.month).aggregate(sum=Sum('count_dbs2_notification'))['sum'] or 0
+
+                other_dbs_notification = backend_messages.filter(year=my_date.year,
+                            month=my_date.month).aggregate(sum=Sum('count_DBS_notification'))['sum'] or 0
+                all_worker_messages_in = backend_messages.filter(year=my_date.year,
+                                                          month=my_date.month,
+                                                          worker_type__contains='worker').aggregate(sum=Sum('count_incoming'))['sum'] or 0
+                all_worker_messages_out = backend_messages.filter(year=my_date.year,
+                                                          month=my_date.month,
+                                                          worker_type__contains='worker').aggregate(sum=Sum('count_outgoing'))['sum'] or 0
+                ratio_sum = tdrc_vl_notification + tdrc_dbs_notification + other_dbs_notification
+                projected_tdrc_vl_messages_in = 0
+                projected_tdrc_vl_messages_out = 0
+                projected_tdrc_dbs_messages_in = 0
+                projected_tdrc_dbs_messages_out = 0
+                projected_tdrc_clinic_messages_in = 0
+                projected_tdrc_clinic_messages_out = 0
+                                
+#                tdrc_participant_message_out = Message.objects.filter(date__year=my_date.year, direction='O', connection__backend__name=backend).filter(
+#                                                          date__month=my_date.month, text__icontains='Bring your referral letter with you').count()
+                tdrc_participant_message_out = backend_messages.filter(year=my_date.year,
+                            month=my_date.month).aggregate(sum=Sum('count_participant_notification'))['sum'] or 0
+                            
+                other_projected_in = 0
+                other_projected_out = 0
+                if ratio_sum:
+                    projected_tdrc_vl_messages_in = all_worker_messages_in * tdrc_vl_notification / (1.0 * ratio_sum )
+                    projected_tdrc_vl_messages_out = all_worker_messages_out * tdrc_vl_notification / (1.0 * ratio_sum )
+                    projected_tdrc_dbs_messages_in = all_worker_messages_in * tdrc_dbs_notification / (1.0 * ratio_sum )
+                    projected_tdrc_dbs_messages_out = all_worker_messages_out * tdrc_dbs_notification / (1.0 * ratio_sum )
+                    other_projected_in = denom_in - int(projected_tdrc_dbs_messages_in) - int(projected_tdrc_vl_messages_in)
+                    other_projected_out = denom_out - tdrc_participant_message_out - int(projected_tdrc_dbs_messages_out) - int(projected_tdrc_vl_messages_out)
+                    projected_tdrc_clinic_messages_in = projected_tdrc_vl_messages_in + projected_tdrc_dbs_messages_in
+                    projected_tdrc_clinic_messages_out = projected_tdrc_vl_messages_out + projected_tdrc_dbs_messages_out
+
+                if use_percentage:
+                    data['%s:TDRC-Clinic-I' % backend].append(round(100.0 * projected_tdrc_clinic_messages_in/(denom_in or 1), 1))
+                    data['%s:TDRC-Clinic-O' % backend].append(round(100.0 * projected_tdrc_clinic_messages_out/(denom_out or 1), 1))
+                    data['%s:Others-I' % backend].append(round(100.0 * other_projected_in/(denom_in or 1), 1))
+                    data['%s:Others-O' % backend].append(round(100.0 * other_projected_out/(denom_out or 1), 1))
+                    data['%s:Participant-O' % backend].append(round(100.0 * tdrc_participant_message_out/(denom_out or 1), 1))
+                else:
+                    data['%s:TDRC-Clinic-I' % backend].append(round(projected_tdrc_clinic_messages_in))
+                    data['%s:TDRC-Clinic-O' % backend].append(round(projected_tdrc_clinic_messages_out))
+                    data['%s:Others-I' % backend].append(round(other_projected_in))
+                    data['%s:Others-O' % backend].append(round(other_projected_out))
+                    data['%s:Participant-O' % backend].append(round(tdrc_participant_message_out))
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+        
         return month_ranges, data
 
     def get_facility_vs_community(self, start_date, end_date, province_slug, district_slug, facility_slug):

@@ -54,6 +54,24 @@ def graphs(request):
                               }, context_instance=RequestContext(request)
                               )
 
+def trivial_graphs(request):
+    end_date = date.today()
+    start_date = end_date - timedelta(days=30)
+
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+    return render_to_response('graphs/trivial_graphs.html',
+                              {
+                              "fstart_date": start_date.strftime("%Y-%m-%d"),
+                              "fend_date": end_date.strftime("%Y-%m-%d"),
+                              'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces),
+                              'rpt_districts': get_facilities_dropdown_html("rpt_districts", get_rpt_districts(request.user), rpt_districts),
+                              'rpt_facilities': get_facilities_dropdown_html("rpt_facilities", get_rpt_facilities(request.user), rpt_facilities),
+
+                              }, context_instance=RequestContext(request)
+                              )
+
 
 def get_report_parameters(request):
     today = date.today()
@@ -330,6 +348,38 @@ def messages_by_user_type(request):
                               "label_y_axis": "'%s'" % data_type.title(),
                               "report_data": report_data,
                               "chart_type": "'spline'",
+                              }, context_instance=RequestContext(request)
+                              )
+
+
+def messages_by_partner(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+    data_type = read_request(request, "data_type") or "percentage"
+    direction = read_request(request, "direction") or "all"
+
+    service = GraphService()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_messages_by_partner(start_date,
+                                                                 end_date, rpt_provinces\
+                                                                 , rpt_districts,
+                                                                 rpt_facilities, data_type, direction)
+
+    for k, v in data.items():
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/stacked_grouped.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly SMS\\'s by Partner %s'" % {"all":"", "I":"- Incoming", "O":"- Outgoing"}.get(direction),
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'%s'" % data_type.title(),
+                              "report_data": report_data,
+                              "chart_type": "'column'",
                               }, context_instance=RequestContext(request)
                               )
 
