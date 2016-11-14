@@ -21,7 +21,8 @@ class ResultAdmin(admin.ModelAdmin):
     list_filter = ('result', 'notification_status', 'verified', 'record_change',
                    'result_sent_date', 'collected_on',  'entered_on',
                    'processed_on', 'clinic',)
-    search_fields = ('sample_id','requisition_id', 'payload__source')
+    search_fields = ('sample_id','requisition_id', 'payload__source',
+                     'clinic_code_unrec', 'clinic__slug', 'clinic__name')
     date_hierarchy = 'result_sent_date'
     actions = [make_new, make_obsolete]
 admin.site.register(Result, ResultAdmin)
