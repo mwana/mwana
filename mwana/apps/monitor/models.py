@@ -4,6 +4,7 @@ from mwana.apps.locations.models import Location
 from django.db import models
 from rapidsms.models import Contact
 from django.contrib.auth.models import User
+from mwana.const import CLINIC_SLUGS
 
 
 class MonitorMessageRecipient(models.Model):
@@ -32,3 +33,11 @@ class LostContactsNotification(models.Model):
     sent_to = models.ForeignKey(Support)
     facility = models.ForeignKey(Location)
     date = models.DateField(auto_now_add=True)
+
+
+class UnrecognisedResult(models.Model):
+    clinic_code_unrec = models.CharField(max_length=20, blank=True)
+    intended_clinic = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)})
+
+    def __unicode__(self):
+        return "%s for %s" % (self.clinic_code_unrec, self.intended_clinic)

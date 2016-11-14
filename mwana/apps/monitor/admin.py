@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.monitor.models import UnrecognisedResult
 from django.contrib import admin
 from mwana.apps.monitor.models import LostContactsNotification
 from mwana.apps.monitor.models import MonitorMessageRecipient
@@ -35,3 +36,10 @@ class SupportAdmin(admin.ModelAdmin):
     list_editable = ('is_active', )
 
 admin.site.register(Support, SupportAdmin)
+
+
+class UnrecognisedResultAdmin(admin.ModelAdmin):
+    list_display = ('clinic_code_unrec', 'intended_clinic')
+    #list_filter = ['clinic_code_unrec', 'intended_clinic']
+    search_fields = ('clinic_code_unrec', 'intended_clinic__slug', 'intended_clinic__name')
+admin.site.register(UnrecognisedResult, UnrecognisedResultAdmin)

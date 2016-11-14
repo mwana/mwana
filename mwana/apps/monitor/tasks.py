@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 #TODO write unit tests for this module
+from mwana.apps.monitor.models import UnrecognisedResult
 from mwana.apps.reports.models import Turnaround
 from mwana.apps.userverification.models import DeactivatedUser
 from datetime import date
@@ -451,8 +452,16 @@ def mark_sent_results_with_date_inconsitencies_as_obsolete():
     logger.info('%s dbs marked as obsolete' % counter)
 
 
+def try_correct_unrecognised_results():
+    for record in UnrecognisedResult.objects.all():
+        for res in Result.objects.filter(clinic=None, clinic_code_unrec=record.clinic_code_unrec):
+            res.clinic = record.intended_clinic
+            res.save()
+
+
 def cleanup_data(router):
     logger.info('cleaning up data, updating supported sites')
+    try_correct_unrecognised_results()
 
     try:
         mark_sent_results_with_date_inconsitencies_as_obsolete()
