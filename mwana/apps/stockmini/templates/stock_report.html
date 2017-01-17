@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}{{model}} - {{ block.super }}{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+{% endblock %}
+
+{% block content %}
+
+    <h3>All {{ model }}</h3>
+    <table border="0">
+        <tbody>
+        <tr>
+            <th>Date</th>
+            <th>Week Of Month</th>
+            <th>Week Of Year</th>
+            <th>Facility</th>
+            <th>Product</th>
+            <th>Level</th>
+        </tr>
+        {% for stock in stock_on_hand %}
+        <tr>
+        <td>{{  stock.date}}</td>
+            <td>{{  stock.week_of_month}}</td>
+            <td>{{  stock.week_of_year}}</td>
+            <td>{{  stock.facility}}</td>
+            <td>{{  stock.stock}}</td>
+            <td>{{  stock.level}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
