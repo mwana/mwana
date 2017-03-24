@@ -41,3 +41,13 @@ class UnrecognisedResult(models.Model):
 
     def __unicode__(self):
         return "%s for %s" % (self.clinic_code_unrec, self.intended_clinic)
+
+
+class EmergencyContact(models.Model):
+    usual_contact = models.ForeignKey(Contact, related_name='usual_contact')
+    emergency_contact = models.ForeignKey(Contact, related_name='emergency_contact')
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return "Emergency contact %s for %s" % (self.emergency_contact, self.usual_contact)
+    
