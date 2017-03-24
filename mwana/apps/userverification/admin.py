@@ -52,7 +52,8 @@ reactivate.short_description = "Reactivate selected users"
 class DeactivatedUserAdmin(admin.ModelAdmin):
     list_display = ("province", "district", "clinic", "contact", "connection", "type", "deactivation_date",)
     search_fields = ('contact__location__name', 'contact__location__parent__name',
-    'contact__location__parent__parent__name', 'contact__name', 'connection__identity')
+    'contact__location__parent__parent__name', 'contact__name',
+    'connection__identity', 'connection__backend__name')
     list_filter = ("deactivation_date", )
     date_hierarchy = 'deactivation_date'
     actions = [reactivate]
