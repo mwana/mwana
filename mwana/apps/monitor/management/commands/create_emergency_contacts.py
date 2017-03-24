@@ -6,6 +6,7 @@ One off task to create RapidSMS contacts for one backend based on another.
 -     send the contact a message that a new contact has been created
 """
 
+from mwana.apps.monitor.models import EmergencyContact
 from django.contrib.auth.models import User
 from mwana.apps.websmssender.models import StagedMessage
 from django.core.management.base import CommandError
@@ -83,6 +84,11 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
         for type in contact1.types.all():
             contact2.types.add(type)
         contact2.save()
+        # @type contact1 Contact
+        contact1.is_active = False
+        contact1.save()
+        
+        EmergencyContact.objects.get_or_create(usual_contact=contact1, emergency_contact=contact2)
 
         text = "We are very sorry %s. %s is still down. For now use this number. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name, usual_number)
         user = None
