@@ -84,13 +84,13 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
             contact2.types.add(type)
         contact2.save()
 
-        text = "We are very sorry %s. %s is still down. For now use this number. Your PIN code is the same. Mwana/Results160 Support" % (contact2.name, usual_number)
+        text = "We are very sorry %s. %s is still down. For now use this number. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name, usual_number)
         user = None
         user = User.objects.get(username="you can't see me here")
-        
+
         StagedMessage.objects.create(connection=contact2.default_connection, text=text, user=user)
-        print text
+        
         print "We now have", contact1, contact1.default_connection, "and ", contact2, contact2.default_connection
 
-      
+
 
