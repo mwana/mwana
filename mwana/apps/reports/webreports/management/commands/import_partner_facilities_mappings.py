@@ -1,7 +1,4 @@
 # vim: ai ts=4 sts=4 et sw=4
-"""
-assign facilities to a group by importing from another group
-"""
 
 from django.core.management.base import LabelCommand
 from mwana.apps.locations.models import Location
