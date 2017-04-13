@@ -199,7 +199,7 @@ class TestApp(LabresultsSetUp):
     def testUnregisteredCheck(self):
         script = """
             unknown_user > CHECK RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results.
         """
         self.runScript(script)
         
@@ -467,7 +467,7 @@ class TestApp(LabresultsSetUp):
 
         self.startRouter()
         tlcprinter_tasks.send_results_to_printer(self.router)
-        msgs=self.receiveAllMessages()
+        msgs = self.receiveAllMessages()
 
         expected_msgs = []
         msg1 = "John Banda:Hello John Banda, 2 results sent to printer at Mibenge Clinic. IDs : 0002, 402029-0001-1"

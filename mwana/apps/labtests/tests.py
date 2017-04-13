@@ -135,7 +135,7 @@ class TestApp(LabtestsSetUp):
     def testUnregisteredCheck(self):
         script = """
             unknown_user > VL RESULTS
-            unknown_user < Sorry you must be registered with a clinic to check results. To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>
+            unknown_user < Sorry you must be registered with a clinic to check results. Send HELP REGISTRATION if you need to be assisted
         """
         self.runScript(script)
         

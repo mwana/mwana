@@ -21,9 +21,9 @@ class JoinHandler(KeywordHandler):
     MIN_NAME_LENGTH = 2
 
     PATTERN = re.compile(r"^(\w+)(\s+)(.{1,})(\s+)(\d+)$")
-    HELP_TEXT = "To register, send JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>"
-    MALFORMED_MSG_TXT = "Sorry, I didn't understand that. Make sure you send your type, location, name and pin like: JOIN <TYPE> <LOCATION CODE> <NAME> <PIN CODE>."
-    INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <LOCATION CODE> <YOUR NAME> <PIN CODE>."
+    HELP_TEXT = "Send HELP REGISTRATION if you need to be assisted"
+    MALFORMED_MSG_TXT = "Sorry, I didn't understand that. " + HELP_TEXT
+    INVALID_PIN = "Please make sure your code is a 4-digit number"
 
     ALREADY_REGISTERED = "Your phone is already registered to %(name)s at %(location)s. To change name or location first reply with keyword 'LEAVE' and try again."
         
@@ -126,7 +126,7 @@ class JoinHandler(KeywordHandler):
         ('clinic','dho','hub','pho'):
             self.include_type = True
             self.PATTERN = new_pattern            
-            self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. Send JOIN <TYPE> <LOCATION CODE> <YOUR NAME> <PIN CODE>."
+            self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. " + self.HELP_TEXT
 
 
     def get_response_message(self, worker_type, name, location, pin):
@@ -261,8 +261,8 @@ class JoinHandler(KeywordHandler):
     def handle_zone(self, text):
         my_text =  text.lower().replace(' zone ', ' ')
         PATTERN = re.compile(r"^\s*(?:clinic\s+)?(?P<clinic>\S+)\s+(?:zone\s+)?(?P<zone>\S+)\s+(?:name\s+)?(?P<name>.+)$")
-        HELP_TEXT = _("To register as a RemindMi agent, send JOIN CBA <CLINIC CODE> "\
-                "<ZONE #> <YOUR NAME>")
+#        HELP_TEXT = _("To register as a RemindMi agent, send JOIN CBA <CLINIC CODE> "\
+#                "<ZONE #> <YOUR NAME>")
 
         m = PATTERN.search(my_text)
         if m is not None:
@@ -343,7 +343,7 @@ class JoinHandler(KeywordHandler):
                      "zone."))
         else:
             msg = self.respond(_("Sorry, I didn't understand that."))
-            msg.append(HELP_TEXT)
+            msg.append(self.HELP_TEXT)
 
 def get_unique_value(query_set, field_name, value, sep="_"):
     """Gets a unique name for an object corresponding to a particular

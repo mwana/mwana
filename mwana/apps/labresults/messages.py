@@ -2,7 +2,6 @@
 from mwana.apps.labresults.models import Result
 from datetime import date, timedelta
 from django.conf import settings
-from mwana.apps.labresults.handlers.join import JoinHandler
 _ = lambda s: s
 
 RESULTS_READY     = "Hello %(name)s. We have %(count)s DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."
@@ -13,7 +12,7 @@ ALREADY_COLLECTED = "Hi %(name)s. It looks like the results you are looking for 
 RESULTS           = "Thank you! Here are your results: "
 RESULTS_PROCESSED = "%(name)s has collected these results"
 INSTRUCTIONS      = "Please record these results in your clinic records and promptly delete them from your phone.  Thank you again %(name)s!"
-NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results. " + JoinHandler.HELP_TEXT
+NOT_REGISTERED    = "Sorry you must be registered with a clinic to check results."
 DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: DEMO <CLINIC_CODE>"
 PRINTER_DEMO_FAIL         = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of Results160. To specify a clinic send: PRINTERDEMO <CLINIC_CODE>"
 HUB_DEMO_FAIL     = "Sorry you must be registered with a location or specify in your message to initiate a reports demo. To specify a location send: HUBDEMO <LOCATION_CODE>"
