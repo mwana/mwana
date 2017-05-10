@@ -33,7 +33,7 @@ def update_infant_result_alert():
     """
     #TODO: write proper implementation
 
-    lookback_date = date.today() - timedelta(days=90)
+    lookback_date = date.today() - timedelta(days=150)
 
     results = Result.objects.filter(result='P').exclude(processed_on__lte=lookback_date).\
         exclude(arrival_date__lte=lookback_date).exclude(clinic=None)
@@ -47,7 +47,7 @@ def update_infant_result_alert():
     if not alerts:
         return
     email_sender = EmailSender()
-    for manager in EmailRecipientForInfantResultAlert.objects.filter(user__email__contains='@'):
+    for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@'):
         manager_alerts = alerts.filter(location__in=Location.objects.filter(groupfacilitymapping__group__in=
                                                                             manager.user.groupusermapping_set.all()))
         if not manager_alerts:
@@ -60,3 +60,6 @@ def update_infant_result_alert():
 
         print "sending mail", manager.user.email, message_text
         email_sender.send(list(set([manager.user.email])), 'ATTENTION: Your follow-up needed', message_text)
+        for alert in manager_alerts:
+            alert.notification_status = 'alerted'
+            alert.save()
