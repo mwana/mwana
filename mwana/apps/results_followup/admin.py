@@ -3,12 +3,23 @@
 from django.contrib import admin
 from rapidsms.models import Contact
 
+from mwana.apps.locations.models import Location
+from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.results_followup.models import EmailRecipientForInfantResultAlert
 from mwana.apps.results_followup.models import InfantResultAlertViews
 from mwana.apps.results_followup.models import InfantResultAlert
 
 
 class InfantResultAlertAdmin(admin.ModelAdmin):
+    def queryset(self, request):
+        user_groups = ReportingGroup.objects.filter(groupusermapping__user=
+                                                    request.user).distinct()
+
+        site_ids =  Location.objects.filter(groupfacilitymapping__group__in=
+                                user_groups).distinct()
+
+        return super(InfantResultAlertAdmin, self).queryset(request).filter(result__clinic__in=site_ids)
+
     list_display = ('summary', 'followup_status', 'location', 'clinic_staff', 'birthdate',
                     'collected_on', 'processed_on',  'date_retrieved',
                     )

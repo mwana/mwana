@@ -33,7 +33,7 @@ def update_infant_result_alert():
     """
     #TODO: write proper implementation
 
-    lookback_date = date.today() - timedelta(days=60)
+    lookback_date = date.today() - timedelta(days=90)
 
     results = Result.objects.filter(result='P').exclude(processed_on__lte=lookback_date).\
         exclude(arrival_date__lte=lookback_date).exclude(clinic=None)
@@ -51,6 +51,7 @@ def update_infant_result_alert():
         manager_alerts = alerts.filter(location__in=Location.objects.filter(groupfacilitymapping__group__in=
                                                                             manager.user.groupusermapping_set.all()))
         if not manager_alerts:
+            print 'No alerts for', manager.user.username
             continue
         message_text = ('Hello %s %s, you have %s results that you need to follow up. Follow this link to take action: '
                         '%s/admin/results_followup/infantresultalert/') % (manager.user.first_name,
