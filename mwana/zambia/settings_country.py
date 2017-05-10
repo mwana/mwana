@@ -40,6 +40,7 @@ INSTALLED_APPS.append("mwana.apps.act")
 #INSTALLED_APPS.append("mwana.apps.reminders.experimental")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.export")
+INSTALLED_APPS.append("mwana.apps.results_followup")
 INSTALLED_APPS.insert(0, 'mwana.apps.blacklist')
 
 ADMINS = (

@@ -248,3 +248,4 @@ RESULTS160_SLUGS = {
 
 # RemindMi setting to configure ...
 SEND_LIVE_BIRTH_REMINDERS = True
+SERVER_ADDRESS = ''
