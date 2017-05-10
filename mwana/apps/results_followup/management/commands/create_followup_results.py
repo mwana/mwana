@@ -45,11 +45,12 @@ def update_infant_result_alert():
 
     alerts = InfantResultAlert.objects.filter(notification_status='new')
     if not alerts:
+        print 'No alerts'
         return
     email_sender = EmailSender()
     for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@'):
-        manager_alerts = alerts.filter(location__in=Location.objects.filter(groupfacilitymapping__group__in=
-                                                                            manager.user.groupusermapping_set.all()))
+        facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=manager.user)
+        manager_alerts = alerts.filter(location__in=facs)
         if not manager_alerts:
             print 'No alerts for', manager.user.username
             continue
@@ -61,5 +62,6 @@ def update_infant_result_alert():
         print "sending mail", manager.user.email, message_text
         email_sender.send(list(set([manager.user.email])), 'ATTENTION: Your follow-up needed', message_text)
         for alert in manager_alerts:
-            alert.notification_status = 'alerted'
+            alert.notification_status = 'notified'
+            alert.followup_status = 'alerted'
             alert.save()
