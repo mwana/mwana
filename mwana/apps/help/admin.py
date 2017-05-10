@@ -7,13 +7,14 @@ from mwana.apps.help import models as help
 
 class HelpRequestAdmin(admin.ModelAdmin):
     list_display = ('parent_loc', 'location', 'requested_by', 'name', 'pin', 'type',
-    'requested_on', 'additional_text','status',)
+    'requested_on', 'additional_text','status', 'addressed_on',)
     list_filter = ('requested_on', 'status' )
     list_select_related = True
     search_fields = ('requested_by__identity', 'status', 'requested_by__contact__name',
     'additional_text',
     'requested_by__contact__location__parent__name',
     'requested_by__contact__types__name',)
+    list_editable = ['status', 'addressed_on',]
 
     def pin(self, obj):
         try:
