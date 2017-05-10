@@ -58,4 +58,4 @@ def update_infant_result_alert():
                                                                            len(manager_alerts), settings.SERVER_ADDRESS)
 
         print "sending mail", manager.user.email, message_text
-        email_sender.send(list(set(manager.user.email)), 'ATTENTION: Your follow-up needed', message_text)
+        email_sender.send(list(set([manager.user.email])), 'ATTENTION: Your follow-up needed', message_text)
