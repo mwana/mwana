@@ -56,6 +56,7 @@ def update_infant_result_alert():
             obj.save()
 
     alerts = InfantResultAlert.objects.filter(notification_status='new')
+    alerted = []
     if not alerts:
         print 'No alerts'
         return
@@ -73,7 +74,10 @@ def update_infant_result_alert():
 
         print "sending mail", manager.user.email, message_text
         email_sender.send(list(set([manager.user.email])), 'ATTENTION: Your follow-up needed', message_text)
+
         for alert in manager_alerts:
-            alert.notification_status = 'notified'
-            alert.followup_status = 'alerted'
-            alert.save()
+            alerted.append(alert)
+    for alert in alerted:
+        alert.notification_status = 'notified'
+        alert.followup_status = 'alerted'
+        alert.save()
