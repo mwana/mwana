@@ -13,7 +13,7 @@ class InfantResultAlert(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending Action'),
         ('alerted', 'Staff Alerted'),
-        ('identified', 'Client identified and seen by facility'),
+        ('identified', 'Client identified & seen by facility'),
         ('treatment_started', 'Client Started on treatment'),
         ('ltf', 'Lost to Followup'),
         ('deceased', 'Deceased'),
@@ -38,6 +38,8 @@ class InfantResultAlert(models.Model):
     processed_on = models.DateField(editable=False, blank=True, null=True)
     date_reached_moh = models.DateField(editable=False, blank=True, null=True)
     date_retrieved = models.DateField(editable=False, blank=True, null=True)
+    treatment_start_date = models.DateField(blank=True, null=True)
+    treatment_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Treatment #')
     lab = models.CharField(max_length=100)
 
     def save(self, *args, **kwargs):
@@ -59,8 +61,7 @@ class InfantResultAlert(models.Model):
         super(InfantResultAlert, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return "Client ID=%s, Lab ID=%s: %s" % (self.result.requisition_id, self.result.sample_id,
-                                                   self.followup_status)
+        return "Client ID=%s, Lab ID=%s" % (self.result.requisition_id, self.result.sample_id)
 
 
 class InfantResultAlertViews(models.Model):

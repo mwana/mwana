@@ -11,6 +11,12 @@ from mwana.apps.results_followup.models import InfantResultAlert
 
 
 class InfantResultAlertAdmin(admin.ModelAdmin):
+    def save_model(self, request, object, form, change):
+        instance = form.save()
+        instance.save()
+        InfantResultAlertViews.objects.get_or_create(alert=instance, seen_by=request.user)
+        return instance
+
     def queryset(self, request):
         user_groups = ReportingGroup.objects.filter(groupusermapping__user=
                                                     request.user).distinct()
@@ -20,17 +26,17 @@ class InfantResultAlertAdmin(admin.ModelAdmin):
 
         return super(InfantResultAlertAdmin, self).queryset(request).filter(result__clinic__in=site_ids)
 
-    list_display = ('summary', 'followup_status', 'location', 'clinic_staff', 'birthdate',
-                    'collected_on', 'processed_on',  'date_retrieved',
+    list_display = ('summary', 'followup_status', 'treatment_start_date', 'location', 'clinic_staff', 'birthdate',
+                    'collected_on', 'processed_on',  'date_retrieved', 'treatment_number'
                     )
-    list_filter = ['followup_status', 'notification_status', 'created_on',  'birthdate', 'sex', 'verified',
+    list_filter = ['followup_status', 'notification_status', 'created_on',  'lab', 'sex', 'verified',
                    'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'location']
     search_fields = ('result__requisition_id', 'result__sample_id', 'location__name',)
     date_hierarchy = 'created_on'
-    list_editable = ['followup_status']
+    list_editable = ['followup_status', 'treatment_start_date', 'treatment_number']
 
     def summary(self, obj):
-        return obj.__unicode__()
+        return obj.result.requisition_id
 
     def clinic_staff(self, obj):
         return ", ".join ("%s %s" % (c.name, c.default_connection.identity) for c in Contact.active.filter(location=obj.result.clinic))
