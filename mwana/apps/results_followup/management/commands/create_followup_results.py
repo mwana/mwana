@@ -13,6 +13,8 @@ from mwana.apps.results_followup.models import EmailRecipientForInfantResultAler
 from mwana.apps.labresults.models import Result
 from mwana.apps.results_followup.models import InfantResultAlert
 from django.conf import settings
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
 
 
 class Command(LabelCommand):
@@ -26,12 +28,22 @@ class Command(LabelCommand):
         pass
 
 
+def update_permissions():
+    group, _ = Group.objects.get_or_create(name='Results Followup')
+    for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@'):
+        if group not in manager.user.groups.all():
+            print 'adding permissions for', manager, ' to ', group
+            group.user_set.add(manager.user)
+
+
 def update_infant_result_alert():
     """
     For testing purposes
     :return: None
     """
     #TODO: write proper implementation
+
+    update_permissions()
 
     lookback_date = date.today() - timedelta(days=150)
 
