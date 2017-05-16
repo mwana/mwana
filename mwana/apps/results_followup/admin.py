@@ -10,6 +10,18 @@ from mwana.apps.results_followup.models import InfantResultAlertViews
 from mwana.apps.results_followup.models import InfantResultAlert
 
 
+from django import forms
+
+
+class InfantResultAlertAdminForm(forms.ModelForm):
+    class Meta:
+        model = InfantResultAlert
+
+    def __init__(self, *args, **kwds):
+        super(InfantResultAlertAdminForm, self).__init__(*args, **kwds)
+        self.fields['referred_to'].queryset = Location.objects.exclude(type__slug__in=['zone', 'district', 'province']).order_by('name')
+
+
 class InfantResultAlertAdmin(admin.ModelAdmin):
     def save_model(self, request, object, form, change):
         instance = form.save()
@@ -26,20 +38,24 @@ class InfantResultAlertAdmin(admin.ModelAdmin):
 
         return super(InfantResultAlertAdmin, self).queryset(request).filter(result__clinic__in=site_ids)
 
-    list_display = ('summary', 'followup_status', 'treatment_start_date', 'location', 'clinic_staff', 'birthdate',
-                    'collected_on', 'processed_on',  'date_retrieved', 'treatment_number'
+    list_display = ('location', 'clinic_staff', 'client_id', 'DOB_and_collected_on', 'followup_status',
+                    'referred_to', 'treatment_start_date', 'notes'
                     )
-    list_filter = ['followup_status', 'notification_status', 'created_on',  'lab', 'sex', 'verified',
+    list_filter = ['followup_status', 'created_on',  'lab', 'sex', 'verified',
                    'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'location']
-    search_fields = ('result__requisition_id', 'result__sample_id', 'location__name',)
+    search_fields = ('result__requisition_id', 'result__sample_id', 'location__name', 'notes')
     date_hierarchy = 'created_on'
-    list_editable = ['followup_status', 'treatment_start_date', 'treatment_number']
+    list_editable = ['followup_status', 'treatment_start_date', 'notes', 'referred_to']
+    form = InfantResultAlertAdminForm
 
-    def summary(self, obj):
-        return obj.result.requisition_id
+    def client_id(self, obj):
+        return "%s %s" % (obj.location.slug, obj.result.requisition_id)
 
     def clinic_staff(self, obj):
         return ", ".join ("%s %s" % (c.name, c.default_connection.identity) for c in Contact.active.filter(location=obj.result.clinic))
+    def DOB_and_collected_on(self, obj):
+        return "%s, %s " % (obj.birthdate, obj.collected_on)
+
 admin.site.register(InfantResultAlert, InfantResultAlertAdmin)
 
 
@@ -50,7 +66,9 @@ admin.site.register(InfantResultAlertViews, InfantResultAlertViewsAdmin)
 
 
 class EmailRecipientForInfantResultAlertAdmin(admin.ModelAdmin):
-    list_display = ('user', 'is_active')
-    list_filter = ['is_active', 'user']
+    list_display = ('user', 'is_active', 'last_alert_number', 'last_alert_date')
+    list_filter = ['is_active', 'last_alert_date']
+    search_fields = ['user__username', 'user__first_name', 'user__last_name']
     list_editable = ['is_active']
+    date_hierarchy = 'last_alert_date'
 admin.site.register(EmailRecipientForInfantResultAlert, EmailRecipientForInfantResultAlertAdmin)

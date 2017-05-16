@@ -38,10 +38,9 @@ def update_permissions():
 
 def update_infant_result_alert():
     """
-    For testing purposes
-    :return: None
+    
     """
-    #TODO: write proper implementation
+    #TODO: write, unit test, task, frontend
 
     update_permissions()
 
@@ -55,13 +54,16 @@ def update_infant_result_alert():
         if not created:
             obj.save()
 
-    alerts = InfantResultAlert.objects.filter(notification_status='new')
+    alerts = InfantResultAlert.objects.filter(notification_status__in=['new', 'notified'])
     alerted = []
     if not alerts:
         print 'No alerts'
         return
     email_sender = EmailSender()
-    for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@'):
+    date_back = date.today() - timedelta(days=31)
+
+    for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@').\
+            exclude(last_alert_date__gte=date_back):
         facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=manager.user)
         manager_alerts = alerts.filter(location__in=facs)
         if not manager_alerts:
@@ -74,7 +76,9 @@ def update_infant_result_alert():
 
         print "sending mail", manager.user.email, message_text
         email_sender.send(list(set([manager.user.email])), 'ATTENTION: Your follow-up needed', message_text)
-
+        manager.last_alert_number = len(manager_alerts)
+        manager.last_alert_date = date.today()
+        manager.save()
         for alert in manager_alerts:
             alerted.append(alert)
     for alert in alerted:

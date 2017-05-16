@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 
+from mwana.const import CLINIC_SLUGS
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
 
@@ -12,25 +13,32 @@ class InfantResultAlert(models.Model):
 
     STATUS_CHOICES = (
         ('pending', 'Pending Action'),
-        ('alerted', 'Staff Alerted'),
-        ('identified', 'Client identified & seen by facility'),
+        ('alerted', 'Managers Alerted'),
+        ('identified', 'Client identified'),
+        ('seen', 'Client Seen by facility'),
         ('treatment_started', 'Client Started on treatment'),
-        ('ltf', 'Lost to Followup'),
+        ('referred', 'Referred'),
         ('deceased', 'Deceased'),
+        ('unknown', 'Unknown'),
     )
     NOTIFICATION_CHOICES = (
         ('new', 'New'),
         ('notified', 'Staff Alerted'),
+        ('closed', 'Closed'),
     )
 
     result = models.ForeignKey(Result)
-    followup_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    followup_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Action')
     notification_status = models.CharField(max_length=20, choices=NOTIFICATION_CHOICES, default='new', editable=False)
-    created_on = models.DateTimeField(default=datetime.now, editable=False, null=True, blank=True)
+    created_on = models.DateTimeField(default=datetime.now, editable=False, null=True, blank=True,
+                                      verbose_name='First Alert Date')
 
     # fields for faster reporting
-    location = models.ForeignKey(Location, editable=False, null=True, blank=True)
-    birthdate = models.DateField(editable=False, null=True, blank=True)
+    location = models.ForeignKey(Location, editable=False, null=True, blank=True,
+                                 limit_choices_to={"type__slug__in": list(CLINIC_SLUGS),})
+    referred_to = models.ForeignKey(Location, related_name='referred_to', null=True, blank=True,
+                                    limit_choices_to={"type__slug__in": list(CLINIC_SLUGS),})
+    birthdate = models.DateField(editable=False, null=True, blank=True, verbose_name='DOB')
     sex = models.CharField(editable=False, max_length=1, blank=True)
     verified = models.NullBooleanField(editable=False, null=True, blank=True)
     collected_on = models.DateField(editable=False, blank=True, null=True)
@@ -39,8 +47,8 @@ class InfantResultAlert(models.Model):
     date_reached_moh = models.DateField(editable=False, blank=True, null=True)
     date_retrieved = models.DateField(editable=False, blank=True, null=True)
     treatment_start_date = models.DateField(blank=True, null=True)
-    treatment_number = models.CharField(max_length=20, blank=True, null=True, verbose_name='Treatment #')
-    lab = models.CharField(max_length=100)
+    notes = models.CharField(max_length=120, blank=True, null=True)
+    lab = models.CharField(max_length=100, editable=False)
 
     def save(self, *args, **kwargs):
         if self.result:
@@ -58,10 +66,16 @@ class InfantResultAlert(models.Model):
         if self.notification_status == 'notified':
             if self.followup_status == 'pending':
                 self.followup_status = 'alerted'
+        if self.notification_status and self.followup_status not in ['pending', 'alerted']:
+            self.notification_status = 'closed'
         super(InfantResultAlert, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return "Client ID=%s, Lab ID=%s" % (self.result.requisition_id, self.result.sample_id)
+
+    def parent(self):
+        if self.id:
+            return self.location.parent
 
 
 class InfantResultAlertViews(models.Model):
@@ -78,6 +92,8 @@ class InfantResultAlertViews(models.Model):
 class EmailRecipientForInfantResultAlert(models.Model):
     user = models.ForeignKey(User)
     is_active = models.BooleanField(default=True)
+    last_alert_number = models.PositiveIntegerField(editable=False, null=True, blank=True)
+    last_alert_date = models.DateField(editable=False, null=True, blank=True)
 
     def __unicode__(self):
         return "%s: Enabled? %s" % (self.user, self.is_active)
