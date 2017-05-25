@@ -45,7 +45,7 @@ class InfantResultAlertAdmin(admin.ModelAdmin):
                    'collected_on', 'received_at_lab', 'processed_on', 'date_reached_moh', 'date_retrieved', 'location']
     search_fields = ('result__requisition_id', 'result__sample_id', 'location__name', 'notes')
     date_hierarchy = 'created_on'
-    list_editable = ['followup_status', 'treatment_start_date', 'notes', 'referred_to']
+    list_editable = ['followup_status', 'treatment_start_date', 'notes', ]
     form = InfantResultAlertAdminForm
 
     def client_id(self, obj):
