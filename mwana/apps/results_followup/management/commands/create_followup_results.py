@@ -70,7 +70,11 @@ def update_infant_result_alert():
             print 'No alerts for', manager.user.username
             continue
         message_text = ('Hello %s %s, you have %s results that you need to follow up. Follow this link to take action: '
-                        '%s/admin/results_followup/infantresultalert/') % (manager.user.first_name,
+                        '%s/admin/results_followup/infantresultalert/?followup_status__exact=alerted'
+                        '\n\n'
+                        'Please take note that when you make changes, either on the date, action, '
+                        'status, or any other field '
+                        'CLICK the Save button at the bottom so that your changes are saved to the database.') % (manager.user.first_name,
                                                                            manager.user.last_name,
                                                                            len(manager_alerts), settings.SERVER_ADDRESS)
 
