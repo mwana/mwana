@@ -31,7 +31,7 @@ class Client(models.Model):
         ('deprecated', 'Deprecated'),
     )
     facility = models.ForeignKey(Location, related_name='anc_client_location')
-    connection = models.ForeignKey(Connection, related_name='anc_client_connection')
+    connection = models.ForeignKey(Connection, related_name='anc_client_connection', editable=False)
     is_active = models.BooleanField(default=True)
     lmp = models.DateField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='pregnant')
@@ -42,7 +42,7 @@ class Client(models.Model):
         return "%s at %s" % (self.connection.identity, self.facility.name)
 
     class Meta:
-        unique_together = ('connection', 'lmp')
+        unique_together = ('is_active', 'connection', 'lmp')
 
     def is_eligible_for_messages(self):
         if not self.is_active:
@@ -62,6 +62,7 @@ class Client(models.Model):
 class SentMessage(models.Model):
     client = models.ForeignKey(Client)
     message = models.ForeignKey(EducationalMessage)
+    date = models.DateTimeField(default=datetime.now, editable=False)
 
     def __unicode__(self):
         return "%s: %s" % (self.client, self.message.gestational_age)

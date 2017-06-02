@@ -23,8 +23,9 @@ admin.site.register(Client, ClientAdmin)
 
 
 class SentMessageAdmin(admin.ModelAdmin):
-    list_display = ('client', 'message')
-    #list_filter = ['client', 'message']
+    list_display = ('client', 'message', 'date')
+    list_filter = ['date',]
+    date_hierarchy = 'date'
     #search_fields = ('client', 'message')
 
 admin.site.register(SentMessage, SentMessageAdmin)
