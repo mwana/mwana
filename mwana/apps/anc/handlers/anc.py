@@ -9,7 +9,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 _ = lambda s: s
 
-
+#TODO: consider handling at identity level instead of connection level
 class AncHandler(KeywordHandler):
     """
     """

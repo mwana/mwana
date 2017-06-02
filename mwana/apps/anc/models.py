@@ -43,6 +43,7 @@ class Client(models.Model):
 
     class Meta:
         unique_together = ('is_active', 'connection', 'lmp')
+        verbose_name = 'Client Gestation'
 
     def is_eligible_for_messages(self):
         if not self.is_active:
@@ -66,3 +67,13 @@ class SentMessage(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.client, self.message.gestational_age)
+
+
+class WaitingForResponse(models.Model):
+    client_gestation = models.ForeignKey(Client, editable=False)
+    response = models.CharField(max_length=200, blank=True, null=True, editable=False)
+    date_created = models.DateTimeField(default=datetime.now, editable=False)
+
+    def __unicode__(self):
+        return self.response
+

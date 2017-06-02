@@ -2,6 +2,8 @@
 import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
 
+from mwana.apps.anc.messages import MISCARRIAGE_MSG, STILL_BITH_MSG
+from mwana.apps.anc.models import WaitingForResponse
 from mwana.apps.anc.mocking import MockANCUtility
 from mwana.apps.anc.models import Client
 
@@ -29,7 +31,6 @@ class App(rapidsms.apps.base.AppBase):
                                      minutes=range(60))
 
     def handle(self, msg):
-
         mocker = MockANCUtility()
 
         if mocker.handle(msg):
@@ -38,6 +39,28 @@ class App(rapidsms.apps.base.AppBase):
         if not Client.objects.filter(connection=msg.connection).exists():
             return False
         if not msg.text:
+            return True
+        # TODO: ensure on gestation exists at a time per client. Deprecate stale ones
+        waitingForResponses = WaitingForResponse.objects.filter(client_gestation__connection=msg.connection,
+                                                                response=None)
+        if waitingForResponses:
+            for record in waitingForResponses:
+                client_gestation = record.client_gestation
+                if msg.text.strip() == '1':
+                    client_gestation.status = 'miscarriage'
+                elif msg.text.strip() == '2':
+                    client_gestation.status = 'stillbirth'
+                else:
+                    client_gestation.status = 'stop'
+                client_gestation.save()
+                record.response = msg.text.strip()
+                record.save()
+            if msg.text.strip() == '1':
+                msg.respond(MISCARRIAGE_MSG)
+            elif msg.text.strip() == '2':
+                msg.respond(STILL_BITH_MSG)
+            else:
+                msg.respond("Thank you")
             return True
         msg.respond("Received")
 

@@ -6,6 +6,7 @@ from rapidsms.models import Connection
 from rapidsms.tests.scripted import TestScript
 
 import mwana.const as const
+from mwana.apps.anc.models import WaitingForResponse
 from mwana.apps.anc.models import EducationalMessage
 from mwana.apps.anc.messages import EDUCATIONAL_MESSAGES
 from mwana.apps.anc.messages import WELCOME_MSG_A
@@ -188,22 +189,70 @@ class TestApp(AncSetUp):
         # run task
         script = """
             client > Thank you
-            client > Received
-        """.format(msg1=WELCOME_MSG_A, msg2=WELCOME_MSG_B)
+            client < Received
+        """
         self.runScript(script)
 
     def testIgnoreHandleInvalidMessage(self):
         self.create_client()
         script = """
             client > Thank you
-            client > Received
-        """.format(msg1=WELCOME_MSG_A, msg2=WELCOME_MSG_B)
+            client < Received
+        """
         self.runScript(script)
 
     def testCleanMessage(self):
-        self.create_client()
         script = """
             client > ANC 101010 14 weeks
-            client > Received
+            client < You have successfully subscribed from Chelston clinic and your gestational age is 14. Resubmit if this is incorrect
+            client < {msg1}
+            client < {msg2}
         """.format(msg1=WELCOME_MSG_A, msg2=WELCOME_MSG_B)
         self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+
+    def testUnsubscribing(self):
+        script = """
+            client > 555555
+            client < Thank you for your submission to stop receiving messages
+        """
+        self.runScript(script)
+        self.assertEqual(WaitingForResponse.objects.all().count(), 0)
+
+        self.create_client()
+        script = """
+            client > 555555 
+            client > 1            
+        """
+
+        # received = "client < You have successfully unsubscribed. Please let us know why. Send 1 for Pregnancy ended\n2 for Baby was still-born\n3 for Do not want reminders"
+
+        self.runScript(script)
+
+        self.assertEqual(WaitingForResponse.objects.all().count(), 1)
+        self.assertEqual(Client.objects.get(pk=1).status, 'miscarriage')
+        self.assertEqual(Client.objects.get(pk=1).is_active, False)
+        #TODO test messages received
+
+        self.create_client('client2')
+        script = """
+            client2 > 555555 
+            client2 > 2            
+        """
+        self.runScript(script)
+
+        self.assertEqual(WaitingForResponse.objects.filter(response=None).count(), 0)
+        self.assertEqual(Client.objects.get(connection__identity='client2').status, 'stillbirth')
+        self.assertEqual(Client.objects.get(connection__identity='client2').is_active, False)
+        #TODO test messages received
+
+        self.create_client('client3')
+        script = """
+            client3 > 555555 
+            client3 > 42            
+        """
+        self.runScript(script)
+
+        self.assertEqual(Client.objects.get(connection__identity='client3').status, 'stop')
+        self.assertEqual(Client.objects.get(connection__identity='client3').is_active, False)
+        #TODO test messages received
