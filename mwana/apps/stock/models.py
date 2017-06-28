@@ -28,6 +28,9 @@ class StockUnit(models.Model):
     abbr = models.CharField(max_length=10, null=True, blank=True)
     description = models.CharField(max_length=20, null=False, blank=False)
 
+    def __unicode__(self):
+        return self.abbr
+
 
 class Stock(models.Model):
     """

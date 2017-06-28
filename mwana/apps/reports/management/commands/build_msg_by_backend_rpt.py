@@ -24,13 +24,12 @@ def __del__(self):
 def rebuild_messages_data():
    
     try:
-        logged  = MsgByLocationByBackendBuildLog.objects.all()[0]
+        logged = MsgByLocationByBackendBuildLog.objects.all()[0]
     except IndexError:
         logged = MsgByLocationByBackendBuildLog()
         logged.lock = 1
         logged.message_id = 0
         logged.save()
-
 
     for msg in Message.objects.filter(id__gt=logged.message_id).\
                                 exclude(connection=None).order_by('id'):

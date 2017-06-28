@@ -58,6 +58,9 @@ class ResultsForFollowup(models.Model):
     lab = models.CharField(max_length=100)
     result_detail = models.CharField(max_length=200, blank=True)  # reason for rejection or explanation of inconsistency
 
+    def __unicode__(self):
+        return "%s: %s" % (self.requisition_id, self.result)
+
 
 class SupportedLocation(models.Model):
     location = models.ForeignKey(Location)

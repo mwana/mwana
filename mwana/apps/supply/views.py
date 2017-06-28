@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 # Create your views here.
-from apps.supply.forms import SupplyRequestForm
-from apps.supply.models import SupplyRequest
+from mwana.apps.supply.forms import SupplyRequestForm
+from mwana.apps.supply.models import SupplyRequest
 from datetime import datetime
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse

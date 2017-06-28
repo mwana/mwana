@@ -3,12 +3,14 @@ from mwana.apps.reports.webreports.models import GroupUserMapping
 from datetime import timedelta
 from mwana.apps.email.sender import EmailSender
 
+
 def get_admin_email_address():
     from djappsettings import settings
     try:
         return settings.ADMINS[0][1]
     except:
         return "Mwana Admin."
+
 
 def send_issue_email(issue, user):
     edit_mode = "created" if (issue.edited_on - issue.date_created) < timedelta(seconds=10)  else "edited"
