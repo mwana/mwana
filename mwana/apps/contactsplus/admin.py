@@ -8,10 +8,13 @@ from rapidsms.models import Backend
 from rapidsms.admin import ContactAdmin
 from rapidsms.contrib.messagelog.models import Message
 
+from mwana.apps.contactsplus.models import PreferredContact
 from mwana.apps.contactsplus import models as contactsplus
 
 
 admin.site.unregister(Contact)
+
+
 class ContactAdmin(ContactAdmin):
     list_display = ('unicode', 'alias', 'language', 'parent_location',
                     'location', 
@@ -60,6 +63,8 @@ admin.site.register(contactsplus.ContactType, ContactTypeAdmin)
 
 
 admin.site.unregister(Message)
+
+
 class MessageAdmin(admin.ModelAdmin):
     list_display = ("text", "direction", "who", "date",)
     list_filter = ("direction", "date", "contact",)
@@ -77,6 +82,8 @@ def create_action(backend):
 
 
 admin.site.unregister(Connection)
+
+
 class ConnectionAdmin(admin.ModelAdmin):
     list_display = ("identity", "backend", "contact",)
     list_filter = ("backend", "contact",)
@@ -85,3 +92,15 @@ class ConnectionAdmin(admin.ModelAdmin):
     def get_actions(self, request):
         return dict(create_action(b) for b in Backend.objects.all())
 admin.site.register(Connection, ConnectionAdmin)
+
+
+class PreferredContactAdmin(admin.ModelAdmin):
+    list_display = ('minor_contact', 'minor_contact_active', 'preferred_contact', 'preferred_contact_active')
+    search_fields = ('minor_contact__name', 'preferred_contact__connection__identity')
+
+    def minor_contact_active(self, obj):
+        return obj.minor_contact.is_active
+
+    def preferred_contact_active(self, obj):
+        return obj.preferred_contact.is_active
+admin.site.register(PreferredContact, PreferredContactAdmin)

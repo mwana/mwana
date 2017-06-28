@@ -6,6 +6,7 @@ Created on Mar 31, 2010
 '''
 
 import logging
+from mwana.apps.contactsplus.models import PreferredContact
 import mwana.apps.labresults.config as config
 import mwana.const as const
 import rapidsms
@@ -148,7 +149,7 @@ class App(rapidsms.apps.base.AppBase):
             # was taken care of
             clinic_connections = [contact.default_connection for contact in \
                                   Contact.active.filter \
-                                          (Q(location=clinic) | Q(location__parent=clinic))]
+                                          (Q(location=clinic))]
 
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
@@ -270,8 +271,10 @@ class App(rapidsms.apps.base.AppBase):
             messages = self.results_avail_messages(clinic, results)
             if messages:
                 self.send_messages(messages)
-                self._mark_results_pending(results, (msg.connection
-                                                     for msg in messages))
+                primary_connections = [msg.connection for msg in messages]
+                alternate_connections = [PreferredContact.get_minor_connection(msg.connection) for msg in messages]
+                connections = set(primary_connections + alternate_connections)
+                self._mark_results_pending(results, connections)
 
     def send_printers_pending_results(self, clinic):
         """
@@ -304,7 +307,6 @@ class App(rapidsms.apps.base.AppBase):
         else:
             return Result.objects.none()
 
-
     def filterout(self, results, check):
         """
         If clinic has not been retrieving results despite being notified, then
@@ -315,7 +317,7 @@ class App(rapidsms.apps.base.AppBase):
         today = datetime.today()
         ago = today - timedelta(days=14)
         if SYSTEM_LOCALE == LOCALE_ZAMBIA and not check:
-            if today.weekday() != 0:
+            if today.weekday() not in [0, 1, 2]:
                 results = results.exclude(notification_status='notified',
                                           arrival_date__lte=ago)
         return results
@@ -407,7 +409,6 @@ class App(rapidsms.apps.base.AppBase):
             else:
                 logger.info("There are no help admins")
 
-
     def _mark_results_pending(self, results, connections):
         for connection in connections:
             self.waiting_for_pin[connection] = results
@@ -429,8 +430,8 @@ class App(rapidsms.apps.base.AppBase):
                          "These will go unreported until clinic staff "
                          "register at this clinic." % clinic)
 
-        all_msgs = []
-        for contact in contacts:
+        all_msgs = []       
+        for contact in set(PreferredContact.get_preferred_contact(item) for item in contacts):
             msg = OutgoingMessage(connection=contact.default_connection,
                                   template=RESULTS_READY,
                                   name=contact.name, count=results.count())
