@@ -117,6 +117,13 @@ class Result(models.Model):
     def get_result_text(self):
         return '%s%s' % (self.result, self.result_unit if self.result_unit else "")
 
+    def unsuppressed(self):
+        try:
+            return float(self.result) >= 1000
+        except ValueError:
+            return False
+        return False
+
 
 class Payload(models.Model):
     """a raw incoming data payload from the testing lab"""
