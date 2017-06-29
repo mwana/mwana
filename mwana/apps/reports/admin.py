@@ -328,6 +328,7 @@ class ResultsForFollowupAdmin(admin.ModelAdmin):
 
 admin.site.register(ResultsForFollowup, ResultsForFollowupAdmin)
 
+
 class CoverageAdmin(admin.ModelAdmin):
     list_display = ('location', 'raw_district_text', 'raw_facility_text', 'supported', 'number_of_active_staff', 'number_of_active_cba', 'mwana_district', 'partner', 'site_category', 'matched')
     list_filter = ('supported',  'matched', 'partner', 'site_category', 'raw_district_text', 'raw_facility_text','number_of_active_staff', 'number_of_active_cba')
