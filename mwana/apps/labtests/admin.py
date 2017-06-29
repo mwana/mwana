@@ -18,7 +18,7 @@ class ResultAdmin(admin.ModelAdmin):
                     'result', 'result_unit', 'processed_on', 'notification_status', 'sex',
                     'result_sent_date', 'phone', 'guspec', 'province', 'district', 'constit',
                     'ward', 'csa', 'sea')
-    list_filter = ('test_type', 'processed_on', 'notification_status', 'sex',
+    list_filter = ('test_type', 'verified', 'processed_on', 'notification_status', 'sex',
                    'collected_on', 'arrival_date', 'result_sent_date', 'province', 'district', 'clinic',
                    'constit', 'ward', 'csa', 'sea')
     search_fields = ('requisition_id', 'clinic__name', 'clinic__slug', 'result',
