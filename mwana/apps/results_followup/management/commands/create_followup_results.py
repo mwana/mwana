@@ -78,7 +78,7 @@ def update_infant_result_alert():
         facs = Location.objects.filter(groupfacilitymapping__group__groupusermapping__user=manager.user)
         manager_alerts = alerts.filter(location__in=facs)
         if not manager_alerts:
-            logger.info('No alerts for 5s' % manager.user.username)
+            logger.info('No alerts for %s' % manager.user.username)
             continue
         message_text = ('Hello %s %s, you have %s results that you need to follow up. Follow this link to take action: '
                         '%s/admin/results_followup/infantresultalert/?followup_status__exact=alerted'
