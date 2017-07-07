@@ -60,16 +60,16 @@ def process_data(start, end, group='SMACHT'):
     print "DBS Tested at Lab between %s and %s" % (start, end)
     print "Data as of date:", date.today().strftime('%d-%b-%Y')
     print "Data source: Mwana System"
-    print "District| Facility name|Facility Code|Positive|Negative|Rejected|Total"
+    print "#|District| Facility name|Facility Code|Positive|Negative|Rejected|Total"
 
     all = Result.objects.filter(result__in='PNRXI', clinic__groupfacilitymapping__group__name=group, processed_on__gte=get_date(start)).filter(processed_on__lte=get_date(end))
 
     positive = all.filter(result='P')
     negative = all.filter(result='N')
     rejected = all.filter(result__in=['R', 'X', 'I'])
-    print "Summary:"
-    print "All Listed Districts| All Listed Facilities||%s|%s|%s|%s" % (positive.count(), negative.count(), rejected.count(), all.count())
-    print "Listing:"
+    print "|Summary:"
+    print "|All Listed Districts| All Listed Facilities||%s|%s|%s|%s" % (positive.count(), negative.count(), rejected.count(), all.count())
+    print "|Listing:"
     data = []
     for loc in Location.objects.filter(groupfacilitymapping__group__name=group):
         expando = Expando()
@@ -82,6 +82,7 @@ def process_data(start, end, group='SMACHT'):
         expando.rejected = rejected.filter(clinic=loc).count()
         expando.total = all.filter(clinic=loc).count()
         data.append(expando)
-
+    count = 0
     for item in sorted(data, key=lambda x: "%s%s%s" % (x.district_name, x.facility_name, x.slug)):
-        print "|".join(str(i) for i in [item.district_name, item.facility_name, item.slug, item.positive, item.negative, item.rejected, item.total])
+        count += 1
+        print "|".join(str(i) for i in [count, item.district_name, item.facility_name, item.slug, item.positive, item.negative, item.rejected, item.total])
