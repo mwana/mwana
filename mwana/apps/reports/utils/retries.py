@@ -21,12 +21,14 @@ def my_min(date1, date2):
     else:
         return None
 
+
 def get_contact(identity):
     try:
-        return Contact.objects.filter(default_connection__identity=identity)[0].name
-    except:
+        return Contact.objects.filter(connection__identity=identity)[0].name
+    except IndexError:
         return "Unknown"
-    
+
+
 def get_clinic(identity):
     try:
         return get_clinic_or_default(get_contact(identity))

@@ -13,4 +13,5 @@ logger = logging.getLogger('mwana.apps.results_followup.tasks')
 def send_email_alerts(router):
     logger.info('Sending email messages')
     update_infant_result_alert()
-    update_viral_load_alert()
+    # TODO: Enable when necessary
+    # update_viral_load_alert()
