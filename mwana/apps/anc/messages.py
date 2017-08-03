@@ -54,4 +54,4 @@ EDUCATIONAL_MESSAGES = (
     (78, "We wish you and your family all the best for your future! Remember to eat lots of fruits and vegetables"),
 
 )
-DEMO_FAIL = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of ANC Messages. To specify a clinic send: DEMO <CLINIC_CODE>"
+DEMO_FAIL = "Sorry you must be registered with a clinic or specify in your message to initiate a demo of ANC Messages. To specify a clinic send: ANCDEMO <CLINIC_CODE>"

@@ -24,7 +24,7 @@ class MockANCUtility(LoggerMixin):
                 OutgoingMessage(client.connection, ed.text).send()
 
     def handle(self, message):
-        if message.text.strip().upper().startswith("DEMOANC"):
+        if message.text.strip().upper().startswith("ANCDEMO"):
             rest = message.text.strip()[4:].strip()
             clinic = None
             if rest:
