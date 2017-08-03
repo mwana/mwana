@@ -1,8 +1,9 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 _ = lambda s: s
-WELCOME_MSG_A = "Welcome to the mother baby service reminder program. From now we will support you until you have given birth. We will send text messages on health education and remind you to attend your 8 ANC regularly and use skilled healthcare providers at delivery. Kind regards. MoH"
-WELCOME_MSG_B = "International experts recommend 8 clinic visits during pregnancy to make sure you and your baby are healthy. Your first visit should be at 16 weeks at the latest. Ask for iron and folic acid tablets. To stop messages please dial"
+# WELCOME_MSG_A = "Welcome to the mother baby service reminder program. From now we will support you until you have given birth. We will send text messages on health education and remind you to attend your 8 ANC regularly and use skilled healthcare providers at delivery. Kind regards. MoH"
+WELCOME_MSG_A = "Welcome to the Mother Baby Service Reminder Program. We will now support you until you give birth. We will send text messages on health education and remind you to attend your 8 ANC regularly and use skilled healthcare providers at delivery. Kind regards. MoH"
+WELCOME_MSG_B = "8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 555555"
 MISCARRIAGE_MSG = "We feel sorry that your pregnancy has ended up with a miscarriage. It's unfortunate but some miscarriages occur because the baby was not ready to live. Talk to family and friends for support and try again after 6 months."
 STILL_BITH_MSG = "It's unfortunate that your baby could not survive. We are sorry for that. The health care provider who assisted you at delivery can help understand why that happened and when you can start trying again. Losing a baby is very difficult. Talk to family and friends for support."
 
