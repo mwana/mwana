@@ -25,10 +25,10 @@ class App(rapidsms.apps.base.AppBase):
 
         # remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-        # EventSchedule.objects.create(callback=callback, hours=[6, 15],
-        #                              minutes=[5])
-        EventSchedule.objects.create(callback=callback, hours=range(24),
-                                     minutes=range(60))
+
+        # TODO: modify after testing window
+        EventSchedule.objects.create(callback=callback, hours=range(6, 18),
+                                     minutes=range(0, 60, 5))
 
     def handle(self, msg):
         mocker = MockANCUtility()

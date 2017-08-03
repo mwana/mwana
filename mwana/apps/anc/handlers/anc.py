@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+import time
+
 from mwana.apps.anc.messages import WELCOME_MSG_A, WELCOME_MSG_B
 from mwana.apps.locations.models import Location
 from mwana.apps.anc.models import EducationalMessage
@@ -78,6 +80,8 @@ class AncHandler(KeywordHandler):
         self.respond("You have successfully subscribed from %s clinic and your "
                      "gestational age is %s. Resubmit if this is incorrect" %
                      (facility.name, gestational_age))
+        time.sleep(5)
         self.respond(WELCOME_MSG_A)
+        time.sleep(5)
         self.respond(WELCOME_MSG_B)
         return True
