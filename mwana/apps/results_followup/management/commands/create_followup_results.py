@@ -71,7 +71,7 @@ def update_infant_result_alert():
         logger.info('No alerts')
         return
     email_sender = EmailSender()
-    date_back = date.today() - timedelta(days=31)
+    date_back = date.today() - timedelta(days=7)
 
     for manager in EmailRecipientForInfantResultAlert.objects.filter(is_active=True, user__email__contains='@').\
             exclude(last_alert_date__gte=date_back):
