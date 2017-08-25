@@ -32,8 +32,12 @@ def clean(item):
 
 
 def process(args=['SMACHT']):
-    print 'followup_status,created_on,location,referred_to,birthdate,sex,verified,collected_on,processed_on,date_retrieved,treatment_start_date'
+    print 'followup_status,created_on,location,referred_to,birthdate,sex,verified,collected_on,date_received_at_lab,' \
+          'processed_on,date_result_reached_moh,date_retrieved,treatment_start_date','end'
     for r in InfantResultAlert.objects.filter(location__groupfacilitymapping__group__name__in=args):
         print ','.join(clean(x) for x in [r.followup_status, r.created_on, r.location, r.referred_to,
-                                          r.birthdate, r.sex, r.verified, r.collected_on, r.processed_on,
-                                          r.date_retrieved, r.treatment_start_date])
+                                          r.birthdate, r.sex, r.verified, r.collected_on,
+                                          r.result.entered_on,
+                                          r.processed_on,
+                                          r.result.arrival_date,
+                                          r.date_retrieved, r.treatment_start_date, 'end'])
