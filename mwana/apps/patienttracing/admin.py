@@ -6,7 +6,7 @@ from mwana.apps.patienttracing.models import PatientTrace
 class PatientTraceAdmin(admin.ModelAdmin):
     list_display = ('name', 'patient_event', 'clinic', 'type', 'messenger', 'confirmed_by', 'status', 'start_date', 'reminded_date',
                      'confirmed_date','initiator',)
-    list_filter = ('type', 'status', 'initiator', 'messenger','confirmed_by', 'start_date', 'reminded_date', 'confirmed_date')
+    list_filter = ('type', 'status', 'initiator', 'messenger','confirmed_by', 'start_date', 'reminded_date', 'confirmed_date', 'clinic')
     search_fields = ('name', 'messenger__name','confirmed_by__name')
     date_hierarchy = 'confirmed_date'
 admin.site.register(PatientTrace, PatientTraceAdmin)
