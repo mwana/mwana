@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labresults.models import Result
 
 from mwana.apps.reports.models import MsgByLocationUserTypeBackendLog
 from mwana.apps.reports.models import MessageByLocationUserTypeBackend
@@ -37,7 +38,7 @@ from django.views.decorators.csrf import csrf_protect
 
 
 class TurnaroundAdmin(admin.ModelAdmin):
-    list_display = ('province', 'district', 'facility', 'transporting',
+    list_display = ('province', 'district', 'facility', 'transporting', 'result',
                     'processing', 'delays', 'retrieving', 'turnaround',
                     'collected_on',  'received_at_lab', 'processed_on',
                     'date_reached_moh', 'date_retrieved', 'lab')
@@ -45,6 +46,10 @@ class TurnaroundAdmin(admin.ModelAdmin):
                     'date_reached_moh', 'date_retrieved', 'district', 'facility')
     search_fields = ('province', 'district', 'facility',)
     date_hierarchy = 'received_at_lab'
+
+    def result(self, obj):
+        return Result.objects.get(pk=obj.id).result
+
 admin.site.register(Turnaround, TurnaroundAdmin)
 
 
