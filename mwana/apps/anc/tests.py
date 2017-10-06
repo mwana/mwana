@@ -144,6 +144,16 @@ class TestApp(AncSetUp):
         self.assertEqual(chw.facility, self.clinic)
         self.assertEqual(CommunityWorker.objects.all().count(), 2)
 
+    def testRegistrationByUnknownUser(self):
+        script = """
+            +260979112233 > ANC
+            +260979112233 < Sorry, you must be registered as a CHW for the Mother Baby Service Reminder Program before you can register a pregnancy. Reply with HELP ANC if you need to be assisted
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 0)
+        # TODO: test re-registration
+
+
     def testRegistration(self):
         self.create_chw(chw_con='+260979112233')
         script = """
