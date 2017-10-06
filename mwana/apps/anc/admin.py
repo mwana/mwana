@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from mwana.apps.anc.models import EducationalMessage, SentMessage, Client
+from mwana.apps.anc.models import EducationalMessage, SentClientMessage, Client
 
 
 class EducationalMessageAdmin(admin.ModelAdmin):
@@ -28,5 +28,5 @@ class SentMessageAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     #search_fields = ('client', 'message')
 
-admin.site.register(SentMessage, SentMessageAdmin)
+admin.site.register(SentClientMessage, SentMessageAdmin)
 

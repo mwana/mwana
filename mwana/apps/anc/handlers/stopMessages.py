@@ -1,10 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.anc.models import CommunityWorker
 from mwana.apps.anc.models import WaitingForResponse
-from mwana.apps.anc.messages import WELCOME_MSG_A, WELCOME_MSG_B
-from mwana.apps.locations.models import Location
-from mwana.apps.anc.models import EducationalMessage
 from mwana.apps.anc.models import Client
-from mwana.apps.anc.models import SentMessage
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
@@ -23,6 +20,16 @@ class StopMessagesHandler(KeywordHandler):
     def handle(self, text):
         exists = False
         # we should idealy expect one such record
+        for record in CommunityWorker.objects.filter(is_active=True, connection__identity=self.msg.connection.identity):
+            record.is_active = False
+            record.save()
+            exists = True
+        if exists:
+            self.respond("You have successfully unsubscribed %(name)s.", name=record.name)
+            return
+
+        exists = False
+        # we should idealy expect one such record
         for record in Client.objects.filter(is_active=True, connection__identity=self.msg.connection.identity):
             record.is_active = False
             record.save()
@@ -33,7 +40,8 @@ class StopMessagesHandler(KeywordHandler):
                          "Send 1 for Pregnancy ended"
                          "\n2 for Baby was still-born"
                          "\n3 for Do not want reminders")
-            #TODO: ask reason
+            return
         else:
+            # TODO: deactivate if CHW
             self.respond("Thank you for your submission to stop receiving messages")
         return True

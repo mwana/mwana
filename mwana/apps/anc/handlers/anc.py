@@ -1,17 +1,14 @@
 # vim: ai ts=4 sts=4 et sw=4
-import time
 
-from mwana.apps.anc.messages import WELCOME_MSG_A, WELCOME_MSG_B
-from mwana.apps.locations.models import Location
-from mwana.apps.anc.models import EducationalMessage
-from mwana.apps.anc.models import Client
-from mwana.apps.anc.models import SentMessage
+from datetime import datetime, timedelta
+
+from mwana.apps.anc.models import CommunityWorker, FlowClientRegistration
 
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 _ = lambda s: s
 
-#TODO: consider handling at identity level instead of connection level
+
 class AncHandler(KeywordHandler):
     """
     """
@@ -22,81 +19,19 @@ class AncHandler(KeywordHandler):
     MALFORMED_MSG_TXT = "Sorry, I didn't understand that. " + HELP_TEXT
 
     def help(self):
-        self.respond(self.HELP_TEXT)
+        connection = self.msg.connection
+        if CommunityWorker.objects.filter(is_active=True, connection=connection):
+            chw = CommunityWorker.objects.get(is_active=True, connection=connection)
+            FlowClientRegistration.objects.filter(community_worker=chw).delete()
+            FlowClientRegistration.objects.create(community_worker=chw, start_time=datetime.now(),
+                                                  valid_until=datetime.now() + timedelta(hours=5))
+            # TODO: configure supported numbers in database
+            self.respond(
+                "Hi %s, to register a pregnancy first reply with mother's Airtel or MTN phone number" % chw.name)
+            return
 
-    def malformed_msg_help(self):
-        self.respond(self.MALFORMED_MSG_TXT)
-        
-    def send_initial_educational_message(self, client):
-        if not client.is_eligible_for_messages():
-            return
-        age = client.get_gestational_age()
-        educational_msgs = EducationalMessage.objects.filter(gestational_age=age)
-        if not educational_msgs:
-            return
-        for ed in educational_msgs:
-            if SentMessage.objects.filter(client=client, message=ed).exists():
-                continue
-            self.respond(ed.text)
-            SentMessage.objects.create(client=client, message=ed)
+        self.respond("Sorry, you must be registered as a CHW for the Mother Baby Service Reminder Program before you "
+                     "can register a pregnancy. Reply with HELP ANC if you need to be assisted")
 
     def handle(self, text):
-        tokens = text.replace('weeks', '').replace('week', '').replace('wks', '').replace('weaks', ''). \
-            replace('weak', '').replace('wk', '').strip().split()
-        if len(tokens) != 2:
-            self.malformed_msg_help()
-            return True
-        phone_number = self.msg.connection.identity
-        # TODO: Add validations like client cannot have two different pregnancies
-        # alternatively just update pregnancy to current gestational age
-        slug = tokens[0]
-        gestational_age_str = tokens[1]
-        locations = Location.objects.filter(slug=slug)
-        if not locations:
-            self.respond(
-                _("Sorry, I don't know about a location with code %(code)s. "
-                  "Please check your code and try again."),
-                code=slug)
-            return
-        facility = locations[0]
-        # if not gestational_age_str.isdigit():
-        #     self.malformed_msg_help()
-        #     return
-        try:
-            gestational_age = abs(int(gestational_age_str))
-        except ValueError:
-            self.malformed_msg_help()
-            return
-
-        if gestational_age > 40:
-            self.respond("Sorry you cannot subscribe when your gestational age is already 40 or above")
-            return
-
-        # if gestational_age < 0:
-        #     gestational_age = abs(gestational_age)
-
-        clients = Client.objects.filter(connection=self.msg.connection, is_active=True, lmp__gte=Client.find_lmp(40))
-        # TODO: ensure there is only one such record at a time
-        if clients:
-            client = clients[0]
-            client.gestation_at_subscription = gestational_age
-            client.lmp = Client.find_lmp(gestational_age)
-            client.facility = facility
-            client.connection = self.msg.connection
-            client.status = 'pregnant'
-            client.save()
-        else:
-            client = Client.objects.create(gestation_at_subscription=gestational_age,
-                                  lmp=Client.find_lmp(gestational_age), facility=facility,
-                                  connection=self.msg.connection)
-
-        self.respond("You have successfully subscribed from %s clinic and your "
-                     "gestational age is %s. Resubmit if this is incorrect" %
-                     (facility.name, gestational_age))
-        time.sleep(5-5)
-        self.respond(WELCOME_MSG_A)
-        time.sleep(5-5)
-        self.respond(WELCOME_MSG_B)
-        time.sleep(5-5)
-        self.send_initial_educational_message(client)
-        return True
+        self.help()
