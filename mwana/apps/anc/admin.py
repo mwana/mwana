@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 from django.contrib import admin
+from apps.anc.models import SentCHWMessage
 
 from mwana.apps.anc.models import EducationalMessage, SentClientMessage, Client
 
@@ -22,11 +23,19 @@ class ClientAdmin(admin.ModelAdmin):
 admin.site.register(Client, ClientAdmin)
 
 
-class SentMessageAdmin(admin.ModelAdmin):
+class SentClientMessageAdmin(admin.ModelAdmin):
     list_display = ('client', 'message', 'date')
-    list_filter = ['date',]
+    list_filter = ['date', 'message']
+    search_fields = ('client__connection__identity',)
     date_hierarchy = 'date'
-    #search_fields = ('client', 'message')
+admin.site.register(SentClientMessage, SentClientMessageAdmin)
 
-admin.site.register(SentClientMessage, SentMessageAdmin)
+
+class SentCHWMessageAdmin(admin.ModelAdmin):
+    list_display = ('community_worker', 'message', 'date')
+    list_filter = ['date', 'message', 'community_worker',  ]
+    search_fields = ('community_worker__name', 'community_worker__connection__identity')
+    date_hierarchy = 'date'
+admin.site.register(SentCHWMessage, SentCHWMessageAdmin)
+
 
