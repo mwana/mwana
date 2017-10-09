@@ -15,9 +15,12 @@ admin.site.register(EducationalMessage, EducationalMessageAdmin)
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('facility', 'connection', 'is_active', 'status', 'date_created', 'gestation_at_subscription')
-    list_filter = ['is_active', 'status', 'date_created', 'gestation_at_subscription', 'facility', 'community_worker']
-    search_fields = ('facility', 'connection__identity', 'community_worker__name', 'community_worker__connection__identity')
+    list_display = ('facility', 'community_worker', 'connection', 'is_active', 'status', 'date_created',
+                    'gestation_at_subscription', 'phone_confirmed')
+    list_filter = ['is_active', 'phone_confirmed', 'status', 'date_created', 'gestation_at_subscription',
+                   'community_worker']
+    search_fields = ('facility__name', 'connection__identity', 'community_worker__name',
+                     'community_worker__connection__identity')
     date_hierarchy = 'date_created'
     #list_editable = ['is_active']
 admin.site.register(Client, ClientAdmin)
@@ -41,7 +44,7 @@ admin.site.register(SentCHWMessage, SentCHWMessageAdmin)
 
 class CommunityWorkerAdmin(admin.ModelAdmin):
     list_display = ('name', 'facility', 'connection', 'is_active')
-    list_filter = ['is_active', 'facility',]
+    list_filter = ['is_active', 'facility']
     search_fields = ('name', 'connection__identity',)
     list_editable = ['is_active']
 admin.site.register(CommunityWorker, CommunityWorkerAdmin)
