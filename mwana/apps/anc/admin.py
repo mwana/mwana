@@ -15,7 +15,7 @@ admin.site.register(EducationalMessage, EducationalMessageAdmin)
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('facility', 'connection', 'is_active', 'status', 'date_created', 'gestation_at_subscription' 'lmp',)
+    list_display = ('facility', 'connection', 'is_active', 'status', 'date_created', 'gestation_at_subscription')
     list_filter = ['is_active', 'status', 'date_created', 'gestation_at_subscription', 'facility', 'community_worker']
     search_fields = ('facility', 'connection__identity', 'community_worker__name', 'community_worker__connection__identity')
     date_hierarchy = 'date_created'
