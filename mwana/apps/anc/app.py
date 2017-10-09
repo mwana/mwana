@@ -182,6 +182,7 @@ class App(rapidsms.apps.base.AppBase):
                 msg.respond("You have successfully registered %(age)s week pregnant mother with phone number "
                             "%(phone)s", age=flow.gestation_at_subscription, phone=flow.phone)
                 client.age_confirmed = False
+                client.community_worker = flow.community_worker
                 client.save()
                 time.sleep(3)
                 other_age = flow.gestation_at_subscription + 1

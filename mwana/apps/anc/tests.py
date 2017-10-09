@@ -144,7 +144,7 @@ class TestApp(AncSetUp):
 
 
     def testRegistration(self):
-        self.create_chw(chw_con='+260979112233')
+        chw = self.create_chw(chw_con='+260979112233')
         script = """
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
@@ -160,6 +160,7 @@ class TestApp(AncSetUp):
         self.assertEqual(Client.objects.all().count(), 1)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.status, 'pregnant')
+        self.assertEqual(client.community_worker, chw)
         self.assertTrue(client.lmp != None)
         self.assertEqual(client.lmp, Client.find_lmp(8))
         self.assertEqual(client.gestation_at_subscription, 8)
