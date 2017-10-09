@@ -94,22 +94,18 @@ class App(rapidsms.apps.base.AppBase):
                         code=cleaned_text)
                     return True
                 flow.facility = locations[0]
-                flow.save()
-                msg.respond("Your clinic is %s. Now reply with your zone name" % flow.facility.name)
-                return True
-            elif not flow.zone:
-                flow.zone = cleaned_text
+
                 flow.save()
                 chw = CommunityWorker()
                 chw.connection = flow.connection
                 chw.name = flow.name
                 chw.facility = flow.facility
-                chw.zone = flow.zone
+
                 chw.save()
                 flow.delete()
                 msg.respond("%(name)s you have successfully joined as CHW for the Mother Baby Service Reminder Program "
-                            "from zone %(zone)s of %(clinic)s clinic. If this is not correct register again",
-                            name=chw.name, zone=chw.zone, clinic=chw.facility.name)
+                            "from %(clinic)s clinic. If this is not correct register again",
+                            name=chw.name, clinic=chw.facility.name)
                 return True
 
         #--------------------------------#
@@ -131,7 +127,7 @@ class App(rapidsms.apps.base.AppBase):
                 flow.phone = phone
                 flow.save()
                 msg.respond(
-                    "You have submitted mum's phone number %s. Now reply with the mum's gestational age" % flow.phone)
+                    "You have submitted mum's phone number %s. Now reply with the mum's gestational age in weeks" % flow.phone)
                 return True
             elif not flow.gestation_at_subscription:
                 try:
@@ -188,7 +184,10 @@ class App(rapidsms.apps.base.AppBase):
                 client.age_confirmed = False
                 client.save()
                 time.sleep(3)
-                OutgoingMessage(client.connection, WELCOME_MSG_A, age=flow.gestation_at_subscription).send()
+                other_age = flow.gestation_at_subscription + 1
+                if flow.gestation_at_subscription >= 39:
+                    other_age = flow.gestation_at_subscription - 1
+                OutgoingMessage(client.connection, WELCOME_MSG_A, age=flow.gestation_at_subscription, other_age=other_age).send()
                 flow.delete()
                 return True
             elif cleaned_text in ('no', 'n'):

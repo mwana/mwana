@@ -2,7 +2,7 @@
 
 _ = lambda s: s
 # TODO: Welcome message should be improved. What if it's a man
-WELCOME_MSG_A = "Welcome to the Mother Baby Service Reminder. Reply with YES if you are %(age)s weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if %(age)s is not correct. Kind regards. MoH"
+WELCOME_MSG_A = "Welcome to the Mother Baby Service Reminder. Reply with YES if you are %(age)s weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE %(other_age)s) if %(age)s is not correct. Kind regards. MoH"
 WELCOME_MSG_B = "8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555"
 MISCARRIAGE_MSG = "We feel sorry that your pregnancy has ended up with a miscarriage. It's unfortunate but some miscarriages occur because the baby was not ready to live. Talk to family and friends for support and try again after 6 months."
 STILL_BITH_MSG = "It's unfortunate that your baby could not survive. We are sorry for that. The health care provider who assisted you at delivery can help understand why that happened and when you can start trying again. Losing a baby is very difficult. Talk to family and friends for support."

@@ -24,7 +24,6 @@ class EducationalMessage(models.Model):
 class CommunityWorker(models.Model):
     name = models.CharField(max_length=255)
     facility = models.ForeignKey(Location, related_name='anc_chw_location')
-    zone = models.CharField(max_length=50, null=True, blank=True)
     connection = models.ForeignKey(Connection, related_name='anc_chw_connection', editable=False)
     is_active = models.BooleanField(default=True)
 

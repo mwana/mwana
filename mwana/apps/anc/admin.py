@@ -39,3 +39,10 @@ class SentCHWMessageAdmin(admin.ModelAdmin):
 admin.site.register(SentCHWMessage, SentCHWMessageAdmin)
 
 
+class CommunityWorkerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'facility', 'connection', 'is_active')
+    list_filter = ['is_active', 'facility',]
+    search_fields = ('name', 'connection__identity',)
+    list_editable = ['is_active']
+admin.site.register(CommunityWorker, CommunityWorkerAdmin)
+

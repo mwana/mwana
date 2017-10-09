@@ -15,9 +15,6 @@ class AncHandler(KeywordHandler):
 
     keyword = "anc"
 
-    HELP_TEXT = _("To subscribe, Send ANC <CLINIC-CODE> <GESTATIONAL-AGE IN WEEKS>, E.g. ANC 504033 8")
-    MALFORMED_MSG_TXT = "Sorry, I didn't understand that. " + HELP_TEXT
-
     def help(self):
         connection = self.msg.connection
         if CommunityWorker.objects.filter(is_active=True, connection=connection):

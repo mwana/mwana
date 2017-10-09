@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 
 from rapidsms.contrib.messagelog.models import Message
-from rapidsms.models import Connection
+from rapidsms.models import Connection, Backend
 from rapidsms.tests.scripted import TestScript
 
 import mwana.const as const
@@ -42,19 +42,17 @@ class AncSetUp(TestScript):
 
 
 class TestApp(AncSetUp):
-    def create_chw(self, chw_con='chw'):
+    def create_chw(self, chw_con='chw', name='Donald Clinton'):
         script = """
-               {chw} > CHW
-               {chw} < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
-               {chw} > Donald Clinton
-               {chw} < Thank you Donald Clinton. Now reply with your clinic code
-               {chw} > 101010
-               {chw} < Your clinic is Chelston. Now reply with your zone name
-               {chw} > 3
-               {chw} < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from zone 3 of Chelston clinic. If this is not correct register again
-           """.format(chw=chw_con)
+            {chw} > blah blah 101010
+            {chw} < Please send the keyword HELP if you need to be assisted.
+        """.format(chw=chw_con)
         self.runScript(script)
-        return CommunityWorker.objects.get(connection__identity=chw_con)
+        conn = Connection.objects.get(identity=chw_con)
+
+
+        return CommunityWorker.objects.create(facility=self.clinic, connection=conn, name=name)
+
 
     def create_client(self, client_con='client', gestational_age=8, community_worker=None):
         """
@@ -87,16 +85,13 @@ class TestApp(AncSetUp):
             chw > Donald Clinton
             chw < Thank you Donald Clinton. Now reply with your clinic code
             chw > 101010
-            chw < Your clinic is Chelston. Now reply with your zone name
-            chw > 3
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from zone 3 of Chelston clinic. If this is not correct register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
         chw = CommunityWorker.objects.get(pk=1)
         self.assertEqual(chw.connection.identity, 'chw')
         self.assertEqual(chw.name, 'Donald Clinton')
-        self.assertEqual(chw.zone, '3')
         self.assertEqual(chw.is_active, True)
         self.assertEqual(chw.facility, self.clinic)
         self.assertEqual(CommunityWorker.objects.all().count(), 1)
@@ -112,9 +107,7 @@ class TestApp(AncSetUp):
             chw > zone
             chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
             chw > 1010105
-            chw < Your clinic is Chelston. Now reply with your zone name
-            chw > 3
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from zone 3 of Chelston clinic. If this is not correct register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
             chw > CHW
             chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted 
             chw > 55555
@@ -124,22 +117,18 @@ class TestApp(AncSetUp):
             chw > Hillary Trump
             chw < Thank you Hillary Trump. Now reply with your clinic code
             chw > 101010
-            chw < Your clinic is Chelston. Now reply with your zone name
-            chw > lovely
-            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from zone lovely of Chelston clinic. If this is not correct register again        
+            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
         chw = CommunityWorker.objects.get(pk=1)
         self.assertEqual(chw.connection.identity, 'chw')
         self.assertEqual(chw.name, 'Donald Clinton')
-        self.assertEqual(chw.zone, '3')
         self.assertEqual(chw.is_active, False)
         self.assertEqual(chw.facility, self.clinic)
         chw = CommunityWorker.objects.get(pk=2)
         self.assertEqual(chw.connection.identity, 'chw')
         self.assertEqual(chw.name, 'Hillary Trump')
-        self.assertEqual(chw.zone, 'lovely')
         self.assertEqual(chw.is_active, True)
         self.assertEqual(chw.facility, self.clinic)
         self.assertEqual(CommunityWorker.objects.all().count(), 2)
@@ -160,11 +149,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 8
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 8. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 8 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 9) if 8 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 8 week pregnant mother with phone number +260977123456
         """
         self.runScript(script)
@@ -186,11 +175,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 10
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 10. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 10 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 10 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 10 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 11) if 10 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 10 week pregnant mother with phone number +260977123456
         """
         self.runScript(script)
@@ -210,11 +199,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 12
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 12. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 12 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 12 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 12 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 13) if 12 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 12 week pregnant mother with phone number +260977123456
             """
         self.runScript(script)
@@ -237,11 +226,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 8
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 8. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 8 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 9) if 8 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 8 week pregnant mother with phone number +260977123456
             +260977123456 > Yes
             +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555
@@ -264,11 +253,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 10
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 10. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 10 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 10 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 10 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 11) if 10 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 10 week pregnant mother with phone number +260977123456
             +260977123456 > age
             +260977123456 < To record your gestation age, Send AGE <GESTATIONAL-AGE IN WEEKS>, E.g. AGE 8
@@ -293,11 +282,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > 8
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 8. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 8 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 9) if 8 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 8 week pregnant mother with phone number +260977123456
             +260977123456 > No
             +260977123456 < Thank you.
@@ -322,11 +311,11 @@ class TestApp(AncSetUp):
             +260979112233 > ANC
             +260979112233 < Hi Donald Clinton, to register a pregnancy first reply with mother's Airtel or MTN phone number
             +260979112233 > 0977123456
-            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260977123456. Now reply with the mum's gestational age in weeks
             +260979112233 > -12
             +260979112233 < Mother's phone number is +260977123456 and gestational age is 12. Reply with Yes if this is correct or No if not
             +260979112233 > Yes
-            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 12 weeks pregnant and want to receive SMS reminders about ANC. Or reply with AGE + the number of weeks if 12 is not correct. Kind regards. MoH
+            +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 12 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 13) if 12 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 12 week pregnant mother with phone number +260977123456
             """
         self.runScript(script)
@@ -346,7 +335,7 @@ class TestApp(AncSetUp):
             +260979112233 > 77123456
             +260979112233 < Sorry 77123456 is not a valid Airtel or MTN number. Reply with correct number
             +260979112233 > 971234560
-            +260979112233 < You have submitted mum's phone number +260971234560. Now reply with the mum's gestational age
+            +260979112233 < You have submitted mum's phone number +260971234560. Now reply with the mum's gestational age in weeks
             +260979112233 > 971234560
             +260979112233 < Sorry 971234560 gestational age is too much. You cannot register a mother's pregnancy when gestational age is already 40 or above
             +260979112233 > 40
@@ -440,6 +429,7 @@ class TestApp(AncSetUp):
         gestational_ages = [item[0] for item in EDUCATIONAL_MESSAGES]
         self.assertEqual(Client.objects.count(), 0)
         chw = self.create_chw()
+        other_chw = self.create_chw(chw_con='other_chw')
         for age in gestational_ages:
             if age >= 40:  # get around validation
                 backend = Connection.objects.get(pk=1).backend
@@ -467,14 +457,13 @@ class TestApp(AncSetUp):
         self.assertEqual(SentClientMessage.objects.count(), 0)
         self.assertEqual(SentCHWMessage.objects.count(), len(gestational_ages))
         self.assertEqual(SentCHWMessage.objects.filter(community_worker=chw).count(), len(gestational_ages))
-        self.assertEqual(Message.objects.filter(direction='O', connection=chw.connection).count(), 4 + len(gestational_ages))
+        self.assertEqual(Message.objects.filter(direction='O', connection=chw.connection).count(), 1 + len(gestational_ages))
         self.assertEqual(Message.objects.filter(direction='O', connection=chw.connection, text__istartswith='client').count(), len(gestational_ages))
-
 
         for item in EDUCATIONAL_MESSAGES:
             chw_msg = item[1].replace(' Stop messages with 5555', '')
             self.assertTrue(Message.objects.filter(connection=chw.connection,
-                                                   text__endswith="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
+                                                   text="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
                             'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
 
     def testSendANCMessagesCHWOnlyClientInactive(self):
@@ -482,6 +471,7 @@ class TestApp(AncSetUp):
         gestational_ages = [item[0] for item in EDUCATIONAL_MESSAGES]
         self.assertEqual(Client.objects.count(), 0)
         chw = self.create_chw()
+        self.create_chw(chw_con='other_chw')
         for age in gestational_ages:
             if age >= 40:  # get around validation
                 backend = Connection.objects.get(pk=1).backend
@@ -508,22 +498,51 @@ class TestApp(AncSetUp):
         self.assertEqual(SentClientMessage.objects.count(), 0)
         self.assertEqual(SentCHWMessage.objects.count(), len(gestational_ages))
 
-        for item in EDUCATIONAL_MESSAGES:
-            chw_msg = item[1].replace(' Stop messages with 5555', '')
-            self.assertTrue(Message.objects.filter(connection=chw.connection,
-                                                   text__endswith="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
-                            'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
+        # for item in EDUCATIONAL_MESSAGES:
+        #     chw_msg = item[1].replace(' Stop messages with 5555', '')
+        #     self.assertTrue(Message.objects.filter(connection=chw.connection,
+        #                                            text__endswith="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
+        #                     'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
+        msgs = self.receiveAllMessages()
+        received_texts = (msg.text for msg in msgs)
 
-    def testStatusMessage(self):
-        self.create_client()
-        client = Client.objects.get()
-        client.status = ''
-        # run task
-        script = """
-            client > Thank you
-            client < Sorry, the system could not understand your message. For emergencies contact your local clinic
-        """
-        self.runScript(script)
+        for msg in msgs:
+            self.assertEqual(msg.connection, chw.connection)
+
+
+        self.assertTrue("client12: 12 weeks: go for ANC1 visit for a full checkup. Ask about iron and folic acid to "
+                        "help you get the proper nutrition." in received_texts)
+        self.assertTrue("client15: Please go for ANC2 visit. Avoid taking medicine without healthcare worker's"
+                        " advice. Follow their advice for your and baby's health." in received_texts)
+        self.assertTrue("client20: 5 months: You should feel baby kicking. Please go for ANC3. Ask your health"
+                        " worker how to protect baby and yourself from tetanus." in received_texts)
+        self.assertTrue("client26: 26 weeks pregnant. Time for ANC4. Remember: wash your hands after handling "
+                        "animals, using the latrine and before cooking/handling food." in received_texts)
+        self.assertTrue("client30: ANC5: ANC visits help in early detection and treatment of pregnancy problems."
+                        " Make delivery plan. What facility you will deliver in?" in received_texts)
+        self.assertTrue("client34: Please go for ANC6. If the bag of water surrounding your baby breaks, your baby "
+                        "is at risk of infection or the cord may come out before baby birth. These, bleeding or "
+                        "swelling can be danger signs, go to the clinic immediately." in received_texts)
+        self.assertTrue("client37: Delivery is near. Have you planned where you will deliver? It is important to"
+                        " deliver at a health facility with skilled attendants." in received_texts)
+        self.assertTrue("client38: ANC7 visit: after delivery it is important to attend postnatal care. Complications"
+                        " can still occur after baby is born." in received_texts)
+        self.assertTrue("client40: If you have had a home delivery, visit PNC within two days after delivery. "
+                        "This provides opportunity to immunize your baby." in received_texts)
+        self.assertTrue("client40: If you have not delivered please go for ANC8 visit. If you have delivered, please "
+                        "visit the clinic for postnatal care." in received_texts)
+        self.assertTrue("client42: Congratulations, your baby is here! If you have not taken your baby to OPV0 for"
+                        " his/her first vaccinations please do so immediately!" in received_texts)
+        self.assertTrue("client44: Please take your baby to the clinic for OPV1. The vaccinations your baby will "
+                        "receive are critical to protect him/her from diseases." in received_texts)
+        self.assertTrue("client48: Please take baby to the clinic for further vaccinations and growth monitoring. It "
+                        "is critical to protect him/her from diseases." in received_texts)
+        self.assertTrue("client52: Please take baby to the clinic for OPV3, other vaccinations and growth monitoring."
+                        " Ask your clinician about safe foods for your baby." in received_texts)
+        self.assertTrue("client76: Please take baby for his/her measles shots." in received_texts)
+        self.assertTrue("client78: This is the final reminder message. Please keep taking baby for further checkups"
+                        " according to your under 5 card." in received_texts)
+        self.assertTrue("client78: We wish you and your family all the best for your future! Remember to eat lots of fruits and vegetables" in received_texts)
 
     def testIgnoreHandleInvalidMessage(self):
         self.create_client()
@@ -541,16 +560,26 @@ class TestApp(AncSetUp):
         """
         self.runScript(script)
         self.assertEqual(WaitingForResponse.objects.all().count(), 0)
+        self.assertEqual(Client.objects.all().count(), 0)
 
         self.create_client()
         script = """
-            client > 555555 
-            client > 1            
+            client > 555555
+            client > 1
         """
-
-        # received = "client < You have successfully unsubscribed. Please let us know why. Send 1 for Pregnancy ended\n2 for Baby was still-born\n3 for Do not want reminders"
-
         self.runScript(script)
+        m1 = ("You have successfully unsubscribed. Please let us know why. "
+              "Send 1 for Pregnancy ended"
+              "\n2 for Baby was still-born"
+              "\n3 for Do not want reminders")
+        m2 = "We feel sorry that your pregnancy has ended up with a miscarriage. It's unfortunate but some miscarriages occur because the baby was not ready to live. Talk to family and friends for support and try again after 6 months."
+        expected_msg_texts = [m2, m1]
+
+        received_msg_texts = [msg.text for msg in self.receiveAllMessages()]
+        for text in expected_msg_texts:
+            self.assertTrue(text in received_msg_texts, text + ' not in received texts: ' +  ",".join(received_msg_texts))
+            # self.assertTrue(text in received_msg_texts, len(received_msg_texts))
+
 
         self.assertEqual(WaitingForResponse.objects.all().count(), 1)
         self.assertEqual(Client.objects.get(pk=1).status, 'miscarriage')
