@@ -549,7 +549,7 @@ class TestApp(AncSetUp):
         self.create_client()
         script = """
             client > Thank you
-            client < Sorry, the system could not understand your message. For emergencies contact your local clinic
+            client < For emergencies contact your local clinic
         """
         self.runScript(script)
 

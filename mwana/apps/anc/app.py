@@ -238,8 +238,7 @@ class App(rapidsms.apps.base.AppBase):
 
         # Unknown message from client/mother
         if Client.objects.filter(connection=msg.connection).exists():
-            msg.respond("Sorry, the system could not understand your message. "
-                        "For emergencies contact your local clinic")
+            msg.respond("For emergencies contact your local clinic")
             return True
         if CommunityWorker.objects.filter(connection=msg.connection).exists():
             msg.respond("Sorry, the system could not understand your message.")
