@@ -11,6 +11,7 @@ from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.results_followup.models import EmailRecipientForInfantResultAlert
 from mwana.apps.results_followup.models import InfantResultAlertViews
 from mwana.apps.results_followup.models import InfantResultAlert
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 
 
 from django import forms
@@ -50,6 +51,7 @@ class InfantResultAlertAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     list_editable = ['followup_status', 'treatment_start_date', 'notes', ]
     form = InfantResultAlertAdminForm
+    actions = [export_as_csv_action("Export to CSV", exclude=('id',))]
 
     def client_id(self, obj):
         return "%s %s" % (obj.location.slug, obj.result.requisition_id)
@@ -112,6 +114,7 @@ class ViralLoadAlertAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     list_editable = ['followup_status', 'treatment_start_date', 'notes', ]
     form = ViralLoadAlertAdminForm
+    actions = [export_as_csv_action("Export to CSV", exclude=('id',))]
 
     def client_id(self, obj):
         return "%s" % (obj.result.requisition_id)
