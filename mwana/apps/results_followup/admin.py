@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 
 from mwana.apps.results_followup.models import ViralLoadAlertViews
 from mwana.apps.results_followup.models import EmailRecipientForViralLoadAlert
@@ -50,12 +51,14 @@ class InfantResultAlertAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     list_editable = ['followup_status', 'treatment_start_date', 'notes', ]
     form = InfantResultAlertAdminForm
+    actions = [export_as_csv_action(exclude=['id'])]
 
     def client_id(self, obj):
         return "%s %s" % (obj.location.slug, obj.result.requisition_id)
 
     def clinic_staff(self, obj):
         return ", ".join ("%s %s" % (c.name, c.default_connection.identity) for c in Contact.active.filter(location=obj.result.clinic))
+
     def DOB_and_collected_on(self, obj):
         return "%s, %s " % (obj.birthdate, obj.collected_on)
 
@@ -112,6 +115,7 @@ class ViralLoadAlertAdmin(admin.ModelAdmin):
     date_hierarchy = 'created_on'
     list_editable = ['followup_status', 'treatment_start_date', 'notes', ]
     form = ViralLoadAlertAdminForm
+    actions = [export_as_csv_action(exclude=['id'])]
 
     def client_id(self, obj):
         return "%s" % (obj.result.requisition_id)

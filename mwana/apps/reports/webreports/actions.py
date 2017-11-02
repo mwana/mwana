@@ -1,4 +1,4 @@
-import unicodecsv
+import csv
 from django.http import HttpResponse
 
 def export_as_csv_action(description="Export selected objects as CSV file",
@@ -15,15 +15,16 @@ def export_as_csv_action(description="Export selected objects as CSV file",
             field_names = [field.name for field in opts.fields]
         else:
             field_names = fields
-
+        field_names = list(field_names)
         if exclude:
             for field in exclude:
-                field_names.remove(field)
+                if field in field_names:
+                    field_names.remove(field)
 
         response = HttpResponse(mimetype='text/csv')
         response['Content-Disposition'] = 'attachment; filename=%s.csv' % unicode(opts).replace('.', '_')
 
-        writer = unicodecsv.writer(response, encoding='utf-8')
+        writer = csv.writer(response, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         if header:
             writer.writerow(field_names)
         for obj in queryset:
