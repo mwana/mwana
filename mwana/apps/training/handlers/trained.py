@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from datetime import date
 from mwana.apps.reports.webreports.models import ReportingGroup
 from mwana.apps.training.models import Trained
 from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
@@ -19,13 +20,13 @@ class TrainedHandler(KeywordHandler):
             self.respond(self.UNGREGISTERED)
             return
 
-        phone=self.msg.contact.default_connection.identity
-        if Trained.objects.filter(phone=phone):
-            trained = Trained.objects.get(phone=phone)
+        phone = self.msg.contact.default_connection.identity
+        contact = self.msg.contact
+        if Trained.objects.filter(phone=phone, location=contact.location, name=contact.name, date=date.today()):
+            trained = Trained.objects.get(phone=phone, location=contact.location, name=contact.name, date=date.today())
         else:
             text = text.strip()
 
-            contact =  self.msg.contact
             trained = Trained()
             trained.name = contact.name
             trained.location = contact.location
@@ -38,8 +39,6 @@ class TrainedHandler(KeywordHandler):
                     trained.trained_by = ReportingGroup.objects.get(name__iexact=trainer_group)
                     
             trained.save()
-
-        
 
         self.respond("Thanks %(name)s. You have been trained as %(type)s at %(location)s",
                      name=trained.name, location=trained.location.name, type=trained.type)
