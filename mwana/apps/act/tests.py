@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.act.models import LAB_TYPE
+from mwana.apps.act.models import PHARMACY_TYPE
+from mwana.apps.act.models import FlowCHWRegistration
 from mwana.apps.act.models import ReminderMessagePreference
 from mwana.apps.act.models import HistoricalEvent
 from mwana.apps.act.models import SentReminder
@@ -7,6 +10,7 @@ from mwana.apps.act.models import RemindersSwitch
 from mwana.apps.act.models import Appointment
 from mwana.apps.act.models import CHW
 from mwana.apps.act import tasks
+import uuid
 import json
 
 import datetime
@@ -42,9 +46,9 @@ class ActSetUp(TestScript):
         self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="mansa", parent=self.luapula)
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="samfya",
                                               parent=self.luapula)
-        self.clinic = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="402029", parent=self.samfya,
+        self.clinic = Location.objects.create(type=self.type, name="Mibenge", slug="402029", parent=self.samfya,
                                               send_live_results=True)
-        self.mansa_central = Location.objects.create(type=self.type, name="Central Clinic", slug="403012",
+        self.mansa_central = Location.objects.create(type=self.type, name="Central", slug="403012",
                                                      parent=self.mansa, send_live_results=True)
         # clinic for send_live_results = True
         self.clinic_live_results_true = Location.objects.create(type=self.type, name="LiveResultsTrue Clinic",
@@ -383,4 +387,574 @@ class TestPayloadAcceptor(ActSetUp):
         user.user_permissions.add(perm)
         self.client.login(username='adh', password='abc')
 
+
+class TestApp(ActSetUp):
+    def create_chw(self, chw_con='chw', name='Donald Clinton'):
+        script = """
+            {chw} > blah blah 101010
+            {chw} < Please send the keyword HELP if you need to be assisted.
+        """.format(chw=chw_con)
+        self.runScript(script)
+        conn = Connection.objects.get(identity=chw_con)
+
+        return CHW.objects.create(location=self.clinic, connection=conn, name=name, uuid=uuid.uuid1())
+
+    def create_client(self, client_con='client', sex='m', community_worker=None):
+        script = """
+               {client} > blah blah 101010
+               {client} < Please send the keyword HELP if you need to be assisted.
+           """.format(client=client_con)
+        self.runScript(script)
+        client = Client(connection=Connection.objects.get(identity=client_con),
+                        phone=client_con, sex=sex,
+                        location=self.clinic, phone_verified=True, community_worker=community_worker)
+
+        client.save()
+        return client
+
+
+    def testCHWRegistration(self):
+        script = """
+                chw > ACT CHW
+                chw < Welcome to the ACT Program. To register as a CHW reply with your name.
+                chw > Donald Clinton
+                chw < Thank you Donald Clinton. Now reply with your NRC
+                chw > 403012/12/1
+                chw < Thank you Donald Clinton. Now reply with your clinic code
+                chw > 403012
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 403012/12/1. If this is not correct send 4444 and register again
+            """
+        self.runScript(script)
+        self.assertEqual(0, FlowCHWRegistration.objects.count())
+        chw = CHW.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.location, self.mansa_central)
+        self.assertEqual(CHW.objects.all().count(), 1)
+
+
+    def testCHWRegistrationErrorHandling(self):
+        script = """
+                chw > ACT CHW 101010 x8
+                chw < Welcome to the ACT Program. To register as a CHW reply with your name.
+                chw > Donald Clinton
+                chw < Thank you Donald Clinton. Now reply with your NRC
+                chw > okay
+                chw < Sorry okay is not a valid NRC number. Reply with correct NRC number
+                chw > 2222/2/2
+                chw < Sorry 2222/2/2 is not a valid NRC number. Reply with correct NRC number
+                chw > 12222/2/2
+                chw < Sorry 12222/2/2 is not a valid NRC number. Reply with correct NRC number
+                chw > 112222/2/2
+                chw < Sorry 112222/2/2 is not a valid NRC number. Reply with correct NRC number
+                chw > 112222/2/1
+                chw < Thank you Donald Clinton. Now reply with your clinic code
+                chw > okay
+                chw < Sorry, I don't know about a clinic with code okay. Please check your code and try again.
+                chw > zone
+                chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
+                chw > 402029
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Mibenge clinic and your NRC is 112222/2/1. If this is not correct send 4444 and register again
+                chw > ACT CHW
+                chw < Your phone is already registered to Donald Clinton of Mibenge health facility. Send HELP ACT if you need to be assisted
+                chw > 4444
+                chw < You have successfully unsubscribed Donald Clinton.
+                chw > act CHW
+                chw < Welcome to the ACT Program. To register as a CHW reply with your name.
+                chw > Hillary Trump
+                chw < Thank you Hillary Trump. Now reply with your NRC
+                chw > 101010/12/1
+                chw < Thank you Hillary Trump. Now reply with your clinic code
+                chw > 403012
+                chw < Hillary Trump you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 101010/12/1. If this is not correct send 4444 and register again
+            """
+        self.runScript(script)
+        self.assertEqual(0, FlowCHWRegistration.objects.count())
+        chw = CHW.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, False)
+        self.assertEqual(chw.location, self.clinic)
+        chw = CHW.objects.get(pk=2)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Hillary Trump')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.location, self.mansa_central)
+        self.assertEqual(CHW.objects.all().count(), 2)
+
+
+    def testClientRegistrationByUnknownUser(self):
+        script = """
+                +260979112233 > ACT CLIENT
+                +260979112233 < Sorry, you must be registered as a CHW for the ACT Program before you can register a client. Reply with HELP ACT if you need to be assisted
+                """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 0)
+        # TODO: test re-registration
+
+
+    def testClientRegistration(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > N
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+        self.assertEqual(client.national_id, '403012-12-1')
+        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.community_worker, chw)
+        self.assertEqual(client.dob.year, 2008)
+        self.assertEqual(client.dob.month, 2)
+        self.assertEqual(client.dob.day, 12)
+        self.assertEqual(client.sex, 'f')
+        self.assertEqual(client.can_receive_messages, False)
+        self.assertEqual(client.location, self.clinic)
+        self.assertEqual(client.phone, '+260977123456')
+        self.assertEqual(client.phone_verified, False)
+        self.assertEqual(client.connection, None)
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+
+
+    def testClientRegistrationNoPhone(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > N
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > N/A
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        self.assertEqual(FlowCHWRegistration.objects.all().count(), 0)
+        client = Client.objects.get(pk=1)
+        self.assertEqual(client.national_id, '403012-12-1')
+        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.community_worker, chw)
+        self.assertEqual(client.dob.year, 2008)
+        self.assertEqual(client.dob.month, 2)
+        self.assertEqual(client.dob.day, 12)
+        self.assertEqual(client.sex, 'f')
+        self.assertEqual(client.can_receive_messages, False)
+        self.assertEqual(client.location, self.clinic)
+        self.assertEqual(client.phone, None)
+        self.assertEqual(client.phone_verified, False)
+        self.assertEqual(client.connection, None)
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+
+
+    def testClientRegistrationMaleSMSYes(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > m
+                +260979112233 < You have submitted client's gender as Male. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > y
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+        self.assertEqual(client.national_id, '403012-12-1')
+        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.community_worker, chw)
+        self.assertEqual(client.dob.year, 2008)
+        self.assertEqual(client.dob.month, 2)
+        self.assertEqual(client.dob.day, 12)
+        self.assertEqual(client.sex, 'm')
+        self.assertEqual(client.can_receive_messages, True)
+        self.assertEqual(client.location, self.clinic)
+        self.assertEqual(client.phone, '+260977123456')
+        self.assertEqual(client.phone_verified, False)
+        self.assertEqual(client.connection, None)
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+
+
+    def testClientRegistrationCanceled(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT CLIENT
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > m
+                +260979112233 < You have submitted client's gender as Male. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > y
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > No
+                +260979112233 < You can start a new submission by sending ACT CLIENT or ACT CHILD
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 0)
+        self.assertEqual(FlowCHWRegistration.objects.all().count(), 0)
+
+
+    def testClientRegistrationErrorHandling(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT PATIENT
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012
+                +260979112233 < Sorry 403012 is not a valid unique ID. Reply with correct unique ID.
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Rob
+                +260979112233 < Rob does not look like a valid name. Reply with a valid name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 08
+                +260979112233 < Date 12 02 08 has an invalid year. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 >  x 2008
+                +260979112233 < x 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 >  13 2008
+                +260979112233 < 13 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 > 12 13 2008
+                +260979112233 < Date 12 13 2008 has an invalid month. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 > 12 02 2028
+                +260979112233 < Sorry, client's date of birth 12 02 2028 is after today's. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 > 40 02 2008
+                +260979112233 < 40 02 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > man
+                +260979112233 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260979112233 > c
+                +260979112233 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260979112233 > boy
+                +260979112233 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260979112233 > men
+                +260979112233 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260979112233 > Male
+                +260979112233 < You have submitted client's gender as Male. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > yo
+                +260979112233 < Sorry, I din't understand that. Reply with Y if client will be receiving SMS messages or N if not
+                +260979112233 > yep
+                +260979112233 < Sorry, I din't understand that. Reply with Y if client will be receiving SMS messages or N if not
+                +260979112233 > y
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 >
+                +260979112233 < Sorry, I couldn't read your message. Make sure you have correct GSM message settings on your phone
+                +260979112233 > 077123456
+                +260979112233 < Sorry 077123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260979112233 > 0777123456
+                +260979112233 < Sorry 0777123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260979112233 > 09777123456
+                +260979112233 < Sorry 09777123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > whatever
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+        self.assertEqual(client.national_id, '403012-12-1')
+        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.community_worker, chw)
+        self.assertEqual(client.dob.year, 2008)
+        self.assertEqual(client.dob.month, 2)
+        self.assertEqual(client.dob.day, 12)
+        self.assertEqual(client.sex, 'm')
+        self.assertEqual(client.can_receive_messages, True)
+        self.assertEqual(client.location, self.clinic)
+        self.assertEqual(client.phone, '+260977123456')
+        self.assertEqual(client.phone_verified, False)
+        self.assertEqual(client.connection, None)
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+
+
+    def testClientReRegistration(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > N
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+        self.assertEqual(client.national_id, '403012-12-1')
+        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.community_worker, chw)
+        self.assertEqual(client.dob.year, 2008)
+        self.assertEqual(client.dob.month, 2)
+        self.assertEqual(client.dob.day, 12)
+        self.assertEqual(client.sex, 'f')
+        self.assertEqual(client.can_receive_messages, False)
+        self.assertEqual(client.location, self.clinic)
+        self.assertEqual(client.phone, '+260977123456')
+        self.assertEqual(client.phone_verified, False)
+        self.assertEqual(client.connection, None)
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < A client, Robert Mukale, with ID 403012-12-1 already exists. Reply with correct ID or send HELP CLIENT if you need to be assisted
+                +260979112233 > whatever
+                +260979112233 < Sorry whatever is not a valid unique ID. Reply with correct unique ID.
+                +260979112233 > 403012-12-2
+                +260979112233 < You have submitted client's ID 403012-12-2. Now reply with the client's name
+                +260979112233 > Grace mukale
+                +260979112233 < You have submitted client's name as Grace Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 03 2008
+                +260979112233 < You have submitted client's date of birth as 12 Mar 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > N
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Grace Mukale, ID is 403012-12-2, DOB is 12 March 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Grace Mukale
+            """
+        self.runScript(script)
+
+    def testLabAppointmentRegistration(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        client = self.create_client(client_con='+260979676767')
+        client.national_id = '805010-12345-1'
+        client.name = 'Rebekah Malope'
+        client.save()
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < Client with ID 403012-12-1 does not exist. Please verify the ID or to regsiter a new client send ACT CHILD
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 12 02 2018
+                +260979112233 < You have submitted appointment date as 12 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > l
+                +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m2
+                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(client=client)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(pref.visit_type, LAB_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Good day. Happy day %(date)s')
+        appointment  = Appointment.objects.get(pk=1)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, LAB_TYPE)
+        self.assertEqual(appointment.date, date(2018, 2, 12))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)
+
+    def testPharmacyAppointmentRegistration(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        client = self.create_client(client_con='+260979676767')
+        client.national_id = '805010-12345-1'
+        client.name = 'Rebekah Malope'
+        client.save()
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 1 01 2018
+                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > p
+                +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m1
+                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 January 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(client=client)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(pref.visit_type, PHARMACY_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Happy health day %(date)s')
+        appointment  = Appointment.objects.get(pk=1)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, PHARMACY_TYPE)
+        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)
+
+
+    def testSuccessiveDifferentTypeAppointmentRegistrations(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        client = self.create_client(client_con='+260979676767')
+        client.national_id = '805010-12345-1'
+        client.name = 'Rebekah Malope'
+        client.save()
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < Client with ID 403012-12-1 does not exist. Please verify the ID or to regsiter a new client send ACT CHILD
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 12 02 2018
+                +260979112233 < You have submitted appointment date as 12 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > l
+                +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m2
+                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(client=client)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(pref.visit_type, LAB_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Good day. Happy day %(date)s')
+        appointment  = Appointment.objects.get(pk=1)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, LAB_TYPE)
+        self.assertEqual(appointment.date, date(2018, 2, 12))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)
+
     
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 1 01 2018
+                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > p
+                +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m1
+                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 January 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(client=client, pk=2)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(pref.visit_type, PHARMACY_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Happy health day %(date)s')
+        appointment  = Appointment.objects.get(pk=2)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, PHARMACY_TYPE)
+        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)
+
+    def testSuccessiveSameTypeAppointmentRegistrations(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        client = self.create_client(client_con='+260979676767')
+        client.national_id = '805010-12345-1'
+        client.name = 'Rebekah Malope'
+        client.save()
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < Client with ID 403012-12-1 does not exist. Please verify the ID or to regsiter a new client send ACT CHILD
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 12 02 2018
+                +260979112233 < You have submitted appointment date as 12 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > l
+                +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m2
+                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(client=client)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(pref.visit_type, LAB_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Good day. Happy day %(date)s')
+        appointment  = Appointment.objects.get(pk=1)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, LAB_TYPE)
+        self.assertEqual(appointment.date, date(2018, 2, 12))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)
+
+
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 805010-12345-1
+                +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > 1 01 2018
+                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > l
+                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 01 January 2018
+                """
+        self.runScript(script)
+        pref = ReminderMessagePreference.objects.get(pk=1)
+        # @type pref ReminderMessagePreference
+        self.assertEqual(ReminderMessagePreference.objects.count(), 1)
+        self.assertEqual(pref.visit_type, LAB_TYPE)
+        self.assertEqual(pref.get_message_id_display(), 'Good day. Happy day %(date)s')
+        appointment  = Appointment.objects.get(pk=2)
+        self.assertEqual(appointment.client, client)
+        self.assertEqual(appointment.type, LAB_TYPE)
+        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.status, 'pending')
+        self.assertEqual(appointment.cha_responsible, chw)

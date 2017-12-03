@@ -85,7 +85,7 @@ class TestApp(AncSetUp):
             chw > Donald Clinton
             chw < Thank you Donald Clinton. Now reply with your clinic code
             chw > 101010
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -107,7 +107,7 @@ class TestApp(AncSetUp):
             chw > zone
             chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
             chw > 1010105
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
             chw > CHW
             chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted 
             chw > 55555
@@ -117,7 +117,7 @@ class TestApp(AncSetUp):
             chw > Hillary Trump
             chw < Thank you Hillary Trump. Now reply with your clinic code
             chw > 101010
-            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct register again
+            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -141,7 +141,6 @@ class TestApp(AncSetUp):
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 0)
         # TODO: test re-registration
-
 
     def testRegistration(self):
         chw = self.create_chw(chw_con='+260979112233')
@@ -344,6 +343,8 @@ class TestApp(AncSetUp):
             +260979112233 > 1x2 weeks
             +260979112233 < Sorry 1x2 weeks is not a valid gestational age. Enter a valid number
             +260979112233 > 39 weeks
+            +260979112233 < Mother's phone number is +260971234560 and gestational age is 39. Reply with Yes if this is correct or No if not
+            +260979112233 > whatever
             +260979112233 < Mother's phone number is +260971234560 and gestational age is 39. Reply with Yes if this is correct or No if not
             +260979112233 > No
             +260979112233 < You can start a new submission by sending ANC

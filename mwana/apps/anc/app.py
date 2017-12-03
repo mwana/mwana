@@ -21,7 +21,7 @@ from mwana.util import LocationCode
 
 _ = lambda s: s
 # TODO: configure supported numbers in database
-SUPPORTED_PHONE_LINES = ['7', '6']
+SUPPORTED_PHONE_LINES = ['97', '96']
 INVALID_PHONE_NUMBER_RESPONSE = "Sorry %(number)s is not a valid Airtel or MTN number. Reply with correct number"
 
 
@@ -37,7 +37,7 @@ class App(rapidsms.apps.base.AppBase):
         if len(text) not in (len('+260979123456'), len('260979123456'), len('0979123456'),
                              len('979123456')):
             return None
-        if text[-8] not in SUPPORTED_PHONE_LINES:
+        if text[-9:-7] not in SUPPORTED_PHONE_LINES:
             return None
         return '+260' + text[-9:]
 
@@ -104,7 +104,7 @@ class App(rapidsms.apps.base.AppBase):
                 chw.save()
                 flow.delete()
                 msg.respond("%(name)s you have successfully joined as CHW for the Mother Baby Service Reminder Program "
-                            "from %(clinic)s clinic. If this is not correct register again",
+                            "from %(clinic)s clinic. If this is not correct send 555 and register again",
                             name=chw.name, clinic=chw.facility.name)
                 return True
 
@@ -195,6 +195,11 @@ class App(rapidsms.apps.base.AppBase):
                 msg.respond("You can start a new submission by sending ANC")
                 flow.delete()
                 return True
+            else:
+                msg.respond("Mother's phone number is %(phone)s and gestational age is %(age)s. Reply with Yes if "
+                            "this is correct or No if not", phone=flow.phone, age=flow.gestation_at_subscription)
+                return True
+
 
         if cleaned_text.startswith('yes') and Client.objects.filter(connection=msg.connection,
                                                                     is_active=True, phone_confirmed=False):

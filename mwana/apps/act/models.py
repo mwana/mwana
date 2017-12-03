@@ -5,11 +5,13 @@ from django.db import models
 from mwana.apps.locations.models import Location
 from mwana.apps.act.messages import CLIENT_MESSAGE_CHOICES
 
+
 class Payload(models.Model):
     """a raw incoming data payload"""
 
     incoming_date = models.DateTimeField()                  #date received by rapidsms
-    auth_user = models.ForeignKey(User, null=True, blank=True, related_name='act_payloads') #http user used for authorization (blank == anon)
+    auth_user = models.ForeignKey(User, null=True, blank=True,
+                                  related_name='act_payloads') #http user used for authorization (blank == anon)
 
     version = models.CharField(max_length=10, blank=True)    #version of extract script payload came from
     source = models.CharField(max_length=50, blank=True)
@@ -54,12 +56,29 @@ class Log(models.Model):
             if not self.raw else 'parse error'
 
 
-class Client(models.Model):
-    GENDER_CHOICES = (
-        ('m', 'Male'),
-        ('f', 'Female'),
-    )
+class CHW(models.Model):
+    name = models.CharField(max_length=255)
+    national_id = models.CharField(max_length=255)
+    address = models.TextField(null=True, blank=True)
+    location = models.ForeignKey(Location, null=True, blank=True)
+    clinic_code_unrec = models.CharField(max_length=10, null=True, blank=True)
+    phone = models.CharField(max_length=13, null=True, blank=True)
+    phone_verified = models.NullBooleanField(null=True, blank=True, default=False)
+    uuid = models.CharField(max_length=255, unique=True)
+    connection = models.ForeignKey(Connection, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
 
+    def __unicode__(self):
+        return self.name
+
+
+GENDER_CHOICES = (
+    ('m', 'Male'),
+    ('f', 'Female'),
+)
+
+
+class Client(models.Model):
     national_id = models.CharField(max_length=255, unique=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     alias = models.CharField(max_length=100)
@@ -75,6 +94,7 @@ class Client(models.Model):
     phone_verified = models.NullBooleanField(null=True, blank=True, default=False)
     uuid = models.CharField(max_length=255, unique=True)
     connection = models.ForeignKey(Connection, null=True, blank=True)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True)
 
     def __unicode__(self):
         return self.alias
@@ -82,20 +102,33 @@ class Client(models.Model):
     def is_eligible_for_messaging(self):
         return self.can_receive_messages and self.phone_verified and (self.connection is not None)
 
-    
-class CHW(models.Model):
+
+class FlowCHWRegistration(models.Model):
     name = models.CharField(max_length=255)
-    national_id = models.CharField(max_length=255, unique=True)
+    national_id = models.CharField(max_length=255)
     address = models.TextField(null=True, blank=True)
     location = models.ForeignKey(Location, null=True, blank=True)
-    clinic_code_unrec = models.CharField(max_length=10, null=True, blank=True)
-    phone = models.CharField(max_length=13, null=True, blank=True)
-    phone_verified = models.NullBooleanField(null=True, blank=True, default=False)
-    uuid = models.CharField(max_length=255, unique=True)
-    connection = models.ForeignKey(Connection, null=True, blank=True)
+    open = models.BooleanField(default=True)
+    start_time = models.DateTimeField(editable=False)
+    valid_until = models.DateTimeField(editable=False)
+    connection = models.ForeignKey(Connection, editable=False)
 
     def __unicode__(self):
         return self.name
+
+
+class FlowClientRegistration(models.Model):
+    national_id = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    sex = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    can_receive_messages = models.NullBooleanField()  # Client consented to receiving SMS messages
+    phone = models.CharField(max_length=13, null=True, blank=True)
+    open = models.BooleanField(default=True)
+    start_time = models.DateTimeField(editable=False)
+    valid_until = models.DateTimeField(editable=False)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True)
+
 
 LAB_TYPE = 'lab'
 PHARMACY_TYPE = 'pharmacy'
@@ -105,13 +138,24 @@ APPOINTMENT_TYPES = (
 )
 
 
+class FlowAppointment(models.Model):
+    open = models.BooleanField(default=True)
+    start_time = models.DateTimeField(editable=False)
+    valid_until = models.DateTimeField(editable=False)
+    date = models.DateField(null=True, blank=True)
+    type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10, null=True, blank=True)
+    message_id = models.CharField(max_length=2, null=True, blank=True)
+    client = models.ForeignKey(Client, null=True, blank=True)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True)
+
+
 class Appointment(models.Model):
     APPOINTMENT_STATUS = (
         ('pending', 'Pending'),
         ('attended', 'Attended'),
         ('notified', 'Notified by SMS'),
         ('missed', 'Missed'),
-        ('canceled', 'Canceled'), 
+        ('canceled', 'Canceled'),
     )
 
     client = models.ForeignKey(Client)
@@ -120,7 +164,7 @@ class Appointment(models.Model):
     date = models.DateField(help_text="Date when client should go to clinic for this appointment")
     status = models.CharField(choices=APPOINTMENT_STATUS, max_length=10, default='pending')
     notes = models.CharField(max_length=255, blank=True, null=True)
-    payload = models.ForeignKey(Payload)
+    payload = models.ForeignKey(Payload, null=True, blank=True)
     uuid = models.CharField(max_length=255, unique=True)
 
     def __unicode__(self):
@@ -198,7 +242,7 @@ class SystemUser(models.Model):
 
 
 class HistoricalEvent(models.Model):
-    date = models.DateField()
+    date = models.DateField()#TODO: ensure date is >= 1900. Add unique together
     fact_message = models.CharField(max_length=120)
 
     def __unicode__(self):
