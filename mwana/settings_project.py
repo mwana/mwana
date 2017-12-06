@@ -252,3 +252,10 @@ SERVER_ADDRESS = ''
 
 NATIONAL_CLIENT_IDS = ''
 
+def GET_CLEANED_TEXT(text):
+    return "%s cleaned" % text
+
+
+def GET_ORIGINAL_TEXT(text):
+    return "%s original" % text
+
