@@ -4,7 +4,7 @@ from mwana.apps.act.models import Appointment
 from mwana.apps.act.models import PHARMACY_TYPE
 from mwana.apps.act.models import LAB_TYPE
 from mwana.apps.act.models import FlowAppointment
-from datetime import date
+from datetime import date, timedelta
 from datetime import datetime
 from django.conf import settings
 from mwana.apps.act.models import CHW
@@ -16,6 +16,7 @@ from mwana.apps.locations.models import Location
 from mwana.util import LocationCode
 import rapidsms
 from rapidsms.contrib.scheduler.models import EventSchedule
+from rapidsms.contrib.messagelog.models import Message
 import uuid
 
 
@@ -129,7 +130,7 @@ class App(rapidsms.apps.base.AppBase):
                 chw.save()
                 flow.delete()
                 msg.respond("%(name)s you have successfully joined as CHW for the ACT Program "
-                            "from %(clinic)s clinic and your NRC is %(nrc)s. If this is not correct send 4444 and register again",
+                            "from %(clinic)s clinic and your NRC is %(nrc)s. If this is NOT correct send 4444 and register again",
                             name=chw.name, clinic=chw.location.name, nrc=chw.national_id)
                 return True
 
@@ -149,7 +150,7 @@ class App(rapidsms.apps.base.AppBase):
                     reply = "Sorry %s is not a valid unique ID. Reply with correct unique ID." % cleaned_text
                     last = ''
                     if settings.NATIONAL_CLIENT_IDS:
-                        last = " Valid unique ID's are %s" % ','.join(settings.NATIONAL_CLIENT_IDS)
+                        last = " Valid unique ID's are %s" % ', '.join(settings.NATIONAL_CLIENT_IDS)
 
                     msg.respond(reply + last)
                     return True
@@ -268,6 +269,8 @@ class App(rapidsms.apps.base.AppBase):
                 return True
             elif cleaned_text in ('yes', 'y'):
                 client_uuid = str(uuid.uuid1())
+                today = datetime.today()
+                yesterday = today - timedelta(days=1)
 
                 client = Client.objects.create(national_id=flow.national_id,
                                                name=settings.GET_CLEANED_TEXT(flow.name),
@@ -284,6 +287,16 @@ class App(rapidsms.apps.base.AppBase):
 
                 msg.respond("Thank you %(chw)s. You have successfully registered the client %(client)s"
                     , chw=flow.community_worker.name, client=flow.name)
+
+                if flow.phone:
+                    # TODO: Test this
+                    phone_verified = Message.objects.filter(direction='I', date__lte=yesterday,
+                                                            connection__identity__endswith=flow.phone,
+                                                            text__istartswith='ACT YES').exists()
+                    if phone_verified:
+                        client.phone_verified = True
+                        client.can_receive_messages = True
+                        client.save()
 
                 flow.delete()
                 return True
@@ -332,7 +345,7 @@ class App(rapidsms.apps.base.AppBase):
                 msg.respond(
                     "ID %(id)s is for %(client)s. Now reply with the appointment date "
                     "like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.", id=client.national_id,
-                    client=client.name)
+                    client=settings.GET_ORIGINAL_TEXT(client.name))
                 return True
 
             elif not flow.date:
@@ -392,12 +405,12 @@ class App(rapidsms.apps.base.AppBase):
                         "You have submitted %(type)s appointment for "
                         "%(client)s for %(date)s. Reply with Yes if this is"
                         " correct or No if not", type=flow.get_type_display(),
-                        client=flow.client.name, date=flow.date.strftime('%d %B %Y'))
+                        client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 else:
                     msg.respond(
                         "Now submit the client's preferred message type for %(type)s. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc",
                         type=flow.get_type_display(),
-                        client=flow.client.name, date=flow.date)
+                        client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date)
                 return True
             elif flow.message_id == None:
                 response = cleaned_text.lower()
@@ -414,7 +427,7 @@ class App(rapidsms.apps.base.AppBase):
                     "You have submitted %(type)s appointment for "
                     "%(client)s for %(date)s. Reply with Yes if this is"
                     " correct or No if not", type=flow.get_type_display(),
-                    client=flow.client.name, date=flow.date.strftime('%d %B %Y'))
+                    client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 return True
             elif cleaned_text in ('yes', 'y'):
                 _uuid = str(uuid.uuid1())
@@ -425,7 +438,7 @@ class App(rapidsms.apps.base.AppBase):
 
                 msg.respond("Thank you %(chw)s. You have successfully registered a "
                             "%(type)s appointment for %(client)s on %(date)s"
-                    , chw=record.cha_responsible.name, client=record.client.name,
+                        , chw=record.cha_responsible.name, client=settings.GET_ORIGINAL_TEXT(record.client.name),
                             type=record.get_type_display(), date=record.date.strftime('%d %B %Y'))
 
                 flow.delete()
@@ -439,7 +452,7 @@ class App(rapidsms.apps.base.AppBase):
                     "You have submitted %(type)s appointment for "
                     "%(client)s for %(date)s. Reply with Yes if this is"
                     " correct or No if not", type=flow.get_type_display(),
-                    client=flow.client.name, date=flow.date.strftime('%d %B %Y'))
+                    client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 return True
 
         return False

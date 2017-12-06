@@ -4,6 +4,7 @@ from rapidsms.models import Connection
 from django.db import models
 from mwana.apps.locations.models import Location
 from mwana.apps.act.messages import CLIENT_MESSAGE_CHOICES
+import base64
 
 
 class Payload(models.Model):
@@ -79,8 +80,18 @@ GENDER_CHOICES = (
 
 
 class Client(models.Model):
+    _name = models.TextField(
+        db_column='data',
+        blank=True)
+
+    def set_name(self, name):
+        self._name = base64.encodestring(name)
+
+    def get_name(self):
+        return base64.decodestring(self._name)
+
+    name = property(get_name, set_name)
     national_id = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255, null=True, blank=True)
     alias = models.CharField(max_length=100)
     dob = models.DateField(null=True, blank=True)
     sex = models.CharField(max_length=1, choices=GENDER_CHOICES)

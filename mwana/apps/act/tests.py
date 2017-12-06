@@ -10,6 +10,7 @@ from mwana.apps.act.models import RemindersSwitch
 from mwana.apps.act.models import Appointment
 from mwana.apps.act.models import CHW
 from mwana.apps.act import tasks
+from django.conf import settings
 import uuid
 import json
 
@@ -422,12 +423,14 @@ class TestApp(ActSetUp):
                 chw > 403012/12/1
                 chw < Thank you Donald Clinton. Now reply with your clinic code
                 chw > 403012
-                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 403012/12/1. If this is not correct send 4444 and register again
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 403012/12/1. If this is NOT correct send 4444 and register again
             """
         self.runScript(script)
         self.assertEqual(0, FlowCHWRegistration.objects.count())
         chw = CHW.objects.get(pk=1)
         self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.phone_verified, True)
+        self.assertEqual(chw.phone, 'chw')
         self.assertEqual(chw.name, 'Donald Clinton')
         self.assertEqual(chw.is_active, True)
         self.assertEqual(chw.location, self.mansa_central)
@@ -455,7 +458,7 @@ class TestApp(ActSetUp):
                 chw > zone
                 chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
                 chw > 402029
-                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Mibenge clinic and your NRC is 112222/2/1. If this is not correct send 4444 and register again
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Mibenge clinic and your NRC is 112222/2/1. If this is NOT correct send 4444 and register again
                 chw > ACT CHW
                 chw < Your phone is already registered to Donald Clinton of Mibenge health facility. Send HELP ACT if you need to be assisted
                 chw > 4444
@@ -467,7 +470,7 @@ class TestApp(ActSetUp):
                 chw > 101010/12/1
                 chw < Thank you Hillary Trump. Now reply with your clinic code
                 chw > 403012
-                chw < Hillary Trump you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 101010/12/1. If this is not correct send 4444 and register again
+                chw < Hillary Trump you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 101010/12/1. If this is NOT correct send 4444 and register again
             """
         self.runScript(script)
         self.assertEqual(0, FlowCHWRegistration.objects.count())
@@ -518,7 +521,7 @@ class TestApp(ActSetUp):
         self.assertEqual(Client.objects.all().count(), 1)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.national_id, '403012-12-1')
-        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(settings.GET_ORIGINAL_TEXT(client.name), 'Robert Mukale')
         self.assertEqual(client.community_worker, chw)
         self.assertEqual(client.dob.year, 2008)
         self.assertEqual(client.dob.month, 2)
@@ -557,7 +560,7 @@ class TestApp(ActSetUp):
         self.assertEqual(FlowCHWRegistration.objects.all().count(), 0)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.national_id, '403012-12-1')
-        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(settings.GET_ORIGINAL_TEXT(client.name), 'Robert Mukale')
         self.assertEqual(client.community_worker, chw)
         self.assertEqual(client.dob.year, 2008)
         self.assertEqual(client.dob.month, 2)
@@ -595,7 +598,7 @@ class TestApp(ActSetUp):
         self.assertEqual(Client.objects.all().count(), 1)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.national_id, '403012-12-1')
-        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(settings.GET_ORIGINAL_TEXT(client.name), 'Robert Mukale')
         self.assertEqual(client.community_worker, chw)
         self.assertEqual(client.dob.year, 2008)
         self.assertEqual(client.dob.month, 2)
@@ -696,7 +699,7 @@ class TestApp(ActSetUp):
         self.assertEqual(Client.objects.all().count(), 1)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.national_id, '403012-12-1')
-        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(settings.GET_ORIGINAL_TEXT(client.name), 'Robert Mukale')
         self.assertEqual(client.community_worker, chw)
         self.assertEqual(client.dob.year, 2008)
         self.assertEqual(client.dob.month, 2)
@@ -734,7 +737,8 @@ class TestApp(ActSetUp):
         self.assertEqual(Client.objects.all().count(), 1)
         client = Client.objects.get(pk=1)
         self.assertEqual(client.national_id, '403012-12-1')
-        self.assertEqual(client.name, 'Robert Mukale cleaned')
+        self.assertEqual(client.alias, 'RM-403012-12-1')
+        self.assertEqual(settings.GET_ORIGINAL_TEXT(client.name), 'Robert Mukale')
         self.assertEqual(client.community_worker, chw)
         self.assertEqual(client.dob.year, 2008)
         self.assertEqual(client.dob.month, 2)
@@ -775,7 +779,7 @@ class TestApp(ActSetUp):
         chw = self.create_chw(chw_con='+260979112233')
         client = self.create_client(client_con='+260979676767')
         client.national_id = '805010-12345-1'
-        client.name = 'Rebekah Malope'
+        client.name = settings.GET_CLEANED_TEXT('Rebekah Malope')
         client.save()
         script = """
                 +260979112233 > ACT visit
@@ -809,7 +813,7 @@ class TestApp(ActSetUp):
         chw = self.create_chw(chw_con='+260979112233')
         client = self.create_client(client_con='+260979676767')
         client.national_id = '805010-12345-1'
-        client.name = 'Rebekah Malope'
+        client.name = settings.GET_CLEANED_TEXT('Rebekah Malope')
         client.save()
         script = """
                 +260979112233 > ACT visit
@@ -842,7 +846,7 @@ class TestApp(ActSetUp):
         chw = self.create_chw(chw_con='+260979112233')
         client = self.create_client(client_con='+260979676767')
         client.national_id = '805010-12345-1'
-        client.name = 'Rebekah Malope'
+        client.name = settings.GET_CLEANED_TEXT('Rebekah Malope')
         client.save()
         script = """
                 +260979112233 > ACT visit
@@ -903,7 +907,7 @@ class TestApp(ActSetUp):
         chw = self.create_chw(chw_con='+260979112233')
         client = self.create_client(client_con='+260979676767')
         client.national_id = '805010-12345-1'
-        client.name = 'Rebekah Malope'
+        client.name = settings.GET_CLEANED_TEXT('Rebekah Malope')
         client.save()
         script = """
                 +260979112233 > ACT visit

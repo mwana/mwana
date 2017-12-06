@@ -15,9 +15,9 @@ from django.contrib import admin
 
 
 class ClientAdmin(admin.ModelAdmin):
-    list_display = ('national_id', 'name', 'alias', 'dob', 'sex', 'address', 'short_address', 'can_receive_messages', 'location', 'clinic_code_unrec', 'zone', 'phone', 'phone_verified', 'uuid')
+    list_display = ('national_id', 'alias', 'dob', 'sex', 'address', 'short_address', 'can_receive_messages', 'location', 'clinic_code_unrec', 'zone', 'phone', 'phone_verified', 'uuid')
     list_filter = ('sex', 'can_receive_messages', 'phone_verified', 'location')
-    search_fields = ('national_id', 'name', 'alias', 'address', 'short_address',  'location__name', 'phone')
+    search_fields = ('national_id', 'alias', 'address', 'short_address',  'location__name', 'phone')
     list_editable = ['can_receive_messages', 'phone_verified']
     date_hierarchy = 'dob'
 
