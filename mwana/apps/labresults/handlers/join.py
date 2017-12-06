@@ -15,7 +15,7 @@ class JoinHandler(KeywordHandler):
     """
     """
     include_type = False
-    keyword = "j0in|join|jin|john|jo1n|jion|j01n|jon"
+    keyword = "j0in|join|jin|jo1n|jion|j01n|jon"
     PIN_LENGTH = 4
     MIN_CLINIC_CODE_LENGTH = 3
     MIN_NAME_LENGTH = 2
