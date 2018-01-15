@@ -820,14 +820,18 @@ class TestApp(ActSetUp):
                 +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
                 +260979112233 > 805010-12345-1
                 +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
-                +260979112233 > 1 01 2018
-                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > p
+                +260979112233 < p does not look like a valid date. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018.
+                +260979112233 > 1 02 2018
+                +260979112233 < You have submitted appointment date as 01 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > x
+                +260979112233 < Sorry, appointment type must be L or P. Reply with the correct appointment type, L for Lab visit or P if Pharmacy visit
                 +260979112233 > p
                 +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m1
-                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
-                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 January 2018
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 February 2018
                 """
         self.runScript(script)
         pref = ReminderMessagePreference.objects.get(client=client)
@@ -837,7 +841,7 @@ class TestApp(ActSetUp):
         appointment  = Appointment.objects.get(pk=1)
         self.assertEqual(appointment.client, client)
         self.assertEqual(appointment.type, PHARMACY_TYPE)
-        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.date, date(2018, 2, 1))
         self.assertEqual(appointment.status, 'pending')
         self.assertEqual(appointment.cha_responsible, chw)
 
@@ -882,14 +886,14 @@ class TestApp(ActSetUp):
                 +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
                 +260979112233 > 805010-12345-1
                 +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
-                +260979112233 > 1 01 2018
-                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > 1 02 2018
+                +260979112233 < You have submitted appointment date as 01 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
                 +260979112233 > p
                 +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m1
-                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
-                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 January 2018
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 February 2018
                 """
         self.runScript(script)
         pref = ReminderMessagePreference.objects.get(client=client, pk=2)
@@ -899,7 +903,7 @@ class TestApp(ActSetUp):
         appointment  = Appointment.objects.get(pk=2)
         self.assertEqual(appointment.client, client)
         self.assertEqual(appointment.type, PHARMACY_TYPE)
-        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.date, date(2018, 2, 1))
         self.assertEqual(appointment.status, 'pending')
         self.assertEqual(appointment.cha_responsible, chw)
 
@@ -943,12 +947,12 @@ class TestApp(ActSetUp):
                 +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
                 +260979112233 > 805010-12345-1
                 +260979112233 < ID 805010-12345-1 is for Rebekah Malope. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
-                +260979112233 > 1 01 2018
-                +260979112233 < You have submitted appointment date as 01 Jan 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > 1 02 2018
+                +260979112233 < You have submitted appointment date as 01 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
                 +260979112233 > l
-                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 01 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
-                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 01 January 2018
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 01 February 2018
                 """
         self.runScript(script)
         pref = ReminderMessagePreference.objects.get(pk=1)
@@ -959,6 +963,6 @@ class TestApp(ActSetUp):
         appointment  = Appointment.objects.get(pk=2)
         self.assertEqual(appointment.client, client)
         self.assertEqual(appointment.type, LAB_TYPE)
-        self.assertEqual(appointment.date, date(2018, 1, 1))
+        self.assertEqual(appointment.date, date(2018, 2, 1))
         self.assertEqual(appointment.status, 'pending')
         self.assertEqual(appointment.cha_responsible, chw)

@@ -389,7 +389,7 @@ class App(rapidsms.apps.base.AppBase):
                 response = cleaned_text.lower()
                 if response not in ('l', 'p', 'lab', 'pharmacy'):
                     msg.respond(
-                        "Sorry, appointment type must be L or P. Reply with the client's gender, L for Lab visit or P if Pharmacy visit")
+                        "Sorry, appointment type must be L or P. Reply with the correct appointment type, L for Lab visit or P if Pharmacy visit")
                     return True
                 if response in ('l', 'lab'):
                     flow.type = LAB_TYPE
