@@ -273,7 +273,7 @@ class ReminderMessagePreference(models.Model):
     visit_type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10)
 
     def __unicode__(self):
-        return "%s => %s" % (self.client, self.type, self.message_id)
+        return "%s => %s: %s" % (self.client, self.visit_type, self.message_id)
 
     class Meta:
         unique_together = (('client', 'visit_type',),)
