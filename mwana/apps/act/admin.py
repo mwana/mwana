@@ -50,7 +50,7 @@ admin.site.register(ReminderDay, ReminderDayAdmin)
 
 
 class SentReminderAdmin(admin.ModelAdmin):
-    list_display = ('appointment', 'reminder_type', 'date_logged', 'visit_date')
+    list_display = ('appointment', 'reminder_type', 'phone', 'date_logged', 'visit_date')
     list_filter = ('reminder_type', 'date_logged', 'visit_date')
     #search_fields = ('appointment', 'reminder_type', 'date_logged')
     date_hierarchy = 'date_logged'
