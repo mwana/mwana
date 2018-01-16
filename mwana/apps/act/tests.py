@@ -793,7 +793,7 @@ class TestApp(ActSetUp):
                 +260979112233 > l
                 +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m2
-                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Lab Visit and appointment date is 12 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
                 """
@@ -829,7 +829,7 @@ class TestApp(ActSetUp):
                 +260979112233 > p
                 +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m1
-                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Pharmacy Visit and appointment date is 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 February 2018
                 """
@@ -864,7 +864,7 @@ class TestApp(ActSetUp):
                 +260979112233 > l
                 +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m2
-                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Lab Visit and appointment date is 12 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
                 """
@@ -891,7 +891,7 @@ class TestApp(ActSetUp):
                 +260979112233 > p
                 +260979112233 < Now submit the client's preferred message type for Pharmacy Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m1
-                +260979112233 < You have submitted Pharmacy Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Pharmacy Visit and appointment date is 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Pharmacy Visit appointment for Rebekah Malope on 01 February 2018
                 """
@@ -925,7 +925,7 @@ class TestApp(ActSetUp):
                 +260979112233 > l
                 +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
                 +260979112233 > m2
-                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 12 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Lab Visit and appointment date is 12 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 12 February 2018
                 """
@@ -950,7 +950,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 1 02 2018
                 +260979112233 < You have submitted appointment date as 01 Feb 2018. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
                 +260979112233 > l
-                +260979112233 < You have submitted Lab Visit appointment for Rebekah Malope for 01 February 2018. Reply with Yes if this is correct or No if not
+                +260979112233 < Client is Rebekah Malope, appointment type is Lab Visit and appointment date is 01 February 2018. Reply with Yes if this is correct or No if not
                 +260979112233 > Y
                 +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Rebekah Malope on 01 February 2018
                 """

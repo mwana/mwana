@@ -402,8 +402,8 @@ class App(rapidsms.apps.base.AppBase):
                 flow.save()
                 if flow.message_id:
                     msg.respond(
-                        "You have submitted %(type)s appointment for "
-                        "%(client)s for %(date)s. Reply with Yes if this is"
+                        "Client is %(client)s, appointment type is %(type)s and appointment "
+                        "date is %(date)s. Reply with Yes if this is"
                         " correct or No if not", type=flow.get_type_display(),
                         client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 else:
@@ -424,8 +424,8 @@ class App(rapidsms.apps.base.AppBase):
                 flow.message_id = response
                 flow.save()
                 msg.respond(
-                    "You have submitted %(type)s appointment for "
-                    "%(client)s for %(date)s. Reply with Yes if this is"
+                    "Client is %(client)s, appointment type is %(type)s and appointment "
+                    "date is %(date)s. Reply with Yes if this is"
                     " correct or No if not", type=flow.get_type_display(),
                     client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 return True
@@ -449,8 +449,8 @@ class App(rapidsms.apps.base.AppBase):
                 return True
             else:
                 msg.respond(
-                    "You have submitted %(type)s appointment for "
-                    "%(client)s for %(date)s. Reply with Yes if this is"
+                    "Client is %(client)s, appointment type is %(type)s and appointment "
+                    "date is %(date)s. Reply with Yes if this is"
                     " correct or No if not", type=flow.get_type_display(),
                     client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
                 return True
