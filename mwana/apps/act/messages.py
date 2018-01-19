@@ -1,6 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
-CHW_MESSAGE = "Hello %(name)s. %(client)s is due for %(visit_type)s on %(date)s."
+CHW_MESSAGE = "Hello %(name)s. %(client)s is due for a visit (%(visit_type)s) on %(date)s. Appointment ID is: %(appointment_id)s"
 M8 = '''Happy day!
 oooO
 (....).... Oooo....

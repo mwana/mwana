@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.act.models import Visit
 from mwana.apps.act.models import HistoricalEvent
 from mwana.apps.act.models import ReminderMessagePreference
 from mwana.apps.act.models import SystemUser
@@ -108,3 +109,18 @@ class HistoricalEventAdmin(admin.ModelAdmin):
     search_fields = ('fact_message',)
     date_hierarchy = 'date'
 admin.site.register(HistoricalEvent, HistoricalEventAdmin)
+
+
+class VisitAdmin(admin.ModelAdmin):
+    list_display = ('appointment', 'actual_visit_date', 'location', 'chw')
+    list_filter = ['actual_visit_date']
+    search_fields = ('appointment__client__national_id',
+    'appointment__client__location__code', 'appointment__client__location__name', 'actual_visit_date')
+    date_hierarchy = 'actual_visit_date'
+
+    def location(self, obj):
+        return obj.appointment.client.location.name
+
+    def chw(self, obj):
+        return obj.appointment.cha_responsible.name
+admin.site.register(Visit, VisitAdmin)

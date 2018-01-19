@@ -12,6 +12,7 @@ from rapidsms.models import Connection
 from rapidsms.messages.outgoing import OutgoingMessage
 
 from mwana.apps.act import models as act
+from django.conf import settings
 
 
 _ = lambda s: s
@@ -66,9 +67,11 @@ def send_notifications(router):
                 if not already_sent:
                     chw_conn = chw.connection
                     if chw_conn:
-                        OutgoingMessage(connection=chw_conn, template=CHW_MESSAGE, name=chw.name, client=client.alias,
-                                        visit_type=appointment.get_type_display(),
-                                        date=appointment.date.strftime('%d/%m/%Y')).send()
+                        OutgoingMessage(connection=chw_conn, template=CHW_MESSAGE, name=chw.name,
+                                        client=("%s %s" %(settings.GET_ORIGINAL_TEXT(client.name), client.alias[-5:])) if client.name else client.alias,
+                                        visit_type=appointment.get_type_display()[0],
+                                        date=appointment.date.strftime('%d/%m/%Y'),
+                                        appointment_id=str(appointment.id).zfill(4)).send()
                         act.SentReminder.objects.get_or_create(appointment=appointment, reminder_type=reminder_type,
                                                                phone=chw.phone, visit_date=appointment.date)
                         appointment.status = 'notified'

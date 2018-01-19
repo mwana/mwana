@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.act.models import Visit
 from mwana.apps.act.models import LAB_TYPE
 from mwana.apps.act.models import PHARMACY_TYPE
 from mwana.apps.act.models import FlowCHWRegistration
@@ -207,7 +208,7 @@ class TestPayloadAcceptor(ActSetUp):
         self.assertEqual(record.location.slug, '402029')
         self.assertEqual(record.address, 'Kwatu. (Zone 1)')
 
-    def test_workflow(self):
+    def test_tablet_workflow(self):
         self.create_payload_auther_login()
 
         now = datetime.datetime.now()
@@ -279,7 +280,7 @@ class TestPayloadAcceptor(ActSetUp):
         self.assertEqual(2, len(msgs))
 
         msg1 = "Time up %s" % appointment_date.strftime('%d/%m/%Y')
-        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for Lab Visit on %s." % appointment_date.strftime(
+        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for a visit (L) on %s. Appointment ID is: 0001" % appointment_date.strftime(
             '%d/%m/%Y')
         self.assertTrue(msg1 in [msg.text for msg in msgs], msg1 + " not in " + ", ".join(msg.text for msg in msgs))
         self.assertTrue(msg2 in [msg.text for msg in msgs], msg2 + " not in " + ", ".join(msg.text for msg in msgs))
@@ -312,7 +313,7 @@ class TestPayloadAcceptor(ActSetUp):
         self.assertEqual(2, len(msgs))
 
         msg1 = "Did you know? On %s Jonah was swallowed" % appointment_date.strftime('%d %B')
-        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for Lab Visit on %s." % appointment_date.strftime(
+        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for a visit (L) on %s. Appointment ID is: 0001" % appointment_date.strftime(
             '%d/%m/%Y')
         self.assertTrue(msg1 in [msg.text for msg in msgs], msg1 + " not in " + ", ".join(msg.text for msg in msgs))
         self.assertTrue(msg2 in [msg.text for msg in msgs], msg2 + " not in " + ", ".join(msg.text for msg in msgs))
@@ -332,7 +333,7 @@ class TestPayloadAcceptor(ActSetUp):
         self.assertEqual(2, len(msgs))
 
         msg1 = "One Zambia one nation. %s" % appointment_date.strftime('%d/%m/%Y')
-        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for Lab Visit on %s." % appointment_date.strftime(
+        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for a visit (L) on %s. Appointment ID is: 0001" % appointment_date.strftime(
             '%d/%m/%Y')
         self.assertTrue(msg1 in [msg.text for msg in msgs], msg1 + " not in " + ", ".join(msg.text for msg in msgs))
         self.assertTrue(msg2 in [msg.text for msg in msgs], msg2 + " not in " + ", ".join(msg.text for msg in msgs))
@@ -349,7 +350,7 @@ class TestPayloadAcceptor(ActSetUp):
 
         appointment_date = date.today() + timedelta(days=14)
         msg1 = "Good day. Happy day %s" % appointment_date.strftime('%d/%m/%Y')
-        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for Pharmacy Visit on %s." % appointment_date.strftime(
+        msg2 = "Hello Trevor Sinkala. TK-14141414141 is due for a visit (P) on %s. Appointment ID is: 0002" % appointment_date.strftime(
             '%d/%m/%Y')
         self.assertTrue(msg1 in [msg.text for msg in msgs], msg1 + " not in " + ", ".join(msg.text for msg in msgs))
         self.assertTrue(msg2 in [msg.text for msg in msgs], msg2 + " not in " + ", ".join(msg.text for msg in msgs))
@@ -966,3 +967,147 @@ class TestApp(ActSetUp):
         self.assertEqual(appointment.date, date(2018, 2, 1))
         self.assertEqual(appointment.status, 'pending')
         self.assertEqual(appointment.cha_responsible, chw)
+
+    def test_work_flow(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        chw.phone = '+260979112233'
+        chw.phone_verified = True
+        chw.save()
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+
+        script = '''
+            +260977123456 > ACT YES
+            +260977123456 < Thank you
+        '''
+        self.runScript(script)
+
+        appointment_date = date.today() + timedelta(days=7)
+
+        script = """
+                +260979112233 > ACT visit
+                +260979112233 < Hi Donald Clinton, to register a client's appointment first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < ID 403012-12-1 is for Robert Mukale. Now reply with the appointment date like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > {date}
+                +260979112233 < You have submitted appointment date as {date1}. Now reply with the type of appointment, L for Lab visit or P if Pharmacy visit
+                +260979112233 > l
+                +260979112233 < Now submit the client's preferred message type for Lab Visit. Refer to Job Aid on Message Preferences, e.g. m1 or m2 or m3 etc
+                +260979112233 > m2
+                +260979112233 < Client is Robert Mukale, appointment type is Lab Visit and appointment date is {date2}. Reply with Yes if this is correct or No if not
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. You have successfully registered a Lab Visit appointment for Robert Mukale on {date2}
+                """.format(date=appointment_date.strftime('%d %m %Y'), date1=appointment_date.strftime('%d %b %Y'), date2=appointment_date.strftime('%d %B %Y'))
+        self.runScript(script)
+
+        RemindersSwitch.objects.create()
+        # configure reminder for lab visits
+        ReminderDay.objects.create(appointment_type=Appointment.get_lab_type(), days=7)
+
+        time.sleep(.2)
+        self.startRouter()
+        tasks.send_notifications(self.router)
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+        # self.assertEqual(2, len(msgs))
+
+        msg1 = "Good day. Happy day %s" % appointment_date.strftime('%d/%m/%Y')
+        msg2 = "Hello Donald Clinton. Robert Mukale -12-1 is due for a visit (L) on %s. Appointment ID is: 0001" % appointment_date.strftime(
+            '%d/%m/%Y')
+        self.assertTrue(msg1 in [msg.text for msg in msgs], msg1 + " not in " + ", ".join(msg.text for msg in msgs))
+        self.assertTrue(msg2 in [msg.text for msg in msgs], msg2 + " not in " + ", ".join(msg.text for msg in msgs))
+
+        script = """
+                +260979112233 > ACT DONE
+                +260979112233 < Hi Donald Clinton, to confirm a client's visit first reply with appointment ID
+                +260979112233 > 19
+                +260979112233 < Appointment with ID 19 does not exist. Please verify the ID and send the correct one
+                +260979112233 > x
+                +260979112233 < x is not a valid appointment ID. Please verify the ID and send the correct one
+                +260979112233 > 001
+                +260979112233 < ID 1 is for the appointment for Robert Mukale on 26 January 2018. Now reply with the actual date Robert Mukale went to the facility like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.
+                +260979112233 > AxCT
+                +260979112233 < axct does not look like a valid date. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018.
+                +260979112233 > 19 01 2019
+                +260979112233 < Sorry, visit date cannot be after today's. 19 01 2019 is in the future
+                +260979112233 > 19 01 2018
+                +260979112233 < Client Robert Mukale visited the facility on 19 January 2018. Reply with Yes if this is correct or No if not
+                +260979112233 > yes
+                +260979112233 < Thank you Donald Clinton. You have successfully confirmed that Robert Mukale went to the facility on 19 January 2018
+        """
+
+        self.runScript(script)
+        self.assertEqual(1, Visit.objects.all().count())
+        self.assertEqual('Donald Clinton', Visit.objects.get(pk=1).appointment.cha_responsible.name)
+        self.assertEqual(date(2018, 1, 19), Visit.objects.get(pk=1).actual_visit_date)
+
+
+    def test_help(self):
+        chw = self.create_chw(chw_con='+260979112233')
+        chw.phone = '+260979112233'
+        chw.phone_verified = True
+        chw.save()
+        script = """
+                +260979112233 > ACT CHILD
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-1
+                +260979112233 < You have submitted client's ID 403012-12-1. Now reply with the client's name
+                +260979112233 > Robert mukale
+                +260979112233 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260979112233 > 12 02 2008
+                +260979112233 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260979112233 > f
+                +260979112233 < You have submitted client's gender as Female. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260979112233 > Y
+                +260979112233 < Thank you Donald Clinton. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260979112233 > 0977123456
+                +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260979112233 > Yes
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+            """
+
+        self.runScript(script)
+        self.assertEqual(Client.objects.all().count(), 1)
+        client = Client.objects.get(pk=1)
+
+        script = '''
+            +260977123456 > ACT YES
+            +260977123456 < Thank you
+        '''
+        self.runScript(script)
+
+
+        script = """
+                +260979112233 > help act
+                support_contact < Someone has requested help. Please call them at +260979112233. Their message was: act
+                support_contact2 < Someone has requested help. Please call them at +260979112233. Their message was: act
+                +260979112233 < Sorry you're having trouble. Your help request has been forwarded to a support team member and they will call you soon.
+                +260977123456 > help me
+                support_contact < Someone has requested help. Please call them at +260977123456. Their message was: me
+                support_contact2 < Someone has requested help. Please call them at +260977123456. Their message was: me
+                +260977123456 < Sorry you're having trouble. Your help request has been forwarded to a support team member and they will call you soon.
+                """
+        self.runScript(script)
+
+
+

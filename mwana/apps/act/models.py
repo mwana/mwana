@@ -196,6 +196,15 @@ class Appointment(models.Model):
         return self.type == PHARMACY_TYPE
 
 
+class FlowVisitConfirmation(models.Model):
+    open = models.BooleanField(default=True)
+    start_time = models.DateTimeField(editable=False)
+    valid_until = models.DateTimeField(editable=False)
+    actual_visit_date = models.DateField(null=True, blank=True)
+    appointment = models.ForeignKey(Appointment, null=True, blank=True)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True)
+
+
 class VerifiedNumber(models.Model):
     number = models.CharField(max_length=13)
     verified = models.BooleanField(default=True)
@@ -280,3 +289,11 @@ class ReminderMessagePreference(models.Model):
 
     def get_message_text(self):
         return CLIENT_MESSAGE_CHOICES.get(self.message_id)
+
+
+class Visit(models.Model):
+    appointment = models.ForeignKey(Appointment)
+    actual_visit_date = models.DateField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s done on %s" % (self.appointment, self.actual_visit_date.strftime('%d %B %Y'))

@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.act.models import Visit
+from mwana.apps.act.models import FlowVisitConfirmation
 from mwana.apps.act.messages import CLIENT_MESSAGE_CHOICES
 from mwana.apps.act.models import Appointment
 from mwana.apps.act.models import PHARMACY_TYPE
@@ -319,9 +321,9 @@ class App(rapidsms.apps.base.AppBase):
                         id=flow.national_id, dob=flow.dob.strftime('%d %B %Y'),
                         sex='Female' if flow.sex == 'f' else 'Male')
                 return True
+                #--------------------------------#
+                # Handle Appointment Registration #
             #--------------------------------#
-        # Handle Appointment Registration #
-        #--------------------------------#
         open_flows = FlowAppointment.objects.filter(community_worker__connection=msg.connection, open=True,
                                                     start_time__lte=datetime.now()). \
             filter(valid_until__gte=datetime.now())
@@ -438,7 +440,7 @@ class App(rapidsms.apps.base.AppBase):
 
                 msg.respond("Thank you %(chw)s. You have successfully registered a "
                             "%(type)s appointment for %(client)s on %(date)s"
-                        , chw=record.cha_responsible.name, client=settings.GET_ORIGINAL_TEXT(record.client.name),
+                    , chw=record.cha_responsible.name, client=settings.GET_ORIGINAL_TEXT(record.client.name),
                             type=record.get_type_display(), date=record.date.strftime('%d %B %Y'))
 
                 flow.delete()
@@ -453,6 +455,117 @@ class App(rapidsms.apps.base.AppBase):
                     "date is %(date)s. Reply with Yes if this is"
                     " correct or No if not", type=flow.get_type_display(),
                     client=settings.GET_ORIGINAL_TEXT(flow.client.name), date=flow.date.strftime('%d %B %Y'))
+                return True
+                # Handle Visit Confirmation #
+            #--------------------------------#
+        open_flows = FlowVisitConfirmation.objects.filter(community_worker__connection=msg.connection, open=True,
+                                                          start_time__lte=datetime.now()). \
+            filter(valid_until__gte=datetime.now())
+
+        if open_flows:
+            flow = FlowVisitConfirmation.objects.filter(community_worker__connection=msg.connection, open=True,
+                                                        start_time__lte=datetime.now()). \
+                get(valid_until__gte=datetime.now())
+            if not flow.appointment:
+                try:
+                    id = int(cleaned_text)
+                except ValueError:
+                    msg.respond(
+                        "%(id)s is not a valid appointment ID. Please verify the ID and send the correct one",
+                        id=cleaned_text)
+                    return True
+                appointments = Appointment.objects.filter(id=id)
+                if not appointments:
+                    msg.respond(
+                        "Appointment with ID %(id)s does not exist. Please verify the ID and send the correct one",
+                        id=cleaned_text)
+                    return True
+                appointments = Appointment.objects.filter(id=id, cha_responsible=flow.community_worker)
+                if not appointments:
+                    msg.respond(
+                        "Sorry %(name)s, appointment with ID %(id)s was not created by you."
+                        " Please verify the ID and send the correct one", name=flow.community_worker.name,
+                        id=cleaned_text)
+                    return True
+
+                appointment = appointments[0]
+
+                flow.appointment = appointment
+                flow.save()
+                msg.respond(
+                    "ID %(id)s is for the appointment for %(client)s on %(appointment_date)s. Now reply with the actual "
+                    "date %(client)s went to the facility "
+                    "like <DAY> <MONTH> <YEAR> e.g. 12 04 2018 for 12 April 2018.", id=id,
+                    client=settings.GET_ORIGINAL_TEXT(appointment.client.name),
+                                                      appointment_date=appointment.date.strftime('%d %B %Y'))
+                return True
+
+            elif not flow.actual_visit_date:
+                tokens = cleaned_text.split()
+                if len(tokens) != 3:
+                    msg.respond(
+                        "%s does not look like a valid date. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018." % cleaned_text)
+                    return True
+                try:
+                    day, month, year = [int(i) for i in tokens]
+                except ValueError:
+                    msg.respond(
+                        "%s does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018." % cleaned_text)
+                    return True
+                if year < 1900:
+                    msg.respond(
+                        "Date %s has an invalid year. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018." % cleaned_text)
+                    return True
+                elif month < 1 or month > 12:
+                    msg.respond(
+                        "Date %s has an invalid month. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018." % cleaned_text)
+                    return True
+                try:
+                    appointment_date = date(year, month, day)
+                except ValueError:
+                    msg.respond(
+                        "%s does not look like a valid date. Reply with correct date like <DAY> <MONTH> <YEAR> e.g. 12 04 2008 for 12 April 2018." % cleaned_text)
+                    return True
+                if appointment_date > date.today():
+                    msg.respond(
+                        "Sorry, visit date cannot be after today's. %s is in the future" % cleaned_text)
+                    return True
+
+                flow.actual_visit_date = appointment_date
+                flow.save()
+                msg.respond(
+                    "Client %(client)s visited the facility on %(date)s."
+                    " Reply with Yes if this is"
+                    " correct or No if not",
+                    client=settings.GET_ORIGINAL_TEXT(flow.appointment.client.name),
+                    date=flow.actual_visit_date.strftime('%d %B %Y'))
+                return True
+
+            elif cleaned_text in ('yes', 'y'):
+
+
+                record, _ = Visit.objects.get_or_create(appointment=flow.appointment,
+                                                        actual_visit_date=flow.actual_visit_date)
+
+                msg.respond("Thank you %(chw)s. You have successfully confirmed that "
+                            "%(client)s went to the facility on %(date)s"
+                    , chw=record.appointment.cha_responsible.name,
+                            client=settings.GET_ORIGINAL_TEXT(record.appointment.client.name),
+                            date=record.actual_visit_date.strftime('%d %B %Y'))
+
+                flow.delete()
+                return True
+            elif cleaned_text in ('no', 'n'):
+                msg.respond("You can start a new submission by sending ACT DONE")
+                flow.delete()
+                return True
+            else:
+                msg.respond(
+                    "Client %(client)s visited the facility on %(date)s."
+                    " Reply with Yes if this is"
+                    " correct or No if not",
+                    client=settings.GET_ORIGINAL_TEXT(flow.appointment.client.name),
+                    date=flow.actual_visit_date.strftime('%d %B %Y'))
                 return True
 
         return False

@@ -8,6 +8,7 @@ from rapidsms.contrib.handlers.handlers.keyword import KeywordHandler
 
 _ = lambda s: s
 
+
 class ActYesHandler(KeywordHandler):
     """
     """

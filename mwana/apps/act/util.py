@@ -5,6 +5,20 @@ from mwana.apps.act.models import HistoricalEvent
 from mwana.apps.act.models import ReminderMessagePreference
 from mwana.apps.act.models import Appointment
 
+from mwana.apps.act.models import FlowVisitConfirmation
+from mwana.apps.act.models import FlowClientRegistration
+from mwana.apps.act.models import FlowAppointment
+
+from datetime import datetime, timedelta
+
+
+_ = lambda s: s
+
+
+def clear_flows(chw):
+    FlowAppointment.objects.filter(community_worker=chw).delete()
+    FlowClientRegistration.objects.filter(community_worker=chw).delete()
+    FlowVisitConfirmation.objects.filter(community_worker=chw).delete()
 
 def get_historical_event_message(p_date):
     events = HistoricalEvent.objects.filter(date__month=p_date.month).filter(date__day=p_date.day)
@@ -32,4 +46,5 @@ def get_preferred_lab_message_template(client):
 
 def get_preferred_pharmacy_message_template(client):
         return get_preferred_message_template(client, Appointment.get_pharmacy_type())
+
 
