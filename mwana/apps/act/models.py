@@ -264,6 +264,7 @@ class SystemUser(models.Model):
 class HistoricalEvent(models.Model):
     date = models.DateField()#TODO: ensure date is >= 1900. Add unique together
     fact_message = models.CharField(max_length=120)
+    fact_day = models.CharField(max_length=20, null=True, blank=True, editable=False)
 
     def __unicode__(self):
         return 'Did you know? On %s %s' % (self.date.strftime('%d %B'), self.fact_message)
@@ -274,6 +275,13 @@ class HistoricalEvent(models.Model):
     @classmethod
     def mock_message(cls, p_date):
         return 'Happy healthy day %s' % (p_date.strftime('%d %B'))
+
+    def save(self, *args, **kwargs):
+
+        if self.date and not self.fact_day:
+            self.fact_day = self.date.strftime('%m-%d (%d %B)')
+
+        super(HistoricalEvent, self).save(*args, **kwargs)
 
 
 class ReminderMessagePreference(models.Model):

@@ -104,7 +104,7 @@ admin.site.register(ReminderMessagePreference, ReminderMessagePreferenceAdmin)
 
 
 class HistoricalEventAdmin(admin.ModelAdmin):
-    list_display = ('date', 'fact_message')
+    list_display = ('fact_day', 'date', 'fact_message')
     #list_filter = ['date', 'fact_message']
     search_fields = ('fact_message',)
     date_hierarchy = 'date'
