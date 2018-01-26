@@ -585,33 +585,33 @@ function updateDisplay(str, location_type){
             clinic_fragment = "<br>In these " +(districts.length) + " districts Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
             contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>" + workers 
                 + " clinic staff<a/> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>" +
-                cbas + " Comminuty Based Agents</a> currently registered."
+                cbas + " Community Based Agents</a> currently registered."
         }else if(location_type === "District"){
             district_fragment = " District Mwana has been deployed to " + (districts.length) + " facilities namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             contact_fragment = " In these <a onclick='drawLabelsOnShapes(\"facilities\")'>" +(districts.length) + " facilities</a>, a total of <a onclick='drawLabelsOnShapes(\"workers\", \"" + location_type + "\")'>"+ workers
                 + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\", \"" + location_type + "\")'>"
-                + cbas + " Comminuty Based Agents</a> are currently registered."
+                + cbas + " Community Based Agents</a> are currently registered."
         }else if(location_type === "Country"){
             district_fragment = ", within <a onclick='showGrowthChart()'>" + mwana_years + "</a>, Mwana has been deployed to " +(districts.length) + " provinces namely, "
                 + districts.slice(0,-1).join(", ") + " and " + districts[districts.length - 1] + "."
             clinic_fragment = "<br>In these " +(districts.length) +
                 " provinces Mwana has been deployed to a total of <a onclick='drawLabelsOnShapes(\"facilities\")'>" + facilities + " health facilities</a> "
             contact_fragment = " with <a onclick='drawLabelsOnShapes(\"workers\")'>" + workers + " clinic staff</a> and <a onclick='drawLabelsOnShapes(\"cbas\")'>" + cbas
-                + " Comminuty Based Agents</a> currently registered."
+                + " Community Based Agents</a> currently registered."
         }
 
     }else if(districts.length == 1){
         if(location_type === "Province"){
             district_fragment = " Province Mwana has been deployed to 1 district namely, " + districts[0]
             clinic_fragment = "<br>In this district Mwana has been deployed to a total of " + facilities + " health facilities "
-            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Community Based Agents registered."
         }else if(location_type === "District"){
             district_fragment = " District Mwana has been deployed to 1 facility namely, " + districts[0]
-            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Community Based Agents registered."
         }else if(location_type === "Country"){
             district_fragment = " Mwana has been deployed to 1 province namely, " + districts[0]
-            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Comminuty Based Agents registered."
+            contact_fragment = " with " + workers + " clinic staff and " + cbas + " Community Based Agents registered."
         }
 
     }else if(districts.length == 0){
