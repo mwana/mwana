@@ -554,7 +554,7 @@ class TestApp(ActSetUp):
                 +260979112233 > N/A
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
