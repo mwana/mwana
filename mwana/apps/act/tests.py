@@ -1055,7 +1055,7 @@ class TestApp(ActSetUp):
                 +260979112233 > yes
                 +260979112233 < Thank you Donald Clinton. You have successfully confirmed that Robert Mukale went to the facility on 19 January 2018
         """
-
+        # TODO: Test visit status change
         self.runScript(script)
         self.assertEqual(1, Visit.objects.all().count())
         self.assertEqual('Donald Clinton', Visit.objects.get(pk=1).appointment.cha_responsible.name)
