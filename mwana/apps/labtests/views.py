@@ -51,12 +51,14 @@ def json_datetime (val):
     except:
         return None
 
+
 def json_date (val):
     """convert a date value from the json into a python date"""
     try:
         return datetime.strptime(val, '%Y-%m-%d').date()
     except:
         return None
+
 
 def json_timestamp (val):
     """convert a timestamp value (with milliseconds) from the json into a python datetime"""
@@ -141,7 +143,18 @@ def process_payload(payload, data=None):
     else:
         records_validate = False
 
-    logs_validate = True #TODO: process logs
+
+
+    if 'logs' in data and hasattr(data['logs'], '__iter__'):
+        logs_validate = True
+        for log in data['logs']:
+            if not accept_log(log, payload):
+                logger.debug('log %s did not validate' % log)
+                logs_validate = False
+    else:
+        logger.debug('no logs in data')
+        logs_validate = False
+
     if not (records_validate and logs_validate):
         transaction.savepoint_rollback(pre_record_creation)
 
@@ -371,16 +384,40 @@ def accept_record (record, payload):
     return True
 
 
+def accept_log (log, payload):
+    """parse and save a single log message; if does not validate, save the raw data;
+    return whether the record validated"""
+
+    logentry = labtests.LabLog(payload=payload)
+    logfields = {
+        'timestamp': dictval(log, 'at', json_timestamp),
+        'message': dictval(log, 'msg'),
+        'level': dictval(log, 'lvl'),
+        'line': dictval(log, 'ln'),
+        }
+
+    f_log = LogForm(logfields, instance=logentry)
+    if f_log.is_valid():
+        f_log.save()
+        return True
+    else:
+        logger.error('errors in json schema for log: ' + str(f_log.errors))
+        logentry.raw = str(log)
+        logentry.save()
+        return False
+
 
 class PayloadForm(ModelForm):
     class Meta:
         model = labtests.Payload
         fields = ['version', 'source', 'client_timestamp', 'info']
 
+
 class LogForm(ModelForm):
     class Meta:
         model = labtests.LabLog
         fields = ['timestamp', 'message', 'level', 'line']
+
 
 class ResultForm(ModelForm):
     class Meta:
@@ -389,6 +426,7 @@ class ResultForm(ModelForm):
             'requisition_id_search']
 
 log_rotation_threshold = 5000
+
 
 def log_cmp (a, b, wraparound):
     def get_line (lg):
