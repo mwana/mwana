@@ -22,8 +22,8 @@ class Trained(models.Model):
     Keeps a record of those that have been trained
     """
     name = models.CharField(max_length=50, null=False, blank=False)
-    phone = models.CharField(max_length=15, null=True, blank=True, unique=True)
-    email = models.CharField(max_length=50, null=True, blank=True, unique=True)
+    phone = models.CharField(max_length=15, null=True, blank=True)
+    email = models.CharField(max_length=50, null=True, blank=True)
     location = models.ForeignKey(Location)
     type = models.ForeignKey(ContactType)#,
 #    limit_choices_to={'slug__in':(type.slug for type in ContactType.objects.exclude(name__in=["Patient", "DBS Printer"]))})

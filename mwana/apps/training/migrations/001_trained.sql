@@ -1,0 +1,2 @@
+AlTER TABLE training_trained DROP CONSTRAINT training_trained_email_key;
+AlTER TABLE training_trained DROP CONSTRAINT training_trained_phone_key;
