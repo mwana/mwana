@@ -15,7 +15,7 @@ make_new.short_description = "Mark selected results as new"
 
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('requisition_id', 'payload', 'clinic', 'clinic_code_unrec',
-                    'result', 'result_unit', 'processed_on', 'notification_status', 'sex',
+                    'result', 'numeric_result', 'processed_on', 'notification_status', 'sex',
                     'result_sent_date', 'phone', 'guspec', 'province', 'district', 'constit',
                     'ward', 'csa', 'sea')
     list_filter = ('test_type', 'verified', 'processed_on', 'notification_status', 'sex',

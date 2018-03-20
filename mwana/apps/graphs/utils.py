@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.db.models import Sum
 from mwana.apps.labresults.models import Payload
 from mwana.apps.labresults.models import Result
+from mwana.apps.labtests.models import Result as VL_Result
 from mwana.apps.locations.models import Location
 from mwana.apps.patienttracing.models import PatientTrace
 from mwana.apps.reminders.models import PatientEvent
@@ -395,6 +396,54 @@ class GraphService:
                 tt_diff = 1 + tt_diff + (result.result_sent_date - result.arrival_date).days
 
             data['4. Retrieval Time'].append(int(tt_diff / tt))
+
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
+    def get_monthly_vl_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
+        # start, end = get_datetime_bounds(start_date, end_date)
+
+        trend_items = ['Total', '1. Suppressed', '2. Unsuppressed',
+                       '3. Other']
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for item in sorted(trend_items):
+            data[item] = []
+
+        results = VL_Result.objects.filter(clinic__in=facs)
+
+        month_ranges = []
+        while my_date <= end_date:
+            # Total
+            tt_res = results.filter(processed_on__year=my_date.year,
+                                    processed_on__month=my_date.month
+                                    )
+            data['Total'].append(tt_res.count())
+
+            #'1. Suppressed'
+            tt_res = results.filter(processed_on__year=my_date.year,
+                                    processed_on__month=my_date.month,
+                                    numeric_result__lt=1000
+                                    )
+            data['1. Suppressed'].append(tt_res.count())
+
+            #2. Unsuppressed
+            tt_res = results.filter(processed_on__year=my_date.year,
+                                    processed_on__month=my_date.month,
+                                    numeric_result__gte=1000
+                                    )
+            data['2. Unsuppressed'].append(tt_res.count())
+
+            #Other
+            tt_res = results.filter(processed_on__year=my_date.year,
+                                    processed_on__month=my_date.month,
+                                    numeric_result=None
+            )
+            data['3. Other'].append(tt_res.count())
 
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
