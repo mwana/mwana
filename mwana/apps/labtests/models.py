@@ -129,7 +129,7 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         if not self.numeric_result:
             value = self.result.lower().replace('copies/ml', '').replace('cp/ml', '').strip()
-            if value in ('< 20', '<20', 'target not detected', 'target not detected'):
+            if value in ('< 20', '<20', 'target not detected', 'rna not detected'):
                 self.numeric_result = 0
             elif '>' in value:
                 self.numeric_result =  10000000
