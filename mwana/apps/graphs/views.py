@@ -254,8 +254,8 @@ def monthly_vl_trends(request):
     return render_to_response('graphs/messages.html',
                               {
                               "x_axis": time_ranges,
-                              "title": "'Monthly DBS Turnaround Trends'",
-                              "sub_title": "'Period: %s  to %s (Filtered by Results Retreived Date)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "title": "'Monthly Viral Load Results from Labs'",
+                              "sub_title": "'Period: %s  to %s (Filtered by Processed-on Date)'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'Days'",
                               "report_data": report_data,
                               "skip_total": True,
