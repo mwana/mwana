@@ -407,7 +407,7 @@ class GraphService:
         # start, end = get_datetime_bounds(start_date, end_date)
 
         trend_items = ['Total', '1. Suppressed', '2. Unsuppressed',
-                       '3. Other (Invalid/Rejected)', '4. Results sent facilities']
+                       '3. Other (Invalid/Rejected)', '4. Results sent to facilities']
 
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
@@ -447,10 +447,9 @@ class GraphService:
 
             #Results Sent
             tt_res = results.filter(result_sent_date__year=my_date.year,
-                                    result_sent_date__month=my_date.month,
-                                    numeric_result=None
+                                    result_sent_date__month=my_date.month
             )
-            data['4. Results sent facilities'].append(tt_res.count())
+            data['4. Results sent to facilities'].append(tt_res.count())
 
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
