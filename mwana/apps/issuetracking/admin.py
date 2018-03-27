@@ -9,6 +9,47 @@ class CommentInline(admin.TabularInline):
     model = Comment
     extra = 0
 
+
+def make_ongoing(modeladmin, request, queryset):
+    queryset.update(status='ongoing')
+make_ongoing.short_description = "Mark selected issues as In Progress"
+
+
+def make_waiting(modeladmin, request, queryset):
+    queryset.update(status='waiting')
+make_waiting.short_description = "Mark selected issues as Waiting on Something"
+
+
+def make_completed(modeladmin, request, queryset):
+    queryset.update(status='completed')
+make_completed.short_description = "Mark selected issues as Completed"
+
+
+def make_bugfixed(modeladmin, request, queryset):
+    queryset.update(status='bugfixed')
+make_bugfixed.short_description = "Mark selected issues as Bug Fixed"
+
+
+def make_obsolete(modeladmin, request, queryset):
+    queryset.update(status='obsolete')
+make_obsolete.short_description = "Mark selected issues as Obsolete"
+
+
+def make_resurfaced(modeladmin, request, queryset):
+    queryset.update(status='resurfaced')
+make_resurfaced.short_description = "Mark selected issues as Resurfaced"
+
+
+def make_future(modeladmin, request, queryset):
+    queryset.update(status='future')
+make_future.short_description = "Mark selected issues as Future"
+
+
+def make_closed(modeladmin, request, queryset):
+    queryset.update(status='closed')
+make_closed.short_description = "Mark selected issues as Closed"
+
+
 class IssueAdmin(admin.ModelAdmin):
     list_display = ('id','title', 'snippet' , 'type', 'status', 'dev_time',
     'assigned_to','author','desired_start_date', 'desired_completion_date','start_date','end_date',)
@@ -16,7 +57,7 @@ class IssueAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_created'
     list_filter = ('open', 'type', 'status', 'assigned_to', 'web_author', 'sms_author',)
     search_fields = ('title', 'body',)
-
+    actions = [make_ongoing, make_waiting, make_completed, make_bugfixed, make_obsolete, make_resurfaced, make_future, make_closed]
 
     def snippet(self, obj):
         x = 500
