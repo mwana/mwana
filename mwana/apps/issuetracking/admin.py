@@ -12,31 +12,39 @@ class CommentInline(admin.TabularInline):
 
 def make_ongoing(modeladmin, request, queryset):
     queryset.update(status='ongoing')
+    queryset.update(open=True)
 make_ongoing.short_description = "Mark selected issues as In Progress"
 
 
 def make_waiting(modeladmin, request, queryset):
     queryset.update(status='waiting')
+    queryset.update(open=True)
 make_waiting.short_description = "Mark selected issues as Waiting on Something"
 
 
 def make_completed(modeladmin, request, queryset):
     queryset.update(status='completed')
+    queryset.update(percentage_complete=100)
+    queryset.update(open=False)
 make_completed.short_description = "Mark selected issues as Completed"
 
 
 def make_bugfixed(modeladmin, request, queryset):
     queryset.update(status='bugfixed')
+    queryset.update(open=False)
+    queryset.update(percentage_complete=100)
 make_bugfixed.short_description = "Mark selected issues as Bug Fixed"
 
 
 def make_obsolete(modeladmin, request, queryset):
     queryset.update(status='obsolete')
+    queryset.update(open=False)
 make_obsolete.short_description = "Mark selected issues as Obsolete"
 
 
 def make_resurfaced(modeladmin, request, queryset):
     queryset.update(status='resurfaced')
+    queryset.update(open=True)
 make_resurfaced.short_description = "Mark selected issues as Resurfaced"
 
 
@@ -47,6 +55,7 @@ make_future.short_description = "Mark selected issues as Future"
 
 def make_closed(modeladmin, request, queryset):
     queryset.update(status='closed')
+    queryset.update(open=False)
 make_closed.short_description = "Mark selected issues as Closed"
 
 

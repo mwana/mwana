@@ -47,8 +47,6 @@ def get_next_navigation(text):
 
 
 def list_issues(request):
-
-    
     message = ""
     errors = ""
     navigation = read_request(request, "navigate")
@@ -70,7 +68,6 @@ def list_issues(request):
             dev_time = form.cleaned_data['dev_time']
 
             web_author = request.user
-           
             
             issue = Issue(type=type, priority=priority, title=title,
             body=body, desired_start_date=desired_start_date, dev_time=dev_time,
