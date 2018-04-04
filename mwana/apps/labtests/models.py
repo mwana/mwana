@@ -129,15 +129,16 @@ class Result(models.Model):
     def save(self, *args, **kwargs):
         if not self.numeric_result:
             value = self.result.lower().replace('copies/ml', '').replace('cp/ml', '').strip()
-            if value in ('< 20', '<20', 'target not detected', 'rna not detected'):
+            test = [x for x in ['< 20', '<20', 'detected'] if x in value]
+            if test:
                 self.numeric_result = 0
             elif '>' in value:
-                self.numeric_result =  10000000
+                self.numeric_result = 10000000
             elif value in ('invalid', ''):
                 pass
             elif value and 'e' not in value:
                 try:
-                    self.numeric_result =  int(float(value))
+                    self.numeric_result = int(float(value))
                 except ValueError:
                     pass
         super(Result, self).save(*args, **kwargs)
