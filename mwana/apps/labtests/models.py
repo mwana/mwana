@@ -69,7 +69,7 @@ class Result(models.Model):
     nearest_facility_name = models.CharField(max_length=100,
                                          blank=True, null=True)
 
-    result = models.CharField(max_length=30, blank=True)  #blank == 'not tested yet'
+    result = models.CharField(max_length=60, blank=True)  #blank == 'not tested yet'
     result_unit = models.CharField(max_length=30, null=True, blank=True)
     numeric_result = models.PositiveIntegerField(null=True, blank=True)
     test_type = models.CharField(choices=TEST_TYPES, max_length=20, null=True, blank=True)
