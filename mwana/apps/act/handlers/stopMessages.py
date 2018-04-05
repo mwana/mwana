@@ -11,7 +11,7 @@ class StopACTMessagesHandler(KeywordHandler):
     """
     """
 
-    keyword = "stop|444444|44444|4444"
+    keyword = "stop|444444"
 
     def help(self):
         self.handle('')

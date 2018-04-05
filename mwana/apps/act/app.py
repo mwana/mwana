@@ -132,7 +132,7 @@ class App(rapidsms.apps.base.AppBase):
                 chw.save()
                 flow.delete()
                 msg.respond("%(name)s you have successfully joined as CHW for the ACT Program "
-                            "from %(clinic)s clinic and your NRC is %(nrc)s. If this is NOT correct send 4444 and register again",
+                            "from %(clinic)s clinic and your NRC is %(nrc)s. If this is NOT correct send 444444 and register again",
                             name=chw.name, clinic=chw.location.name, nrc=chw.national_id)
                 return True
 

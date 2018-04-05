@@ -110,7 +110,7 @@ class TestApp(AncSetUp):
             chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
             chw > CHW
             chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted 
-            chw > 55555
+            chw > 555555
             chw < You have successfully unsubscribed Donald Clinton.
             chw > CHW
             chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
@@ -233,7 +233,7 @@ class TestApp(AncSetUp):
             +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 9) if 8 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 8 week pregnant mother with phone number +260977123456
             +260977123456 > Yes
-            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555
+            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 555555
         """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -262,7 +262,7 @@ class TestApp(AncSetUp):
             +260977123456 > age
             +260977123456 < To record your gestation age, Send AGE <GESTATIONAL-AGE IN WEEKS>, E.g. AGE 8
             +260977123456 > age 18
-            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555
+            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 555555
         """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -463,7 +463,7 @@ class TestApp(AncSetUp):
         self.assertEqual(Message.objects.filter(direction='O', connection=chw.connection, text__istartswith='client').count(), len(gestational_ages))
 
         for item in EDUCATIONAL_MESSAGES:
-            chw_msg = item[1].replace(' Stop messages with 5555', '')
+            chw_msg = item[1].replace(' Stop messages with 555555', '')
             self.assertTrue(Message.objects.filter(connection=chw.connection,
                                                    text="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
                             'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
@@ -501,7 +501,7 @@ class TestApp(AncSetUp):
         self.assertEqual(SentCHWMessage.objects.count(), len(gestational_ages))
 
         # for item in EDUCATIONAL_MESSAGES:
-        #     chw_msg = item[1].replace(' Stop messages with 5555', '')
+        #     chw_msg = item[1].replace(' Stop messages with 555555', '')
         #     self.assertTrue(Message.objects.filter(connection=chw.connection,
         #                                            text__endswith="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
         #                     'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
