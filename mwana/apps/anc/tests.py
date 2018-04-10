@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 
 from rapidsms.contrib.messagelog.models import Message
-from rapidsms.models import Connection, Backend
+from rapidsms.models import Connection
 from rapidsms.tests.scripted import TestScript
 
 import mwana.const as const
@@ -13,8 +13,6 @@ from mwana.apps.anc.models import FlowCommunityWorkerRegistration, CommunityWork
 from mwana.apps.anc.models import WaitingForResponse
 from mwana.apps.anc.models import EducationalMessage
 from mwana.apps.anc.messages import EDUCATIONAL_MESSAGES
-from mwana.apps.anc.messages import WELCOME_MSG_A
-from mwana.apps.anc.messages import WELCOME_MSG_B
 from mwana.apps.anc.models import Client
 from mwana.apps.anc.models import SentClientMessage
 from mwana.apps.anc import tasks
@@ -30,6 +28,8 @@ class AncSetUp(TestScript):
             0]
 
         self.clinic = Location.objects.create(type=self.type, name="Chelston", slug="101010",
+                                              send_live_results=True)
+        self.clinic2 = Location.objects.create(type=self.type, name="Kaunda Square", slug="101020",
                                               send_live_results=True)
         self.zone_type = LocationType.objects.get_or_create(singular="zone", plural="zone", slug=const.ZONE_SLUGS[0])[0]
         self.zone = Location.objects.create(type=self.zone_type, name='3', slug='zone')
@@ -85,7 +85,7 @@ class TestApp(AncSetUp):
             chw > Donald Clinton
             chw < Thank you Donald Clinton. Now reply with your clinic code
             chw > 101010
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -95,6 +95,50 @@ class TestApp(AncSetUp):
         self.assertEqual(chw.is_active, True)
         self.assertEqual(chw.facility, self.clinic)
         self.assertEqual(CommunityWorker.objects.all().count(), 1)
+
+    def testCHWReRegistration(self):
+        script = """
+            chw > CHW
+            chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
+            chw > Donald Clinton
+            chw < Thank you Donald Clinton. Now reply with your clinic code
+            chw > 101010
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
+        """
+        self.runScript(script)
+        self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
+        chw = CommunityWorker.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.facility, self.clinic)
+        self.assertEqual(CommunityWorker.objects.all().count(), 1)
+
+        script = """
+            chw > CHW
+            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted or send 555555 to leave Chelston and then register with the new facility
+            chw > 555555
+            chw < You have successfully unsubscribed Donald Clinton.
+            chw > CHW
+            chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
+            chw > Donald J Clinton
+            chw < Thank you Donald J Clinton. Now reply with your clinic code
+            chw > 101020
+            chw < Donald J Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Kaunda Square clinic. If this is not correct send 555555 and register again
+        """
+        self.runScript(script)
+        self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
+        self.assertEqual(2, CommunityWorker.objects.count())
+        chw = CommunityWorker.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, False)
+        self.assertEqual(chw.facility, self.clinic)
+        chw = CommunityWorker.objects.get(pk=2)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald J Clinton')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.facility, self.clinic2)
 
     def testCHWRegistrationErrorHandling(self):
         script = """
@@ -107,9 +151,9 @@ class TestApp(AncSetUp):
             chw > zone
             chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
             chw > 1010105
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
             chw > CHW
-            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted 
+            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted or send 555555 to leave Chelston and then register with the new facility
             chw > 555555
             chw < You have successfully unsubscribed Donald Clinton.
             chw > CHW
@@ -117,7 +161,7 @@ class TestApp(AncSetUp):
             chw > Hillary Trump
             chw < Thank you Hillary Trump. Now reply with your clinic code
             chw > 101010
-            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -553,7 +597,6 @@ class TestApp(AncSetUp):
             client < For emergencies contact your local clinic
         """
         self.runScript(script)
-
 
     def testUnsubscribing(self):
         script = """

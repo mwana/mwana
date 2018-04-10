@@ -100,11 +100,12 @@ class App(rapidsms.apps.base.AppBase):
                 chw.connection = flow.connection
                 chw.name = flow.name
                 chw.facility = flow.facility
+                chw.is_active = True
 
                 chw.save()
                 flow.delete()
                 msg.respond("%(name)s you have successfully joined as CHW for the Mother Baby Service Reminder Program "
-                            "from %(clinic)s clinic. If this is not correct send 555 and register again",
+                            "from %(clinic)s clinic. If this is not correct send 555555 and register again",
                             name=chw.name, clinic=chw.facility.name)
                 return True
 
