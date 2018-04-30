@@ -424,7 +424,7 @@ class TestApp(ActSetUp):
                 chw > 403012/12/1
                 chw < Thank you Donald Clinton. Now reply with your clinic code
                 chw > 403012
-                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 403012/12/1. If this is NOT correct send 4444 and register again
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 403012/12/1. If this is NOT correct send 444444 and register again
             """
         self.runScript(script)
         self.assertEqual(0, FlowCHWRegistration.objects.count())
@@ -459,10 +459,10 @@ class TestApp(ActSetUp):
                 chw > zone
                 chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
                 chw > 402029
-                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Mibenge clinic and your NRC is 112222/2/1. If this is NOT correct send 4444 and register again
+                chw < Donald Clinton you have successfully joined as CHW for the ACT Program from Mibenge clinic and your NRC is 112222/2/1. If this is NOT correct send 444444 and register again
                 chw > ACT CHW
                 chw < Your phone is already registered to Donald Clinton of Mibenge health facility. Send HELP ACT if you need to be assisted
-                chw > 4444
+                chw > 444444
                 chw < You have successfully unsubscribed Donald Clinton.
                 chw > act CHW
                 chw < Welcome to the ACT Program. To register as a CHW reply with your name.
@@ -471,7 +471,7 @@ class TestApp(ActSetUp):
                 chw > 101010/12/1
                 chw < Thank you Hillary Trump. Now reply with your clinic code
                 chw > 403012
-                chw < Hillary Trump you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 101010/12/1. If this is NOT correct send 4444 and register again
+                chw < Hillary Trump you have successfully joined as CHW for the ACT Program from Central clinic and your NRC is 101010/12/1. If this is NOT correct send 444444 and register again
             """
         self.runScript(script)
         self.assertEqual(0, FlowCHWRegistration.objects.count())

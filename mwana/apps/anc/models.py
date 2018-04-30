@@ -2,11 +2,9 @@
 from datetime import datetime, timedelta
 from datetime import date
 
-from django.contrib.auth.models import User
 from django.db import models
 from rapidsms.models import Connection
 
-from mwana.const import CLINIC_SLUGS
 from mwana.apps.locations.models import Location
 
 

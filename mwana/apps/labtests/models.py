@@ -30,6 +30,7 @@ TEST_TYPES = (
         (get_viral_load_type(), 'Viral Load'),
     )
 
+
 class Result(models.Model):
     """A viral load result"""
 
@@ -68,8 +69,9 @@ class Result(models.Model):
     nearest_facility_name = models.CharField(max_length=100,
                                          blank=True, null=True)
 
-    result = models.CharField(max_length=30, blank=True)  #blank == 'not tested yet'
+    result = models.CharField(max_length=60, blank=True)  #blank == 'not tested yet'
     result_unit = models.CharField(max_length=30, null=True, blank=True)
+    numeric_result = models.PositiveIntegerField(null=True, blank=True)
     test_type = models.CharField(choices=TEST_TYPES, max_length=20, null=True, blank=True)
     result_detail = models.CharField(max_length=200, blank=True)   #reason for rejection or explanation of inconsistency
     collected_on = models.DateField(null=True, blank=True)   #date collected at clinic
@@ -123,6 +125,23 @@ class Result(models.Model):
         except ValueError:
             return False
         return False
+
+    def save(self, *args, **kwargs):
+        if not self.numeric_result:
+            value = self.result.lower().replace('copies/ml', '').replace('cp/ml', '').strip()
+            test = [x for x in ['< 20', '<20', 'detected'] if x in value]
+            if test:
+                self.numeric_result = 0
+            elif '>' in value:
+                self.numeric_result = 10000000
+            elif value in ('invalid', ''):
+                pass
+            elif value and 'e' not in value:
+                try:
+                    self.numeric_result = int(float(value))
+                except ValueError:
+                    pass
+        super(Result, self).save(*args, **kwargs)
 
 
 class Payload(models.Model):

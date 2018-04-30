@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 from mwana.apps.labresults.models import Result
+from mwana.apps.labtests.models import Result as LabtestsResult
 
 from mwana.apps.reports.models import MsgByLocationUserTypeBackendLog
 from mwana.apps.reports.models import MessageByLocationUserTypeBackend
@@ -53,6 +54,22 @@ class TurnaroundAdmin(admin.ModelAdmin):
 admin.site.register(Turnaround, TurnaroundAdmin)
 
 
+class LabtestsTurnaroundAdmin(admin.ModelAdmin):
+    list_display = ('province', 'district', 'facility', 'result', 'transporting',
+                    'processing', 'delays', 'retrieving', 'turnaround',
+                    'collected_on',  'received_at_lab', 'processed_on',
+                    'date_reached_moh', 'date_retrieved', 'lab')
+    list_filter = ('lab', 'province',  'collected_on', 'received_at_lab', 'processed_on',
+                   'date_reached_moh', 'date_retrieved', 'district', 'facility')
+    search_fields = ('province', 'district', 'facility',)
+    date_hierarchy = 'received_at_lab'
+
+    def result(self, obj):
+        return LabtestsResult.objects.get(pk=obj.id).sample_id
+
+admin.site.register(LabtestsTurnaround, LabtestsTurnaroundAdmin)
+
+
 class MessageGroupAdmin(admin.ModelAdmin):
     list_display = ('date', 'text', 'direction', 'contact_type',
                     'keyword', 'backend', 'changed_res',
@@ -89,11 +106,13 @@ class PhoReportNotificationAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_sent'
 admin.site.register(PhoReportNotification, PhoReportNotificationAdmin)
 
+
 class DhoReportNotificationAdmin(admin.ModelAdmin):
     list_display = ('contact', 'district', 'type', 'samples', 'results', 'births', 'date', 'date_sent')
     list_filter = ('district', 'date', 'date_sent')
     date_hierarchy = 'date_sent'
 admin.site.register(DhoReportNotification, DhoReportNotificationAdmin)
+
 
 class CbaThanksNotificationAdmin(admin.ModelAdmin):
     list_display = ('contact', 'facility', 'births', 'date', 'date_sent')
@@ -102,12 +121,14 @@ class CbaThanksNotificationAdmin(admin.ModelAdmin):
     search_fields = ('contact__name', )
 admin.site.register(CbaThanksNotification, CbaThanksNotificationAdmin)
 
+
 class CbaEncouragementAdmin(admin.ModelAdmin):
     list_display = ('contact', 'facility', 'date_sent')
     list_filter = ('facility', 'date_sent')
     date_hierarchy = 'date_sent'
     search_fields = ('contact__name', )
 admin.site.register(CbaEncouragement, CbaEncouragementAdmin)
+
 
 class LoginAdmin(admin.ModelAdmin):
     list_display = ('user', 'ever_logged_in',)

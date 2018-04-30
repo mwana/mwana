@@ -20,7 +20,7 @@ class ChwHandler(KeywordHandler):
         if CommunityWorker.objects.filter(is_active=True, connection=connection):
             chw = CommunityWorker.objects.get(is_active=True, connection=connection)
             self.respond("Your phone is already registered to %s of %s health facility. Send HELP CHW if you need to be"
-                         " assisted" % (chw.name, chw.facility.name))
+                         " assisted or send 555555 to leave %s and then register with the new facility" % (chw.name, chw.facility.name, chw.facility.name))
             return
         FlowCommunityWorkerRegistration.objects.filter(connection=self.msg.connection).delete()
         FlowCommunityWorkerRegistration.objects.create(connection=self.msg.connection, start_time=datetime.now(),

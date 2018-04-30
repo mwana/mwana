@@ -4,7 +4,7 @@ import time
 from datetime import timedelta
 
 from rapidsms.contrib.messagelog.models import Message
-from rapidsms.models import Connection, Backend
+from rapidsms.models import Connection
 from rapidsms.tests.scripted import TestScript
 
 import mwana.const as const
@@ -13,8 +13,6 @@ from mwana.apps.anc.models import FlowCommunityWorkerRegistration, CommunityWork
 from mwana.apps.anc.models import WaitingForResponse
 from mwana.apps.anc.models import EducationalMessage
 from mwana.apps.anc.messages import EDUCATIONAL_MESSAGES
-from mwana.apps.anc.messages import WELCOME_MSG_A
-from mwana.apps.anc.messages import WELCOME_MSG_B
 from mwana.apps.anc.models import Client
 from mwana.apps.anc.models import SentClientMessage
 from mwana.apps.anc import tasks
@@ -30,6 +28,8 @@ class AncSetUp(TestScript):
             0]
 
         self.clinic = Location.objects.create(type=self.type, name="Chelston", slug="101010",
+                                              send_live_results=True)
+        self.clinic2 = Location.objects.create(type=self.type, name="Kaunda Square", slug="101020",
                                               send_live_results=True)
         self.zone_type = LocationType.objects.get_or_create(singular="zone", plural="zone", slug=const.ZONE_SLUGS[0])[0]
         self.zone = Location.objects.create(type=self.zone_type, name='3', slug='zone')
@@ -85,7 +85,7 @@ class TestApp(AncSetUp):
             chw > Donald Clinton
             chw < Thank you Donald Clinton. Now reply with your clinic code
             chw > 101010
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -95,6 +95,50 @@ class TestApp(AncSetUp):
         self.assertEqual(chw.is_active, True)
         self.assertEqual(chw.facility, self.clinic)
         self.assertEqual(CommunityWorker.objects.all().count(), 1)
+
+    def testCHWReRegistration(self):
+        script = """
+            chw > CHW
+            chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
+            chw > Donald Clinton
+            chw < Thank you Donald Clinton. Now reply with your clinic code
+            chw > 101010
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
+        """
+        self.runScript(script)
+        self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
+        chw = CommunityWorker.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.facility, self.clinic)
+        self.assertEqual(CommunityWorker.objects.all().count(), 1)
+
+        script = """
+            chw > CHW
+            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted or send 555555 to leave Chelston and then register with the new facility
+            chw > 555555
+            chw < You have successfully unsubscribed Donald Clinton.
+            chw > CHW
+            chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
+            chw > Donald J Clinton
+            chw < Thank you Donald J Clinton. Now reply with your clinic code
+            chw > 101020
+            chw < Donald J Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Kaunda Square clinic. If this is not correct send 555555 and register again
+        """
+        self.runScript(script)
+        self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
+        self.assertEqual(2, CommunityWorker.objects.count())
+        chw = CommunityWorker.objects.get(pk=1)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald Clinton')
+        self.assertEqual(chw.is_active, False)
+        self.assertEqual(chw.facility, self.clinic)
+        chw = CommunityWorker.objects.get(pk=2)
+        self.assertEqual(chw.connection.identity, 'chw')
+        self.assertEqual(chw.name, 'Donald J Clinton')
+        self.assertEqual(chw.is_active, True)
+        self.assertEqual(chw.facility, self.clinic2)
 
     def testCHWRegistrationErrorHandling(self):
         script = """
@@ -107,17 +151,17 @@ class TestApp(AncSetUp):
             chw > zone
             chw < Sorry, I don't know about a clinic with code zone. Please check your code and try again.
             chw > 1010105
-            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Donald Clinton you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
             chw > CHW
-            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted 
-            chw > 55555
+            chw < Your phone is already registered to Donald Clinton of Chelston health facility. Send HELP CHW if you need to be assisted or send 555555 to leave Chelston and then register with the new facility
+            chw > 555555
             chw < You have successfully unsubscribed Donald Clinton.
             chw > CHW
             chw < Welcome to the Mother Baby Service Reminder Program. To register as a CHW reply with your name.
             chw > Hillary Trump
             chw < Thank you Hillary Trump. Now reply with your clinic code
             chw > 101010
-            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555 and register again
+            chw < Hillary Trump you have successfully joined as CHW for the Mother Baby Service Reminder Program from Chelston clinic. If this is not correct send 555555 and register again
         """
         self.runScript(script)
         self.assertEqual(0, FlowCommunityWorkerRegistration.objects.count())
@@ -233,7 +277,7 @@ class TestApp(AncSetUp):
             +260977123456 < Welcome to the Mother Baby Service Reminder. Reply with YES if you are 8 weeks pregnant and want to receive SMS reminders about ANC. Or reply with keyword AGE + the number of weeks (E.g AGE 9) if 8 is not correct. Kind regards. MoH
             +260979112233 < You have successfully registered 8 week pregnant mother with phone number +260977123456
             +260977123456 > Yes
-            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555
+            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 555555
         """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -262,7 +306,7 @@ class TestApp(AncSetUp):
             +260977123456 > age
             +260977123456 < To record your gestation age, Send AGE <GESTATIONAL-AGE IN WEEKS>, E.g. AGE 8
             +260977123456 > age 18
-            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 5555
+            +260977123456 < 8 antenatal clinic visits are recommended. Your first visit should be before 16 weeks. Ask for iron and folic acid tablets. To stop messages please dial 555555
         """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -463,7 +507,7 @@ class TestApp(AncSetUp):
         self.assertEqual(Message.objects.filter(direction='O', connection=chw.connection, text__istartswith='client').count(), len(gestational_ages))
 
         for item in EDUCATIONAL_MESSAGES:
-            chw_msg = item[1].replace(' Stop messages with 5555', '')
+            chw_msg = item[1].replace(' Stop messages with 555555', '')
             self.assertTrue(Message.objects.filter(connection=chw.connection,
                                                    text="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
                             'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
@@ -501,7 +545,7 @@ class TestApp(AncSetUp):
         self.assertEqual(SentCHWMessage.objects.count(), len(gestational_ages))
 
         # for item in EDUCATIONAL_MESSAGES:
-        #     chw_msg = item[1].replace(' Stop messages with 5555', '')
+        #     chw_msg = item[1].replace(' Stop messages with 555555', '')
         #     self.assertTrue(Message.objects.filter(connection=chw.connection,
         #                                            text__endswith="%s: %s" % ("client%s" % item[0], chw_msg)).exists(),
         #                     'Not found %s' % "%s: %s" % (client.connection.identity, chw_msg))
@@ -553,7 +597,6 @@ class TestApp(AncSetUp):
             client < For emergencies contact your local clinic
         """
         self.runScript(script)
-
 
     def testUnsubscribing(self):
         script = """

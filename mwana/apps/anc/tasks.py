@@ -40,6 +40,6 @@ def send_anc_messages(router):
         for ed in educational_msgs:
             if SentCHWMessage.objects.filter(community_worker=client.community_worker, message=ed).exists():
                 continue
-            chw_msg = ed.text.replace(' Stop messages with 5555', '')
+            chw_msg = ed.text.replace(' Stop messages with 555555', '')
             OutgoingMessage(client.community_worker.connection, "%s: %s" % (client.connection.identity, chw_msg)).send()
             SentCHWMessage.objects.create(community_worker=client.community_worker, message=ed)

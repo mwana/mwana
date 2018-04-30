@@ -12,7 +12,7 @@ class StopMessagesHandler(KeywordHandler):
     """
     """
 
-    keyword = "stop|555555|55555|5555|555"
+    keyword = "stop|555555"
 
     def help(self):
         self.handle('')
