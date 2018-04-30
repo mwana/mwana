@@ -1,4 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
+
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 from mwana.apps.labresults.models import Result
 from mwana.apps.labtests.models import Result as LabtestsResult
 
@@ -48,6 +50,8 @@ class TurnaroundAdmin(admin.ModelAdmin):
     search_fields = ('province', 'district', 'facility',)
     date_hierarchy = 'received_at_lab'
 
+    actions = [export_as_csv_action(exclude=['id'])]
+
     def result(self, obj):
         return Result.objects.get(pk=obj.id).result
 
@@ -63,6 +67,8 @@ class LabtestsTurnaroundAdmin(admin.ModelAdmin):
                    'date_reached_moh', 'date_retrieved', 'district', 'facility')
     search_fields = ('province', 'district', 'facility',)
     date_hierarchy = 'received_at_lab'
+
+    actions = [export_as_csv_action(exclude=['id'])]
 
     def result(self, obj):
         return LabtestsResult.objects.get(pk=obj.id).sample_id
