@@ -5,6 +5,9 @@ CREATE OR REPLACE VIEW reports_turnaround
 AS
 SELECT
      labresults_result.id,
+     labresults_result.sample_id,
+     labresults_result.requisition_id,
+     labresults_result.result,
      province.name as Province,
      district.name as district,
      locations_location.name as facility,

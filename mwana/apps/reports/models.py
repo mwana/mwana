@@ -30,6 +30,9 @@ class Turnaround(models.Model):
     date_reached_moh = models.DateField(blank=True, null=True)
     date_retrieved = models.DateField(blank=True, null=True)
     lab = models.CharField(max_length=100)
+    result = models.CharField(max_length=100)
+    sample_id = models.CharField(max_length=100)
+    requisition_id = models.CharField(max_length=100)
 
 
 class LabtestsTurnaround(models.Model):
