@@ -37,7 +37,7 @@ class TestApp(TestScript):
         #create some contacts for the facilities
         script = """
             0971 > join kdh worker one  1234
-            0972 > join 403012 worker two  1234
+            0972 > join 403012 worker two  4567
             0973 > join 403012 worker three  1234
             0974 > join 403012 help admin  1234
             0975 > join cba kdh 2 Kafue CBA
@@ -64,7 +64,7 @@ class TestApp(TestScript):
             0974 < Someone has requested help. Please call them at unknown.
             unknown < Sorry you're having trouble. Your help request has been forwarded to a support team member and they will call you soon.
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
+            0974 < Worker One (worker, 1234) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
         """
         self.runScript(script)
@@ -92,7 +92,7 @@ class TestApp(TestScript):
 
         script = """
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
+            0974 < Worker One (worker, 1234) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
         """
         self.runScript(script)
@@ -123,7 +123,7 @@ class TestApp(TestScript):
         # Total forwarded help requests will be come 2
         script = """
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
+            0974 < Worker One (worker, 1234) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
             """
         self.runScript(script)
@@ -131,7 +131,7 @@ class TestApp(TestScript):
         # Total forwarded help requests will be come 3
         script = """
             0972 > help how to get results
-            0974 < Worker Two (worker) at Central Clinic(403012) has requested help. Please call them at 0972. Their message was: how to get results
+            0974 < Worker Two (worker, 4567) at Central Clinic(403012) has requested help. Please call them at 0972. Their message was: how to get results
             0972 < Sorry you're having trouble Worker Two. Your help request has been forwarded to a support team member and they will call you soon.
             """
         self.runScript(script)
@@ -150,7 +150,7 @@ class TestApp(TestScript):
         # no training. Total forwarded help requests will be come 4
         script = """
             0972 > help how to get results
-            0974 < Worker Two (worker) at Central Clinic(403012) has requested help. Please call them at 0972. Their message was: how to get results
+            0974 < Worker Two (worker, 4567) at Central Clinic(403012) has requested help. Please call them at 0972. Their message was: how to get results
             0972 < Sorry you're having trouble Worker Two. Your help request has been forwarded to a support team member and they will call you soon.
             """
         self.runScript(script)
@@ -190,7 +190,7 @@ class TestApp(TestScript):
         # Total forwarded help requests will be come 6
         script = """
             0971 > help
-            0974 < Worker One (worker) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
+            0974 < Worker One (worker, 1234) at Kafue District Hospital(kdh) has requested help. Please call them at 0971.
             0971 < Sorry you're having trouble Worker One. Your help request has been forwarded to a support team member and they will call you soon.
             """
         self.runScript(script)
@@ -340,8 +340,8 @@ class TestApp(TestScript):
             0974 > PIN 098773
             0974 < There are no active SMS users with phone number matching 098773
             0974 > pin 0972
-            0974 < Worker Two: 1234.
+            0974 < Worker Two: 4567.
             0974 > pin 097
-            0974 < Worker One: 1234. Worker Two: 1234. Worker Three: 1234. Help Admin: 1234.
+            0974 < Worker One: 1234. Worker Two: 4567. Worker Three: 1234. Help Admin: 1234.
         """
         self.runScript(script)

@@ -20,6 +20,7 @@ CONTACT_FORWARD    = "%(name)s has requested help. Please call them at %(phone)s
 CON_LOC_FORWARD    = "%(name)s at %(location)s has requested help. Please call them at %(phone)s."
 ADDITIONAL_INFO    = "Their message was: %(message)s"
 
+
 class HelpHandler(KeywordHandler):
     """
     A simple help app, that optionally lets you forward requests to help admins
@@ -43,7 +44,8 @@ class HelpHandler(KeywordHandler):
         resp_template = ANONYMOUS_FORWARD
         if self.msg.connection.contact:
             params["name"] = "%s (%s)" % (self.msg.connection.contact.name,
-                                          get_contact_type_slug(self.msg.contact))
+                                          ', '.join(i for i in [get_contact_type_slug(self.msg.contact),
+                                                                self.msg.connection.contact.pin] if i))
             if self.msg.connection.contact.location:
                 params["location"] = "%s(%s)" % (get_clinic_or_default(self.msg.contact),
                                                  get_clinic_or_default(self.msg.contact).slug)
@@ -94,5 +96,5 @@ class HelpHandler(KeywordHandler):
         
         person_arg = " " + self.msg.connection.contact.name if self.msg.connection.contact else ""
         self.respond(RESPONSE, person=person_arg)
-                                         
+
         
