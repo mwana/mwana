@@ -21,6 +21,8 @@ class InfantResultAlert(models.Model):
         ('treatment_started', 'Client Started on treatment'),
         ('referred', 'Referred'),
         ('deceased', 'Deceased'),
+        ('ltf', 'Lost to Follow-up'),
+        ('defaulted', 'Defaulted'),
         ('unknown', 'Unknown'),
     )
     NOTIFICATION_CHOICES = (
@@ -90,6 +92,8 @@ class ViralLoadAlert(models.Model):
         ('iac_started', 'Intensive adherence counselling started'),
         ('regimen_changed', 'Changed drug regimen'),
         ('deceased', 'Deceased'),
+        ('ltf', 'Lost to Follow-up'),
+        ('defaulted', 'Defaulted'),
         ('unknown', 'Unknown'),
     )
     NOTIFICATION_CHOICES = (
