@@ -106,7 +106,6 @@ class TestApp(TestScript):
         self.assertEqual(6, Contact.objects.count())
         hubman = Contact.objects.get(name='Hubman Banda')
         self.assertEqual(hubman.types.all()[0].slug, const.HUB_WORKER_SLUG)
-        
 
         script = """
             dho     > join dho 4030 Dho banda 1234
@@ -127,6 +126,18 @@ class TestApp(TestScript):
         self.assertEqual(8, Contact.objects.count())
         pho = Contact.objects.get(name='Pho Banda')
         self.assertEqual(pho.types.all()[0].slug, const.PROVINCE_WORKER_SLUG)
+
+        script = """
+            labman     > join lab 4o30i2 mark zuckerberg 1234
+            labman     < Hi Mark Zuckerberg, thanks for registering for Results160 from lab at Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        time.sleep(.5)
+        self.assertEqual(9, Contact.objects.count())
+        labman = Contact.objects.get(name='Mark Zuckerberg')
+        self.assertEqual(labman.types.all()[0].slug, const.LAB_WORKER_SLUG)
+
+
 
     def testAgentThenJoinRegistrationSameClinic(self):
         self.assertEqual(0, Contact.objects.count())

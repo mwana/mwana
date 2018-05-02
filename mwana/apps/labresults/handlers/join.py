@@ -121,9 +121,9 @@ class JoinHandler(KeywordHandler):
         return tuple(tokens)
 
     def set_pattern_to_use(self, text):
-        new_pattern = re.compile(r"^(clinic|agent|dho|hub|pho)(\s+)(\w+)(\s+)(.{1,})(\s+)(\d+)$", re.IGNORECASE)
+        new_pattern = re.compile(r"^(clinic|agent|dho|hub|pho|lab)(\s+)(\w+)(\s+)(.{1,})(\s+)(\d+)$", re.IGNORECASE)
         if new_pattern.findall(text) or text.strip().split()[0].lower() in \
-        ('clinic','dho','hub','pho'):
+        ('clinic','dho','hub','pho', 'lab'):
             self.include_type = True
             self.PATTERN = new_pattern            
             self.INVALID_PIN = "Please make sure your code is a 4-digit number like 1234. " + self.HELP_TEXT
@@ -136,6 +136,8 @@ class JoinHandler(KeywordHandler):
                          "incorrect" % {'name':name, 'location':location, 'pin':pin})
         if worker_type == const.get_hub_worker_type():
             response = response.replace("for Results160 from", "for Results160 from hub at")
+        elif worker_type == const.get_lab_worker_type():
+            response = response.replace("for Results160 from", "for Results160 from lab at")
         elif worker_type == const.get_district_worker_type():
             response = response.replace(". Your PIN is ", " DHO. Your PIN is ")
         elif worker_type == const.get_province_worker_type():
