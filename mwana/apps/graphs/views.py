@@ -116,6 +116,35 @@ def lab_submissions(request):
                               }, context_instance=RequestContext(request)
                               )
 
+
+def labtests_submissions(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date = min(max(enddate1, startdate1, MWANA_ZAMBIA_START_DATE), date.today())
+    start_date = end_date - timedelta(days=30)
+
+    service = GraphService()
+    report_data = []
+
+    time_ranges, data = service.get_labtests_submissions(start_date, end_date, rpt_provinces\
+                                                    , rpt_districts,
+                                                    rpt_facilities)
+
+    for k, v in data.items():
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/lab_submissions.html',
+                              {
+                              "x_axis":time_ranges,
+                              "title": "'Daily Laboratory VL Submissions to Mwana'",
+                              "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'VL samples'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
 def monthly_lab_submissions(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)

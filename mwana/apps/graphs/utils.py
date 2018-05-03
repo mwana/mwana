@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labtests import models as labtests
 from mwana.apps.reports.models import MessageByLocationUserTypeBackend
 from mwana.apps.reports.models import MessageByLocationByBackend
 from mwana.apps.reports.models import MessageByLocationByUserType
@@ -155,6 +156,57 @@ class GraphService:
         query = '''
         select count(labresults_result.id), incoming_date::date  as my_date, source from labresults_result
         join labresults_payload on labresults_payload.id = labresults_result.payload_id
+        join locations_location loc on loc.id = clinic_id
+        where loc.id in (''' + ids + ''')
+        and date(incoming_date) between %s and %s
+        group by source, my_date'''
+
+        cursor = connection.cursor()
+        cursor.execute(query, [start_date, end_date])
+        rows = cursor.fetchall()
+
+        objects = []
+        for row in rows:
+            count, my_date, source = row
+            expando = Expando()
+            expando.count = int(count)
+            expando.my_date = my_date
+            expando.source = source
+            objects.append(expando)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        for lab in sorted(labs):
+            data[lab[0]] = []
+
+        time_ranges = []
+        while my_date <= end_date:
+            for lab in sorted(labs):
+                item = [x for x in objects if
+                        (x.source == lab[0] and x.my_date == my_date)]
+                count = 0
+                if item:
+                    count = item[0].count
+                data[lab[0]].append(count)
+            time_ranges.append(my_date.strftime('%d %b'))
+            my_date = my_date + timedelta(days=1)
+
+        return time_ranges, data
+    
+    def get_labtests_submissions(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        """
+        Uses raw SQL for performance reasons. Works on PostgreSql database
+        """
+
+        labs = labtests.Payload.objects.values_list('source').all().distinct()
+
+        ids = ", ".join("%s" % fac.id for fac in get_dbs_facilities(province_slug, district_slug, facility_slug))
+        if not ids:
+            ids = '-1'
+
+        query = '''
+        select count(labtests_result.id), incoming_date::date  as my_date, source from labtests_result
+        join labtests_payload on labtests_payload.id = labtests_result.payload_id
         join locations_location loc on loc.id = clinic_id
         where loc.id in (''' + ids + ''')
         and date(incoming_date) between %s and %s
