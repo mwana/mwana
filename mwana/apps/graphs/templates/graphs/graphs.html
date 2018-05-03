@@ -5,6 +5,19 @@
 
 {% block stylesheets %}
 {{ block.super }}
+<style type="text/css">
+    #wrapper {
+        background: none repeat scroll 0 0 #FFFFFF;
+        box-shadow: 4px 4px 8px #AAAAAA;
+        margin: 0.5em auto 0;
+        width: 100%;
+    }
+    /*    .ui-dialog { z-index: 21000 !important ;}*/
+    .ui-widget {
+        font: 9pt "Lucida Grande", "Bitstream Vera Sans", Verdana, sans-serif !important;
+        font-size: 1.1em !important;
+    }
+</style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/chosen.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/jquery-ui-1.10.2.redmond.min.css" />
 <!--<link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}reports/stylesheets/bootstrap-responsive.min.css" />
@@ -262,6 +275,7 @@
                             | <a class="report" id="monthly_results_retrival_trends" enddate="" monthrange="" >Results Retrieval Trends</a>
                             | <a class="report" id="dbs_testing_trends" enddate="" monthrange="" >Results Testing Trends</a>
                             | <a class="report" id="monthly_scheduled_visit_trends" enddate="" monthrange="" extra="visit_type-select-6 day:6 Day, 6 week:6 Week, 6 month:6 Month;data_type-select-percentage:Percentage, count:Count" >Postnatal Visit Trends</a>
+                            / <a class="report" id="labtests_submissions" enddate="" >Daily VL Submissions</a>
                             | <a class="report" id="monthly_vl_trends" enddate="" monthrange="" >Viral Load Trends</a>
                         </div>
                     </div>
