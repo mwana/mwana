@@ -367,11 +367,21 @@ class Alerter:
         # uses raw sql for performance reasons
         ids = self._get_reporting_ids()
 
-        sql = '''
-        SELECT "source", max(processed_on) FroM labresults_result
+        sql1 = '''
+        SELECT DISTINCT "source" FROM labresults_result
         JOIN labresults_payload on labresults_payload.id=labresults_result.payload_id
-        WHERE clinic_id in (''' + ids + ''')
-        and processed_on IS NOT null
+        WHERE clinic_id in (''' + ids + ''');
+        '''
+        
+        cursor1 = connection.cursor()
+        cursor1.execute(sql1)
+        rows1 = cursor1.fetchall()
+        sources = [x[0] for x in rows1]
+
+        sql = '''
+        SELECT "source", max(processed_on) FROM labresults_result
+        JOIN labresults_payload on labresults_payload.id=labresults_result.payload_id
+        WHERE processed_on IS NOT null
         GROUP BY "source";
         '''
         cursor = connection.cursor()
@@ -380,7 +390,9 @@ class Alerter:
         rows = cursor.fetchall()
         self.last_processed_dbs.clear()
         for row in rows:
-            self.last_processed_dbs[row[0]] = row[1]
+            source = row[0]
+            if source in sources:
+                self.last_processed_dbs[source] = row[1]
       
     def set_lab_last_sent_payload(self):
         self.last_sent_payloads = dict(Payload.objects.all().values_list("source").annotate(Max('incoming_date')))
