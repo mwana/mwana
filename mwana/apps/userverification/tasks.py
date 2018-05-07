@@ -57,7 +57,7 @@ def send_verification_request(router):
                                            request_date__gte=date_back).exists():
             continue
 
-        msg = VERICATION_MSG % (contact.name, contact.location.name)
+        msg = VERICATION_MSG % (contact.name, contact.location.name, contact.location.slug)
         contact_types = contact.types.all()
         if get_cba_type() in contact_types:
             msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)
@@ -94,7 +94,7 @@ def send_final_verification_request(router):
                                            request_date__gte=date_back).exists():
             continue
 
-        msg = VERICATION_MSG % (contact.name, contact.location.name)
+        msg = VERICATION_MSG % (contact.name, contact.location.name, contact.location.slug)
         contact_types = contact.types.all()
         if get_cba_type() in contact_types:
             msg = CBA_VERICATION_MSG % (contact.name, contact.location.parent.name)

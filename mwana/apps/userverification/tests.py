@@ -95,10 +95,10 @@ class TestUserVerications(UserVerificationSetUp):
                                 'kashitu_cba', 'central_cba1', 'central_cba2',
                                 'luapula_pho', 'mansa_dho', 'samfya_dho',
                                 'kawambwa_dho', 'peter_hubs']
-        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
-Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
-Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No
+        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 401012
+Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403029
+Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 402026
+Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403012
 Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic? Please respond with YES or No
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
@@ -142,9 +142,9 @@ Hello Peter Hubs. Are you still working at Salanga Clinic and still using Result
         expected_recipients = ["salanga_worker", "mibenge_worker",
                                 "kashitu_worker", "central_worker",'mibenge_cba',
                                 'kashitu_cba', 'central_cba1', 'central_cba2']
-        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
-Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
+        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 401012
+Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403029
+Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 402026
 Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
 Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
@@ -175,7 +175,7 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
         self.assertEqual(len(msgs), 1)
 
         self.assertEqual(msgs[0].connection.identity, "central_worker", "Message was sent to wrong recipient")
-        self.assertEqual(msgs[0].text, "Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No", "Message not as expected")
+        self.assertEqual(msgs[0].text, "Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403012", "Message not as expected")
 
         self.assertEqual(UserVerification.objects.count(), 7, "Number of User verications not equal")
 
@@ -194,10 +194,10 @@ Hello Central Cba2. Are you still working as a RemindMi Agent for Central Clinic
                                 'kashitu_cba', 'central_cba1', 'central_cba2',
                                 'luapula_pho', 'mansa_dho', 'samfya_dho',
                                 'kawambwa_dho', 'peter_hubs']
-        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
-Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
-Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No
+        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 401012
+Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403029
+Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 402026
+Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403012
 Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic? Please respond with YES or No
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
@@ -255,10 +255,10 @@ Hello Peter Hubs. Are you still working at Salanga Clinic and still using Result
                                 'kashitu_cba', 'central_cba1', 'central_cba2',
                                 'luapula_pho', 'mansa_dho', 'samfya_dho',
                                 'kawambwa_dho', 'peter_hubs']
-        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No
-Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No
-Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No
-Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No
+        expected_msgs = """Hello Salanga Man. Are you still working at Salanga Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 401012
+Hello Mibenge Man. Are you still working at Mibenge Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403029
+Hello Kashitu Man. Are you still working at Kashitu Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 402026
+Hello Central Man. Are you still working at Central Clinic and still using Results160? Please respond with YES or No, or to change your clinic send CHANGE CLINIC <YOUR_CLINIC_CODE>, e.g CHANGE CLINIC 403012
 Hello Mibenge Cba. Are you still working as a RemindMi Agent for Mibenge Clinic? Please respond with YES or No
 Hello Kashitu Cba. Are you still working as a RemindMi Agent for Kashitu Clinic? Please respond with YES or No
 Hello Central Cba1. Are you still working as a RemindMi Agent for Central Clinic? Please respond with YES or No
