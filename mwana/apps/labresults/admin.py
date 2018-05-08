@@ -19,8 +19,8 @@ class ResultAdmin(admin.ModelAdmin):
                     'arrival_date', 'result_sent_date', 'notification_status',
                     'old_value', 'verified',)
     list_filter = ('result', 'notification_status', 'verified', 'record_change',
-                   'result_sent_date', 'collected_on',  'entered_on',
-                   'processed_on', 'clinic',)
+                    'collected_on',  'entered_on',
+                   'processed_on', 'arrival_date', 'result_sent_date', 'clinic',)
     search_fields = ('sample_id','requisition_id', 'payload__source',
                      'clinic_code_unrec', 'clinic__slug', 'clinic__name')
     date_hierarchy = 'result_sent_date'
