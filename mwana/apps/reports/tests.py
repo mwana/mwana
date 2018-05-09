@@ -17,6 +17,7 @@ from mwana.apps.reminders.models import Event
 from mwana.apps.reports import tasks
 from mwana.apps.reports.models import DhoReportNotification, CbaThanksNotification
 from rapidsms.tests.scripted import TestScript
+from django.conf import settings
 
 
 class SmsReportsSetUp(TestScript):
@@ -28,6 +29,7 @@ class SmsReportsSetUp(TestScript):
         self.type1 = LocationType.objects.get_or_create(singular="district", plural="districts", slug="districts")[0]
         self.type2 = LocationType.objects.get_or_create(singular="province", plural="provinces", slug="provinces")[0]
         self.luapula = Location.objects.create(type=self.type2, name="Luapula Province", slug="400000")
+        self.lusaka = Location.objects.create(type=self.type2, name="Lusaka Province", slug="500000")
         self.mansa = Location.objects.create(type=self.type1, name="Mansa District", slug="403000", parent=self.luapula)
         self.samfya = Location.objects.create(type=self.type1, name="Samfya District", slug="404000", parent=self.luapula)
         self.mibende = Location.objects.create(type=self.type, name="Mibenge Clinic", slug="403029", parent=self.samfya, send_live_results=True)
@@ -42,6 +44,7 @@ class SmsReportsSetUp(TestScript):
             district_worker > join dho 403000 dho m. banda 1111            
             district_worker2 > join dho 404000 dho m. kangwa 1111           
             province_worker > join pho 400000 pho mwale 1111
+            province_worker2 > join pho 500000 pho trump 1111
         """
         self.runScript(script)
 
@@ -93,13 +96,18 @@ class TestApp(SmsReportsSetUp):
 DBS received at lab: 3 *
 Tested: 3 *
 Results sent to facility: 3 *
-Births registered: 2""" % month_ago.strftime("%B"), """Dho M Kangwa, %s Samfya District EID & Birth Totals
+Births registered: 2""" % month_ago.strftime("%B"),
+
+"""Dho M Kangwa, %s Samfya District EID & Birth Totals
 DBS received at lab: 1 *
 Tested: 0 *
 Results sent to facility: 0 *
-Births registered: 0""" % month_ago.strftime("%B")]
+Births registered: 0""" % month_ago.strftime("%B"),
 
-        self.assertEqual(len(msgs), 2)
+"Dear Dho M Kangwa, please open the Alerts page on the Mwana website for issues that need your attention {address}/alerts".format(address=settings.SERVER_ADDRESS),
+]
+
+        self.assertEqual(len(msgs), 3)
         for msg in msgs:
             self.assertTrue(msg.text in expected_msgs,"%s not in %s"%(msg.text,"\n".join(msg for msg in expected_msgs)))
     def testCbaThanksReport(self):
@@ -215,14 +223,24 @@ Births registered: 0""" % month_ago.strftime("%B")]
         self.stopRouter()
         msgs = self.receiveAllMessages()
 
-        expected_msg ="""Pho Mwale, %s Luapula Province EID & Birth Totals
+        expected_msgs =["""Pho Mwale, %s Luapula Province EID & Birth Totals
 DBS received at lab: 4 *
 Tested: 3 *
 Results sent to facility: 3 *
-Births registered: 2""" % month_ago.strftime("%B")
+Births registered: 2""" % month_ago.strftime("%B"),
 
-        self.assertEqual(len(msgs), 1)
-        self.assertEqual(msgs[0].text, expected_msg)
+"""Pho Trump, %s Lusaka Province EID & Birth Totals
+DBS received at lab: 0 *
+Tested: 0 *
+Results sent to facility: 0 *
+Births registered: 0""" % month_ago.strftime("%B"),
+
+
+"Dear Pho Trump, please open the Alerts page on the Mwana website for issues that need your attention {address}/alerts".format(address=settings.SERVER_ADDRESS),]
+
+        self.assertEqual(len(msgs), 3)
+        for msg in msgs:
+            self.assertTrue(msg.text in expected_msgs, "%s not in %s" % (msg.text,"\n".join(msg for msg in expected_msgs)))
 
 
     def send_results(self):

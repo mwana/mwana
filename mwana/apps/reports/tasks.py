@@ -83,6 +83,8 @@ def send_dho_eid_and_birth_report(router):
                                              date=month_ago)
 
         OutgoingMessage(worker.default_connection, msg).send()
+        if not results:
+            OutgoingMessage(worker.default_connection, "Dear %(name)s, please open the Alerts page on the Mwana website for issues that need your attention %(address)s/alerts", name=name, address=settings.SERVER_ADDRESS).send()
 
 def send_pho_eid_and_birth_report(router):
     logger.info('notifying province workers of monthly EID and Births summary')
@@ -134,6 +136,8 @@ def send_pho_eid_and_birth_report(router):
                                              date=month_ago)
 
         OutgoingMessage(worker.default_connection, msg).send()
+        if not results:
+            OutgoingMessage(worker.default_connection, "Dear %(name)s, please open the Alerts page on the Mwana website for issues that need your attention %(address)s/alerts", name=name, address=settings.SERVER_ADDRESS).send()
 
 
 def send_cba_birth_report(router):
