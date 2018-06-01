@@ -162,6 +162,13 @@ class App(rapidsms.apps.base.AppBase):
                         "A client, %(client)s, with ID %(id)s already exists. Reply with correct ID or send HELP CLIENT if you need to be assisted",
                         client=settings.GET_ORIGINAL_TEXT(client.name), id=cleaned_text)
                     return True
+                elif FlowClientRegistration.objects.filter(national_id=cleaned_text):
+                    other_chw = FlowClientRegistration.objects.filter(national_id=cleaned_text)[0].community_worker
+                    msg.respond(
+                        "%s is already registering a client with ID %s. "
+                        "Reply with correct ID or send HELP CLIENT if you "
+                        "need to be assisted" % (other_chw.name, cleaned_text))
+                    return True
                 flow.national_id = cleaned_text
                 flow.save()
                 msg.respond(
