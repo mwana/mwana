@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.act.models import FlowAppointment, FlowClientRegistration, FlowCHWRegistration
 
 from mwana.apps.act.models import Visit
 from mwana.apps.act.models import HistoricalEvent
@@ -124,3 +125,29 @@ class VisitAdmin(admin.ModelAdmin):
     def chw(self, obj):
         return obj.appointment.cha_responsible.name
 admin.site.register(Visit, VisitAdmin)
+
+
+class FlowAppointmentAdmin(admin.ModelAdmin):
+    list_display = ('open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker')
+    #list_filter = ['open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker']
+    #search_fields = ('open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker')
+    date_hierarchy = 'date'
+    #list_editable = ['open']
+admin.site.register(FlowAppointment, FlowAppointmentAdmin)
+
+
+class FlowClientRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker')
+    #list_filter = ['national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker']
+    #search_fields = ('national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker')
+    #list_editable = ['can_receive_messages', 'open']
+admin.site.register(FlowClientRegistration, FlowClientRegistrationAdmin)
+
+
+class FlowCHWRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'national_id', 'address', 'location', 'open', 'start_time', 'valid_until', 'connection')
+    list_filter = ['open', 'start_time', 'valid_until', 'location',]
+    search_fields = ('name', 'national_id', 'address', 'location__name', 'open', 'start_time', 'valid_until', 'connection__identity')
+    #list_editable = ['open']
+admin.site.register(FlowCHWRegistration, FlowCHWRegistrationAdmin)
+

@@ -115,11 +115,11 @@ class Client(models.Model):
 
 
 class FlowCHWRegistration(models.Model):
-    name = models.CharField(max_length=255)
-    national_id = models.CharField(max_length=255)
-    address = models.TextField(null=True, blank=True)
-    location = models.ForeignKey(Location, null=True, blank=True)
-    open = models.BooleanField(default=True)
+    name = models.CharField(max_length=255, editable=False)
+    national_id = models.CharField(max_length=255, editable=False)
+    address = models.TextField(null=True, blank=True, editable=False)
+    location = models.ForeignKey(Location, null=True, blank=True, editable=False)
+    open = models.BooleanField(default=True, editable=False)
     start_time = models.DateTimeField(editable=False)
     valid_until = models.DateTimeField(editable=False)
     connection = models.ForeignKey(Connection, editable=False)
@@ -129,16 +129,19 @@ class FlowCHWRegistration(models.Model):
 
 
 class FlowClientRegistration(models.Model):
-    national_id = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255, null=True, blank=True)
-    dob = models.DateField(null=True, blank=True)
-    sex = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    can_receive_messages = models.NullBooleanField()  # Client consented to receiving SMS messages
-    phone = models.CharField(max_length=13, null=True, blank=True)
-    open = models.BooleanField(default=True)
+    national_id = models.CharField(max_length=255, unique=True, editable=False, blank=True, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True, editable=False)
+    dob = models.DateField(null=True, blank=True, editable=False)
+    sex = models.CharField(max_length=1, choices=GENDER_CHOICES, editable=False)
+    can_receive_messages = models.NullBooleanField(editable=False)  # Client consented to receiving SMS messages
+    phone = models.CharField(max_length=13, null=True, blank=True, editable=False)
+    open = models.BooleanField(default=True, editable=False)
     start_time = models.DateTimeField(editable=False)
     valid_until = models.DateTimeField(editable=False)
-    community_worker = models.ForeignKey(CHW, blank=True, null=True)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True, editable=False)
+
+    def __unicode__(self):
+        "; ".join(str(i) for i in [self.community_worker, self.national_id, self.name] if i)
 
 
 LAB_TYPE = 'lab'
@@ -150,14 +153,14 @@ APPOINTMENT_TYPES = (
 
 
 class FlowAppointment(models.Model):
-    open = models.BooleanField(default=True)
+    open = models.BooleanField(default=True, editable=False)
     start_time = models.DateTimeField(editable=False)
     valid_until = models.DateTimeField(editable=False)
-    date = models.DateField(null=True, blank=True)
-    type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10, null=True, blank=True)
-    message_id = models.CharField(max_length=2, null=True, blank=True)
-    client = models.ForeignKey(Client, null=True, blank=True)
-    community_worker = models.ForeignKey(CHW, blank=True, null=True)
+    date = models.DateField(null=True, blank=True, editable=False)
+    type = models.CharField(choices=APPOINTMENT_TYPES, max_length=10, null=True, blank=True, editable=False)
+    message_id = models.CharField(max_length=2, null=True, blank=True, editable=False)
+    client = models.ForeignKey(Client, null=True, blank=True, editable=False)
+    community_worker = models.ForeignKey(CHW, blank=True, null=True, editable=False)
 
 
 class Appointment(models.Model):
