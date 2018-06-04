@@ -292,10 +292,14 @@ class App(rapidsms.apps.base.AppBase):
                                                phone=flow.phone if flow.phone != 'None' else None,
                                                sex=flow.sex,
                                                can_receive_messages=flow.can_receive_messages
-                )
+                                            )
+                if flow.phone and flow.phone != 'None':
+                    msg.respond("Thank you %(chw)s. You have successfully registered the client %(client)s. Ask the Client to send ACT YES to Mwana to confirm their number"
+                                , chw=flow.community_worker.name, client=flow.name)
 
-                msg.respond("Thank you %(chw)s. You have successfully registered the client %(client)s"
-                    , chw=flow.community_worker.name, client=flow.name)
+                else:
+                    msg.respond("Thank you %(chw)s. You have successfully registered the client %(client)s"
+                                , chw=flow.community_worker.name, client=flow.name)
 
                 if flow.phone:
                     # TODO: Test this
