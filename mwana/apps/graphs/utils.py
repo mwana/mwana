@@ -552,7 +552,7 @@ class GraphService:
 
         return month_ranges, data
 
-    def get_monthly_results_retrival_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
+    def get_monthly_results_retrieval_trends(self, start_date, end_date, province_slug, district_slug, facility_slug):
         facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
         start, end = get_datetime_bounds(start_date, end_date)
 
@@ -591,6 +591,29 @@ class GraphService:
             tt_clinics = len(set([res.clinic for res in tt_res]))
 
             data['Facilities'].append(tt_clinics)
+
+            month_ranges.append(my_date.strftime('%b %Y'))
+            my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)
+
+        return month_ranges, data
+
+    def get_monthly_results_retrieval_trends_by_province(self, start_date, end_date, province_slug, district_slug, facility_slug):
+        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
+        start, end = get_datetime_bounds(start_date, end_date)
+
+        my_date = date(start_date.year, start_date.month, start_date.day)
+        data = {}
+        trend_items = [l.name for l in Location.objects.filter(slug__endswith='00000')]
+        for item in sorted(trend_items):
+            data[item] = []
+
+        # TODO: use implementation that queries the database only once
+        month_ranges = []
+        while my_date <= end_date:
+            for item in trend_items:
+                data[item].append(Result.objects.filter(result_sent_date__year=my_date.year,
+                                    result_sent_date__month=my_date.month,
+                                    clinic__parent__parent__name=item).count())
 
             month_ranges.append(my_date.strftime('%b %Y'))
             my_date = date(my_date.year, my_date.month, 28) + timedelta(days=6)

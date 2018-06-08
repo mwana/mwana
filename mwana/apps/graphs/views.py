@@ -320,14 +320,15 @@ def dbs_testing_trends(request):
                               }, context_instance=RequestContext(request)
                               )
 
-def monthly_results_retrival_trends(request):
+
+def monthly_results_retrieval_trends(request):
     enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
     end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
 
     service = GraphService()
     report_data = []
 
-    time_ranges, data = service.get_monthly_results_retrival_trends(start_date, end_date,
+    time_ranges, data = service.get_monthly_results_retrieval_trends(start_date, end_date,
                                                                     rpt_provinces
                                                                     , rpt_districts,
                                                                     rpt_facilities)
@@ -343,6 +344,35 @@ def monthly_results_retrival_trends(request):
                               "x_axis": time_ranges,
                               "title": "'Monthly Results Retrieval Trends'",
                               "sub_title": "'Facilities retrieving results in Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
+                              "label_y_axis": "'Count'",
+                              "report_data": report_data,
+                              }, context_instance=RequestContext(request)
+                              )
+
+
+def monthly_results_retrieval_trends_by_province(request):
+    enddate1, rpt_districts, rpt_facilities, rpt_provinces, startdate1, monthrange = get_report_parameters(request)
+    end_date, start_date = get_month_range_bounds(enddate1, monthrange, startdate1)
+
+    service = GraphService()
+    report_data = []
+
+    time_ranges, data = service.get_monthly_results_retrieval_trends_by_province(start_date, end_date,
+                                                                    rpt_provinces
+                                                                    , rpt_districts,
+                                                                    rpt_facilities)
+
+    for k, v in sorted(data.items()):
+        rpt_object = Expando()
+        rpt_object.key = k.title()
+        rpt_object.value = v
+        report_data.append(rpt_object)
+
+    return render_to_response('graphs/lab_submissions.html',
+                              {
+                              "x_axis": time_ranges,
+                              "title": "'Monthly Results Retrieval Trends'",
+                              "sub_title": "'Provinces retrieving results in Period: %s  to %s'" % (start_date.strftime("%d %b %Y"), end_date.strftime("%d %b %Y")),
                               "label_y_axis": "'Count'",
                               "report_data": report_data,
                               }, context_instance=RequestContext(request)
