@@ -824,7 +824,7 @@ class GraphService:
     def get_messages_by_location(self, start_date, end_date, province_slug, district_slug, facility_slug):
 
         start, end = get_datetime_bounds(start_date, end_date)
-        messages = MessageByLocationByUserType.objects.filter(min_date__gte=start).filter(max_date__lte=end)
+        messages = MessageByLocationByUserType.objects.filter(month_year=end_date.strftime('%b %Y'))
         report_level = 'province'
 
         if district_slug:

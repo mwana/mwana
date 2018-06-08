@@ -514,7 +514,7 @@ def messages_by_location(request):
     return render_to_response('graphs/facility_vs_community.html',
                               {
                               "x_axis":[(end_date - timedelta(days=i)).strftime('%d %b') for i in range(30, 0, -1)],
-                              "title": "'Messages by Loaction'",
+                              "title": "'Messages by Location'",
                               "sub_title": "'Period: %s  to %s'" % (start_date.strftime("%b %Y"), end_date.strftime("%b %Y")),                              
                               "report_data": report_data,
                               "series_name": 'Messages',
