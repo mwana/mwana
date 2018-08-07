@@ -11,7 +11,8 @@ from django.contrib.auth.models import User
 from mwana.apps.websmssender.models import StagedMessage
 from django.core.management.base import CommandError
 from django.core.management.base import LabelCommand
-from mwana.const import get_clinic_worker_type
+from mwana.const import get_clinic_worker_type, get_hub_worker_type, get_cba_type, get_district_worker_type,\
+    get_lab_worker_type, get_province_worker_type
 from rapidsms.models import Backend, Contact, Connection
 import logging
 
@@ -60,12 +61,13 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
 
     target_backend = backends[0]
     choice = raw_input("Are you sure you want to create contacts on %s backend based on %s backend? Y/N  " % (
-        source_backend, target_backend))
+        target_backend, source_backend ))
     if choice.lower() != 'y':
         print "Process termination here."
         return
 
-    for contact in Contact.active.filter(types=get_clinic_worker_type(), connection__backend=source_backend):
+    for contact in Contact.active.filter(types__in=[get_clinic_worker_type(),  get_hub_worker_type(),  get_cba_type(),  get_district_worker_type(),
+                                                    get_lab_worker_type(),  get_province_worker_type()], connection__backend=source_backend):
         identity = contact.default_connection.identity
         conn, created = Connection.objects.get_or_create(backend=target_backend, identity=identity)
         if not created:
@@ -90,7 +92,7 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
         
         EmergencyContact.objects.get_or_create(usual_contact=contact1, emergency_contact=contact2)
 
-        text = "We are very sorry %s. %s is still down. For now use this number. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name, usual_number)
+        text = "We are very sorry %s. %s is still down. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name, usual_number)
         user = None
         user = User.objects.get(username="you can't see me here")
 
