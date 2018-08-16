@@ -34,6 +34,14 @@ def mwana_alerts (request):
             is_report_admin = True
     except:
         pass
+    is_support_admin = False
+    try:
+        user_group_name = request.user.groupusermapping_set.all()[0].group.name
+        if request.user.groupusermapping_set.all()[0].group.id in (1,2)\
+        and ("support" in user_group_name.lower()):
+            is_support_admin = True
+    except:
+        pass
 
     rpt_group = read_request(request, "rpt_group")
     rpt_provinces = read_request(request, "rpt_provinces")
@@ -85,6 +93,7 @@ def mwana_alerts (request):
 
                               'days':range(1, 60),
                               'is_report_admin': is_report_admin,
+                              'is_support_admin': is_support_admin,
                               'region_selectable': True,
                               'rpt_group': get_groups_dropdown_html('rpt_group',rpt_group),
                               'rpt_provinces': get_facilities_dropdown_html("rpt_provinces", get_rpt_provinces(request.user), rpt_provinces) ,
