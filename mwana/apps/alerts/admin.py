@@ -6,8 +6,15 @@ from mwana.apps.alerts.models import Lab
 from mwana.apps.alerts.models import SMSAlertLocation
 
 admin.site.register(Hub)
-admin.site.register(Lab)
+
+class LabAdmin(admin.ModelAdmin):
+    list_display = ('source_key', 'name', 'lab_code', 'phone')
+    #list_filter = ['source_key', 'name', 'lab_code', 'phone']
+    #search_fields = ('source_key', 'name', 'lab_code', 'phone')
+admin.site.register(Lab, LabAdmin)
+
 admin.site.register(SMSAlertLocation)
+
 
 class DhoSMSAlertNotificationAdmin(admin.ModelAdmin):
     list_display = ('contact', 'district', 'report_type', 'alert_type', 'date_sent')

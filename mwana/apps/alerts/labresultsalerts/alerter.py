@@ -393,6 +393,23 @@ class Alerter:
             source = row[0]
             if source in sources:
                 self.last_processed_dbs[source] = row[1]
+
+        sql2 = '''
+        SELECT source_key, max(processed_on)  FROM labresults_result
+        join alerts_lab on substring(sample_id, 1, 3) = lab_code
+        WHERE processed_on IS NOT null
+        GROUP BY source_key;
+        '''
+        cursor = connection.cursor()
+        cursor.execute(sql2)
+        rows = cursor.fetchall()
+        for row in rows:
+            source = row[0]
+            if source in sources:
+                if self.last_processed_dbs[source] < row[1]:
+                    self.last_processed_dbs[source] = row[1]
+                elif not self.last_processed_dbs[source]:
+                    self.last_processed_dbs[source] = row[1]
       
     def set_lab_last_sent_payload(self):
         self.last_sent_payloads = dict(Payload.objects.all().values_list("source").annotate(Max('incoming_date')))

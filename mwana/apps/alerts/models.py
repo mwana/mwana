@@ -31,6 +31,7 @@ class Hub(models.Model):
 class Lab(models.Model):
     source_key = models.CharField(max_length=50)
     name = models.CharField(max_length=50, null=True, blank=True)
+    lab_code = models.CharField(max_length=50)
     phone = models.CharField(max_length=15, null=True, blank=True)
 
     def __str__(self):
