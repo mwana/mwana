@@ -26,7 +26,7 @@ class Command(LabelCommand):
 
 def load_locations(file_path):
     # give django some time to bootstrap itself
-    from rapidsms.contrib.locations.models import LocationType, Location, Point
+    from mwana.apps.locations.models import LocationType, Location, Point
     if not os.path.exists(file_path):
         raise CommandError("Invalid file path: %s." % file_path)
 
@@ -101,7 +101,7 @@ def load_locations(file_path):
 
 
 def _new_facility_name():
-    from rapidsms.contrib.locations.models import Location
+    from mwana.apps.locations.models import Location
     name = "%s %s" % (random.choice(PLACES_IN_ZAMBIA),
                       random.choice(HEALTH_CENTER_TYPES))
     try:
