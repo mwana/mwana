@@ -414,6 +414,24 @@ class Alerter:
     def set_lab_last_sent_payload(self):
         self.last_sent_payloads = dict(Payload.objects.all().values_list("source").annotate(Max('incoming_date')))
 
+        sql = '''
+        SELECT source_key, max(processed_on)  FROM labresults_result
+        join alerts_lab on substring(sample_id, 1, 3) = lab_code
+        WHERE processed_on IS NOT null
+        GROUP BY source_key;
+        '''
+        cursor = connection.cursor()
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        for row in rows:
+            source = row[0]
+            if source in self.last_sent_payloads:
+                d = datetime.combine(row[1], datetime.min.time())
+                if self.last_sent_payloads[source] < d:
+                    self.last_sent_payloads[source] = d
+                elif not self.last_sent_payloads[source]:
+                    self.last_sent_payloads[source] = d
+
     def set_not_sending_dbs_alerts(self):
         self.set_district_last_received_dbs()
         
