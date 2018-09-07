@@ -403,6 +403,79 @@ def zambia_reports(request):
 
 
 @require_GET
+def vl_reports(request):
+    if request.user and "dont_check_first_login" \
+        not in request.session:
+        request.session["dont_check_first_login"] = True
+
+        login = Login.objects.get_or_create(user=request.user)[0]
+        if not login.ever_logged_in:
+            login.ever_logged_in = True
+            login.save()
+            return redirect('/admin/password_change')
+
+    from webreports.reportcreator import Results160Reports
+
+    today = datetime.today().date()
+    try:
+        startdate1 = text_date(request.REQUEST['startdate'])
+    except (KeyError, ValueError, IndexError):
+        startdate1 = today - timedelta(days=30)
+
+    try:
+        enddate1 = text_date(request.REQUEST['enddate'])
+    except (KeyError, ValueError, IndexError):
+        enddate1 = datetime.today().date()
+    startdate = min(startdate1, enddate1, datetime.today().date())
+    enddate = min(max(enddate1, startdate1), datetime.today().date())
+
+    is_report_admin = False
+    if request.user:
+        is_report_admin = request.user.groupusermapping_set.filter(group__name__iexact='support').exists() or request.user.groupusermapping_set.filter(group__name__iexact='moh').exists()
+
+    rpt_group = read_request(request, "rpt_group")
+    rpt_provinces = read_request(request, "rpt_provinces")
+    rpt_districts = read_request(request, "rpt_districts")
+    rpt_facilities = read_request(request, "rpt_facilities")
+
+    r = Results160Reports(request.user, rpt_group, rpt_provinces, rpt_districts, rpt_facilities)
+
+    report = r.vl_tested_and_sent_report(startdate, enddate)
+
+    return render_to_response('reports/vl.html',
+                              {'startdate': startdate,
+                               'enddate': enddate,
+                               'fstartdate': try_format(startdate),
+                               'fenddate': try_format(enddate),
+                               'today': today,
+                               'adminEmail': get_admin_email_address(),
+                               'userHasNoAssingedFacilities': False if r.get_rpt_provinces(request.user) else True,
+
+                               'processed_vs_tested_rpt': report,
+
+                               'formattedtoday': today.strftime("%d %b %Y"),
+                               'formattedtime': datetime.today().strftime("%I:%M %p"),
+
+                               'is_report_admin': is_report_admin,
+                               'region_selectable': True,
+                               'user_name': request.user.get_full_name(),
+                               'show_export_msg': 'false' if preference_exists(request.user, NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO, VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES) else 'true',
+                               'pref_id': NAME_REPORTS_SHOW_EXPORT_TO_CSV_INTRO,
+                               'val': VALUE_REPORTS_SHOW_EXPORT_TO_CSV_INTRO_YES,
+                               'rpt_group': get_groups_dropdown_html('rpt_group', rpt_group),
+                               'rpt_provinces': get_facilities_dropdown_html("rpt_provinces",
+                                                                             get_rpt_provinces(request.user),
+                                                                             rpt_provinces),
+                               'rpt_districts': get_facilities_dropdown_html("rpt_districts",
+                                                                             get_rpt_districts(request.user),
+                                                                             rpt_districts),
+                               'rpt_facilities': get_facilities_dropdown_html("rpt_facilities",
+                                                                              get_rpt_facilities(request.user),
+                                                                              rpt_facilities),
+                              }, context_instance=RequestContext(request))
+
+
+@require_GET
 def contacts_report(request):
     from webreports.reportcreator import Results160Reports
 
