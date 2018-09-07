@@ -98,12 +98,12 @@ You currently don't belong to any group for viewing reports. Contact the system 
             Generated on <b>{{formattedtoday}}</b> at <b>{{formattedtime}}</b> by <b>{{ user.username|title }}</b>
             <p>
 
-            <h3 id="tested_and_sent">Processed vs Sent Samples&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <h3 id="tested_and_sent">Processed and Sent Samples&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 StartDate: {{startdate}} Enddate: {{enddate}}</h3>
             <p>
-                Showing number of VL samples processed in reporting period and also showing number of samples retrieved
-                by facilities within the same reporting period
+                Showing number of VL samples processed in reporting period and also how many of these
+                were retrieved by facilities within the same reporting period
             <p>
             <table width="100%">
                 {% for record in processed_vs_tested_rpt %}
