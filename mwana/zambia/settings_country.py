@@ -99,8 +99,8 @@ RAPIDSMS_TABS = [
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
     ('mwana.apps.training.views.trained', 'Trained'),
     ('mwana.apps.graphs.views.graphs', 'Charts'),
-    ('mwana.apps.surveillance.views.surveillance', 'Survey'),
-#    ('mwana.apps.reports.views.vl_reports', 'VL Reports'),
+#    ('mwana.apps.surveillance.views.surveillance', 'Survey'),
+    ('mwana.apps.reports.views.vl_reports', 'VL Reports'),
 #    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 

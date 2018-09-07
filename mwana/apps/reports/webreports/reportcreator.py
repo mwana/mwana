@@ -905,7 +905,7 @@ class Results160Reports:
 
         query = '''
         SELECT pro.name as province, dis.name as district, loc.name as facility, count(sample_id) as tested,
-        count(result_sent_date) delivered
+        count(CASE WHEN result_sent_date between %s AND %s then 1 else null end ) delivered
 	FROM public.labtests_result
         JOIN locations_location loc on loc.id = clinic_id
         LEFT JOIN locations_location dis on dis.id = loc.parent_id
@@ -917,7 +917,7 @@ class Results160Reports:
         '''
 
         cursor = connection.cursor()
-        cursor.execute(query, [self.dbsr_startdate, self.dbsr_enddate])
+        cursor.execute(query, [self.dbsr_startdate, self.dbsr_enddate, self.dbsr_startdate, self.dbsr_enddate])
         rows = cursor.fetchall()
 
         table = []
