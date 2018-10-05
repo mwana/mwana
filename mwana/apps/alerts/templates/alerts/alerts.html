@@ -131,6 +131,7 @@
                 <p><p>
                 <hr>
                 <!--Resport3-->
+                {% if not_sending_dbs_alerts%}
                 <h1 id="HubIssues">Hub Issues:</h1>
                 <p align="center">
                 <h3 id="HubsNotSendingSamples">Alerts for Clinic Hubs Not Sending Samples to Labs in the last {{ transport_time }} days</h3>
@@ -177,6 +178,7 @@
 
                 <p><p>
                 <hr>
+                {% endif %}
                 <h1 id="ClinicIssues">Clinic Issues:</h1>
                 <div>
                     <!-- Report 1-->

@@ -52,8 +52,8 @@ def mwana_alerts (request):
     alerter = Alerter(request.user, rpt_group, rpt_provinces,rpt_districts,
                         rpt_facilities)
 
-    transport_time, not_sending_dbs_alerts = \
-        alerter.get_districts_not_sending_dbs_alerts(transport_time)
+#    transport_time, not_sending_dbs_alerts = \
+#        alerter.get_districts_not_sending_dbs_alerts(transport_time)
     retrieving_time, not_retrieving_results = \
         alerter.get_clinics_not_retriving_results_alerts(retrieving_time)
     notifying_time, not_notifying_or_using_results = \
@@ -71,8 +71,8 @@ def mwana_alerts (request):
     
     return render_to_response('alerts/alerts.html',
                               {
-                              'not_sending_dbs_alerts':not_sending_dbs_alerts,
-                              'transport_time':transport_time,
+#                              'not_sending_dbs_alerts':not_sending_dbs_alerts,
+#                              'transport_time':transport_time,
 
                               'not_retrieving_results':not_retrieving_results,
                               'retrieving_time':retrieving_time,
