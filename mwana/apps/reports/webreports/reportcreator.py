@@ -851,8 +851,9 @@ class Results160Reports:
 
         if not year:
             year = date.today().year
+        start_date = datetime.today() - timedelta(days=366)
         results = Result.objects.exclude(result=None).exclude(result='').\
-                                        filter(clinic__in=self.user_facilities())
+                                        filter(arrival_date__gte=start_date, clinic__in=self.user_facilities())
         total_dbs = results.count()
 
         percent_positive_country = percent(results.filter(result__iexact='P',clinic__in=self.user_facilities()).count(), total_dbs)
@@ -863,14 +864,12 @@ class Results160Reports:
         percent_negative_provinces = []
         percent_rejected_provinces = []
         stacked = []
-        facilities = self.get_active_facilities()
-        districts = self.get_distinct_parents(facilities, type_slugs=const.DISTRICT_SLUGS)
-        provinces = self.get_distinct_parents(districts, type_slugs=const.PROVINCE_SLUGS)
+        provinces = Location.objects.filter(pk__in=results.order_by().values_list('clinic__parent__parent', flat=True).distinct())
         if provinces:
             for province in provinces:
-                p_percent = percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
-                n_percent = percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
-                r_percent = percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(),self.get_total_results_in_province(province))
+                p_percent = percent(results.filter(result__iexact='P', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), results.filter(clinic__parent__parent=province).count())
+                n_percent = percent(results.filter(result__iexact='N', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), results.filter(clinic__parent__parent=province).count())
+                r_percent = percent(results.filter(result__in='XIR', clinic__parent__parent=province,clinic__in=self.user_facilities()).count(), results.filter(clinic__parent__parent=province).count())
                 percent_positive_provinces.append((p_percent,  province.name))
                 percent_negative_provinces.append((n_percent,  province.name))
                 percent_rejected_provinces.append((r_percent,  province.name))
@@ -886,8 +885,8 @@ class Results160Reports:
         months_reporting = 0
         days_reporting = 0
         if results:
-            start_date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
-            days_reporting = (date.today()-start_date).days
+            _date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
+            days_reporting = (date.today() - _date).days
         
         year_reporting = year
 
