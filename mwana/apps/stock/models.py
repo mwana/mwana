@@ -38,7 +38,7 @@ class Stock(models.Model):
     """
     type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False,)
     abbr = models.CharField(max_length=10, null=True, blank=True)
-    code = models.CharField(max_length=10, null=False, blank=False, unique=True)
+    code = models.CharField(max_length=20, null=False, blank=False, unique=True)
     short_code = models.CharField(max_length=10, null=False, blank=True, unique=True)
     name = models.CharField(max_length=80, null=False, blank=False)
     units = models.ForeignKey(StockUnit, null=True, blank=True)
@@ -63,9 +63,12 @@ class StockAccount(models.Model):
     amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     pending_amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     last_updated = models.DateTimeField(default=datetime.now, editable=False)
+    stock_date = models.DateField(null=True, blank=True)
 
     def save(self, * args, ** kwargs):
         self.last_updated = datetime.now()
+        if self.pk and not self.stock_date:
+            self.stock_date = self.last_updated.date()
         super(StockAccount, self).save(*args, ** kwargs)
         Threshold.try_create_threshold(self)
 
@@ -290,3 +293,40 @@ class Supported(models.Model):
 
     class Meta:
         verbose_name_plural = "Supported"
+
+
+class WMS(models.Model):
+    stock = models.ForeignKey(Stock)
+    active = models.BooleanField(default=True)
+    ordering = models.SmallIntegerField(blank=True, null=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.stock.name, "Supported" if self.active else "Not Supported")
+
+
+class WeeklyStockMonitoringReport(models.Model):
+    """
+    This model is used for  submitting items for the Weekly Stock Monitoring
+    Tool. It does not take into account actual consumption at the facility but
+    just get submissions for weekly 'Stock on hand' and 'Average monthly consumption'
+    """
+    week_start = models.DateField()
+    week_end = models.DateField()
+    location = models.ForeignKey(Location)
+    wms_stock = models.ForeignKey(WMS)
+    soh = models.PositiveIntegerField(null=True, blank=True, verbose_name='Stock on hand')
+    amc = models.PositiveIntegerField(null=True, blank=True, verbose_name='Average monthly consumption')
+    mos = models.PositiveIntegerField(null=True, blank=True, verbose_name='Months of Supply', editable=False)
+    deprecated = models.BooleanField(default=False, editable=False)
+
+    def save(self, * args, ** kwargs):
+        if self.soh and self.amc:
+            self.mos = self.soh // self.amc
+
+        super(WeeklyStockMonitoringReport, self).save(*args, ** kwargs)
+
+    def __unicode__(self):
+        return "%s %s %s: %s" % (self.location, self.week_start, self.wms_stock.stock.name, self.soh)
+
+    class Meta:
+        unique_together = (('location', 'week_start', 'wms_stock',))

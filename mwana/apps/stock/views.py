@@ -1,4 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.stock.models import WMS
+from mwana.apps.stock.models import WeeklyStockMonitoringReport
+from mwana.apps.locations.models import Location
+from mwana.apps.reports.utils.htmlhelper import get_rpt_facilities
 from mwana.apps.stock.models import StockTransaction
 from mwana.apps.stock.models import Threshold
 from mwana.apps.stock.models import StockAccount
@@ -13,16 +17,33 @@ from mwana.apps.reports.utils.facilityfilter import user_facilities
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 from mwana.apps.reports.views import read_request
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.const import MWANA_ZAMBIA_START_DATE
 
 
 from mwana.apps.reports.utils.htmlhelper import read_request
-from datetime import date
+from datetime import date, timedelta, datetime
 
 class TransactedStock:
     pass
+
+
+def week_start():
+    to_return = date.today()
+    for i in range(6):
+        if to_return.weekday() == 6:
+            return to_return
+        to_return = to_return - timedelta(days=1)
+
+def week_end():
+    to_return = date.today()
+    for i in range(6):
+        if to_return.weekday() == 5:
+            return to_return
+        to_return = to_return + timedelta(days=1)
 
 def _year_ago(date_param):
     return date(date_param.year - 1, date_param.month, date_param.day)
@@ -112,5 +133,134 @@ def stock(request):
                               "dispensed_stock": dispensed_stock,
                               "can_set_threshold": ("%s" % can_set_threshold(request.user)).lower(),
                               "districts_with_data": ", ".join(list(set([sa.location.parent.name for sa in stockAccountsWithData]))),
+                              }, context_instance=RequestContext(request)
+                              )
+
+def wsm_select_location(request):
+    last_week_start = week_start() - timedelta(days=7)
+    last_week_end = week_end() - timedelta(days=7)
+    return render_to_response('stock/wsm_select_location.html',
+                                {
+                                'formatted_last_week_start': last_week_start.strftime('%d-%b-%y'),
+                                'formatted_last_week_end': last_week_end.strftime('%d-%b-%y'),
+                                'rpt_facilities': get_facilities_dropdown_html("rpt_facilities",
+                                                                              get_rpt_facilities(request.user),
+                                                                              None).replace("All", "------------"),
+
+                                }, context_instance=RequestContext(request))
+
+
+@require_POST
+def wsm_create(request):
+    rpt_facilities = request.REQUEST.get("rpt_facilities", None)
+    last_week_start = week_start() - timedelta(days=7)
+    last_week_end = week_end() - timedelta(days=7)
+    location_selected = True
+    if not rpt_facilities:
+        location_selected = False
+    location = None
+    locations = Location.objects.filter(slug=rpt_facilities.strip())
+    if locations and locations[0] in get_rpt_facilities(request.user):
+        location = locations[0]
+    else:
+        location_selected = False
+
+    if not location_selected:
+        return render_to_response('stock/wsm_select_location.html',
+                                {
+                                'message': "Please select your facility",
+                                'formatted_last_week_start': last_week_start.strftime('%d-%b-%y'),
+                                'formatted_last_week_end': last_week_end.strftime('%d-%b-%y'),
+                                'rpt_facilities': get_facilities_dropdown_html("rpt_facilities",
+                                                                              get_rpt_facilities(request.user),
+                                                                              rpt_facilities).replace("All", "------------"),
+
+                                }, context_instance=RequestContext(request))
+
+    wsmrs = WeeklyStockMonitoringReport.objects.filter(location=location, week_start=last_week_start, week_end=last_week_end)
+    if not wsmrs:
+        for item in WMS.objects.all():
+            WeeklyStockMonitoringReport.objects.create(location=location, week_start=last_week_start, week_end=last_week_end,
+            wms_stock=item)
+        wsmrs = WeeklyStockMonitoringReport.objects.filter(location=location, week_start=last_week_start, week_end=last_week_end)
+
+    return render_to_response('stock/wsm_create.html',
+                              {
+                              'formatted_last_week_start': last_week_start.strftime('%d-%b-%y'),
+                              'formatted_last_week_end': last_week_end.strftime('%d-%b-%y'),
+                              'location': location,
+                              'wsmrs': wsmrs,
+                              'wsmr': wsmrs[0].id if wsmrs else '-1',
+                              }, context_instance=RequestContext(request)
+                              )
+
+@require_POST
+def wsm_save(request):
+    rpt_facilities = request.REQUEST.get("rpt_facilities", None)
+    location_id = request.REQUEST.get("location_id", '-1')
+    wsmr_id =  request.REQUEST.get("wsmr", '-1')
+
+    location = None
+    locations = Location.objects.filter(id=location_id.strip())
+    if locations and locations[0] in get_rpt_facilities(request.user):
+        location = locations[0]
+    if not (location and wsmr_id.isdigit() and WeeklyStockMonitoringReport.objects.filter(location=location, pk=wsmr_id)):
+        last_week_start = week_start() - timedelta(days=7)
+        last_week_end = week_end() - timedelta(days=7)
+        return render_to_response('stock/wsm_select_location.html',
+                                {
+                                'message':'Something went wrong.',
+                                'formatted_last_week_start': last_week_start.strftime('%d-%b-%y'),
+                                'formatted_last_week_end': last_week_end.strftime('%d-%b-%y'),
+                                'rpt_facilities': get_facilities_dropdown_html("rpt_facilities",
+                                                                              get_rpt_facilities(request.user),
+                                                                              rpt_facilities).replace("All", "------------"),
+
+                                }, context_instance=RequestContext(request))
+
+
+    error_msgs = []
+    wsmr = WeeklyStockMonitoringReport.objects.get(location=location, pk=wsmr_id)
+    for item in WMS.objects.all():
+        report_item = WeeklyStockMonitoringReport.objects.get(deprecated=False, location=location, week_start=wsmr.week_start, week_end=wsmr.week_end,
+            wms_stock=item)
+        val = request.REQUEST.get("amc#%s" % item.stock.code, None)
+        if val and not val.isdigit():
+            error_msgs.append("Value %s for AMC %s is not correct" % (val, item.stock.name))
+        else:
+            # @type report_item WeeklyStockMonitoringReport
+            report_item.amc = int(val) if val else None
+        val = request.REQUEST.get("soh#%s" % item.stock.code, '')
+        if not val.isdigit():
+            error_msgs.append("Value %s for SOH %s is not correct" % (val, item.stock.name))
+        else:
+            report_item.soh = int(val)
+        report_item.save()
+        stock_account, created = StockAccount.objects.get_or_create(stock=item.stock, location=location)
+        # @type stock_account StockAccount
+        if created or stock_account.stock_date is None or stock_account.stock_date <= wsmr.week_end:
+            stock_account.amount = report_item.soh
+            stock_account.stock_date = wsmr.week_end
+            stock_account.save()
+    wsmrs = WeeklyStockMonitoringReport.objects.filter(location=location, week_start=wsmr.week_start, week_end=wsmr.week_end)
+    if error_msgs:
+        return render_to_response('stock/wsm_create.html',
+                              {
+                              'message': ', '.join(error_msgs),
+                              'formatted_last_week_start': wsmr.week_start.strftime('%d-%b-%y'),
+                              'formatted_last_week_end': wsmr.week_end.strftime('%d-%b-%y'),
+                              'location': location,
+                              'wsmrs': wsmrs,
+                              'wsmr': wsmrs[0].id if wsmrs else '-1',
+                              }, context_instance=RequestContext(request)
+                              )
+
+    return render_to_response('stock/wsm_saved.html',
+                              {
+                              'formatted_last_week_start': wsmr.week_start.strftime('%d-%b-%y'),
+                              'formatted_last_week_end': wsmr.week_end.strftime('%d-%b-%y'),
+                              'location': location,
+                              'wsmrs': wsmrs,
+
                               }, context_instance=RequestContext(request)
                               )

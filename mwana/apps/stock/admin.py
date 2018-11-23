@@ -1,4 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.reports.webreports.actions import export_as_csv_action
+from mwana.apps.stock.models import WeeklyStockMonitoringReport
+from mwana.apps.stock.models import WMS
 from mwana.const import DISTRICT_SLUGS
 from mwana.apps.stock.models import Supported
 from mwana.apps.stock.models import LowStockLevelNotification
@@ -46,10 +49,9 @@ class StockAccountAdminForm(forms.ModelForm):
         self.fields['location'].queryset = Location.objects.exclude(type__slug__in=['zone', 'district', 'province']).order_by('name')
 
 class StockAccountAdmin(admin.ModelAdmin):
-    list_display = ('stock', 'location', 'amount', 'last_updated')
-    list_filter = ('stock', 'location',  'last_updated')
-#    search_fields = ('stock', 'location', 'amount', 'last_updated')
-    date_hierarchy = 'last_updated'
+    list_display = ('stock', 'location', 'amount', 'stock_date', 'last_updated')
+    list_filter = ('stock', 'location', 'stock_date', 'last_updated')
+    date_hierarchy = 'stock_date'
     form = StockAccountAdminForm
 
 admin.site.register(StockAccount, StockAccountAdmin)
@@ -100,3 +102,19 @@ class SupportedAdmin(admin.ModelAdmin):
     form = SupportedAdminForm
 
 admin.site.register(Supported, SupportedAdmin)
+
+
+class WMSAdmin(admin.ModelAdmin):
+    list_display = ('stock', 'active', 'ordering')
+    list_filter = ['active',]
+    search_fields = ('stock__name',)
+    list_editable = ('active',)
+admin.site.register(WMS, WMSAdmin)
+
+
+class WeeklyStockMonitoringReportAdmin(admin.ModelAdmin):
+    list_display = ('week_start', 'week_end', 'location', 'wms_stock', 'soh', 'amc', 'mos', 'deprecated')
+    list_filter = ['week_start', 'week_end', 'wms_stock', 'mos', 'location', 'deprecated']
+    search_fields = ('wms_stock__name',)
+    actions = [export_as_csv_action(exclude=['id'])]
+admin.site.register(WeeklyStockMonitoringReport, WeeklyStockMonitoringReportAdmin)
