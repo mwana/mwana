@@ -238,7 +238,7 @@ def wsm_save(request):
         report_item.save()
         stock_account, created = StockAccount.objects.get_or_create(stock=item.stock, location=location)
         # @type stock_account StockAccount
-        if created or stock_account.stock_date is None or stock_account.stock_date <= wsmr.week_end:
+        if report_item.soh and (created or stock_account.stock_date is None or stock_account.stock_date <= wsmr.week_end):
             stock_account.amount = report_item.soh
             stock_account.stock_date = wsmr.week_end
             stock_account.save()
