@@ -23,7 +23,7 @@ admin.site.register(GroupUserMapping, GroupUserMappingAdmin)
 
 class ReportingGroupAdmin(admin.ModelAdmin):
     list_display = ('name')
-    search_fields = ('name')
+    search_fields = ('name',)
 admin.site.register(ReportingGroup, ReportingGroupAdmin)
 
 
