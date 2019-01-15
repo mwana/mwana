@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
 from mwana.const import DISTRICT_SLUGS
+from mwana.const import CLINIC_SLUGS
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -268,13 +269,13 @@ class LowStockLevelNotification(models.Model):
 
     def save(self, * args, ** kwargs):
         if not self.week_of_year and self.date_logged:
-            self.week_of_year = int(self.date_logged.strftime('%U'))
+            self.week_of_year = self.date_logged.isocalendar()[1]
 
         super(LowStockLevelNotification, self).save(*args, ** kwargs)
 
     @classmethod
     def week(cls, date_value):
-        return int(date_value.strftime('%U'))
+        return int(date_value.isocalendar()[1])
 
     def __unicode__(self):
         return "%s: %s - %s" % (self.week_of_year, self.stock_account, self.contact)
@@ -312,16 +313,18 @@ class WeeklyStockMonitoringReport(models.Model):
     """
     week_start = models.DateField()
     week_end = models.DateField()
-    location = models.ForeignKey(Location)
+    location = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)})
     wms_stock = models.ForeignKey(WMS)
     soh = models.PositiveIntegerField(null=True, blank=True, verbose_name='Stock on hand')
     amc = models.PositiveIntegerField(null=True, blank=True, verbose_name='Average monthly consumption')
     mos = models.PositiveIntegerField(null=True, blank=True, verbose_name='Months of Supply', editable=False)
+    expected_stockout_date = models.DateField(null=True, blank=True, editable=False)
     deprecated = models.BooleanField(default=False, editable=False)
 
     def save(self, * args, ** kwargs):
         if self.soh and self.amc:
             self.mos = self.soh // self.amc
+            self.expected_stockout_date = self.week_end + timedelta(days = (30.4375 * self.soh) / self.amc)
 
         super(WeeklyStockMonitoringReport, self).save(*args, ** kwargs)
 

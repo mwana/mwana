@@ -113,8 +113,12 @@ admin.site.register(WMS, WMSAdmin)
 
 
 class WeeklyStockMonitoringReportAdmin(admin.ModelAdmin):
-    list_display = ('week_start', 'week_end', 'location', 'wms_stock', 'soh', 'amc', 'mos', 'deprecated')
-    list_filter = ['week_start', 'week_end', 'wms_stock', 'mos', 'location', 'deprecated']
+    list_display = ('week_start', 'week_end', 'week_of_year', 'location', 'wms_stock', 'soh', 'amc', 'mos', 'expected_stockout_date', 'deprecated')
+    list_filter = ['week_start', 'week_end', 'expected_stockout_date', 'wms_stock', 'mos', 'location', 'deprecated']
     search_fields = ('wms_stock__name',)
+    date_hierarchy = 'week_start'
     actions = [export_as_csv_action(exclude=['id'])]
+
+    def week_of_year(self, obj):
+        return obj.week_start.isocalendar()[1]
 admin.site.register(WeeklyStockMonitoringReport, WeeklyStockMonitoringReportAdmin)

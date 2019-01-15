@@ -17,17 +17,19 @@ from mwana.apps.reports.utils.facilityfilter import user_facilities
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 from mwana.apps.reports.views import read_request
 from mwana.apps.reports.utils.htmlhelper import read_date_or_default
 from mwana.const import MWANA_ZAMBIA_START_DATE
 
-
 from mwana.apps.reports.utils.htmlhelper import read_request
-from datetime import date, timedelta, datetime
+
 
 class TransactedStock:
+    pass
+
+
+class Expando:
     pass
 
 
@@ -135,6 +137,33 @@ def stock(request):
                               "districts_with_data": ", ".join(list(set([sa.location.parent.name for sa in stockAccountsWithData]))),
                               }, context_instance=RequestContext(request)
                               )
+
+def wsm_alerts(request):
+    rpt_facilities = request.REQUEST.get("rpt_facilities", None)
+    last_date = date.today() + timedelta(days=31)
+
+    locations = get_rpt_facilities(request.user)
+    records = []
+    for item in WeeklyStockMonitoringReport.objects.filter(location__in=locations, expected_stockout_date__lte=last_date).order_by('location__name'):
+        expando = Expando()
+        expando.location = item.location
+        expando.wms_stock = item.wms_stock
+        expando.expected_stockout_date = item.expected_stockout_date
+        expando.week_end = item.week_end
+        css_class = 'alert-defaut'
+        # @type item WeeklyStockMonitoringReport
+        if item.expected_stockout_date <= date.today():
+            css_class = 'danger'
+        elif (item.expected_stockout_date - date.today()).days < 14:
+            css_class = 'warning'
+        expando.css_class = css_class
+
+        records.append(expando)
+
+    return render_to_response('stock/wsm_alerts.html',
+                                {'wsmrs': records,},
+                                context_instance=RequestContext(request))
+
 
 def wsm_select_location(request):
     last_week_start = week_start() - timedelta(days=7)

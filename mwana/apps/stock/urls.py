@@ -8,4 +8,5 @@ urlpatterns = patterns('',
     url(r"^wsm/$", views.wsm_select_location, name="wsm_select_location"),
     url(r"^wsm/create$", views.wsm_create, name="wsm_create"),
     url(r"^wsm/save$", views.wsm_save, name="wsm_save"),
+    url(r"^wsm/alerts$", views.wsm_alerts, name="wsm_alerts"),
 )
