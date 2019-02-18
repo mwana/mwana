@@ -57,7 +57,7 @@ class Result(models.Model):
     )
 
     sample_id = models.CharField(max_length=20)    #lab-assigned sample id
-    requisition_id = models.CharField(max_length=50, verbose_name='PTID')
+    requisition_id = models.CharField(max_length=50)
     payload = models.ForeignKey('Payload', null=True, blank=True,
                                 related_name='test_results') # originating payload
     clinic = models.ForeignKey(Location, null=True, blank=True,
