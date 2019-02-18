@@ -11,4 +11,4 @@ def weekend(p_date):
 
 
 def week_of_year(p_date):
-    return int(p_date.strftime('%U'))
+    return p_date.isocalendar()[1]
