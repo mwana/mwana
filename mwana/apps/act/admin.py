@@ -14,9 +14,13 @@ from mwana.apps.act.models import SentReminder
 from mwana.apps.act.models import ReminderDay
 from mwana.apps.act.models import Payload
 from django.contrib import admin
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 
 
-class ClientAdmin(admin.ModelAdmin):
+class ExportAdmin(admin.ModelAdmin):
+    actions = [export_as_csv_action(exclude=['id'])]
+
+class ClientAdmin(ExportAdmin):
     list_display = ('national_id', 'alias', 'dob', 'sex', 'address', 'short_address', 'can_receive_messages', 'location', 'clinic_code_unrec', 'zone', 'phone', 'phone_verified', 'uuid')
     list_filter = ('sex', 'can_receive_messages', 'phone_verified', 'location')
     search_fields = ('national_id', 'alias', 'address', 'short_address',  'location__name', 'phone')
@@ -26,7 +30,7 @@ class ClientAdmin(admin.ModelAdmin):
 admin.site.register(Client, ClientAdmin)
 
 
-class CHAAdmin(admin.ModelAdmin):
+class CHAAdmin(ExportAdmin):
     list_display = ('name', 'national_id', 'address', 'location', 'clinic_code_unrec', 'phone', 'phone_verified', 'uuid')
     list_filter = ('phone_verified', 'location', 'clinic_code_unrec')
     search_fields = ('name', 'national_id', 'address', 'location__name', 'location__slug', 'clinic_code_unrec', 'phone', 'phone_verified', 'uuid')
@@ -34,7 +38,7 @@ class CHAAdmin(admin.ModelAdmin):
 admin.site.register(CHW, CHAAdmin)
 
 
-class AppointmentAdmin(admin.ModelAdmin):
+class AppointmentAdmin(ExportAdmin):
     list_display = ('client', 'cha_responsible', 'type', 'date', 'status', 'notes')
     #list_filter = ('APPOINTMENT_STATUS', 'client', 'cha_responsible', 'type', 'date', 'status', 'notes')
     #search_fields = ('APPOINTMENT_STATUS', 'client', 'cha_responsible', 'type', 'date', 'status', 'notes')
@@ -43,7 +47,7 @@ class AppointmentAdmin(admin.ModelAdmin):
 admin.site.register(Appointment, AppointmentAdmin)
 
 
-class ReminderDayAdmin(admin.ModelAdmin):
+class ReminderDayAdmin(ExportAdmin):
     list_display = ('appointment_type', 'days')
     #list_filter = ('appointment_type', 'days')
     #search_fields = ('appointment_type', 'days')
@@ -51,7 +55,7 @@ class ReminderDayAdmin(admin.ModelAdmin):
 admin.site.register(ReminderDay, ReminderDayAdmin)
 
 
-class SentReminderAdmin(admin.ModelAdmin):
+class SentReminderAdmin(ExportAdmin):
     list_display = ('appointment', 'reminder_type', 'phone', 'date_logged', 'visit_date')
     list_filter = ('reminder_type', 'date_logged', 'visit_date')
     #search_fields = ('appointment', 'reminder_type', 'date_logged')
@@ -60,7 +64,7 @@ class SentReminderAdmin(admin.ModelAdmin):
 admin.site.register(SentReminder, SentReminderAdmin)
 
 
-class PayloadAdmin(admin.ModelAdmin):
+class PayloadAdmin(ExportAdmin):
     list_display = ('incoming_date', 'auth_user', 'version', 'source',
                     'client_timestamp', 'info', 'parsed_json',
                     'validated_schema')
@@ -71,7 +75,7 @@ class PayloadAdmin(admin.ModelAdmin):
 admin.site.register(Payload, PayloadAdmin)
 
 
-class VerifiedNumberAdmin(admin.ModelAdmin):
+class VerifiedNumberAdmin(ExportAdmin):
     list_display = ('number', 'verified')
     list_filter = ('verified',)
     search_fields = ('number',)
@@ -80,7 +84,7 @@ class VerifiedNumberAdmin(admin.ModelAdmin):
 admin.site.register(VerifiedNumber, VerifiedNumberAdmin)
 
 
-class RemindersSwitchAdmin(admin.ModelAdmin):
+class RemindersSwitchAdmin(ExportAdmin):
     list_display = ('logged_on', 'can_send_reminders',  'singleton_lock')
     #list_filter = ('can_send_reminders', 'logged_on', 'singleton_lock')
     #search_fields = ('can_send_reminders', 'logged_on', 'singleton_lock')
@@ -89,7 +93,7 @@ class RemindersSwitchAdmin(admin.ModelAdmin):
 admin.site.register(RemindersSwitch, RemindersSwitchAdmin)
 
 
-class SystemUserAdmin(admin.ModelAdmin):
+class SystemUserAdmin(ExportAdmin):
     list_display = ('name', 'password_slice', 'site')
     list_filter = ['site']
     search_fields = ('name',  'site')
@@ -97,14 +101,14 @@ class SystemUserAdmin(admin.ModelAdmin):
 admin.site.register(SystemUser, SystemUserAdmin)
 
 
-class ReminderMessagePreferenceAdmin(admin.ModelAdmin):
+class ReminderMessagePreferenceAdmin(ExportAdmin):
     list_display = ('client', 'message_id', 'visit_type')
     list_filter = ['message_id', 'visit_type', 'client',]
     #search_fields = ('client', 'message_id', 'visit_type')
 admin.site.register(ReminderMessagePreference, ReminderMessagePreferenceAdmin)
 
 
-class HistoricalEventAdmin(admin.ModelAdmin):
+class HistoricalEventAdmin(ExportAdmin):
     list_display = ('fact_day', 'date', 'fact_message')
     #list_filter = ['date', 'fact_message']
     search_fields = ('fact_message',)
@@ -112,7 +116,7 @@ class HistoricalEventAdmin(admin.ModelAdmin):
 admin.site.register(HistoricalEvent, HistoricalEventAdmin)
 
 
-class VisitAdmin(admin.ModelAdmin):
+class VisitAdmin(ExportAdmin):
     list_display = ('appointment', 'actual_visit_date', 'location', 'chw')
     list_filter = ['actual_visit_date']
     search_fields = ('appointment__client__national_id',
@@ -127,7 +131,7 @@ class VisitAdmin(admin.ModelAdmin):
 admin.site.register(Visit, VisitAdmin)
 
 
-class FlowAppointmentAdmin(admin.ModelAdmin):
+class FlowAppointmentAdmin(ExportAdmin):
     list_display = ('open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker')
     #list_filter = ['open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker']
     #search_fields = ('open', 'start_time', 'valid_until', 'date', 'type', 'message_id', 'client', 'community_worker')
@@ -136,7 +140,7 @@ class FlowAppointmentAdmin(admin.ModelAdmin):
 admin.site.register(FlowAppointment, FlowAppointmentAdmin)
 
 
-class FlowClientRegistrationAdmin(admin.ModelAdmin):
+class FlowClientRegistrationAdmin(ExportAdmin):
     list_display = ('national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker')
     #list_filter = ['national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker']
     #search_fields = ('national_id', 'name', 'dob', 'sex', 'can_receive_messages', 'phone', 'open', 'start_time', 'valid_until', 'community_worker')
@@ -144,7 +148,7 @@ class FlowClientRegistrationAdmin(admin.ModelAdmin):
 admin.site.register(FlowClientRegistration, FlowClientRegistrationAdmin)
 
 
-class FlowCHWRegistrationAdmin(admin.ModelAdmin):
+class FlowCHWRegistrationAdmin(ExportAdmin):
     list_display = ('name', 'national_id', 'address', 'location', 'open', 'start_time', 'valid_until', 'connection')
     list_filter = ['open', 'start_time', 'valid_until', 'location',]
     search_fields = ('name', 'national_id', 'address', 'location__name', 'open', 'start_time', 'valid_until', 'connection__identity')
