@@ -123,21 +123,15 @@ def send_report_to_lab_workers():
             continue
 
         my_lab = lab[0]
-        res = Result.objects.filter(payload__source=my_lab.source_key,
+        res = Result.objects.filter(sample_id__startswith=my_lab.lab_code,
                                     payload__incoming_date__year=my_date.year,
                                     payload__incoming_date__month=my_date.month,
                                     payload__incoming_date__day=my_date.day
                                     ).count()
 
-        payloads = Payload.objects.filter(source=my_lab.source_key,
-                                          incoming_date__year=my_date.year,
-                                          incoming_date__month=my_date.month,
-                                          incoming_date__day=my_date.day
-                                          ).count()
-
-        message = ("Hi %(name)s. Today Mwana server has received %(payloads)s "
-                   "payloads and %(res)s results from %(lab)s" % {
-                   "name": lab_worker.name, "lab": my_lab.source_key.title(), "payloads": payloads, "res": res})
+        message = ("Hi %(name)s. Today Mwana server has received"
+                   " %(res)s results from %(lab)s" % {
+                   "name": lab_worker.name, "lab": my_lab.source_key.title(), "res": res})
 
         OutgoingMessage(lab_worker.default_connection, message).send()
 
