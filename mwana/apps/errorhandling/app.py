@@ -5,6 +5,7 @@ Created on Apr 12, 2011
 @author: Trevor Sinkala
 '''
 
+from mwana.const import get_phia_worker_type
 import logging
 
 from mwana.apps.labresults.messages import *
@@ -40,6 +41,10 @@ class App (rapidsms.apps.base.AppBase):
         if hasattr(message, "possible_bad_pin"):
             message.respond(BAD_PIN)
             return True
+        if hasattr(message, "possible_bad_mock_pin"):
+            message.respond(BAD_PIN)
+            return True
+
         # Clinic worker: pin issues
         if is_pin(text) and ready_results(contact).count() == 0:
             message.respond("Hello %s. Are you trying to retrieve new "
@@ -90,6 +95,9 @@ class App (rapidsms.apps.base.AppBase):
         elif get_hub_worker_type() in contact.types.all():
             message.respond(HUB_DEFAULT_RESPONSE)
         elif get_province_worker_type() in contact.types.all():
+            message.respond(PHO_DEFAULT_RESPONSE % contact.name)
+            message.respond(HUB_DEFAULT_RESPONSE)
+        elif get_phia_worker_type() in contact.types.all():
             message.respond(PHO_DEFAULT_RESPONSE % contact.name)
             
         return True

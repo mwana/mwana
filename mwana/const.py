@@ -6,6 +6,7 @@ from mwana.apps.contactsplus.models import ContactType
 from mwana.apps.locations.models import LocationType
 
 # contact types:
+PHIA_WORKER_SLUG = settings.RESULTS160_SLUGS.get('PHIA_WORKER_SLUG', 'phia')
 LAB_WORKER_SLUG = settings.RESULTS160_SLUGS.get('LAB_WORKER_SLUG', 'lab')
 HUB_WORKER_SLUG = settings.RESULTS160_SLUGS.get('HUB_WORKER_SLUG', 'hub')
 CBA_SLUG = settings.RESULTS160_SLUGS.get('CBA_SLUG', 'cba')
@@ -52,6 +53,9 @@ def _get_locationtype(slug, singular, plural=None):
                                            plural=plural)
     return type
 
+
+def get_phia_worker_type():
+    return _get_contacttype(PHIA_WORKER_SLUG, 'PHIA Worker')
 
 def get_lab_worker_type():
     return _get_contacttype(LAB_WORKER_SLUG, 'LAB Worker')
