@@ -17,7 +17,7 @@ from rapidsms.messages.outgoing import OutgoingMessage
 from rapidsms.models import Contact
 
 
-RESULTS = "Thank you! Here are your results: "
+RESULTS = "Here are your results: "
 
 
 def build_results_messages(results):
