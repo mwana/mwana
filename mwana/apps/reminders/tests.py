@@ -44,7 +44,7 @@ class EventRegistration(TestScript):
         script = """
             +260977600123     > birth
             +260977600123     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
-            +260977600123     > birth 24 3 2016
+            +260977600123     > birth 24 3 2019
             +260977600123     < Sorry, I didn't understand that. To add a birth, send BIRTH <DATE> <NAME>. The date is optional and is logged as TODAY if left out.
         """
         self.runScript(script)
@@ -56,7 +56,7 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
             +260977600123     > birth 34553 maria
-            +260977600123     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2017
+            +260977600123     < Sorry, I couldn't understand that date. Please enter the date like so: DAY MONTH YEAR, for example: 23 04 2020
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -66,18 +66,18 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            +260977600123     > birth 1/1/2017 maria
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1 1 2017 laura
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1-1-2017 anna
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1.1.2017 michelle
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 1. 1. 2017 anne
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
-            +260977600123     > birth 01012017 heidi
-            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2017. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1/1/2020 maria
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for maria on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1 1 2020 laura
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for laura on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1-1-2020 anna
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anna on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1.1.2020 michelle
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for michelle on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 1. 1. 2020 anne
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for anne on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
+            +260977600123     > birth 01012020 heidi
+            +260977600123     < Thank you %(cba)s! You have successfully registered a birth for heidi on 01/01/2020. You will be notified when it is time for his or her next appointment at the clinic.
             +260977600123     > birth 1/1 rachel
             +260977600123     < Thank you %(cba)s! You have successfully registered a birth for rachel on 01/01/%(year)s. You will be notified when it is time for his or her next appointment at the clinic.
             +260977600123     > birth 1 1 nancy
@@ -97,7 +97,7 @@ class EventRegistration(TestScript):
         for patient in patients:
             self.assertEqual(1, patient.patient_events.count())
             patient_event = patient.patient_events.get()
-            self.assertEqual(patient_event.date, datetime.date(2017, 1, 1))
+            self.assertEqual(patient_event.date, datetime.date(2020, 1, 1))
             self.assertEqual(patient_event.event.slug, "birth")
 
     def testTooOldDate(self):
@@ -115,8 +115,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            +260977600123     > birth 4/3/2017 maria
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2017. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -126,8 +126,8 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth")
         script = """
-            aa     > birth 4/3/2017 maria
-            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2017. You will be notified when it is time for his or her next appointment at the clinic.
+            aa     > birth 4/3/2019 maria
+            aa     < Thank you! You have successfully registered a birth for maria on 04/03/2019. You will be notified when it is time for his or her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -138,15 +138,15 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", gender="f",
                                        slug="birth|bith|bilth|mwana")
         script = """
-            +260977600123     > bIrth 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
-            +260977600123     > bith 4/3/2016 anna
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
-            +260977600123     > BILTH 4/3/2016 laura
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
-            +260977600123     > mwaNA 4/3/2016 lynn
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
-            +260977600123     > unknownevent 4/3/2016 lynn
+            +260977600123     > bIrth 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > bith 4/3/2019 anna
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for anna on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > BILTH 4/3/2019 laura
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for laura on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > mwaNA 4/3/2019 lynn
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for lynn on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > unknownevent 4/3/2019 lynn
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -172,10 +172,10 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="birth", gender='f')
         script = """
-            +260977600123     > birth 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
-            +260977600123     > birth 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2016. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
+            +260977600123     > birth 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You have successfully registered a birth for maria on 04/03/2019. You will be notified when it is time for her next appointment at the clinic.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -186,12 +186,12 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
         reminders.Event.objects.create(name="Birth", slug="mwanaf", gender='f')
         script = """
-            +260977600123     > mwana f 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2016. You will be notified when it is time for her next clinic appointment.
-            +260977600123     > mwanaf 4/3/2016 Nelly Daka
-            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2016. You will be notified when it is time for her next clinic appointment.
-            +260977600123     > mwana facility 4/3/2016 Nelly Mwansa
-            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2016. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana f 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for maria on 04/03/2019. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwanaf 4/3/2019 Nelly Daka
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Daka on 04/03/2019. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana facility 4/3/2019 Nelly Mwansa
+            +260977600123     < Thank you Rupiah Banda! You registered a facility birth for Nelly Mwansa on 04/03/2019. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -204,12 +204,12 @@ class EventRegistration(TestScript):
         reminders.Event.objects.create(name="Birth", slug="mwana", gender='f')
         reminders.Event.objects.create(name="Birth", slug="mwanah", gender='f')
         script = """
-            +260977600123     > mwana h 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2016. You will be notified when it is time for her next clinic appointment.
-            +260977600123     > mwana h 4/3/2016 maria
-            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2016. You will be notified when it is time for her next clinic appointment.
-            +260977600123     > mwanah 4/3/2016 Nelly Daka
-            +260977600123     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2016. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana h 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2019. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwana h 4/3/2019 maria
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for maria on 04/03/2019. You will be notified when it is time for her next clinic appointment.
+            +260977600123     > mwanah 4/3/2019 Nelly Daka
+            +260977600123     < Thank you Rupiah Banda! You registered a home birth for Nelly Daka on 04/03/2019. You will be notified when it is time for her next clinic appointment.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -221,28 +221,28 @@ class EventRegistration(TestScript):
         self._register()
         reminders.Event.objects.create(name="Birth", slug="mwana|birth", gender='f')
         script = """
-            unknown > mwanafor +260977600123 h 4/3/2016 maria
+            unknown > mwanafor +260977600123 h 4/3/2019 maria
             unknown < Sorry, you are NOT allowed to register a birth on behalf of anyone. If you think this message is a mistake reply with keyword HELP
-            admin > mwanafor +260977600000 h 4/3/2016 maria
+            admin > mwanafor +260977600000 h 4/3/2019 maria
             admin < The phone number +260977600000 does not belong to any CBA. Make sure you typed it correctly
-            admin > mwanafor +260977600123 h 4/3/2016 maria
-            admin < Thank you Beyonce! You have registered a home birth for Maria on 04/03/2016 on behalf of Rupiah Banda.
-            admin > mwanafor 0977600123 f 4.5.2016 Tracy
-            admin < Thank you Beyonce! You have registered a facility birth for Tracy on 04/05/2016 on behalf of Rupiah Banda.
-            admin > mwanafor 977600123 4 6 2016 Shakira
-            admin < Thank you Beyonce! You have registered a birth for Shakira on 04/06/2016 on behalf of Rupiah Banda.
+            admin > mwanafor +260977600123 h 4/3/2019 maria
+            admin < Thank you Beyonce! You have registered a home birth for Maria on 04/03/2019 on behalf of Rupiah Banda.
+            admin > mwanafor 0977600123 f 4.5.2019 Tracy
+            admin < Thank you Beyonce! You have registered a facility birth for Tracy on 04/05/2019 on behalf of Rupiah Banda.
+            admin > mwanafor 977600123 4 6 2019 Shakira
+            admin < Thank you Beyonce! You have registered a birth for Shakira on 04/06/2019 on behalf of Rupiah Banda.
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
         self.assertEqual(3, patients.count())
 
         script = """
-            admin > mwanafor +260977600123 h 4/3/2016 maria
-            admin < Maria with DOB 04/03/2016 is already for/by Rupiah Banda (+260977600123).
-            admin > mwanafor 0977600123 f 4.5.2016 Tracy
-            admin < Tracy with DOB 04/05/2016 is already for/by Rupiah Banda (+260977600123).
-            admin > mwanafor 977600123 4 6 2016 Shakira
-            admin < Shakira with DOB 04/06/2016 is already for/by Rupiah Banda (+260977600123).
+            admin > mwanafor +260977600123 h 4/3/2019 maria
+            admin < Maria with DOB 04/03/2019 is already for/by Rupiah Banda (+260977600123).
+            admin > mwanafor 0977600123 f 4.5.2019 Tracy
+            admin < Tracy with DOB 04/05/2019 is already for/by Rupiah Banda (+260977600123).
+            admin > mwanafor 977600123 4 6 2019 Shakira
+            admin < Shakira with DOB 04/06/2019 is already for/by Rupiah Banda (+260977600123).
         """
         self.runScript(script)
         patients = Contact.objects.filter(types__slug='patient')
@@ -511,8 +511,8 @@ class MockReminders(TestScript):
 
         #only cba at given faclity should receive reminder. If baby is registered pick one
         script = """
-        kashitu_cba > birth 29 06 2016 Groovy Phiri
-        kashitu_cba < Thank you Kashitu Cba! You have successfully registered a birth for Groovy Phiri on 29/06/2016. You will be notified when it is time for his or her next appointment at the clinic.
+        kashitu_cba > birth 29 06 2019 Groovy Phiri
+        kashitu_cba < Thank you Kashitu Cba! You have successfully registered a birth for Groovy Phiri on 29/06/2019. You will be notified when it is time for his or her next appointment at the clinic.
         demo_initiator > rmdemo 402026
         kashitu_cba < Hi Kashitu Cba.Groovy Phiri is due for 6 day clinic visit on %s.Please remind them to visit Kashitu Clinic, then reply with TOLD Groovy Phiri
         """ % (fdate)
