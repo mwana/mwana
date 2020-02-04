@@ -1243,8 +1243,8 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         # let clinic worker also become a cba, let other worker leave
         script = """
-            clinic_worker > join agent 402029 3 John Banda
-            clinic_worker  < Thank you John Banda! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
+            other_worker > join agent 402029 3 Mary Phiri
+            other_worker  < Thank you Mary Phiri! You have successfully registered as a RemindMi Agent for zone 3 of Mibenge Clinic.
             """
         
         self.runScript(script)
@@ -1300,7 +1300,7 @@ class TestResultsAcceptor(LabresultsSetUp):
 
         from mwana.locale_settings import SYSTEM_LOCALE, LOCALE_ZAMBIA
         if SYSTEM_LOCALE==LOCALE_ZAMBIA:
-            if today.weekday() != 0:
+            if today.weekday() not in [0, 1, 2]:
                 self.assertTrue(msgs[0].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
                 self.assertTrue(msgs[1].text.endswith("We have 2 DBS test results ready for you. Please reply to this SMS with your pin code to retrieve these results."))
             else:
