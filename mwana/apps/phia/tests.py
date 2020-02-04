@@ -91,8 +91,8 @@ class TestApp(TestScript):
        
         script = """
             phia_man > ROR DEMO 403012
-            phia_man < Central Clinic has 3 results ready. Please reply to this SMS with your pin code to retrieve them.
-            phia_lady < Central Clinic has 3 results ready. Please reply to this SMS with your pin code to retrieve them.
+            phia_man < Central Clinic has 3 results ready. Please reply with your pin code to retrieve them.
+            phia_lady < Central Clinic has 3 results ready. Please reply with your pin code to retrieve them.
             phia_man > 234
             phia_man < Sorry, that was not the correct pin code. Your pin code is a 4-digit number like 1234. If you forgot your pin code, reply with keyword 'HELP'
             phia_man > 2345

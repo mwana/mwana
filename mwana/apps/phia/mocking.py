@@ -8,7 +8,6 @@ from mwana.apps.labresults.messages import BAD_PIN
 from mwana.apps.labresults.messages import DEMO_FAIL
 from mwana.apps.labresults.messages import INSTRUCTIONS
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
-from mwana.apps.labresults.messages import RESULTS_READY
 from mwana.apps.labresults.messages import SELF_COLLECTED
 from mwana.apps.labresults.models import Result
 from mwana.apps.locations.models import Location
@@ -177,7 +176,7 @@ class MockResultUtility(LoggerMixin):
         for contact in contacts:
             
             msg = OutgoingMessage(connection=contact.default_connection,
-                                  template="%(clinic)s has %(count)s results ready. Please reply to this SMS with your pin code to retrieve them.",
+                                  template="%(clinic)s has %(count)s results ready. Please reply with your pin code to retrieve them.",
                                   clinic=contact.location.name, count=len(results))
             msg.send()
             self._mark_results_pending(results, msg.connection)

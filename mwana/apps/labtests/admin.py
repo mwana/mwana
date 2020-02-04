@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labtests.models import PreferredBackend
 from django.contrib import admin
 from mwana.apps.labtests.models import *
 from mwana.apps.reports.webreports.actions import export_as_csv_action
@@ -62,3 +63,9 @@ class ViralLoadViewAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_reached_moh'
 
 admin.site.register(ViralLoadView, ViralLoadViewAdmin)
+
+
+class PreferredBackendAdmin(admin.ModelAdmin):
+    list_display = ('phone_first_part', 'backend')
+    list_filter = ('backend',)
+admin.site.register(PreferredBackend, PreferredBackendAdmin)

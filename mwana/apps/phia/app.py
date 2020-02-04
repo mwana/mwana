@@ -24,6 +24,7 @@ from datetime import date
 from datetime import datetime
 from rapidsms.models import Connection, Backend
 from rapidsms.models import Contact
+from rapidsms.contrib.scheduler.models import EventSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +61,84 @@ class App(rapidsms.apps.base.AppBase):
     LTC_NEW_REGEX = r"^(?:%s)(?:[\s,;:]+(.+))?$" % ("LTC NEW")
 
     def start(self):
-        pass
         """Configure your app in the start phase."""
-#        self.schedule_notification_task()
-#        self.schedule_process_payloads_tasks()
-#        self.schedule_participant_notification_task()
+        self.schedule_notification_task()
+        self.schedule_process_payloads_tasks()
+        self.schedule_participant_notification_task()
+        
+    def _get_schedule(self, key, default=None):
+        schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
+        return schedules.get(key, default)
+
+    def schedule_notification_task(self):
+        callback = 'mwana.apps.phia.tasks.send_phia_results_notification'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [9, 15], 'minutes': [30],
+                                        'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+        callback = 'mwana.apps.phia.tasks.send_tlc_details_notification'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [10, 14], 'minutes': [30],
+                                        'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+    def schedule_participant_notification_task(self):
+        callback = 'mwana.apps.phia.tasks.send_results_ready_notification_to_participant'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'hours': [9, 15], 'minutes': [0],
+                                        'days_of_week': [0, 1, 2, 3, 4]})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+    def schedule_process_payloads_tasks(self):
+        callback = 'mwana.apps.phia.tasks.process_outstanding_payloads'
+        # remove existing schedule tasks; reschedule based on the current setting
+        EventSchedule.objects.filter(callback=callback).delete()
+        schedule = self._get_schedule(callback.split('.')[-1],
+                                      {'minutes': [0], 'hours': '*'})
+        EventSchedule.objects.create(callback=callback, **schedule)
+
+    def notify_clinic_pending_results(self, clinic):
+
+        results = self._pending_results(clinic)
+        if not results:
+            logger.info("0 results to send for %s" % clinic.name)
+            return
+        else:
+            messages = self.results_avail_messages(clinic, results)
+            if messages:
+                self.send_messages(messages)
+                self._mark_results_pending(results, (msg.connection
+                                                     for msg in messages))
+                for result in results:
+                    result.date_clinic_notified = datetime.now()
+                    if not result.date_of_first_notification:
+                        result.date_of_first_notification = datetime.now()
+                    result.save()
+
+    def notify_clinic_pending_details(self, clinic):
+        results = self._pending_ltc(clinic)
+        if not results:
+            logger.info("0 details to send for %s" % clinic.name)
+            return
+        else:
+            messages = self.details_avail_messages(clinic, results)
+            if messages:
+                self.send_messages(messages)
+                self._mark_details_pending(results, (msg.connection
+                                                     for msg in messages))
+                 # todo: review
+#                for result in results:
+#                    result.date_clinic_notified = datetime.now()
+#                    if not result.date_of_first_notification:
+#                        result.date_of_first_notification = datetime.now()
+#                    result.save()
 
     def pop_pending_connection(self, connection):
         self.waiting_for_pin.pop(connection)
@@ -212,10 +286,10 @@ class App(rapidsms.apps.base.AppBase):
             and clinic in self.last_collectors \
             and message.text.strip().upper() == message.contact.pin.upper():
             if message.contact == self.last_collectors[clinic]:
-                message.respond("Hi %(name)s. It looks like you already collected your results. To check for new results reply with keyword 'ROR CHECK'", name=message.connection.contact.name)
+                message.respond("It looks like you already collected the results/details.")
             else:
-                message.respond(ALREADY_COLLECTED, name=message.connection.contact.name,
-                                collector=self.last_collectors[clinic])
+                message.respond("It looks like the results/details you are looking for were already collected by %(collector)s. ",
+                                     collector=self.last_collectors[clinic])
             return True
         return self.mocker.default(message)
 
@@ -270,6 +344,60 @@ class App(rapidsms.apps.base.AppBase):
             r.notification_status = 'notified'
             r.save()
 
+    def _mark_details_pending(self, results, connections):
+        for connection in connections:
+            self.waiting_for_ltc_pin[connection] = results
+            #todo: perhaps we should have tc notication status
+#        for r in results:
+#            r.notification_status = 'notified'
+#            r.save()
+
+    def results_avail_messages(self, clinic, results):
+        """
+        Returns clinic workers registered to receive results notification at this clinic.
+        """
+        contacts = \
+            Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                                  Q(types=const.get_phia_worker_type())).distinct()
+        if not contacts:
+            self.warning("No contacts registered to receive results at %s! "
+                         "These will go unreported until clinic staff "
+                         "register at this clinic." % clinic)
+
+        all_msgs = []
+        for contact in contacts:
+            msg = OutgoingMessage(connection=contact.default_connection,
+                                  template="%(clinic)s has %(count)s results ready. Please reply with your pin code to retrieve them.",
+                                  clinic=clinic.name, count=results.count())
+            all_msgs.append(msg)
+
+        return all_msgs
+
+    def details_avail_messages(self, clinic, results):
+        """
+        Returns clinic workers registered to receive results notification at this clinic.
+        """
+        contacts = \
+            Contact.active.filter(Q(location=clinic) | Q(location__parent=clinic),
+                                  Q(types=const.get_phia_worker_type())).distinct()
+        if not contacts:
+            self.warning("No contacts registered to receive results at %s! "
+                         "These will go unreported until clinic staff "
+                         "register at this clinic." % clinic)
+
+        all_msgs = []
+        for contact in contacts:
+            msg = OutgoingMessage(connection=contact.default_connection,
+                                  template="%(clinic)s has %(count)s ALTC participants to link to care. Please reply with your PIN code to get details of ALTC participants.",
+                                  clinic=clinic.name, count=results.count())
+            all_msgs.append(msg)
+
+        return all_msgs
+
+    def send_messages(self, messages):
+        for msg in messages:
+            msg.send()
+
     def send_results_after_pin(self, message):
         """
         Sends the actual results in response to the message
@@ -296,8 +424,7 @@ class App(rapidsms.apps.base.AppBase):
             # remove pending contacts for this clinic and notify them it
             # was taken care of
             clinic_connections = [contact.default_connection for contact in
-                                  Contact.active.filter
-                                  (Q(location=clinic) | Q(location__parent=clinic))]
+                                  Contact.active.filter(location=clinic)]
 
             for conn in clinic_connections:
                 if conn in self.waiting_for_pin:
@@ -331,16 +458,14 @@ class App(rapidsms.apps.base.AppBase):
             # remove pending contacts for this clinic and notify them it
 #            # was taken care of
 #            clinic_connections = [contact.default_connection for contact in
-#                                  Contact.active.filter
-#                                  (Q(location=clinic) | Q(location__parent=clinic))]
-
+#                                  Contact.active.filter(location=clinic)]
+#
 #            for conn in clinic_connections:
 #                if conn in self.waiting_for_linkage_pin:
-#                #                    self.waiting_for_pin.pop(conn)
-#                    self.pop_pending_connection(conn)
+#                    self.waiting_for_linkage_pin.pop(conn)
 #                    OutgoingMessage(conn, " %(name)s has linked",
 #                                    name=message.connection.contact.name).send()
-
+#
 #            self.last_collectors[clinic] = \
 #                message.connection.contact
 
@@ -360,6 +485,19 @@ class App(rapidsms.apps.base.AppBase):
             for resp in responses:
                 message.respond(resp)
             self.waiting_for_ltc_pin.pop(message.connection)
+
+            clinic_connections = [contact.default_connection for contact in
+                                  Contact.active.filter(location=clinic)]
+
+            for conn in clinic_connections:
+                if conn in self.waiting_for_ltc_pin:
+                    self.waiting_for_ltc_pin.pop(conn)
+                    OutgoingMessage(conn, " %(name)s has collected ltc details for %(Ids)s",
+                    Ids=", ".join(res.requsition_id for res in results),
+                                    name=message.connection.contact.name).send()
+
+            self.last_collectors[clinic] = \
+                message.connection.contact
 
 #            self.last_collectors[clinic] = \
 #                message.connection.contact
@@ -389,6 +527,12 @@ class App(rapidsms.apps.base.AppBase):
         else:
             conn,_ = Connection.objects.get_or_create(backend=backend, identity=phone)
         return conn
+
+    def send_pending_participant_notifications(self):
+        results = Result.objects.exclude(who_retrieved=None).exclude(result_sent_date=None).\
+            exclude(notification_status='new').exclude(phone=None).exclude(phone='').filter(date_participant_notified=None)
+        for res in results:
+            self.send_participant_message(res)
 
     def send_results(self, connections, results, msgcls=OutgoingMessage):
         """Sends the specified results to the given contacts."""
