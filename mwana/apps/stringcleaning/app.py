@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.vaccination.handlers.dangersign import DangerSignHandler
 from mwana.apps.vaccination.handlers.session_seven import SessionSevenHandler
 from mwana.apps.vaccination.handlers.session_six import SessionSixHandler
 from mwana.apps.vaccination.handlers.session_five import SessionFiveHandler
@@ -67,7 +68,7 @@ class App (rapidsms.apps.base.AppBase):
         broadcast_keywords.extend(self.to_lower(SessionFourHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(SessionFiveHandler.keyword.split('|')))
         broadcast_keywords.extend(self.to_lower(SessionSixHandler.keyword.split('|')))
-        broadcast_keywords.extend(self.to_lower(SessionSevenHandler.keyword.split('|')))
+        broadcast_keywords.extend(self.to_lower(DangerSignHandler.keyword.split('|')))
 
         # remove leading/trailing whitespace
         # get out your featherduster

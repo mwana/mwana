@@ -162,9 +162,8 @@ class Results160Reports:
                     =status)
 
     def get_results_by_status_and_location(self, status, location):
-        """Returns results query set by status in reporting period"""
+        """Returns results query set by status"""
         return Result.objects.filter(notification_status__in=status, clinic=location)
-
 
     def get_sent_results(self, location):
         """Returns results query set for sent results in reporting period"""
@@ -838,9 +837,10 @@ class Results160Reports:
 
     def get_total_results_in_province(self, province):
         return Result.objects.filter(clinic__parent__parent=province).\
-    filter(clinic__in=self.user_facilities()).exclude(result=None).exclude(result='').count()
+            filter(clinic__in=self.user_facilities()).exclude(result=None).exclude(result='').count()
 
-    def dbs_positivity_data(self, year=None):
+    def dbs_positivity_data(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
 
         def percent(num, den):
             if not num:
@@ -850,15 +850,16 @@ class Results160Reports:
             else:
                 return "%4.1f" % (100.0 * num / den)
 
-        if not year:
-            year = date.today().year
+        # if not year:
+        #     year = date.today().year
         results = Result.objects.exclude(result=None).exclude(result='').\
-                                        filter(clinic__in=self.user_facilities())
+                                        filter(Q(processed_on__gte=self.dbsr_startdate),
+                                     Q(processed_on__lte=self.dbsr_enddate), clinic__in=self.user_facilities())
         total_dbs = results.count()
 
-        percent_positive_country = percent(results.filter(result__iexact='P',clinic__in=self.user_facilities()).count(), total_dbs)
-        percent_negative_country = percent(results.filter(result__iexact='N',clinic__in=self.user_facilities()).count(), total_dbs)
-        percent_rejected_country = percent(results.filter(result__in='XIR',clinic__in=self.user_facilities()).count(), total_dbs)
+        percent_positive_country = percent(results.filter(result__iexact='P', clinic__in=self.user_facilities()).count(), total_dbs)
+        percent_negative_country = percent(results.filter(result__iexact='N', clinic__in=self.user_facilities()).count(), total_dbs)
+        percent_rejected_country = percent(results.filter(result__in='XIR', clinic__in=self.user_facilities()).count(), total_dbs)
 
         percent_positive_provinces = []
         percent_negative_provinces = []
@@ -890,7 +891,7 @@ class Results160Reports:
             start_date = results.exclude(processed_on=None).order_by('processed_on')[0].processed_on
             days_reporting = (date.today()-start_date).days
         
-        year_reporting = year
+        year_reporting = 2010
 
 
         return percent_positive_country, percent_negative_country, \

@@ -386,12 +386,12 @@ def update_sub_groups():
 
 
             unicef = ReportingGroup.objects.get(name__iexact='unicef')
-            mgic = ReportingGroup.objects.get(name__iexact='MGIC Zambia')
+#            mgic = ReportingGroup.objects.get(name__iexact='MGIC Zambia')
 
             if loc.parent.slug in ['106000', '302000', '301000', '901000', '903000']:
                 try_assign(unicef, [loc]);
-            if loc.parent.parent.slug == '800000':
-                try_assign(mgic, [loc]);
+#            if loc.parent.parent.slug == '800000':
+#                try_assign(mgic, [loc]);
         except ReportingGroup.DoesNotExist, e:
             ReportingGroup.objects.get_or_create(name=dho)
             ReportingGroup.objects.get_or_create(name=pho)

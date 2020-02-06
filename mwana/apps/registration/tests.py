@@ -380,4 +380,21 @@ class TestApp(TestScript):
         # @type new_contact Contact
         self.assertEqual(new_contact.location, central_clinic)
         self.assertEqual(new_contact.name, 'Tizie Kays')
-        
+
+    def testRegistrationWithNewClinicCodes(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        dst = LocationType.objects.create(slug=const.DISTRICT_SLUGS[0])
+        prv = LocationType.objects.create(slug=const.PROVINCE_SLUGS[0])
+
+        central_clinic = Location.objects.create(name="Mosa University Medical Clinic",
+                                                 slug="10010022", type=ctr)
+        mansa = Location.objects.create(name="Mansa",
+                                        slug="403000", type=dst)
+        luapula = Location.objects.create(name="Luapula",
+                                          slug="400000", type=prv)
+        script = """
+            hubman     > join hub 10010022 hubman banda 1234
+            hubman     < Hi Hubman Banda, thanks for registering for Results160 from hub at Mosa University Medical Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)

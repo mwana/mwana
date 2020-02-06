@@ -516,7 +516,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -554,7 +554,7 @@ class TestApp(ActSetUp):
                 +260979112233 > N/A
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -593,7 +593,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -694,7 +694,7 @@ class TestApp(ActSetUp):
                 +260979112233 > whatever
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -712,6 +712,69 @@ class TestApp(ActSetUp):
         self.assertEqual(client.phone_verified, False)
         self.assertEqual(client.connection, None)
         self.assertEqual(client.alias, 'RM-403012-12-1')
+
+        chw2 = self.create_chw(chw_con='+260966700333', name='Mark')
+        script = """
+                +260979112233 > ACT PATIENT
+                +260979112233 < Hi Donald Clinton, to register a client first reply with client's unique ID
+                +260979112233 > 403012-12-3
+                +260979112233 < You have submitted client's ID 403012-12-3. Now reply with the client's name
+                +260966700333 > ACT PATIENT
+                +260966700333 < Hi Mark, to register a client first reply with client's unique ID
+                +260966700333 > 403012-12-3
+                +260966700333 < Donald Clinton is already registering a client with ID 403012-12-3. Reply with correct ID or send HELP CLIENT if you need to be assisted
+                +260966700333 > 403012-12-4
+                +260966700333 < You have submitted client's ID 403012-12-4. Now reply with the client's name
+                +260966700333 > Rob
+                +260966700333 < Rob does not look like a valid name. Reply with a valid name
+                +260966700333 > Robert mukale
+                +260966700333 < You have submitted client's name as Robert Mukale. Now reply with client's date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 2006 for 12 April 2006
+                +260966700333 > 12 02 08
+                +260966700333 < Date 12 02 08 has an invalid year. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 >  x 2008
+                +260966700333 < x 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 >  13 2008
+                +260966700333 < 13 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 > 12 13 2008
+                +260966700333 < Date 12 13 2008 has an invalid month. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 > 12 02 2028
+                +260966700333 < Sorry, client's date of birth 12 02 2028 is after today's. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 > 40 02 2008
+                +260966700333 < 40 02 2008 does not look like a valid date. Reply with client's correct date of birth like <DAY> <MONTH> <YEAR> e.g. 12 04 1997 for 12 April 1997.
+                +260966700333 > 12 02 2008
+                +260966700333 < You have submitted client's date of birth as 12 Feb 2008. Now reply with the client's gender, F for Female or M if Male
+                +260966700333 > man
+                +260966700333 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260966700333 > c
+                +260966700333 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260966700333 > boy
+                +260966700333 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260966700333 > men
+                +260966700333 < Sorry, client's gender must be F or M. Reply with the client's gender, F for Female or M if Male
+                +260966700333 > Male
+                +260966700333 < You have submitted client's gender as Male. Will client be receiving SMS messages, Reply with Y for Yes or N for No?
+                +260966700333 > yo
+                +260966700333 < Sorry, I din't understand that. Reply with Y if client will be receiving SMS messages or N if not
+                +260966700333 > yep
+                +260966700333 < Sorry, I din't understand that. Reply with Y if client will be receiving SMS messages or N if not
+                +260966700333 > y
+                +260966700333 < Thank you Mark. Now reply with the client's phone number or N/A if client or caregiver does not have a phone
+                +260966700333 >
+                +260966700333 < Sorry, I couldn't read your message. Make sure you have correct GSM message settings on your phone
+                +260966700333 > 077123456
+                +260966700333 < Sorry 077123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260966700333 > 0777123456
+                +260966700333 < Sorry 0777123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260966700333 > 09777123456
+                +260966700333 < Sorry 09777123456 is not a valid Airtel or MTN number. Reply with correct number
+                +260966700333 > 0977123456
+                +260966700333 < Client's name is Robert Mukale, ID is 403012-12-4, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260966700333 > whatever
+                +260966700333 < Client's name is Robert Mukale, ID is 403012-12-4, DOB is 12 February 2008, gender is Male, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
+                +260966700333 > Yes
+                +260966700333 < Thank you Mark. You have successfully registered the client Robert Mukale
+            """
+        self.runScript(script)
 
 
     def testClientReRegistration(self):
@@ -732,7 +795,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
         self.assertEqual(Client.objects.all().count(), 1)
@@ -772,7 +835,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Grace Mukale, ID is 403012-12-2, DOB is 12 March 2008, gender is Female, phone # is +260977123456, will receive SMS: No. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Grace Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Grace Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
         self.runScript(script)
 
@@ -989,7 +1052,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
 
         self.runScript(script)
@@ -1083,7 +1146,7 @@ class TestApp(ActSetUp):
                 +260979112233 > 0977123456
                 +260979112233 < Client's name is Robert Mukale, ID is 403012-12-1, DOB is 12 February 2008, gender is Female, phone # is +260977123456, will receive SMS: Yes. Reply with Yes if this is correct or No if not
                 +260979112233 > Yes
-                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale
+                +260979112233 < Thank you Donald Clinton. You have successfully registered the client Robert Mukale. Ask the Client to send ACT YES to Mwana to confirm their number
             """
 
         self.runScript(script)
