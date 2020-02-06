@@ -69,8 +69,6 @@ class MockReminders(TestScript):
         cba1_conn.contact = cba1
         cba1_conn.save()
 
-
-
         staff_conn = Connection.objects.get(identity="staff")
         staff = Contact.objects.create(name='Suarez', location=central)
         staff.types.add(const.get_clinic_worker_type())

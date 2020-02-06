@@ -70,8 +70,8 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
                                                     get_lab_worker_type(),  get_province_worker_type()], connection__backend=source_backend):
         identity = contact.default_connection.identity
         conn, created = Connection.objects.get_or_create(backend=target_backend, identity=identity)
-        if not created:
-            print("Connection with backend %s and identity %s already exists" % (target_backend.name, identity))
+        if not created and conn.contact:
+            print("Connection with backend %s and identity %s already exists with an active contact" % (target_backend.name, identity))
             continue
 
         # clever way to create 'duplicate' record but with different primary key
@@ -92,9 +92,9 @@ def create_emergency_contacts(from_backend, to_backend, usual_number='short code
         
         EmergencyContact.objects.get_or_create(usual_contact=contact1, emergency_contact=contact2)
 
-        text = "We are very sorry %s. %s is still down. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name, usual_number)
+        text = "We are very sorry %s. %s is still down. Your PIN code is the same. From Mwana/Results160 Support" % (contact2.name[:30], usual_number)
         user = None
-        user = User.objects.get(username="you can't see me here")
+        user = User.objects.get(username="You can't see me here")
 
         StagedMessage.objects.create(connection=contact2.default_connection, text=text, user=user)
         

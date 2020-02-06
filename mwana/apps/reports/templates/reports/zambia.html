@@ -7,6 +7,11 @@
 
 {% block stylesheets %}
 {{ block.super }}
+<style type="text/css">
+    #wrapper {
+/*        width: 90%;*/
+    }
+</style>
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}stylesheets/modules.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/locations.css" />
 <link type="text/css" rel="stylesheet" href="{{ MEDIA_URL }}locations/stylesheets/label-overlay.css" />
@@ -104,7 +109,6 @@ You currently don't belong to any group for viewing reports. Contact the system 
                     <th>Province</th>
                     <th>District</th>
                     <th>Facility</th>
-                    <th>Implementer</th>
                     <th></th>
                     </thead>
                     <tbody>
@@ -123,13 +127,19 @@ You currently don't belong to any group for viewing reports. Contact the system 
                                 {{rpt_facilities}}
                                 {% endautoescape %}
                             </td>
-                            <td>{% if is_report_admin %}
+                            <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+                        {% if is_report_admin %}
+                        <tr>
+                            <th colspan="6">Implementer</th>
+                        </tr>
+                        <tr>
+                            <td colspan="6">
                                 {% autoescape off %}
                                 {{rpt_group}}
                                 {% endautoescape %}
-                                {%endif%}</td>
-                            <td><input type="submit" value="Ok" name="SubmitValues" /></td>
+                                </td>
                         </tr>
+                        {%endif%}                        
                     </tbody>
                 </table>
 

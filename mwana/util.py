@@ -75,6 +75,8 @@ def get_worker_type(category):
         return const.get_hub_worker_type()
     elif type == 'lab':
         return const.get_lab_worker_type()
+    elif type == 'phia':
+        return const.get_phia_worker_type()
 
 def get_location_type(category):
     '''
@@ -92,4 +94,6 @@ def get_location_type(category):
     elif type == 'hub':
         return const.CLINIC_SLUGS
     elif type == 'lab':
+        return const.CLINIC_SLUGS
+    elif type == 'phia':
         return const.CLINIC_SLUGS

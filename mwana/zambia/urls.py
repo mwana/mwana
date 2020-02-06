@@ -24,7 +24,8 @@ urlpatterns = patterns('',
     (r'^stock/', include('mwana.apps.stock.urls')),
     (r'^data_integrity/', include('mwana.apps.monitor.urls')),
     (r'^labtests/', include('mwana.apps.labtests.urls', namespace="labtests")),
-    (r'^act/', include('mwana.apps.act.urls')),
+    (r'^phia/', include('mwana.apps.phia.urls', namespace="phia")),
+    (r'^act/', include('mwana.apps.act.urls', namespace="act")),
     # global project URLs:
     # putting this at the bottom allows overidding global patterns as necessary
     (r'^', include('mwana.urls')),

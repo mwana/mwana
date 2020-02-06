@@ -150,7 +150,6 @@ class Results160Reports:
                                        'unprocessed', 'new', 'notified', 'updated'])
                                        ).distinct()
 
-
     def get_results_by_status(self, status):
         """Returns results query set by status in reporting period"""
         
@@ -897,6 +896,43 @@ class Results160Reports:
         return percent_positive_country, percent_negative_country, \
             percent_rejected_country, total_dbs, months_reporting,\
             days_reporting, year_reporting, stacked
+
+    def vl_tested_and_sent_report(self, startdate=None, enddate=None):
+        self.set_reporting_period(startdate, enddate)
+
+        ids = ", ".join("%s" % fac.id for fac in self.user_facilities())
+        if not ids:
+            ids = '-1'
+
+        query = '''
+        SELECT pro.name as province, dis.name as district, loc.name as facility, count(sample_id) as tested,
+        count(CASE WHEN result_sent_date between %s AND %s then 1 else null end ) delivered
+	FROM public.labtests_result
+        JOIN locations_location loc on loc.id = clinic_id
+        LEFT JOIN locations_location dis on dis.id = loc.parent_id
+        LEFT JOIN locations_location pro on pro.id = dis.parent_id
+        WHERE loc.id in (''' + ids + ''')
+        AND processed_on BETWEEN %s AND %s
+        GROUP By pro.name, dis.name, loc.name
+        ORDER BY 1, 2, 3
+        '''
+
+        cursor = connection.cursor()
+        cursor.execute(query, [self.dbsr_startdate, self.dbsr_enddate, self.dbsr_startdate, self.dbsr_enddate])
+        rows = cursor.fetchall()
+
+        table = []
+        table.append(['  Province', '  District', '  Facility', 'Tested', 'Retrieved by Facilities'])
+        number_processed = 0
+        number_sent = 0
+        for row in rows:
+            table.append(row)
+            number_processed = number_processed + row[3]
+            number_sent = number_sent + row[4]
+
+        table.append(['All listed provinces', 'All listed districts', 'All listed  clinics', number_processed, number_sent])
+
+        return table
 
 
 class MalawiReports(Results160Reports):

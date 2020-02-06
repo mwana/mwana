@@ -8,7 +8,7 @@ import json
 
 from datetime import datetime
 from datetime import date
-from datetime import timedelta
+from django.conf import settings
 from django.db import transaction
 from django.forms import ModelForm
 from django.http import HttpResponse
@@ -18,8 +18,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import logging
 from mwana.apps.alerts.views import get_int
-from mwana.apps.labtests import models as labtests
-from mwana.apps.labtests.labtestsreports import get_viral_load_data
+from mwana.apps.phia import models as phia
+from mwana.apps.labtests.views import valid_phone, json_datetime, json_date, json_timestamp, dictval
+
 from mwana.apps.locations.models import Location
 from mwana.apps.reports.utils.htmlhelper import get_contacttype_dropdown_html
 from mwana.apps.reports.views import get_groups_dropdown_html
@@ -31,64 +32,14 @@ from mwana.decorators import has_perm_or_basicauth
 
 
 
-logger = logging.getLogger('mwana.apps.labtests.views')
+logger = logging.getLogger('mwana.apps.phia.views')
 
 
-def valid_phone(val):
-    stripped = val.strip()
-    if len(stripped) == 13 and stripped[:6] in ['+26097', '+26096', '+26095', '+26076']:
-        return stripped
-    if len(stripped) == 10 and stripped[:3] in ['097', '096', '095', '076', '077']:
-        return '+26' + stripped
-    if len(stripped) == 9 and stripped[:2] in ['97', '96', '95', '76', '77']:
-        return '+260' + stripped    
-
-
-def json_datetime (val):
-    """convert a datetime value from the json into a python datetime"""
-    try:
-        return datetime.strptime(val, '%Y-%m-%d %H:%M:%S')
-    except:
-        return None
-
-
-def json_date (val):
-    """convert a date value from the json into a python date"""
-    try:
-        return datetime.strptime(val, '%Y-%m-%d').date()
-    except:
-        return None
-
-
-def json_timestamp (val):
-    """convert a timestamp value (with milliseconds) from the json into a python datetime"""
-    if val[-4] not in ('.', ','):
-        return None
-
-    try:
-        dt = datetime.strptime(val[:-4], '%Y-%m-%d %H:%M:%S')
-        return dt + timedelta(microseconds=1000 * int(val[-3:]))
-    except:
-        return None
-
-
-def dictval (dict, field, trans=lambda x: x, trans_none=False, default_val=None):
-    """extract a value from a data dictionary, which may or may not be present in the dictionary,
-    and may also need to be transformed in some way"""
-    if field in dict:
-        val = dict[field]
-        if val is not None or trans_none:
-            return trans(val)
-        else:
-            return None
-    else:
-        return default_val
-
-
+#todo: write unit tests
 
 @csrf_exempt
 @require_http_methods(['POST'])
-@has_perm_or_basicauth('labtests.add_payload', 'Lab Results')
+@has_perm_or_basicauth('phia.add_payload', 'Lab Results')
 @transaction.commit_on_success
 def accept_results(request):
    
@@ -106,7 +57,7 @@ def accept_results(request):
     except:
         data = None
     #safety -- no matter what else happens, we'll have the original data
-    payload = labtests.Payload.objects.create(incoming_date=payload_date,
+    payload = phia.Payload.objects.create(incoming_date=payload_date,
                                               auth_user=payload_user,
                                               parsed_json=data is not None,
                                               raw=content)
@@ -178,19 +129,21 @@ def process_payload(payload, data=None):
                      (payload.id, str(f_payload.errors)))
 
 
-def normalize_clinic_id (zpct_id):
-    """turn the ZPCT clinic id format into the MoH clinic id format"""
-    return zpct_id[:-1] if zpct_id[-1] == '0' and len(zpct_id) == 7 else zpct_id
+def normalize_clinic_id (id):
+    """turn the lab clinic id format into the MoH clinic id format"""
+    return id
 
+def _clean (text):
+    if not text:
+        return text
+    return settings.GET_CLEANED_TEXT(text[:100])
 
 def map_result (verbose_result):
     return verbose_result
 
-
 def map_sex(sex):
     key = sex.lower()
     return {"male": "m", "female": "f", "m": "m", "f": "f"}.get(key)
-
 
 def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
@@ -202,8 +155,8 @@ def accept_record (record, payload):
     old_record = None
     if sample_id:
         try:
-            old_record = labtests.Result.objects.get(sample_id=sample_id)
-        except labtests.Result.DoesNotExist:
+            old_record = phia.Result.objects.get(sample_id=sample_id)
+        except phia.Result.DoesNotExist:
             pass
 
     def cant_save(message):
@@ -244,8 +197,7 @@ def accept_record (record, payload):
         'payload': payload.id if payload else None,
         'clinic': clinic_obj.id if clinic_obj else None,
         'clinic_code_unrec': clinic_code if not clinic_obj else None,
-        'result': dictval(record, 'result', map_result),
-        'result_unit': dictval(record, 'unit', map_result),
+       
         'result_detail': dictval(record, 'result_detail'),
         'collected_on': dictval(record, 'coll_on', json_date),
         'entered_on': dictval(record, 'recv_on', json_date),
@@ -254,26 +206,49 @@ def accept_record (record, payload):
         'age': dictval(record, 'child_age'),
         'age_unit': dictval(record, 'child_age_unit'),
         'sex': dictval(record, 'sex', map_sex),
-        'mother_age': dictval(record, 'mother_age'),
         'collecting_health_worker': dictval(record, 'hw'),
         'coll_hw_title': dictval(record, 'hw_tit'),
         'verified': dictval(record, 'verified'),
-        'guspec': dictval(record, 'guspec'),
-        'phone': dictval(record, 'phone', valid_phone),
-        'phone_invalid': dictval(record, 'phone') if not dictval(record, 'phone', valid_phone) else None,
         'province': dictval(record, 'province'),
         'district': dictval(record, 'district'),
-        'constit': dictval(record, 'constit'),
-        'ward': dictval(record, 'ward'),
-        'csa': dictval(record, 'csa'),
-        'sea': dictval(record, 'sea'),
+        
         'given_facility_name': dictval(record, 'fname'),
-        'nearest_facility_name': dictval(record, 'nfname'),
-        'test_type': dictval(record, 'test_type') or const.get_viral_load_type(),
+
+        'fname': _clean(dictval(record, 'fname')),
+        'lname': _clean(dictval(record, 'lname')),
+        'nick_name': _clean(dictval(record, 'nick_name')),
+        'phone': _clean(dictval(record, 'phone', valid_phone)),
+        'address': _clean(dictval(record, 'address')),
+        'phone_invalid': dictval(record, 'phone') if not dictval(record, 'phone', valid_phone) else None,
+
+
+# todo: inclue pii
+#        'address': dictval(record, 'address'),
+        'send_pii': dictval(record, 'send_pii'),
+        'share_contact': dictval(record, 'share_contact'),
+        'contact_by_phone': dictval(record, 'contact_by_phone'),
+        'fa_code': dictval(record, 'fa_code'),
+        'fa_name': dictval(record, 'fa_name'),
+        'contact_method': dictval(record, 'contact_method'),
+        'past_test': dictval(record, 'past_test'),
+        'past_status': dictval(record, 'past_status'),
+        'new_status': dictval(record, 'new_status'),
+        'was_on_art': dictval(record, 'was_on_art'),
+        'on_art': dictval(record, 'on_art'),
+        'art_start_date': dictval(record, 'art_start_date', json_date),
+        'contact_by_phone': dictval(record, 'contact_by_phone'),
+        'send_pii': dictval(record, 'send_pii'),
+        'share_contact': dictval(record, 'share_contact'),
+        'contact_method': dictval(record, 'contact_method'),
+        'bd_date': dictval(record, 'bd_date', json_date),
+        'vl': dictval(record, 'vl'),
+        'vl_date': dictval(record, 'vl_date', json_date),
+        'cd4': dictval(record, 'cd4'),
+        'cd4_date': dictval(record, 'cd4_date', json_date),
         }
 
     #need to keep old record 'pristine' so we can check which fields have changed
-    old_record_copy = labtests.Result.objects.get(sample_id=sample_id) if old_record else None
+    old_record_copy = phia.Result.objects.get(sample_id=sample_id) if old_record else None
     f_result = ResultForm(record_fields, instance=old_record_copy)
     if f_result.is_valid():
         new_record = f_result.save(commit=False)
@@ -287,7 +262,7 @@ def accept_record (record, payload):
     if rec_status not in ('new', 'update'):
         cant_save('sync_status not an allowed value')
         return False
-    if new_record.result:
+    if new_record.vl or new_record.cd4:
         # @type new_record Result
         if new_record.verified is None or new_record.verified == True:
             new_record.arrival_date = new_record.payload.incoming_date
@@ -295,10 +270,10 @@ def accept_record (record, payload):
         if rec_status == 'update':
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
-        new_record.notification_status = 'new' if new_record.result else 'unprocessed'        
+        new_record.notification_status = 'new' if (new_record.vl or new_record.cd4) else 'unprocessed'
     else:
         #keep track of original date for payload with result
-        if old_record.arrival_date and old_record.result:
+        if old_record.arrival_date and (new_record.vl or new_record.cd4):
             new_record.arrival_date = old_record.arrival_date
 
         # if result was previously sent update new record with result_sent_date
@@ -333,7 +308,7 @@ def accept_record (record, payload):
 
         #change to clinic
         if old_record.notification_status == 'sent' and old_record.clinic != new_record.clinic:
-            same_result = (new_record.result == old_record.result)
+            same_result = (new_record.vl == old_record.vl and new_record.cd4 == old_record.cd4)
             same_patient_id = (new_record.requisition_id == old_record.requisition_id)
             if same_patient_id and same_result:
                 new_record.record_change = 'loc_st'
@@ -363,21 +338,22 @@ def accept_record (record, payload):
                          (sample_id, old_record.clinic.slug, new_record.clinic.slug))
 
         #change to test result
-        if not old_record.result and new_record.result:
+        if not (old_record.cd4 or old_record.vl ) and (new_record.vl or new_record.cd4):
             new_record.notification_status = 'new'   #sample was processed by lab
-        elif old_record.notification_status == 'sent' and old_record.result != new_record.result:
+        elif old_record.notification_status == 'sent' and (old_record.vl != new_record.vl or old_record.cd4 != new_record.cd4):
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
             if not (new_record.record_change and new_record.record_change == 'loc_st'):
                 new_record.notification_status = 'updated'
         #what to do if result changes from a reportable status (+, -, rej) to unreportable (indet, blank)??
-            if (old_record.result in 'PN' or new_record.result in 'PN') \
-            and (new_record.record_change == 'req_id' or (not new_record.record_change)):
-                if not new_record.record_change: #if requisition id hasn't changed
-                    new_record.record_change = 'result'
-                    new_record.old_value = old_record.result
-                elif new_record.record_change == 'req_id': #both requisition id and result have changed
-                    new_record.record_change = 'both'
-                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
+          #todo ended here
+#            if (old_record.result in 'PN' or new_record.result in 'PN') \
+#            and (new_record.record_change == 'req_id' or (not new_record.record_change)):
+#                if not new_record.record_change: #if requisition id hasn't changed
+#                    new_record.record_change = 'result'
+#                    new_record.old_value = old_record.result
+#                elif new_record.record_change == 'req_id': #both requisition id and result have changed
+#                    new_record.record_change = 'both'
+#                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
 
 
     new_record.save()
@@ -388,7 +364,7 @@ def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
 
-    logentry = labtests.LabLog(payload=payload)
+    logentry = phia.LabLog(payload=payload)
     logfields = {
         'timestamp': dictval(log, 'at', json_timestamp),
         'message': dictval(log, 'msg'),
@@ -409,19 +385,19 @@ def accept_log (log, payload):
 
 class PayloadForm(ModelForm):
     class Meta:
-        model = labtests.Payload
+        model = phia.Payload
         fields = ['version', 'source', 'client_timestamp', 'info']
 
 
 class LogForm(ModelForm):
     class Meta:
-        model = labtests.LabLog
+        model = phia.LabLog
         fields = ['timestamp', 'message', 'level', 'line']
 
 
 class ResultForm(ModelForm):
     class Meta:
-        model = labtests.Result
+        model = phia.Result
         exclude = ['notification_status', 'record_change', 'old_value',
             'requisition_id_search']
 
@@ -478,7 +454,7 @@ def get_next_navigation(text):
 def render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
                 messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
                 search_key, startdate, table, title, today, worker_types):
-    return render_to_response('labtests/dashboard.html',
+    return render_to_response('phia/dashboard.html',
                               {'startdate': startdate,
                                'enddate': enddate,
                                'title': title,

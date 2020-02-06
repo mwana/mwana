@@ -19,7 +19,13 @@ class GroupUserMappingAdmin(admin.ModelAdmin):
     search_fields = ('group__name','user__username')
 
 admin.site.register(GroupUserMapping, GroupUserMappingAdmin)
-admin.site.register(ReportingGroup)
+
+
+class ReportingGroupAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ('name',)
+admin.site.register(ReportingGroup, ReportingGroupAdmin)
+
 
 class UserPreferenceAdmin(admin.ModelAdmin):
     list_display = ('user', 'preference_name', 'preference_value', 'extra_preference_value')

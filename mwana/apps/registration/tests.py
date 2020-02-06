@@ -137,6 +137,16 @@ class TestApp(TestScript):
         labman = Contact.objects.get(name='Mark Zuckerberg')
         self.assertEqual(labman.types.all()[0].slug, const.LAB_WORKER_SLUG)
 
+        script = """
+            phia     > join phia 403012 broken hill 2345
+            phia     < Hi Broken Hill, thanks for registering for Results160 PHIA at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
+            """
+        self.runScript(script)
+        time.sleep(.5)
+        self.assertEqual(10, Contact.objects.count())
+        phiaman = Contact.objects.get(name='Broken Hill')
+        self.assertEqual(phiaman.types.all()[0].slug, const.PHIA_WORKER_SLUG)
+        #todo: allow to clinic workers to join as phia
 
 
     def testAgentThenJoinRegistrationSameClinic(self):

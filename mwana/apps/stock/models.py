@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Q
 from mwana.apps.locations.models import Location
 from mwana.const import DISTRICT_SLUGS
+from mwana.const import CLINIC_SLUGS
 from rapidsms.models import Contact
 
 class ConfirmationCode(models.Model):
@@ -38,7 +39,7 @@ class Stock(models.Model):
     """
     type = models.CharField(max_length=10, choices=STOCK_TYPES, default='drug', null=False, blank=False,)
     abbr = models.CharField(max_length=10, null=True, blank=True)
-    code = models.CharField(max_length=10, null=False, blank=False, unique=True)
+    code = models.CharField(max_length=20, null=False, blank=False, unique=True)
     short_code = models.CharField(max_length=10, null=False, blank=True, unique=True)
     name = models.CharField(max_length=80, null=False, blank=False)
     units = models.ForeignKey(StockUnit, null=True, blank=True)
@@ -63,9 +64,12 @@ class StockAccount(models.Model):
     amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     pending_amount = models.PositiveIntegerField(default=0, null=False, blank=False)
     last_updated = models.DateTimeField(default=datetime.now, editable=False)
+    stock_date = models.DateField(null=True, blank=True)
 
     def save(self, * args, ** kwargs):
         self.last_updated = datetime.now()
+        if self.pk and not self.stock_date:
+            self.stock_date = self.last_updated.date()
         super(StockAccount, self).save(*args, ** kwargs)
         Threshold.try_create_threshold(self)
 
@@ -265,13 +269,13 @@ class LowStockLevelNotification(models.Model):
 
     def save(self, * args, ** kwargs):
         if not self.week_of_year and self.date_logged:
-            self.week_of_year = int(self.date_logged.strftime('%U'))
+            self.week_of_year = self.date_logged.isocalendar()[1]
 
         super(LowStockLevelNotification, self).save(*args, ** kwargs)
 
     @classmethod
     def week(cls, date_value):
-        return int(date_value.strftime('%U'))
+        return int(date_value.isocalendar()[1])
 
     def __unicode__(self):
         return "%s: %s - %s" % (self.week_of_year, self.stock_account, self.contact)
@@ -290,3 +294,42 @@ class Supported(models.Model):
 
     class Meta:
         verbose_name_plural = "Supported"
+
+
+class WMS(models.Model):
+    stock = models.ForeignKey(Stock)
+    active = models.BooleanField(default=True)
+    ordering = models.SmallIntegerField(blank=True, null=True)
+
+    def __unicode__(self):
+        return "%s: %s" % (self.stock.name, "Supported" if self.active else "Not Supported")
+
+
+class WeeklyStockMonitoringReport(models.Model):
+    """
+    This model is used for  submitting items for the Weekly Stock Monitoring
+    Tool. It does not take into account actual consumption at the facility but
+    just get submissions for weekly 'Stock on hand' and 'Average monthly consumption'
+    """
+    week_start = models.DateField()
+    week_end = models.DateField()
+    location = models.ForeignKey(Location, limit_choices_to={"type__slug__in": list(CLINIC_SLUGS)})
+    wms_stock = models.ForeignKey(WMS)
+    soh = models.PositiveIntegerField(null=True, blank=True, verbose_name='Stock on hand')
+    amc = models.PositiveIntegerField(null=True, blank=True, verbose_name='Average monthly consumption')
+    mos = models.PositiveIntegerField(null=True, blank=True, verbose_name='Months of Supply', editable=False)
+    expected_stockout_date = models.DateField(null=True, blank=True, editable=False)
+    deprecated = models.BooleanField(default=False, editable=False)
+
+    def save(self, * args, ** kwargs):
+        if self.soh and self.amc:
+            self.mos = self.soh // self.amc
+            self.expected_stockout_date = self.week_end + timedelta(days = (30.4375 * self.soh) / self.amc)
+
+        super(WeeklyStockMonitoringReport, self).save(*args, ** kwargs)
+
+    def __unicode__(self):
+        return "%s %s %s: %s" % (self.location, self.week_start, self.wms_stock.stock.name, self.soh)
+
+    class Meta:
+        unique_together = (('location', 'week_start', 'wms_stock',))

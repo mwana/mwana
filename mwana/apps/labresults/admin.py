@@ -1,6 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 from django.contrib import admin
 from mwana.apps.labresults.models import *
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 
 
 def make_obsolete(modeladmin, request, queryset):
@@ -24,7 +25,7 @@ class ResultAdmin(admin.ModelAdmin):
     search_fields = ('sample_id','requisition_id', 'payload__source',
                      'clinic_code_unrec', 'clinic__slug', 'clinic__name')
     date_hierarchy = 'result_sent_date'
-    actions = [make_new, make_obsolete]
+    actions = [export_as_csv_action(exclude=['id', 'payload']), make_new, make_obsolete]
 admin.site.register(Result, ResultAdmin)
 
 

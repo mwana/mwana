@@ -1,6 +1,8 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.labtests.models import PreferredBackend
 from django.contrib import admin
 from mwana.apps.labtests.models import *
+from mwana.apps.reports.webreports.actions import export_as_csv_action
 
 
 def make_obsolete(modeladmin, request, queryset):
@@ -14,18 +16,18 @@ make_new.short_description = "Mark selected results as new"
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('requisition_id', 'payload', 'clinic', 'clinic_code_unrec',
-                    'result', 'numeric_result', 'processed_on', 'notification_status', 'sex',
-                    'result_sent_date', 'phone', 'guspec', 'province', 'district', 'constit',
-                    'ward', 'csa', 'sea')
-    list_filter = ('test_type', 'verified', 'processed_on', 'notification_status', 'sex',
-                   'collected_on', 'arrival_date', 'result_sent_date', 'province', 'district', 'clinic',
-                   'constit', 'ward', 'csa', 'sea')
+    list_display = ('sample_id', 'requisition_id', 'clinic', 'clinic_code_unrec',
+                    'result', 'collected_on', 'entered_on', 'processed_on',
+                    'arrival_date', 'result_sent_date', 'notification_status',
+                    'old_value', )
+    list_filter = ('processed_on', 'notification_status', 'sex',
+                   'collected_on', 'arrival_date', 'result_sent_date', 'clinic',
+                   )
     search_fields = ('requisition_id', 'clinic__name', 'clinic__slug', 'result',
                      'phone', 'guspec', )
-    date_hierarchy = 'result_sent_date'
+    date_hierarchy = 'arrival_date'
 
-    actions = [make_new, make_obsolete]
+    actions = [export_as_csv_action(exclude=['id', 'payload']), make_new, make_obsolete]
 admin.site.register(Result, ResultAdmin)
 
 
@@ -61,3 +63,9 @@ class ViralLoadViewAdmin(admin.ModelAdmin):
     date_hierarchy = 'date_reached_moh'
 
 admin.site.register(ViralLoadView, ViralLoadViewAdmin)
+
+
+class PreferredBackendAdmin(admin.ModelAdmin):
+    list_display = ('phone_first_part', 'backend')
+    list_filter = ('backend',)
+admin.site.register(PreferredBackend, PreferredBackendAdmin)

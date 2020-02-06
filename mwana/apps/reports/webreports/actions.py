@@ -29,7 +29,7 @@ def export_as_csv_action(description="Export selected objects as CSV file",
             writer.writerow(field_names)
         for obj in queryset:
             row = [getattr(obj, field)() if callable(getattr(obj, field)) else getattr(obj, field) for field in field_names]
-            writer.writerow(row)
+            writer.writerow([("%s" % x).encode('utf-8') for x in row])
         return response
     export_as_csv.short_description = description
     return export_as_csv

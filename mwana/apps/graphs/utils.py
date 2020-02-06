@@ -597,13 +597,10 @@ class GraphService:
 
         return month_ranges, data
 
-    def get_monthly_results_retrieval_trends_by_province(self, start_date, end_date, province_slug, district_slug, facility_slug):
-        facs = get_dbs_facilities(province_slug, district_slug, facility_slug)
-        start, end = get_datetime_bounds(start_date, end_date)
-
+    def get_monthly_results_retrieval_trends_by_province(self, start_date, end_date, province_slug, district_slug, facility_slug):        
         my_date = date(start_date.year, start_date.month, start_date.day)
         data = {}
-        trend_items = [l.name for l in Location.objects.filter(slug__endswith='00000')]
+        trend_items = [l.name for l in Location.objects.filter(type__slug='provinces', slug__endswith='00000')]
         for item in sorted(trend_items):
             data[item] = []
 

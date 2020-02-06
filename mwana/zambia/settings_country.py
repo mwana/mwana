@@ -12,6 +12,7 @@ RESULTS160_SLUGS = {
     'PROVINCE_WORKER_SLUG': 'province',
     'HUB_WORKER_SLUG': 'hub',
     'LAB_WORKER_SLUG': 'lab',
+    'PHIA_WORKER_SLUG': 'phia',
     # location types:
     'CLINIC_SLUGS': ('urban_health_centre', '1st_level_hospital',
                      '2nd_level_hospital', 'rural_health_centre',
@@ -39,6 +40,7 @@ INSTALLED_APPS.append("mwana.apps.act")
 #INSTALLED_APPS.append("mwana.apps.vaccination")
 #INSTALLED_APPS.append("mwana.apps.reminders.experimental")
 INSTALLED_APPS.append("mwana.apps.anc")
+INSTALLED_APPS.append("mwana.apps.phia")
 INSTALLED_APPS.append("mwana.apps.errorhandling")
 INSTALLED_APPS.append("mwana.apps.export")
 INSTALLED_APPS.append("mwana.apps.results_followup")
@@ -99,7 +101,8 @@ RAPIDSMS_TABS = [
     ('mwana.apps.websmssender.views.send_sms', 'Message Blaster'),
     ('mwana.apps.training.views.trained', 'Trained'),
     ('mwana.apps.graphs.views.graphs', 'Charts'),
-    ('mwana.apps.surveillance.views.surveillance', 'Survey'),
+#    ('mwana.apps.surveillance.views.surveillance', 'Survey'),
+    ('mwana.apps.reports.views.vl_reports', 'VL Reports'),
 #    ('mwana.apps.blacklist.views.blacklisted', 'Blacklisted People'),
 ]
 

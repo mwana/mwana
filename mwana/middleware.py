@@ -23,7 +23,8 @@ class LoginRequired(object):
     """
     
     urls = ['/admin/', '/accounts/login/', '/accounts/logout/',
-        '/labresults/incoming/', '/labtests/incoming/', '/act/incoming/', settings.MEDIA_URL]
+        '/labresults/incoming/', '/labtests/incoming/',
+        '/act/incoming/', '/phia/incoming/', settings.MEDIA_URL]
     
     def process_view(self, request, view_func, view_args, view_kwargs):
         if request.get_full_path() in settings.EXCLUDE_FROM_LOGIN:

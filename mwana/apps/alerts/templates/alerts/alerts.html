@@ -61,7 +61,6 @@
                         </tr>
                     </tbody>
                 </table>
-                {% if is_support_admin %}
                 <h1 id="LabIssues">Lab Issues:</h1>
                 <p align="center">
                 <h3 id="LabsNotProcessingDBS">Alerts for Labs Not Processing DBS samples in the last {{ lab_processing_days }} days.</h3>
@@ -131,8 +130,8 @@
                 {% endfor %}
                 <p><p>
                 <hr>
-                {% endif %}
                 <!--Resport3-->
+                {% if not_sending_dbs_alerts%}
                 <h1 id="HubIssues">Hub Issues:</h1>
                 <p align="center">
                 <h3 id="HubsNotSendingSamples">Alerts for Clinic Hubs Not Sending Samples to Labs in the last {{ transport_time }} days</h3>
@@ -179,6 +178,7 @@
 
                 <p><p>
                 <hr>
+                {% endif %}
                 <h1 id="ClinicIssues">Clinic Issues:</h1>
                 <div>
                     <!-- Report 1-->
