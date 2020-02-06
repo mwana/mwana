@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import logging
 from mwana.apps.alerts.views import get_int
-from mwana.apps.phia import models as labtests
+from mwana.apps.phia import models as phia
 from mwana.apps.labtests.views import valid_phone, json_datetime, json_date, json_timestamp, dictval
 
 from mwana.apps.locations.models import Location
@@ -57,7 +57,7 @@ def accept_results(request):
     except:
         data = None
     #safety -- no matter what else happens, we'll have the original data
-    payload = labtests.Payload.objects.create(incoming_date=payload_date,
+    payload = phia.Payload.objects.create(incoming_date=payload_date,
                                               auth_user=payload_user,
                                               parsed_json=data is not None,
                                               raw=content)
@@ -135,10 +135,15 @@ def normalize_clinic_id (id):
 
 def _clean (text):
     if not text:
-        return text[:100]
+        return text
     return settings.GET_CLEANED_TEXT(text[:100])
+
 def map_result (verbose_result):
     return verbose_result
+
+def map_sex(sex):
+    key = sex.lower()
+    return {"male": "m", "female": "f", "m": "m", "f": "f"}.get(key)
 
 def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
@@ -150,8 +155,8 @@ def accept_record (record, payload):
     old_record = None
     if sample_id:
         try:
-            old_record = labtests.Result.objects.get(sample_id=sample_id)
-        except labtests.Result.DoesNotExist:
+            old_record = phia.Result.objects.get(sample_id=sample_id)
+        except phia.Result.DoesNotExist:
             pass
 
     def cant_save(message):
@@ -243,7 +248,7 @@ def accept_record (record, payload):
         }
 
     #need to keep old record 'pristine' so we can check which fields have changed
-    old_record_copy = labtests.Result.objects.get(sample_id=sample_id) if old_record else None
+    old_record_copy = phia.Result.objects.get(sample_id=sample_id) if old_record else None
     f_result = ResultForm(record_fields, instance=old_record_copy)
     if f_result.is_valid():
         new_record = f_result.save(commit=False)
@@ -257,7 +262,7 @@ def accept_record (record, payload):
     if rec_status not in ('new', 'update'):
         cant_save('sync_status not an allowed value')
         return False
-    if new_record.result:
+    if new_record.vl or new_record.cd4:
         # @type new_record Result
         if new_record.verified is None or new_record.verified == True:
             new_record.arrival_date = new_record.payload.incoming_date
@@ -265,10 +270,10 @@ def accept_record (record, payload):
         if rec_status == 'update':
             logger.info('received a record update for a result that doesn\'t exist in the model; original record may not have validated; treating as new record...')
 
-        new_record.notification_status = 'new' if new_record.result else 'unprocessed'        
+        new_record.notification_status = 'new' if (new_record.vl or new_record.cd4) else 'unprocessed'
     else:
         #keep track of original date for payload with result
-        if old_record.arrival_date and old_record.result:
+        if old_record.arrival_date and (new_record.vl or new_record.cd4):
             new_record.arrival_date = old_record.arrival_date
 
         # if result was previously sent update new record with result_sent_date
@@ -303,7 +308,7 @@ def accept_record (record, payload):
 
         #change to clinic
         if old_record.notification_status == 'sent' and old_record.clinic != new_record.clinic:
-            same_result = (new_record.result == old_record.result)
+            same_result = (new_record.vl == old_record.vl and new_record.cd4 == old_record.cd4)
             same_patient_id = (new_record.requisition_id == old_record.requisition_id)
             if same_patient_id and same_result:
                 new_record.record_change = 'loc_st'
@@ -333,21 +338,22 @@ def accept_record (record, payload):
                          (sample_id, old_record.clinic.slug, new_record.clinic.slug))
 
         #change to test result
-        if not old_record.result and new_record.result:
+        if not (old_record.cd4 or old_record.vl ) and (new_record.vl or new_record.cd4):
             new_record.notification_status = 'new'   #sample was processed by lab
-        elif old_record.notification_status == 'sent' and old_record.result != new_record.result:
+        elif old_record.notification_status == 'sent' and (old_record.vl != new_record.vl or old_record.cd4 != new_record.cd4):
             logger.info('already-sent result for record [%s] has changed! need to notify of update' % sample_id)
             if not (new_record.record_change and new_record.record_change == 'loc_st'):
                 new_record.notification_status = 'updated'
         #what to do if result changes from a reportable status (+, -, rej) to unreportable (indet, blank)??
-            if (old_record.result in 'PN' or new_record.result in 'PN') \
-            and (new_record.record_change == 'req_id' or (not new_record.record_change)):
-                if not new_record.record_change: #if requisition id hasn't changed
-                    new_record.record_change = 'result'
-                    new_record.old_value = old_record.result
-                elif new_record.record_change == 'req_id': #both requisition id and result have changed
-                    new_record.record_change = 'both'
-                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
+          #todo ended here
+#            if (old_record.result in 'PN' or new_record.result in 'PN') \
+#            and (new_record.record_change == 'req_id' or (not new_record.record_change)):
+#                if not new_record.record_change: #if requisition id hasn't changed
+#                    new_record.record_change = 'result'
+#                    new_record.old_value = old_record.result
+#                elif new_record.record_change == 'req_id': #both requisition id and result have changed
+#                    new_record.record_change = 'both'
+#                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
 
 
     new_record.save()
@@ -358,7 +364,7 @@ def accept_log (log, payload):
     """parse and save a single log message; if does not validate, save the raw data;
     return whether the record validated"""
 
-    logentry = labtests.LabLog(payload=payload)
+    logentry = phia.LabLog(payload=payload)
     logfields = {
         'timestamp': dictval(log, 'at', json_timestamp),
         'message': dictval(log, 'msg'),
@@ -379,19 +385,19 @@ def accept_log (log, payload):
 
 class PayloadForm(ModelForm):
     class Meta:
-        model = labtests.Payload
+        model = phia.Payload
         fields = ['version', 'source', 'client_timestamp', 'info']
 
 
 class LogForm(ModelForm):
     class Meta:
-        model = labtests.LabLog
+        model = phia.LabLog
         fields = ['timestamp', 'message', 'level', 'line']
 
 
 class ResultForm(ModelForm):
     class Meta:
-        model = labtests.Result
+        model = phia.Result
         exclude = ['notification_status', 'record_change', 'old_value',
             'requisition_id_search']
 
@@ -448,7 +454,7 @@ def get_next_navigation(text):
 def render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
                 messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
                 search_key, startdate, table, title, today, worker_types):
-    return render_to_response('labtests/dashboard.html',
+    return render_to_response('phia/dashboard.html',
                               {'startdate': startdate,
                                'enddate': enddate,
                                'title': title,

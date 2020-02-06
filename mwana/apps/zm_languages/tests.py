@@ -14,9 +14,9 @@ MESSAGES = '''
 join cba {language} 502012  2 Michael Kaseba
 join cba {language} 502012  2 Michael Kaseba
 join cba {language} 502013  2 Michael Kaseba
-BIRTH 4/3/2014 laura
-BIRTH h 4/3/2014 laura
-BIRTH f 4/3/2014 laura
+BIRTH 4/3/2019 laura
+BIRTH h 4/3/2019 laura
+BIRTH f 4/3/2019 laura
 rmdemo 502012
 told patient 1
 confirm patient 2
@@ -139,17 +139,17 @@ class LanguagesTest(LangaugeSetup):
             Natoteela Michael Kaseba! Mwakwanisha ukulembesha nga Kafwa wa RemindMi wa zone 2 iya Kafue District Hospital. Mukwayi mukatwebe elyo umuntu akapaapa munchende yenu.
             Mwapoleeni ba Michael Kaseba! Mwalilembesha kale nga Kafwa wa RemindMi wa zone 2 iya Kafue District Hospital.
             Mwapoleeni ba Michael Kaseba! Mwalilembesha kale nga Kafwa wa RemindMi wa Kafue District Hospital. Nga mulefwaya ukufuma ku chipatata mwalembesha kabili nokulembesha ku Kapata, tumeni ati LEAVE elyo mutume amashiwi yenu nakabili.
-            Twatotela ba Michael Kaseba, mwalembesha ukupaapa kwa ba laura pa 04/03/2014. Tukamyeba inshita yabo ngayafika iyakuya ku chipatala.
-            Natoteela ba Michael Kaseba! Mwalembesha ukupaapila ku ng'anda ukwaba laura pa 04/03/2014. Mukebwa inshita yabo ngayafika iyakuya ku chipatala.
-            Natoteela ba Michael Kaseba! Mwalembesha ukupaapila pa kiliniki ukwaba laura pa 04/03/2014. Mukebwa inshita yabo ngayafika iyakuya ku chipatala.
+            Twatotela ba Michael Kaseba, mwalembesha ukupaapa kwa ba laura pa 04/03/2019. Tukamyeba inshita yabo ngayafika iyakuya ku chipatala.
+            Natoteela ba Michael Kaseba! Mwalembesha ukupaapila ku ng'anda ukwaba laura pa 04/03/2019. Mukebwa inshita yabo ngayafika iyakuya ku chipatala.
+            Natoteela ba Michael Kaseba! Mwalembesha ukupaapila pa kiliniki ukwaba laura pa 04/03/2019. Mukebwa inshita yabo ngayafika iyakuya ku chipatala.
             Ba Michael Kaseba, inshita yaba laura ukuya kuchipatala pa bushiku bwalenga 6 pa {next_appointment_date} naifika. Bebukisheni ukuya ku Kafue District Hospital, elyo mutume ati TOLD laura
             Natoteela Michael Kaseba! Panuma ya kushininksha patient 1 aliya ku kiliniki, napapata tumeeni ishiwi lya: CONFIRM patient 1.
             Natoteela Michael Kaseba! Mwashininkisha ukuti patient 2 aliya ku kiliniki
             Njeleleeniko, mulekwata ubwafya ba Michael Kaseba. Ubwafya bwenu bwapeelwa kuli umo uwa mwibumba lya bakafwa kabili balamitumina lamya nomba line
             Ishiwi ilya lubana. Amashiwi yeneyene ni aya: BIRTH, MWANA, TOLD, CONFIRM. Asukeeni ne shiwi ilikankala ilili lyonse nangula HELP pakuti mupokelele imbila imbi.
-            Munjeleleko, shininkisheeni ukuti mwalemba bwino umwaka. 2009 mwaka uwakale sana. Umwaka tulimo ni 2014.
+            Munjeleleko, shininkisheeni ukuti mwalemba bwino umwaka. 2009 mwaka uwakale sana. Umwaka tulimo ni 2020.
             Munjeleleko, teti mulembeshe ukupaapa pa nshiku iyishilafika.
-            Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI UMWAKA. Ichilangililo: 23 04 2014
+            Munjeleleko, nshumfwile inshiku. Lelo tumenu nga ifi - UBUSHIKU UMWENSHI UMWAKA. Ichilangililo: 23 04 2020
             Njeleleeniko, nshacumfwa iyo imbila. Pakulembesha ukupaapa, tumeni MWANA <DATE> <ISHINA LYABANINA>. Ichilangililo, MWANA 12 3 2012 Loveness Bwalya.
             Njeleleeniko, nshacumfwa iyo imbila. Pakulembesha ukupaapa, tumeni MWANA <DATE> <ISHINA LYABANINA>. Ichilangililo, MWANA 12 3 2012 Loveness Bwalya.
         '''.format(next_appointment_date=(date.today() + timedelta(days=3)).strftime("%d/%m/%Y"))        
@@ -163,17 +163,17 @@ class LanguagesTest(LangaugeSetup):
             Zikomo Michael Kaseba! Mwakwanitsa kulembetsa ngati wothandiza wa RemindMi wa zone 2 la Kafue District Hospital. Pepani mukatidziwitse kukabadwa mwana mumudzi mwanu.
             Moni Michael Kaseba! Ndinu wolembetsedwa kale ngati wothandiza wa RemindMi wa zone 2 la Kafue District Hospital.
             Moni Michael Kaseba! Ndinu wolembetsedwa kale ngati wothandiza wa RemindMi wa Kafue District Hospital. Kuti muchoke kuchipatala chakale ndi kulowa chatsopano Kapata, tumani ndi liwu loti LEAVE ndi kutumiza uthenga wanu.
-            Zikomo Michael Kaseba! Mwalembetsa kubeleka kwa laura pa 04/03/2014. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
-            Zikomo Michael Kaseba! Mwalembetsa kubelekela kunyumba kwaba laura pa 04/03/2014. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
-            Zikomo Michael Kaseba! Mwalembetsa kubelekela kukiliniki kwaba laura pa 04/03/2014. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
+            Zikomo Michael Kaseba! Mwalembetsa kubeleka kwa laura pa 04/03/2019. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
+            Zikomo Michael Kaseba! Mwalembetsa kubelekela kunyumba kwaba laura pa 04/03/2019. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
+            Zikomo Michael Kaseba! Mwalembetsa kubelekela kukiliniki kwaba laura pa 04/03/2019. Mudzaziwitsidwa pamene nthawi iwo yopita ku kiliniki.
             Moni Michael Kaseba. Nthawi ya laura yopita ku kiliniki pa matsiku okwanira 6 pa {next_appointment_date} yakwanira. Chonde akumbukiritseni kupita ku Kafue District Hospital, ndipo yankhulani ndi liwu la TOLD laura.
             Zikomo Michael Kaseba! Pambuyo posimikiza patient 1 anapita ku kiliniki, chonde tumizani: CONFIRM patient 1.
             Zikomo Michael Kaseba! Mwasimikiza kuti patient 2 apita ku kiliniki!
             Pepani, muli ndi mabvuto Michael Kaseba. Bvuto lanu lapatsidwa kwa umodzi wa gulu lothandiza ndipo akuitaneni posachedwa
             Liwu losakwanira. Mawu yokwanira ndi: BIRTH, MWANA, TOLD, CONFIRM. Yankhulani ndi liwu lokwanira liri lonse kapena HELP kuti mulandire uthenga wina.
-            Pepani, onetsetsani kuti mulowetse chaka choyenera. 2009 ndi chaka chakale. Chaka chomwe tilimo ndi 2014.
+            Pepani, onetsetsani kuti mulowetse chaka choyenera. 2009 ndi chaka chakale. Chaka chomwe tilimo ndi 2020.
             Pepani simungathe kulembetsa kubeleka ndi tsiku kuposa pa la lelo
-            Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY MONTH YEAR mwachisanzo: 23 04 2014.
+            Sindinamvere tsiku ilo. Chonde lembani ilo tsiku monga: DAY MONTH YEAR mwachisanzo: 23 04 2020.
             Pepani sindinamvere icho. Poongeza kubeleka, tumizani MWANA <DATE> <NAME>. Mwachisanzo, MWANA 12 3 2012 Loveness Bwalya.
             Pepani sindinamvere icho. Poongeza kubeleka, tumizani MWANA <DATE> <NAME>. Mwachisanzo, MWANA 12 3 2012 Loveness Bwalya.
         '''.format(next_appointment_date=(date.today() + timedelta(days=3)).strftime("%d/%m/%Y"))

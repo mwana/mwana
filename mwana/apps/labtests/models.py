@@ -18,8 +18,8 @@ class Participant(models.Model):
 
 
 class PreferredBackend(models.Model):
-    phone_first_part = models.CharField(max_length=6, )
-    backend = models.ForeignKey(Backend)
+    phone_first_part = models.CharField(max_length=6, editable=False)
+    backend = models.ForeignKey(Backend, editable=False)
 
     def __unicode__(self):
         return "%s on %s" % (self.phone_first_part, self.backend)
