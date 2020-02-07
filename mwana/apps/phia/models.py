@@ -35,7 +35,8 @@ class Result(models.Model):
         blank=True)
 
     def set_fname(self, fname):
-        self._fname = base64.encodestring(fname)
+        if fname:
+            self._fname = base64.encodestring(fname)
 
     def get_fname(self):
         return base64.decodestring(self._fname)
@@ -46,7 +47,8 @@ class Result(models.Model):
         blank=True)
 
     def set_lname(self, lname):
-        self._lname = base64.encodestring(lname)
+        if lname:
+            self._lname = base64.encodestring(lname)
 
     def get_lname(self):
         return base64.decodestring(self._lname)
@@ -57,7 +59,8 @@ class Result(models.Model):
         blank=True)
 
     def set_nick_name(self, nick_name):
-        self._nick_name = base64.encodestring(nick_name)
+        if nick_name:
+            self._nick_name = base64.encodestring(nick_name)
 
     def get_nick_name(self):
         return base64.decodestring(self._nick_name)
@@ -68,7 +71,8 @@ class Result(models.Model):
         blank=True)
 
     def set_phone(self, phone):
-        self._phone = base64.encodestring(phone)
+        if phone:
+            self._phone = base64.encodestring(phone)
 
     def get_phone(self):
         return base64.decodestring(self._phone)
@@ -79,7 +83,8 @@ class Result(models.Model):
         blank=True)
 
     def set_address(self, address):
-        self._address = base64.encodestring(address)
+        if address:
+            self._address = base64.encodestring(address)
 
     def get_address(self):
         return base64.decodestring(self._address)
@@ -94,7 +99,7 @@ class Result(models.Model):
     contact_by_phone = models.NullBooleanField(null=True, blank=True)
     fa_code = models.CharField(max_length=20, null=True, blank=True)
     fa_name = models.CharField(max_length=100, null=True, blank=True)
-    contact_method = models.CharField(max_length=15, null=True, blank=True)
+    contact_method = models.CharField(max_length=30, null=True, blank=True)
 
     sample_id = models.CharField(max_length=20)    #lab-assigned sample id
     requisition_id = models.CharField(max_length=50)
@@ -137,11 +142,11 @@ class Result(models.Model):
     was_on_art = models.NullBooleanField(null=True, blank=True)
     on_art = models.NullBooleanField(null=True, blank=True)
     art_start_date = models.DateField(max_length=30, blank=True, null=True)
-    contact_by_phone = models.NullBooleanField(null=True, blank=True)
-    send_pii = models.NullBooleanField(null=True, blank=True)
-    share_contact = models.NullBooleanField(null=True, blank=True)
+    # contact_by_phone = models.NullBooleanField(null=True, blank=True)
+    # send_pii = models.NullBooleanField(null=True, blank=True)
+    # share_contact = models.NullBooleanField(null=True, blank=True)
     linked = models.BooleanField(default=False)
-    contact_method = models.CharField(max_length=30, blank=True)
+    # contact_method = models.CharField(max_length=30, blank=True)
     bd_date = models.DateField(null=True, blank=True)
     vl = models.CharField(max_length=30, blank=True)
     vl_date = models.DateField(null=True, blank=True)

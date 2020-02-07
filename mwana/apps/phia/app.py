@@ -4,17 +4,18 @@
 from mwana.apps.phia.models import Result
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import NOT_REGISTERED
-from mwana.apps.labresults.messages import combine_to_length
+from mwana.apps.labresults.messages import combine_to_length, BAD_PIN
 from rapidsms.messages import OutgoingMessage
 from mwana.apps.phia.mocking import MockLtcUtility
 import logging
 from mwana.apps.labtests.models import PreferredBackend
-
+from rapidsms.contrib.messagelog.models import Message
 import mwana.const as const
 import rapidsms
 from django.db.models import Q
 import re
-from mwana.apps.labresults.messages import INSTRUCTIONS
+
+
 from mwana.apps.phia.mocking import MockResultUtility
 from mwana.util import get_clinic_or_default
 import mwana.const as const
@@ -34,6 +35,7 @@ RESULTS = "Here are your results: "
 
 def is_eligible_for_phia_results(contact):
     return contact and contact.is_active  and const.get_phia_worker_type() in contact.types.all() \
+
 
 class App(rapidsms.apps.base.AppBase):
     # we store everyone who we think could be sending us a PIN for results
@@ -414,7 +416,7 @@ class App(rapidsms.apps.base.AppBase):
             self.pop_pending_connection(message.connection)
         else:
             self.send_results([message.connection], results)
-            message.respond(INSTRUCTIONS, name=message.connection.contact.name)
+            message.respond("Please record these results in your clinic records and promptly delete them from your phone.")
 
             for res in self.waiting_for_pin[message.connection]:
                 res.who_retrieved = message.connection.contact
@@ -480,10 +482,10 @@ class App(rapidsms.apps.base.AppBase):
             #            self.waiting_for_pin.pop(message.connection)
             self.waiting_for_ltc_pin.pop(message.connection)
         else:
-            #todo ended here: use send results model
             responses = build_ltc_messages(results)
             for resp in responses:
                 message.respond(resp)
+            message.respond("Please record the details in your LTC immediately and DELETE them from your phone. Thank you again!")
             self.waiting_for_ltc_pin.pop(message.connection)
 
             clinic_connections = [contact.default_connection for contact in
@@ -492,8 +494,8 @@ class App(rapidsms.apps.base.AppBase):
             for conn in clinic_connections:
                 if conn in self.waiting_for_ltc_pin:
                     self.waiting_for_ltc_pin.pop(conn)
-                    OutgoingMessage(conn, " %(name)s has collected ltc details for %(Ids)s",
-                    Ids=", ".join(res.requsition_id for res in results),
+                    OutgoingMessage(conn, "%(name)s has collected LTC details for %(Ids)s",
+                    Ids=", ".join(res.requisition_id for res in results),
                                     name=message.connection.contact.name).send()
 
             self.last_collectors[clinic] = \
@@ -503,7 +505,7 @@ class App(rapidsms.apps.base.AppBase):
 #                message.connection.contact
 
     def send_participant_message(self, res, msgcls=OutgoingMessage):
-        conn = self._get_participant_connection(settings.GET_ORIGINAL_TXT(res.phone))
+        conn = self._get_participant_connection(settings.GET_ORIGINAL_TEXT(res.phone))
         if conn:
             msgcls(conn, "Your appointment is due at %(clinic)s. If you got this msg by mistake please ignore", clinic=res.clinic.name).send()
             res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
@@ -551,7 +553,7 @@ class App(rapidsms.apps.base.AppBase):
                 continue
             elif not res.contact_method:
                 continue
-            elif res.contact_method.lower() != 'sms':
+            elif res.contact_method.strip().lower() != 'sms':
                 continue
             self.send_participant_message(res, msgcls)
 
@@ -589,9 +591,9 @@ def build_ltc_messages(results):
     for res in results:
         result_strings.append("**** %s %s;%s;%s" % (
         # @type res Result
-        settings.GET_ORIGINAL_TEXT(res.fname),
-        settings.GET_ORIGINAL_TEXT(res.lname),
-        settings.GET_ORIGINAL_TEXT(res.address),
+        settings.GET_ORIGINAL_TEXT(res.fname) or '',
+        settings.GET_ORIGINAL_TEXT(res.lname) or '',
+        settings.GET_ORIGINAL_TEXT(res.address) or '',
         res.requisition_id))
 
     result_text, remainder = combine_to_length(result_strings,

@@ -15,10 +15,10 @@ from mwana.apps.locations.models import Location
 
 logger = logging.getLogger(__name__)
 
-verified = Q(test_results__verified__isnull=True) |\
-           Q(test_results__verified=True)
+verified = Q(phia_results__verified__isnull=True) |\
+           Q(phia_results__verified=True)
 
-send_live_results = Q(test_results__clinic__send_live_results=True)
+send_live_results = Q(phia_results__clinic__send_live_results=True)
 
 
 #todo: write unit tests
@@ -27,7 +27,7 @@ def send_phia_results_notification(router):
     logger.debug('in send_phia_results_notification')
     if settings.SEND_LIVE_LABRESULTS:
         facility_type = Q(type__slug__in=const.CLINIC_SLUGS)
-        new_notified = Q(test_results__notification_status__in=
+        new_notified = Q(phia_results__notification_status__in=
                          ['new', 'notified'])
         clinics_with_results =\
           Location.objects.filter(new_notified & verified & send_live_results, facility_type).distinct()
@@ -40,13 +40,14 @@ def send_phia_results_notification(router):
         logger.info('not notifying any clinics of new results because '
                     'settings.SEND_LIVE_LABRESULTS is False')
 
+
 def send_tlc_details_notification(router):
     logger.debug('in send_tlc_details_notification')
     if settings.SEND_LIVE_LABRESULTS:
         facility_type = Q(type__slug__in=const.CLINIC_SLUGS)
-        not_linked = Q(linked=False)
+        not_linked = Q(phia_results__linked=False)
         #Todo: review
-        new_notified = Q(test_results__notification_status__in=
+        new_notified = Q(phia_results__notification_status__in=
                          ['sent'])
         clinics_with_results =\
           Location.objects.filter(new_notified & verified & send_live_results & not_linked, facility_type).distinct()
@@ -58,6 +59,7 @@ def send_tlc_details_notification(router):
     else:
         logger.info('not notifying any clinics of new results because '
                     'settings.SEND_LIVE_LABRESULTS is False')
+
 
 def send_results_ready_notification_to_participant(router):
     logger.debug('in send_results_notification')

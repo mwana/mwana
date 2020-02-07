@@ -141,9 +141,11 @@ def _clean (text):
 def map_result (verbose_result):
     return verbose_result
 
+
 def map_sex(sex):
     key = sex.lower()
     return {"male": "m", "female": "f", "m": "m", "f": "f"}.get(key)
+
 
 def accept_record (record, payload):
     """parse and save an individual record, updating the notification flag if necessary; if record
@@ -212,7 +214,7 @@ def accept_record (record, payload):
         'province': dictval(record, 'province'),
         'district': dictval(record, 'district'),
         
-        'given_facility_name': dictval(record, 'fname'),
+        'given_facility_name': dictval(record, 'fa_name'),
 
         'fname': _clean(dictval(record, 'fname')),
         'lname': _clean(dictval(record, 'lname')),
@@ -221,9 +223,6 @@ def accept_record (record, payload):
         'address': _clean(dictval(record, 'address')),
         'phone_invalid': dictval(record, 'phone') if not dictval(record, 'phone', valid_phone) else None,
 
-
-# todo: inclue pii
-#        'address': dictval(record, 'address'),
         'send_pii': dictval(record, 'send_pii'),
         'share_contact': dictval(record, 'share_contact'),
         'contact_by_phone': dictval(record, 'contact_by_phone'),
@@ -355,7 +354,11 @@ def accept_record (record, payload):
 #                    new_record.record_change = 'both'
 #                    new_record.old_value = old_record.requisition_id + ":" + old_record.result
 
-
+    new_record.fname = record_fields["fname"]
+    new_record.lname = record_fields["lname"]
+    new_record.nick_name = record_fields["nick_name"]
+    new_record.address = record_fields["address"]
+    new_record.phone = record_fields["phone"]
     new_record.save()
     return True
 
@@ -489,30 +492,30 @@ def render_page(enddate, is_report_admin, messages_has_next, messages_has_previo
     )
 
 
-def dashboard(request):
-    enddate, is_report_admin, page, rpt_districts, rpt_facilities, rpt_group, rpt_provinces, search_key, startdate, today, worker_types = initialise_parameters(
-        request)
-
-    (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
-    get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_viral_load_type(), request.user)
-    title = "Viral Load"
-    return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
-                       messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
-                       search_key, startdate, table, title, today, worker_types)
-
-
-def eid_dashboard(request):
-    enddate, is_report_admin, page, rpt_districts, rpt_facilities, rpt_group, rpt_provinces, search_key, startdate, today, worker_types = initialise_parameters(
-        request)
+# def dashboard(request):
+#     enddate, is_report_admin, page, rpt_districts, rpt_facilities, rpt_group, rpt_provinces, search_key, startdate, today, worker_types = initialise_parameters(
+#         request)
+#
+#     (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
+#     get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_viral_load_type(), request.user)
+#     title = "Viral Load"
+#     return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
+#                        messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
+#                        search_key, startdate, table, title, today, worker_types)
 
 
-    (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
-        get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_dbs_type(), request.user)
-
-    title = "EID"
-    return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
-                       messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
-                       search_key, startdate, table, title, today, worker_types)
+# def eid_dashboard(request):
+#     enddate, is_report_admin, page, rpt_districts, rpt_facilities, rpt_group, rpt_provinces, search_key, startdate, today, worker_types = initialise_parameters(
+#         request)
+#
+#
+#     (table, messages_paginator_num_pages, messages_number, messages_has_next, messages_has_previous) = \
+#         get_viral_load_data(rpt_provinces, rpt_districts, rpt_facilities, startdate, enddate, search_key, page, const.get_dbs_type(), request.user)
+#
+#     title = "EID"
+#     return render_page(enddate, is_report_admin, messages_has_next, messages_has_previous, messages_number,
+#                        messages_paginator_num_pages, request, rpt_districts, rpt_facilities, rpt_group, rpt_provinces,
+#                        search_key, startdate, table, title, today, worker_types)
 
 
 def initialise_parameters(request):
