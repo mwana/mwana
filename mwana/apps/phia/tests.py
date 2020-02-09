@@ -375,7 +375,7 @@ class TestResultsAcceptor(PhiaSetUp):
                     "fac": 2020200,
                     "id": "10-09999",
                     "hw_tit": "NURSE",
-                    "pat_id": "",
+                    "sample_id": "",
                     "dob": "2010-02-08",
                     "proc_on": "2010-04-11",
                     "child_age": 3,
@@ -394,7 +394,7 @@ class TestResultsAcceptor(PhiaSetUp):
                     "fac": 2020200,
                     "id": "10-09998",
                     "hw_tit": "AMM",
-                    "pat_id": "1029023412",
+                    "sample_id": "1029023412",
                     "dob": "2009-03-30",
                     "proc_on": "2010-04-13",
                     "child_age": 8,
@@ -417,7 +417,7 @@ class TestResultsAcceptor(PhiaSetUp):
                     "fac": 2020200,
                     "id": "10-09997",
                     "hw_tit": "ZAN",
-                    "pat_id": "212987",
+                    "sample_id": "212987",
                     "dob": "2010-01-12",
                     "proc_on": "2010-04-17",
                     "child_age": 4,
@@ -443,7 +443,7 @@ class TestResultsAcceptor(PhiaSetUp):
         self.assertEqual(phia.Result.objects.count(), 2)
         result1 = phia.Result.objects.get(sample_id="10-09998")
         result2 = phia.Result.objects.get(sample_id="10-09997")
-        # 10-09999 will not make it in because it's missing a pat_id
+        # 10-09999 will not make it in because it's missing a sample_id
         self.assertEqual(result1.payload, payload)
         self.assertEqual(result2.payload, payload)
         self.assertTrue(result1.verified)
@@ -485,7 +485,7 @@ class TestResultsAcceptor(PhiaSetUp):
                     "fac": 0,
                     "id": "10-09999",
                     "hw_tit": "NURSE",
-                    "pat_id": "1234",
+                    "sample_id": "1234",
                     "dob": "2010-02-08",
                     "proc_on": "2010-04-11",
                     "child_age": 3

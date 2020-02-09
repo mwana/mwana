@@ -175,13 +175,13 @@ def accept_record (record, payload):
             cant_save('required field %s missing' % reqd_field)
             return False
 
-    # If pat_id is missing, log a warning and return success without saving.
+    # If sample_id is missing, log a warning and return success without saving.
     # We can't save the record, but this is an expected error condition
-    # because pat_id is not required in the source (Access) database.
+    # because sample_id is not required in the source (Access) database.
     # The only way to recover is if they update the database (the record will
     # be resent at that time).
-    if not dictval(record, 'pat_id'):
-        logger.warning('ignoring record without pat_id field: %s' % str(record))
+    if not dictval(record, 'sample_id'):
+        logger.warning('ignoring record without sample_id field: %s' % str(record))
         return True
 
     #validate clinic id
@@ -195,7 +195,7 @@ def accept_record (record, payload):
     #general field validation
     record_fields = {
         'sample_id': sample_id,
-        'requisition_id': dictval(record, 'pat_id'),
+        'requisition_id': dictval(record, 'sample_id'),
         'payload': payload.id if payload else None,
         'clinic': clinic_obj.id if clinic_obj else None,
         'clinic_code_unrec': clinic_code if not clinic_obj else None,
