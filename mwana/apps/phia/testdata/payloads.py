@@ -4,27 +4,27 @@ Defines some test data payloads
 """
 #a simple raw json payload with three client results records
 INITIAL_PAYLOAD = {
-    "source": "ndola/arthur-davison",
-    "now": "2010-04-22 10:30:00",
+    "source": "lusaka/phia-aims",
+    "now": "2020-04-22 10:30:00",
     "version": "1.0",
     "info": "sync",
     "logs": [
         {
             "msg": "booting daemon...",
             "lvl": "INFO",
-            "at": "2010-04-22 07:18:03,140"
+            "at": "2020-04-22 07:18:03,140"
         },
         {
             "msg": "archiving 124 records",
             "lvl": "INFO",
-            "at": "2010-04-22 09:18:23,248"
+            "at": "2020-04-22 09:18:23,248"
         }
     ],
     "samples": [
         {
-            "coll_on": "2010-03-31",
+            "coll_on": "2020-03-31",
             "hw": "BEYONSE KNOWS",
-            "mother_age": 19,
+            "age": 19,
             "result_detail": None,
             "sync": "new",
             "sex": "f",
@@ -62,9 +62,9 @@ INITIAL_PAYLOAD = {
             "address": "23 Los Angeles",
         },
         {
-            "coll_on": "2010-03-31",
+            "coll_on": "2020-03-31",
             "hw": "JANE SMITH",
-            "mother_age": 19,
+            "age": 19,
             "result_detail": None,
             "sync": "new",
             "sex": "f",
@@ -100,7 +100,7 @@ INITIAL_PAYLOAD = {
         {
             "coll_on": "2010-03-25",
             "hw": "JENNY HOWARD",
-            "mother_age": 41,
+            "age": 41,
             "result_detail": None,
             "sync": "new",
             "sex": "f",
@@ -132,9 +132,9 @@ INITIAL_PAYLOAD = {
             "address": "Lusaka",
         },
         {
-            "coll_on": "2010-04-08",
+            "coll_on": "2020-04-08",
             "hw": "MOLLY",
-            "mother_age": 31,
+            "age": 31,
             "result_detail": None,
             "sync": "new",
             "sex": "f",

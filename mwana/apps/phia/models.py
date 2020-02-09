@@ -2,9 +2,11 @@
 from django.contrib.auth.models import User
 from django.db import models
 from rapidsms.models import Contact
+from datetime import datetime
 
 from mwana.apps.locations.models import Location
 import base64
+
 
 class Result(models.Model):
 
@@ -153,7 +155,6 @@ class Result(models.Model):
     cd4 = models.CharField(max_length=30, blank=True)
     cd4_date = models.DateField(null=True, blank=True)
 
-
     class Meta:
         ordering = ('collected_on', 'requisition_id')
 
@@ -165,29 +166,21 @@ class Result(models.Model):
     def get_result_text(self):
         return '%s;%s' % (self.cd4 or '', self.vl or '')
 
-#    def unsuppressed(self):
-#        try:
-#            return float(self.result) >= 1000
-#        except ValueError:
-#            return False
-#        return False
 
-#    def save(self, *args, **kwargs):
-#        if not self.numeric_result:
-#            value = self.result.lower().replace('copies/ml', '').replace('cp/ml', '').strip()
-#            test = [x for x in ['< 20', '<20', 'detected'] if x in value]
-#            if test:
-#                self.numeric_result = 0
-#            elif '>' in value:
-#                self.numeric_result = 10000000
-#            elif value in ('invalid', ''):
-#                pass
-#            elif value and 'e' not in value:
-#                try:
-#                    self.numeric_result = int(float(value))
-#                except ValueError:
-#                    pass
-#        super(Result, self).save(*args, **kwargs)
+class Followup(models.Model):
+    """ LTC Followup visits log """
+    result = models.ForeignKey(Result)
+    temp_id = models.CharField(max_length=50)
+    clinic_name = models.CharField(max_length=100)
+    reported_on = models.DateTimeField(default=datetime.now)
+    reported_by = models.CharField(max_length=200)
+
+    class Meta:
+        ordering = ('reported_on', 'reported_by')
+
+    def __unicode__(self):
+        return '%s | %s | %s' % (self.temp_id, self.clinic_name,
+                                self.reported_on)
 
 
 class Payload(models.Model):

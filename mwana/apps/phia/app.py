@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-from mwana.apps.phia.models import Result
+from mwana.apps.phia.models import Result, Followup
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import NOT_REGISTERED
 from mwana.apps.labresults.messages import combine_to_length, BAD_PIN
@@ -40,11 +40,12 @@ class App(rapidsms.apps.base.AppBase):
     waiting_for_linkage_pin = {}
     waiting_for_demo_results_pin = {}
     waiting_for_ltc_pin = {}
+    waiting_for_ltc_visit_pin = {}
 
     # we keep a mapping of locations to who collected last, so we can respond
     # when we receive stale pins
     last_collectors = {}
-    
+
 
     mocker = MockResultUtility()
     ltc_mocker = MockLtcUtility()
@@ -58,12 +59,14 @@ class App(rapidsms.apps.base.AppBase):
 
     LTC_NEW_REGEX = r"^(?:%s)(?:[\s,;:]+(.+))?$" % ("LTC NEW")
 
+    LTC_VISIT_REGEX = r"^(?:%s)(?:[\s,;:]+(.+))?$" % ("LTC VISIT")
+
     def start(self):
         """Configure your app in the start phase."""
         self.schedule_notification_task()
         self.schedule_process_payloads_tasks()
         self.schedule_participant_notification_task()
-        
+
     def _get_schedule(self, key, default=None):
         schedules = getattr(settings, 'RESULTS160_SCHEDULES', {})
         return schedules.get(key, default)
@@ -218,6 +221,22 @@ class App(rapidsms.apps.base.AppBase):
                 self.waiting_for_ltc_pin[message.connection] = results
                 message.respond("%(clinic)s has %(count)s ALTC to link to care. Please reply with your PIN code to get details of ALTC participants", count=results.count(), clinic=clinic.name)
             return True
+        if re.match(self.LTC_VISIT_REGEX, message.text, re.IGNORECASE):
+            if not is_eligible_for_phia_results(message.contact):
+                message.respond(NOT_REGISTERED)
+                return True
+            tokens = message.text.split()
+            if len(tokens) == 3:
+                results = Result.objects.filter(clinic=message.contact.clinic, requisition_id=tokens[2].strip())
+                if not results:
+                    message.respond("There is no participant with ID %(id)s. Make sure you typed the temporary ID correctly and try again.", id=tokens[2])
+                    return True
+                self.waiting_for_ltc_visit_pin[message.connection] = results
+                message.respond("Please reply with your PIN to save follow-up visit to %(req_id)s", req_id=tokens[2])
+            else:
+                message.respond("Please specify one valid temporary ID")
+            return True
+
         elif self.mocker.handle(message):
             return True
         elif self.ltc_mocker.handle(message):
@@ -267,6 +286,15 @@ class App(rapidsms.apps.base.AppBase):
             pin = message.text.strip()
             if pin.upper() == message.connection.contact.pin.upper():
                 self.process_ltc_after_pin(message)
+                return True
+            else:
+                message.possible_bad_pin = True
+                logger.warning("bad pin %s" % message.text)
+        elif message.connection in self.waiting_for_ltc_visit_pin \
+                and message.connection.contact:
+            pin = message.text.strip()
+            if pin.upper() == message.connection.contact.pin.upper():
+                self.process_ltc_visit_after_pin(message)
                 return True
             else:
                 message.possible_bad_pin = True
@@ -452,6 +480,29 @@ class App(rapidsms.apps.base.AppBase):
                 res.linked = True
                 res.save()
             self.waiting_for_linkage_pin.pop(message.connection)
+
+    def process_ltc_visit_after_pin(self, message):
+        results = self.waiting_for_ltc_visit_pin[message.connection]
+        clinic = get_clinic_or_default(message.contact)
+        if not results:
+            # how did this happen? 2020/02/07 13:52:59
+            self.error("Problem logging follow-up visit for %s to %s -- there was nothing to report!" % \
+                       (clinic, message.connection.contact))
+            message.respond("Sorry, there are no new records to link for %s." % clinic.name)
+            #            self.waiting_for_pin.pop(message.connection)
+            self.waiting_for_ltc_visit_pin.pop(message.connection)
+        else:
+            for res in results:
+
+                Followup.objects.create(clinic_name=message.contact.clinic.name,
+                                 reported_by=message.contact.name, result=res,
+                                 temp_id=res.requisition_id)
+
+                OutgoingMessage(message.connection, "Follow-up visit to %(req_id)s confirmed",
+                                    # @type res Result
+                                    req_id=res.requisition_id).send()
+                res.save()
+            self.waiting_for_ltc_visit_pin.pop(message.connection)
 
             # remove pending contacts for this clinic and notify them it
 #            # was taken care of

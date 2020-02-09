@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.phia.models import Followup
 from mwana.apps.phia.models import Result
 import time
 import json
@@ -302,6 +303,22 @@ class TestApp(TestScript):
             phia_man < LTC: Banana Nkonde;14 Munali, Lusaka;Demo9991
             """
         self.runScript(script)
+
+        script = """
+            stranger > LTC VISIT
+            stranger < Please send the keyword HELP if you need to be assisted.
+            phia_man > LTC VISIT
+            phia_man < Please specify one valid temporary ID
+            phia_man > LTC VISIT 123x
+            phia_man < There is no participant with ID 123x. Make sure you typed the temporary ID correctly and try again.
+            phia_man > LTC VISIT 9991
+            phia_man < Please reply with your PIN to save follow-up visit to 9991
+            phia_man > 2345
+            phia_man < Follow-up visit to 9991 confirmed
+            """
+        self.runScript(script)
+        followup = Followup.objects.get(temp_id=9991)
+        self.assertEqual(followup.reported_by, "Broken Hill")
 
         
 
