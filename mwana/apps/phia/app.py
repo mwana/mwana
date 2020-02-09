@@ -33,10 +33,6 @@ logger = logging.getLogger(__name__)
 RESULTS = "Here are your results: "
 
 
-def is_eligible_for_phia_results(contact):
-    return contact and contact.is_active  and const.get_phia_worker_type() in contact.types.all() \
-
-
 class App(rapidsms.apps.base.AppBase):
     # we store everyone who we think could be sending us a PIN for results
     # here, so we can intercept the message.
@@ -562,6 +558,7 @@ class App(rapidsms.apps.base.AppBase):
             r.result_sent_date = datetime.now()
             r.save()
 
+
 def build_results_messages(results):
     """
     From a list of results, build a list of messages reporting
@@ -604,3 +601,7 @@ def build_ltc_messages(results):
         next_msg, remainder = combine_to_length(remainder)
         responses.append(next_msg)
     return responses
+
+
+def is_eligible_for_phia_results(contact):
+    return contact and contact.is_active  and const.get_phia_worker_type() in contact.types.all() \

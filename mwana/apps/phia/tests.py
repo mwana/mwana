@@ -24,16 +24,6 @@ from mwana.apps.phia.testdata.payloads import INITIAL_PAYLOAD
 
 class PhiaSetUp(TestScript):
 
-    def _result_text(self):
-        """
-        Returns the appropriate display value for viral load results as it would
-        appear in an SMS.
-        """
-        results_text = getattr(settings, 'RESULTS160_RESULT_DISPLAY', {})
-        results = {'detected': results_text.get('P', 'Detected'),
-                   'not_detected': results_text.get('N', 'NotDetected')}
-        return results
-
     def setUp(self):
         # this call is required if you want to override setUp
         super(PhiaSetUp, self).setUp()
@@ -594,6 +584,13 @@ class TestResultsAcceptor(PhiaSetUp):
         """
         time.sleep(1)
         self.runScript(script)
+        # r = Result()
+        # r.result_sent_date
+
+        self.assertEqual(2, Result.objects.exclude(date_participant_notified=None).count())
+        self.assertEqual(3, Result.objects.exclude(who_retrieved=None).count())
+        self.assertEqual(3, Result.objects.exclude(result_sent_date=None).count())
+        self.assertEqual(3, Result.objects.filter(notification_status='sent').count())
 
 
         # Result.objects.filter(notification_status='notified').update(notification_status='sent')
