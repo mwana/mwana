@@ -528,8 +528,17 @@ class App(rapidsms.apps.base.AppBase):
 
     def send_pending_participant_notifications(self):
         results = Result.objects.exclude(who_retrieved=None).exclude(result_sent_date=None).\
-            exclude(notification_status='new').exclude(phone=None).exclude(phone='').filter(date_participant_notified=None)
+            filter(notification_status='sent').filter(date_participant_notified=None)
         for res in results:
+            if not res.phone:
+                continue
+            # @type res Result
+            elif not res.send_pii:
+                continue
+            elif not res.contact_method:
+                continue
+            elif res.contact_method.strip().lower() != 'sms':
+                continue
             self.send_participant_message(res)
 
     def send_results(self, connections, results, msgcls=OutgoingMessage):

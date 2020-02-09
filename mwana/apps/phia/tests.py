@@ -592,6 +592,21 @@ class TestResultsAcceptor(PhiaSetUp):
         self.assertEqual(3, Result.objects.exclude(result_sent_date=None).count())
         self.assertEqual(3, Result.objects.filter(notification_status='sent').count())
 
+        # If for some reason eligible participants did not get notifications
+        Result.objects.all().update(date_participant_notified=None)
+        self.startRouter()
+        tasks.send_results_ready_notification_to_participant(self.router)
+
+        # Get all the messages sent
+        msgs = self.receiveAllMessages()
+        self.stopRouter()
+
+        msg = "Your appointment is due at Mibenge Clinic. If you got this msg by mistake please ignore"
+        self.assertEqual(2, len(msgs))
+        self.assertEqual(msg, msgs[0].text)
+        self.assertEqual(msg, msgs[1].text)
+        self.assertEqual('+260978656561', msgs[0].connection.identity)
+        self.assertEqual('+260978656562', msgs[1].connection.identity)
 
         # Result.objects.filter(notification_status='notified').update(notification_status='sent')
         # start router and send a notification
@@ -606,16 +621,6 @@ class TestResultsAcceptor(PhiaSetUp):
         self.assertEqual(msg, msgs[0].text)
         self.assertEqual(msg, msgs[1].text)
 
-        # self.assertEqual(3, Result.objects.filter(notification_status='notified',
-        #                     ).count())
-        #
-        # self.assertEqual(3, Result.objects.filter(notification_status='notified',
-        #                     ).exclude(date_of_first_notification=None).count())
-        #
-        # self.assertEqual(0, Result.objects.filter(notification_status='sent',
-        #                     result_sent_date=None).count())
-        # self.assertEqual(0, Result.objects.filter(
-        #                     arrival_date=None).exclude(result=None).count())
         time.sleep(1)
         self.stopRouter()
 
