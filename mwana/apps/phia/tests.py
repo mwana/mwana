@@ -594,8 +594,8 @@ class TestResultsAcceptor(PhiaSetUp):
         script = """
             other_worker > 6789
             other_worker < Here are your results: **** tempID3;;800cp/ml. **** tempID1;780;400cp/ml. **** tempID2;780;
-            +260978656561 < Your appointment is due at Mibenge Clinic. If you got this msg by mistake please ignore
-            +260978656562 < Your appointment is due at Mibenge Clinic. If you got this msg by mistake please ignore
+            +260978656561 < Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID1
+            +260978656562 < Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID2
             clinic_worker < Mary Phiri has collected these results
             other_worker < Please record these results in your clinic records and promptly delete them from your phone.
         """
@@ -618,10 +618,11 @@ class TestResultsAcceptor(PhiaSetUp):
         msgs = self.receiveAllMessages()
         self.stopRouter()
 
-        msg = "Your appointment is due at Mibenge Clinic. If you got this msg by mistake please ignore"
+        msg1 = "Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID1"
+        msg2 = "Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID2"
         self.assertEqual(2, len(msgs))
-        self.assertEqual(msg, msgs[0].text)
-        self.assertEqual(msg, msgs[1].text)
+        self.assertEqual(msg1, msgs[0].text)
+        self.assertEqual(msg2, msgs[1].text)
         self.assertEqual('+260978656561', msgs[0].connection.identity)
         self.assertEqual('+260978656562', msgs[1].connection.identity)
 

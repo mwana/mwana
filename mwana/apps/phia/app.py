@@ -551,10 +551,21 @@ class App(rapidsms.apps.base.AppBase):
 #            self.last_collectors[clinic] = \
 #                message.connection.contact
 
-    def send_participant_message(self, res, msgcls=OutgoingMessage):
+    def send_participant_message(self, res, worker=None, msgcls=OutgoingMessage):
         conn = self._get_participant_connection(settings.GET_ORIGINAL_TEXT(res.phone))
+        if worker:
+            to_see = worker.name
+        elif res.who_retrieved:
+            to_see = res.who_retrieved.name
+        else:
+            to_see = "the facility"
+
         if conn:
-            msgcls(conn, "Your appointment is due at %(clinic)s. If you got this msg by mistake please ignore", clinic=res.clinic.name).send()
+#            msgcls(conn, "Your appointment is due at %(clinic)s. If you got this msg by mistake please ignore", clinic=res.clinic.name).send()
+            msgcls(conn, "Your results are ready at %(clinic)s, see %(to_see)s with your "
+                         "referral form and keep this number %(req_id)s", clinic=res.clinic.name,
+                   to_see=to_see,
+                   req_id=res.requisition_id).send()
             res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
             res.date_participant_notified = datetime.now()
             res.save()
@@ -601,6 +612,14 @@ class App(rapidsms.apps.base.AppBase):
                 msg = msgcls(connection, resp)
                 msg.send()
 
+        for r in results:
+            r.notification_status = 'sent'
+            r.result_sent_date = datetime.now()
+            r.save()
+
+        if len(connections) == 1:
+            worker = connections[0].contact
+
         for res in results:
             if not res.phone:
                 continue
@@ -611,12 +630,8 @@ class App(rapidsms.apps.base.AppBase):
                 continue
             elif res.contact_method.strip().lower() != 'sms':
                 continue
-            self.send_participant_message(res, msgcls)
+            self.send_participant_message(res, worker, msgcls)
 
-        for r in results:
-            r.notification_status = 'sent'
-            r.result_sent_date = datetime.now()
-            r.save()
 
 
 def build_results_messages(results):
