@@ -139,7 +139,7 @@ class TestApp(TestScript):
 
         script = """
             phia     > join phia 403012 broken hill 2345
-            phia     < Hi Broken Hill, thanks for registering for Results160 PHIA at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
+            phia     < Hi Broken Hill, thanks for registering as a ZAMPHIA2020 user at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
         time.sleep(.5)
@@ -206,6 +206,36 @@ class TestApp(TestScript):
             rb     < Hi Rupiah Banda, thanks for registering for Results160 from Central Clinic. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
             rb     > agent kdh 02 rupiah banda
             rb     < Hello Rupiah Banda! You are already registered as a RemindMi Agent for Central Clinic. To leave your current clinic and join Kafue District Hospital, reply with LEAVE and then re-send your message.
+        """
+        self.runScript(script)
+
+    def testJoinAsWorkerThenPhiaRegistrationSameClinic(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        # the same clinic
+        script = """
+            rb     > join clinic kdh rupiah banda 1000
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            rb     > join phia kdh rupiah banda 1000
+            rb     < Hi Rupiah Banda, thanks for registering as a ZAMPHIA2020 user at Kafue District Hospital. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+        """
+        self.runScript(script)
+
+    def testJoinAsWorkerThenPhiaRegistrationDifferentClinics(self):
+        self.assertEqual(0, Contact.objects.count())
+        ctr = LocationType.objects.create(slug=const.CLINIC_SLUGS[0])
+        kdh = Location.objects.create(name="Kafue District Hospital",
+                                      slug="kdh", type=ctr)
+        central_clinic = Location.objects.create(name="Central Clinic",
+                                                 slug="101010", type=ctr)
+        # different clinics
+        script = """
+            rb     > join clinic 101010 rupiah banda 1000
+            rb     < Hi Rupiah Banda, thanks for registering for Results160 from Central Clinic. Your PIN is 1000. Reply with keyword 'HELP' if this is incorrect
+            rb     > join phia kdh rupiah banda 1000
+            rb     < Your phone is already registered to Rupiah Banda at Central Clinic. To change name or location first reply with keyword 'LEAVE' and try again.
         """
         self.runScript(script)
 

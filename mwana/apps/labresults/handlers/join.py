@@ -133,7 +133,7 @@ class JoinHandler(KeywordHandler):
         response = ("Hi %(name)s, thanks for registering for Results160 from"
                          " %(location)s. Your PIN is %(pin)s. " 
                          "Reply with keyword 'HELP' if this is " 
-                         "incorrect" % {'name':name, 'location':location, 'pin':pin})
+                         "incorrect" % {'name': name, 'location': location, 'pin': pin})
         if worker_type == const.get_hub_worker_type():
             response = response.replace("for Results160 from", "for Results160 from hub at")
         elif worker_type == const.get_lab_worker_type():
@@ -143,7 +143,7 @@ class JoinHandler(KeywordHandler):
         elif worker_type == const.get_province_worker_type():
             response = response.replace(". Your PIN is ", " PHO. Your PIN is ")        
         elif worker_type == const.get_phia_worker_type():
-            response = response.replace("for Results160 from", "as a ZAMPHIA2020 RoR & LTC SMS user at")
+            response = response.replace("for Results160 from", "as a ZAMPHIA2020 user at")[:160]
         return response
 
     def handle(self, text):

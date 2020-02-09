@@ -170,16 +170,16 @@ class TestApp(TestScript):
             labman > join lab 4o30i2 mark zuckerberg 1234
             labman < Hi Mark Zuckerberg, thanks for registering for Results160 from lab at Central Clinic. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             kdh_man > join phia kdh James Bond 1234
-            kdh_man < Hi James Bond, thanks for registering as a ZAMPHIA2020 RoR & LTC SMS user at Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
+            kdh_man < Hi James Bond, thanks for registering as a ZAMPHIA2020 user at Kafue District Hospital. Your PIN is 1234. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
         
 
         script = """
             phia_man > join phia 403012 broken hill 2345
-            phia_man < Hi Broken Hill, thanks for registering as a ZAMPHIA2020 RoR & LTC SMS user at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
+            phia_man < Hi Broken Hill, thanks for registering as a ZAMPHIA2020 user at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
             phia_lady > join phia 403012 lady gaga 2345
-            phia_lady < Hi Lady Gaga, thanks for registering as a ZAMPHIA2020 RoR & LTC SMS user at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
+            phia_lady < Hi Lady Gaga, thanks for registering as a ZAMPHIA2020 user at Central Clinic. Your PIN is 2345. Reply with keyword 'HELP' if this is incorrect
             """
         self.runScript(script)
         time.sleep(.5)
