@@ -69,6 +69,16 @@ class Issue(models.Model):
             
         return ("%s %s" % (f_name, l_name)).strip()
 
+    def save(self, *args, **kwargs):
+        if self.status in ['new', 'ongoing', 'resurfaced', 'future']:
+            self.open = True
+        elif self.status in ['completed', 'bugfixed', 'obsolete', 'closed']:
+            self.open = False
+        if self.status in ['completed', 'bugfixed']:
+            self.percentage_complete = 100
+        super(Issue, self).save(*args, **kwargs)
+
+
 class Comment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     edited_on = models.DateTimeField(auto_now=True)
