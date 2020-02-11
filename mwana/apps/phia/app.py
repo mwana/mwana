@@ -170,7 +170,7 @@ class App(rapidsms.apps.base.AppBase):
                     self._mark_results_pending(results, [message.connection])
                     return True
                 else:
-                    message.respond("Central Clinic has no new results ready right now for %(req_id)s. You will be notified when new results are ready.", req_id=tokens[2])
+                    message.respond("%(clinic)s has no new results ready right now for %(req_id)s. You will be notified when new results are ready.", clinic=clinic.name, req_id=tokens[2])
                     return True
             results = self._pending_results(clinic)
             if results:
