@@ -207,7 +207,7 @@ class App(rapidsms.apps.base.AppBase):
                 message.respond("LTC: Banana Nkonde;14 Munali, Lusaka;%(req_id)s", req_id=tokens[2])
             elif len(tokens) == 3:
                 #todo: review
-                results = Result.objects.filter(clinic=message.contact.clinic, linked=False, requisition_id=tokens[2].strip())
+                results = Result.objects.filter(clinic=message.contact.clinic, requisition_id=tokens[2].strip())
                 if not results:
                     message.respond("There are no LTC details for participant with ID %(req_id)s for %(clinic)s. Make sure you entered the correct ID", clinic=clinic.name, req_id=tokens[2])
                     return True

@@ -301,6 +301,11 @@ class TestApp(TestScript):
             phia_man < LTC: Banana Nkonde;14 Munali, Lusaka;Demo9990
             phia_man > LTC CHECK Demo9991
             phia_man < LTC: Banana Nkonde;14 Munali, Lusaka;Demo9991
+            phia_man > LTC CHECK 1234567
+            phia_man < Please reply with your PIN to save linkage for 1234567
+            phia_man > 2345
+            phia_man < LTC: **** Banana Nkonde;14 Munali, Lusaka;1234567
+            phia_man < Please record the details in your LTC immediately and DELETE them from your phone. Thank you again!
             """
         self.runScript(script)
 
