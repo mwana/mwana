@@ -115,9 +115,10 @@ class App(rapidsms.apps.base.AppBase):
             messages = self.results_avail_messages(clinic, results)
             if messages:
                 self.send_messages(messages)
-                self._mark_results_pending(results, (msg.connection
-                                                     for msg in messages))
+#                self._mark_results_pending(results, (msg.connection
+#                                                     for msg in messages))
                 for result in results:
+                    result.notification_status = 'notified'
                     result.date_clinic_notified = datetime.now()
                     if not result.date_of_first_notification:
                         result.date_of_first_notification = datetime.now()
@@ -172,13 +173,8 @@ class App(rapidsms.apps.base.AppBase):
                 else:
                     message.respond("%(clinic)s has no new results ready right now for %(req_id)s. You will be notified when new results are ready.", clinic=clinic.name, req_id=tokens[2])
                     return True
-            results = self._pending_results(clinic)
-            if results:
-                message.respond("%(clinic)s has %(count)s results ready. Please reply with your PIN code to retrieve them.",
-                clinic=clinic.name, count=results.count())
-                self._mark_results_pending(results, [message.connection])
             else:
-                message.respond("%(clinic)s has no new results ready right now. You will be notified when new results are ready.", clinic=clinic.name)
+                message.respond("Please specify one valid temporary ID")
             return True
         if re.match(self.LTC_NEW_REGEX, message.text, re.IGNORECASE):
             if not is_eligible_for_phia_results(message.contact):
@@ -353,9 +349,9 @@ class App(rapidsms.apps.base.AppBase):
 
             results = Result.objects.filter(clinic=clinic,
                                             clinic__send_live_results=True,
-                                            linked=False, # when should we stop if linkage not happening
+                                            ltc_details_sent=False, # when should we stop if linkage not happening
                                             #todo: review
-                                            notification_status__in=['sent'])
+                                            ).exclude(notification_status='unprocessed')
             if req_id:
                 return results.filter(self._result_verified()).filter(requisition_id=req_id)[:9]
             return results.filter(self._result_verified())[:9]
@@ -392,7 +388,7 @@ class App(rapidsms.apps.base.AppBase):
         all_msgs = []
         for contact in contacts:
             msg = OutgoingMessage(connection=contact.default_connection,
-                                  template="%(clinic)s has %(count)s results ready. Please reply with your pin code to retrieve them.",
+                                  template="%(clinic)s has %(count)s results ready.",
                                   clinic=clinic.name, count=results.count())
             all_msgs.append(msg)
 
@@ -554,15 +550,24 @@ class App(rapidsms.apps.base.AppBase):
             self.last_collectors[clinic] = \
                 message.connection.contact
 
+            for res in results:
+                res.ltc_details_sent =  True
+                res.save()
+
 #            self.last_collectors[clinic] = \
 #                message.connection.contact
 
     def send_participant_message(self, res, worker=None, msgcls=OutgoingMessage):
         conn = self._get_participant_connection(settings.GET_ORIGINAL_TEXT(res.phone))
+        contacts = \
+            Contact.active.filter(Q(location=res.clinic) | Q(location__parent=res.clinic),
+                                  Q(types=const.get_phia_worker_type())).distinct()
         if worker:
             to_see = worker.name
         elif res.who_retrieved:
             to_see = res.who_retrieved.name
+        elif contacts:
+            to_see = contacts[0].name
         else:
             to_see = "the facility"
 
@@ -595,8 +600,7 @@ class App(rapidsms.apps.base.AppBase):
         return conn
 
     def send_pending_participant_notifications(self):
-        results = Result.objects.exclude(who_retrieved=None).exclude(result_sent_date=None).\
-            filter(notification_status='sent').filter(date_participant_notified=None)
+        results = Result.objects.exclude(linked=True).exclude(clinic=False).filter(date_participant_notified=None)
         for res in results:
             if not res.phone:
                 continue

@@ -118,6 +118,7 @@ class Result(models.Model):
     #all date fields are entered by lab -- not based on date result entered or such
 
     notification_status = models.CharField(choices=STATUS_CHOICES, max_length=15)
+    ltc_details_sent = models.BooleanField(default=False)
 
     #ancillary demographic data that can help matching up results back to patients
     birthdate = models.DateField(null=True, blank=True)

@@ -229,7 +229,7 @@ class TestApp(TestScript):
             phia_man < Here are your results: **** 9990;CD200;VL500. **** 9991;CD250;VL300. **** 9992;CD650;VL100
             phia_man < Please record these results in your clinic records and promptly delete them from your phone.  Thank you again Broken Hill!
             phia_lady > 2345
-            phia_lady < Hello Lady Gaga. Are you trying to retrieve new results? There are no new results ready for you. We shall let you know as soon as they are ready.
+            phia_lady < Sorry Lady Gaga. Respond with keyword HELP for assistance.
             """
         self.runScript(script)
 
@@ -238,7 +238,7 @@ class TestApp(TestScript):
             stranger > ROR CHECK
             stranger < Please send the keyword HELP if you need to be assisted.
             phia_man > ROR CHECK
-            phia_man < Central Clinic has 1 results ready. Please reply with your PIN code to retrieve them.
+            phia_man < Please specify one valid temporary ID
             phia_man > ROR CHECK 403012
             phia_man < Central Clinic has no new results ready right now for 403012. You will be notified when new results are ready.
             phia_man > ROR CHECK Demo9990
@@ -266,9 +266,11 @@ class TestApp(TestScript):
 
         script = """
             phia_man > ROR CHECK
-            phia_man < Central Clinic has 2 results ready. Please reply with your PIN code to retrieve them.
+            phia_man < Please specify one valid temporary ID
+            phia_man > ROR CHECK 1234567
+            phia_man < Please reply with your PIN to view the results for 1234567
             phia_man > 2345
-            phia_man < Here are your results: **** 1111;601;255. **** 1234567;600;250
+            phia_man < Here are your results: **** 1234567;600;250
             """
         self.runScript(script)
 
@@ -283,7 +285,7 @@ class TestApp(TestScript):
             phia_man < LTC: Banana Nkonde;14 Munali, Lusaka;9990 ****. Sante Banda;12 Minestone, Lusaka;9991 ****
             phia_man < Please record these details in your LTC Register immediately and promptly delete them from your phone. Thank you again!
             phia_lady > 2345
-            phia_lady < Hello Lady Gaga. Are you trying to retrieve new results? There are no new results ready for you. We shall let you know as soon as they are ready.
+            phia_lady < Sorry Lady Gaga. Respond with keyword HELP for assistance.
             """
         self.runScript(script)
 
@@ -292,7 +294,7 @@ class TestApp(TestScript):
         lname=settings.GET_CLEANED_TEXT("Banda"),
         address=settings.GET_CLEANED_TEXT("12 Minestone, Lusaka"),
         sample_id='1', vl='250', cd4 = 600, notification_status='sent')
-        Result.objects.filter(clinic=phiaman.clinic, requisition_id="1234567").update(notification_status='sent')
+        Result.objects.filter(clinic=phiaman.clinic, requisition_id="1234567").update(ltc_details_sent=True)
         #todo: ask for pin even for demo results
         script = """
             stranger > LTC CHECK
@@ -593,8 +595,8 @@ class TestResultsAcceptor(PhiaSetUp):
         self.stopRouter()
         self.assertEqual(2, len(msgs))
 
-        msg1 = "Mibenge Clinic has 3 results ready. Please reply with your pin code to retrieve them."
-        msg2 = "Mibenge Clinic has 3 results ready. Please reply with your pin code to retrieve them."
+        msg1 = "Mibenge Clinic has 3 results ready."
+        msg2 = "Mibenge Clinic has 3 results ready."
 
         self.assertTrue(msg1 in (msgs[0].text, msgs[1].text ),
         "Following message was not sent:\n%s" % msg1)
@@ -602,26 +604,24 @@ class TestResultsAcceptor(PhiaSetUp):
         "Following message was not sent:\n%s" % msg2)
         self.assertEqual(2, len(msgs))
         self.assertEqual(3, Result.objects.filter(notification_status='notified').count())
+        self.assertEqual(1, Result.objects.filter(notification_status='unprocessed').count())
 
         time.sleep(.1)
 
+        # No results will be sent
         script = """
             other_worker > 6789
-            other_worker < Here are your results: **** tempID3;;800cp/ml. **** tempID1;780;400cp/ml. **** tempID2;780;
-            +260978656561 < Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID1
-            +260978656562 < Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID2
-            clinic_worker < Mary Phiri has collected these results
-            other_worker < Please record these results in your clinic records and promptly delete them from your phone.
-        """
+            other_worker < Sorry Mary Phiri. Respond with keyword HELP for assistance.
+            """
         time.sleep(1)
         self.runScript(script)
         # r = Result()
         # r.result_sent_date
 
-        self.assertEqual(2, Result.objects.exclude(date_participant_notified=None).count())
-        self.assertEqual(3, Result.objects.exclude(who_retrieved=None).count())
-        self.assertEqual(3, Result.objects.exclude(result_sent_date=None).count())
-        self.assertEqual(3, Result.objects.filter(notification_status='sent').count())
+        self.assertEqual(0, Result.objects.exclude(date_participant_notified=None).count())
+        self.assertEqual(4, Result.objects.filter(who_retrieved=None).count())
+        self.assertEqual(4, Result.objects.filter(result_sent_date=None).count())
+        self.assertEqual(0, Result.objects.filter(notification_status='sent').count())
 
         # If for some reason eligible participants did not get notifications
         Result.objects.all().update(date_participant_notified=None)
@@ -632,8 +632,8 @@ class TestResultsAcceptor(PhiaSetUp):
         msgs = self.receiveAllMessages()
         self.stopRouter()
 
-        msg1 = "Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID1"
-        msg2 = "Your results are ready at Mibenge Clinic, see Mary Phiri with your referral form and keep this number tempID2"
+        msg1 = "Your results are ready at Mibenge Clinic, see John Banda with your referral form and keep this number tempID1"
+        msg2 = "Your results are ready at Mibenge Clinic, see John Banda with your referral form and keep this number tempID2"
         self.assertEqual(2, len(msgs))
         self.assertEqual(msg1, msgs[0].text)
         self.assertEqual(msg2, msgs[1].text)
@@ -643,6 +643,8 @@ class TestResultsAcceptor(PhiaSetUp):
         # Result.objects.filter(notification_status='notified').update(notification_status='sent')
         # start router and send a notification
         self.startRouter()
+
+        self.assertEqual(1, Result.objects.filter(notification_status='unprocessed', requisition_id="tempID4").count())
         tasks.send_tlc_details_notification(self.router)
 
         # Get all the messages sent

@@ -48,7 +48,7 @@ def send_tlc_details_notification(router):
         not_linked = Q(phia_results__linked=False)
         #Todo: review
         new_notified = Q(phia_results__notification_status__in=
-                         ['sent'])
+                         ['new', 'updated', 'notified',  'sent'])
         clinics_with_results =\
           Location.objects.filter(new_notified & verified & send_live_results & not_linked, facility_type).distinct()
         testresults_app = router.get_app("mwana.apps.phia")
