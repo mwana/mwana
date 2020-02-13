@@ -573,8 +573,11 @@ class App(rapidsms.apps.base.AppBase):
 
         if conn:
 #            msgcls(conn, "Your appointment is due at %(clinic)s. If you got this msg by mistake please ignore", clinic=res.clinic.name).send()
+            clinic_name = clinic=res.clinic.name
+            if not any(i in clinic_name.lower() for i in ['hosptal', 'clinic', 'health']):
+                clinic_name += " Clinic"
             msgcls(conn, "Your results are ready at %(clinic)s, see %(to_see)s with your "
-                         "referral form and keep this number %(req_id)s", clinic=res.clinic.name,
+                         "referral form and keep this number %(req_id)s", clinic=clinic_name,
                    to_see=to_see,
                    req_id=res.requisition_id).send()
             res.participant_informed = res.participant_informed + 1 if res.participant_informed else 1
