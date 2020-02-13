@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4
+from mwana.apps.phia.models import Linkage
 from mwana.apps.phia.models import Followup
 from django.contrib import admin
 from mwana.apps.phia.models import *
@@ -51,3 +52,11 @@ class FollowupAdmin(admin.ModelAdmin):
     search_fields = ('temp_id', 'clinic_name', 'reported_by')
     date_hierarchy = 'reported_on'
 admin.site.register(Followup, FollowupAdmin)
+
+
+class LinkageAdmin(admin.ModelAdmin):
+    list_display = ('temp_id', 'clinic', 'clinic_code', 'linked_by', 'linked_on', 'result')
+    list_filter = ['linked_by', 'clinic',]
+    search_fields = ('temp_id', 'clinic_code', 'result')
+    date_hierarchy = 'linked_on'
+admin.site.register(Linkage, LinkageAdmin)

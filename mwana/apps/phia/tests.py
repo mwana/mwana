@@ -1,5 +1,6 @@
 # vim: ai ts=4 sts=4 et sw=4
 
+from mwana.apps.phia.models import Linkage
 from mwana.apps.phia.models import Followup
 from mwana.apps.phia.models import Result
 import time
@@ -188,7 +189,7 @@ class TestApp(TestScript):
         self.assertEqual(phiaman.types.all()[0].slug, const.PHIA_WORKER_SLUG)
      
 
-        Result.objects.create(clinic=phiaman.clinic, requisition_id="1234567",
+        Result.objects.create(clinic=phiaman.location, requisition_id="1234567",
         fname=settings.GET_CLEANED_TEXT("Banana"),
         lname=settings.GET_CLEANED_TEXT("Nkonde"),
         address=settings.GET_CLEANED_TEXT("14 Munali, Lusaka"),
@@ -199,7 +200,9 @@ class TestApp(TestScript):
             phia_man > LTC NEW
             phia_man < Please specify one valid temporary ID
             phia_man > LTC NEW 123456
-            phia_man < There is no record with ID 123456 to link. Make sure you typed the ID correctly and try again.
+            phia_man < Please reply with your PIN to save linkage for 123456
+            phia_man > 2345
+            phia_man < Clinical interaction for 123456 confirmed
             phia_man > LTC NEW 1234567
             phia_man < Please reply with your PIN to save linkage for 1234567
             phia_man > 1111
@@ -208,6 +211,12 @@ class TestApp(TestScript):
             phia_man < Clinical interaction for 1234567 confirmed
             """
         self.runScript(script)
+        self.assertEqual(2, Linkage.objects.all().count())
+        self.assertEqual(2, Linkage.objects.filter(linked_by=phiaman, clinic=phiaman.location).count())
+        self.assertEqual(1, Linkage.objects.filter(result=None).count())
+        self.assertEqual(1, Linkage.objects.filter(temp_id='123456').count())
+        self.assertEqual(1, Linkage.objects.filter(temp_id='1234567').count())
+        self.assertEqual(0, Linkage.objects.filter(linked_on=None).count())
        
         script = """
             phia_man > ROR DEMO 403012
@@ -302,7 +311,7 @@ class TestApp(TestScript):
             phia_man > LTC CHECK Demo9991
             phia_man < LTC: Banana Nkonde;14 Munali, Lusaka;Demo9991
             phia_man > LTC CHECK 1234567
-            phia_man < Please reply with your PIN to save linkage for 1234567
+            phia_man < Please reply with your PIN to view the details for 1234567
             phia_man > 2345
             phia_man < LTC: **** Banana Nkonde;14 Munali, Lusaka;1234567
             phia_man < Please record the details in your LTC immediately and DELETE them from your phone. Thank you again!

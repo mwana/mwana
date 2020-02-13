@@ -1,7 +1,7 @@
 # vim: ai ts=4 sts=4 et sw=4
 
 
-from mwana.apps.phia.models import Result, Followup
+from mwana.apps.phia.models import Result, Followup, Linkage
 from mwana.apps.labresults.messages import RESULTS_PROCESSED
 from mwana.apps.labresults.messages import NOT_REGISTERED
 from mwana.apps.labresults.messages import combine_to_length, BAD_PIN
@@ -187,11 +187,10 @@ class App(rapidsms.apps.base.AppBase):
             clinic = get_clinic_or_default(message.contact)
             tokens = message.text.split()
             if len(tokens) == 3:
-                results = Result.objects.filter(clinic=message.contact.clinic, linked=False, requisition_id=tokens[2].strip())
-                if not results:
-                    message.respond("There is no record with ID %(id)s to link. Make sure you typed the ID correctly and try again.", id=tokens[2])
+                if Linkage.objects.filter(clinic=clinic, temp_id=tokens[2].strip()).exists():
+                    message.respond("Participant with ID %(id)s already saved as linked to care. Make sure you typed the ID correctly and try again.", id=tokens[2])
                     return True
-                self.waiting_for_linkage_pin[message.connection] = results
+                self.waiting_for_linkage_pin[message.connection] = tokens[2].strip()
                 message.respond("Please reply with your PIN to save linkage for %(req_id)s", req_id=tokens[2])
             else:
                 message.respond("Please specify one valid temporary ID")
@@ -212,7 +211,7 @@ class App(rapidsms.apps.base.AppBase):
                     message.respond("There are no LTC details for participant with ID %(req_id)s for %(clinic)s. Make sure you entered the correct ID", clinic=clinic.name, req_id=tokens[2])
                     return True
                 self.waiting_for_ltc_pin[message.connection] = results
-                message.respond("Please reply with your PIN to save linkage for %(req_id)s", req_id=tokens[2])
+                message.respond("Please reply with your PIN to view the details for %(req_id)s", req_id=tokens[2])
             else:
                 results = self._pending_ltc(message.contact.clinic)
                 if not results:
@@ -463,9 +462,9 @@ class App(rapidsms.apps.base.AppBase):
                 message.connection.contact
 
     def process_linkage_after_pin(self, message):
-        results = self.waiting_for_linkage_pin[message.connection]
+        temp_id = self.waiting_for_linkage_pin[message.connection]
         clinic = get_clinic_or_default(message.contact)
-        if not results:
+        if not temp_id:
             # how did this happen?
             self.error("Problem linking client for %s to %s -- there was nothing to report!" % \
                        (clinic, message.connection.contact))
@@ -473,12 +472,19 @@ class App(rapidsms.apps.base.AppBase):
             #            self.waiting_for_pin.pop(message.connection)
             self.waiting_for_linkage_pin.pop(message.connection)
         else:
-            for res in results:
-                OutgoingMessage(message.connection, "Clinical interaction for %(req_id)s confirmed",
+
+            linkage = Linkage.objects.create(temp_id=temp_id, clinic=clinic, clinic_code=clinic.slug,
+            linked_by=message.contact)
+            results = Result.objects.filter(clinic=linkage.clinic, requisition_id=linkage.temp_id)
+            if results:
+                result = results[0]
+                linkage.result = result
+                linkage.save()
+                result.linked = True
+                result.save()
+            OutgoingMessage(message.connection, "Clinical interaction for %(req_id)s confirmed",
                                     # @type res Result
-                                    req_id=res.requisition_id).send()
-                res.linked = True
-                res.save()
+                                    req_id=temp_id).send()
             self.waiting_for_linkage_pin.pop(message.connection)
 
     def process_ltc_visit_after_pin(self, message):

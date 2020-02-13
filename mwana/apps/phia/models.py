@@ -234,3 +234,21 @@ class LabLog(models.Model):
                                 self.message if len(self.message) < 20 else (self.message[:17] + '...'))) \
             if not self.raw else 'parse error'
 
+class Linkage(models.Model):
+    """2020/02/10 18:00:02
+       Logs Linkage To Care of all participants even those whose results are not yet in the system.
+       That may happen if participants tested have quickly gone to the clinic before lab results are ready
+       It is also used to track how active HCW are to determine their remuneration
+    """
+    temp_id = models.CharField(max_length=50, unique=True)
+    clinic = models.ForeignKey(Location, null=True, blank=True)
+    clinic_code = models.CharField(max_length=20)
+    linked_by = models.ForeignKey(Contact)
+    linked_on = models.DateTimeField(default=datetime.now)
+    result = models.ForeignKey(Result, null=True, blank=True)
+
+    class Meta:
+        ordering = ('linked_on', 'linked_by')
+
+    def __unicode__(self):
+        return '%s | %s | %s | %s' % (self.temp_id, self.clinic.name, self.clinic_code, self.linked_on)
