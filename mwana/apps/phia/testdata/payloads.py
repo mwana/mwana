@@ -138,7 +138,6 @@ INITIAL_PAYLOAD = {
             "result_detail": None,
             "sync": "new",
             "sex": "f",
-            "result": "300",
             "recv_on": "2010-04-15",
             "fac": '402029',
             "id": "10-09997",
