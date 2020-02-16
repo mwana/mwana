@@ -46,13 +46,13 @@ class App (rapidsms.apps.base.AppBase):
             return True
 
         # Clinic worker: pin issues
-        if is_pin(text) and ready_results(contact).count() == 0:
+        if is_pin(text) and ready_results(contact).count() == 0 and get_clinic_worker_type() in contact.types.all():
             message.respond("Hello %s. Are you trying to retrieve new "
                             "results? There are no new results ready for you. We shall let "
                             "you know as soon as they are ready." % contact.name)
             return True
 
-        if is_pin(text) and notified_results(contact).count() > 0:
+        if is_pin(text) and notified_results(contact).count() > 0 and get_clinic_worker_type() in contact.types.all():
             if is_pin_correct(text, message):
                 message.respond("Sorry %s. If you are trying "
                                 "to retrieve new results please send the keyword CHECK." % contact.name)
@@ -62,7 +62,7 @@ class App (rapidsms.apps.base.AppBase):
                                 " correct PIN when asked to." % contact.name)
                 
             return True    
-        elif is_pin(text) and fresh_results(contact).count() > 0:
+        elif is_pin(text) and fresh_results(contact).count() > 0 and get_clinic_worker_type() in contact.types.all():
             if is_pin_correct(text, message):
                 message.respond("Hello %s. If you are trying to retrieve new "
                                 "results please send the keyword CHECK." % contact.name)

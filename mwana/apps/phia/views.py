@@ -226,6 +226,7 @@ def accept_record (record, payload):
         'send_pii': dictval(record, 'send_pii'),
         'share_contact': dictval(record, 'share_contact'),
         'contact_by_phone': dictval(record, 'contact_by_phone'),
+        "fac": dictval(record, 'fa_code'),
         'fa_code': dictval(record, 'fa_code'),
         'fa_name': dictval(record, 'fa_name'),
         'contact_method': dictval(record, 'contact_method'),
