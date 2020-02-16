@@ -40,8 +40,8 @@ class App(rapidsms.apps.base.AppBase):
 
         #remove existing schedule tasks; reschedule based on the current setting from config
         EventSchedule.objects.filter(callback=callback).delete()
-        EventSchedule.objects.create(callback=callback, hours=range(24),
-                                     minutes=range(60))
+        EventSchedule.objects.create(callback=callback, hours=range(7, 14),
+                                     minutes=range(0, 60, 20))
 
     def valid_phone(self, text):
         try:
