@@ -160,9 +160,11 @@ class Result(models.Model):
         ordering = ('collected_on', 'requisition_id')
 
     def __unicode__(self):
-        return '%s - %s - %s %s (%s)' % (self.requisition_id, self.sample_id,
+        return '%s - %s - %s %s (%s)' % (self.requisition_id,
                                          self.clinic.slug if self.clinic else '%s[*]' % self.clinic_code_unrec,
-                                         self.result if self.result else '-', self.notification_status)
+                                         self.cd4 if self.cd4 else '-',
+                                         self.vl if self.cd4 else '-',
+                                         self.notification_status)
 
     def get_result_text(self):
         return '%s;%s' % (self.cd4 or '', self.vl or '')
