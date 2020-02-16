@@ -170,7 +170,7 @@ def accept_record (record, payload):
         logger.warning(message)
 
     #validate required identifying fields
-    for reqd_field in ('id', 'fac'):
+    for reqd_field in ('id', 'fa_code'):
         if dictval(record, reqd_field) is None:
             cant_save('required field %s missing' % reqd_field)
             return False
@@ -222,7 +222,6 @@ def accept_record (record, payload):
         'phone': _clean(dictval(record, 'phone', valid_phone)),
         'address': _clean(dictval(record, 'address')),
         'phone_invalid': dictval(record, 'phone') if not dictval(record, 'phone', valid_phone) else None,
-
         'send_pii': dictval(record, 'send_pii'),
         'share_contact': dictval(record, 'share_contact'),
         'contact_by_phone': dictval(record, 'contact_by_phone'),
