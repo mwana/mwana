@@ -72,7 +72,7 @@ def send_results_ready_notification_to_participant(router):
                     'settings.SEND_LIVE_LABRESULTS is False')
 
 
-#@transaction.commit_manually
+@transaction.commit_manually
 def process_outstanding_payloads(router):
     logger.debug('in process_outstanding_payloads')
     for payload in Payload.objects.filter(parsed_json=True,

@@ -106,7 +106,8 @@ def process_payload(payload, data=None):
         logger.debug('no logs in data')
         logs_validate = False
 
-    if not (records_validate and logs_validate):
+#    if not (records_validate and logs_validate):
+    if not (records_validate): # remove logs validation requirement
         transaction.savepoint_rollback(pre_record_creation)
 
     meta_fields = {
@@ -119,7 +120,7 @@ def process_payload(payload, data=None):
     f_payload = PayloadForm(meta_fields, instance=payload)
     if f_payload.is_valid():
         payload = f_payload.save(commit=False)
-        payload.validated_schema = (records_validate and logs_validate)
+        payload.validated_schema = (records_validate) # remove logs validation requirement
         payload.save()
         logger.info('saving payload %s with records_validate=%s and '
                     'logs_validate=%s' %
