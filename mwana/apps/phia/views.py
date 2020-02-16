@@ -180,12 +180,12 @@ def accept_record (record, payload):
     # because sample_id is not required in the source (Access) database.
     # The only way to recover is if they update the database (the record will
     # be resent at that time).
-    if not dictval(record, 'sample_id'):
+    if not dictval(record, 'id'):
         logger.warning('ignoring record without sample_id field: %s' % str(record))
         return True
 
     #validate clinic id
-    clinic_code = normalize_clinic_id(str(dictval(record, 'fac')))
+    clinic_code = normalize_clinic_id(str(dictval(record, 'fa_code')))
     try:
         clinic_obj = Location.objects.get(slug=clinic_code)
     except Location.DoesNotExist:
@@ -195,7 +195,7 @@ def accept_record (record, payload):
     #general field validation
     record_fields = {
         'sample_id': sample_id,
-        'requisition_id': dictval(record, 'sample_id'),
+        'requisition_id': dictval(record, 'id'),
         'payload': payload.id if payload else None,
         'clinic': clinic_obj.id if clinic_obj else None,
         'clinic_code_unrec': clinic_code if not clinic_obj else None,

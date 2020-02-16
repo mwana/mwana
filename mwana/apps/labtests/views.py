@@ -35,7 +35,7 @@ logger = logging.getLogger('mwana.apps.labtests.views')
 
 
 def valid_phone(val):
-    stripped = val.strip()
+    stripped = ("%s" % val).strip()
     if len(stripped) == 13 and stripped[:6] in ['+26097', '+26096', '+26095', '+26076']:
         return stripped
     if len(stripped) == 10 and stripped[:3] in ['097', '096', '095', '076', '077']:
